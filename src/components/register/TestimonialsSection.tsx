@@ -72,7 +72,7 @@ export function TestimonialsSection() {
                   ))}
                 </div>
                 <p className="text-gray-700 text-sm md:text-base lg:text-lg italic mb-6 md:mb-8 leading-relaxed">
-                  "{testimonial.quote}"
+                  &ldquo;{testimonial.quote}&rdquo;
                 </p>
                 <div className="flex items-center gap-3 md:gap-4 pt-4 md:pt-6 border-t border-gray-100">
                   <div className={`w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br ${testimonial.bgColor} rounded-xl md:rounded-2xl flex items-center justify-center text-white text-lg md:text-xl lg:text-2xl font-bold shadow-md md:shadow-lg flex-shrink-0`}>
