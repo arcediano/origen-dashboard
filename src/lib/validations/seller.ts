@@ -20,7 +20,8 @@ export const initialRegistrationSchema = z.object({
   businessName: z.string().min(3, 'Mínimo 3 caracteres').max(200),
   businessType: z.enum(['individual', 'company']),
   province: z.string().min(2, 'Selecciona una provincia'),
-  city: z.string().min(2, 'Introduce tu ciudad'),
+  municipio: z.string().min(2, 'Introduce el municipio'),
+  postalCode: z.string().regex(/^\d{5}$/, 'El código postal debe tener 5 dígitos'),
   producerCategory: z.enum(['agricola', 'ganadero', 'artesano', 'apicultor', 'viticultor', 'especializado']),
   whyOrigin: z.string()
     .min(50, 'Cuéntanos un poco más (mínimo 50 caracteres)')

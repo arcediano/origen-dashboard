@@ -344,13 +344,13 @@ interface SuccessModalProps {
   businessName: string;
   contactName: string;
   email: string;
-  city: string;
+  municipio: string;
   province: string;
   trackingCode: string;
 }
 
 const SuccessModal: React.FC<SuccessModalProps> = ({
-  isOpen, onClose, businessName, contactName, email, city, province, trackingCode
+  isOpen, onClose, businessName, contactName, email, municipio, province, trackingCode
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
@@ -462,7 +462,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
                   <p className="text-sm font-bold text-origen-bosque truncate">{businessName}</p>
                   <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5 truncate">
                     <MapPin className="w-3 h-3 flex-shrink-0" />
-                    {city}, {provinceName}
+                    {municipio}, {provinceName}
                   </p>
                 </div>
               </div>
@@ -528,7 +528,8 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
       businessName: '',
       businessType: 'individual',
       province: '',
-      city: '',
+      municipio: '',
+      postalCode: '',
       producerCategory: undefined,
       whyOrigin: '',
       acceptsTerms: false,
@@ -556,7 +557,8 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
         businessType: data.businessType as 'individual' | 'company',
         producerCategory: data.producerCategory,
         province: data.province,
-        city: data.city,
+        municipio: data.municipio,
+        postalCode: data.postalCode,
         whyOrigin: data.whyOrigin,
         acceptsTerms: true,
         acceptsPrivacy: true,
@@ -593,7 +595,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
             businessName={submittedData.businessName}
             contactName={submittedData.contactName}
             email={submittedData.email}
-            city={submittedData.city}
+            municipio={submittedData.municipio}
             province={submittedData.province}
             trackingCode={trackingCode}
           />
@@ -776,12 +778,28 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 <div className="space-y-1.5">
                   <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
                     <MapPin className="w-4 h-4 md:w-5 md:h-5 text-origen-pradera" />
-                    Ciudad <span className="text-destructive">*</span>
+                    Municipio <span className="text-destructive">*</span>
                   </label>
                   <Input
-                    placeholder="Tu localidad"
-                    error={errors.city?.message}
-                    {...register('city')}
+                    placeholder="Tu municipio"
+                    error={errors.municipio?.message}
+                    {...register('municipio')}
+                    className="h-11 md:h-12 text-sm md:text-base border-gray-200 focus:border-origen-pradera focus:ring-1 focus:ring-origen-pradera/30"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div className="space-y-1.5">
+                  <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
+                    <MapPin className="w-4 h-4 md:w-5 md:h-5 text-origen-pradera" />
+                    Código postal <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    placeholder="Ej: 28001"
+                    maxLength={5}
+                    error={errors.postalCode?.message}
+                    {...register('postalCode')}
                     className="h-11 md:h-12 text-sm md:text-base border-gray-200 focus:border-origen-pradera focus:ring-1 focus:ring-origen-pradera/30"
                   />
                 </div>
