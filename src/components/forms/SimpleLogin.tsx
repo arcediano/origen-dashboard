@@ -242,7 +242,7 @@ export function SimpleLogin() {
             type="submit"
             disabled={isLoading}
             className={cn(
-              "w-full h-12",
+              "w-full sm:w-full h-12",
               "bg-origen-bosque hover:bg-origen-pino",
               "text-white text-sm font-semibold",
               "rounded-xl shadow-md hover:shadow-lg",
