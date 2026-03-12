@@ -138,7 +138,7 @@ export default function RegisterPage() {
                 </div>
                 <span className="text-base font-bold text-origen-bosque">ORIGEN</span>
               </div>
-              <Link href="/login" className="text-xs font-medium text-origen-pradera hover:text-origen-bosque transition-colors flex items-center gap-1">
+              <Link href="/auth/login" className="text-xs font-medium text-origen-pradera hover:text-origen-bosque transition-colors flex items-center gap-1">
                 <Lock className="w-3 h-3" />
                 Acceso productores
               </Link>
@@ -227,7 +227,7 @@ export default function RegisterPage() {
                     </li>
                   ))}
                   <li className="pt-2">
-                    <Link href="/login" className="text-sm font-medium text-origen-pradera hover:text-origen-bosque transition-colors inline-flex items-center gap-1">
+                    <Link href="/auth/login" className="text-sm font-medium text-origen-pradera hover:text-origen-bosque transition-colors inline-flex items-center gap-1">
                       <Shield className="w-3.5 h-3.5" />
                       Acceso productores
                     </Link>

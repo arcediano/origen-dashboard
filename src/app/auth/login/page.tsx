@@ -62,7 +62,7 @@ export default function LoginPage() {
             </Link>
             
             <Link 
-              href="/register" 
+              href="/auth/register" 
               // CORREGIDO: focus:ring-origen-menta → focus:ring-origen-pradera
               className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-white hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2"
             >

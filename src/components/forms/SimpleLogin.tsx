@@ -77,7 +77,7 @@ export function SimpleLogin() {
     setIsLoading(true);
 
     try {
-      await loginUser({ email, password });
+      await loginUser({ email, password, rememberMe });
       router.push('/dashboard');
     } catch (err) {
       if (err instanceof GatewayError && err.status === 401) {
@@ -169,7 +169,7 @@ export function SimpleLogin() {
                 Contraseña <span className="text-red-500">*</span>
               </label>
               <Link
-                href="/recuperar"
+                href="/auth/forgot-password"
                 className="text-xs text-origen-pradera hover:text-origen-bosque transition-colors"
               >
                 ¿Olvidaste?
@@ -268,7 +268,7 @@ export function SimpleLogin() {
           <div className="text-center pt-2">
             <p className="text-xs text-gray-500">
               ¿No tienes cuenta?{' '}
-              <Link href="/register" className="text-origen-pradera hover:text-origen-bosque font-medium">
+              <Link href="/auth/register" className="text-origen-pradera hover:text-origen-bosque font-medium">
                 Regístrate como productor
               </Link>
             </p>

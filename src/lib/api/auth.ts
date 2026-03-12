@@ -75,10 +75,12 @@ export async function registerProducer(params: {
 export async function loginUser(params: {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }): Promise<LoginResponse> {
   return gatewayClient.post<LoginResponse>('/auth/login', {
     email: params.email,
     password: params.password,
+    rememberMe: params.rememberMe ?? false,
   });
 }
 
@@ -104,4 +106,13 @@ export async function refreshTokens(): Promise<void> {
  */
 export async function getCurrentUser(): Promise<AuthUser> {
   return gatewayClient.get<AuthUser>('/auth/userinfo');
+}
+
+/**
+ * Solicita un email de recuperación de contraseña.
+ * El backend envía un enlace de un solo uso válido 30 minutos.
+ * Por seguridad, la respuesta es siempre 200 aunque el email no exista.
+ */
+export async function requestPasswordReset(email: string): Promise<void> {
+  await gatewayClient.post('/auth/forgot-password', { email });
 }

@@ -59,7 +59,7 @@ export function UserMenu({
   const handleLogout = () => {
     if (onLogout) onLogout();
     setIsOpen(false);
-    router.push('/login');
+    router.push('/auth/login');
   };
 
   return (
