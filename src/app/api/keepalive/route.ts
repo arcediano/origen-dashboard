@@ -14,7 +14,7 @@ const SERVICES = [
   { name: 'Auth',          url: 'https://origen-auth-dev.onrender.com/health' },
   { name: 'Producers',     url: 'https://origen-producers-dev.onrender.com/health' },
   { name: 'Products',      url: 'https://origen-products-dev.onrender.com/health' },
-  { name: 'Notifications', url: 'https://origen-notifications-dev.onrender.com/health' },
+  { name: 'Notifications', url: 'https://origen-notifications.onrender.com/health' },
 ];
 
 export async function GET() {
