@@ -82,6 +82,8 @@ export function SimpleLogin() {
     } catch (err) {
       if (err instanceof GatewayError && err.status === 401) {
         setErrors({ general: 'Credenciales incorrectas. Revisa tu email y contraseña.' });
+      } else if (err instanceof GatewayError && err.status === 403) {
+        setErrors({ general: err.message });
       } else {
         setErrors({ general: 'No se pudo conectar con el servidor. Inténtalo de nuevo.' });
       }
