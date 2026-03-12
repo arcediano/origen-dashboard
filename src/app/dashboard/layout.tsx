@@ -6,11 +6,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { DashboardSidebar } from '@/app/dashboard/components/sidebar/DashboardSidebar';
 import { DashboardHeader } from '@/app/dashboard/components/header/DashboardHeader';
 import { StatusBanner } from '@/components/shared/status/StatusBanner';
 import { cn } from '@/lib/utils';
 import { type SellerStatus } from '@/types/seller';
+import { getCurrentUser } from '@/lib/api/auth';
 
 // Datos mock - @todo: GET /api/producer/status
 const MOCK_PRODUCER_STATUS = {
@@ -26,20 +28,35 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
+    getCurrentUser()
+      .then((user) => {
+        if (user.role !== 'PRODUCER') {
+          router.replace('/auth/login');
+          return;
+        }
+        setAuthorized(true);
+      })
+      .catch(() => router.replace('/auth/login'));
+  }, [router]);
+
+  useEffect(() => {
+    if (!authorized) return;
     setMounted(true);
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  }, [authorized]);
 
   if (!mounted) return null;
 
