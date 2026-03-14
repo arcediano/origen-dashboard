@@ -22,7 +22,7 @@ export interface AuthUser {
   firstName: string;
   lastName: string;
   role: UserRole;
-  producerId: string | null;
+  producerCode: string | null;
   createdAt: string;
   updatedAt: string;
 }
