@@ -36,34 +36,33 @@ export function HeroSection() {
   }, []);
 
   const stats = [
-    { 
-      value: '15%', 
-      label: 'Comisión', 
-      icon: TrendingUp, 
+    {
+      value: '15%',
+      label: 'Comisión',
+      icon: TrendingUp,
       sublabel: 'Solo al vender',
-      // CORREGIDO: Eliminado Menta del degradado
-      color: 'from-origen-pradera/70 to-origen-hoja/70'
+      color: 'from-origen-pradera/80 to-origen-pino/80'
     },
-    { 
-      value: '24-48h', 
-      label: 'Aprobación', 
-      icon: Clock, 
+    {
+      value: '24-48h',
+      label: 'Aprobación',
+      icon: Clock,
       sublabel: 'Rápido',
-      color: 'from-origen-pradera/70 to-origen-hoja/70'
+      color: 'from-origen-pradera/80 to-origen-pino/80'
     },
-    { 
-      value: '0€', 
-      label: 'Sin cuota', 
-      icon: ShieldCheck, 
+    {
+      value: '0€',
+      label: 'Sin cuota',
+      icon: ShieldCheck,
       sublabel: 'Costes fijos',
-      color: 'from-origen-hoja/70 to-origen-pino/70'
+      color: 'from-origen-pino/80 to-origen-bosque/80'
     },
-    { 
-      value: 'España', 
-      label: 'Cobertura', 
-      icon: Globe, 
+    {
+      value: 'España',
+      label: 'Cobertura',
+      icon: Globe,
       sublabel: 'Nacional',
-      color: 'from-origen-pino/70 to-origen-bosque/70'
+      color: 'from-origen-pino/80 to-origen-bosque/80'
     },
   ];
 
@@ -115,20 +114,20 @@ export function HeroSection() {
         
         {/* OVERLAY - Verde Bosque sólido con opacidad controlada */}
         <div className="absolute inset-0 z-10">
-          <div 
-            className="absolute inset-0" 
+          <div
+            className="absolute inset-0"
             style={{
-              background: isMobile 
-                ? 'linear-gradient(to bottom, rgba(27, 67, 50, 0.85) 0%, rgba(27, 67, 50, 0.75) 30%, rgba(27, 67, 50, 0.65) 60%, rgba(27, 67, 50, 0.55) 100%)'
-                : 'linear-gradient(135deg, rgba(27, 67, 50, 0.9) 0%, rgba(27, 67, 50, 0.8) 30%, rgba(27, 67, 50, 0.7) 70%, rgba(27, 67, 50, 0.6) 100%)'
+              background: isMobile
+                ? 'linear-gradient(to bottom, rgba(27, 42, 74, 0.88) 0%, rgba(27, 42, 74, 0.80) 30%, rgba(27, 42, 74, 0.70) 60%, rgba(27, 42, 74, 0.55) 100%)'
+                : 'linear-gradient(135deg, rgba(27, 42, 74, 0.92) 0%, rgba(27, 42, 74, 0.82) 30%, rgba(27, 42, 74, 0.70) 70%, rgba(27, 42, 74, 0.55) 100%)'
             }}
           />
           
           {/* Gradiente inferior sutil */}
-          <div 
+          <div
             className="absolute bottom-0 left-0 right-0 h-1/4 opacity-30"
             style={{
-              background: 'linear-gradient(to top, rgba(241, 250, 238, 0.2) 0%, transparent 80%)',
+              background: 'linear-gradient(to top, rgba(248, 249, 252, 0.15) 0%, transparent 80%)',
               mask: 'linear-gradient(to top, black 0%, transparent 100%)'
             }}
           />
@@ -156,7 +155,7 @@ export function HeroSection() {
               {/* Título */}
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-5 leading-tight text-white drop-shadow-xl">
                 Conecta tu pasión
-                <span className="block text-origen-pradera mt-1 md:mt-2 drop-shadow-2xl"> {/* CORREGIDO: Menta → Pradera */}
+                <span className="block text-origen-hoja mt-1 md:mt-2 drop-shadow-2xl">
                   con quien la valora
                 </span>
               </h1>
@@ -255,8 +254,8 @@ export function HeroSection() {
                         @error: Antes usaba from-origen-menta to-origen-pradera
                         @fix: Cambiado a from-origen-pradera to-origen-hoja
                       */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-origen-pradera to-origen-hoja rounded-full animate-pulse opacity-20"></div>
-                      <div className="relative w-full h-full bg-gradient-to-br from-origen-pradera to-origen-hoja rounded-full flex items-center justify-center shadow-lg">
+                      <div className="absolute inset-0 bg-gradient-to-br from-origen-bosque to-origen-pino rounded-full animate-pulse opacity-20"></div>
+                      <div className="relative w-full h-full bg-gradient-to-br from-origen-bosque to-origen-pino rounded-full flex items-center justify-center shadow-lg">
                         <CheckCircle className="w-8 h-8 md:w-9 md:h-9 text-white" />
                       </div>
                     </div>

@@ -80,13 +80,13 @@ export function ProcessSection() {
   };
 
   return (
-    <section className="py-10 md:py-16 lg:py-20 bg-gradient-to-b from-white to-origen-crema">
+    <section className="py-10 md:py-16 lg:py-20">
       <div className="container mx-auto px-4 md:px-6">
         {/* Cabecera */}
         <div className="text-center max-w-4xl mx-auto mb-7 md:mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-origen-bosque mb-2 md:mb-6">
             Un camino claro hacia
-            <span className="block text-origen-pradera">tu éxito online</span>
+            <span className="block text-origen-hoja">tu éxito online</span>
           </h2>
           <p className="hidden md:block text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Desde tu registro hasta tu primera venta, te acompañamos en cada paso
@@ -121,7 +121,7 @@ export function ProcessSection() {
 
         {/* CTA */}
         <div className="text-center mt-10 md:mt-16">
-          <div className="hidden md:block bg-gradient-to-r from-origen-crema to-white rounded-3xl p-8 max-w-2xl mx-auto border border-origen-pradera/30 mb-8">
+          <div className="hidden md:block bg-white rounded-3xl p-8 max-w-2xl mx-auto border border-origen-pradera/30 shadow-subtle mb-8">
             <p className="text-xl text-origen-bosque mb-4 font-semibold">
               ¿Listo para dar el primer paso?
             </p>

@@ -39,14 +39,14 @@ export function QuickActionCard({
       
       <div className={cn(
         "relative bg-white rounded-2xl p-6 border border-gray-200",
-        "shadow-lg group-hover:shadow-xl group-hover:border-origen-pradera",
+        "shadow-origen group-hover:shadow-origen-lg group-hover:border-origen-pradera",
         "transition-all duration-300",
         className
       )}>
         <div className="flex items-center gap-4">
           {/* Icono circular */}
           <div className={cn(
-            "w-14 h-14 rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0 shadow-md",
+            "w-14 h-14 rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0 shadow-subtle",
             gradient
           )}>
             <Icon className="w-7 h-7 text-white" />

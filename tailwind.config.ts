@@ -2,14 +2,19 @@ import type { Config } from "tailwindcss";
 
 /**
  * Configuración de Tailwind CSS para Origen
- * Basado en el Manual de Marca v1.1 - Paleta "Bosque Innovador"
- * 
- * @version 1.4.0 - MEJORAS APLICADAS:
- *   - Añadidos breakpoints específicos: xs, tablet, desktop
- *   - Añadidas animaciones para cards: card-hover, gradient-shift
- *   - Unificada nomenclatura de colores con variables CSS
- *   - Añadidas transiciones personalizadas
- * 
+ * Basado en el Manual de Marca v2.0 - Paleta "Índigo y Salvia"
+ *
+ * @version 2.0.0 - NUEVA PALETA:
+ *   - origen-bosque  → Índigo Marino   #1B2A4B
+ *   - origen-pino    → Azul Pizarra    #2E4A6E
+ *   - origen-hoja    → Verde Salvia    #4E7456
+ *   - origen-pradera → Azul Niebla     #6B90B8
+ *   - origen-menta   → Oro Envejecido  #C89B4C
+ *   - origen-crema   → Lienzo Frío     #F8F9FC
+ *   - origen-oscuro  → Tinta           #0D1626
+ *   - origen-pastel  → Bruma           #E8EEF5
+ *   Los nombres de tokens se mantienen por compatibilidad con componentes.
+ *
  * @created Febrero 2026
  * @updated Marzo 2026
  * @author Equipo de Diseño Origen
@@ -47,28 +52,28 @@ const config: Config = {
     },
     
     extend: {
-      // === PALETA DE COLORES OFICIAL - ORIGEN v1.1 ===
+      // === PALETA DE COLORES OFICIAL - ORIGEN v2.0 "ÍNDIGO Y SALVIA" ===
       colors: {
         // Colores principales - Manual Sección 3.1
         origen: {
           // Primarios
-          bosque: "hsl(var(--bosque))",      // #1B4332
-          pino: "hsl(var(--pino))",          // #2D6A4F
-          hoja: "hsl(var(--hoja))",          // #40916C
-          pradera: "hsl(var(--pradera))",    // #74C69D
-          menta: "hsl(var(--menta))",        // #06D6A0
-          crema: "hsl(var(--crema))",        // #F1FAEE
-          
+          bosque: "hsl(var(--bosque))",      // #1B2A4B - Índigo Marino
+          pino: "hsl(var(--pino))",          // #2E4A6E - Azul Pizarra
+          hoja: "hsl(var(--hoja))",          // #4E7456 - Verde Salvia
+          pradera: "hsl(var(--pradera))",    // #6B90B8 - Azul Niebla
+          menta: "hsl(var(--menta))",        // #C89B4C - Oro Envejecido
+          crema: "hsl(var(--crema))",        // #F8F9FC - Lienzo Frío
+
           // Apoyo
-          oscuro: "hsl(var(--oscuro))",      // #081C15
-          pastel: "hsl(var(--pastel))",      // #D8F3DC
+          oscuro: "hsl(var(--oscuro))",      // #0D1626 - Tinta
+          pastel: "hsl(var(--pastel))",      // #E8EEF5 - Bruma
         },
-        
-        // Estados hover (calculados: 15% más oscuros)
+
+        // Estados hover
         hover: {
-          bosque: "hsl(var(--hover-bosque))",    // #0F2A1F
-          pradera: "hsl(var(--hover-pradera))",  // #5AA67D
-          menta: "hsl(var(--hover-menta))",      // #05B386
+          bosque: "hsl(var(--hover-bosque))",    // #0F1B30
+          pradera: "hsl(var(--hover-pradera))",  // #5B7FA6
+          menta: "hsl(var(--hover-menta))",      // #A47A30
         },
         
         // Variables del sistema (shadcn/ui)
@@ -124,6 +129,7 @@ const config: Config = {
       // === TIPOGRAFÍA ===
       fontFamily: {
         sans: ["var(--font-sans)", "Arial", "Helvetica Neue", "Helvetica", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
       },
       
       fontSize: {
@@ -150,6 +156,8 @@ const config: Config = {
         'origen-inner': 'inset 0 2px 4px hsla(var(--bosque) / 0.06)',
         'subtle': '0 2px 8px hsla(var(--bosque) / 0.08)',
         'card-hover': '0 20px 30px hsla(var(--bosque) / 0.15)',
+        'menta-glow': '0 0 8px hsl(var(--menta))',
+        'menta-glow-lg': '0 2px 8px hsla(var(--menta) / 0.4)',
       },
       
       // === ANIMACIONES (ACTUALIZADO v1.4) ===
@@ -212,8 +220,11 @@ const config: Config = {
       
       // === GRADIENTES ===
       backgroundImage: {
+        // Índigo → Pizarra → Niebla (profundidad monocromática azul)
         'gradient-origen': 'linear-gradient(135deg, hsl(var(--bosque)) 0%, hsl(var(--pino)) 50%, hsl(var(--pradera)) 100%)',
-        'gradient-menta': 'linear-gradient(135deg, hsl(var(--menta)) 0%, hsl(var(--pradera)) 100%)',
+        // Oro → Salvia (calidez a naturaleza)
+        'gradient-menta': 'linear-gradient(135deg, hsl(var(--menta)) 0%, hsl(var(--hoja)) 100%)',
+        // Lienzo frío → Blanco (fondo neutro)
         'gradient-crema': 'linear-gradient(135deg, hsl(var(--crema)) 0%, #FFFFFF 100%)',
       },
       

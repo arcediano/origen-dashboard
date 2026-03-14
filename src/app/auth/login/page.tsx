@@ -6,7 +6,7 @@
  * @description Página de acceso para productores con mismo estilo que registro
  */
 
-import { SimpleLogin } from '@/components/forms/SimpleLogin';
+import { SimpleLogin } from '@/components/auth/SimpleLogin';
 import Link from 'next/link';
 import { 
   Shield, 
@@ -23,13 +23,12 @@ import {
   Globe,
   ChevronRight,
   Mail,
-  Phone,
-  Sprout
+  Phone
 } from 'lucide-react';
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema/30">
+    <div className="min-h-screen bg-origen-crema/30">
       {/* Header */}
       <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
@@ -110,7 +109,7 @@ export default function LoginPage() {
               <div className="text-left max-w-xl">
                 <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-origen-bosque mb-4 md:mb-6">
                   Bienvenido a tu
-                  <span className="block text-origen-pradera">panel de control</span>
+                  <span className="block text-origen-hoja">panel de control</span>
                 </h2>
                 <p className="text-base md:text-lg text-gray-600 leading-relaxed">
                   Gestiona tu tienda, analiza tus ventas y haz crecer tu negocio 
@@ -217,195 +216,187 @@ export default function LoginPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-8 md:mt-16 lg:mt-20">
+      <footer className="bg-origen-bosque mt-8 md:mt-16 lg:mt-20">
+        <div className="container mx-auto px-4 md:px-6 pt-10 pb-6 md:pt-14 md:pb-8">
 
-        {/* Footer compacto — solo móvil */}
-        <div className="lg:hidden px-4 py-6">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-lg bg-origen-bosque flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" viewBox="0 0 200 200">
-                <circle cx="100" cy="100" r="85" fill="none" stroke="white" strokeWidth="3"/>
-                <path d="M100 140 L100 80" stroke="white" strokeWidth="5" strokeLinecap="round"/>
-                <path d="M100 90 Q85 75, 75 65" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-                <path d="M100 90 Q115 75, 125 65" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-                <circle cx="100" cy="140" r="8" fill="white"/>
-                <circle cx="100" cy="140" r="5" fill="#74C69D"/>
-              </svg>
-            </div>
-            <span className="font-bold text-origen-bosque">ORIGEN</span>
-          </div>
-          <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-4">
-            <Link href="/privacidad" className="text-xs text-gray-500 hover:text-origen-pradera transition-colors">Privacidad</Link>
-            <Link href="/cookies" className="text-xs text-gray-500 hover:text-origen-pradera transition-colors">Cookies</Link>
-            <Link href="/aviso-legal" className="text-xs text-gray-500 hover:text-origen-pradera transition-colors">Aviso Legal</Link>
-            <Link href="/soporte" className="text-xs text-gray-500 hover:text-origen-pradera transition-colors">Soporte</Link>
-          </div>
-          <p className="text-center text-xs text-gray-400">
-            © {new Date().getFullYear()} Origen Marketplace
-          </p>
-        </div>
-
-        {/* Footer completo — solo desktop */}
-        <div className="hidden lg:block pt-12 pb-8">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
-            
-            <div className="lg:col-span-4 space-y-5">
-              <div className="flex items-center gap-3">
-                {/* CORREGIDO: Sprout → SVG oficial como en el header */}
-                <div className="w-10 h-10 rounded-lg bg-origen-bosque flex items-center justify-center shadow-md">
-                  <svg 
-                    className="w-6 h-6 text-white" 
-                    viewBox="0 0 200 200"
-                  >
-                    <circle cx="100" cy="100" r="85" fill="none" stroke="white" strokeWidth="3"/>
-                    <path d="M100 140 L100 80" stroke="white" strokeWidth="5" strokeLinecap="round"/>
-                    <path d="M100 90 Q85 75, 75 65" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-                    <path d="M100 90 Q115 75, 125 65" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-                    <circle cx="100" cy="140" r="8" fill="white"/>
-                    <circle cx="100" cy="140" r="5" fill="#74C69D"/>
+          {/* Móvil: footer mínimo */}
+          <div className="md:hidden">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-origen-pino flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" viewBox="0 0 200 200" aria-hidden="true">
+                    <circle cx="100" cy="100" r="85" fill="none" stroke="currentColor" strokeWidth="3"/>
+                    <path d="M100 140 L100 80" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/>
+                    <path d="M100 90 Q85 75, 75 65" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                    <path d="M100 90 Q115 75, 125 65" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                    <circle cx="100" cy="140" r="8" fill="currentColor"/>
+                    <circle cx="100" cy="140" r="5" fill="#52B788"/>
                   </svg>
                 </div>
-                <div>
-                  <div className="text-xl font-bold text-origen-bosque">ORIGEN</div>
-                  <div className="text-xs text-origen-hoja italic">Conoce de dónde viene lo que comes</div>
-                </div>
+                <span className="text-base font-bold text-white">ORIGEN</span>
               </div>
-              
-              <p className="text-sm text-gray-600 leading-relaxed max-w-sm">
-                Marketplace que conecta productores locales españoles con consumidores 
-                que valoran la autenticidad, la transparencia y la sostenibilidad.
+              <Link href="/auth/register" className="text-xs font-medium text-origen-menta hover:text-white transition-colors flex items-center gap-1">
+                <Store className="w-3 h-3" />
+                Nuevo productor
+              </Link>
+            </div>
+
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5 mb-6">
+              {[
+                { href: '/privacidad', label: 'Privacidad' },
+                { href: '/cookies', label: 'Cookies' },
+                { href: '/aviso-legal', label: 'Aviso Legal' },
+                { href: '/soporte', label: 'Soporte' },
+              ].map(({ href, label }) => (
+                <Link key={href} href={href} className="text-xs text-white/70 hover:text-white transition-colors">
+                  {label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+              <p className="text-[10px] text-white/70">
+                © {new Date().getFullYear()} Origen Marketplace
               </p>
-              
-              <div className="flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-origen-crema/80 text-xs font-medium text-origen-bosque">
-                  <Leaf className="w-3 h-3 text-origen-pradera" />
-                  Sostenibilidad
-                </span>
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-origen-crema/80 text-xs font-medium text-origen-bosque">
-                  <Shield className="w-3 h-3 text-origen-pradera" />
-                  Transparencia
-                </span>
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-origen-crema/80 text-xs font-medium text-origen-bosque">
-                  <Heart className="w-3 h-3 text-origen-pradera" />
-                  Comunidad
-                </span>
-              </div>
-            </div>
-
-            <div className="lg:col-span-2">
-              <h3 className="text-sm font-bold text-origen-bosque uppercase tracking-wider mb-4">
-                Productores
-              </h3>
-              <ul className="space-y-3">
-                <li>
-                  <Link href="/como-funciona" className="text-sm text-gray-600 hover:text-origen-pradera transition-colors inline-flex items-center gap-1 group">
-                    {/* CORREGIDO: text-origen-menta/70 → text-origen-pradera/70 */}
-                    <ChevronRight className="w-3 h-3 text-origen-pradera/70 group-hover:translate-x-0.5 transition-transform" />
-                    Cómo funciona
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/tarifas" className="text-sm text-gray-600 hover:text-origen-pradera transition-colors inline-flex items-center gap-1 group">
-                    {/* CORREGIDO: text-origen-menta/70 → text-origen-pradera/70 */}
-                    <ChevronRight className="w-3 h-3 text-origen-pradera/70 group-hover:translate-x-0.5 transition-transform" />
-                    Tarifas y comisiones
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/soporte" className="text-sm text-gray-600 hover:text-origen-pradera transition-colors inline-flex items-center gap-1 group">
-                    {/* CORREGIDO: text-origen-menta/70 → text-origen-pradera/70 */}
-                    <ChevronRight className="w-3 h-3 text-origen-pradera/70 group-hover:translate-x-0.5 transition-transform" />
-                    Soporte especializado
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="lg:col-span-2">
-              <h3 className="text-sm font-bold text-origen-bosque uppercase tracking-wider mb-4">
-                Legal
-              </h3>
-              <ul className="space-y-3">
-                <li>
-                  <Link href="/privacidad" className="text-sm text-gray-600 hover:text-origen-pradera transition-colors inline-flex items-center gap-1 group">
-                    {/* CORREGIDO: text-origen-menta/70 → text-origen-pradera/70 */}
-                    <ChevronRight className="w-3 h-3 text-origen-pradera/70 group-hover:translate-x-0.5 transition-transform" />
-                    Política de Privacidad
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/cookies" className="text-sm text-gray-600 hover:text-origen-pradera transition-colors inline-flex items-center gap-1 group">
-                    {/* CORREGIDO: text-origen-menta/70 → text-origen-pradera/70 */}
-                    <ChevronRight className="w-3 h-3 text-origen-pradera/70 group-hover:translate-x-0.5 transition-transform" />
-                    Política de Cookies
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/aviso-legal" className="text-sm text-gray-600 hover:text-origen-pradera transition-colors inline-flex items-center gap-1 group">
-                    {/* CORREGIDO: text-origen-menta/70 → text-origen-pradera/70 */}
-                    <ChevronRight className="w-3 h-3 text-origen-pradera/70 group-hover:translate-x-0.5 transition-transform" />
-                    Aviso Legal
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="lg:col-span-4">
-              <h3 className="text-sm font-bold text-origen-bosque uppercase tracking-wider mb-4">
-                Contacto
-              </h3>
-              
-              <div className="bg-origen-crema/50 rounded-xl p-5 space-y-3">
-                <div className="flex items-center gap-3 text-sm">
-                  {/* CORREGIDO: bg-origen-menta/10 → bg-origen-pradera/10 */}
-                  <div className="w-8 h-8 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
-                    {/* CORREGIDO: text-origen-menta → text-origen-pradera */}
-                    <Mail className="w-4 h-4 text-origen-pradera" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Email</p>
-                    <p className="font-medium text-origen-bosque">info@origen.es</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  {/* CORREGIDO: bg-origen-menta/10 → bg-origen-pradera/10 */}
-                  <div className="w-8 h-8 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
-                    {/* CORREGIDO: text-origen-menta → text-origen-pradera */}
-                    <Phone className="w-4 h-4 text-origen-pradera" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Teléfono</p>
-                    <p className="font-medium text-origen-bosque">+34 900 123 456</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  {/* CORREGIDO: bg-origen-menta/10 → bg-origen-pradera/10 */}
-                  <div className="w-8 h-8 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
-                    {/* CORREGIDO: text-origen-menta → text-origen-pradera */}
-                    <Clock className="w-4 h-4 text-origen-pradera" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Horario</p>
-                    <p className="font-medium text-origen-bosque">Lunes a Viernes, 9:00 - 18:00</p>
-                  </div>
-                </div>
+              <div className="flex items-center gap-3 text-[10px] text-white/70">
+                <span className="flex items-center gap-0.5"><Shield className="w-3 h-3 text-origen-menta" /> SSL</span>
+                <span className="flex items-center gap-0.5"><Globe className="w-3 h-3 text-origen-menta" /> RGPD</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-gray-200">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <p className="text-sm text-gray-600">
-                © {new Date().getFullYear()} Origen Marketplace. Todos los derechos reservados.
-              </p>
-              <p className="text-xs text-gray-400">
-                Diseño según Manual de Marca Origen v1.1.0
-              </p>
+          {/* Desktop: footer completo */}
+          <div className="hidden md:block">
+            <div className="grid grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
+
+              {/* Columna 1: Marca */}
+              <div className="lg:col-span-4 space-y-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-origen-pino flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" viewBox="0 0 200 200" aria-hidden="true">
+                      <circle cx="100" cy="100" r="85" fill="none" stroke="currentColor" strokeWidth="3"/>
+                      <path d="M100 140 L100 80" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/>
+                      <path d="M100 90 Q85 75, 75 65" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                      <path d="M100 90 Q115 75, 125 65" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                      <circle cx="100" cy="140" r="8" fill="currentColor"/>
+                      <circle cx="100" cy="140" r="5" fill="#52B788"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold text-white">ORIGEN</div>
+                    <div className="text-xs text-origen-menta italic">Conoce de dónde viene lo que comes</div>
+                  </div>
+                </div>
+                <p className="text-sm text-white/80 leading-relaxed max-w-sm">
+                  Marketplace que conecta productores locales españoles con consumidores
+                  que valoran la autenticidad, la transparencia y la sostenibilidad.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {[
+                    { icon: Leaf, label: 'Sostenibilidad' },
+                    { icon: Shield, label: 'Transparencia' },
+                    { icon: Heart, label: 'Comunidad' },
+                    { icon: Globe, label: 'Kilómetro 0' },
+                  ].map(({ icon: Icon, label }) => (
+                    <span key={label} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-xs font-medium text-white border border-white/20">
+                      <Icon className="w-3 h-3 text-origen-menta" />
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Columna 2: Productores */}
+              <div className="lg:col-span-2">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Productores</h3>
+                <ul className="space-y-3">
+                  {[
+                    { href: '/como-funciona', label: 'Cómo funciona' },
+                    { href: '/tarifas', label: 'Tarifas y comisiones' },
+                    { href: '/soporte', label: 'Soporte especializado' },
+                    { href: '/casos-exito', label: 'Casos de éxito' },
+                  ].map(({ href, label }) => (
+                    <li key={href}>
+                      <Link href={href} className="text-sm text-white/70 hover:text-white transition-colors inline-flex items-center gap-1 group">
+                        <ChevronRight className="w-3 h-3 text-origen-menta/70 group-hover:translate-x-0.5 transition-transform" />
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                  <li className="pt-2">
+                    <Link href="/auth/register" className="text-sm font-medium text-origen-menta hover:text-white transition-colors inline-flex items-center gap-1">
+                      <Store className="w-3.5 h-3.5" />
+                      Nuevo productor
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Columna 3: Legal */}
+              <div className="lg:col-span-2">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Legal</h3>
+                <ul className="space-y-3">
+                  {[
+                    { href: '/privacidad', label: 'Política de Privacidad' },
+                    { href: '/cookies', label: 'Política de Cookies' },
+                    { href: '/aviso-legal', label: 'Aviso Legal' },
+                    { href: '/soporte', label: 'Contacto' },
+                  ].map(({ href, label }) => (
+                    <li key={href}>
+                      <Link href={href} className="text-sm text-white/70 hover:text-white transition-colors inline-flex items-center gap-1 group">
+                        <ChevronRight className="w-3 h-3 text-origen-menta/70 group-hover:translate-x-0.5 transition-transform" />
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Columna 4: Contacto */}
+              <div className="lg:col-span-4">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Contacto</h3>
+                <div className="bg-white/10 rounded-xl p-5 space-y-3 border border-white/10">
+                  {[
+                    { icon: Mail, label: 'Email', value: 'info@origen.es' },
+                    { icon: Phone, label: 'Teléfono', value: '+34 900 123 456' },
+                    { icon: Clock, label: 'Horario', value: 'L-V, 9:00 - 18:00' },
+                  ].map(({ icon: Icon, label, value }) => (
+                    <div key={label} className="flex items-center gap-3 text-sm">
+                      <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-4 h-4 text-origen-menta" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-white/70">{label}</p>
+                        <p className="font-medium text-white">{value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center gap-4">
+                  <div className="flex items-center gap-2 text-xs text-white/70">
+                    <Shield className="w-3.5 h-3.5 text-origen-menta" /><span>SSL 256-bit</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-white/70">
+                    <Globe className="w-3.5 h-3.5 text-origen-menta" /><span>RGPD</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-white/70">
+                    <Heart className="w-3.5 h-3.5 text-origen-menta" /><span>Pagos seguros</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 pt-6 border-t border-white/10">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-3">
+                <p className="text-xs text-white/70">
+                  © {new Date().getFullYear()} Origen Marketplace. Todos los derechos reservados.
+                </p>
+                <p className="text-xs text-white/70">Versión 5.3.0 • Acceso productores</p>
+              </div>
             </div>
           </div>
+
         </div>
-        </div>{/* /hidden lg:block */}
       </footer>
     </div>
   );

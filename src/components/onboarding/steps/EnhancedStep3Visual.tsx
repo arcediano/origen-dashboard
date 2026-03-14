@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { FileUpload, type UploadedFile } from '@/components/forms/FileUpload';
+import { FileUpload, type UploadedFile } from '@/components/shared/FileUpload';
 
 import {
   Camera,

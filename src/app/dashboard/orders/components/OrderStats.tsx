@@ -31,19 +31,15 @@ export function OrderStats({ stats, className }: OrderStatsProps) {
       label: 'Total pedidos',
       value: stats.total,
       icon: ShoppingBag,
-      color: 'pradera',
-      bg: 'from-origen-pradera/5 to-transparent',
-      border: 'border-origen-pradera/10',
-      iconColor: 'text-origen-pradera'
+      iconColor: 'text-origen-pradera',
+      accent: 'border-l-origen-pradera',
     },
     {
       label: 'Ingresos totales',
       value: `${stats.totalRevenue.toFixed(2)}€`,
       icon: DollarSign,
-      color: 'green',
-      bg: 'from-green-50/50 to-transparent',
-      border: 'border-green-100',
       iconColor: 'text-green-500',
+      accent: 'border-l-green-400',
       secondaryInfo: {
         label: 'media',
         value: `${stats.averageOrderValue.toFixed(2)}€`
@@ -53,46 +49,36 @@ export function OrderStats({ stats, className }: OrderStatsProps) {
       label: 'Pendientes',
       value: stats.pending,
       icon: Clock,
-      color: 'amber',
-      bg: 'from-amber-50/50 to-transparent',
-      border: 'border-amber-100',
-      iconColor: 'text-amber-500'
+      iconColor: 'text-amber-500',
+      accent: 'border-l-amber-400',
     },
     {
       label: 'Procesando',
       value: stats.processing,
       icon: Package,
-      color: 'blue',
-      bg: 'from-blue-50/50 to-transparent',
-      border: 'border-blue-100',
-      iconColor: 'text-blue-500'
+      iconColor: 'text-origen-hoja',
+      accent: 'border-l-origen-hoja',
     },
     {
       label: 'Enviados',
       value: stats.shipped,
       icon: Truck,
-      color: 'purple',
-      bg: 'from-purple-50/50 to-transparent',
-      border: 'border-purple-100',
-      iconColor: 'text-purple-500'
+      iconColor: 'text-origen-pino',
+      accent: 'border-l-origen-pino',
     },
     {
       label: 'Entregados',
       value: stats.delivered,
       icon: CheckCircle,
-      color: 'green',
-      bg: 'from-green-50/50 to-transparent',
-      border: 'border-green-100',
-      iconColor: 'text-green-500'
+      iconColor: 'text-green-500',
+      accent: 'border-l-green-500',
     },
     {
       label: 'Hoy',
       value: stats.todayOrders,
       icon: Calendar,
-      color: 'info',
-      bg: 'from-origen-menta/5 to-transparent',
-      border: 'border-origen-menta/20',
       iconColor: 'text-origen-menta',
+      accent: 'border-l-origen-menta',
       secondaryInfo: {
         label: 'ingresos',
         value: `${stats.todayRevenue.toFixed(2)}€`
@@ -102,10 +88,8 @@ export function OrderStats({ stats, className }: OrderStatsProps) {
       label: 'Cancelados',
       value: stats.cancelled + stats.refunded,
       icon: XCircle,
-      color: 'red',
-      bg: 'from-red-50/50 to-transparent',
-      border: 'border-red-100',
-      iconColor: 'text-red-500'
+      iconColor: 'text-red-500',
+      accent: 'border-l-red-400',
     }
   ];
 
@@ -118,10 +102,10 @@ export function OrderStats({ stats, className }: OrderStatsProps) {
         <div
           key={index}
           className={cn(
-            'p-4 rounded-xl bg-gradient-to-br',
-            card.bg,
-            'border',
-            card.border
+            'p-4 rounded-xl bg-white',
+            'border border-gray-100 border-l-4',
+            card.accent,
+            'shadow-subtle'
           )}
         >
           <div className="flex items-start justify-between mb-2">

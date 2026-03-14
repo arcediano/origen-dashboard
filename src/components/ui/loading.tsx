@@ -139,7 +139,7 @@ export function LoadingSkeleton({
   animate = true
 }: LoadingSkeletonProps) {
   const baseClass = cn(
-    'bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200',
+    'bg-origen-pastel',
     animate && 'animate-pulse',
     'rounded'
   );

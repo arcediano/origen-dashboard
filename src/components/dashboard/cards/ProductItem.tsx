@@ -47,12 +47,12 @@ export function ProductItem({
       
       <div className={cn(
         "relative bg-white rounded-2xl p-6 border border-gray-200",
-        "shadow-lg group-hover:shadow-xl group-hover:border-origen-pradera",
+        "shadow-origen group-hover:shadow-origen-lg group-hover:border-origen-pradera",
         "transition-all duration-300"
       )}>
         <div className="flex items-center gap-4">
           {/* Icono circular */}
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-origen-pradera to-origen-hoja flex items-center justify-center flex-shrink-0 shadow-md">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-origen-pradera to-origen-hoja flex items-center justify-center flex-shrink-0 shadow-subtle">
             <Package className="w-7 h-7 text-white" />
           </div>
           
@@ -64,7 +64,7 @@ export function ProductItem({
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <span className="font-semibold text-xl text-origen-pradera">
+                <span className="font-semibold text-xl text-origen-hoja">
                   {price.toFixed(2)}€
                 </span>
                 

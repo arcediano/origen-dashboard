@@ -48,9 +48,9 @@ export function BenefitsSection() {
     const Icon = benefit.icon;
     return (
       <div className="group relative h-full">
-        <div className="absolute inset-0 bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5 rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
-        <div className="relative bg-white rounded-2xl p-5 md:p-8 shadow-lg border border-gray-200 group-hover:border-origen-pradera group-hover:shadow-xl transition-all duration-300 h-full">
-          <div className="w-11 h-11 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center mb-3 md:mb-6 group-hover:scale-110 transition-transform duration-300">
+        <div className="absolute inset-0 bg-gradient-to-br from-origen-bosque/4 to-transparent rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
+        <div className="relative bg-white rounded-2xl p-5 md:p-8 shadow-lg border border-gray-200 group-hover:border-origen-hoja/50 group-hover:shadow-xl transition-all duration-300 h-full">
+          <div className="w-11 h-11 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-origen-pastel flex items-center justify-center mb-3 md:mb-6 group-hover:scale-110 transition-transform duration-300">
             <Icon className="w-5 h-5 md:w-8 md:h-8 text-origen-bosque" />
           </div>
           <h3 className="text-base md:text-2xl font-bold text-origen-bosque mb-1.5 md:mb-4">
@@ -75,11 +75,11 @@ export function BenefitsSection() {
   };
 
   return (
-    <section className="py-10 md:py-16 lg:py-20 bg-white">
+    <section className="py-10 md:py-16 lg:py-20">
       <div className="container mx-auto px-4 md:px-6">
         {/* Cabecera */}
         <div className="text-center max-w-4xl mx-auto mb-7 md:mb-16">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 text-origen-bosque rounded-full px-4 py-2 mb-3 md:mb-6 border border-origen-pradera/30">
+          <div className="inline-flex items-center gap-2 bg-origen-pastel text-origen-bosque rounded-full px-4 py-2 mb-3 md:mb-6 border border-origen-hoja/30">
             <CheckCircle className="w-4 h-4 text-origen-pradera" />
             <span className="text-sm font-semibold">Todo en un solo lugar</span>
           </div>
@@ -126,7 +126,7 @@ export function BenefitsSection() {
         {/* Desktop: resumen estadísticas */}
         <div className="hidden md:block mt-20 pt-16 border-t border-gray-200">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-r from-origen-crema to-white rounded-3xl p-10 border border-origen-pradera/30">
+            <div className="bg-white rounded-3xl p-10 border border-origen-pradera/30 shadow-origen">
               <div className="grid grid-cols-3 gap-8 text-center">
                 {[
                   { value: '15%', title: 'Comisión única', sub: 'Solo pagas cuando vendes' },
@@ -134,7 +134,7 @@ export function BenefitsSection() {
                   { value: '24h', title: 'Soporte prioritario', sub: 'Respuesta en menos de 24h' },
                 ].map(({ value, title, sub }) => (
                   <div key={value}>
-                    <div className="text-4xl font-bold text-origen-pradera mb-3">{value}</div>
+                    <div className="text-4xl font-bold text-origen-hoja mb-3">{value}</div>
                     <h4 className="font-bold text-origen-bosque text-base mb-2">{title}</h4>
                     <p className="text-gray-600 text-sm">{sub}</p>
                   </div>

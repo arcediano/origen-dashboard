@@ -36,19 +36,19 @@ export function OrderItem({
       text: 'text-amber-700',
       border: 'border-amber-200'
     },
-    processing: { 
-      label: 'Procesando', 
-      color: 'bg-blue-500',
-      bg: 'bg-blue-50',
-      text: 'text-blue-700',
-      border: 'border-blue-200'
+    processing: {
+      label: 'Procesando',
+      color: 'bg-origen-hoja',
+      bg: 'bg-origen-pastel',
+      text: 'text-origen-pino',
+      border: 'border-origen-hoja/30'
     },
-    shipped: { 
-      label: 'Enviado', 
-      color: 'bg-purple-500',
-      bg: 'bg-purple-50',
-      text: 'text-purple-700',
-      border: 'border-purple-200'
+    shipped: {
+      label: 'Enviado',
+      color: 'bg-origen-bosque',
+      bg: 'bg-origen-crema',
+      text: 'text-origen-bosque',
+      border: 'border-origen-bosque/20'
     },
     delivered: { 
       label: 'Entregado', 
@@ -79,12 +79,12 @@ export function OrderItem({
       
       <div className={cn(
         "relative bg-white rounded-2xl p-6 border border-gray-200",
-        "shadow-lg group-hover:shadow-xl group-hover:border-origen-pradera",
+        "shadow-origen group-hover:shadow-origen-lg group-hover:border-origen-pradera",
         "transition-all duration-300"
       )}>
         <div className="flex items-center gap-4">
           {/* Icono circular */}
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-origen-pradera to-origen-hoja flex items-center justify-center flex-shrink-0 shadow-md">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-origen-pradera to-origen-hoja flex items-center justify-center flex-shrink-0 shadow-subtle">
             <ShoppingBag className="w-7 h-7 text-white" />
           </div>
           

@@ -25,7 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileUpload, type UploadedFile } from '@/components/forms/FileUpload';
+import { FileUpload, type UploadedFile } from '@/components/shared/FileUpload';
 
 interface Certification {
   id: string;

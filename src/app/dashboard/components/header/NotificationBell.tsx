@@ -112,8 +112,8 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
         variant="ghost"
         size="icon"
         className={cn(
-          'relative text-gray-700 hover:text-[#1B4332] hover:bg-[#74C69D]/10 transition-all',
-          isOpen && 'bg-[#74C69D]/10 text-[#06D6A0]'
+          'relative text-gray-700 hover:text-origen-bosque hover:bg-origen-pradera/10 transition-all',
+          isOpen && 'bg-origen-pradera/10 text-origen-menta'
         )}
         onClick={toggleOpen}
         aria-label="Notificaciones"
@@ -122,11 +122,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
         <Bell className="w-5 h-5" />
         
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[1.2rem] h-5 px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center shadow-lg"
-                style={{ 
-                  background: '#06D6A0',
-                  boxShadow: '0 2px 8px rgba(6, 214, 160, 0.4)'
-                }}>
+          <span className="absolute -top-1 -right-1 min-w-[1.2rem] h-5 px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center shadow-lg bg-origen-menta shadow-menta-glow-lg">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -147,15 +143,15 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
             <div className="bg-gradient-to-r from-origen-crema to-white px-4 py-3 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-[#06D6A0]/10 flex items-center justify-center">
-                    <Bell className="w-4 h-4 text-[#06D6A0]" />
+                  <div className="w-8 h-8 rounded-lg bg-origen-menta/10 flex items-center justify-center">
+                    <Bell className="w-4 h-4 text-origen-menta" />
                   </div>
-                  <h3 className="text-sm font-semibold text-[#1B4332]">Notificaciones</h3>
+                  <h3 className="text-sm font-semibold text-origen-bosque">Notificaciones</h3>
                 </div>
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllAsRead}
-                    className="text-xs text-[#06D6A0] hover:text-[#74C69D] transition-colors font-medium"
+                    className="text-xs text-origen-menta hover:text-origen-pradera transition-colors font-medium"
                   >
                     Marcar todas
                   </button>
@@ -196,7 +192,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
             <div className="border-t border-gray-100 p-2 bg-gray-50/50">
               <Link
                 href="/dashboard/notificaciones"
-                className="block w-full text-center text-xs text-gray-600 hover:text-[#1B4332] py-2 transition-colors font-medium"
+                className="block w-full text-center text-xs text-gray-600 hover:text-origen-bosque py-2 transition-colors font-medium"
                 onClick={close}
               >
                 Ver todas las notificaciones

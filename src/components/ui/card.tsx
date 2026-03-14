@@ -72,7 +72,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       elevated: "bg-white border-0 shadow-origen hover:shadow-origen-lg",
       outline: "bg-transparent border-2 border-origen-pradera/30 hover:border-origen-hoja",
       flat: "bg-origen-crema border-0 shadow-none",
-      organic: "bg-gradient-to-br from-white to-origen-crema border border-origen-pradera/30 shadow-origen relative overflow-hidden",
+      organic: "bg-white border border-origen-pradera/30 shadow-origen relative overflow-hidden",
       forest: "bg-gradient-to-br from-origen-bosque to-origen-pino border border-origen-bosque/30 text-white shadow-lg shadow-origen-bosque/20",
     };
 

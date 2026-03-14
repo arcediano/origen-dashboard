@@ -129,14 +129,14 @@ export function NotificationItem({
           <div className="flex items-start justify-between gap-2">
             <p className={cn(
               'text-sm truncate',
-              !notification.read ? 'font-semibold text-[#1B4332]' : 'text-gray-700'
+              !notification.read ? 'font-semibold text-origen-bosque' : 'text-gray-700'
             )}>
               {notification.title}
             </p>
             
             {/* Indicador de no leído (visible solo en no leídas) */}
             {!notification.read && (
-              <span className="w-2 h-2 rounded-full bg-[#06D6A0] flex-shrink-0 mt-1.5" />
+              <span className="w-2 h-2 rounded-full bg-origen-menta flex-shrink-0 mt-1.5" />
             )}
           </div>
           
@@ -152,7 +152,7 @@ export function NotificationItem({
         </div>
 
         {/* Efecto hover para indicar que es clickeable */}
-        <div className="absolute inset-y-0 right-0 w-1 bg-[#06D6A0] opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute inset-y-0 right-0 w-1 bg-origen-menta opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
 
       {/* Metadata adicional (si existe) - opcional */}

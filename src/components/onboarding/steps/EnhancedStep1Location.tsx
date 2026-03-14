@@ -11,7 +11,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 import { Input } from '@/components/ui/input';
-import { FileUpload, type UploadedFile } from '@/components/forms/FileUpload';
+import { FileUpload, type UploadedFile } from '@/components/shared/FileUpload';
 
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { PRODUCER_CATEGORIES } from '@/constants/categories';

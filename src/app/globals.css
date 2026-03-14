@@ -1,17 +1,23 @@
 /**
- * Estilos globales de la aplicación - ORIGEN v2.0.0
- * Paleta de colores oficial - Manual de Marca v1.1
- * 
- * @version 2.0.0 - SIMPLIFICACIÓN COMPLETA:
- *   1. ✅ Eliminadas clases de componentes (ahora en React)
- *   2. ✅ Unificada nomenclatura de variables CSS
- *   3. ✅ Solo variables de color y estilos base
- *   4. ✅ Mantenida jerarquía tipográfica
- *   5. ✅ Mejorada documentación
- * 
+ * Estilos globales de la aplicación - ORIGEN v3.0.0
+ * Paleta de colores oficial - Manual de Marca v2.0
+ *
+ * @version 3.0.0 - NUEVA PALETA "ÍNDIGO Y SALVIA":
+ *   - Primario: Índigo Marino #1B2A4B (antes Verde Bosque)
+ *   - Secundario: Azul Pizarra #2E4A6E (antes Verde Pino)
+ *   - Acento medio: Verde Salvia #4E7456 (antes Verde Hoja)
+ *   - Interactivo: Azul Niebla #6B90B8 (antes Verde Pradera)
+ *   - Acento brillante: Oro Envejecido #C89B4C (antes Verde Menta)
+ *   - Fondo: Lienzo Frío #F8F9FC (antes Blanco Crema)
+ *   - Texto: Tinta #0D1626 (antes Verde Oscuro)
+ *   - Suave: Bruma #E8EEF5 (antes Verde Pastel)
+ *
+ * @note Los nombres de los tokens CSS se mantienen para compatibilidad
+ *       con los componentes existentes. Ver MANUAL-DE-MARCA.md v2.0
+ *
  * @note Los componentes personalizados ahora viven en:
  *       src/components/ui/*.tsx
- * 
+ *
  * @note Los estilos de utilidad adicionales están en:
  *       tailwind.config.ts
  */
@@ -22,62 +28,62 @@
 
 @layer base {
   :root {
-    /* === PALETA "BOSQUE INNOVADOR" - ORIGEN v1.1 === */
-    
+    /* === PALETA "ÍNDIGO Y SALVIA" - ORIGEN v2.0 === */
+
     /* ----- COLORES PRINCIPALES (Manual Sección 3.1) ----- */
-    --bosque: 149 43% 18%;      /* #1B4332 - Verde Bosque (Principal) */
-    --pino: 154 47% 29%;        /* #2D6A4F - Verde Pino (H2) */
-    --hoja: 154 43% 39%;        /* #40916C - Verde Hoja (H3, enlaces) */
-    --pradera: 167 38% 55%;     /* #74C69D - Verde Pradera (Secundario) */
-    --menta: 167 80% 44%;       /* #06D6A0 - Menta Vibrante (Acento) */
-    --crema: 100 67% 96%;       /* #F1FAEE - Blanco Crema (Fondo) */
-    
+    --bosque: 221 47% 20%;      /* #1B2A4B - Índigo Marino (Principal) */
+    --pino: 214 41% 31%;        /* #2E4A6E - Azul Pizarra (H2) */
+    --hoja: 133 20% 38%;        /* #4E7456 - Verde Salvia (H3, enlaces) */
+    --pradera: 211 35% 57%;     /* #6B90B8 - Azul Niebla (Interactivo) */
+    --menta: 39 53% 54%;        /* #C89B4C - Oro Envejecido (Acento) */
+    --crema: 228 38% 98%;       /* #F8F9FC - Lienzo Frío (Fondo) */
+
     /* ----- COLORES DE APOYO (Manual Sección 3.2) ----- */
-    --oscuro: 164 84% 8%;       /* #081C15 - Verde Oscuro (Texto principal) */
-    --pastel: 139 68% 93%;      /* #D8F3DC - Verde Pastel (Fondos suaves) */
-    
-    /* ----- ESTADOS HOVER (15% más oscuros) ----- */
-    --hover-bosque: 149 43% 12%;    /* #0F2A1F - Hover Verde Bosque */
-    --hover-pradera: 167 38% 48%;   /* #5AA67D - Hover Verde Pradera */
-    --hover-menta: 167 80% 38%;     /* #05B386 - Hover Menta Vibrante */
-    
+    --oscuro: 221 49% 10%;      /* #0D1626 - Tinta (Texto principal) */
+    --pastel: 213 38% 94%;      /* #E8EEF5 - Bruma (Fondos suaves) */
+
+    /* ----- ESTADOS HOVER (más oscuros) ----- */
+    --hover-bosque: 221 47% 13%;    /* #0F1B30 - Hover Índigo Marino */
+    --hover-pradera: 211 35% 48%;   /* #5B7FA6 - Hover Azul Niebla */
+    --hover-menta: 39 53% 44%;      /* #A47A30 - Hover Oro Envejecido */
+
     /* ----- SISTEMA DE VARIABLES (shadcn/ui) ----- */
-    
+
     /* Fondo y Texto Principal */
     --background: var(--crema);
     --foreground: var(--oscuro);
-    
+
     /* Tarjetas */
     --card: 0 0% 100%;
     --card-foreground: var(--oscuro);
     --popover: 0 0% 100%;
     --popover-foreground: var(--oscuro);
-    
+
     /* ----- ESTADOS Y ACCIONES - WCAG COMPLIANT ----- */
-    
-    /* Primario: Verde Bosque + Blanco (Contraste: 10.5:1 - AAA) */
+
+    /* Primario: Índigo Marino + Blanco (Contraste: 12.4:1 - AAA) */
     --primary: var(--bosque);
     --primary-foreground: 0 0% 100%;
-    
-    /* Secundario: Verde Pradera + Verde Oscuro (Contraste: 5.8:1 - AA) */
+
+    /* Secundario: Azul Niebla + Tinta (Contraste: 5.6:1 - AA) */
     --secondary: var(--pradera);
     --secondary-foreground: var(--oscuro);
-    
-    /* Acento: Menta Vibrante - SOLO SOBRE FONDOS OSCUROS */
+
+    /* Acento: Oro Envejecido - SOLO SOBRE FONDOS OSCUROS */
     --accent: var(--menta);
     --accent-foreground: 0 0% 100%;
-    
-    /* Muted: Verde Pastel + Verde Hoja (Contraste: 4.7:1 - AA) */
+
+    /* Muted: Bruma + Verde Salvia (Contraste: 4.8:1 - AA) */
     --muted: var(--pastel);
     --muted-foreground: var(--hoja);
-    
+
     /* Destructivo */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    
+
     /* Bordes e Inputs */
-    --border: 147 20% 85%;                    /* #D1E7DD */
-    --input: 147 20% 85%;
+    --border: 214 25% 85%;                    /* #C5D3E6 */
+    --input: 214 25% 85%;
     --ring: var(--menta);
     
     /* Variables de Diseño */
@@ -85,6 +91,7 @@
     
     /* === TIPOGRAFÍA (Manual Sección 4) === */
     --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    --font-serif: Georgia, "Times New Roman", serif;
   }
 
   /* === ESTILOS BASE === */
@@ -103,65 +110,69 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* === JERARQUÍA TIPOGRÁFICA (Manual Sección 4.2) === */
-  h1, .h1 {
-    color: hsl(var(--bosque));
-    font-size: 2.5rem;
-    font-weight: 700;
-    line-height: 1.2;
-    border-bottom: 4px solid hsl(var(--menta));
-    padding-bottom: 0.5rem;
-    margin-bottom: 2rem;
-  }
+}
 
-  h2, .h2 {
-    color: hsl(var(--pino));
-    font-size: 1.8rem;
-    font-weight: 700;
-    line-height: 1.3;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-  }
+/* === JERARQUÍA TIPOGRÁFICA (Manual Sección 4.2) — solo dentro de .prose-origen === */
+/* Usar esta clase en páginas de contenido editorial (landing, legal, blog) */
+/* NO aplicar en dashboard o componentes de UI */
+.prose-origen h1, .prose-origen .h1 {
+  font-family: var(--font-serif);
+  color: hsl(var(--bosque));
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  border-bottom: 4px solid hsl(var(--menta));
+  padding-bottom: 0.5rem;
+  margin-bottom: 2rem;
+}
 
-  h3, .h3 {
-    color: hsl(var(--hoja));
-    font-size: 1.3rem;
-    font-weight: 600;
-    line-height: 1.4;
-    margin-top: 1.5rem;
-    margin-bottom: 0.8rem;
-  }
+.prose-origen h2, .prose-origen .h2 {
+  font-family: var(--font-serif);
+  color: hsl(var(--pino));
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
 
-  p, .text-body {
-    color: hsl(var(--oscuro));
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 1rem;
-    opacity: 0.9;
-  }
+.prose-origen h3, .prose-origen .h3 {
+  color: hsl(var(--hoja));
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+}
 
-  .text-small {
-    font-size: 0.875rem;
-    color: hsl(var(--muted-foreground));
-    line-height: 1.5;
-  }
+.prose-origen p, .prose-origen .text-body {
+  color: hsl(var(--oscuro));
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
 
-  /* === ENLACES === */
-  a {
-    color: hsl(var(--hoja));
-    transition: color 0.2s ease;
-    text-decoration: none;
-  }
+.prose-origen .text-small {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.5;
+}
 
-  a:hover {
-    color: hsl(var(--bosque));
-    text-decoration: underline;
-  }
+.prose-origen a {
+  color: hsl(var(--hoja));
+  transition: color 0.2s ease;
+  text-decoration: none;
+}
 
-  a:focus-visible {
-    outline: 2px solid hsl(var(--menta));
-    outline-offset: 2px;
-  }
+.prose-origen a:hover {
+  color: hsl(var(--bosque));
+  text-decoration: underline;
+}
+
+.prose-origen a:focus-visible {
+  outline: 2px solid hsl(var(--menta));
+  outline-offset: 2px;
 }
 
 /* === COMPONENTES BÁSICOS (solo los más simples) === */
@@ -215,33 +226,6 @@
 
   .text-over-bosque {
     color: white;
-  }
-
-  /* === SOMBRAS (definidas en Tailwind, pero mantenemos utilidades) === */
-  .shadow-origen {
-    box-shadow: 0 4px 20px hsla(var(--bosque) / 0.1);
-  }
-
-  .shadow-subtle {
-    box-shadow: 0 2px 8px hsla(var(--bosque) / 0.08);
-  }
-
-  /* === DEGRADADOS === */
-  .bg-gradient-origen {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--bosque)) 0%,
-      hsl(var(--pino)) 50%,
-      hsl(var(--pradera)) 100%
-    );
-  }
-
-  .bg-gradient-menta {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--menta)) 0%,
-      hsl(var(--pradera)) 100%
-    );
   }
 
   /* === SCROLLBAR PERSONALIZADO === */

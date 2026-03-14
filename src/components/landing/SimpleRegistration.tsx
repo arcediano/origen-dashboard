@@ -105,11 +105,11 @@ const ProgressBar: React.FC<{ value: number; max: number; className?: string }> 
     <div className={cn('space-y-1', className)}>
       <div className="flex items-center justify-between">
         <span className="text-xs md:text-sm text-origen-hoja">Mínimo 50 caracteres</span>
-        <span className="text-xs md:text-sm font-semibold text-origen-pradera">{percentage}%</span>
+        <span className="text-xs md:text-sm font-semibold text-origen-hoja">{percentage}%</span>
       </div>
       <div className="h-2 bg-origen-crema rounded-full overflow-hidden">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-origen-pradera to-origen-hoja transition-all duration-700"
+          className="h-full rounded-full bg-gradient-to-r from-origen-hoja to-origen-menta transition-all duration-700"
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -211,7 +211,7 @@ const BusinessTypeSelector: React.FC<BusinessTypeSelectorProps> = ({ value, onCh
           >
             {isSelected && (
               <div className="absolute top-2 right-2">
-                <div className="w-5 h-5 bg-gradient-to-br from-origen-pradera to-origen-hoja rounded-full flex items-center justify-center shadow">
+                <div className="w-5 h-5 bg-gradient-to-br from-origen-bosque to-origen-pino rounded-full flex items-center justify-center shadow">
                   <Check className="w-3 h-3 text-white" />
                 </div>
               </div>
@@ -221,7 +221,7 @@ const BusinessTypeSelector: React.FC<BusinessTypeSelectorProps> = ({ value, onCh
                 'rounded-xl flex items-center justify-center mb-2 transition-all',
                 'w-10 h-10 md:w-16 md:h-16',
                 isSelected
-                  ? 'bg-gradient-to-br from-origen-pradera to-origen-hoja text-white shadow-lg'
+                  ? 'bg-gradient-to-br from-origen-bosque to-origen-pino text-white shadow-lg'
                   : 'bg-origen-crema text-origen-bosque'
               )}>
                 <Icon className="w-5 h-5 md:w-8 md:h-8" />
@@ -252,14 +252,14 @@ interface CategoryCardProps {
 const CategoryCard: React.FC<CategoryCardProps> = ({ category, isSelected, onSelect }) => {
   const IconComponent = getCategoryIcon(category.id);
   const gradients: Record<string, string> = {
-    agricola: 'from-origen-pradera/20 to-origen-hoja/20',
-    ganadero: 'from-origen-hoja/20 to-origen-pino/20',
+    agricola: 'from-origen-hoja/20 to-origen-pastel',
+    ganadero: 'from-origen-pino/20 to-origen-bosque/20',
     artesano: 'from-origen-pino/20 to-origen-bosque/20',
-    apicultor: 'from-origen-pradera/20 to-origen-hoja/20',
+    apicultor: 'from-origen-menta/20 to-origen-crema',
     viticultor: 'from-origen-pradera/20 to-origen-pino/20',
-    especializado: 'from-origen-pradera/20 to-origen-hoja/20',
+    especializado: 'from-origen-hoja/20 to-origen-pastel',
   };
-  const gradient = gradients[category.id] || 'from-origen-pradera/20 to-origen-hoja/20';
+  const gradient = gradients[category.id] || 'from-origen-bosque/10 to-origen-pastel';
 
   return (
     <button
@@ -271,13 +271,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, isSelected, onSel
         'focus:outline-none focus:ring-2 focus:ring-origen-pradera/50',
         'p-3 md:p-5',
         isSelected
-          ? 'border-origen-pradera bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5 shadow-md'
+          ? 'border-origen-bosque/40 bg-gradient-to-br from-origen-bosque/5 to-transparent shadow-md'
           : 'border-gray-200 hover:border-origen-pradera'
       )}
     >
       {isSelected && (
         <div className="absolute top-2 right-2">
-          <div className="w-5 h-5 bg-gradient-to-br from-origen-pradera to-origen-hoja rounded-full flex items-center justify-center shadow">
+          <div className="w-5 h-5 bg-gradient-to-br from-origen-bosque to-origen-pino rounded-full flex items-center justify-center shadow">
             <Check className="w-3 h-3 text-white" />
           </div>
         </div>
@@ -287,7 +287,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, isSelected, onSel
           'rounded-xl flex items-center justify-center mb-2 transition-all',
           'w-11 h-11 md:w-16 md:h-16',
           isSelected
-            ? 'bg-gradient-to-br from-origen-pradera to-origen-hoja text-white shadow-lg'
+            ? 'bg-gradient-to-br from-origen-bosque to-origen-pino text-white shadow-lg'
             : `bg-gradient-to-br ${gradient} text-origen-bosque group-hover:scale-110`
         )}>
           <IconComponent className="w-5 h-5 md:w-8 md:h-8" />
@@ -314,21 +314,21 @@ interface FormSectionProps {
 const FormSection: React.FC<FormSectionProps> = ({ title, description, children, className, badge }) => (
   <div className={cn(
     'bg-white rounded-xl md:rounded-2xl border border-gray-200',
-    'p-4 md:p-8',
-    'hover:border-origen-pradera transition-all shadow-sm hover:shadow-md',
+    'p-4 md:p-6',
+    'hover:border-origen-hoja/40 transition-all shadow-subtle hover:shadow-origen',
     className
   )}>
     {badge && (
-      <div className="inline-flex items-center gap-1.5 bg-origen-crema/80 rounded-full px-3 py-1 md:px-4 md:py-1.5 mb-3 md:mb-6 border border-origen-pradera/30">
-        <Sparkles className="w-3 h-3 md:w-4 md:h-4 text-origen-pradera" />
-        <span className="text-xs md:text-sm font-semibold text-origen-bosque">{badge}</span>
+      <div className="inline-flex items-center gap-1.5 bg-origen-crema/80 rounded-full px-3 py-1 mb-2 md:mb-4 border border-origen-pradera/30">
+        <Sparkles className="w-3 h-3 text-origen-pradera" />
+        <span className="text-xs font-semibold text-origen-bosque">{badge}</span>
       </div>
     )}
-    <h3 className="text-base md:text-xl font-bold text-origen-bosque mb-1 md:mb-2">{title}</h3>
+    <h3 className="text-base md:text-lg font-bold text-origen-bosque mb-1">{title}</h3>
     {description && (
-      <p className="text-xs md:text-base text-gray-600 mb-3 md:mb-6">{description}</p>
+      <p className="text-xs md:text-sm text-gray-600 mb-3 md:mb-4">{description}</p>
     )}
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-3 md:space-y-4">
       {children}
     </div>
   </div>
@@ -399,14 +399,14 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
               'overflow-hidden max-h-[95dvh] overflow-y-auto'
             )}
           >
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-origen-pradera via-origen-hoja to-origen-pino" />
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-origen-bosque via-origen-pino to-origen-pradera" />
             <div className="sm:hidden flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-gray-300" />
             </div>
 
             <div className="p-5 sm:p-8">
               <div className="text-center mb-5">
-                <div className="mx-auto mb-4 w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-origen-pradera to-origen-hoja flex items-center justify-center shadow-lg">
+                <div className="mx-auto mb-4 w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-lg">
                   <CheckCircle className="w-7 h-7 md:w-8 md:h-8 text-white" />
                 </div>
                 <div className="inline-flex items-center gap-1.5 bg-origen-crema rounded-full px-3 py-1.5 border border-origen-pradera/30 mb-3">
@@ -455,7 +455,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
               </div>
 
               <div className="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-xl p-3 mb-5">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera to-origen-hoja flex items-center justify-center flex-shrink-0 shadow">
+                <div className="w-9 h-9 rounded-lg bg-origen-hoja flex items-center justify-center flex-shrink-0 shadow">
                   <span className="text-sm font-bold text-white">{initial}</span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -631,7 +631,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
         )}
 
         {submitStatus !== 'submitting' && (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
 
             {/* SECCIÓN 1: Contacto */}
             <FormSection

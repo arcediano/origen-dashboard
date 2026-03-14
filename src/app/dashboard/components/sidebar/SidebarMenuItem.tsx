@@ -70,23 +70,23 @@ export function SidebarMenuItem({
           className={cn(
             'group relative w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-all',
             itemPadding,
-            'hover:bg-[#74C69D]/5',
-            (isActive || hasActiveChild) && 'bg-[#74C69D]/15'
+            'hover:bg-origen-pradera/5',
+            (isActive || hasActiveChild) && 'bg-origen-pradera/15'
           )}
         >
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {/* Icono solo en primer nivel */}
             <Icon className={cn(
               'w-5 h-5 flex-shrink-0 transition-colors',
-              (isActive || hasActiveChild) 
-                ? 'text-[#06D6A0]' 
-                : 'text-gray-400 group-hover:text-[#74C69D]'
+              (isActive || hasActiveChild)
+                ? 'text-origen-menta'
+                : 'text-gray-400 group-hover:text-origen-pradera'
             )} />
             <span className={cn(
               'truncate',
-              (isActive || hasActiveChild) 
-                ? 'text-[#1B4332] font-semibold' 
-                : 'text-gray-500 group-hover:text-[#1B4332]'
+              (isActive || hasActiveChild)
+                ? 'text-origen-bosque font-semibold'
+                : 'text-gray-500 group-hover:text-origen-bosque'
             )}>
               {label}
             </span>
@@ -98,7 +98,7 @@ export function SidebarMenuItem({
             <ChevronDown className={cn(
               'w-4 h-4 transition-transform',
               isOpen ? 'rotate-180' : '',
-              (isActive || hasActiveChild) ? 'text-[#06D6A0]' : 'text-gray-400'
+              (isActive || hasActiveChild) ? 'text-origen-menta' : 'text-gray-400'
             )} />
           </div>
 
@@ -107,7 +107,7 @@ export function SidebarMenuItem({
             <motion.div
               layoutId="activeNav"
               className="absolute left-0 w-1 h-6 rounded-full"
-              style={{ background: '#06D6A0', boxShadow: '0 0 8px #06D6A0' }}
+              className="absolute left-0 w-1 h-6 rounded-full bg-origen-menta shadow-menta-glow"
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             />
           )}
@@ -149,18 +149,18 @@ export function SidebarMenuItem({
       className={cn(
         'group relative flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-all',
         itemPadding,
-        'hover:bg-[#74C69D]/5',
-        isActive && 'bg-[#74C69D]/15'
+        'hover:bg-origen-pradera/5',
+        isActive && 'bg-origen-pradera/15'
       )}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <Icon className={cn(
           'w-5 h-5 flex-shrink-0 transition-colors',
-          isActive ? 'text-[#06D6A0]' : 'text-gray-400 group-hover:text-[#74C69D]'
+          isActive ? 'text-origen-menta' : 'text-gray-400 group-hover:text-origen-pradera'
         )} />
         <span className={cn(
           'truncate',
-          isActive ? 'text-[#1B4332] font-semibold' : 'text-gray-500 group-hover:text-[#1B4332]'
+          isActive ? 'text-origen-bosque font-semibold' : 'text-gray-500 group-hover:text-origen-bosque'
         )}>
           {label}
         </span>
@@ -172,8 +172,7 @@ export function SidebarMenuItem({
       {isActive && (
         <motion.div
           layoutId="activeNav"
-          className="absolute left-0 w-1 h-6 rounded-full"
-          style={{ background: '#06D6A0', boxShadow: '0 0 8px #06D6A0' }}
+          className="absolute left-0 w-1 h-6 rounded-full bg-origen-menta shadow-menta-glow"
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         />
       )}

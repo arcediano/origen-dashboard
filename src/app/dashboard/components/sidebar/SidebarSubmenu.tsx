@@ -54,17 +54,17 @@ export function SidebarSubmenu({
                   className={cn(
                     'group relative flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all',
                     // SIN ICONO, solo texto
-                    'hover:bg-[#74C69D]/5',
-                    isActive && 'bg-[#74C69D]/15 font-medium'
+                    'hover:bg-origen-pradera/5',
+                    isActive && 'bg-origen-pradera/15 font-medium'
                   )}
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     {/* SIN ICONO - solo texto con un pequeño indicador visual */}
                     <span className={cn(
                       'truncate transition-all',
-                      isActive 
-                        ? 'text-[#1B4332] font-semibold pl-0' 
-                        : 'text-gray-500 group-hover:text-[#1B4332] pl-0'
+                      isActive
+                        ? 'text-origen-bosque font-semibold pl-0'
+                        : 'text-gray-500 group-hover:text-origen-bosque pl-0'
                     )}>
                       {item.label}
                     </span>
@@ -78,8 +78,7 @@ export function SidebarSubmenu({
                   {isActive && (
                     <motion.div
                       layoutId="activeSubmenuIndicator"
-                      className="absolute left-0 w-1 h-5 rounded-full"
-                      style={{ background: '#06D6A0', boxShadow: '0 0 8px #06D6A0' }}
+                      className="absolute left-0 w-1 h-5 rounded-full bg-origen-menta shadow-menta-glow"
                       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     />
                   )}

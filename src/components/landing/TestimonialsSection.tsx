@@ -12,7 +12,7 @@ export function TestimonialsSection() {
       quote: "Desde que me uní a Origen, mis ventas han aumentado un 40%. La plataforma es intuitiva y el soporte excelente.",
       category: "Hortalizas ecológicas",
       initials: "MG",
-      bgColor: "from-origen-pradera to-origen-hoja",
+      bgColor: "from-origen-hoja/80 to-origen-hoja/60",
     },
     {
       name: "Carlos Rodríguez",
@@ -28,14 +28,14 @@ export function TestimonialsSection() {
       quote: "El sistema de pagos seguro y la logística integrada me han ahorrado horas de gestión semanal.",
       category: "Quesos artesanales",
       initials: "AM",
-      bgColor: "from-origen-hoja to-origen-pradera",
+      bgColor: "from-origen-menta/80 to-origen-menta/60",
     },
   ];
 
   const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] }) => (
     <div className="group relative h-full">
-      <div className="absolute inset-0 bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5 rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
-      <div className="relative bg-white rounded-2xl p-5 md:p-8 shadow-lg md:shadow-xl border border-gray-200 group-hover:border-origen-pradera transition-all h-full flex flex-col">
+      <div className="absolute inset-0 bg-gradient-to-br from-origen-bosque/4 to-transparent rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
+      <div className="relative bg-white rounded-2xl p-5 md:p-8 shadow-lg md:shadow-xl border border-gray-200 group-hover:border-origen-hoja/50 transition-all h-full flex flex-col">
         <div className="flex items-center mb-3 md:mb-6">
           {[...Array(5)].map((_, i) => (
             <Star key={i} className="w-4 h-4 md:w-6 md:h-6 text-yellow-400 fill-current" />
@@ -65,7 +65,7 @@ export function TestimonialsSection() {
   );
 
   return (
-    <section className="py-10 md:py-16 lg:py-20 bg-gradient-to-b from-white to-origen-crema">
+    <section className="py-10 md:py-16 lg:py-20">
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         {/* Cabecera */}
         <div className="text-center max-w-3xl mx-auto mb-7 md:mb-16">
@@ -74,7 +74,7 @@ export function TestimonialsSection() {
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-origen-bosque mb-2 md:mb-6">
             Historias de éxito que
-            <span className="block text-origen-pradera">inspiran</span>
+            <span className="block text-origen-hoja">inspiran</span>
           </h2>
           <p className="hidden md:block text-xl text-gray-600">
             Descubre cómo otros productores locales han transformado su negocio con Origen

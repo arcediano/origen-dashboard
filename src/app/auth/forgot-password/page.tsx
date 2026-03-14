@@ -5,7 +5,7 @@
  * @description Página para solicitar el restablecimiento de contraseña
  */
 
-import { SimpleForgotPassword } from '@/components/forms/SimpleForgotPassword';
+import { SimpleForgotPassword } from '@/components/auth/SimpleForgotPassword';
 import Link from 'next/link';
 import {
   Shield,
@@ -100,7 +100,7 @@ export default function RecuperarPage() {
               <div className="text-left max-w-xl">
                 <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-origen-bosque mb-4 md:mb-6">
                   Recupera el acceso
-                  <span className="block text-origen-pradera">a tu panel</span>
+                  <span className="block text-origen-hoja">a tu panel</span>
                 </h2>
                 <p className="text-base md:text-lg text-gray-600 leading-relaxed">
                   Sin acceso a tu cuenta no puedes gestionar tu tienda.
