@@ -10,8 +10,8 @@ import { motion, AnimatePresence, type Variants } from 'framer-motion'; // ← I
 import { Package, Sparkles, TrendingUp, Lightbulb } from 'lucide-react';
 
 // Componentes UI
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Badge } from '@/components/ui/atoms/badge';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 
 // Steps del formulario

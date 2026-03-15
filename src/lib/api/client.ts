@@ -29,6 +29,13 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
 const API_VERSION = 'v1';
 
+// Declaración global para debounce de sesión expirada
+declare global {
+  interface Window {
+    lastSessionExpiredTime?: number;
+  }
+}
+
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
 export interface RequestOptions {
@@ -130,6 +137,24 @@ async function request<T>(
     const message = Array.isArray(raw)
       ? raw.join(', ')
       : (raw ?? `Error ${response.status} en ${method} ${path}`);
+
+    // Notificar al dashboard que la sesión ha expirado (solo en el browser)
+    // Implementamos debounce para evitar múltiples eventos 401
+    if (response.status === 401 && typeof window !== 'undefined') {
+      // Usar una variable global para debounce
+      if (!window.lastSessionExpiredTime) {
+        window.lastSessionExpiredTime = 0;
+      }
+      
+      const now = Date.now();
+      const SESSION_EXPIRED_DEBOUNCE = 1000; // 1 segundo
+      
+      if (now - (window.lastSessionExpiredTime as number) > SESSION_EXPIRED_DEBOUNCE) {
+        window.lastSessionExpiredTime = now;
+        window.dispatchEvent(new CustomEvent('session:expired'));
+      }
+    }
+
     throw new GatewayError(response.status, message, data);
   }
 

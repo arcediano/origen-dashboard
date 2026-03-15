@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { NotificationBadge } from '@/components/ui/notification-badge';
+import { Badge } from '@/components/ui/atoms/badge';
 import type { SubmenuItem } from '@/constants/sidebar';
 
 interface SidebarSubmenuProps {
@@ -71,7 +71,9 @@ export function SidebarSubmenu({
                   </div>
 
                   {item.badge && (
-                    <NotificationBadge count={item.badge} size="sm" />
+                    <Badge variant="notification" size="xs" className="min-w-[1.2rem] h-5">
+                      {item.badge > 99 ? '99+' : item.badge}
+                    </Badge>
                   )}
 
                   {/* Indicador de elemento activo */}

@@ -15,7 +15,7 @@ import {
   Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Tooltip } from '@/components/ui/atoms/tooltip';
 
 export interface ProductStatsProps {
   total: number;

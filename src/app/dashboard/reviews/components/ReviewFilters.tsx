@@ -18,8 +18,8 @@ import {
   Image
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/atoms/card';
+import { Badge } from '@/components/ui/atoms/badge';
 import type { ReviewFilters as ReviewFiltersType, ReviewType, ReviewStatus } from '@/types/review';
 
 export interface ReviewFiltersProps {

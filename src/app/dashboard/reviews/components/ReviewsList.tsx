@@ -9,11 +9,11 @@ import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/atoms/card';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Button } from '@/components/ui/atoms/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/atoms/avatar';
+import { Textarea } from '@/components/ui/atoms/textarea';
 import { 
   Star, 
   ThumbsUp, 

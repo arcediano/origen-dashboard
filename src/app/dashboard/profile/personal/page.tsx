@@ -17,13 +17,13 @@ import {
 } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Button } from '@/components/ui/atoms/button';
+import { Input } from '@/components/ui/atoms/input';
+import { Label } from '@/components/ui/atoms/label';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/atoms/avatar';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
 
 // Variants corregidos
 const itemVariants: Variants = {

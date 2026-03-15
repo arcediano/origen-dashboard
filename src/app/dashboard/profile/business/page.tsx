@@ -25,15 +25,15 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Button } from '@/components/ui/atoms/button';
+import { Input } from '@/components/ui/atoms/input';
+import { Textarea } from '@/components/ui/atoms/textarea';
+import { Label } from '@/components/ui/atoms/label';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
+import { Separator } from '@/components/ui/atoms/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/tabs';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },

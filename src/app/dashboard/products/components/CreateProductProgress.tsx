@@ -8,10 +8,10 @@
 import React from 'react';
 import { Package, Camera, DollarSign, FlaskConical, Leaf, ShoppingBag, Award, CheckCircle, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Card } from '@/components/ui/atoms/card';
+import { Progress } from '@/components/ui/atoms/progress';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 
 // ============================================================================

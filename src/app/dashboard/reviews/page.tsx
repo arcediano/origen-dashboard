@@ -11,13 +11,13 @@ import { MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 // Componentes UI
-import { LoadingPage } from '@/components/ui/loading';
-import { ErrorDisplay } from '@/components/ui/error';
+import { PageLoader } from '@/components/shared';
+import { PageError } from '@/components/shared';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ReviewStats } from './components/ReviewStats';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
-import { Pagination } from '@/components/ui/Pagination';
+import { Pagination } from '@/components/ui/atoms/Pagination';
 
 // Hooks y API
 import { fetchReviews } from '@/lib/api/reviews'; // Eliminamos approveReview y rejectReview
@@ -155,16 +155,15 @@ export default function ReviewsPage() {
   // ==========================================================================
 
   if (isLoading && !reviews.length) {
-    return <LoadingPage message="Cargando reseñas..." />;
+    return <PageLoader message="Cargando reseñas..." />;
   }
 
   if (error) {
     return (
-      <ErrorDisplay
+      <PageError
         title="Error al cargar"
         message={error}
         onRetry={loadReviews}
-        size="lg"
       />
     );
   }

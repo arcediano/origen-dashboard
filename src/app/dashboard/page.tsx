@@ -9,14 +9,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { DashboardFooter } from '@/app/dashboard/components/footer/DashboardFooter';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Alert } from '@/components/ui/alert';
-import { StatsCard } from '@/components/dashboard/cards/StatsCard';
-import { QuickActionCard } from '@/components/dashboard/cards/QuickActionCard';
-import { OrderItem } from '@/components/dashboard/cards/OrderItem';
-import { ProductItem } from '@/components/dashboard/cards/ProductItem';
+import { Button } from '@/components/ui/atoms/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/atoms/avatar';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/atoms/tabs';
+import { Alert } from '@/components/ui/atoms/alert';
+import { StatsCard } from '@/components/features/dashboard/components/stats/stats-card';
+import { QuickActionCard } from '@/components/features/dashboard/components/quick-actions/quick-action-card';
+import { OrderItem } from '@/components/features/dashboard/components/recent/order-item';
+import { ProductItem } from '@/components/features/dashboard/components/recent/product-item';
 
 // Iconos
 import {

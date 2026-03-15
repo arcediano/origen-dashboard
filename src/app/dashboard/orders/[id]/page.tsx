@@ -14,11 +14,11 @@ import { motion } from 'framer-motion';
 import { ShoppingBag, ArrowLeft, Package, Truck, CheckCircle, Clock, XCircle } from 'lucide-react';
 
 // Componentes UI
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { LoadingPage } from '@/components/ui/loading';
-import { ErrorDisplay } from '@/components/ui/error';
+import { Button } from '@/components/ui/atoms/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Badge } from '@/components/ui/atoms/badge';
+import { PageLoader } from '@/components/shared';
+import { PageError } from '@/components/shared';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 
 // Hooks y API
@@ -118,16 +118,15 @@ export default function OrderDetailPage() {
   };
 
   if (isLoading) {
-    return <LoadingPage message="Cargando pedido..." />;
+    return <PageLoader message="Cargando pedido..." />;
   }
 
   if (error || !order) {
     return (
-      <ErrorDisplay
+      <PageError
         title="Error al cargar"
         message={error || 'Pedido no encontrado'}
         onRetry={loadOrder}
-        size="lg"
       />
     );
   }

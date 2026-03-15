@@ -19,13 +19,13 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileUpload, type UploadedFile } from '@/components/shared/FileUpload';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Button } from '@/components/ui/atoms/button';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
+import { Progress } from '@/components/ui/atoms/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/tabs';
+import { FileUpload, type UploadedFile } from '@/components/shared';
 
 interface Certification {
   id: string;

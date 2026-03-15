@@ -8,9 +8,9 @@
 import React from 'react';
 import { Package, Eye, Edit, PlusCircle, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card } from '@/components/ui/card';
-import { StatusBadge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/atoms/card';
+import { StatusBadge } from '@/components/ui/atoms/badge';
+import { Button } from '@/components/ui/atoms/button';
 import { type Product } from '@/types/product';
 
 export interface ProductCardProps {

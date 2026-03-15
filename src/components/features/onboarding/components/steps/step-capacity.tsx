@@ -1,0 +1,783 @@
+// 📁 /src/components/onboarding/steps/EnhancedStep4Capacity.tsx
+/**
+ * @file EnhancedStep4Capacity.tsx
+ * @description Paso 4: Logística - Rutas, áreas de entrega y precios
+ * @version 6.0.0 - REDISEÑO COMPLETO: Lógica de rutas, zonas por CP
+ */
+
+'use client';
+
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+
+import { Input } from '@/components/ui/atoms/input';
+import { FileUpload, type UploadedFile } from '@/components/shared';
+import { Button } from '@/components/ui/atoms/button';
+
+import {
+  Truck,
+  MapPin,
+  Euro,
+  CheckCircle2,
+  AlertCircle,
+  Lock,
+  Clock,
+  Store,
+  Zap,
+  Leaf,
+  Info,
+  Package,
+  Compass,
+  Route,
+  Plus,
+  X,
+  Recycle,
+  TrendingUp,
+  Users
+} from 'lucide-react';
+
+// ============================================================================
+// TIPOS
+// ============================================================================
+
+export interface ShippingZone {
+  id: string;
+  type: 'province' | 'postal' | 'custom';
+  value: string; // Provincia, código postal o descripción
+  label: string;
+}
+
+export interface DeliveryOption {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  estimatedDays: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+export interface EnhancedCapacityData {
+  // ¿Está en ruta de Origen?
+  isInOriginRoute: boolean;
+  
+  // Opciones de envío (personalizadas si no está en ruta)
+  deliveryOptions: DeliveryOption[];
+  
+  // Zonas de entrega (donde SÍ entrega)
+  includedZones: ShippingZone[];
+  
+  // Zonas de exclusión (donde NO entrega - opcional)
+  excludedZones?: ShippingZone[];
+  
+  // Pedido mínimo
+  minOrderAmount: number;
+  
+  // Packaging sostenible
+  sustainablePackaging?: boolean;
+  packagingDescription?: string;
+}
+
+export interface EnhancedStep4CapacityProps {
+  data: EnhancedCapacityData;
+  onChange: (data: EnhancedCapacityData) => void;
+  // Datos del productor del paso 1
+  producerLocation?: {
+    province: string;
+    city: string;
+    postalCode: string;
+  };
+}
+
+// ============================================================================
+// CONSTANTES
+// ============================================================================
+
+// Rutas predefinidas de Origen (simulado)
+const ORIGEN_ROUTES = [
+  { id: 'route-north', name: 'Ruta Norte', provinces: ['cantabria', 'asturias', 'galicia'] },
+  { id: 'route-east', name: 'Ruta Este', provinces: ['barcelona', 'girona', 'tarragona', 'lleida'] },
+  { id: 'route-south', name: 'Ruta Sur', provinces: ['sevilla', 'cadiz', 'cordoba', 'granada', 'malaga'] },
+  { id: 'route-center', name: 'Ruta Centro', provinces: ['madrid', 'toledo', 'guadalajara', 'cuenca'] }
+];
+
+// Opciones de envío predeterminadas para productores fuera de ruta
+const DEFAULT_DELIVERY_OPTIONS: DeliveryOption[] = [
+  { 
+    id: 'standard', 
+    name: 'Envío estándar', 
+    description: 'Entrega en 2-3 días laborables',
+    price: 5.90, 
+    estimatedDays: '2-3',
+    icon: Truck 
+  },
+  { 
+    id: 'express', 
+    name: 'Envío exprés', 
+    description: 'Entrega en 24 horas',
+    price: 8.90, 
+    estimatedDays: '1',
+    icon: Zap 
+  },
+  { 
+    id: 'pickup', 
+    name: 'Recogida en local', 
+    description: 'Sin coste de envío',
+    price: 0, 
+    estimatedDays: 'Mismo día',
+    icon: Store 
+  }
+];
+
+// ============================================================================
+// COMPONENTES AUXILIARES
+// ============================================================================
+
+interface ZoneSelectorProps {
+  includedZones: ShippingZone[];
+  excludedZones?: ShippingZone[];
+  onAddZone: (zone: ShippingZone) => void;
+  onRemoveZone: (id: string) => void;
+  onToggleExclude?: (zoneId: string) => void;
+}
+
+const ZoneSelector: React.FC<ZoneSelectorProps> = ({
+  includedZones,
+  excludedZones = [],
+  onAddZone,
+  onRemoveZone,
+  onToggleExclude
+}) => {
+  const [zoneType, setZoneType] = React.useState<'province' | 'postal' | 'custom'>('province');
+  const [zoneValue, setZoneValue] = React.useState('');
+  const [zoneLabel, setZoneLabel] = React.useState('');
+
+  const handleAddZone = () => {
+    if (!zoneValue.trim()) return;
+    
+    const newZone: ShippingZone = {
+      id: `${zoneType}-${Date.now()}-${zoneValue}`,
+      type: zoneType,
+      value: zoneValue,
+      label: zoneLabel || zoneValue
+    };
+    
+    onAddZone(newZone);
+    setZoneValue('');
+    setZoneLabel('');
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Selector de tipo de zona */}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setZoneType('province')}
+          className={cn(
+            "flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all",
+            zoneType === 'province'
+              ? "border-origen-pradera bg-origen-pradera/5 text-origen-bosque"
+              : "border-gray-200 text-gray-600 hover:border-origen-pradera"
+          )}
+        >
+          Provincia
+        </button>
+        <button
+          type="button"
+          onClick={() => setZoneType('postal')}
+          className={cn(
+            "flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all",
+            zoneType === 'postal'
+              ? "border-origen-pradera bg-origen-pradera/5 text-origen-bosque"
+              : "border-gray-200 text-gray-600 hover:border-origen-pradera"
+          )}
+        >
+          Código Postal
+        </button>
+        <button
+          type="button"
+          onClick={() => setZoneType('custom')}
+          className={cn(
+            "flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all",
+            zoneType === 'custom'
+              ? "border-origen-pradera bg-origen-pradera/5 text-origen-bosque"
+              : "border-gray-200 text-gray-600 hover:border-origen-pradera"
+          )}
+        >
+          Zona personalizada
+        </button>
+      </div>
+
+      {/* Input para el valor */}
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <Input
+            value={zoneValue}
+            onChange={(e) => setZoneValue(e.target.value)}
+            placeholder={
+              zoneType === 'province' ? 'Ej: Madrid, Barcelona...' :
+              zoneType === 'postal' ? 'Ej: 28001, 08001...' :
+              'Ej: Zona Norte de Madrid'
+            }
+            className="h-11 text-base"
+          />
+          {zoneType === 'postal' && (
+            <p className="text-xs text-gray-500 mt-1">
+              Puedes usar * para rangos: 280* (todos los que empiecen por 280)
+            </p>
+          )}
+        </div>
+        <Button
+          type="button"
+          onClick={handleAddZone}
+          disabled={!zoneValue.trim()}
+          className="h-11 px-5 bg-origen-bosque hover:bg-origen-pino text-white"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Añadir
+        </Button>
+      </div>
+
+      {/* Lista de zonas incluidas */}
+      {includedZones.length > 0 && (
+        <div className="mt-4">
+          <h4 className="text-sm font-medium text-origen-bosque mb-2">
+            Zonas donde SÍ entregas ({includedZones.length})
+          </h4>
+          <div className="space-y-2">
+            {includedZones.map((zone) => (
+              <div
+                key={zone.id}
+                className="flex items-center justify-between p-3 bg-origen-crema/20 rounded-lg border border-origen-pradera/30"
+              >
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-origen-pradera" />
+                  <div>
+                    <p className="text-sm font-medium text-origen-bosque">{zone.label}</p>
+                    <p className="text-xs text-gray-500">
+                      {zone.type === 'province' && 'Provincia'}
+                      {zone.type === 'postal' && 'Código Postal'}
+                      {zone.type === 'custom' && 'Zona personalizada'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {onToggleExclude && (
+                    <button
+                      type="button"
+                      onClick={() => onToggleExclude(zone.id)}
+                      className={cn(
+                        "p-1.5 rounded-lg text-xs font-medium transition-colors",
+                        excludedZones.some(z => z.id === zone.id)
+                          ? "bg-red-100 text-red-700 hover:bg-red-200"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      )}
+                    >
+                      {excludedZones.some(z => z.id === zone.id) ? 'Excluido' : 'Excluir'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => onRemoveZone(zone.id)}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================================================
+// COMPONENTE PRINCIPAL
+// ============================================================================
+
+export function EnhancedStep4Capacity({ 
+  data, 
+  onChange,
+  producerLocation 
+}: EnhancedStep4CapacityProps) {
+
+  // ========================================================================
+  // ESTADO LOCAL
+  // ========================================================================
+  
+  const [editingOption, setEditingOption] = React.useState<string | null>(null);
+
+  // ========================================================================
+  // VALIDACIÓN
+  // ========================================================================
+  
+  const hasDeliveryOptions = data.deliveryOptions?.length > 0;
+  const hasIncludedZones = data.includedZones?.length > 0;
+  const hasMinOrder = data.minOrderAmount >= 10;
+  
+  const totalSteps = 3;
+  const completedSteps = [hasDeliveryOptions, hasIncludedZones, hasMinOrder].filter(Boolean).length;
+  const progress = (completedSteps / totalSteps) * 100;
+
+  // ========================================================================
+  // MANEJADORES
+  // ========================================================================
+  
+  const handleInputChange = (field: keyof EnhancedCapacityData, value: any) => {
+    onChange({ ...data, [field]: value });
+  };
+
+  const handleAddZone = (zone: ShippingZone) => {
+    handleInputChange('includedZones', [...data.includedZones, zone]);
+  };
+
+  const handleRemoveZone = (id: string) => {
+    handleInputChange('includedZones', data.includedZones.filter(z => z.id !== id));
+    if (data.excludedZones) {
+      handleInputChange('excludedZones', data.excludedZones.filter(z => z.id !== id));
+    }
+  };
+
+  const handleToggleExclude = (zoneId: string) => {
+    const currentExcluded = data.excludedZones || [];
+    const isExcluded = currentExcluded.some(z => z.id === zoneId);
+    
+    if (isExcluded) {
+      handleInputChange('excludedZones', currentExcluded.filter(z => z.id !== zoneId));
+    } else {
+      const zone = data.includedZones.find(z => z.id === zoneId);
+      if (zone) {
+        handleInputChange('excludedZones', [...currentExcluded, zone]);
+      }
+    }
+  };
+
+  const handleDeliveryOptionChange = (optionId: string, field: keyof DeliveryOption, value: any) => {
+    const updatedOptions = data.deliveryOptions.map(opt =>
+      opt.id === optionId ? { ...opt, [field]: value } : opt
+    );
+    handleInputChange('deliveryOptions', updatedOptions);
+  };
+
+  const handleAddCustomDeliveryOption = () => {
+    const newOption: DeliveryOption = {
+      id: `custom-${Date.now()}`,
+      name: 'Nuevo envío',
+      description: 'Describe tu método de envío',
+      price: 5.90,
+      estimatedDays: '2-3',
+      icon: Package
+    };
+    handleInputChange('deliveryOptions', [...data.deliveryOptions, newOption]);
+    setEditingOption(newOption.id);
+  };
+
+  const handleRemoveDeliveryOption = (optionId: string) => {
+    handleInputChange('deliveryOptions', data.deliveryOptions.filter(opt => opt.id !== optionId));
+  };
+
+  // Determinar si el productor está en ruta (simulado)
+  React.useEffect(() => {
+    if (producerLocation?.province) {
+      const isInRoute = ORIGEN_ROUTES.some(route =>
+        route.provinces.includes(producerLocation.province.toLowerCase())
+      );
+      
+      // Si está en ruta, forzamos opciones de Origen
+      if (isInRoute && !data.isInOriginRoute) {
+        handleInputChange('isInOriginRoute', true);
+        handleInputChange('deliveryOptions', [{
+          id: 'origen-route',
+          name: 'Envío con Origen',
+          description: 'Entrega en ruta semanal',
+          price: 3.90,
+          estimatedDays: '1-2',
+          icon: Route
+        }]);
+      } else if (!isInRoute && !data.deliveryOptions?.length) {
+        handleInputChange('isInOriginRoute', false);
+        handleInputChange('deliveryOptions', DEFAULT_DELIVERY_OPTIONS);
+      }
+    }
+  }, [producerLocation]);
+
+  // ========================================================================
+  // RENDER
+  // ========================================================================
+  
+  return (
+    <div className="space-y-6">
+      
+      {/* ====================================================================
+          PROGRESS BAR
+      ==================================================================== */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
+            <span className="text-sm font-medium text-origen-hoja">Logística y envíos</span>
+          </div>
+          <span className="text-sm font-semibold text-origen-pradera">{completedSteps}/{totalSteps}</span>
+        </div>
+        <div className="h-2.5 bg-origen-crema rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-origen-pradera rounded-full transition-all duration-700"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+
+      {/* ====================================================================
+          CARD 1: ESTADO DE RUTA
+      ==================================================================== */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+        
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
+            <Compass className="w-6 h-6 text-origen-pradera" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-origen-bosque">Rutas de Origen</h2>
+            <p className="text-sm text-gray-600">
+              {data.isInOriginRoute 
+                ? '¡Tu negocio está en nuestra ruta de reparto!'
+                : 'Actualmente no estás en nuestras rutas de reparto'}
+            </p>
+          </div>
+        </div>
+
+        <div className={cn(
+          "p-5 rounded-xl border",
+          data.isInOriginRoute
+            ? "bg-green-50 border-green-200"
+            : "bg-amber-50 border-amber-200"
+        )}>
+          <div className="flex items-start gap-3">
+            {data.isInOriginRoute ? (
+              <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            ) : (
+              <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            )}
+            <div>
+              <p className={cn(
+                "text-sm font-medium",
+                data.isInOriginRoute ? "text-green-800" : "text-amber-800"
+              )}>
+                {data.isInOriginRoute
+                  ? 'Envío gestionado por Origen'
+                  : 'Configura tus propios envíos'}
+              </p>
+              <p className={cn(
+                "text-xs mt-1",
+                data.isInOriginRoute ? "text-green-700" : "text-amber-700"
+              )}>
+                {data.isInOriginRoute
+                  ? 'Tus productos se entregarán a través de nuestra ruta semanal. Precio fijo: 3.90€ por pedido.'
+                  : 'Al no estar en ruta, puedes configurar tus propios métodos de envío, precios y zonas de entrega.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ====================================================================
+          CARD 2: OPCIONES DE ENVÍO (SOLO SI NO ESTÁ EN RUTA)
+      ==================================================================== */}
+      {!data.isInOriginRoute && (
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+          
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
+                <Truck className="w-6 h-6 text-origen-pradera" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-origen-bosque">Tus métodos de envío</h2>
+                <p className="text-sm text-gray-600">Configura precios y tiempos</p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddCustomDeliveryOption}
+              className="border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Añadir método
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            {data.deliveryOptions.map((option) => {
+              const Icon = option.icon;
+              const isEditing = editingOption === option.id;
+              
+              return (
+                <div
+                  key={option.id}
+                  className="p-5 bg-white rounded-xl border-2 border-gray-200 hover:border-origen-pradera/50 transition-all"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-origen-pradera" />
+                    </div>
+                    
+                    <div className="flex-1">
+                      {isEditing ? (
+                        <div className="space-y-3">
+                          <Input
+                            value={option.name}
+                            onChange={(e) => handleDeliveryOptionChange(option.id, 'name', e.target.value)}
+                            className="h-10 text-base font-medium"
+                          />
+                          <Input
+                            value={option.description}
+                            onChange={(e) => handleDeliveryOptionChange(option.id, 'description', e.target.value)}
+                            className="h-10 text-sm"
+                          />
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-xs text-gray-500 mb-1 block">Precio (€)</label>
+                              <Input
+                                type="number"
+                                value={option.price}
+                                onChange={(e) => handleDeliveryOptionChange(option.id, 'price', parseFloat(e.target.value) || 0)}
+                                min={0}
+                                step={0.5}
+                                className="h-10 text-base"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-gray-500 mb-1 block">Tiempo estimado</label>
+                              <Input
+                                value={option.estimatedDays}
+                                onChange={(e) => handleDeliveryOptionChange(option.id, 'estimatedDays', e.target.value)}
+                                placeholder="Ej: 2-3 días"
+                                className="h-10 text-base"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-origen-bosque">{option.name}</h3>
+                            <span className="text-xl font-bold text-origen-pradera">{option.price.toFixed(2)}€</span>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">{option.description}</p>
+                          <p className="text-xs text-gray-500 mt-1">Entrega: {option.estimatedDays} días</p>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditingOption(isEditing ? null : option.id)}
+                        className="p-2 text-gray-400 hover:text-origen-bosque transition-colors"
+                      >
+                        {isEditing ? '✓' : '✎'}
+                      </button>
+                      {option.id.startsWith('custom-') && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveDeliveryOption(option.id)}
+                          className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {!hasDeliveryOptions && (
+            <div className="mt-6 p-4 bg-red-50/50 rounded-xl border border-red-200">
+              <p className="text-xs text-red-700 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                Añade al menos un método de envío para continuar
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ====================================================================
+          CARD 3: ZONAS DE ENTREGA (SIEMPRE VISIBLE)
+      ==================================================================== */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+        
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
+            <MapPin className="w-6 h-6 text-origen-pradera" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-origen-bosque">Zonas de entrega</h2>
+            <p className="text-sm text-gray-600">
+              {data.isInOriginRoute
+                ? 'Tu ruta está definida por Origen, pero puedes excluir zonas'
+                : 'Selecciona dónde entregas (y opcionalmente dónde no)'}
+            </p>
+          </div>
+        </div>
+
+        <ZoneSelector
+          includedZones={data.includedZones}
+          excludedZones={data.excludedZones}
+          onAddZone={handleAddZone}
+          onRemoveZone={handleRemoveZone}
+          onToggleExclude={!data.isInOriginRoute ? handleToggleExclude : undefined}
+        />
+
+        {!hasIncludedZones && (
+          <div className="mt-6 p-4 bg-red-50/50 rounded-xl border border-red-200">
+            <p className="text-xs text-red-700 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              Añade al menos una zona de entrega para continuar
+            </p>
+          </div>
+        )}
+
+        {data.isInOriginRoute && (
+          <div className="mt-4 p-3 bg-blue-50/30 rounded-lg border border-blue-100">
+            <p className="text-xs text-blue-700 flex items-center gap-2">
+              <Info className="w-4 h-4" />
+              Al estar en ruta de Origen, solo puedes excluir zonas. Las zonas incluidas se entregan automáticamente.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* ====================================================================
+          CARD 4: PEDIDO MÍNIMO
+      ==================================================================== */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+        
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
+            <Euro className="w-6 h-6 text-origen-pradera" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-origen-bosque">Pedido mínimo</h2>
+            <p className="text-sm text-gray-600">Importe mínimo por pedido</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1 max-w-xs">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
+            <Input
+              type="number"
+              value={data.minOrderAmount || 20}
+              onChange={(e) => handleInputChange('minOrderAmount', parseFloat(e.target.value) || 0)}
+              min={0}
+              step={5}
+              className="h-12 pl-8 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+            />
+          </div>
+          <span className="text-sm text-gray-500">euros</span>
+        </div>
+        
+        <p className="text-xs text-gray-500 mt-3">
+          Recomendado: 20-30€ para venta al público general
+        </p>
+      </div>
+
+      {/* ====================================================================
+          CARD 5: PACKAGING SOSTENIBLE (OPCIONAL)
+      ==================================================================== */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+        
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
+            <Recycle className="w-6 h-6 text-origen-pradera" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold text-origen-bosque">Packaging sostenible</h2>
+              <span className="text-xs bg-origen-crema/80 text-gray-600 px-2 py-1 rounded-full">Recomendado</span>
+            </div>
+            <p className="text-sm text-gray-600">
+              El 73% de los consumidores prefiere marcas con embalaje ecológico
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <button
+            type="button"
+            onClick={() => handleInputChange('sustainablePackaging', !data.sustainablePackaging)}
+            className={cn(
+              "w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all",
+              "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
+              data.sustainablePackaging
+                ? "border-origen-pradera bg-origen-pradera/5"
+                : "border-gray-200 hover:border-origen-pradera bg-white"
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "w-10 h-10 rounded-lg flex items-center justify-center",
+                data.sustainablePackaging
+                  ? "bg-origen-pradera text-white"
+                  : "bg-origen-crema text-origen-bosque"
+              )}>
+                <Leaf className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <p className="font-medium text-origen-bosque">Uso packaging sostenible</p>
+                <p className="text-xs text-gray-500">Materiales reciclados, compostables o reutilizables</p>
+              </div>
+            </div>
+            {data.sustainablePackaging && (
+              <CheckCircle2 className="w-6 h-6 text-origen-pradera" />
+            )}
+          </button>
+
+          {data.sustainablePackaging && (
+            <div className="pl-4 animate-in slide-in-from-top-2 duration-300">
+              <label className="text-sm font-medium text-origen-bosque block mb-2">
+                Describe tu packaging
+                <span className="text-xs text-gray-500 ml-2">(opcional)</span>
+              </label>
+              <Input
+                value={data.packagingDescription || ''}
+                onChange={(e) => handleInputChange('packagingDescription', e.target.value)}
+                placeholder="Ej: Cajas de cartón 100% reciclado, papel kraft, etiquetas compostables..."
+                className="h-11 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+              />
+              <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                <Info className="w-3.5 h-3.5" />
+                Esta información aparecerá destacada en tu perfil
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ====================================================================
+          TRUST BADGES
+      ==================================================================== */}
+      <div className="flex items-center gap-4 pt-2 text-xs text-gray-500 border-t border-gray-200">
+        <div className="flex items-center gap-1.5">
+          <Lock className="w-3.5 h-3.5 text-origen-pradera" />
+          <span>Configuración guardada</span>
+        </div>
+        <span className="w-1 h-1 rounded-full bg-gray-300" />
+        <div className="flex items-center gap-1.5">
+          <Clock className="w-3.5 h-3.5 text-origen-pradera" />
+          <span>Puedes modificarlo después</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+EnhancedStep4Capacity.displayName = 'EnhancedStep4Capacity';
+
+export default EnhancedStep4Capacity;

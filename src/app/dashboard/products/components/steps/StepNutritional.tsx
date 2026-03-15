@@ -5,13 +5,13 @@
 
 'use client';
 
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Card } from '@/components/ui/atoms/card';
+import { Input } from '@/components/ui/atoms/input';
+import { Textarea } from '@/components/ui/atoms/textarea';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/atoms/select';
+import { Checkbox } from '@/components/ui/atoms/checkbox';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 
   FlaskConical, 
   CheckCircle, 

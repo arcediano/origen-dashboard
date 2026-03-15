@@ -25,14 +25,14 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { TagsInput } from '@/components/ui/tags-input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Button } from '@/components/ui/atoms/button';
+import { Input } from '@/components/ui/atoms/input';
+import { Label } from '@/components/ui/atoms/label';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Textarea } from '@/components/ui/atoms/textarea';
+import { TagsInput } from '@/components/ui/atoms/tags-input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/tabs';
 import { cn } from '@/lib/utils';
 
 export default function BusinessPage() {

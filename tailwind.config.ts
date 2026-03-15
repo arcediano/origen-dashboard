@@ -2,17 +2,17 @@ import type { Config } from "tailwindcss";
 
 /**
  * Configuración de Tailwind CSS para Origen
- * Basado en el Manual de Marca v2.0 - Paleta "Índigo y Salvia"
+ * Basado en el Manual de Marca v3.0 - Paleta "Bosque Profundo"
  *
- * @version 2.0.0 - NUEVA PALETA:
- *   - origen-bosque  → Índigo Marino   #1B2A4B
- *   - origen-pino    → Azul Pizarra    #2E4A6E
- *   - origen-hoja    → Verde Salvia    #4E7456
- *   - origen-pradera → Azul Niebla     #6B90B8
- *   - origen-menta   → Oro Envejecido  #C89B4C
- *   - origen-crema   → Lienzo Frío     #F8F9FC
- *   - origen-oscuro  → Tinta           #0D1626
- *   - origen-pastel  → Bruma           #E8EEF5
+ * @version 3.0.0 - NUEVA PALETA:
+ *   - origen-bosque  → Verde Bosque     #1B4332
+ *   - origen-pino    → Verde Pino       #2D6A4F
+ *   - origen-hoja    → Verde Esmeralda  #40916C
+ *   - origen-pradera → Verde Menta      #74C69D
+ *   - origen-menta   → Beige Arena      #D4A373
+ *   - origen-crema   → Blanco Verdeado  #F1FAEE
+ *   - origen-oscuro  → Verde Negro      #081C15
+ *   - origen-pastel  → Verde Pastel     #D8F3DC
  *   Los nombres de tokens se mantienen por compatibilidad con componentes.
  *
  * @created Febrero 2026
@@ -52,28 +52,28 @@ const config: Config = {
     },
     
     extend: {
-      // === PALETA DE COLORES OFICIAL - ORIGEN v2.0 "ÍNDIGO Y SALVIA" ===
+      // === PALETA DE COLORES OFICIAL - ORIGEN v3.0 "BOSQUE PROFUNDO" ===
       colors: {
         // Colores principales - Manual Sección 3.1
         origen: {
           // Primarios
-          bosque: "hsl(var(--bosque))",      // #1B2A4B - Índigo Marino
-          pino: "hsl(var(--pino))",          // #2E4A6E - Azul Pizarra
-          hoja: "hsl(var(--hoja))",          // #4E7456 - Verde Salvia
-          pradera: "hsl(var(--pradera))",    // #6B90B8 - Azul Niebla
-          menta: "hsl(var(--menta))",        // #C89B4C - Oro Envejecido
-          crema: "hsl(var(--crema))",        // #F8F9FC - Lienzo Frío
+          bosque: "hsl(var(--bosque))",      // #1B4332 - Verde Bosque
+          pino: "hsl(var(--pino))",          // #2D6A4F - Verde Pino
+          hoja: "hsl(var(--hoja))",          // #40916C - Verde Esmeralda
+          pradera: "hsl(var(--pradera))",    // #74C69D - Verde Menta
+          menta: "hsl(var(--menta))",        // #D4A373 - Beige Arena
+          crema: "hsl(var(--crema))",        // #F1FAEE - Blanco Verdeado
 
           // Apoyo
-          oscuro: "hsl(var(--oscuro))",      // #0D1626 - Tinta
-          pastel: "hsl(var(--pastel))",      // #E8EEF5 - Bruma
+          oscuro: "hsl(var(--oscuro))",      // #081C15 - Verde Negro
+          pastel: "hsl(var(--pastel))",      // #D8F3DC - Verde Pastel
         },
 
         // Estados hover
         hover: {
-          bosque: "hsl(var(--hover-bosque))",    // #0F1B30
-          pradera: "hsl(var(--hover-pradera))",  // #5B7FA6
-          menta: "hsl(var(--hover-menta))",      // #A47A30
+          bosque: "hsl(var(--hover-bosque))",    // #0D2B1D
+          pradera: "hsl(var(--hover-pradera))",  // #5BB580
+          menta: "hsl(var(--hover-menta))",      // #C4905D
         },
         
         // Variables del sistema (shadcn/ui)
@@ -220,11 +220,11 @@ const config: Config = {
       
       // === GRADIENTES ===
       backgroundImage: {
-        // Índigo → Pizarra → Niebla (profundidad monocromática azul)
+        // Verde Bosque → Verde Pino → Verde Menta (profundidad monocromática verde)
         'gradient-origen': 'linear-gradient(135deg, hsl(var(--bosque)) 0%, hsl(var(--pino)) 50%, hsl(var(--pradera)) 100%)',
-        // Oro → Salvia (calidez a naturaleza)
+        // Beige Arena → Verde Esmeralda (calidez a naturaleza)
         'gradient-menta': 'linear-gradient(135deg, hsl(var(--menta)) 0%, hsl(var(--hoja)) 100%)',
-        // Lienzo frío → Blanco (fondo neutro)
+        // Blanco Verdeado → Blanco (fondo neutro)
         'gradient-crema': 'linear-gradient(135deg, hsl(var(--crema)) 0%, #FFFFFF 100%)',
       },
       

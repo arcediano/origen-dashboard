@@ -5,13 +5,13 @@
 
 'use client';
 
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Progress } from '@/components/ui/progress';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Card } from '@/components/ui/atoms/card';
+import { Input } from '@/components/ui/atoms/input';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/atoms/select';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Checkbox } from '@/components/ui/atoms/checkbox';
+import { Progress } from '@/components/ui/atoms/progress';
+import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 
   Package, 
   CheckCircle, 

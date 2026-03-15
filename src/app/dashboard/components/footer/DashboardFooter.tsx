@@ -29,7 +29,7 @@ import {
   Package,
   ArrowUpRight
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/atoms/badge';
 
 interface DashboardFooterProps {
   className?: string;

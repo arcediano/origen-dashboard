@@ -7,9 +7,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/atoms/button';
+import { Card } from '@/components/ui/atoms/card';
+import { Input } from '@/components/ui/atoms/input';
 import { ArrowLeft, Save, Plus, Truck, Zap, Store } from 'lucide-react';
 
 export default function EnviosPage() {

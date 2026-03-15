@@ -12,15 +12,15 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/atoms/button';
 
 // Importar tipos específicos de cada paso
-import { EnhancedStep1Location, type EnhancedLocationData } from '@/components/onboarding/steps/EnhancedStep1Location';
-import { EnhancedStep2Story, type EnhancedStoryData, type Certification } from '@/components/onboarding/steps/EnhancedStep2Story';
-import { EnhancedStep3Visual, type EnhancedVisualData } from '@/components/onboarding/steps/EnhancedStep3Visual';
-import { EnhancedStep4Capacity, type EnhancedCapacityData } from '@/components/onboarding/steps/EnhancedStep4Capacity';
-import { EnhancedStep5Documents, type EnhancedStep5DocumentsData } from '@/components/onboarding/steps/EnhancedStep5Documents';
-import { EnhancedStep6Stripe, type EnhancedStep6StripeData } from '@/components/onboarding/steps/EnhancedStep6Stripe';
+import { EnhancedStep1Location, type EnhancedLocationData } from '@/components/features/onboarding/components/steps/step-location';
+import { EnhancedStep2Story, type EnhancedStoryData, type Certification } from '@/components/features/onboarding/components/steps/step-story';
+import { EnhancedStep3Visual, type EnhancedVisualData } from '@/components/features/onboarding/components/steps/step-visual';
+import { EnhancedStep4Capacity, type EnhancedCapacityData } from '@/components/features/onboarding/components/steps/step-capacity';
+import { EnhancedStep5Documents, type EnhancedStep5DocumentsData } from '@/components/features/onboarding/components/steps/step-documents';
+import { EnhancedStep6Stripe, type EnhancedStep6StripeData } from '@/components/features/onboarding/components/steps/step-stripe';
 
 import {
   MapPin,

@@ -6,8 +6,9 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { logoutUser } from '@/lib/api/auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/atoms/avatar';
+import { Badge } from '@/components/ui/atoms/badge';
 import { 
   User, 
   Settings,
@@ -56,10 +57,15 @@ export function UserMenu({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const handleLogout = () => {
-    if (onLogout) onLogout();
+  const handleLogout = async () => {
     setIsOpen(false);
-    router.push('/auth/login');
+    try {
+      await logoutUser();
+    } catch {
+      // Continuar con el logout aunque el servidor falle
+    }
+    if (onLogout) onLogout();
+    router.replace('/auth/login');
   };
 
   return (

@@ -8,8 +8,8 @@
 import React from 'react';
 import { Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Table, type Column } from '@/components/ui/table';
-import { StatusBadge } from '@/components/ui/badge';
+import { Table, type Column } from '@/components/ui/atoms/table';
+import { StatusBadge } from '@/components/ui/atoms/badge';
 import { ProductTableActions } from './ProductTableActions';
 import { ProductExpandableDetails } from './ProductExpandableDetails';
 import { type Product } from '@/types/product';

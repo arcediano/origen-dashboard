@@ -5,13 +5,13 @@
 
 'use client';
 
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { CurrencyInput } from '@/components/ui/currency-input';
-import { PercentageInput } from '@/components/ui/percentage-input';
-import { Badge } from '@/components/ui/badge';
-import { Alert } from '@/components/ui/alert';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Card } from '@/components/ui/atoms/card';
+import { Input } from '@/components/ui/atoms/input';
+import { CurrencyInput } from '@/components/ui/atoms/currency-input';
+import { PercentageInput } from '@/components/ui/atoms/percentage-input';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Alert } from '@/components/ui/atoms/alert';
+import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 
   DollarSign, 
   Tag, 

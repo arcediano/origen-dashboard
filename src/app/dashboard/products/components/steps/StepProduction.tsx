@@ -5,14 +5,14 @@
 
 'use client';
 
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ImageUploader, type ImageFile } from '@/components/ui/image-uploader';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Card } from '@/components/ui/atoms/card';
+import { Input } from '@/components/ui/atoms/input';
+import { Textarea } from '@/components/ui/atoms/textarea';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/atoms/select';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Checkbox } from '@/components/ui/atoms/checkbox';
+import { ImageUploader } from '../../components/ImageUploader';
+import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 
   Leaf, 
   MapPin, 

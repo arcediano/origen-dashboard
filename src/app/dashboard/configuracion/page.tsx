@@ -10,7 +10,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Card } from '@/components/ui/card';
+import { Card } from '@/components/ui/atoms/card';
 import { 
   User, 
   Truck, 

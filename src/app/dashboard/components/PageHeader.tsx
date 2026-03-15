@@ -9,7 +9,7 @@ import React from 'react';
 import { ArrowLeft, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Tooltip } from '@/components/ui/atoms/tooltip';
 
 export interface PageHeaderProps {
   title: string;

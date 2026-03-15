@@ -49,8 +49,7 @@ export function DashboardHeader({
   };
 
   const handleLogout = () => {
-    console.log('logout');
-    // Aquí iría la lógica de cierre de sesión
+    // La lógica de logout (API call + redirect) está en UserMenu
   };
 
   return (

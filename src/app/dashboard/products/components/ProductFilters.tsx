@@ -18,7 +18,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card } from '@/components/ui/card';
+import { Card } from '@/components/ui/atoms/card';
 
 export interface ProductFiltersProps {
   searchQuery: string;

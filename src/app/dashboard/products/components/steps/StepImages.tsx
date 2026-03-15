@@ -5,10 +5,10 @@
 
 'use client';
 
-import { Card } from '@/components/ui/card';
-import { ImageUploader } from '@/components/ui/image-uploader';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Card } from '@/components/ui/atoms/card';
+import { ImageUploader } from '../../components/ImageUploader';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 
   Camera, 
   CheckCircle, 

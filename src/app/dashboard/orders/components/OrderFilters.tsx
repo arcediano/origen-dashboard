@@ -21,7 +21,7 @@ import {
   CalendarRange
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card } from '@/components/ui/card';
+import { Card } from '@/components/ui/atoms/card';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
 
 export interface OrderFiltersProps {

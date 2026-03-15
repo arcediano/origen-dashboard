@@ -1,19 +1,19 @@
 /**
  * Estilos globales de la aplicación - ORIGEN v3.0.0
- * Paleta de colores oficial - Manual de Marca v2.0
+ * Paleta de colores oficial - Manual de Marca v3.0
  *
- * @version 3.0.0 - NUEVA PALETA "ÍNDIGO Y SALVIA":
- *   - Primario: Índigo Marino #1B2A4B (antes Verde Bosque)
- *   - Secundario: Azul Pizarra #2E4A6E (antes Verde Pino)
- *   - Acento medio: Verde Salvia #4E7456 (antes Verde Hoja)
- *   - Interactivo: Azul Niebla #6B90B8 (antes Verde Pradera)
- *   - Acento brillante: Oro Envejecido #C89B4C (antes Verde Menta)
- *   - Fondo: Lienzo Frío #F8F9FC (antes Blanco Crema)
- *   - Texto: Tinta #0D1626 (antes Verde Oscuro)
- *   - Suave: Bruma #E8EEF5 (antes Verde Pastel)
+ * @version 3.0.0 - NUEVA PALETA "BOSQUE PROFUNDO":
+ *   - Primario: Verde Bosque     #1B4332
+ *   - Secundario: Verde Pino     #2D6A4F
+ *   - Acento medio: Verde Esmeralda #40916C
+ *   - Interactivo: Verde Menta   #74C69D
+ *   - Acento brillante: Beige Arena #D4A373
+ *   - Fondo: Blanco Verdeado     #F1FAEE
+ *   - Texto: Verde Negro         #081C15
+ *   - Suave: Verde Pastel        #D8F3DC
  *
  * @note Los nombres de los tokens CSS se mantienen para compatibilidad
- *       con los componentes existentes. Ver MANUAL-DE-MARCA.md v2.0
+ *       con los componentes existentes. Ver MANUAL-DE-MARCA.md v3.0
  *
  * @note Los componentes personalizados ahora viven en:
  *       src/components/ui/*.tsx
@@ -28,24 +28,24 @@
 
 @layer base {
   :root {
-    /* === PALETA "ÍNDIGO Y SALVIA" - ORIGEN v2.0 === */
+    /* === PALETA "BOSQUE PROFUNDO" - ORIGEN v3.0 === */
 
     /* ----- COLORES PRINCIPALES (Manual Sección 3.1) ----- */
-    --bosque: 221 47% 20%;      /* #1B2A4B - Índigo Marino (Principal) */
-    --pino: 214 41% 31%;        /* #2E4A6E - Azul Pizarra (H2) */
-    --hoja: 133 20% 38%;        /* #4E7456 - Verde Salvia (H3, enlaces) */
-    --pradera: 211 35% 57%;     /* #6B90B8 - Azul Niebla (Interactivo) */
-    --menta: 39 53% 54%;        /* #C89B4C - Oro Envejecido (Acento) */
-    --crema: 228 38% 98%;       /* #F8F9FC - Lienzo Frío (Fondo) */
+    --bosque: 155 48% 18%;      /* #1B4332 - Verde Bosque (Principal) */
+    --pino: 155 37% 30%;        /* #2D6A4F - Verde Pino (H2) */
+    --hoja: 155 42% 38%;        /* #40916C - Verde Esmeralda (H3, enlaces) */
+    --pradera: 155 42% 65%;     /* #74C69D - Verde Menta (Interactivo) */
+    --menta: 28 56% 64%;        /* #D4A373 - Beige Arena (Acento) */
+    --crema: 154 55% 97%;       /* #F1FAEE - Blanco Verdeado (Fondo) */
 
     /* ----- COLORES DE APOYO (Manual Sección 3.2) ----- */
-    --oscuro: 221 49% 10%;      /* #0D1626 - Tinta (Texto principal) */
-    --pastel: 213 38% 94%;      /* #E8EEF5 - Bruma (Fondos suaves) */
+    --oscuro: 155 54% 7%;       /* #081C15 - Verde Negro (Texto principal) */
+    --pastel: 155 60% 91%;      /* #D8F3DC - Verde Pastel (Fondos suaves) */
 
     /* ----- ESTADOS HOVER (más oscuros) ----- */
-    --hover-bosque: 221 47% 13%;    /* #0F1B30 - Hover Índigo Marino */
-    --hover-pradera: 211 35% 48%;   /* #5B7FA6 - Hover Azul Niebla */
-    --hover-menta: 39 53% 44%;      /* #A47A30 - Hover Oro Envejecido */
+    --hover-bosque: 155 56% 11%;    /* #0D2B1D - Hover Verde Bosque */
+    --hover-pradera: 155 42% 55%;   /* #5BB580 - Hover Verde Menta */
+    --hover-menta: 30 41% 57%;      /* #C4905D - Hover Beige Arena */
 
     /* ----- SISTEMA DE VARIABLES (shadcn/ui) ----- */
 

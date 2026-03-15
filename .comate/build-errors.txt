@@ -1,0 +1,9 @@
+﻿
+> origen-dashboard@2.0.0 build
+> next build
+
+   Ôû▓ Next.js 15.5.12
+   - Environments: .env.production
+   - Experiments (use with caution):
+     ┬À serverActions
+

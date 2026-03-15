@@ -5,7 +5,7 @@
  * @description Página para solicitar el restablecimiento de contraseña
  */
 
-import { SimpleForgotPassword } from '@/components/auth/SimpleForgotPassword';
+import { SimpleForgotPassword } from '@/components/features/auth/components/forgot-password-form';
 import Link from 'next/link';
 import {
   Shield,

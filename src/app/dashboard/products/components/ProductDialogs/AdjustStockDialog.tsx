@@ -8,8 +8,8 @@
 import React, { useEffect, useState } from 'react';
 import { Package, Plus, Minus, Save, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Modal } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/atoms/button';
+import { Modal } from '@/components/ui/atoms/dialog';
 import { type Product } from '@/types/product';
 import { updateProductStock } from '@/lib/api/products';
 

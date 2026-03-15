@@ -11,7 +11,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
-import { NotificationBadge } from '@/components/ui/notification-badge';
+import { Badge } from '@/components/ui/atoms/badge';
 import { SidebarSubmenu } from './SidebarSubmenu';
 import type { MenuItem, SubmenuItem } from '@/constants/sidebar';
 
@@ -93,7 +93,11 @@ export function SidebarMenuItem({
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            {badge && <NotificationBadge count={badge} size="sm" />}
+            {badge && (
+              <Badge variant="notification" size="xs" className="min-w-[1.2rem] h-5">
+                {badge > 99 ? '99+' : badge}
+              </Badge>
+            )}
             {/* Chevron solo en items que tienen submenú */}
             <ChevronDown className={cn(
               'w-4 h-4 transition-transform',

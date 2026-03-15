@@ -15,13 +15,13 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Toggle } from '@/components/ui/toggle';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Button } from '@/components/ui/atoms/button';
+import { Input } from '@/components/ui/atoms/input';
+import { Label } from '@/components/ui/atoms/label';
+import { Toggle } from '@/components/ui/atoms/toggle';
+import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
+import { Separator } from '@/components/ui/atoms/separator';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },

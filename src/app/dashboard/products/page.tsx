@@ -11,12 +11,12 @@ import { motion, type Variants } from 'framer-motion';
 import { Package, Plus, RefreshCw } from 'lucide-react';
 
 // Componentes UI
-import { Button } from '@/components/ui/button';
-import { LoadingPage } from '@/components/ui/loading';
-import { ErrorDisplay } from '@/components/ui/error';
-import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/atoms/button';
+import { PageLoader } from '@/components/shared/loading/page-loader';
+import { PageError } from '@/components/shared/error/page-error';
+import { Card } from '@/components/ui/atoms/card'
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Pagination } from '@/components/ui/Pagination';
+import { Pagination } from '@/components/ui/atoms/Pagination';
 import { ProductStats, ProductFilters, ProductTable, ProductCard } from './components';
 import { AdjustStockDialog } from './components/ProductDialogs/AdjustStockDialog';
 import { DeleteProductDialog } from './components/ProductDialogs/DeleteProductDialog';
@@ -172,16 +172,15 @@ export default function ProductosPage() {
   // ==========================================================================
 
   if (isLoading) {
-    return <LoadingPage message="Cargando productos..." />;
+    return <PageLoader message="Cargando productos..." />;
   }
 
   if (error) {
     return (
-      <ErrorDisplay
+      <PageError
         title="Error al cargar"
         message={error}
         onRetry={loadData}
-        size="lg"
       />
     );
   }

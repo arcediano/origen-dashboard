@@ -10,9 +10,9 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Table, type Column } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Table, type Column } from '@/components/ui/atoms/table';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Button } from '@/components/ui/atoms/button';
 import { 
   Eye, 
   Clock, 

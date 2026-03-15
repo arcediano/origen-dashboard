@@ -11,13 +11,13 @@ import { motion, type Variants } from 'framer-motion';
 import { ShoppingBag } from 'lucide-react';
 
 // Componentes UI
-import { LoadingPage } from '@/components/ui/loading';
-import { ErrorDisplay } from '@/components/ui/error';
+import { PageLoader } from '@/components/shared';
+import { PageError } from '@/components/shared';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { OrderStats } from './components/OrderStats';
 import { OrderFilters } from './components/OrderFilters';
 import { OrdersTable } from './components/OrdersTable';
-import { Pagination } from '@/components/ui/Pagination';
+import { Pagination } from '@/components/ui/atoms/Pagination';
 
 // Hooks y API
 import { fetchOrders } from '@/lib/api/orders';
@@ -125,16 +125,15 @@ export default function OrdersPage() {
   // ==========================================================================
 
   if (isLoading && !orders.length) {
-    return <LoadingPage message="Cargando pedidos..." />;
+    return <PageLoader message="Cargando pedidos..." />;
   }
 
   if (error) {
     return (
-      <ErrorDisplay
+      <PageError
         title="Error al cargar"
         message={error}
         onRetry={loadOrders}
-        size="lg"
       />
     );
   }

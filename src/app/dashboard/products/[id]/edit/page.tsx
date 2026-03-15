@@ -11,9 +11,9 @@ import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { Package, Sparkles, TrendingUp, AlertCircle, RefreshCw } from 'lucide-react';
 
 // Componentes UI
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Badge } from '@/components/ui/atoms/badge';
+import { Button } from '@/components/ui/atoms/button';
 import { PageHeader } from '../../../components/PageHeader';
 
 // Steps del formulario

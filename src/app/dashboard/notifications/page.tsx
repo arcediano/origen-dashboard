@@ -18,10 +18,10 @@ import {
   Save
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Toggle } from '@/components/ui/toggle';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Button } from '@/components/ui/atoms/button';
+import { Toggle } from '@/components/ui/atoms/toggle';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/tabs';
 
 export default function NotificationsPage() {
   const [emailSettings, setEmailSettings] = useState({
