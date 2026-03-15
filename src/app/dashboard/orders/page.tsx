@@ -17,7 +17,7 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { OrderStats } from './components/OrderStats';
 import { OrderFilters } from './components/OrderFilters';
 import { OrdersTable } from './components/OrdersTable';
-import { Pagination } from '@/components/ui/atoms/Pagination';
+import { Pagination } from '@/components/ui/atoms/pagination';
 
 // Hooks y API
 import { fetchOrders } from '@/lib/api/orders';
