@@ -151,7 +151,7 @@ export default function LoginPage() {
                   const Icon = stat.icon;
                   return (
                     <div key={index} className="group">
-                      <div className="bg-white rounded-xl p-4 border border-gray-200 group-hover:border-origen-pradera transition-all duration-300 hover:shadow-lg">
+                      <div className="bg-white rounded-xl p-4 border border-gray-200 hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-origen-hoja/50 transition-all duration-300 group-hover:border-origen-hoja">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md`}>
                             <Icon className="w-5 h-5 text-white" />

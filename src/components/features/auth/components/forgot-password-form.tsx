@@ -37,13 +37,13 @@ function SuccessState({ email }: { email: string }) {
       animate={{ opacity: 1, scale: 1 }}
       className="text-center space-y-6"
     >
-      <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center border border-origen-pradera/20">
-        <CheckCircle2 className="w-10 h-10 text-origen-pradera" />
+      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center border border-origen-pradera/20">
+        <CheckCircle2 className="w-8 h-8 md:w-10 md:h-10 text-origen-pradera" />
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-xl font-bold text-origen-bosque">Revisa tu correo</h3>
-        <p className="text-sm text-gray-600 leading-relaxed max-w-xs mx-auto">
+        <h3 className="text-lg md:text-xl font-bold text-origen-bosque">Revisa tu correo</h3>
+        <p className="text-xs md:text-sm text-gray-600 leading-relaxed max-w-xs mx-auto">
           Si <span className="font-medium text-origen-bosque">{email}</span> está registrado,
           recibirás un enlace para restablecer tu contraseña en los próximos minutos.
         </p>
@@ -121,9 +121,9 @@ export function SimpleForgotPassword() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto px-4 sm:px-0">
       {/* Tarjeta principal */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all">
+      <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 md:p-8 shadow-lg hover:shadow-xl transition-all">
 
         <AnimatePresence mode="wait">
           {submitted ? (
@@ -136,12 +136,14 @@ export function SimpleForgotPassword() {
               exit={{ opacity: 0 }}
             >
               {/* Header */}
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
-                  <Lock className="w-8 h-8 text-white" />
+              <div className="text-center mb-6 md:mb-8">
+                <div className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 rounded-2xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
+                  <Lock className="w-7 h-7 md:w-8 md:h-8 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-origen-bosque mb-1">¿Olvidaste tu contraseña?</h2>
-                <p className="text-sm text-gray-600">
+                <h2 className="text-xl md:text-2xl font-bold text-origen-bosque mb-1">
+                  ¿Olvidaste tu contraseña?
+                </h2>
+                <p className="text-xs md:text-sm text-gray-600">
                   Introduce tu email y te enviaremos un enlace para restablecerla.
                 </p>
               </div>
@@ -164,8 +166,8 @@ export function SimpleForgotPassword() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Campo email */}
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-origen-bosque flex items-center gap-1.5">
-                    <Mail className="w-4 h-4 text-origen-pradera" />
+                  <label className="text-xs md:text-sm font-medium text-origen-bosque flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 text-origen-pradera" />
                     Correo electrónico <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -178,7 +180,7 @@ export function SimpleForgotPassword() {
                     placeholder="nombre@productor.es"
                     autoFocus
                     className={cn(
-                      'w-full h-12 px-4 text-sm',
+                      'w-full h-11 md:h-12 px-3 md:px-4 text-sm',
                       'bg-white border rounded-xl',
                       'focus:outline-none focus:ring-2 focus:ring-origen-pradera/20',
                       'transition-all duration-200',
@@ -189,38 +191,39 @@ export function SimpleForgotPassword() {
                   />
                   {error && (
                     <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
-                      <AlertCircle className="w-3.5 h-3.5" />
+                      <AlertCircle className="w-3 h-3" />
                       {error}
                     </p>
                   )}
                 </div>
 
                 {/* Botón */}
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className={cn(
-                    'w-full sm:w-full h-12',
-                    'bg-origen-bosque hover:bg-origen-pino',
-                    'text-white text-sm font-semibold',
-                    'rounded-xl shadow-md hover:shadow-lg',
-                    'transition-all transform hover:-translate-y-0.5',
-                    'disabled:opacity-50 disabled:hover:translate-y-0',
-                    'mt-2',
-                  )}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Enviando enlace...</span>
-                    </div>
-                  ) : (
-                    <span className="flex items-center justify-center gap-2">
-                      <Send className="w-4 h-4" />
-                      Enviar enlace de recuperación
-                    </span>
-                  )}
-                </Button>
+                <div className="flex justify-center">
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className={cn(
+                      "w-full max-w-xs h-12",
+                      "bg-origen-bosque hover:bg-origen-pino",
+                      "text-white text-sm font-semibold",
+                      "rounded-xl shadow-md hover:shadow-lg",
+                      "transition-all transform hover:-translate-y-0.5",
+                      "disabled:opacity-50 disabled:hover:translate-y-0"
+                    )}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Enviando enlace...</span>
+                      </div>
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        <Send className="w-4 h-4" />
+                        Enviar enlace de recuperación
+                      </span>
+                    )}
+                  </Button>
+                </div>
 
                 {/* Volver al login */}
                 <div className="text-center pt-1">
@@ -239,20 +242,20 @@ export function SimpleForgotPassword() {
       </div>
 
       {/* Trust badges */}
-      <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs">
-        <div className="flex items-center gap-1.5">
-          <Shield className="w-3.5 h-3.5 text-origen-pradera" />
-          <span className="text-gray-600">SSL 256-bit</span>
+      <div className="mt-5 md:mt-6 flex flex-wrap items-center justify-center gap-2 md:gap-3 text-[10px] md:text-xs">
+        <div className="flex items-center gap-1 group cursor-default">
+          <Shield className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera group-hover:text-origen-hoja transition-colors" />
+          <span className="text-gray-600 group-hover:text-gray-800 transition-colors">SSL 256-bit</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300" />
-        <div className="flex items-center gap-1.5">
-          <Clock className="w-3.5 h-3.5 text-origen-pradera" />
-          <span className="text-gray-600">Enlace válido 30 min</span>
+        <span className="w-1 h-1 rounded-full bg-gray-300 hidden sm:block" />
+        <div className="flex items-center gap-1 group cursor-default">
+          <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera group-hover:text-origen-hoja transition-colors" />
+          <span className="text-gray-600 group-hover:text-gray-800 transition-colors">Enlace válido 30 min</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300" />
-        <div className="flex items-center gap-1.5">
-          <Mail className="w-3.5 h-3.5 text-origen-pradera" />
-          <span className="text-gray-600">Email seguro</span>
+        <span className="w-1 h-1 rounded-full bg-gray-300 hidden sm:block" />
+        <div className="flex items-center gap-1 group cursor-default">
+          <Mail className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera group-hover:text-origen-hoja transition-colors" />
+          <span className="text-gray-600 group-hover:text-gray-800 transition-colors">Email seguro</span>
         </div>
       </div>
     </div>

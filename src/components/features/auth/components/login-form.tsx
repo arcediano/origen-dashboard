@@ -226,42 +226,47 @@ export function SimpleLogin() {
             <span className="text-[11px] md:text-xs text-gray-600">Recordar mi sesión</span>
           </div>
 
-          {/* Botón de acceso */}
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className={cn(
-              "w-full h-11 md:h-12",
-              "bg-origen-bosque hover:bg-origen-pino",
-              "text-white text-sm font-semibold",
-              "rounded-xl shadow-md hover:shadow-lg",
-              "transition-all transform hover:-translate-y-0.5",
-              "disabled:opacity-50 disabled:hover:translate-y-0",
-              "mt-2"
-            )}
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Iniciando sesión...</span>
-              </div>
-            ) : (
-              <span className="flex items-center justify-center gap-2">
-                <LogIn className="w-4 h-4" />
-                Acceder al panel
-              </span>
-            )}
-          </Button>
+          {/* Separador visual - Borde de marca */}
+          <div className="border-t border-origen-crema/40 pt-4">
 
-          {/* Enlace a registro */}
-          <div className="text-center pt-2">
-            <p className="text-[11px] md:text-xs text-gray-500">
-              ¿No tienes cuenta?{' '}
-              <Link href="/auth/register" className="text-origen-pradera hover:text-origen-bosque font-medium">
-                Regístrate como productor
-              </Link>
-            </p>
-          </div>
+            {/* Contenedor para centrar botón */}
+            <div className="flex justify-center">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className={cn(
+                  "w-full max-w-xs h-11 md:h-12",
+                  "bg-origen-bosque hover:bg-origen-pino",
+                  "text-white text-sm font-semibold",
+                  "rounded-xl shadow-md hover:shadow-lg",
+                  "transition-all transform hover:-translate-y-0.5",
+                  "disabled:opacity-50 disabled:hover:translate-y-0"
+                )}
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Iniciando sesión...</span>
+                  </div>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <LogIn className="w-4 h-4" />
+                    Acceder al panel
+                  </span>
+                )}
+              </Button>
+            </div>
+
+            {/* Enlace a registro */}
+            <div className="text-center pt-4">
+              <p className="text-[11px] md:text-xs text-gray-500">
+                ¿No tienes cuenta?{' '}
+                <Link href="/auth/register" className="text-origen-pradera hover:text-origen-bosque font-medium">
+                  Regístrate como productor
+                </Link>
+              </p>
+            </div>
+          </div> {/* Cierre del separador visual */}
         </form>
       </div>
 
