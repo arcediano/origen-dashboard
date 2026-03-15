@@ -16,7 +16,7 @@ import { PageLoader } from '@/components/shared/loading/page-loader';
 import { PageError } from '@/components/shared/error/page-error';
 import { Card } from '@/components/ui/atoms/card'
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Pagination } from '@/components/ui/atoms/Pagination';
+import { Pagination } from '@/components/ui/atoms/pagination';
 import { ProductStats, ProductFilters, ProductTable, ProductCard } from './components';
 import { AdjustStockDialog } from './components/ProductDialogs/AdjustStockDialog';
 import { DeleteProductDialog } from './components/ProductDialogs/DeleteProductDialog';

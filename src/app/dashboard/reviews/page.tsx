@@ -17,7 +17,7 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ReviewStats } from './components/ReviewStats';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
-import { Pagination } from '@/components/ui/atoms/Pagination';
+import { Pagination } from '@/components/ui/atoms/pagination';
 
 // Hooks y API
 import { fetchReviews } from '@/lib/api/reviews'; // Eliminamos approveReview y rejectReview
