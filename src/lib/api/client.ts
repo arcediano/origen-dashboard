@@ -36,6 +36,30 @@ declare global {
   }
 }
 
+/**
+ * Despacha el evento 'session:expired' con debounce de 1 segundo
+ * para evitar múltiples disparos en cascada cuando varias peticiones
+ * simultáneas reciben 401.
+ *
+ * POLÍTICA DE SEGURIDAD: esta app de administración NO renueva tokens
+ * automáticamente. Cualquier 401 cierra la sesión y obliga al usuario a
+ * volver a introducir sus credenciales.
+ */
+function dispatchSessionExpired() {
+  if (typeof window === 'undefined') return;
+
+  if (!window.lastSessionExpiredTime) {
+    window.lastSessionExpiredTime = 0;
+  }
+  const now = Date.now();
+  const SESSION_EXPIRED_DEBOUNCE = 1000; // ms
+
+  if (now - (window.lastSessionExpiredTime as number) > SESSION_EXPIRED_DEBOUNCE) {
+    window.lastSessionExpiredTime = now;
+    window.dispatchEvent(new CustomEvent('session:expired'));
+  }
+}
+
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
 export interface RequestOptions {
@@ -138,23 +162,13 @@ async function request<T>(
       ? raw.join(', ')
       : (raw ?? `Error ${response.status} en ${method} ${path}`);
 
-    // Notificar al dashboard que la sesión ha expirado (solo en el browser)
-    // Implementamos debounce para evitar múltiples eventos 401
-    // No disparar en páginas /auth/* donde el 401 es esperado (usuario no autenticado aún)
+    // POLÍTICA DE SEGURIDAD: app de administración — sin refresh automático.
+    // Cualquier 401 fuera de las páginas /auth/* cierra la sesión y fuerza
+    // al usuario a volver a introducir sus credenciales.
     if (response.status === 401 && typeof window !== 'undefined') {
       const isAuthPage = window.location.pathname.startsWith('/auth/');
       if (!isAuthPage) {
-        if (!window.lastSessionExpiredTime) {
-          window.lastSessionExpiredTime = 0;
-        }
-
-        const now = Date.now();
-        const SESSION_EXPIRED_DEBOUNCE = 1000; // 1 segundo
-
-        if (now - (window.lastSessionExpiredTime as number) > SESSION_EXPIRED_DEBOUNCE) {
-          window.lastSessionExpiredTime = now;
-          window.dispatchEvent(new CustomEvent('session:expired'));
-        }
+        dispatchSessionExpired();
       }
     }
 

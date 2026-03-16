@@ -13,7 +13,7 @@ import { DashboardHeader } from '@/app/dashboard/components/header/DashboardHead
 import { SessionExpiredModal } from '@/components/features/auth/components/session-expired-modal';
 import { cn } from '@/lib/utils';
 import { type SellerStatus } from '@/types/seller';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Datos mock - @todo: GET /api/producer/status
 const MOCK_PRODUCER_STATUS = {
@@ -45,22 +45,34 @@ function DashboardContentWrapper({
 
   const { isAuthenticated, isProducer, isLoading: authLoading, user } = useAuth();
 
-  // Debug: Log del estado de autenticación
+  // Debug: Log del estado de autenticación (solo en desarrollo)
   useEffect(() => {
-    console.log('[DashboardLayout] Estado auth:', {
-      isLoading: authLoading,
-      isAuthenticated,
-      isProducer,
-      userRole: user?.role,
-      userId: user?.id,
-      userEmail: user?.email
-    });
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[DashboardLayout] Estado auth:', {
+        isLoading: authLoading,
+        isAuthenticated,
+        isProducer,
+        userRole: user?.role,
+        userId: user?.id,
+      });
+    }
   }, [authLoading, isAuthenticated, isProducer, user]);
 
-  // Redirigir si no es productor (después de verificar que está autenticado)
+  // Redirigir si no está autenticado o no es productor (después de verificar que la carga terminó)
   useEffect(() => {
-    if (!authLoading && isAuthenticated && !isProducer) {
-      console.log('[DashboardLayout] Redirigiendo a login - no es productor');
+    if (authLoading) return;
+
+    if (!isAuthenticated) {
+      // BUG FIX: antes solo se redirigía si isAuthenticated && !isProducer,
+      // dejando a usuarios no autenticados con pantalla en blanco.
+      router.replace('/auth/login');
+      return;
+    }
+
+    if (!isProducer) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[DashboardLayout] Redirigiendo a login - no es productor');
+      }
       router.replace('/auth/login');
     }
   }, [authLoading, isAuthenticated, isProducer, router]);

@@ -10,7 +10,9 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AuthUser } from '@/lib/api/auth';
-import { getCurrentUser } from '@/lib/api/auth';
+import { getCurrentUser, logoutUser } from '@/lib/api/auth';
+import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
+import { useSessionVisibilityGuard } from '@/hooks/useSessionVisibilityGuard';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -33,7 +35,9 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // BUG FIX: Inicializar isLoading en true para evitar el flash de pantalla en blanco
+  // en el primer render antes de que el useEffect valide la sesión.
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasTriedLoad, setHasTriedLoad] = useState(false);
 
@@ -50,14 +54,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     try {
-      // Verificar si hay cookies antes de hacer la llamada
-      if (!document.cookie.includes('accessToken')) {
-        throw new Error('Token no proporcionado');
-      }
-
+      // BUG FIX: Eliminada la comprobación document.cookie.includes('accessToken').
+      // Los cookies accessToken son HttpOnly — document.cookie NUNCA los muestra,
+      // por lo que la comprobación anterior SIEMPRE fallaba y disparaba session:expired
+      // en cada recarga, incluso con sesión válida.
+      // Si no hay token, getCurrentUser() lanzará un GatewayError 401 de forma natural.
       const userData = await getCurrentUser();
       setUser(userData);
-      console.log('[AuthContext] Usuario cargado:', userData);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[AuthContext] Usuario cargado:', userData);
+      }
     } catch (err) {
       let errorMessage = 'Error al cargar datos del usuario';
       
@@ -67,14 +73,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
           : err.message;
       }
 
-      console.error('[AuthContext] Error cargando usuario:', errorMessage);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('[AuthContext] Error cargando usuario:', errorMessage);
+      }
       setError(errorMessage);
       setUser(null);
       
-      // Disparar evento global de sesión expirada
-      if (errorMessage.includes('Sesión') || errorMessage.includes('Token')) {
-        window.dispatchEvent(new CustomEvent('session:expired'));
-      }
+      // Disparar evento global de sesión expirada SOLO si había una sesión previa
+      // (es decir, si el usuario ya estaba autenticado antes de este intento de refresh)
+      // El cliente ya gestiona el evento en los 401 de otras peticiones vía client.ts
     } finally {
       setIsLoading(false);
       setHasTriedLoad(true);
@@ -93,27 +100,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const userData = await getCurrentUser();
         setUser(userData);
-        console.log('[AuthContext] Usuario establecido tras login:', {
-          id: userData.id,
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          role: userData.role,
-          producerCode: userData.producerCode,
-          todasLasPropiedades: Object.keys(userData)
-        });
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('[AuthContext] Usuario establecido tras login:', {
+            id: userData.id,
+            email: userData.email,
+            role: userData.role,
+          });
+        }
         setIsLoading(false);
         setHasTriedLoad(true);
         return userData; // ✅ Devolver el usuario al caller
       } catch (err) {
-        console.warn(`[AuthContext] Intento ${i + 1}/${maxRetries} fallido:`, err);
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(`[AuthContext] Intento ${i + 1}/${maxRetries} fallido:`, err);
+        }
 
         // Último intento fallido
         if (i === maxRetries - 1) {
           const errorMessage = err instanceof Error ? err.message : 'Error al cargar datos del usuario';
-          console.error('[AuthContext] Error tras login (todos los intentos):', errorMessage);
           setError(errorMessage);
           setUser(null);
+          setIsLoading(false);
+          setHasTriedLoad(true);
           throw err; // PROPAGAR ERROR al caller
         }
 
@@ -126,38 +134,89 @@ export function AuthProvider({ children }: AuthProviderProps) {
     throw new Error('Error al cargar usuario después de ' + maxRetries + ' intentos');
   }, []);
 
-  // Función para limpiar los datos del usuario (logout)
+  // Función para limpiar los datos del usuario (logout local sin llamada al backend)
   const clearUser = useCallback(() => {
     setUser(null);
     setError(null);
   }, []);
 
-  // Cargar datos del usuario al montar del provider (solo una vez)
+  // ── Logout forzado centralizado ─────────────────────────────────────────────
+  // Único punto de salida para todos los escenarios de cierre de sesión:
+  // token expirado (401), inactividad y pestaña abandonada.
+  //
+  // Motivos posibles:
+  //   'expired'    → el token caducó (recibimos un 401 del gateway)
+  //   'inactivity' → 15 min sin interacción del usuario
+  //   'hidden'     → pestaña oculta más de 30 min
+  const handleForceLogout = useCallback(async (
+    reason: 'expired' | 'inactivity' | 'hidden'
+  ) => {
+    try {
+      // Invalidar el token en el servidor (borra las cookies HttpOnly)
+      await logoutUser();
+    } catch {
+      // Si el gateway falla (token ya expirado), continuamos igualmente
+    }
+
+    setUser(null);
+    setError(null);
+
+    const messages: Record<typeof reason, string> = {
+      expired:    'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.',
+      inactivity: 'Sesión cerrada automáticamente por inactividad (15 min).',
+      hidden:     'Sesión cerrada por seguridad tras un periodo de inactividad prolongada.',
+    };
+
+    router.replace(
+      `/auth/login?reason=${reason}&message=${encodeURIComponent(messages[reason])}`
+    );
+  }, [router]);
+
+  // ── Cargar usuario al montar (solo una vez) ─────────────────────────────────
   useEffect(() => {
     let mounted = true;
 
-    // Solo cargar si no hemos intentado y no tenemos usuario
     if (!hasTriedLoad && !user) {
-      refreshUser();
+      const load = async () => {
+        await refreshUser();
+      };
+      load();
     }
 
     return () => {
       mounted = false;
     };
-  }, [hasTriedLoad, user, refreshUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Escuchar evento de sesión expirada
+  // ── 401 desde el cliente HTTP → cierre de sesión inmediato ─────────────────
   useEffect(() => {
     const handleSessionExpired = () => {
-      setUser(null);
-      setError(null);
+      // Solo actuar si había sesión activa (evitar logout doble en páginas /auth/*)
+      if (user) {
+        handleForceLogout('expired');
+      }
     };
 
     window.addEventListener('session:expired', handleSessionExpired);
     return () => {
       window.removeEventListener('session:expired', handleSessionExpired);
     };
-  }, []);
+  }, [user, handleForceLogout]);
+
+  // ── 15 min sin interacción → cierre de sesión por inactividad ──────────────
+  useInactivityTimeout(
+    useCallback(() => {
+      if (user) handleForceLogout('inactivity');
+    }, [user, handleForceLogout])
+  );
+
+  // ── Pestaña oculta más de 30 min → cierre al volver ────────────────────────
+  useSessionVisibilityGuard(
+    useCallback(() => {
+      if (user) handleForceLogout('hidden');
+    }, [user, handleForceLogout])
+  );
 
   const value: AuthContextType = {
     user,

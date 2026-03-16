@@ -19,6 +19,7 @@ import {
 
 // Hooks
 import { useDashboardStats, useRecentOrders, useTopProducts } from '@/components/features/dashboard/hooks';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Datos mock
 import { MOCK_PRODUCER } from '@/components/features/dashboard/data';
@@ -29,6 +30,7 @@ import { MOCK_PRODUCER } from '@/components/features/dashboard/data';
 
 export default function ProducerDashboard() {
   const [mounted, setMounted] = useState(false);
+  const { user } = useAuth();
 
   // Hooks para datos
   const { stats: realStats, isLoading: statsLoading } = useDashboardStats();
@@ -41,8 +43,8 @@ export default function ProducerDashboard() {
 
   if (!mounted) return null;
 
-  // Nombre del usuario para el saludo (podría venir del contexto de auth)
-  const userName = 'María';
+  // BUG FIX: usar el nombre real del usuario autenticado en lugar del hardcodeado 'María'
+  const userName = user?.firstName ?? 'Productor';
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">

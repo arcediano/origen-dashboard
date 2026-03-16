@@ -14,7 +14,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/atoms/button';
@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { SidebarMenuItem } from './SidebarMenuItem';
 import { MENU_ITEMS } from '@/constants/sidebar';
+import { useAuth } from '@/contexts/AuthContext';
+import { logoutUser } from '@/lib/api/auth';
 
 interface DashboardSidebarProps {
   isMobileOpen?: boolean;
@@ -34,7 +36,10 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { clearUser } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -42,6 +47,22 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
 
   const handleItemClick = () => {
     if (onMobileClose) onMobileClose();
+  };
+
+  // BUG FIX: Los botones de cerrar sesión no tenían onClick.
+  // Ahora llaman al endpoint de logout del gateway, limpian el contexto
+  // y redirigen al login.
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await logoutUser();
+    } catch {
+      // Si el gateway falla, continuamos con el logout local igualmente
+    } finally {
+      clearUser();
+      router.replace('/auth/login');
+    }
   };
 
   if (!mounted) return null;
@@ -96,9 +117,13 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
               <HelpCircle className="w-5 h-5 text-gray-500" />
               <span>Ayuda</span>
             </Link>
-            <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-all mt-1">
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-all mt-1 disabled:opacity-50"
+            >
               <LogOut className="w-5 h-5" />
-              <span>Cerrar sesión</span>
+              <span>{isLoggingOut ? 'Cerrando...' : 'Cerrar sesión'}</span>
             </button>
           </div>
         </motion.aside>
@@ -137,9 +162,13 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
           <HelpCircle className="w-5 h-5 text-gray-500" />
           <span>Ayuda</span>
         </Link>
-        <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-all mt-1">
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-all mt-1 disabled:opacity-50"
+        >
           <LogOut className="w-5 h-5" />
-          <span>Salir</span>
+          <span>{isLoggingOut ? 'Cerrando...' : 'Salir'}</span>
         </button>
       </div>
     </aside>

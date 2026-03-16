@@ -7,8 +7,8 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/atoms/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -35,6 +35,33 @@ import {
 } from 'lucide-react';
 
 // ============================================================================
+// BANNER DE SESIÓN — muestra el motivo del cierre de sesión (si existe)
+// Usa useSearchParams → requiere Suspense para SSR/SSG
+// ============================================================================
+
+function SessionBanner() {
+  const searchParams = useSearchParams();
+  const message = searchParams.get('message');
+  const reason = searchParams.get('reason');
+
+  if (!message) return null;
+
+  const isInactivity = reason === 'inactivity' || reason === 'hidden';
+
+  return (
+    <div className={cn(
+      'mb-5 p-3 border rounded-lg flex items-start gap-2 text-sm',
+      isInactivity
+        ? 'bg-amber-50 border-amber-200 text-amber-800'
+        : 'bg-red-50 border-red-200 text-red-700'
+    )}>
+      <span className="flex-shrink-0 mt-0.5">{isInactivity ? '⏰' : '🔒'}</span>
+      <span>{decodeURIComponent(message)}</span>
+    </div>
+  );
+}
+
+// ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
@@ -59,8 +86,8 @@ export function SimpleLogin() {
 
     if (!password) {
       newErrors.password = 'La contraseña es requerida';
-    } else if (password.length < 6) {
-      newErrors.password = 'Mínimo 6 caracteres';
+    } else if (password.length < 8) {
+      newErrors.password = 'Mínimo 8 caracteres';
     }
 
     setErrors(newErrors);
@@ -73,54 +100,29 @@ export function SimpleLogin() {
     setIsLoading(true);
 
     try {
-      console.log('[LoginForm] Iniciando login para:', email);
-
       // Paso 1: Login (solo devuelve tokens, NO user)
-      const response = await loginUser({ email, password, rememberMe });
-      console.log('[LoginForm] Login exitoso - tokens obtenidos:', {
-        hasAccessToken: !!response.data?.accessToken,
-        hasRefreshToken: !!response.data?.refreshToken
-      });
+      await loginUser({ email, password, rememberMe });
 
       // Paso 2: Cargar usuario del backend (hace GET /auth/userinfo con retries automáticos)
       // setUserFromLogin maneja el timing issue automáticamente con 3 intentos
       // ✅ Capturar el usuario devuelto para validación inmediata
       const loggedUser = await setUserFromLogin(email);
 
-      console.log('[LoginForm] Usuario recibido desde AuthContext:', {
-        id: loggedUser.id,
-        email: loggedUser.email,
-        firstName: loggedUser.firstName,
-        lastName: loggedUser.lastName,
-        role: loggedUser.role,
-        producerCode: loggedUser.producerCode,
-        todasLasPropiedades: Object.keys(loggedUser)
-      });
-
       // Paso 3: Validar rol usando el usuario devuelto (NO el estado del contexto)
       if (!loggedUser || loggedUser.role !== 'PRODUCER') {
-        console.log('[LoginForm] Acceso denegado - rol:', loggedUser?.role);
         clearUser();
         setErrors({ general: 'Tu cuenta no tiene acceso al panel de productores.' });
         setIsLoading(false);
         return;
       }
 
-      console.log('[LoginForm] Usuario validado, redirigiendo a dashboard:', {
-        id: loggedUser.id,
-        email: loggedUser.email,
-        role: loggedUser.role
-      });
       router.push('/dashboard');
     } catch (err) {
-      console.error('[LoginForm] Error en login:', err);
-
       if (err instanceof GatewayError && err.status === 401) {
         setErrors({ general: 'Credenciales incorrectas. Revisa tu email y contraseña.' });
       } else if (err instanceof GatewayError && err.status === 403) {
         setErrors({ general: err.message });
       } else {
-        console.error('[LoginForm] Error no manejado:', err);
         setErrors({ general: 'No se pudo conectar con el servidor. Inténtalo de nuevo.' });
       }
     } finally {
@@ -141,6 +143,11 @@ export function SimpleLogin() {
           <h2 className="text-xl md:text-2xl font-bold text-origen-bosque mb-1">Acceso productores</h2>
           <p className="text-xs md:text-sm text-gray-600">Gestiona tu tienda y ventas</p>
         </div>
+
+        {/* Banner de sesión expirada / inactividad */}
+        <Suspense fallback={null}>
+          <SessionBanner />
+        </Suspense>
 
         {/* Error general */}
         <AnimatePresence>
@@ -169,6 +176,7 @@ export function SimpleLogin() {
               <input
                 type="email"
                 value={email}
+                autoComplete="email"
                 onChange={(e) => {
                   setEmail(e.target.value);
                   if (errors.email) setErrors({ ...errors, email: '' });
@@ -212,6 +220,7 @@ export function SimpleLogin() {
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
+                autoComplete="current-password"
                 onChange={(e) => {
                   setPassword(e.target.value);
                   if (errors.password) setErrors({ ...errors, password: '' });
