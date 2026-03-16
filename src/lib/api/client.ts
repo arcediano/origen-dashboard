@@ -140,18 +140,21 @@ async function request<T>(
 
     // Notificar al dashboard que la sesión ha expirado (solo en el browser)
     // Implementamos debounce para evitar múltiples eventos 401
+    // No disparar en páginas /auth/* donde el 401 es esperado (usuario no autenticado aún)
     if (response.status === 401 && typeof window !== 'undefined') {
-      // Usar una variable global para debounce
-      if (!window.lastSessionExpiredTime) {
-        window.lastSessionExpiredTime = 0;
-      }
-      
-      const now = Date.now();
-      const SESSION_EXPIRED_DEBOUNCE = 1000; // 1 segundo
-      
-      if (now - (window.lastSessionExpiredTime as number) > SESSION_EXPIRED_DEBOUNCE) {
-        window.lastSessionExpiredTime = now;
-        window.dispatchEvent(new CustomEvent('session:expired'));
+      const isAuthPage = window.location.pathname.startsWith('/auth/');
+      if (!isAuthPage) {
+        if (!window.lastSessionExpiredTime) {
+          window.lastSessionExpiredTime = 0;
+        }
+
+        const now = Date.now();
+        const SESSION_EXPIRED_DEBOUNCE = 1000; // 1 segundo
+
+        if (now - (window.lastSessionExpiredTime as number) > SESSION_EXPIRED_DEBOUNCE) {
+          window.lastSessionExpiredTime = now;
+          window.dispatchEvent(new CustomEvent('session:expired'));
+        }
       }
     }
 

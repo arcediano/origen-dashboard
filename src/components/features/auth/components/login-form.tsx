@@ -78,8 +78,8 @@ export function SimpleLogin() {
       // Paso 1: Login (solo devuelve tokens, NO user)
       const response = await loginUser({ email, password, rememberMe });
       console.log('[LoginForm] Login exitoso - tokens obtenidos:', {
-        hasAccessToken: !!response.accessToken,
-        hasRefreshToken: !!response.refreshToken
+        hasAccessToken: !!response.data?.accessToken,
+        hasRefreshToken: !!response.data?.refreshToken
       });
 
       // Paso 2: Cargar usuario del backend (hace GET /auth/userinfo con retries automáticos)

@@ -30,7 +30,11 @@ export interface AuthUser {
 export interface LoginResponse {
   success: boolean;
   message: string;
-  user: AuthUser;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+  };
 }
 
 export interface RegisterResponse {
@@ -105,7 +109,8 @@ export async function refreshTokens(): Promise<void> {
  * Lanza GatewayError con status 401 si no hay sesión activa.
  */
 export async function getCurrentUser(): Promise<AuthUser> {
-  return gatewayClient.get<AuthUser>('/auth/userinfo');
+  const response = await gatewayClient.get<{ success: boolean; data: AuthUser }>('/auth/userinfo');
+  return response.data;
 }
 
 /**
