@@ -42,15 +42,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     setError(null);
 
+    // Verificar si estamos en el cliente (browser)
+    if (typeof window === 'undefined') {
+      setIsLoading(false);
+      setHasTriedLoad(true);
+      return;
+    }
+
     try {
+      // Verificar si hay cookies antes de hacer la llamada
+      if (!document.cookie.includes('accessToken')) {
+        throw new Error('Token no proporcionado');
+      }
+
       const userData = await getCurrentUser();
       setUser(userData);
       console.log('[AuthContext] Usuario cargado:', userData);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar datos del usuario';
+      let errorMessage = 'Error al cargar datos del usuario';
+      
+      if (err instanceof Error) {
+        errorMessage = err.message.includes('401') || err.message.includes('Token')
+          ? 'Sesión no válida o expirada' 
+          : err.message;
+      }
+
       console.error('[AuthContext] Error cargando usuario:', errorMessage);
       setError(errorMessage);
       setUser(null);
+      
+      // Disparar evento global de sesión expirada
+      if (errorMessage.includes('Sesión') || errorMessage.includes('Token')) {
+        window.dispatchEvent(new CustomEvent('session:expired'));
+      }
     } finally {
       setIsLoading(false);
       setHasTriedLoad(true);

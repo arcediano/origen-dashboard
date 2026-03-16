@@ -5,7 +5,7 @@
 
 import type { Order, DashboardAlert } from '../types';
 
-export const MOCK_RECENT_ORDERS: Order[] = [
+export const MOCK_ORDERS: Order[] = [
   {
     id: '1',
     orderNumber: 'ORD-2024-1234',

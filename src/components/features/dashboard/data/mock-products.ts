@@ -5,7 +5,7 @@
 
 import type { TopProduct } from '../types';
 
-export const MOCK_TOP_PRODUCTS: TopProduct[] = [
+export const MOCK_PRODUCTS: TopProduct[] = [
   {
     id: 'prod_1',
     name: 'Queso Curado 6 meses',

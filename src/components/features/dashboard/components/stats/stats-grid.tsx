@@ -5,8 +5,9 @@
 
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, ShoppingBag, DollarSign, Star, Loader2 } from 'lucide-react';
+import { Eye, ShoppingBag, DollarSign, Star, Loader2, ChevronRight } from 'lucide-react';
 import { StatsCard } from './stats-card';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { DashboardStats } from '../../types';
@@ -15,6 +16,8 @@ interface StatsGridProps {
   stats: DashboardStats | null;
   isLoading?: boolean;
   className?: string;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
 }
 
 // Valores por defecto para mostrar mientras carga
@@ -25,8 +28,21 @@ const DEFAULT_STATS: DashboardStats = {
   rating: { average: 0, total: 0 },
 };
 
-export function StatsGrid({ stats, isLoading = false, className }: StatsGridProps) {
+export function StatsGrid({ 
+  stats, 
+  isLoading = false, 
+  className, 
+  collapsible = false,
+  defaultCollapsed = false 
+}: StatsGridProps) {
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const displayStats = stats || DEFAULT_STATS;
+  
+  // Mostrar mensaje si no hay datos
+  const isEmpty = !isLoading && stats && 
+    stats.profileViews.today === 0 && 
+    stats.orders.today === 0 && 
+    stats.revenue.today === 0;
 
   const statsConfig = [
     {
@@ -66,8 +82,25 @@ export function StatsGrid({ stats, isLoading = false, className }: StatsGridProp
   return (
     <motion.div
       variants={itemVariants}
-      className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${className || ''}`}
+      className={`${className || ''}`}
     >
+      {collapsible && (
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="flex items-center gap-2 mb-4 text-origen-mandarina hover:text-origen-mandarina/80 transition-colors"
+        >
+          <ChevronRight className={`w-4 h-4 transition-transform ${isCollapsed ? '' : 'rotate-90'}`} />
+          <span>Estadísticas {isCollapsed ? '(mostrar)' : '(ocultar)'}</span>
+        </button>
+      )}
+
+      {isEmpty ? (
+        <div className="bg-origen-pastel rounded-lg p-6 text-center text-origen-bosque">
+          <p>No hay actividad reciente</p>
+          <p className="text-sm mt-2">Los datos aparecerán cuando tengas visitas o pedidos</p>
+        </div>
+      ) : !isCollapsed && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {isLoading ? (
         // Estado de carga - Spinner centrado
         <div className="col-span-full flex items-center justify-center py-8">
@@ -83,9 +116,11 @@ export function StatsGrid({ stats, isLoading = false, className }: StatsGridProp
             sublabel={stat.sublabel}
             trend={stat.trend}
             icon={stat.icon}
-            gradient={stat.gradient}
+            gradient={isEmpty ? 'from-origen-pastel to-origen-crema' : stat.gradient}
           />
         ))
+        )}
+      </div>
       )}
     </motion.div>
   );

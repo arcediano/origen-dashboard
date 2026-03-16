@@ -61,12 +61,12 @@ const config: Config = {
           pino: "hsl(var(--pino))",          // #2D6A4F - Verde Pino
           hoja: "hsl(var(--hoja))",          // #40916C - Verde Esmeralda
           pradera: "hsl(var(--pradera))",    // #74C69D - Verde Menta
-          menta: "hsl(var(--menta))",        // #D4A373 - Beige Arena
           crema: "hsl(var(--crema))",        // #F1FAEE - Blanco Verdeado
-
+          
           // Apoyo
           oscuro: "hsl(var(--oscuro))",      // #081C15 - Verde Negro
           pastel: "hsl(var(--pastel))",      // #D8F3DC - Verde Pastel
+          mandarina: "hsl(34, 100%, 67%)",   // #FFB347 - Naranja pastel
         },
 
         // Estados hover
@@ -74,6 +74,7 @@ const config: Config = {
           bosque: "hsl(var(--hover-bosque))",    // #0D2B1D
           pradera: "hsl(var(--hover-pradera))",  // #5BB580
           menta: "hsl(var(--hover-menta))",      // #C4905D
+          mandarina: "hsl(34, 100%, 60%)",       // #E6A040
         },
         
         // Variables del sistema (shadcn/ui)
