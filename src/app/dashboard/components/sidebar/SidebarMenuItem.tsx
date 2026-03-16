@@ -170,7 +170,11 @@ export function SidebarMenuItem({
         </span>
       </div>
 
-      {badge && <NotificationBadge count={badge} size="sm" />}
+      {badge && (
+        <Badge variant="notification" size="xs" className="min-w-[1.2rem] h-5">
+          {badge > 99 ? '99+' : badge}
+        </Badge>
+      )}
 
       {/* Indicador de elemento activo */}
       {isActive && (
