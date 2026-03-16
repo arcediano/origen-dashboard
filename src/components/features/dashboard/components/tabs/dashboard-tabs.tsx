@@ -1,0 +1,50 @@
+/**
+ * @file dashboard-tabs.tsx
+ * @description Sistema de tabs del dashboard - Solo Analíticas
+ */
+
+'use client';
+
+import { motion } from 'framer-motion';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/atoms/tabs';
+import { BarChart3 } from 'lucide-react';
+import { itemVariants } from '../layout/dashboard-shell';
+
+interface DashboardTabsProps {
+  analyticsContent?: React.ReactNode;
+  className?: string;
+}
+
+const defaultContent = (
+  <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-origen text-center">
+    <div className="w-16 h-16 rounded-xl bg-origen-menta/20 mx-auto mb-4 flex items-center justify-center">
+      <BarChart3 className="w-8 h-8 text-origen-menta" />
+    </div>
+    <p className="text-gray-500 mb-1">Analíticas detalladas</p>
+    <p className="text-sm text-gray-400">Próximamente: gráficos de ventas, visitas y rendimiento</p>
+  </div>
+);
+
+export function DashboardTabs({
+  analyticsContent,
+  className,
+}: DashboardTabsProps) {
+  return (
+    <motion.div variants={itemVariants} className={className}>
+      <Tabs defaultValue="analytics" variant="minimal" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger
+            value="analytics"
+            icon={<BarChart3 className="w-4 h-4" />}
+          >
+            Analíticas
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="analytics">
+          {analyticsContent || defaultContent}
+        </TabsContent>
+      </Tabs>
+    </motion.div>
+  );
+}

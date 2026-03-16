@@ -22,7 +22,7 @@ import {
 // ============================================================================
 
 export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "success" | "warning" | "error" | "info" | "organic";
+  variant?: "default" | "success" | "warning" | "error" | "info" | "organic" | "accent";
   dismissible?: boolean;
   onDismiss?: () => void;
   title?: string;
@@ -44,6 +44,7 @@ const variantIcons = {
   error: <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />,
   info: <Info className="h-4 w-4 sm:h-5 sm:w-5" />,
   organic: <Leaf className="h-4 w-4 sm:h-5 sm:w-5" />,
+  accent: <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />,
 };
 
 // ============================================================================
@@ -84,6 +85,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       error: "bg-red-50 border border-red-200 text-red-900 [&>svg]:text-red-600",
       info: "bg-origen-pradera/10 border border-origen-pradera/20 text-origen-bosque [&>svg]:text-origen-pradera",
       organic: "bg-gradient-to-br from-origen-pastel to-origen-crema border-2 border-origen-pradera/30 text-origen-oscuro [&>svg]:text-origen-pradera shadow-lg shadow-origen-pradera/10",
+      accent: "bg-origen-menta/15 border-2 border-origen-menta/40 text-origen-oscuro [&>svg]:text-origen-menta shadow-md shadow-origen-menta/10",
     };
 
     const sizeClasses = {
@@ -172,7 +174,8 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
               variant === "warning" && "hover:bg-amber-200/50 focus:ring-amber-500",
               variant === "error" && "hover:bg-red-200/50 focus:ring-red-500",
               variant === "info" && "hover:bg-blue-200/50 focus:ring-blue-500",
-              variant === "organic" && "hover:bg-origen-pradera/20 focus:ring-origen-pradera"
+              variant === "organic" && "hover:bg-origen-pradera/20 focus:ring-origen-pradera",
+              variant === "accent" && "hover:bg-origen-menta/30 focus:ring-origen-menta"
             )}
             aria-label="Cerrar alerta"
           >

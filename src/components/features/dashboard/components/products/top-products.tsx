@@ -1,0 +1,63 @@
+/**
+ * @file top-products.tsx
+ * @description Lista de productos destacados
+ */
+
+'use client';
+
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { ChevronRight, Loader2, Package } from 'lucide-react';
+import { ProductItem } from '../recent/product-item';
+import { itemVariants } from '../layout/dashboard-shell';
+import type { TopProduct } from '../../types';
+
+interface TopProductsProps {
+  products: TopProduct[];
+  isLoading?: boolean;
+  className?: string;
+}
+
+export function TopProducts({ products, isLoading = false, className }: TopProductsProps) {
+  return (
+    <motion.div
+      variants={itemVariants}
+      className={`space-y-4 ${className || ''}`}
+    >
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+          Productos top
+        </h3>
+        <Link
+          href="/dashboard/products"
+          className="text-sm text-origen-pradera hover:text-origen-hoja flex items-center gap-1"
+        >
+          Ver todos <ChevronRight className="w-4 h-4" />
+        </Link>
+      </div>
+
+      <div className="space-y-3">
+        {isLoading ? (
+          // Estado de carga
+          <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-origen flex flex-col items-center justify-center gap-3">
+            <Loader2 className="w-8 h-8 text-origen-pradera animate-spin" />
+            <p className="text-sm text-gray-500">Cargando productos...</p>
+          </div>
+        ) : products.length > 0 ? (
+          products.map((product) => (
+            <ProductItem key={product.id} {...product} />
+          ))
+        ) : (
+          // Estado vacío
+          <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-origen text-center">
+            <div className="w-16 h-16 rounded-xl bg-origen-pastel mx-auto mb-4 flex items-center justify-center">
+              <Package className="w-8 h-8 text-origen-pino" />
+            </div>
+            <p className="text-gray-500 mb-1">No hay productos registrados</p>
+            <p className="text-sm text-gray-400">Añade productos para verlos aquí</p>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
