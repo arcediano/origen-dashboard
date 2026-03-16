@@ -11,7 +11,7 @@ import { MapPin, Calendar, Shield, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { Producer } from '../../types';
-import { getProducerInitials, getYearsOfExperience } from '../../data';
+import { getProducerInitials, getYearsOfExperience } from '@/components/features/dashboard/data';
 
 interface ProducerCardProps {
   producer: Producer;
