@@ -207,7 +207,6 @@ export function AuthFooter({ variant, showLegalNote = false }: AuthFooterProps) 
               <ul className="space-y-3">
                 {[
                   { href: '/como-funciona', label: 'Cómo funciona' },
-                  { href: '/tarifas', label: 'Tarifas y comisiones' },
                   { href: '/soporte', label: 'Soporte especializado' },
                   { href: '/casos-exito', label: 'Casos de éxito' },
                 ].map(({ href, label }) => (
