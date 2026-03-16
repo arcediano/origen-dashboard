@@ -19,6 +19,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isProducer: boolean;
   refreshUser: () => Promise<void>;
+  setUserFromLogin: (email: string) => Promise<AuthUser>;
+  setUser: (user: AuthUser | null) => void;
   clearUser: () => void;
 }
 
@@ -33,24 +35,71 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasTriedLoad, setHasTriedLoad] = useState(false);
 
   // Función para refrescar los datos del usuario
   const refreshUser = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const userData = await getCurrentUser();
       setUser(userData);
+      console.log('[AuthContext] Usuario cargado:', userData);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar datos del usuario';
+      console.error('[AuthContext] Error cargando usuario:', errorMessage);
       setError(errorMessage);
       setUser(null);
-      
-      // No redirigir aquí - dejar que el layout maneje la redirección
     } finally {
       setIsLoading(false);
+      setHasTriedLoad(true);
     }
+  }, []);
+
+  // Función para establecer usuario después de login (con reintentos automáticos)
+  const setUserFromLogin = useCallback(async (email: string): Promise<AuthUser> => {
+    setIsLoading(true);
+    setError(null);
+
+    const maxRetries = 3;
+    const baseDelay = 300; // ms
+
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const userData = await getCurrentUser();
+        setUser(userData);
+        console.log('[AuthContext] Usuario establecido tras login:', {
+          id: userData.id,
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          role: userData.role,
+          producerCode: userData.producerCode,
+          todasLasPropiedades: Object.keys(userData)
+        });
+        setIsLoading(false);
+        setHasTriedLoad(true);
+        return userData; // ✅ Devolver el usuario al caller
+      } catch (err) {
+        console.warn(`[AuthContext] Intento ${i + 1}/${maxRetries} fallido:`, err);
+
+        // Último intento fallido
+        if (i === maxRetries - 1) {
+          const errorMessage = err instanceof Error ? err.message : 'Error al cargar datos del usuario';
+          console.error('[AuthContext] Error tras login (todos los intentos):', errorMessage);
+          setError(errorMessage);
+          setUser(null);
+          throw err; // PROPAGAR ERROR al caller
+        }
+
+        // Esperar antes del siguiente intento (tiempo incremental)
+        await new Promise(resolve => setTimeout(resolve, baseDelay * (i + 1)));
+      }
+    }
+
+    // TypeScript no debería llegar aquí, pero por seguridad
+    throw new Error('Error al cargar usuario después de ' + maxRetries + ' intentos');
   }, []);
 
   // Función para limpiar los datos del usuario (logout)
@@ -59,31 +108,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setError(null);
   }, []);
 
-  // Cargar datos del usuario al montar el provider (solo si no hay usuario en caché)
+  // Cargar datos del usuario al montar del provider (solo una vez)
   useEffect(() => {
     let mounted = true;
-    
-    // Solo cargar si ya no tenemos un usuario en caché
-    if (!user) {
+
+    // Solo cargar si no hemos intentado y no tenemos usuario
+    if (!hasTriedLoad && !user) {
       refreshUser();
     }
 
     return () => {
       mounted = false;
     };
-  }, []); // Solo al montar - sin dependencias para evitar llamadas múltiples
+  }, [hasTriedLoad, user, refreshUser]);
 
   // Escuchar evento de sesión expirada
   useEffect(() => {
     const handleSessionExpired = () => {
-      clearUser();
+      setUser(null);
+      setError(null);
     };
 
     window.addEventListener('session:expired', handleSessionExpired);
     return () => {
       window.removeEventListener('session:expired', handleSessionExpired);
     };
-  }, [clearUser]);
+  }, []);
 
   const value: AuthContextType = {
     user,
@@ -92,6 +142,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated: !!user,
     isProducer: user?.role === 'PRODUCER',
     refreshUser,
+    setUserFromLogin,
+    setUser,
     clearUser,
   };
 

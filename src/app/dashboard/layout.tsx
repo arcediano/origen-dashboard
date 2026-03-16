@@ -29,11 +29,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AuthProvider>
-      <DashboardContentWrapper>{children}</DashboardContentWrapper>
-    </AuthProvider>
-  );
+  return <DashboardContentWrapper>{children}</DashboardContentWrapper>;
 }
 
 function DashboardContentWrapper({
@@ -46,12 +42,25 @@ function DashboardContentWrapper({
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
-  
-  const { isAuthenticated, isProducer, isLoading: authLoading } = useAuth();
+
+  const { isAuthenticated, isProducer, isLoading: authLoading, user } = useAuth();
+
+  // Debug: Log del estado de autenticación
+  useEffect(() => {
+    console.log('[DashboardLayout] Estado auth:', {
+      isLoading: authLoading,
+      isAuthenticated,
+      isProducer,
+      userRole: user?.role,
+      userId: user?.id,
+      userEmail: user?.email
+    });
+  }, [authLoading, isAuthenticated, isProducer, user]);
 
   // Redirigir si no es productor (después de verificar que está autenticado)
   useEffect(() => {
     if (!authLoading && isAuthenticated && !isProducer) {
+      console.log('[DashboardLayout] Redirigiendo a login - no es productor');
       router.replace('/auth/login');
     }
   }, [authLoading, isAuthenticated, isProducer, router]);

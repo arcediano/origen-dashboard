@@ -148,21 +148,6 @@ export function SimpleForgotPassword() {
                 </p>
               </div>
 
-              {/* Error */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600"
-                  >
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    <span className="text-xs">{error}</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Campo email */}
                 <div className="space-y-1.5">

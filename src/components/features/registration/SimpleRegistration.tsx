@@ -42,8 +42,6 @@ import {
   ShieldCheck,
   Clock,
   Lock,
-  Eye,
-  EyeOff,
   CheckCircle2,
   AlertCircle,
   Check,
@@ -87,8 +85,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [submittedData, setSubmittedData] = useState<InitialRegistrationFormData | null>(null);
   const [trackingCode, setTrackingCode] = useState<string>('');
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
   const errorRef = useRef<HTMLDivElement>(null);
   const spinnerRef = useRef<HTMLDivElement>(null);
@@ -303,27 +299,13 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     <Lock className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
                     Contraseña <span className="text-destructive">*</span>
                   </label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Mín. 8 caracteres"
-                      error={errors.password?.message}
-                      inputSize="lg"
-                      {...register('password')}
-                      className="pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-origen-bosque transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4 md:w-5 md:h-5" />
-                      ) : (
-                        <Eye className="w-4 h-4 md:w-5 md:h-5" />
-                      )}
-                    </button>
-                  </div>
+                  <Input
+                    type="password"
+                    placeholder="Mín. 8 caracteres"
+                    error={errors.password?.message}
+                    inputSize="lg"
+                    {...register('password')}
+                  />
                   <PasswordStrengthIndicator password={formValues.password || ''} />
                 </div>
                 <div className="space-y-1.5">
@@ -331,27 +313,13 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     <Lock className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
                     Confirmar contraseña <span className="text-destructive">*</span>
                   </label>
-                  <div className="relative">
-                    <Input
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Repite la contraseña"
-                      error={errors.confirmPassword?.message}
-                      inputSize="lg"
-                      {...register('confirmPassword')}
-                      className="pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-origen-bosque transition-colors"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="w-4 h-4 md:w-5 md:h-5" />
-                      ) : (
-                        <Eye className="w-4 h-4 md:w-5 md:h-5" />
-                      )}
-                    </button>
-                  </div>
+                  <Input
+                    type="password"
+                    placeholder="Repite la contraseña"
+                    error={errors.confirmPassword?.message}
+                    inputSize="lg"
+                    {...register('confirmPassword')}
+                  />
                   {formValues.confirmPassword && formValues.password === formValues.confirmPassword && (
                     <motion.div
                       initial={{ opacity: 0, y: -5 }}

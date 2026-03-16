@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { loginUser } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ============================================================================
 // ICONOS
@@ -39,6 +40,7 @@ import {
 
 export function SimpleLogin() {
   const router = useRouter();
+  const { setUserFromLogin, clearUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -71,14 +73,54 @@ export function SimpleLogin() {
     setIsLoading(true);
 
     try {
-      await loginUser({ email, password, rememberMe });
+      console.log('[LoginForm] Iniciando login para:', email);
+
+      // Paso 1: Login (solo devuelve tokens, NO user)
+      const response = await loginUser({ email, password, rememberMe });
+      console.log('[LoginForm] Login exitoso - tokens obtenidos:', {
+        hasAccessToken: !!response.accessToken,
+        hasRefreshToken: !!response.refreshToken
+      });
+
+      // Paso 2: Cargar usuario del backend (hace GET /auth/userinfo con retries automáticos)
+      // setUserFromLogin maneja el timing issue automáticamente con 3 intentos
+      // ✅ Capturar el usuario devuelto para validación inmediata
+      const loggedUser = await setUserFromLogin(email);
+
+      console.log('[LoginForm] Usuario recibido desde AuthContext:', {
+        id: loggedUser.id,
+        email: loggedUser.email,
+        firstName: loggedUser.firstName,
+        lastName: loggedUser.lastName,
+        role: loggedUser.role,
+        producerCode: loggedUser.producerCode,
+        todasLasPropiedades: Object.keys(loggedUser)
+      });
+
+      // Paso 3: Validar rol usando el usuario devuelto (NO el estado del contexto)
+      if (!loggedUser || loggedUser.role !== 'PRODUCER') {
+        console.log('[LoginForm] Acceso denegado - rol:', loggedUser?.role);
+        clearUser();
+        setErrors({ general: 'Tu cuenta no tiene acceso al panel de productores.' });
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('[LoginForm] Usuario validado, redirigiendo a dashboard:', {
+        id: loggedUser.id,
+        email: loggedUser.email,
+        role: loggedUser.role
+      });
       router.push('/dashboard');
     } catch (err) {
+      console.error('[LoginForm] Error en login:', err);
+
       if (err instanceof GatewayError && err.status === 401) {
         setErrors({ general: 'Credenciales incorrectas. Revisa tu email y contraseña.' });
       } else if (err instanceof GatewayError && err.status === 403) {
         setErrors({ general: err.message });
       } else {
+        console.error('[LoginForm] Error no manejado:', err);
         setErrors({ general: 'No se pudo conectar con el servidor. Inténtalo de nuevo.' });
       }
     } finally {

@@ -27,8 +27,8 @@ import {
 // ============================================================================
 
 export interface AuthFooterProps {
-  /** Variante del footer: 'login' o 'register' */
-  variant: 'login' | 'register';
+  /** Variante del footer: 'login', 'register' o 'forgot' */
+  variant: 'login' | 'register' | 'forgot';
   /** Mostrar nota legal adicional (solo para registro) */
   showLegalNote?: boolean;
 }
@@ -63,6 +63,19 @@ const VARIANT_CONFIG = {
       label: 'Acceso productores'
     },
     versionLabel: 'Registro de productores'
+  },
+  forgot: {
+    mobileLink: {
+      href: '/auth/login',
+      icon: Lock,
+      label: 'Volver al login'
+    },
+    desktopLink: {
+      href: '/auth/login',
+      icon: Shield,
+      label: 'Volver al login'
+    },
+    versionLabel: 'Recuperar contraseña'
   }
 };
 
