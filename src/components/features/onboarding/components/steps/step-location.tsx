@@ -34,7 +34,6 @@ import {
   Calendar,
   Users,
   ChevronDown,
-  Building2,
 } from 'lucide-react';
 
 // ============================================================================
@@ -46,6 +45,7 @@ interface SelectProps {
   onValueChange: (value: string) => void;
   placeholder: string;
   className?: string;
+  searchable?: boolean;
   children: React.ReactNode;
 }
 
@@ -54,21 +54,32 @@ const Select: React.FC<SelectProps> = ({
   onValueChange,
   placeholder,
   className,
+  searchable = false,
   children
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [selectedLabel, setSelectedLabel] = React.useState('');
+  const [searchQuery, setSearchQuery] = React.useState('');
   const selectRef = React.useRef<HTMLDivElement>(null);
+  const searchRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setSearchQuery('');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  React.useEffect(() => {
+    if (isOpen && searchable && searchRef.current) {
+      setTimeout(() => searchRef.current?.focus(), 50);
+    }
+    if (!isOpen) setSearchQuery('');
+  }, [isOpen, searchable]);
 
   // Buscar la label del valor seleccionado
   React.useEffect(() => {
@@ -77,12 +88,20 @@ const Select: React.FC<SelectProps> = ({
         (child: any) => child.props?.value === value
       );
       if (option && React.isValidElement(option)) {
-        setSelectedLabel(option.props.children);
+        setSelectedLabel(option.props.children as string);
       }
     } else {
       setSelectedLabel('');
     }
   }, [value, children]);
+
+  const filteredChildren = searchable && searchQuery
+    ? React.Children.toArray(children).filter((child: any) => {
+        const label = typeof child.props?.children === 'string' ? child.props.children : '';
+        return label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .includes(searchQuery.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+      })
+    : React.Children.toArray(children);
 
   return (
     <div ref={selectRef} className="relative">
@@ -108,19 +127,36 @@ const Select: React.FC<SelectProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-gray-200 bg-white p-1 shadow-lg animate-in fade-in-0 zoom-in-95">
-          {React.Children.map(children, (child) => {
-            if (React.isValidElement(child)) {
-              return React.cloneElement(child, {
-                onSelect: (value: string) => {
-                  onValueChange(value);
-                  setIsOpen(false);
-                },
-                isSelected: child.props.value === value
-              });
-            }
-            return child;
-          })}
+        <div className="absolute z-50 mt-2 w-full rounded-xl border border-gray-200 bg-white shadow-lg animate-in fade-in-0 zoom-in-95">
+          {searchable && (
+            <div className="p-2 border-b border-gray-100">
+              <input
+                ref={searchRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar provincia..."
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-origen-pradera"
+              />
+            </div>
+          )}
+          <div className="max-h-56 overflow-auto p-1">
+            {filteredChildren.length === 0 && (
+              <p className="px-3 py-2.5 text-sm text-gray-400 text-center">Sin resultados</p>
+            )}
+            {filteredChildren.map((child) => {
+              if (React.isValidElement(child)) {
+                return React.cloneElement(child as React.ReactElement<any>, {
+                  onSelect: (v: string) => {
+                    onValueChange(v);
+                    setIsOpen(false);
+                  },
+                  isSelected: (child as React.ReactElement<any>).props.value === value
+                });
+              }
+              return child;
+            })}
+          </div>
         </div>
       )}
     </div>
@@ -169,7 +205,6 @@ export interface EnhancedLocationData {
   city: string;
   province: string;
   postalCode: string;
-  taxId: string;       // CIF / NIF fiscal
   categories: string[];
   locationImages: UploadedFile[];
 
@@ -227,39 +262,43 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
       type="button"
       onClick={() => onSelect(category.id)}
       className={cn(
-        "group relative bg-white rounded-xl p-5 border-2 transition-all",
-        "hover:shadow-lg hover:scale-[1.02]",
+        "group relative bg-white rounded-xl border-2 transition-all w-full",
+        "p-3",
+        "hover:shadow-md active:scale-[0.98]",
         "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
         isSelected
-          ? "border-origen-pradera shadow-md"
+          ? "border-origen-pradera shadow-md bg-origen-pradera/[0.03]"
           : "border-gray-200 hover:border-origen-pradera"
       )}
     >
       {isSelected && (
         <div className="absolute top-3 right-3">
-          <div className="w-6 h-6 rounded-full bg-origen-pradera flex items-center justify-center shadow-md">
+          <div className="w-6 h-6 rounded-full bg-origen-pradera flex items-center justify-center shadow-sm">
             <CheckCircle2 className="w-3.5 h-3.5 text-white" />
           </div>
         </div>
       )}
-      <div className="flex flex-col items-center text-center">
+      {/* Vertical en todos los breakpoints */}
+      <div className="flex flex-col items-center text-center gap-2">
         <div className={cn(
-          "w-16 h-16 rounded-xl flex items-center justify-center mb-3 transition-all",
+          "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all",
           isSelected
-            ? "bg-gradient-to-br from-origen-pradera to-origen-hoja text-white shadow-lg"
-            : "bg-gradient-to-br from-origen-crema to-origen-pastel text-origen-bosque group-hover:scale-110"
+            ? "bg-gradient-to-br from-origen-pradera to-origen-hoja text-white shadow-md"
+            : "bg-gradient-to-br from-origen-crema to-origen-pastel text-origen-bosque"
         )}>
-          <IconComponent className="w-8 h-8" />
+          <IconComponent className="w-6 h-6" />
         </div>
-        <h3 className={cn(
-          "text-lg font-semibold mb-1",
-          isSelected ? "text-origen-bosque" : "text-gray-900"
-        )}>
-          {category.name}
-        </h3>
-        <p className="text-sm text-gray-500 line-clamp-2">
-          {category.description}
-        </p>
+        <div className="w-full">
+          <h3 className={cn(
+            "text-sm font-semibold leading-tight",
+            isSelected ? "text-origen-bosque" : "text-gray-900"
+          )}>
+            {category.name}
+          </h3>
+          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-snug">
+            {category.description}
+          </p>
+        </div>
       </div>
     </button>
   );
@@ -282,15 +321,12 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
     data.postalCode?.trim()
   );
 
-  const hasTaxId = Boolean(data.taxId?.trim());
-  const taxIdValid = /^[A-Z0-9]{8,9}$/i.test(data.taxId?.trim() ?? '');
-
   const hasCategories = data.categories?.length > 0;
   const hasYear = Boolean(data.foundedYear && data.foundedYear >= 1900 && data.foundedYear <= new Date().getFullYear());
   const hasTeamSize = Boolean(data.teamSize);
 
-  const totalSteps = 5;
-  const completedSteps = [hasBasicInfo, hasTaxId, hasCategories, hasYear, hasTeamSize].filter(Boolean).length;
+  const totalSteps = 4;
+  const completedSteps = [hasBasicInfo, hasCategories, hasYear, hasTeamSize].filter(Boolean).length;
   const progress = (completedSteps / totalSteps) * 100;
 
   // ========================================================================
@@ -359,6 +395,14 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           </div>
         </div>
 
+        {/* Helper contextual */}
+        <div className="flex items-start gap-2 p-3 bg-origen-crema/40 rounded-xl border border-origen-pradera/20 mb-6">
+          <Info className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-gray-600">
+            Esta información nos ayuda a conectarte con compradores de tu zona y a verificar tu identidad como productor.
+          </p>
+        </div>
+
         <div className="space-y-5">
           {/* Dirección */}
           <div className="space-y-2">
@@ -401,7 +445,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             </div>
           </div>
           
-          {/* Provincia - SELECT PERSONALIZADO */}
+          {/* Provincia - SELECT CON BÚSQUEDA */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-origen-bosque">
               Provincia <span className="text-red-500">*</span>
@@ -409,7 +453,8 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             <Select
               value={data.province || ''}
               onValueChange={(value) => handleInputChange('province', value)}
-              placeholder="Selecciona provincia"
+              placeholder="Selecciona o busca provincia"
+              searchable
             >
               {PROVINCIAS_ESPANA.map((province) => {
                 const normalizedValue = province.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -420,27 +465,6 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 );
               })}
             </Select>
-          </div>
-
-          {/* CIF / NIF */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-origen-pradera" />
-              CIF / NIF <span className="text-red-500">*</span>
-            </label>
-            <Input
-              value={data.taxId || ''}
-              onChange={(e) => handleInputChange('taxId', e.target.value.toUpperCase())}
-              placeholder="Ej: B12345678 o 12345678A"
-              maxLength={10}
-              className="h-12 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20 font-mono uppercase"
-            />
-            {hasTaxId && !taxIdValid && (
-              <p className="text-xs text-amber-600 flex items-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5" />
-                Formato habitual: letra + 8 dígitos (empresa) o 8 dígitos + letra (autónomo)
-              </p>
-            )}
           </div>
 
           {/* Año de fundación */}

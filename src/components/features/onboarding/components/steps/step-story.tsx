@@ -351,28 +351,44 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
             value={data.description || ''}
             onChange={(e) => handleInputChange('description', e.target.value)}
             placeholder="Comparte tu pasión, tus valores, lo que te motiva... (mínimo 50 caracteres)"
-            className="min-h-[120px] text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+            className={cn(
+              "min-h-[120px] text-base focus:ring-2",
+              charCount >= 50
+                ? "border-green-400 focus:border-green-500 focus:ring-green-200"
+                : "border-gray-200 focus:border-origen-pradera focus:ring-origen-pradera/20"
+            )}
             maxLength={500}
           />
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {charCount >= 50 ? (
-                <span className="text-xs text-green-600 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Válida
-                </span>
-              ) : (
-                <span className="text-xs text-amber-600 flex items-center gap-1">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  Mínimo 50 caracteres
-                </span>
-              )}
+
+          {/* Barra de progreso hasta 50 chars */}
+          {charCount < 50 && (
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs text-gray-400 mb-1">
+                <span>{charCount} / 50 mínimos</span>
+                <span>{charCount}/500</span>
+              </div>
+              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-origen-pradera rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min((charCount / 50) * 100, 100)}%` }}
+                />
+              </div>
+              <p className="text-xs text-amber-600 flex items-center gap-1 mt-1">
+                <AlertCircle className="w-3 h-3" />
+                {50 - charCount} caracteres más para poder continuar
+              </p>
             </div>
-            <span className="text-xs text-gray-500">
-              {charCount}/500 caracteres
-            </span>
-          </div>
+          )}
+
+          {charCount >= 50 && (
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-green-600 flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                ¡Listo! Ya puedes continuar
+              </span>
+              <span className="text-xs text-gray-400">{charCount}/500</span>
+            </div>
+          )}
         </div>
       </div>
 

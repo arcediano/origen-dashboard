@@ -1,51 +1,74 @@
 /**
  * @file index.ts
  * @description Export de componentes UI atoms - Origen Marketplace v3.0
- * @version 3.0.0
+ * @version 3.1.0
  *
  * Componentes atómicos según Manual de Marca "Bosque Profundo"
  */
 
 // Inputs
-export { Input } from './input';
+export { Input, InputGroup } from './input';
 export { Textarea } from './textarea';
-export { Label } from './label';
+export { Label, labelVariants } from './label';
 export { CurrencyInput } from './currency-input';
 export { PercentageInput } from './percentage-input';
 export { TagsInput } from './tags-input';
 
 // Selection
-export { Select } from './select';
-export { Checkbox } from './checkbox';
-export { RadioGroup } from './radio-group';
-export { Toggle } from './toggle';
+export { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup } from './select';
+export { Checkbox, CheckboxWithLabel, CheckboxGroup } from './checkbox';
+export { RadioGroup, RadioGroupItem } from './radio-group';
+export { Toggle, ToggleGroup } from './toggle';
+export { Switch } from './switch';
 export { Slider } from './slider';
 
 // Display
-export { Badge } from './badge';
-export { Avatar, AvatarFallback, AvatarImage } from './avatar';
-export { Progress } from './progress';
-export { Stepper } from './stepper';
+export { Badge, StatusBadge } from './badge';
+export { Avatar, AvatarFallback, AvatarImage, AvatarGroup } from './avatar';
+export { Progress, CircularProgress, SteppedProgress } from './progress';
+export { Stepper, StepperContent, StepperFooter, StepperHeader } from './stepper';
 export { Separator } from './separator';
 
 // Feedback
-export { Alert } from './alert';
-export { Toast } from './toast';
-export { Tooltip } from './tooltip';
+export { Alert, AlertTitle, AlertDescription, AlertWithIcon, AlertStack } from './alert';
+export {
+  Toast,
+  ToastProvider,
+  ToastViewport,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+  ToastAction,
+  Toaster,
+  toast,
+  toastUtils,
+  useToast,
+} from './toast';
+export { Tooltip, InfoTooltip, TooltipInline } from './tooltip';
 
 // Containers
-export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './card';
-export { Dialog, DialogPortal, DialogOverlay, DialogClose, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from './dialog';
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, FeatureCard, StatCard, ProductCard } from './card';
+export { Modal } from './dialog';
 export { Sheet, SheetPortal, SheetOverlay, SheetClose, SheetTrigger, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription } from './sheet';
 
 // Navigation
-export { Button } from './button';
-export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './accordion';
+export { Button, buttonVariants } from './button';
+export { Tabs, TabsList, TabsTrigger, TabsContent, TabsWithIcon } from './tabs';
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent, FilterAccordion, AccordionGroup } from './accordion';
 export { Pagination } from './pagination';
 
 // Data
-export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from './table';
+export { Table } from './table';
 
 // Other
-export { AlertDialog, AlertDialogPortal, AlertDialogOverlay, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from './alert-dialog';
+export {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from './alert-dialog';

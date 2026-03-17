@@ -36,7 +36,6 @@ export async function saveStep1(
     province: data.province,
     postalCode: data.postalCode,
     categories: data.categories,
-    taxId: data.taxId,
     foundedYear: data.foundedYear ?? null,
     teamSize: data.teamSize ? TEAM_SIZE_MAP[data.teamSize] : null,
     locationImageKeys,

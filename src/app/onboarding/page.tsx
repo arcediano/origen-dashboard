@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { Button } from '@/components/ui/atoms/button';
+import { MobileStepperBar } from '@/components/features/onboarding/components/MobileStepperBar';
+import { MobileNavBar } from '@/components/features/onboarding/components/MobileNavBar';
 import { uploadFile } from '@/lib/api/media';
 import {
   saveStep1,
@@ -152,7 +154,6 @@ export default function OnboardingPage() {
       city: '',
       province: '',
       postalCode: '',
-      taxId: '',
       categories: [],
       locationImages: [],
       foundedYear: undefined,
@@ -268,8 +269,7 @@ export default function OnboardingPage() {
           !!formData.step1.city.trim() &&
           !!formData.step1.address.trim() &&
           /^\d{5}$/.test(formData.step1.postalCode) &&
-          formData.step1.categories.length >= 1 &&
-          !!formData.step1.taxId.trim()
+          formData.step1.categories.length >= 1
         );
       case 1:
         return (
@@ -291,7 +291,7 @@ export default function OnboardingPage() {
           !!formData.step5.manipuladorAlimentos
         );
       case 5:
-        return formData.step6.stripeConnected && formData.step6.acceptTerms;
+        return true; // Stripe es opcional — se puede completar más tarde
       default:
         return true;
     }
@@ -546,16 +546,19 @@ export default function OnboardingPage() {
         </div>
       </header>
 
+      {/* Stepper horizontal - solo mobile */}
+      <MobileStepperBar steps={STEPS} currentStep={currentStep} />
+
       {/* ====================================================================
           MAIN - Layout: Timeline vertical (4) + Formulario (8)
       ==================================================================== */}
-      <main className="max-w-7xl mx-auto px-6 py-10 lg:py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-12 pb-24 lg:pb-12">
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
-          
+
           {/* ====================================================================
-              COLUMNA IZQUIERDA - Timeline vertical (4/12)
+              COLUMNA IZQUIERDA - Timeline vertical (4/12) — solo desktop
           ==================================================================== */}
-          <div className="lg:w-4/12">
+          <div className="hidden lg:block lg:w-4/12">
             <div className="sticky top-24 space-y-6">
               
               {/* Título de la sección */}
@@ -685,7 +688,7 @@ export default function OnboardingPage() {
           {/* ====================================================================
               COLUMNA DERECHA - Formulario (8/12)
           ==================================================================== */}
-          <div className="lg:w-8/12">
+          <div className="w-full lg:w-8/12">
             
             {/* Título del paso actual */}
             <div className="mb-6 pb-4 border-b border-gray-100">
@@ -734,9 +737,9 @@ export default function OnboardingPage() {
             )}
 
             {/* ====================================================================
-                NAVEGACIÓN - Botones en una línea
+                NAVEGACIÓN - Botones (solo desktop — mobile usa MobileNavBar)
             ==================================================================== */}
-            <div className="flex items-center justify-between mt-10 pt-6 border-t border-gray-200">
+            <div className="hidden lg:flex items-center justify-between mt-10 pt-6 border-t border-gray-200">
               
               {/* Trust badges */}
               <div className="flex items-center gap-3 text-xs text-gray-400">
@@ -805,6 +808,18 @@ export default function OnboardingPage() {
           </div>
         </div>
       </main>
+
+      {/* Barra de navegación fija — solo mobile */}
+      <MobileNavBar
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        onBack={handleBack}
+        onNext={currentStep < totalSteps - 1 ? handleNext : handleComplete}
+        onSkip={handleSkipOnboarding}
+        canContinue={isStepValid}
+        isSubmitting={isSubmitting}
+        isLastStep={currentStep === totalSteps - 1}
+      />
     </div>
   );
 }

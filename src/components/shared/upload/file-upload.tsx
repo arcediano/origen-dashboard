@@ -64,6 +64,10 @@ export interface FileUploadProps {
   buttonText?: string;
   /** Si mostrar previsualización de imágenes */
   showPreview?: boolean;
+  /** Dimensiones mínimas para imágenes (en píxeles) */
+  minDimensions?: { width: number; height: number };
+  /** Etiqueta de dimensiones recomendadas a mostrar en la zona de drop (ej: "200×200 px mín.") */
+  dimensionsHint?: string;
 }
 
 // ============================================================================
@@ -92,6 +96,30 @@ const createPreview = (file: File): Promise<string> => {
   });
 };
 
+const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('No se pudo leer la imagen'));
+    };
+    img.src = url;
+  });
+};
+
+const formatAcceptHint = (accept: string): string => {
+  if (accept === '*/*') return '';
+  return accept
+    .split(',')
+    .map(t => t.trim().replace('image/', '').replace('application/', '').toUpperCase())
+    .join(', ');
+};
+
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
@@ -108,41 +136,35 @@ export function FileUpload({
   disabled = false,
   buttonText = 'Subir archivos',
   showPreview = true,
+  minDimensions,
+  dimensionsHint,
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Validar archivo
-  const validateFile = useCallback(
+  const acceptHint = accept !== '*/*' ? formatAcceptHint(accept) : '';
+
+  // Validar tipo de archivo con mensaje específico
+  const validateFileType = useCallback(
     (file: File): string | null => {
-      // Validar tamaño
-      const maxSizeBytes = maxSize * 1024 * 1024;
-      if (file.size > maxSizeBytes) {
-        return `El archivo ${file.name} excede el tamaño máximo de ${maxSize}MB`;
+      if (accept === '*/*') return null;
+      const acceptedTypes = accept.split(',').map((t) => t.trim());
+      const isValidType = acceptedTypes.some((type) => {
+        if (type.startsWith('.')) return file.name.toLowerCase().endsWith(type.toLowerCase());
+        if (type.endsWith('/*')) return file.type.startsWith(type.replace('/*', '/'));
+        return file.type === type;
+      });
+      if (!isValidType) {
+        const hint = acceptHint || accept;
+        return `Formato no válido: "${file.name}". Formatos aceptados: ${hint}`;
       }
-
-      // Validar tipo
-      if (accept !== '*/*') {
-        const acceptedTypes = accept.split(',').map((t) => t.trim());
-        const isValidType = acceptedTypes.some((type) => {
-          if (type.startsWith('.')) {
-            return file.name.toLowerCase().endsWith(type.toLowerCase());
-          }
-          return file.type.startsWith(type);
-        });
-
-        if (!isValidType) {
-          return `El archivo ${file.name} no es un tipo válido`;
-        }
-      }
-
       return null;
     },
-    [accept, maxSize]
+    [accept, acceptHint]
   );
 
-  // Procesar archivos
+  // Procesar archivos (con validación de tamaño, formato y dimensiones)
   const processFiles = useCallback(
     async (files: File[]) => {
       setError(null);
@@ -150,22 +172,40 @@ export function FileUpload({
       const errors: string[] = [];
 
       for (const file of files) {
-        // Validar límite de archivos
+        // Límite de archivos
         if (!multiple && newFiles.length + value.length >= 1) {
           errors.push('Solo se permite un archivo');
           break;
         }
-
         if (newFiles.length + value.length >= maxFiles) {
           errors.push(`Solo se permiten ${maxFiles} archivos como máximo`);
           break;
         }
 
-        // Validar archivo
-        const validationError = validateFile(file);
-        if (validationError) {
-          errors.push(validationError);
+        // Validar formato
+        const typeError = validateFileType(file);
+        if (typeError) { errors.push(typeError); continue; }
+
+        // Validar tamaño
+        const maxSizeBytes = maxSize * 1024 * 1024;
+        if (file.size > maxSizeBytes) {
+          errors.push(`El archivo "${file.name}" pesa ${(file.size / 1024 / 1024).toFixed(1)} MB. El máximo permitido es ${maxSize} MB.`);
           continue;
+        }
+
+        // Validar dimensiones mínimas (solo imágenes)
+        if (minDimensions && isImage(file.type)) {
+          try {
+            const { width, height } = await getImageDimensions(file);
+            if (width < minDimensions.width || height < minDimensions.height) {
+              errors.push(
+                `La imagen "${file.name}" mide ${width}×${height} px. El mínimo requerido es ${minDimensions.width}×${minDimensions.height} px para que se vea nítida en el perfil.`
+              );
+              continue;
+            }
+          } catch {
+            // Si no se pueden leer dimensiones, dejamos pasar
+          }
         }
 
         // Crear uploaded file
@@ -177,7 +217,7 @@ export function FileUpload({
           type: file.type,
         };
 
-        // Crear preview para imágenes
+        // Preview para imágenes
         if (isImage(file.type) && showPreview) {
           uploadedFile.preview = await createPreview(file);
         }
@@ -185,13 +225,10 @@ export function FileUpload({
         newFiles.push(uploadedFile);
       }
 
-      if (errors.length > 0) {
-        setError(errors[0]);
-      }
-
+      if (errors.length > 0) setError(errors[0]);
       onChange([...value, ...newFiles]);
     },
-    [value, onChange, validateFile, multiple, maxFiles, showPreview]
+    [value, onChange, validateFileType, multiple, maxFiles, maxSize, minDimensions, showPreview]
   );
 
   // Manejar drag & drop
@@ -308,7 +345,9 @@ export function FileUpload({
 
           {/* Información de límites */}
           <p className="text-[10px] text-gray-500 mb-4">
-            Máximo {maxSize}MB por archivo • Máximo {maxFiles} archivos
+            {acceptHint && <><span className="font-medium">{acceptHint}</span> · </>}
+            Máx. {maxSize} MB
+            {dimensionsHint && <> · {dimensionsHint}</>}
           </p>
 
           {/* Botón de subida */}

@@ -140,6 +140,41 @@ interface ZoneSelectorProps {
   onToggleExclude?: (zoneId: string) => void;
 }
 
+// Parser de entradas de código postal
+function parsePostalInput(raw: string): ShippingZone[] {
+  const zones: ShippingZone[] = [];
+  const entries = raw.split(',').map(s => s.trim()).filter(Boolean);
+
+  for (const entry of entries) {
+    if (entry.includes('-') && !entry.includes('*')) {
+      // Rango: 28000-28050
+      const parts = entry.split('-');
+      const from = parseInt(parts[0]);
+      const to = parseInt(parts[1]);
+      if (!isNaN(from) && !isNaN(to) && to >= from) {
+        const count = to - from + 1;
+        if (count <= 100) {
+          // Expande hasta 100 códigos
+          for (let cp = from; cp <= to; cp++) {
+            const val = String(cp).padStart(5, '0');
+            zones.push({ id: `postal-${Date.now()}-${val}`, type: 'postal', value: val, label: val });
+          }
+        } else {
+          // Rango grande → agrupa como descripción
+          zones.push({ id: `postal-${Date.now()}-range`, type: 'postal', value: entry, label: `CPs ${entry}` });
+        }
+      }
+    } else if (entry.includes('*')) {
+      // Wildcard: 280*
+      zones.push({ id: `postal-${Date.now()}-${entry}`, type: 'postal', value: entry, label: `CPs ${entry}` });
+    } else if (/^\d{5}$/.test(entry)) {
+      // Código individual
+      zones.push({ id: `postal-${Date.now()}-${entry}`, type: 'postal', value: entry, label: entry });
+    }
+  }
+  return zones;
+}
+
 const ZoneSelector: React.FC<ZoneSelectorProps> = ({
   includedZones,
   excludedZones = [],
@@ -147,103 +182,169 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
   onRemoveZone,
   onToggleExclude
 }) => {
-  const [zoneType, setZoneType] = React.useState<'province' | 'postal' | 'custom'>('province');
+  const [zoneType, setZoneType] = React.useState<'province' | 'postal' | 'named'>('province');
   const [zoneValue, setZoneValue] = React.useState('');
-  const [zoneLabel, setZoneLabel] = React.useState('');
+  const [zoneName, setZoneName] = React.useState('');
+  const [parseError, setParseError] = React.useState('');
 
   const handleAddZone = () => {
     if (!zoneValue.trim()) return;
-    
-    const newZone: ShippingZone = {
-      id: `${zoneType}-${Date.now()}-${zoneValue}`,
-      type: zoneType,
-      value: zoneValue,
-      label: zoneLabel || zoneValue
-    };
-    
-    onAddZone(newZone);
+    setParseError('');
+
+    if (zoneType === 'postal') {
+      const parsed = parsePostalInput(zoneValue);
+      if (parsed.length === 0) {
+        setParseError('Formato no reconocido. Usa: 28001, 280*, 28000-28050');
+        return;
+      }
+      parsed.forEach(zone => onAddZone(zone));
+    } else if (zoneType === 'named') {
+      if (!zoneName.trim()) return;
+      const parsed = parsePostalInput(zoneValue);
+      if (parsed.length === 0) {
+        setParseError('Añade al menos un código postal para definir la cobertura de esta zona');
+        return;
+      }
+      // Crea una sola zona con nombre y los CPs como valor compuesto
+      onAddZone({
+        id: `named-${Date.now()}`,
+        type: 'custom',
+        value: zoneValue,
+        label: zoneName.trim(),
+      });
+    } else {
+      onAddZone({
+        id: `province-${Date.now()}-${zoneValue}`,
+        type: 'province',
+        value: zoneValue,
+        label: zoneValue
+      });
+    }
     setZoneValue('');
-    setZoneLabel('');
+    setZoneName('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddZone();
+    }
   };
 
   return (
     <div className="space-y-4">
-      {/* Selector de tipo de zona */}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setZoneType('province')}
-          className={cn(
-            "flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all",
-            zoneType === 'province'
-              ? "border-origen-pradera bg-origen-pradera/5 text-origen-bosque"
-              : "border-gray-200 text-gray-600 hover:border-origen-pradera"
-          )}
-        >
-          Provincia
-        </button>
-        <button
-          type="button"
-          onClick={() => setZoneType('postal')}
-          className={cn(
-            "flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all",
-            zoneType === 'postal'
-              ? "border-origen-pradera bg-origen-pradera/5 text-origen-bosque"
-              : "border-gray-200 text-gray-600 hover:border-origen-pradera"
-          )}
-        >
-          Código Postal
-        </button>
-        <button
-          type="button"
-          onClick={() => setZoneType('custom')}
-          className={cn(
-            "flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all",
-            zoneType === 'custom'
-              ? "border-origen-pradera bg-origen-pradera/5 text-origen-bosque"
-              : "border-gray-200 text-gray-600 hover:border-origen-pradera"
-          )}
-        >
-          Zona personalizada
-        </button>
+      {/* Tabs de tipo — colores de marca */}
+      <div className="flex gap-0 border border-gray-200 rounded-xl overflow-hidden">
+        {(['province', 'postal', 'named'] as const).map((type, i) => (
+          <button
+            key={type}
+            type="button"
+            onClick={() => { setZoneType(type); setParseError(''); setZoneValue(''); setZoneName(''); }}
+            className={cn(
+              "flex-1 py-2.5 px-2 text-xs font-semibold transition-all",
+              i > 0 && "border-l border-gray-200",
+              zoneType === type
+                ? "bg-origen-pradera text-white"
+                : "bg-white text-gray-500 hover:bg-origen-crema/40 hover:text-origen-bosque"
+            )}
+          >
+            {type === 'province' ? 'Provincia' : type === 'postal' ? 'Cód. Postal' : 'Zona con nombre'}
+          </button>
+        ))}
       </div>
 
-      {/* Input para el valor */}
-      <div className="flex gap-2">
-        <div className="flex-1">
+      {/* Input con contexto */}
+      <div className="space-y-2">
+        {/* Zona con nombre: nombre + CPs */}
+        {zoneType === 'named' && (
           <Input
-            value={zoneValue}
-            onChange={(e) => setZoneValue(e.target.value)}
-            placeholder={
-              zoneType === 'province' ? 'Ej: Madrid, Barcelona...' :
-              zoneType === 'postal' ? 'Ej: 28001, 08001...' :
-              'Ej: Zona Norte de Madrid'
-            }
-            className="h-11 text-base"
+            value={zoneName}
+            onChange={(e) => setZoneName(e.target.value)}
+            placeholder="Nombre de la zona (ej: Área metropolitana de Madrid)"
+            className="h-11 text-sm"
           />
-          {zoneType === 'postal' && (
-            <p className="text-xs text-gray-500 mt-1">
-              Puedes usar * para rangos: 280* (todos los que empiecen por 280)
-            </p>
-          )}
+        )}
+
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <Input
+              value={zoneValue}
+              onChange={(e) => { setZoneValue(e.target.value); setParseError(''); }}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                zoneType === 'province' ? 'Ej: Madrid, Barcelona, Sevilla...' :
+                zoneType === 'postal' ? 'Ej: 28001, 280*, 28000-28050' :
+                'Códigos postales cubiertos (ej: 28001, 280*, 28000-28050)'
+              }
+              className={cn("h-11 text-sm", parseError ? "border-red-300 focus:border-red-400" : "")}
+            />
+          </div>
+          <Button
+            type="button"
+            onClick={handleAddZone}
+            disabled={zoneType === 'named' ? (!zoneName.trim() || !zoneValue.trim()) : !zoneValue.trim()}
+            className="h-11 px-4 bg-origen-bosque hover:bg-origen-pino text-white flex-shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
         </div>
-        <Button
-          type="button"
-          onClick={handleAddZone}
-          disabled={!zoneValue.trim()}
-          className="h-11 px-5 bg-origen-bosque hover:bg-origen-pino text-white"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Añadir
-        </Button>
+
+        {zoneType === 'named' && (
+          <p className="text-xs text-gray-500 flex items-start gap-1">
+            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-origen-pradera" />
+            <span>Asigna un nombre a la zona y los códigos postales que cubre. Ej: nombre <em>"Cuenca"</em>, CPs <em>16001, 160*</em></span>
+          </p>
+        )}
+
+        {parseError && (
+          <p className="text-xs text-red-600 flex items-center gap-1">
+            <AlertCircle className="w-3.5 h-3.5" />
+            {parseError}
+          </p>
+        )}
+
+        {(zoneType === 'postal' || zoneType === 'named') && !parseError && (
+          <p className="text-xs text-gray-500 flex items-start gap-1">
+            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-origen-pradera" />
+            <span>
+              <strong>Formatos CP:</strong> individual <code className="bg-gray-100 px-1 rounded">28001</code>,
+              comodín <code className="bg-gray-100 px-1 rounded">280*</code>,
+              rango <code className="bg-gray-100 px-1 rounded">28000-28050</code>
+            </span>
+          </p>
+        )}
       </div>
+
+      {/* Acceso rápido para provincia: "Toda España" */}
+      {zoneType === 'province' && !includedZones.some(z => z.value === 'ES') && (
+        <button
+          type="button"
+          onClick={() => onAddZone({ id: `custom-ES-${Date.now()}`, type: 'custom', value: 'ES', label: 'Toda España' })}
+          className="text-xs text-origen-pradera hover:text-origen-bosque underline underline-offset-2"
+        >
+          + Añadir toda España de una vez
+        </button>
+      )}
 
       {/* Lista de zonas incluidas */}
       {includedZones.length > 0 && (
-        <div className="mt-4">
+        <div className="mt-2">
           <h4 className="text-sm font-medium text-origen-bosque mb-2">
             Zonas donde SÍ entregas ({includedZones.length})
           </h4>
+          {/* Para muchas zonas (>8), usar chips horizontales */}
+          {includedZones.length > 8 ? (
+            <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 bg-gray-50 rounded-lg">
+              {includedZones.map((zone) => (
+                <span key={zone.id} className="inline-flex items-center gap-1 px-2 py-1 bg-white text-xs text-origen-bosque border border-gray-200 rounded-full">
+                  {zone.label}
+                  <button type="button" onClick={() => onRemoveZone(zone.id)} className="text-gray-400 hover:text-red-600">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : (
           <div className="space-y-2">
             {includedZones.map((zone) => (
               <div
@@ -287,6 +388,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
               </div>
             ))}
           </div>
+          )}
         </div>
       )}
     </div>
@@ -502,9 +604,9 @@ export function EnhancedStep4Capacity({
               type="button"
               variant="outline"
               onClick={handleAddCustomDeliveryOption}
-              className="border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10"
+              className="border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10 flex-shrink-0 whitespace-nowrap"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-4 h-4 mr-1.5 inline-block" />
               Añadir método
             </Button>
           </div>

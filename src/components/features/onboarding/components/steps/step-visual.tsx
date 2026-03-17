@@ -21,8 +21,39 @@ import {
   Info,
   X,
   Video,
-  Sparkles
+  Sparkles,
+  AlertCircle,
+  ExternalLink
 } from 'lucide-react';
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+function getVideoEmbedUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes('youtube.com')) {
+      const videoId = parsed.searchParams.get('v');
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+    if (parsed.hostname.includes('youtu.be')) {
+      const videoId = parsed.pathname.slice(1);
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+    if (parsed.hostname.includes('vimeo.com')) {
+      const videoId = parsed.pathname.split('/').filter(Boolean)[0];
+      return videoId ? `https://player.vimeo.com/video/${videoId}` : null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function isValidVideoUrl(url: string): boolean {
+  return /(youtube\.com|youtu\.be|vimeo\.com)/.test(url);
+}
 
 // ============================================================================
 // TIPOS
@@ -127,8 +158,13 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
 
         {data.logo ? (
           <div className="flex items-center gap-4 p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
-            <div className="w-16 h-16 rounded-lg bg-white border border-gray-200 flex items-center justify-center overflow-hidden">
-              <div className="w-12 h-12 bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 rounded" />
+            <div className="w-16 h-16 rounded-lg bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={data.logo.preview ?? URL.createObjectURL(data.logo.file)}
+                alt="Logo preview"
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-origen-bosque truncate">{data.logo.name}</p>
@@ -156,6 +192,8 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             accept="image/jpeg,image/png,image/webp,image/gif"
             multiple={false}
             maxSize={2}
+            minDimensions={{ width: 200, height: 200 }}
+            dimensionsHint="200×200 px mín."
           />
         )}
       </div>
@@ -187,23 +225,30 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
         </div>
 
         {data.banner ? (
-          <div className="flex items-center gap-4 p-4 bg-origen-crema/20 rounded-xl border border-gray-200">
-            <div className="w-16 h-12 rounded-lg bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-gray-500" />
+          <div className="space-y-3">
+            <div className="w-full h-28 rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={data.banner.preview ?? URL.createObjectURL(data.banner.file)}
+                alt="Banner preview"
+                className="w-full h-full object-cover"
+              />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-origen-bosque truncate">{data.banner.name}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{(data.banner.size / 1024).toFixed(1)} KB</p>
+            <div className="flex items-center gap-3 px-1">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-origen-bosque truncate">{data.banner.name}</p>
+                <p className="text-xs text-gray-500">{(data.banner.size / 1024).toFixed(1)} KB</p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={handleDeleteBanner}
+                className="text-gray-400 hover:text-gray-700"
+              >
+                <X className="w-4 h-4" />
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={handleDeleteBanner}
-              className="text-gray-400 hover:text-gray-700"
-            >
-              <X className="w-4 h-4" />
-            </Button>
           </div>
         ) : (
           <FileUpload
@@ -214,9 +259,11 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
               }
             }}
             helperText="Arrastra tu imagen de cabecera o haz clic para subir"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             multiple={false}
             maxSize={5}
+            minDimensions={{ width: 1200, height: 400 }}
+            dimensionsHint="1200×400 px recomendado"
           />
         )}
       </div>
@@ -242,18 +289,56 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
         </div>
 
         <div className="space-y-4">
-          <Input
-            value={data.introVideo || ''}
-            onChange={(e) => handleInputChange('introVideo', e.target.value)}
-            placeholder="https://youtube.com/watch?v=... o https://vimeo.com/..."
-            className="h-12 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
-          />
-          
+          <div className="relative">
+            <Input
+              value={data.introVideo || ''}
+              onChange={(e) => handleInputChange('introVideo', e.target.value)}
+              placeholder="https://youtube.com/watch?v=... o https://vimeo.com/..."
+              className={cn(
+                "h-12 text-base focus:ring-2",
+                data.introVideo && isValidVideoUrl(data.introVideo)
+                  ? "border-green-400 focus:border-green-500 focus:ring-green-200"
+                  : data.introVideo && !isValidVideoUrl(data.introVideo)
+                  ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                  : "border-gray-200 focus:border-origen-pradera focus:ring-origen-pradera/20"
+              )}
+            />
+            {data.introVideo && isValidVideoUrl(data.introVideo) && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-green-600">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+            )}
+            {data.introVideo && !isValidVideoUrl(data.introVideo) && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <AlertCircle className="w-4 h-4 text-red-400" />
+              </div>
+            )}
+          </div>
+
+          {data.introVideo && !isValidVideoUrl(data.introVideo) && (
+            <p className="text-xs text-red-600 flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5" />
+              Introduce una URL válida de YouTube o Vimeo
+            </p>
+          )}
+
+          {/* Embed preview */}
+          {data.introVideo && isValidVideoUrl(data.introVideo) && getVideoEmbedUrl(data.introVideo) && (
+            <div className="rounded-xl overflow-hidden border border-green-200 bg-black aspect-video">
+              <iframe
+                src={getVideoEmbedUrl(data.introVideo)!}
+                className="w-full h-full"
+                allowFullScreen
+                title="Video preview"
+              />
+            </div>
+          )}
+
           <div className="flex items-start gap-2 p-3 bg-origen-crema/30 rounded-lg">
             <Sparkles className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
             <p className="text-xs text-gray-600">
-              <span className="font-medium">Consejo:</span> Un video auténtico, sin producción profesional, 
-              genera más confianza que uno muy editado. Muestra tu taller, tus manos trabajando, 
+              <span className="font-medium">Consejo:</span> Un video auténtico, sin producción profesional,
+              genera más confianza que uno muy editado. Muestra tu taller, tus manos trabajando,
               tu huerta... ¡Sé tú mismo!
             </p>
           </div>

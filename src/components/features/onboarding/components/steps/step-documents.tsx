@@ -178,10 +178,12 @@ export function EnhancedStep5Documents({
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
-          <Info className="w-3.5 h-3.5 text-origen-pradera" />
-          Sube la documentación requerida. Los documentos se verifican en 24-48h.
-        </p>
+        <div className="flex items-center gap-2 mt-3 p-2.5 bg-amber-50 rounded-lg border border-amber-200">
+          <Clock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+          <p className="text-xs text-amber-700 font-medium">
+            Verificación: 24-48h hábiles tras recibir los documentos
+          </p>
+        </div>
       </div>
 
       {/* ====================================================================
@@ -200,142 +202,118 @@ export function EnhancedStep5Documents({
         </div>
 
         <div className="space-y-6">
+
           {/* CIF / NIF */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-origen-pradera" />
-                <h3 className="font-medium text-origen-bosque">CIF / NIF</h3>
-                {data.cif?.status === 'verified' && (
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Verificado
-                  </span>
-                )}
+            <div className="flex items-start justify-between gap-2">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Shield className="w-4 h-4 text-origen-pradera flex-shrink-0" />
+                  <h3 className="font-medium text-origen-bosque">CIF / NIF</h3>
+                  <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
+                  {data.cif?.status === 'verified' && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Verificado
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 ml-6">El documento que identifica fiscalmente a tu negocio</p>
               </div>
             </div>
-
             {data.cif ? (
               <div className="flex items-center justify-between p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
-                <div className="flex items-center gap-3 flex-1">
-                  <FileText className="w-5 h-5 text-origen-pradera" />
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 text-origen-pradera" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-origen-bosque truncate">{data.cif.name}</p>
-                    <p className="text-xs text-gray-500">{(data.cif.size / 1024).toFixed(1)} KB</p>
+                    <p className="text-xs text-gray-500">{(data.cif.size / 1024).toFixed(1)} KB · Pendiente de verificación</p>
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => handleDeleteRequired('cif')}
-                  className="text-gray-400 hover:text-gray-700"
-                >
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => handleDeleteRequired('cif')} className="text-gray-400 hover:text-gray-700 flex-shrink-0">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
             ) : (
-              <FileUpload
-                value={[]}
-                onChange={(files) => handleDocumentUpload('cif', files)}
-                helperText="Sube tu CIF o NIF (PDF, JPG, PNG)"
-                accept=".pdf,.jpg,.jpeg,.png"
-                multiple={false}
-                maxSize={5}
-              />
+              <FileUpload value={[]} onChange={(files) => handleDocumentUpload('cif', files)}
+                helperText="PDF, JPG o PNG · Máx. 5 MB" accept=".pdf,.jpg,.jpeg,.png" multiple={false} maxSize={5} />
             )}
           </div>
 
           {/* Seguro de Responsabilidad Civil */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-origen-pradera" />
-                <h3 className="font-medium text-origen-bosque">Seguro RC</h3>
-                <span className="text-xs text-gray-500">Mín. 150.000€</span>
-                {data.seguroRC?.status === 'verified' && (
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Verificado
-                  </span>
-                )}
+            <div className="flex items-start justify-between gap-2">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Shield className="w-4 h-4 text-origen-pradera flex-shrink-0" />
+                  <h3 className="font-medium text-origen-bosque">Seguro RC</h3>
+                  <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
+                  {data.seguroRC?.status === 'verified' && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Verificado
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 ml-6">Seguro de responsabilidad civil. Mín. 150.000€. Requerido para operar en el marketplace.</p>
               </div>
             </div>
-
             {data.seguroRC ? (
               <div className="flex items-center justify-between p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
-                <div className="flex items-center gap-3 flex-1">
-                  <FileText className="w-5 h-5 text-origen-pradera" />
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 text-origen-pradera" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-origen-bosque truncate">{data.seguroRC.name}</p>
-                    <p className="text-xs text-gray-500">{(data.seguroRC.size / 1024).toFixed(1)} KB</p>
+                    <p className="text-xs text-gray-500">{(data.seguroRC.size / 1024).toFixed(1)} KB · Pendiente de verificación</p>
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => handleDeleteRequired('seguroRC')}
-                  className="text-gray-400 hover:text-gray-700"
-                >
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => handleDeleteRequired('seguroRC')} className="text-gray-400 hover:text-gray-700 flex-shrink-0">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
             ) : (
-              <FileUpload
-                value={[]}
-                onChange={(files) => handleDocumentUpload('seguroRC', files)}
-                helperText="Sube tu certificado de seguro"
-                accept=".pdf,.jpg,.jpeg,.png"
-                multiple={false}
-                maxSize={5}
-              />
+              <FileUpload value={[]} onChange={(files) => handleDocumentUpload('seguroRC', files)}
+                helperText="PDF, JPG o PNG · Máx. 5 MB" accept=".pdf,.jpg,.jpeg,.png" multiple={false} maxSize={5} />
             )}
           </div>
 
           {/* Manipulador de Alimentos */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-origen-pradera" />
-                <h3 className="font-medium text-origen-bosque">Manipulador de alimentos</h3>
-                {data.manipuladorAlimentos?.status === 'verified' && (
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Verificado
-                  </span>
-                )}
+            <div className="flex items-start justify-between gap-2">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Shield className="w-4 h-4 text-origen-pradera flex-shrink-0" />
+                  <h3 className="font-medium text-origen-bosque">Manipulador de alimentos</h3>
+                  <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
+                  {data.manipuladorAlimentos?.status === 'verified' && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Verificado
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 ml-6">Necesario para cualquier productor de alimentos</p>
               </div>
             </div>
-
             {data.manipuladorAlimentos ? (
               <div className="flex items-center justify-between p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
-                <div className="flex items-center gap-3 flex-1">
-                  <FileText className="w-5 h-5 text-origen-pradera" />
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 text-origen-pradera" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-origen-bosque truncate">{data.manipuladorAlimentos.name}</p>
-                    <p className="text-xs text-gray-500">{(data.manipuladorAlimentos.size / 1024).toFixed(1)} KB</p>
+                    <p className="text-xs text-gray-500">{(data.manipuladorAlimentos.size / 1024).toFixed(1)} KB · Pendiente de verificación</p>
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => handleDeleteRequired('manipuladorAlimentos')}
-                  className="text-gray-400 hover:text-gray-700"
-                >
+                <Button type="button" variant="ghost" size="icon-sm" onClick={() => handleDeleteRequired('manipuladorAlimentos')} className="text-gray-400 hover:text-gray-700 flex-shrink-0">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
             ) : (
-              <FileUpload
-                value={[]}
-                onChange={(files) => handleDocumentUpload('manipuladorAlimentos', files)}
-                helperText="Sube tu certificado de manipulador"
-                accept=".pdf,.jpg,.jpeg,.png"
-                multiple={false}
-                maxSize={5}
-              />
+              <FileUpload value={[]} onChange={(files) => handleDocumentUpload('manipuladorAlimentos', files)}
+                helperText="PDF, JPG o PNG · Máx. 5 MB" accept=".pdf,.jpg,.jpeg,.png" multiple={false} maxSize={5} />
             )}
           </div>
         </div>
