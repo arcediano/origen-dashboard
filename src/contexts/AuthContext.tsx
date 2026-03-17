@@ -65,23 +65,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('[AuthContext] Usuario cargado:', userData);
       }
     } catch (err) {
-      let errorMessage = 'Error al cargar datos del usuario';
-      
-      if (err instanceof Error) {
-        errorMessage = err.message.includes('401') || err.message.includes('Token')
-          ? 'Sesión no válida o expirada' 
-          : err.message;
-      }
-
-      if (process.env.NODE_ENV !== 'production') {
-        console.error('[AuthContext] Error cargando usuario:', errorMessage);
-      }
-      setError(errorMessage);
       setUser(null);
-      
-      // Disparar evento global de sesión expirada SOLO si había una sesión previa
-      // (es decir, si el usuario ya estaba autenticado antes de este intento de refresh)
-      // El cliente ya gestiona el evento en los 401 de otras peticiones vía client.ts
+
+      const is401 = err instanceof Error &&
+        (err.message.includes('401') || err.message.includes('Token'));
+
+      if (is401) {
+        // 401 = sin sesión activa — estado esperado en páginas públicas, no es un error.
+        // No llamar a setError() para no mostrar mensajes erróneos en /auth/register, /auth/login, etc.
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('[AuthContext] Sin sesión activa (401) — usuario no autenticado.');
+        }
+      } else {
+        // Error real (red, servidor caído, etc.) — sí merece notificación
+        const errorMessage = err instanceof Error ? err.message : 'Error al cargar datos del usuario';
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('[AuthContext] Error cargando usuario:', errorMessage);
+        }
+        setError(errorMessage);
+      }
     } finally {
       setIsLoading(false);
       setHasTriedLoad(true);
