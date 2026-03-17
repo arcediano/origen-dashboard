@@ -23,6 +23,7 @@ export interface AuthUser {
   lastName: string;
   role: UserRole;
   producerCode: string | null;
+  onboardingCompleted: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -116,7 +116,8 @@ export function SimpleLogin() {
         return;
       }
 
-      router.push('/dashboard');
+      const destination = loggedUser.onboardingCompleted ? '/dashboard' : '/onboarding';
+      router.push(destination);
     } catch (err) {
       if (err instanceof GatewayError && err.status === 401) {
         setErrors({ general: 'Credenciales incorrectas. Revisa tu email y contraseña.' });

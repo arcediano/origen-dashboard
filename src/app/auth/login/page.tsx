@@ -204,7 +204,7 @@ export default function LoginPage() {
                   <div className="inline-flex items-center gap-3 bg-white rounded-full px-5 py-2.5 border border-gray-200 shadow-sm hover:border-origen-pradera transition-all">
                     <span className="text-sm text-gray-600">¿Problemas para acceder?</span>
                     <Link
-                      href="/soporte"
+                      href="/contacto"
                       className="text-sm font-medium text-origen-pradera hover:text-origen-bosque transition-colors flex items-center gap-1"
                     >
                       Contactar soporte

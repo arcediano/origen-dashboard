@@ -137,7 +137,7 @@ export function AuthFooter({ variant, showLegalNote = false }: AuthFooterProps) 
               { href: '/privacidad', label: 'Privacidad' },
               { href: '/cookies', label: 'Cookies' },
               { href: '/aviso-legal', label: 'Aviso Legal' },
-              { href: '/soporte', label: 'Soporte' },
+              { href: '/contacto', label: 'Contacto' },
             ].map(({ href, label }) => (
               <Link key={href} href={href} className="text-xs text-white/70 hover:text-white transition-colors">
                 {label}
@@ -207,7 +207,7 @@ export function AuthFooter({ variant, showLegalNote = false }: AuthFooterProps) 
               <ul className="space-y-3">
                 {[
                   { href: '/como-funciona', label: 'Cómo funciona' },
-                  { href: '/soporte', label: 'Soporte especializado' },
+                  { href: '/contacto', label: 'Soporte especializado' },
                   { href: '/casos-exito', label: 'Casos de éxito' },
                 ].map(({ href, label }) => (
                   <li key={href}>

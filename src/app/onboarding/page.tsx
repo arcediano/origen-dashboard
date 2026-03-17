@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 import { Button } from '@/components/ui/atoms/button';
 
@@ -125,6 +126,7 @@ interface OnboardingFormData {
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { user, setUser } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -213,12 +215,20 @@ export default function OnboardingPage() {
     try {
       // Aquí iría la llamada a la API para guardar todos los datos
       await new Promise(resolve => setTimeout(resolve, 2000));
+      // Marcar onboarding como completado en el contexto de autenticación
+      if (user) {
+        setUser({ ...user, onboardingCompleted: true });
+      }
       router.push('/dashboard');
     } catch (error) {
       console.error(error);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSkipOnboarding = () => {
+    router.push('/dashboard');
   };
 
   // ========================================================================
@@ -547,6 +557,17 @@ export default function OnboardingPage() {
                     className="h-10 px-4 border-gray-300 text-origen-bosque hover:bg-origen-crema/50 hover:border-origen-pradera"
                   >
                     Anterior
+                  </Button>
+                )}
+
+                {currentStep >= 1 && currentStep < totalSteps - 1 && (
+                  <Button
+                    variant="outline"
+                    onClick={handleSkipOnboarding}
+                    disabled={isSubmitting}
+                    className="h-10 px-4 border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300 text-xs"
+                  >
+                    Completar más tarde
                   </Button>
                 )}
 
