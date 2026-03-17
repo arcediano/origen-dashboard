@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -14,6 +14,16 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { Button } from '@/components/ui/atoms/button';
+import { uploadFile } from '@/lib/api/media';
+import {
+  saveStep1,
+  saveStep2,
+  saveStep3,
+  saveStep4,
+  saveStep5,
+  saveStep6,
+  completeOnboarding as apiCompleteOnboarding,
+} from '@/lib/api/onboarding';
 
 // Importar tipos específicos de cada paso
 import { EnhancedStep1Location, type EnhancedLocationData } from '@/components/features/onboarding/components/steps/step-location';
@@ -130,26 +140,28 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isValid, setIsValid] = useState(true);
 
   // Estado con tipos específicos por paso
   const [formData, setFormData] = useState<OnboardingFormData>({
-    step1: { 
-      address: '', 
-      city: '', 
-      province: '', 
-      postalCode: '', 
-      categories: [], 
+    step1: {
+      address: '',
+      city: '',
+      province: '',
+      postalCode: '',
+      taxId: '',
+      categories: [],
       locationImages: [],
       foundedYear: undefined,
       teamSize: undefined
     },
-    step2: { 
-      businessName: '', 
-      tagline: '', 
-      description: '', 
-      values: [], 
+    step2: {
+      businessName: '',
+      tagline: '',
+      description: '',
+      values: [],
       photos: [],
+      website: '',
+      instagramHandle: '',
       productionPhilosophy: '',
       certifications: []
     },
@@ -160,9 +172,10 @@ export default function OnboardingPage() {
       introVideo: ''
     },
     step4: {
-      productionCapacity: { daily: 50 },
+      isInOriginRoute: false,
       deliveryOptions: [],
-      deliveryAreas: [],
+      includedZones: [],
+      excludedZones: [],
       minOrderAmount: 20,
       sustainablePackaging: false,
       packagingDescription: ''
@@ -183,15 +196,124 @@ export default function OnboardingPage() {
   const totalSteps = STEPS.length;
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
+  const isStepValid = useMemo(() => {
+    switch (currentStep) {
+      case 0:
+        return (
+          !!formData.step1.province &&
+          !!formData.step1.city.trim() &&
+          !!formData.step1.address.trim() &&
+          /^\d{5}$/.test(formData.step1.postalCode) &&
+          formData.step1.categories.length >= 1 &&
+          !!formData.step1.taxId.trim()
+        );
+      case 1:
+        return (
+          !!formData.step2.businessName.trim() &&
+          formData.step2.description.trim().length >= 50 &&
+          formData.step2.values.length >= 1
+        );
+      case 2:
+        return formData.step3.logo !== null && formData.step3.productImages.length >= 1;
+      case 3:
+        return (
+          formData.step4.deliveryOptions.length >= 1 &&
+          formData.step4.includedZones.length >= 1
+        );
+      case 4:
+        return (
+          !!formData.step5.cif &&
+          !!formData.step5.seguroRC &&
+          !!formData.step5.manipuladorAlimentos
+        );
+      case 5:
+        return formData.step6.stripeConnected && formData.step6.acceptTerms;
+      default:
+        return true;
+    }
+  }, [currentStep, formData]);
+
+  // ========================================================================
+  // GUARDAR PASO ACTUAL EN EL BACKEND
+  // ========================================================================
+
+  const saveCurrentStep = useCallback(async (step: number) => {
+    switch (step) {
+      case 0: {
+        const locationImageKeys = await Promise.all(
+          formData.step1.locationImages.map((f) => uploadFile(f.file, 'visual/location').then((r) => r.key)),
+        );
+        await saveStep1(formData.step1, locationImageKeys);
+        break;
+      }
+      case 1: {
+        const teamPhotoKeys = await Promise.all(
+          formData.step2.photos.map((f) => uploadFile(f.file, 'visual/team').then((r) => r.key)),
+        );
+        await saveStep2(formData.step2, teamPhotoKeys);
+        break;
+      }
+      case 2: {
+        const logoKey = formData.step3.logo
+          ? (await uploadFile(formData.step3.logo.file, 'visual/logo')).key
+          : undefined;
+        const bannerKey = formData.step3.banner
+          ? (await uploadFile(formData.step3.banner.file, 'visual/banner')).key
+          : undefined;
+        const productImageKeys = await Promise.all(
+          formData.step3.productImages.map((f) => uploadFile(f.file, 'visual/products').then((r) => r.key)),
+        );
+        await saveStep3({ logoKey, bannerKey, productImageKeys, introVideoUrl: formData.step3.introVideo });
+        break;
+      }
+      case 3: {
+        await saveStep4(formData.step4);
+        break;
+      }
+      case 4: {
+        const cifKey = formData.step5.cif
+          ? (await uploadFile(formData.step5.cif.file, 'documents/cif')).key
+          : undefined;
+        const seguroRcKey = formData.step5.seguroRC
+          ? (await uploadFile(formData.step5.seguroRC.file, 'documents/seguro-rc')).key
+          : undefined;
+        const manipuladorAlimentosKey = formData.step5.manipuladorAlimentos
+          ? (await uploadFile(formData.step5.manipuladorAlimentos.file, 'documents/manipulador-alimentos')).key
+          : undefined;
+        const certificationDocumentKeys = await Promise.all(
+          formData.step5.certifications
+            .filter((c) => (c as any).file)
+            .map(async (c) => ({
+              certificationId: c.certificationId,
+              documentKey: (await uploadFile((c as any).file, `documents/certifications/${c.certificationId}`)).key,
+            })),
+        );
+        await saveStep5(formData.step5, { cifKey, seguroRcKey, manipuladorAlimentosKey, certificationDocumentKeys });
+        break;
+      }
+      case 5: {
+        await saveStep6(formData.step6);
+        break;
+      }
+    }
+  }, [formData]);
+
   // ========================================================================
   // MANEJADORES DE NAVEGACIÓN
   // ========================================================================
-  
-  const handleNext = () => {
-    if (currentStep < totalSteps - 1) {
+
+  const handleNext = async () => {
+    if (currentStep >= totalSteps - 1) return;
+    setIsSubmitting(true);
+    try {
+      await saveCurrentStep(currentStep);
       setDirection(1);
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      console.error('Error al guardar paso:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -213,15 +335,14 @@ export default function OnboardingPage() {
   const handleComplete = async () => {
     setIsSubmitting(true);
     try {
-      // Aquí iría la llamada a la API para guardar todos los datos
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      // Marcar onboarding como completado en el contexto de autenticación
+      await saveCurrentStep(currentStep);
+      await apiCompleteOnboarding();
       if (user) {
         setUser({ ...user, onboardingCompleted: true });
       }
       router.push('/dashboard');
     } catch (error) {
-      console.error(error);
+      console.error('Error al completar onboarding:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -574,7 +695,7 @@ export default function OnboardingPage() {
                 {currentStep < totalSteps - 1 ? (
                   <Button
                     onClick={handleNext}
-                    disabled={!isValid || isSubmitting}
+                    disabled={!isStepValid || isSubmitting}
                     className="h-10 px-5 bg-origen-bosque hover:bg-origen-pino text-white shadow-sm hover:shadow transition-all"
                   >
                     Continuar
@@ -582,7 +703,7 @@ export default function OnboardingPage() {
                 ) : (
                   <Button
                     onClick={handleComplete}
-                    disabled={!isValid || isSubmitting}
+                    disabled={!isStepValid || isSubmitting}
                     className="h-10 px-5 bg-origen-bosque hover:bg-origen-pino text-white shadow-sm hover:shadow transition-all"
                   >
                     {isSubmitting ? (

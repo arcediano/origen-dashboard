@@ -37,9 +37,11 @@ import {
   Sun,
   Wind,
   TreePine,
-  MapPin, // ✅ AÑADIDO: MapPin
-  Store,  // ✅ AÑADIDO: Store
-  Package // ✅ AÑADIDO: Package
+  MapPin,
+  Store,
+  Package,
+  Instagram,
+  Link,
 } from 'lucide-react';
 
 // ============================================================================
@@ -146,10 +148,14 @@ export interface EnhancedStoryData {
   description: string;
   values: string[];
   photos: UploadedFile[];
-  
+
+  // Presencia digital (opcional)
+  website?: string;
+  instagramHandle?: string;
+
   // Filosofía de producción
   productionPhilosophy?: string;
-  
+
   // Certificaciones
   certifications?: Certification[];
 }
@@ -282,6 +288,45 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
             <p className="text-xs text-gray-500">
               Ej: &ldquo;El sabor de la tradición&rdquo;, &ldquo;De nuestra huerta a tu mesa&rdquo;, &ldquo;Artesanía con corazón&rdquo;
             </p>
+          </div>
+
+          {/* Presencia digital */}
+          <div className="pt-4 border-t border-gray-100 space-y-4">
+            <p className="text-sm font-medium text-origen-bosque flex items-center gap-2">
+              <Globe className="w-4 h-4 text-origen-pradera" />
+              Presencia digital
+              <span className="text-xs text-gray-500 font-normal">(opcional)</span>
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                  <Link className="w-3.5 h-3.5" />
+                  Sitio web
+                </label>
+                <Input
+                  value={data.website || ''}
+                  onChange={(e) => handleInputChange('website', e.target.value)}
+                  placeholder="https://www.tunegocio.com"
+                  type="url"
+                  className="h-11 text-sm border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                  <Instagram className="w-3.5 h-3.5" />
+                  Instagram
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 pointer-events-none">@</span>
+                  <Input
+                    value={data.instagramHandle || ''}
+                    onChange={(e) => handleInputChange('instagramHandle', e.target.value.replace(/^@/, ''))}
+                    placeholder="tunegocio"
+                    className="h-11 text-sm pl-7 border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

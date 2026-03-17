@@ -33,7 +33,8 @@ import {
   Info,
   Calendar,
   Users,
-  ChevronDown
+  ChevronDown,
+  Building2,
 } from 'lucide-react';
 
 // ============================================================================
@@ -168,9 +169,10 @@ export interface EnhancedLocationData {
   city: string;
   province: string;
   postalCode: string;
+  taxId: string;       // CIF / NIF fiscal
   categories: string[];
   locationImages: UploadedFile[];
-  
+
   // Confianza inicial
   foundedYear?: number;
   teamSize?: '1-2' | '3-5' | '6-10' | '11+';
@@ -274,18 +276,21 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
   // ========================================================================
   
   const hasBasicInfo = Boolean(
-    data.address?.trim() && 
-    data.city?.trim() && 
-    data.province && 
+    data.address?.trim() &&
+    data.city?.trim() &&
+    data.province &&
     data.postalCode?.trim()
   );
-  
+
+  const hasTaxId = Boolean(data.taxId?.trim());
+  const taxIdValid = /^[A-Z0-9]{8,9}$/i.test(data.taxId?.trim() ?? '');
+
   const hasCategories = data.categories?.length > 0;
   const hasYear = Boolean(data.foundedYear && data.foundedYear >= 1900 && data.foundedYear <= new Date().getFullYear());
   const hasTeamSize = Boolean(data.teamSize);
-  
-  const totalSteps = 4;
-  const completedSteps = [hasBasicInfo, hasCategories, hasYear, hasTeamSize].filter(Boolean).length;
+
+  const totalSteps = 5;
+  const completedSteps = [hasBasicInfo, hasTaxId, hasCategories, hasYear, hasTeamSize].filter(Boolean).length;
   const progress = (completedSteps / totalSteps) * 100;
 
   // ========================================================================
@@ -415,6 +420,27 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 );
               })}
             </Select>
+          </div>
+
+          {/* CIF / NIF */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-origen-pradera" />
+              CIF / NIF <span className="text-red-500">*</span>
+            </label>
+            <Input
+              value={data.taxId || ''}
+              onChange={(e) => handleInputChange('taxId', e.target.value.toUpperCase())}
+              placeholder="Ej: B12345678 o 12345678A"
+              maxLength={10}
+              className="h-12 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20 font-mono uppercase"
+            />
+            {hasTaxId && !taxIdValid && (
+              <p className="text-xs text-amber-600 flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5" />
+                Formato habitual: letra + 8 dígitos (empresa) o 8 dígitos + letra (autónomo)
+              </p>
+            )}
           </div>
 
           {/* Año de fundación */}
