@@ -71,13 +71,12 @@ export async function saveStep2(
 export async function saveStep3(keys: {
   logoKey?: string;
   bannerKey?: string;
-  productImageKeys: string[];
   introVideoUrl?: string;
 }): Promise<StepSaveResponse> {
   return gatewayClient.post('/producers/onboarding/step/3', {
     logoKey: keys.logoKey,
     bannerKey: keys.bannerKey,
-    productImageKeys: keys.productImageKeys,
+    productImageKeys: [],
     introVideoUrl: keys.introVideoUrl,
   });
 }
@@ -142,4 +141,10 @@ export async function saveStep6(data: EnhancedStep6StripeData): Promise<StepSave
 
 export async function completeOnboarding(): Promise<{ success: boolean; onboardingCompleted: boolean }> {
   return gatewayClient.post('/producers/onboarding/complete');
+}
+
+// ─── Cargar datos guardados ────────────────────────────────────────────────────
+
+export async function loadOnboardingData(): Promise<any> {
+  return gatewayClient.get('/producers/onboarding/data');
 }

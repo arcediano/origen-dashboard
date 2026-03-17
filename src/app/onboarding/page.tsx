@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -23,6 +23,7 @@ import {
   saveStep5,
   saveStep6,
   completeOnboarding as apiCompleteOnboarding,
+  loadOnboardingData,
 } from '@/lib/api/onboarding';
 
 // Importar tipos específicos de cada paso
@@ -47,7 +48,8 @@ import {
   Clock,
   Sparkles,
   Shield,
-  Leaf
+  Leaf,
+  AlertCircle,
 } from 'lucide-react';
 
 // ============================================================================
@@ -140,6 +142,8 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Estado con tipos específicos por paso
   const [formData, setFormData] = useState<OnboardingFormData>({
@@ -165,10 +169,9 @@ export default function OnboardingPage() {
       productionPhilosophy: '',
       certifications: []
     },
-    step3: { 
-      logo: null, 
-      banner: null, 
-      productImages: [],
+    step3: {
+      logo: null,
+      banner: null,
       introVideo: ''
     },
     step4: {
@@ -193,6 +196,67 @@ export default function OnboardingPage() {
     }
   });
 
+  useEffect(() => {
+    loadOnboardingData()
+      .then((res: any) => {
+        const d = res?.data;
+        if (!d) return;
+        setFormData(prev => ({
+          ...prev,
+          step1: {
+            ...prev.step1,
+            address: d.location?.address ?? prev.step1.address,
+            city: d.location?.city ?? prev.step1.city,
+            province: d.location?.province ?? d.fiscal?.legalProvince ?? prev.step1.province,
+            postalCode: d.location?.postalCode ?? prev.step1.postalCode,
+            foundedYear: d.location?.foundedYear ?? prev.step1.foundedYear,
+            teamSize: d.location?.teamSize ?? prev.step1.teamSize,
+            categories: d.fiscal?.categories?.length ? d.fiscal.categories : prev.step1.categories,
+            taxId: d.fiscal?.taxId ?? prev.step1.taxId,
+          },
+          step2: {
+            ...prev.step2,
+            businessName: d.story?.businessName ?? d.fiscal?.businessName ?? prev.step2.businessName,
+            tagline: d.story?.tagline ?? prev.step2.tagline,
+            description: d.story?.description ?? d.fiscal?.whyOrigin ?? prev.step2.description,
+            productionPhilosophy: d.story?.productionPhilosophy ?? prev.step2.productionPhilosophy,
+            values: d.story?.values?.length ? d.story.values : prev.step2.values,
+            website: d.story?.website ?? prev.step2.website,
+            instagramHandle: d.story?.instagramHandle ?? prev.step2.instagramHandle,
+          },
+          step3: {
+            ...prev.step3,
+            introVideo: d.story?.introVideoUrl ?? prev.step3.introVideo,
+          },
+          step4: d.logistics ? {
+            ...prev.step4,
+            isInOriginRoute: d.logistics.isInOriginRoute,
+            minOrderAmount: Number(d.logistics.minOrderAmount),
+            sustainablePackaging: d.logistics.sustainablePackaging,
+            packagingDescription: d.logistics.packagingDescription ?? '',
+            deliveryOptions: d.logistics.deliveryOptions.map((o: any) => ({
+              id: o.id, name: o.name, description: o.description ?? '',
+              price: Number(o.price), estimatedDays: o.estimatedDays,
+            })),
+            includedZones: d.logistics.shippingZones.filter((z: any) => !z.isExcluded)
+              .map((z: any) => ({ id: z.id, type: z.type.toLowerCase(), value: z.value, label: z.label })),
+            excludedZones: d.logistics.shippingZones.filter((z: any) => z.isExcluded)
+              .map((z: any) => ({ id: z.id, type: z.type.toLowerCase(), value: z.value, label: z.label })),
+          } : prev.step4,
+          step6: d.payment ? {
+            stripeConnected: d.payment.stripeConnected,
+            acceptTerms: !!d.payment.acceptedTermsAt,
+          } : prev.step6,
+        }));
+        if (d.onboarding?.currentStep) {
+          const savedStep = Math.min(d.onboarding.currentStep - 1, STEPS.length - 1);
+          setCurrentStep(Math.max(0, savedStep));
+        }
+      })
+      .catch(() => { /* primer acceso — sin datos guardados */ })
+      .finally(() => setIsLoading(false));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const totalSteps = STEPS.length;
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
@@ -214,7 +278,7 @@ export default function OnboardingPage() {
           formData.step2.values.length >= 1
         );
       case 2:
-        return formData.step3.logo !== null && formData.step3.productImages.length >= 1;
+        return formData.step3.logo !== null;
       case 3:
         return (
           formData.step4.deliveryOptions.length >= 1 &&
@@ -260,10 +324,7 @@ export default function OnboardingPage() {
         const bannerKey = formData.step3.banner
           ? (await uploadFile(formData.step3.banner.file, 'visual/banner')).key
           : undefined;
-        const productImageKeys = await Promise.all(
-          formData.step3.productImages.map((f) => uploadFile(f.file, 'visual/products').then((r) => r.key)),
-        );
-        await saveStep3({ logoKey, bannerKey, productImageKeys, introVideoUrl: formData.step3.introVideo });
+        await saveStep3({ logoKey, bannerKey, introVideoUrl: formData.step3.introVideo });
         break;
       }
       case 3: {
@@ -305,13 +366,14 @@ export default function OnboardingPage() {
   const handleNext = async () => {
     if (currentStep >= totalSteps - 1) return;
     setIsSubmitting(true);
+    setSaveError(null);
     try {
       await saveCurrentStep(currentStep);
       setDirection(1);
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-      console.error('Error al guardar paso:', error);
+    } catch (error: any) {
+      setSaveError(error?.message ?? 'Error al guardar. Inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
@@ -334,6 +396,7 @@ export default function OnboardingPage() {
 
   const handleComplete = async () => {
     setIsSubmitting(true);
+    setSaveError(null);
     try {
       await saveCurrentStep(currentStep);
       await apiCompleteOnboarding();
@@ -341,8 +404,8 @@ export default function OnboardingPage() {
         setUser({ ...user, onboardingCompleted: true });
       }
       router.push('/dashboard');
-    } catch (error) {
-      console.error('Error al completar onboarding:', error);
+    } catch (error: any) {
+      setSaveError(error?.message ?? 'Error al completar el onboarding. Inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
@@ -437,6 +500,14 @@ export default function OnboardingPage() {
         return null;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-origen-pradera border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema/30">
@@ -650,6 +721,17 @@ export default function OnboardingPage() {
                 {renderStep()}
               </motion.div>
             </AnimatePresence>
+
+            {/* ====================================================================
+                ERROR DE GUARDADO
+            ==================================================================== */}
+            {saveError && (
+              <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{saveError}</span>
+                <button type="button" onClick={() => setSaveError(null)} className="ml-auto text-red-500 hover:text-red-700">×</button>
+              </div>
+            )}
 
             {/* ====================================================================
                 NAVEGACIÓN - Botones en una línea

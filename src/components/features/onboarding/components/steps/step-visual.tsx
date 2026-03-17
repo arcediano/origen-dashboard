@@ -18,8 +18,6 @@ import {
   Camera,
   Image as ImageIcon,
   CheckCircle2,
-  AlertCircle,
-  Heart,
   Info,
   X,
   Video,
@@ -33,7 +31,6 @@ import {
 export interface EnhancedVisualData {
   logo: UploadedFile | null;
   banner: UploadedFile | null;
-  productImages: UploadedFile[];
   introVideo?: string;
 }
 
@@ -54,10 +51,9 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
   
   const hasLogo = Boolean(data.logo);
   const hasBanner = Boolean(data.banner);
-  const hasProductImages = data.productImages?.length > 0;
-  
-  const totalSteps = 4;
-  const completedSteps = [hasLogo, hasBanner, hasProductImages].filter(Boolean).length;
+
+  const totalSteps = 3;
+  const completedSteps = [hasLogo, hasBanner].filter(Boolean).length;
   const progress = (completedSteps / totalSteps) * 100;
 
   // ========================================================================
@@ -74,13 +70,6 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
 
   const handleDeleteBanner = () => {
     onChange({ ...data, banner: null });
-  };
-
-  const handleDeleteProductImage = (id: string) => {
-    onChange({ 
-      ...data, 
-      productImages: data.productImages.filter(img => img.id !== id) 
-    });
   };
 
   // ========================================================================
@@ -125,7 +114,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             </div>
             <div>
               <h2 className="text-xl font-bold text-origen-bosque">Logo del negocio</h2>
-              <p className="text-sm text-gray-600">PNG, JPG o SVG • Fondo transparente ideal</p>
+              <p className="text-sm text-gray-600">PNG, JPG, WebP o GIF • Fondo transparente ideal</p>
             </div>
           </div>
           {hasLogo && (
@@ -164,7 +153,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
               }
             }}
             helperText="Arrastra tu logo o haz clic para subir"
-            accept="image/*,.svg"
+            accept="image/jpeg,image/png,image/webp,image/gif"
             multiple={false}
             maxSize={2}
           />
@@ -233,89 +222,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
       </div>
 
       {/* ====================================================================
-          CARD 3: FOTOS DE PRODUCTOS (OBLIGATORIO - MÍNIMO 1)
-      ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-              <Heart className="w-6 h-6 text-origen-pradera" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-origen-bosque">Fotos de tus productos</h2>
-              <p className="text-sm text-gray-600">JPG o PNG • Máx 5MB • La primera será la principal</p>
-            </div>
-          </div>
-          {hasProductImages && (
-            <span className="text-xs bg-origen-pradera/10 text-origen-pradera px-3 py-1.5 rounded-full font-medium">
-              {data.productImages.length} {data.productImages.length === 1 ? 'foto' : 'fotos'}
-            </span>
-          )}
-        </div>
-
-        {data.productImages?.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
-            {data.productImages.map((image, index) => (
-              <div
-                key={image.id}
-                className="relative aspect-square rounded-lg border-2 border-gray-200 overflow-hidden group"
-              >
-                <div className="w-full h-full bg-gradient-to-br from-origen-crema to-gray-100 flex items-center justify-center">
-                  <ImageIcon className="w-8 h-8 text-gray-400" />
-                </div>
-                {index === 0 && (
-                  <div className="absolute top-1 left-1">
-                    <span className="text-[10px] bg-origen-pradera text-white px-1.5 py-0.5 rounded-full">
-                      Principal
-                    </span>
-                  </div>
-                )}
-                <button
-                  type="button"
-                  onClick={() => handleDeleteProductImage(image.id)}
-                  className="absolute top-1 right-1 w-6 h-6 bg-gray-800/70 hover:bg-gray-900 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-3 h-3 text-white" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <FileUpload
-          value={data.productImages || []}
-          onChange={(files) => handleInputChange('productImages', files)}
-          helperText="Arrastra fotos de tus productos o haz clic para añadir"
-          accept="image/*"
-          multiple={true}
-          maxSize={5}
-        />
-
-        {!hasProductImages && (
-          <div className="mt-4 p-4 bg-red-50/50 rounded-xl border border-red-200 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-red-700">
-                Necesitas al menos una foto de producto
-              </p>
-              <p className="text-xs text-red-600 mt-1">
-                Sube una foto para que los compradores puedan ver tus productos
-              </p>
-            </div>
-          </div>
-        )}
-
-        <div className="mt-4 text-xs text-gray-500 flex items-center gap-2 bg-origen-crema/50 p-3 rounded-lg">
-          <Info className="w-4 h-4 text-origen-pradera flex-shrink-0" />
-          <span>
-            <strong>Consejo:</strong> Los productos con fotos de calidad reciben un 40% más de visitas.
-          </span>
-        </div>
-      </div>
-
-      {/* ====================================================================
-          CARD 4: VIDEO DE PRESENTACIÓN (OPCIONAL)
+          CARD 3: VIDEO DE PRESENTACIÓN (OPCIONAL)
       ==================================================================== */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
@@ -362,7 +269,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
         </div>
         <span className="w-1 h-1 rounded-full bg-gray-300" />
         <div className="flex items-center gap-1.5">
-          <span>📸 {hasProductImages ? `${data.productImages.length} productos` : 'Sin fotos'}</span>
+          <span>🖼️ {hasBanner ? 'Cabecera subida' : 'Cabecera opcional'}</span>
         </div>
       </div>
     </div>
