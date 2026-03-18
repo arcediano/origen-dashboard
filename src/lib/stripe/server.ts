@@ -36,33 +36,23 @@ export async function createConnectAccount(params: {
     postalCode?: string;
   };
 }) {
-  const { sellerId, email, businessName, website, address } = params;
-
-  const line1 = [address?.street, address?.streetNumber].filter(Boolean).join(' ') || undefined;
+  const { sellerId, email, businessName, website } = params;
 
   try {
     const account = await stripe.accounts.create({
       type: STRIPE_CONFIG.connectConfig.type,
       country: STRIPE_CONFIG.connectConfig.country,
       ...(email ? { email } : {}),
-      business_profile: {
-        ...(businessName ? { name: businessName } : {}),
-        ...(website ? { url: website } : {}),
-      },
+      ...(businessName || website ? {
+        business_profile: {
+          ...(businessName ? { name: businessName } : {}),
+          ...(website ? { url: website } : {}),
+        },
+      } : {}),
       capabilities: {
         card_payments: { requested: true },
         transfers: { requested: true },
       },
-      ...(line1 || address?.city || address?.postalCode ? {
-        individual: {
-          address: {
-            ...(line1 ? { line1 } : {}),
-            ...(address?.city ? { city: address.city } : {}),
-            ...(address?.postalCode ? { postal_code: address.postalCode } : {}),
-            country: 'ES',
-          },
-        },
-      } : {}),
       metadata: {
         sellerId,
         platform: 'origen-marketplace',
