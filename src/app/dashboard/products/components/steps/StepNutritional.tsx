@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Button } from '@/components/ui/atoms/button';
 import { Card } from '@/components/ui/atoms/card';
 import { Input } from '@/components/ui/atoms/input';
 import { Textarea } from '@/components/ui/atoms/textarea';
@@ -602,13 +603,13 @@ export function StepNutritional({
                       className="h-11 flex-1 rounded-xl"
                       onKeyDown={(e) => e.key === 'Enter' && addIngredient()}
                     />
-                    <button
+                    <Button
                       onClick={addIngredient}
                       disabled={!ingredientInput.trim()}
-                      className="h-11 px-4 rounded-xl bg-origen-bosque hover:bg-origen-pino text-white text-sm font-medium transition-all disabled:opacity-50 shrink-0"
+                      className="shrink-0"
                     >
                       Añadir
-                    </button>
+                    </Button>
                   </div>
 
                   {nutritionalInfo.ingredients.length > 0 && (

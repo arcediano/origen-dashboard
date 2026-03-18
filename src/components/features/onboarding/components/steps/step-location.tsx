@@ -15,6 +15,7 @@ import { FileUpload, type UploadedFile, CategoryCard } from '@/components/shared
 
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
+import { getProvinciaFromCP } from '@/constants/cp-provincias';
 
 import {
   MapPin,
@@ -40,6 +41,7 @@ interface SelectProps {
   placeholder: string;
   className?: string;
   searchable?: boolean;
+  disabled?: boolean;
   children: React.ReactNode;
 }
 
@@ -49,6 +51,7 @@ const Select: React.FC<SelectProps> = ({
   placeholder,
   className,
   searchable = false,
+  disabled = false,
   children
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -101,10 +104,12 @@ const Select: React.FC<SelectProps> = ({
     <div ref={selectRef} className="relative">
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
         className={cn(
           "flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 text-left transition-all",
           "border-gray-200 hover:border-origen-pradera focus:border-origen-pradera focus:outline-none focus:ring-2 focus:ring-origen-pradera/20",
+          disabled && "cursor-not-allowed opacity-50 bg-gray-50 hover:border-gray-200",
           className
         )}
       >
@@ -195,7 +200,9 @@ const SelectItem: React.FC<SelectItemProps> = ({
 
 export interface EnhancedLocationData {
   // Ubicación
-  address: string;
+  street: string;
+  streetNumber: string;
+  streetComplement?: string;
   city: string;
   province: string;
   postalCode: string;
@@ -225,11 +232,22 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
   // ========================================================================
   
   const hasBasicInfo = Boolean(
-    data.address?.trim() &&
+    data.street?.trim() &&
+    data.streetNumber?.trim() &&
     data.city?.trim() &&
     data.province &&
     data.postalCode?.trim()
   );
+
+  const cpError = React.useMemo(() => {
+    const cp = data.postalCode || '';
+    if (cp.length < 5 || !data.province) return undefined;
+    const expected = getProvinciaFromCP(cp);
+    if (expected === null) return undefined;
+    // Both values are now the capitalized PROVINCIAS_ESPANA name — direct comparison
+    if (expected === data.province) return undefined;
+    return `Este código postal corresponde a ${expected}, no a ${data.province}.`;
+  }, [data.postalCode, data.province]);
 
   const hasCategories = data.categories?.length > 0;
   const hasYear = Boolean(data.foundedYear && data.foundedYear >= 1900 && data.foundedYear <= new Date().getFullYear());
@@ -246,10 +264,28 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
   const handleInputChange = (field: keyof EnhancedLocationData, value: any) => {
     onChange({ ...data, [field]: value });
   };
-  
+
+  const capitalizeWords = (str: string) =>
+    str.trim().toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+
   const handlePostalCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+    if (value.length === 5) {
+      const expected = getProvinciaFromCP(value);
+      if (expected !== null) {
+        onChange({ ...data, postalCode: value, province: expected });
+        return;
+      }
+    }
     handleInputChange('postalCode', value);
+  };
+
+  const handleCityBlur = () => {
+    if (data.city) handleInputChange('city', capitalizeWords(data.city));
+  };
+
+  const handleStreetBlur = () => {
+    if (data.street) handleInputChange('street', capitalizeWords(data.street));
   };
 
   const handleCategorySelect = (categoryId: string) => {
@@ -314,33 +350,51 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
         </div>
 
         <div className="space-y-5">
-          {/* Dirección */}
+          {/* Nombre de la vía */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
               <MapPin className="w-4 h-4 text-origen-pradera" />
-              Dirección completa <span className="text-red-500">*</span>
+              Nombre de la vía <span className="text-red-500">*</span>
             </label>
             <Input
-              value={data.address || ''}
-              onChange={(e) => handleInputChange('address', e.target.value)}
-              placeholder="Calle, número, finca, local..."
+              value={data.street || ''}
+              onChange={(e) => handleInputChange('street', e.target.value)}
+              onBlur={handleStreetBlur}
+              placeholder="Ej: Calle Mayor, Av. de la Constitución"
               inputSize="lg"
             />
           </div>
-          
-          {/* Ciudad + CP */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+          {/* Número + Piso/Puerta */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
             <div className="space-y-2">
               <label className="text-sm font-medium text-origen-bosque">
-                Ciudad <span className="text-red-500">*</span>
+                Número <span className="text-red-500">*</span>
               </label>
               <Input
-                value={data.city || ''}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                placeholder="Ej: Madrid"
+                value={data.streetNumber || ''}
+                onChange={(e) => handleInputChange('streetNumber', e.target.value)}
+                placeholder="Ej: 15"
+                inputSize="lg"
+                className="font-mono"
+              />
+            </div>
+            <div className="sm:col-span-2 space-y-2">
+              <label className="text-sm font-medium text-origen-bosque flex items-center gap-1">
+                Piso / Puerta
+                <span className="text-xs text-gray-400 font-normal">(opcional)</span>
+              </label>
+              <Input
+                value={data.streetComplement || ''}
+                onChange={(e) => handleInputChange('streetComplement', e.target.value)}
+                placeholder="Ej: 3º A, Local 1, Bajo"
                 inputSize="lg"
               />
             </div>
+          </div>
+
+          {/* CP + Provincia + Ciudad/Municipio */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <div className="space-y-2">
               <label className="text-sm font-medium text-origen-bosque">
                 Código Postal <span className="text-red-500">*</span>
@@ -352,30 +406,38 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 maxLength={5}
                 inputSize="lg"
                 className="font-mono"
+                error={cpError}
               />
             </div>
-          </div>
-          
-          {/* Provincia - SELECT CON BÚSQUEDA */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque">
-              Provincia <span className="text-red-500">*</span>
-            </label>
-            <Select
-              value={data.province || ''}
-              onValueChange={(value) => handleInputChange('province', value)}
-              placeholder="Selecciona o busca provincia"
-              searchable
-            >
-              {PROVINCIAS_ESPANA.map((province) => {
-                const normalizedValue = province.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                return (
-                  <SelectItem key={province} value={normalizedValue}>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-origen-bosque">
+                Provincia <span className="text-red-500">*</span>
+              </label>
+              <Select
+                value={data.province || ''}
+                onValueChange={(value) => handleInputChange('province', value)}
+                placeholder="Ej: Madrid"
+                disabled
+              >
+                {PROVINCIAS_ESPANA.map((province) => (
+                  <SelectItem key={province} value={province}>
                     {province}
                   </SelectItem>
-                );
-              })}
-            </Select>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-origen-bosque">
+                Ciudad / Municipio <span className="text-red-500">*</span>
+              </label>
+              <Input
+                value={data.city || ''}
+                onChange={(e) => handleInputChange('city', e.target.value)}
+                onBlur={handleCityBlur}
+                placeholder="Ej: Madrid"
+                inputSize="lg"
+              />
+            </div>
           </div>
 
           {/* Año de fundación */}

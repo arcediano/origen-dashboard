@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Button } from '@/components/ui/atoms/button';
 import { Card } from '@/components/ui/atoms/card';
 import { Input } from '@/components/ui/atoms/input';
 import { Textarea } from '@/components/ui/atoms/textarea';
@@ -649,23 +650,26 @@ export function StepProduction({
                       <p className="text-xs text-red-600 mb-2">{videoError}</p>
                     )}
                     <div className="flex gap-2">
-                      <button
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="flex-1"
                         onClick={() => {
                           setShowVideoInput(false);
                           setVideoUrl('');
                           setVideoError(null);
                         }}
-                        className="flex-1 px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all text-sm font-medium text-gray-700"
                       >
                         Cancelar
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1"
                         onClick={handleVideoAdd}
                         disabled={!videoUrl}
-                        className="flex-1 px-4 py-2 rounded-lg bg-origen-bosque hover:bg-origen-pino text-white text-sm font-medium transition-all disabled:opacity-50"
                       >
                         Añadir vídeo
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}

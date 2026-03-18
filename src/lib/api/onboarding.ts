@@ -30,8 +30,12 @@ export async function saveStep1(
   data: EnhancedLocationData,
   locationImageKeys: string[],
 ): Promise<StepSaveResponse> {
+  const address = [data.street, data.streetNumber, data.streetComplement]
+    .filter(Boolean)
+    .join(', ');
+
   return gatewayClient.post('/producers/onboarding/step/1', {
-    address: data.address,
+    address,
     city: data.city,
     province: data.province,
     postalCode: data.postalCode,

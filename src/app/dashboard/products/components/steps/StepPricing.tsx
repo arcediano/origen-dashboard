@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Button } from '@/components/ui/atoms/button';
 import { Card } from '@/components/ui/atoms/card';
 import { Input } from '@/components/ui/atoms/input';
 import { CurrencyInput } from '@/components/ui/atoms/currency-input';
@@ -603,23 +604,24 @@ export function StepPricing({
 
                   {/* Botones */}
                   <div className="flex justify-end gap-2 mt-4">
-                    <button
+                    <Button
+                      size="sm"
+                      variant="secondary"
                       onClick={() => {
                         resetForm();
                         setShowTierForm(false);
                         setEditingTierId(null);
                       }}
-                      className="px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all text-sm font-medium text-gray-700"
                     >
                       Cancelar
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      size="sm"
                       onClick={editingTierId ? handleUpdateTier : handleAddTier}
-                      className="px-4 py-2 rounded-lg bg-origen-bosque hover:bg-origen-pino text-white text-sm font-medium transition-all flex items-center gap-2"
+                      leftIcon={<Save className="w-4 h-4" />}
                     >
-                      <Save className="w-4 h-4" />
                       {editingTierId ? 'Actualizar' : 'Crear oferta'}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </motion.div>
@@ -738,13 +740,14 @@ export function StepPricing({
                 Las ofertas por cantidad ayudan a aumentar el ticket medio y fidelizar clientes
               </p>
               {hasBasePrice ? (
-                <button
+                <Button
+                  size="xs"
+                  className="mt-4"
                   onClick={() => setShowTierForm(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 mt-4 rounded-lg bg-origen-bosque hover:bg-origen-pino text-white text-xs font-medium transition-all"
+                  leftIcon={<Plus className="w-3 h-3" />}
                 >
-                  <Plus className="w-3 h-3" />
                   Crear primera oferta
-                </button>
+                </Button>
               ) : (
                 <div className="mt-4 text-xs text-amber-600">
                   Configura primero el precio base

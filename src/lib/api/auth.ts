@@ -63,9 +63,12 @@ export async function registerProducer(params: {
   businessName: string;
   businessType: 'individual' | 'company';
   producerCategory: string;
-  province: string;
+  street: string;
+  streetNumber: string;
+  streetComplement?: string;
   municipio: string;
   postalCode: string;
+  province: string;
   whyOrigin: string;
   acceptsTerms: true;
   acceptsPrivacy: true;

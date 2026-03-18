@@ -228,7 +228,7 @@ export function SimpleLogin() {
               size="lg"
               loading={isLoading}
               loadingText="Iniciando sesión..."
-              className="w-full"
+              className="w-full sm:w-full"
               leftIcon={<LogIn className="w-4 h-4" />}
             >
               Acceder al panel

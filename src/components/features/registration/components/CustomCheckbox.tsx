@@ -37,8 +37,8 @@ export const CustomCheckbox: React.FC<CustomCheckboxProps> = ({
             onClick={() => onChange(!checked)}
             className={cn(
               'h-5 w-5 rounded-md border-2 bg-white transition-all',
-              'focus:outline-none focus:ring-2 focus:ring-origen-hoja/50 focus:ring-offset-2',
-              checked ? 'bg-origen-bosque border-origen-bosque' : 'border-gray-300 hover:border-origen-hoja',
+              'focus:outline-none focus:ring-2 focus:ring-origen-pradera/50 focus:ring-offset-2',
+              checked ? 'bg-origen-pradera border-origen-pradera' : 'border-gray-300 hover:border-origen-pradera',
               error && 'border-destructive'
             )}
           >

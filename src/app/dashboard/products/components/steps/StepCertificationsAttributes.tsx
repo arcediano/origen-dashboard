@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Button } from '@/components/ui/atoms/button';
 import { Card } from '@/components/ui/atoms/card';
 import { Input } from '@/components/ui/atoms/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/atoms/select';
@@ -587,16 +588,16 @@ export function StepCertificationsAttributes({
 
               {/* Botón añadir certificación */}
               <div className="flex justify-end">
-                <button
+                <Button
+                  size="sm"
                   onClick={() => {
                     resetCertForm();
                     setShowCertForm(!showCertForm);
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-origen-bosque hover:bg-origen-pino text-white text-sm font-medium transition-all"
+                  leftIcon={<Plus className="w-4 h-4" />}
                 >
-                  <Plus className="w-4 h-4" />
                   {showCertForm ? 'Cancelar' : 'Nueva certificación'}
-                </button>
+                </Button>
               </div>
 
               {/* Formulario de certificación */}
@@ -707,20 +708,21 @@ export function StepCertificationsAttributes({
                         />
 
                         <div className="flex justify-end gap-2 mt-2">
-                          <button
+                          <Button
+                            size="sm"
+                            variant="secondary"
                             onClick={resetCertForm}
-                            className="px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all text-sm font-medium text-gray-700"
                           >
                             Cancelar
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            size="sm"
                             onClick={editingCert ? handleUpdateCertification : handleAddCertification}
                             disabled={!newCert.name || !newCert.issuingBody}
-                            className="px-4 py-2 rounded-lg bg-origen-bosque hover:bg-origen-pino text-white text-sm font-medium transition-all disabled:opacity-50 flex items-center gap-2"
+                            leftIcon={<Save className="w-4 h-4" />}
                           >
-                            <Save className="w-4 h-4" />
                             {editingCert ? 'Actualizar' : 'Guardar'}
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -865,13 +867,14 @@ export function StepCertificationsAttributes({
                   <p className="text-xs text-gray-500 max-w-md mx-auto mt-1">
                     Añade certificaciones para aumentar la confianza de tus clientes y diferenciar tu producto
                   </p>
-                  <button
+                  <Button
+                    size="xs"
+                    className="mt-4"
                     onClick={() => setShowCertForm(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 mt-4 rounded-lg bg-origen-bosque hover:bg-origen-pino text-white text-xs font-medium transition-all"
+                    leftIcon={<Plus className="w-3 h-3" />}
                   >
-                    <Plus className="w-3 h-3" />
                     Añadir certificación
-                  </button>
+                  </Button>
                 </div>
               )}
             </motion.div>
@@ -950,16 +953,16 @@ export function StepCertificationsAttributes({
 
               {/* Botón añadir atributo */}
               <div className="flex justify-end">
-                <button
+                <Button
+                  size="sm"
                   onClick={() => {
                     resetAttrForm();
                     setShowAttrForm(!showAttrForm);
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-origen-bosque hover:bg-origen-pino text-white text-sm font-medium transition-all"
+                  leftIcon={<Plus className="w-4 h-4" />}
                 >
-                  <Plus className="w-4 h-4" />
                   {showAttrForm ? 'Cancelar' : 'Atributo personalizado'}
-                </button>
+                </Button>
               </div>
 
               {/* Formulario de atributo */}
@@ -1067,20 +1070,21 @@ export function StepCertificationsAttributes({
                         </div>
 
                         <div className="flex justify-end gap-2">
-                          <button
+                          <Button
+                            size="sm"
+                            variant="secondary"
                             onClick={resetAttrForm}
-                            className="px-4 py-2 rounded-lg border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all text-sm font-medium text-gray-700"
                           >
                             Cancelar
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            size="sm"
                             onClick={editingAttr ? handleUpdateAttribute : handleAddAttribute}
                             disabled={!newAttr.name}
-                            className="px-4 py-2 rounded-lg bg-origen-bosque hover:bg-origen-pino text-white text-sm font-medium transition-all disabled:opacity-50 flex items-center gap-2"
+                            leftIcon={<Save className="w-4 h-4" />}
                           >
-                            <Save className="w-4 h-4" />
                             {editingAttr ? 'Actualizar' : 'Guardar'}
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>

@@ -1,7 +1,7 @@
 // components/landing/SimpleRegistration.tsx
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -22,6 +22,7 @@ import { LoadingSpinner } from '@/components/shared';
 
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
+import { getProvinciaFromCP } from '@/constants/cp-provincias';
 import {
   initialRegistrationSchema,
   type InitialRegistrationFormData
@@ -105,9 +106,12 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
       confirmPassword: '',
       businessName: '',
       businessType: 'individual',
-      province: '',
+      street: '',
+      streetNumber: '',
+      streetComplement: '',
       municipio: '',
       postalCode: '',
+      province: '',
       producerCategory: undefined,
       whyOrigin: '',
       acceptsTerms: false,
@@ -119,6 +123,26 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
   const whyOriginValue = formValues.whyOrigin || '';
   const textareaValid = whyOriginValue.length >= 50;
   const isFormValid = isValid && textareaValid;
+
+  const cpError = useMemo(() => {
+    const cp = formValues.postalCode || '';
+    const prov = formValues.province;
+    if (errors.postalCode || cp.length < 5 || !prov) return undefined;
+    const expected = getProvinciaFromCP(cp);
+    if (expected === null) return undefined;
+    // Both values are now the capitalized PROVINCIAS_ESPANA name — direct comparison
+    if (expected === prov) return undefined;
+    return `Este código postal corresponde a ${expected}, no a ${prov}.`;
+  }, [formValues.postalCode, formValues.province, errors.postalCode]);
+
+  // Auto-fill province when CP reaches 5 digits
+  useEffect(() => {
+    const cp = formValues.postalCode || '';
+    if (cp.length === 5) {
+      const expected = getProvinciaFromCP(cp);
+      if (expected !== null) setValue('province', expected, { shouldValidate: true });
+    }
+  }, [formValues.postalCode]);
 
   // ============================================================================
   // AUTOSAVE - Guardado automático de borrador
@@ -151,9 +175,12 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
         businessName: data.businessName,
         businessType: data.businessType as 'individual' | 'company',
         producerCategory: data.producerCategory,
-        province: data.province,
+        street: data.street,
+        streetNumber: data.streetNumber,
+        streetComplement: data.streetComplement || undefined,
         municipio: data.municipio,
         postalCode: data.postalCode,
+        province: data.province,
         whyOrigin: data.whyOrigin,
         acceptsTerms: true,
         acceptsPrivacy: true,
@@ -340,51 +367,89 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 error={errors.businessType?.message}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              {/* Nombre de la vía */}
+              <Input
+                label="Nombre de la vía"
+                leftIcon={<MapPin />}
+                required
+                placeholder="Ej: Calle Mayor, Av. de la Constitución"
+                inputSize="lg"
+                error={errors.street?.message}
+                {...register('street')}
+                onBlur={() => {
+                  const v = formValues.street;
+                  if (v) setValue('street', v.trim().toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()));
+                }}
+              />
+
+              {/* Número + Piso/Puerta */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                <Input
+                  label="Número"
+                  required
+                  placeholder="Ej: 15"
+                  inputSize="lg"
+                  className="font-mono"
+                  error={errors.streetNumber?.message}
+                  {...register('streetNumber')}
+                />
+                <div className="md:col-span-2">
+                  <Input
+                    label="Piso / Puerta"
+                    placeholder="Ej: 3º A, Local 1, Bajo"
+                    inputSize="lg"
+                    helperText="opcional"
+                    error={errors.streetComplement?.message}
+                    {...register('streetComplement')}
+                  />
+                </div>
+              </div>
+
+              {/* CP + Provincia + Ciudad/Municipio */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <Input
+                  label="Código postal"
+                  required
+                  placeholder="Ej: 28001"
+                  inputSize="lg"
+                  maxLength={5}
+                  className="font-mono"
+                  error={errors.postalCode?.message || cpError}
+                  {...register('postalCode')}
+                />
                 <div className="space-y-1.5">
-                  <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
-                    <MapPin className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
+                  <label className="text-sm md:text-base font-medium text-origen-bosque">
                     Provincia <span className="text-destructive">*</span>
                   </label>
                   <Select
                     value={formValues.province}
                     onValueChange={(value) => setValue('province', value, { shouldValidate: true })}
-                    placeholder="Selecciona provincia"
+                    placeholder="Ej: Madrid"
                     error={errors.province?.message}
-                    searchable
+                    disabled
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {PROVINCIAS_ESPANA.map((provincia) => {
-                        const value = provincia.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                        return <SelectItem key={value} value={value}>{provincia}</SelectItem>;
-                      })}
+                      {PROVINCIAS_ESPANA.map((provincia) => (
+                        <SelectItem key={provincia} value={provincia}>{provincia}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <Input
-                  label="Municipio"
+                  label="Ciudad / Municipio"
                   leftIcon={<MapPin />}
                   required
-                  placeholder="Tu municipio"
+                  placeholder="Ej: Madrid"
                   inputSize="lg"
                   error={errors.municipio?.message}
                   {...register('municipio')}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <Input
-                  label="Código postal"
-                  leftIcon={<MapPin />}
-                  required
-                  placeholder="Ej: 28001"
-                  inputSize="lg"
-                  maxLength={5}
-                  error={errors.postalCode?.message}
-                  {...register('postalCode')}
+                  onBlur={() => {
+                    const v = formValues.municipio;
+                    if (v) setValue('municipio', v.trim().toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()));
+                  }}
                 />
               </div>
             </FormSection>
@@ -415,24 +480,24 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               )}
             </FormSection>
 
-            {/* SECCIÓN 4: Historia */}
+            {/* SECCIÓN 4: Candidatura */}
             <FormSection
-              title="Tu historia"
-              description="Los compradores conectan con personas, no solo con productos"
+              title="Tu candidatura"
+              description="Esta información es clave para valorar si encajas en la comunidad Origen"
               badge="Paso 4 de 5"
             >
               <div className="space-y-3">
                 <div className="space-y-1.5">
                   <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
                     <Heart className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
-                    ¿Por qué quieres vender en Origen? <span className="text-destructive">*</span>
+                    Cuéntanos tu historia como productor <span className="text-destructive">*</span>
                   </label>
                   <Textarea
-                    placeholder="Comparte tu pasión, tus valores... (mínimo 50 caracteres)"
+                    placeholder="¿Quién eres, qué produces y desde cuándo? ¿Cuáles son tus valores y prácticas? ¿Por qué quieres formar parte de la comunidad Origen? (mínimo 50 caracteres)"
                     error={errors.whyOrigin?.message}
                     maxLength={300}
                     {...register('whyOrigin')}
-                    className="min-h-[100px] md:min-h-[120px] resize-y"
+                    className="min-h-[120px] md:min-h-[140px] resize-y"
                   />
                 </div>
                 {whyOriginValue.length > 0 && (
@@ -441,7 +506,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 {textareaValid && (
                   <div className="flex items-center gap-2 text-sm text-origen-hoja bg-origen-crema/50 p-3 rounded-lg border border-origen-hoja/30">
                     <CheckCircle2 className="w-4 h-4" />
-                    <span className="font-medium">¡Gracias por compartir tu historia!</span>
+                    <span className="font-medium">¡Gracias por contarnos tu historia!</span>
                   </div>
                 )}
               </div>

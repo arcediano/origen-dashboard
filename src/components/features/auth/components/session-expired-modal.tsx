@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Clock } from 'lucide-react';
 import { Modal } from '@/components/ui/atoms/dialog';
+import { Button } from '@/components/ui/atoms/button';
 
 interface SessionExpiredModalProps {
   isOpen: boolean;
@@ -30,12 +31,9 @@ export function SessionExpiredModal({ isOpen }: SessionExpiredModalProps) {
       title="Sesión expirada"
       description="Tu sesión ha expirado por inactividad. Por favor, inicia sesión de nuevo para continuar."
       footer={
-        <button
-          onClick={handleGoToLogin}
-          className="w-full px-4 py-2.5 bg-origen-pradera hover:bg-origen-hoja text-white text-sm font-medium rounded-xl transition-colors"
-        >
+        <Button onClick={handleGoToLogin} className="w-full">
           Ir al inicio de sesión
-        </button>
+        </Button>
       }
     >
       <p className="text-sm text-gray-500">

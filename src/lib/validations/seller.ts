@@ -19,9 +19,12 @@ export const initialRegistrationSchema = z.object({
   confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
   businessName: z.string().min(3, 'Mínimo 3 caracteres').max(200),
   businessType: z.enum(['individual', 'company']),
-  province: z.string().min(2, 'Selecciona una provincia'),
+  street: z.string().min(3, 'Introduce el nombre de la vía'),
+  streetNumber: z.string().min(1, 'Introduce el número'),
+  streetComplement: z.string().optional(),
   municipio: z.string().min(2, 'Introduce el municipio'),
   postalCode: z.string().regex(/^\d{5}$/, 'El código postal debe tener 5 dígitos'),
+  province: z.string().min(2, 'Selecciona una provincia'),
   producerCategory: z.enum(['agricola', 'ganadero', 'artesano', 'apicultor', 'viticultor', 'especializado']),
   whyOrigin: z.string()
     .min(50, 'Cuéntanos un poco más (mínimo 50 caracteres)')

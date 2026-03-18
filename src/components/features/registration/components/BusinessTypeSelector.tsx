@@ -30,37 +30,40 @@ export const BusinessTypeSelector: React.FC<BusinessTypeSelectorProps> = ({ valu
             key={option.id}
             type="button"
             onClick={() => onChange(option.id as 'individual' | 'company')}
+            aria-pressed={isSelected}
             className={cn(
-              'relative bg-white rounded-xl border-2 transition-all',
-              'hover:shadow-md hover:scale-[1.02]',
-              'focus:outline-none focus:ring-2 focus:ring-origen-hoja/50',
+              'relative bg-white rounded-xl border-2 transition-all duration-200',
+              'hover:shadow-md hover:scale-[1.02] active:scale-[0.98]',
+              'focus:outline-none focus:ring-2 focus:ring-origen-pradera/50',
               'p-3 md:p-5',
               isSelected
-                ? 'border-origen-hoja bg-origen-hoja/5 shadow-md'
-                : 'border-gray-200 hover:border-origen-hoja'
+                ? 'border-origen-pradera bg-origen-pradera/[0.03] shadow-md'
+                : 'border-gray-200 hover:border-origen-pradera'
             )}
           >
             {isSelected && (
               <div className="absolute top-2 right-2">
-                <div className="w-5 h-5 bg-gradient-to-br from-origen-bosque to-origen-pino rounded-full flex items-center justify-center shadow">
-                  <Check className="w-3 h-3 text-white" />
+                <div className="w-6 h-6 rounded-full bg-origen-pradera flex items-center justify-center shadow-sm">
+                  <Check className="w-3.5 h-3.5 text-white" />
                 </div>
               </div>
             )}
-            <div className="flex flex-col items-center text-center">
+            <div className="flex flex-col items-center text-center gap-2">
               <div className={cn(
-                'rounded-xl flex items-center justify-center mb-2 transition-all',
-                'w-10 h-10 md:w-16 md:h-16',
+                'rounded-xl flex items-center justify-center transition-all',
+                'w-12 h-12 flex-shrink-0',
                 isSelected
-                  ? 'bg-gradient-to-br from-origen-bosque to-origen-pino text-white shadow-lg'
-                  : 'bg-gradient-to-br from-origen-crema to-origen-pastel text-origen-bosque'
+                  ? 'bg-gradient-to-br from-origen-pradera to-origen-hoja text-white shadow-md'
+                  : 'bg-gradient-to-br from-origen-crema to-origen-pastel text-origen-bosque group-hover:scale-110',
               )}>
-                <Icon className="w-5 h-5 md:w-8 md:h-8" />
+                <Icon className="w-6 h-6" />
               </div>
-              <h3 className={cn('text-sm md:text-lg font-semibold mb-0.5', isSelected ? 'text-origen-bosque' : 'text-gray-900')}>
-                {option.label}
-              </h3>
-              <p className="text-xs text-gray-500 hidden md:block">{option.desc}</p>
+              <div>
+                <h3 className={cn('text-sm font-semibold leading-tight', isSelected ? 'text-origen-bosque' : 'text-gray-900')}>
+                  {option.label}
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5 hidden md:block">{option.desc}</p>
+              </div>
             </div>
           </button>
         );

@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/atoms/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -50,7 +49,7 @@ export function MobileNavBar({
           variant="ghost"
           onClick={onSkip}
           disabled={isSubmitting}
-          className="flex-1 h-12 text-xs text-gray-500 hover:text-gray-700"
+          className="flex-shrink-0 h-12 text-xs text-gray-500 hover:text-gray-700"
         >
           Más tarde
         </Button>
@@ -59,23 +58,15 @@ export function MobileNavBar({
       {/* Continue / Finish button */}
       <Button
         type="button"
+        variant="primary"
         onClick={onNext}
         disabled={!canContinue || isSubmitting}
-        className={cn(
-          'h-12 bg-origen-bosque hover:bg-origen-pino text-white',
-          currentStep >= 1 && !isLastStep ? 'px-5 flex-shrink-0' : 'flex-1'
-        )}
+        loading={isSubmitting}
+        loadingText="Guardando..."
+        className="flex-1 h-12"
+        rightIcon={!isSubmitting && !isLastStep ? <ChevronRight className="w-4 h-4" /> : undefined}
       >
-        {isSubmitting ? (
-          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-        ) : isLastStep ? (
-          'Finalizar'
-        ) : (
-          <span className="flex items-center gap-1">
-            Continuar
-            <ChevronRight className="w-4 h-4" />
-          </span>
-        )}
+        {isLastStep ? 'Finalizar' : 'Continuar'}
       </Button>
     </div>
   );

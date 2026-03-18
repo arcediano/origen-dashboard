@@ -150,7 +150,9 @@ export default function OnboardingPage() {
   // Estado con tipos específicos por paso
   const [formData, setFormData] = useState<OnboardingFormData>({
     step1: {
-      address: '',
+      street: '',
+      streetNumber: '',
+      streetComplement: '',
       city: '',
       province: '',
       postalCode: '',
@@ -206,7 +208,9 @@ export default function OnboardingPage() {
           ...prev,
           step1: {
             ...prev.step1,
-            address: d.location?.address ?? prev.step1.address,
+            street: d.location?.street ?? d.location?.address ?? prev.step1.street,
+            streetNumber: d.location?.streetNumber ?? prev.step1.streetNumber,
+            streetComplement: d.location?.streetComplement ?? prev.step1.streetComplement,
             city: d.location?.city ?? prev.step1.city,
             province: d.location?.province ?? d.fiscal?.legalProvince ?? prev.step1.province,
             postalCode: d.location?.postalCode ?? prev.step1.postalCode,
@@ -267,7 +271,8 @@ export default function OnboardingPage() {
         return (
           !!formData.step1.province &&
           !!formData.step1.city.trim() &&
-          !!formData.step1.address.trim() &&
+          !!formData.step1.street.trim() &&
+          !!formData.step1.streetNumber.trim() &&
           /^\d{5}$/.test(formData.step1.postalCode) &&
           formData.step1.categories.length >= 1
         );

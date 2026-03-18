@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/atoms/button';
 import { Card } from '@/components/ui/atoms/card';
 import { Input } from '@/components/ui/atoms/input';
+import { Badge } from '@/components/ui/atoms/badge';
 import { ArrowLeft, Save, Plus, Truck, Zap, Store } from 'lucide-react';
 
 export default function EnviosPage() {
@@ -103,9 +104,7 @@ export default function EnviosPage() {
           <h2 className="text-lg font-semibold text-origen-bosque mb-4">Zonas de entrega</h2>
           <div className="flex flex-wrap gap-2">
             {['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Bilbao', 'Toledo'].map((city) => (
-              <span key={city} className="px-3 py-1.5 bg-origen-bosque text-white rounded-full text-xs">
-                {city}
-              </span>
+              <Badge key={city} variant="leaf" size="sm">{city}</Badge>
             ))}
             <Button variant="outline" size="sm">
               <Plus className="w-3 h-3 mr-1" />
