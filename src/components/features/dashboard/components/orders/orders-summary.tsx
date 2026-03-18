@@ -7,7 +7,8 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ChevronRight, Loader2, ShoppingBag } from 'lucide-react';
+import { ChevronRight, ShoppingBag } from 'lucide-react';
+import { SectionLoader } from '@/components/shared';
 import { OrderItem } from '../recent/order-item';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { Order } from '../../types';
@@ -39,9 +40,8 @@ export function OrdersSummary({ orders, isLoading = false, className }: OrdersSu
       <div className="space-y-3">
         {isLoading ? (
           // Estado de carga
-          <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-origen flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-8 h-8 text-origen-pradera animate-spin" />
-            <p className="text-sm text-gray-500">Cargando pedidos...</p>
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-origen">
+            <SectionLoader message="Cargando pedidos..." />
           </div>
         ) : orders.length > 0 ? (
           orders.map((order) => (

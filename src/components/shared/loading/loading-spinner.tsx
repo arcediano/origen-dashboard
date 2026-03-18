@@ -1,66 +1,68 @@
 /**
- * @file loading.tsx
- * @description Componentes de loading reutilizables para toda la aplicación
+ * @file loading-spinner.tsx
+ * @description Componentes de carga centralizados para toda la aplicación.
+ *
+ * Exporta tres componentes:
+ *   - `Spinner`       — SVG elegante (arco sobre pista semitransparente) para botones y acciones
+ *   - `SectionLoader` — Spinner + mensaje para cards y paneles
+ *   - `LoadingSkeleton` — Esqueleto animado para contenido estructurado
+ *
+ * Alias retrocompatible: `LoadingSpinner` → `Spinner`
  */
 
 'use client';
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { RefreshCw, Package } from 'lucide-react';
 import { Card } from '@/components/ui/atoms/card';
 
 // ============================================================================
 // TIPOS
 // ============================================================================
 
-export type LoadingSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-export type LoadingVariant = 'default' | 'primary' | 'secondary' | 'white';
+export type SpinnerSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type SpinnerVariant = 'default' | 'primary' | 'secondary' | 'white';
 
-export interface LoadingSpinnerProps {
+export interface SpinnerProps {
   /** Tamaño del spinner */
-  size?: LoadingSize;
+  size?: SpinnerSize;
   /** Variante de color */
-  variant?: LoadingVariant;
+  variant?: SpinnerVariant;
   /** Clase CSS adicional */
   className?: string;
   /** Texto alternativo para accesibilidad */
   label?: string;
 }
 
+export interface SectionLoaderProps {
+  /** Mensaje descriptivo bajo el spinner */
+  message?: string;
+  /** Tamaño del spinner */
+  size?: SpinnerSize;
+  /** Clase CSS adicional */
+  className?: string;
+}
+
 export interface LoadingSkeletonProps {
-  /** Número de líneas (para texto) */
+  /** Número de líneas (para texto/tabla) */
   lines?: number;
   /** Tipo de skeleton */
   type?: 'text' | 'card' | 'table' | 'image' | 'custom';
   /** Clase CSS adicional */
   className?: string;
-  /** Ancho del skeleton (para texto) */
+  /** Ancho del skeleton */
   width?: string;
-  /** Alto del skeleton (para texto) */
+  /** Alto del skeleton */
   height?: string;
   /** Si debe tener animación */
   animate?: boolean;
-}
-
-
-
-
-
-export interface LoadingDotsProps {
-  /** Tamaño de los puntos */
-  size?: LoadingSize;
-  /** Color de los puntos */
-  color?: string;
-  /** Clase CSS adicional */
-  className?: string;
 }
 
 // ============================================================================
 // CONSTANTES
 // ============================================================================
 
-const sizeMap: Record<LoadingSize, string> = {
+const spinnerSizes: Record<SpinnerSize, string> = {
   xs: 'w-3 h-3',
   sm: 'w-4 h-4',
   md: 'w-6 h-6',
@@ -68,65 +70,109 @@ const sizeMap: Record<LoadingSize, string> = {
   xl: 'w-12 h-12',
 };
 
-const variantMap: Record<LoadingVariant, string> = {
-  default: 'text-gray-400',
-  primary: 'text-origen-pradera',
+const spinnerColors: Record<SpinnerVariant, string> = {
+  default:   'text-gray-400',
+  primary:   'text-origen-pradera',
   secondary: 'text-origen-hoja',
-  white: 'text-white',
+  white:     'text-white',
 };
 
 // ============================================================================
-// COMPONENTES
+// SPINNER
 // ============================================================================
 
 /**
- * Spinner simple para botones o acciones pequeñas
- * 
+ * Spinner SVG elegante: arco animado sobre pista semitransparente.
+ * Reemplaza `border-t-transparent` divs y el antiguo `RefreshCw`.
+ *
  * @example
- * <LoadingSpinner size="sm" variant="primary" />
- * <Button disabled><LoadingSpinner size="xs" /> Cargando...</Button>
+ * // En botones de acción
+ * <Spinner size="sm" variant="white" />
+ *
+ * // En secciones de carga
+ * <Spinner size="lg" variant="primary" />
  */
-export function LoadingSpinner({ 
-  size = 'md', 
+export function Spinner({
+  size = 'md',
   variant = 'primary',
   className,
-  label = 'Cargando...'
-}: LoadingSpinnerProps) {
+  label = 'Cargando...',
+}: SpinnerProps) {
   return (
-    <RefreshCw 
-      className={cn(
-        'animate-spin',
-        sizeMap[size],
-        variantMap[variant],
-        className
-      )}
+    <svg
+      className={cn('animate-spin', spinnerSizes[size], spinnerColors[variant], className)}
+      viewBox="0 0 24 24"
+      fill="none"
       aria-label={label}
-    />
+      role="status"
+    >
+      {/* Pista semitransparente */}
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeOpacity="0.15"
+      />
+      {/* Arco activo */}
+      <path
+        d="M12 3a9 9 0 0 1 9 9"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 
+// ============================================================================
+// SECTION LOADER
+// ============================================================================
+
 /**
- * Esqueleto de carga para contenido
- * 
+ * Loader para cards y paneles: spinner centrado con mensaje opcional.
+ * Reemplaza el patrón `Loader2 + <p>Cargando...</p>` en componentes de dashboard.
+ *
  * @example
- * <LoadingSkeleton type="card" lines={3} />
+ * {isLoading && <SectionLoader message="Cargando pedidos..." />}
+ */
+export function SectionLoader({
+  message,
+  size = 'lg',
+  className,
+}: SectionLoaderProps) {
+  return (
+    <div className={cn('flex flex-col items-center justify-center gap-3 py-10 px-6', className)}>
+      <Spinner size={size} variant="primary" />
+      {message && (
+        <p className="text-sm text-gray-400 font-medium">{message}</p>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// LOADING SKELETON
+// ============================================================================
+
+/**
+ * Esqueleto animado para contenido estructurado (texto, cards, tablas, imágenes).
+ *
+ * @example
+ * <LoadingSkeleton type="card" />
  * <LoadingSkeleton type="table" lines={5} />
  */
-export function LoadingSkeleton({ 
-  lines = 3, 
+export function LoadingSkeleton({
+  lines = 3,
   type = 'text',
   className,
   width,
   height,
-  animate = true
+  animate = true,
 }: LoadingSkeletonProps) {
-  const baseClass = cn(
-    'bg-origen-pastel',
-    animate && 'animate-pulse',
-    'rounded'
-  );
+  const baseClass = cn('bg-origen-pastel', animate && 'animate-pulse', 'rounded');
 
-  // Skeleton para tarjetas
   if (type === 'card') {
     return (
       <Card className="p-4 space-y-3">
@@ -141,7 +187,6 @@ export function LoadingSkeleton({
     );
   }
 
-  // Skeleton para tablas
   if (type === 'table') {
     return (
       <div className="space-y-2">
@@ -153,30 +198,25 @@ export function LoadingSkeleton({
     );
   }
 
-  // Skeleton para imágenes
   if (type === 'image') {
     return (
-      <div 
-        className={cn(
-          baseClass, 
-          'aspect-square rounded-lg',
-          className
-        )}
+      <div
+        className={cn(baseClass, 'aspect-square rounded-lg', className)}
         style={{ width, height }}
       />
     );
   }
 
-  // Skeleton para texto (por defecto)
+  // Texto (por defecto)
   return (
     <div className={cn('space-y-2', className)}>
       {Array.from({ length: lines }).map((_, i) => (
         <div
           key={i}
           className={cn(baseClass, 'h-4')}
-          style={{ 
+          style={{
             width: width || (i === lines - 1 ? '60%' : '100%'),
-            height: height || '1rem'
+            height: height || '1rem',
           }}
         />
       ))}
@@ -184,48 +224,14 @@ export function LoadingSkeleton({
   );
 }
 
-
+// ============================================================================
+// ALIAS RETROCOMPATIBLE
+// ============================================================================
 
 /**
- * Puntos animados para estados de espera
- * 
- * @example
- * <LoadingDots size="md" />
+ * @deprecated Usa `Spinner` en su lugar.
  */
-export function LoadingDots({ 
-  size = 'md',
-  color = 'bg-origen-pradera',
-  className 
-}: LoadingDotsProps) {
-  const dotSize = {
-    xs: 'w-1 h-1',
-    sm: 'w-1.5 h-1.5',
-    md: 'w-2 h-2',
-    lg: 'w-2.5 h-2.5',
-    xl: 'w-3 h-3',
-  }[size];
-
-  return (
-    <div className={cn('flex items-center gap-1', className)}>
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className={cn(dotSize, 'rounded-full', color)}
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.5, 1, 0.5]
-          }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            delay: i * 0.2,
-            ease: 'easeInOut'
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// Necesitamos importar motion para las animaciones
-import { motion } from 'framer-motion';
+export const LoadingSpinner = Spinner;
+export type LoadingSpinnerProps = SpinnerProps;
+export type LoadingSize = SpinnerSize;
+export type LoadingVariant = SpinnerVariant;

@@ -25,6 +25,7 @@ import {
   Clock,
   Lock,
 } from 'lucide-react';
+import { Spinner } from '@/components/shared';
 
 // ============================================================================
 // ESTADO ÉXITO
@@ -197,10 +198,10 @@ export function SimpleForgotPassword() {
                     )}
                   >
                     {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Enviando enlace...</span>
-                      </div>
+                      <span className="flex items-center gap-2">
+                        <Spinner size="sm" variant="white" />
+                        Enviando enlace...
+                      </span>
                     ) : (
                       <span className="flex items-center justify-center gap-2">
                         <Send className="w-4 h-4" />

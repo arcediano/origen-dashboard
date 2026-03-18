@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/atoms/button';
 import { Checkbox } from '@/components/ui/atoms/checkbox';
 import { saveStep6 } from '@/lib/api/onboarding';
+import { Spinner } from '@/components/shared';
 
 import {
   CreditCard,
@@ -32,7 +33,6 @@ import {
   Lock,
   Zap,
   Info,
-  Euro,
   ArrowRight,
   AlertCircle,
 } from 'lucide-react';
@@ -268,7 +268,7 @@ export function EnhancedStep6Stripe({
             >
               {isConnecting ? (
                 <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <Spinner size="sm" variant="white" />
                   Conectando con Stripe...
                 </span>
               ) : (

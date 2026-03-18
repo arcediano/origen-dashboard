@@ -15,7 +15,8 @@
 
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
+import { Spinner } from '@/components/shared';
 import { saveStep6 } from '@/lib/api/onboarding';
 
 type VerificationState = 'verifying' | 'success' | 'incomplete' | 'error';
@@ -79,7 +80,7 @@ export default function StripeCompletePage() {
 
         {state === 'verifying' && (
           <>
-            <Loader2 className="w-12 h-12 text-origen-pradera mx-auto animate-spin" />
+            <Spinner size="xl" variant="primary" className="mx-auto" />
             <h1 className="text-xl font-bold text-origen-bosque">Verificando conexión...</h1>
             <p className="text-sm text-gray-500">Estamos confirmando tu cuenta con Stripe.</p>
           </>

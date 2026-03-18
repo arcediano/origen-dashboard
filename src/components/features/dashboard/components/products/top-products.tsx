@@ -7,7 +7,8 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ChevronRight, Loader2, Package } from 'lucide-react';
+import { ChevronRight, Package } from 'lucide-react';
+import { SectionLoader } from '@/components/shared';
 import { ProductItem } from '../recent/product-item';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { TopProduct } from '../../types';
@@ -39,9 +40,8 @@ export function TopProducts({ products, isLoading = false, className }: TopProdu
       <div className="space-y-3">
         {isLoading ? (
           // Estado de carga
-          <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-origen flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-8 h-8 text-origen-pradera animate-spin" />
-            <p className="text-sm text-gray-500">Cargando productos...</p>
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-origen">
+            <SectionLoader message="Cargando productos..." />
           </div>
         ) : products.length > 0 ? (
           products.map((product) => (

@@ -33,6 +33,7 @@ import {
   Store,
   Clock
 } from 'lucide-react';
+import { Spinner } from '@/components/shared';
 
 // ============================================================================
 // BANNER DE SESIÓN — muestra el motivo del cierre de sesión (si existe)
@@ -296,10 +297,10 @@ export function SimpleLogin() {
                 )}
               >
                 {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Iniciando sesión...</span>
-                  </div>
+                  <span className="flex items-center gap-2">
+                    <Spinner size="sm" variant="white" />
+                    Iniciando sesión...
+                  </span>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
                     <LogIn className="w-4 h-4" />

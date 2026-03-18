@@ -15,7 +15,8 @@
 
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import { Spinner } from '@/components/shared';
 
 export default function StripeRefreshPage() {
   const router = useRouter();
@@ -75,7 +76,7 @@ export default function StripeRefreshPage() {
   return (
     <div className="min-h-screen bg-origen-crema flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center space-y-6">
-        <Loader2 className="w-12 h-12 text-origen-pradera mx-auto animate-spin" />
+        <Spinner size="xl" variant="primary" className="mx-auto" />
         <h1 className="text-xl font-bold text-origen-bosque">Renovando enlace...</h1>
         <p className="text-sm text-gray-500">
           El enlace anterior expiró. Generando uno nuevo, serás redirigido automáticamente.
