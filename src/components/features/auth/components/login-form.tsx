@@ -119,9 +119,23 @@ export function SimpleLogin() {
 
     setIsLoading(true);
 
+    // ── Paso 1: autenticar ───────────────────────────────────────────────────
     try {
       await loginUser({ email: trimmedEmail, password: trimmedPassword, rememberMe });
+    } catch (err) {
+      if (err instanceof GatewayError && err.status === 401) {
+        setErrors({ general: 'Credenciales incorrectas. Revisa tu email y contraseña.' });
+      } else if (err instanceof GatewayError && err.status === 403) {
+        setErrors({ general: err.message });
+      } else {
+        setErrors({ general: 'No se pudo conectar con el servidor. Inténtalo de nuevo.' });
+      }
+      setIsLoading(false);
+      return;
+    }
 
+    // ── Paso 2: cargar perfil ────────────────────────────────────────────────
+    try {
       const loggedUser = await setUserFromLogin(trimmedEmail);
 
       if (!loggedUser || loggedUser.role !== 'PRODUCER') {
@@ -132,13 +146,7 @@ export function SimpleLogin() {
 
       router.push(loggedUser.onboardingCompleted ? '/dashboard' : '/onboarding');
     } catch (err) {
-      if (err instanceof GatewayError && err.status === 401) {
-        setErrors({ general: 'Credenciales incorrectas. Revisa tu email y contraseña.' });
-      } else if (err instanceof GatewayError && err.status === 403) {
-        setErrors({ general: err.message });
-      } else {
-        setErrors({ general: 'No se pudo conectar con el servidor. Inténtalo de nuevo.' });
-      }
+      setErrors({ general: 'Sesión iniciada correctamente, pero no se pudo cargar tu perfil. Inténtalo de nuevo.' });
     } finally {
       setIsLoading(false);
     }
