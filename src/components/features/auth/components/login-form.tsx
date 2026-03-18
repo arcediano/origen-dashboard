@@ -221,6 +221,9 @@ export function SimpleLogin() {
               label="Contraseña"
               placeholder="••••••••"
               autoComplete="current-password"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
               required
               value={password}
               onChange={(e) => {
