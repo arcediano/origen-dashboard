@@ -26,7 +26,12 @@
  * ```
  */
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
+// Browser: usa la misma URL del frontend (mismo origen) → Next.js reescribe a API_GATEWAY_URL
+// Servidor (SSR/Server Components): llama directamente al gateway, sin restricciones CORS
+const BASE_URL =
+  typeof window !== 'undefined'
+    ? (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3001')
+    : (process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000');
 const API_VERSION = 'v1';
 
 // Declaración global para debounce de sesión expirada

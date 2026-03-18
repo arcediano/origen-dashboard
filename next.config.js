@@ -18,6 +18,15 @@ const nextConfig = {
       { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
     ],
   },
+  // Proxy API calls through Next.js to avoid cross-origin cookie issues on mobile (iOS Safari)
+  async rewrites() {
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/api/v1/:path*`,
+      },
+    ];
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
