@@ -99,13 +99,30 @@ export function SimpleLogin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
+    const next: Record<string, string> = {};
+    if (!trimmedEmail) {
+      next.email = 'El email es requerido';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      next.email = 'Introduce un email válido';
+    }
+    if (!trimmedPassword) {
+      next.password = 'La contraseña es requerida';
+    } else if (trimmedPassword.length < 8) {
+      next.password = 'Mínimo 8 caracteres';
+    }
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
+
     setIsLoading(true);
 
     try {
-      await loginUser({ email, password, rememberMe });
+      await loginUser({ email: trimmedEmail, password: trimmedPassword, rememberMe });
 
-      const loggedUser = await setUserFromLogin(email);
+      const loggedUser = await setUserFromLogin(trimmedEmail);
 
       if (!loggedUser || loggedUser.role !== 'PRODUCER') {
         clearUser();
@@ -172,6 +189,10 @@ export function SimpleLogin() {
             label="Correo electrónico"
             placeholder="nombre@productor.es"
             autoComplete="email"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            inputMode="email"
             required
             value={email}
             onChange={(e) => {
