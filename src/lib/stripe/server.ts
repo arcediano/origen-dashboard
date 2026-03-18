@@ -12,7 +12,7 @@ import { STRIPE_CONFIG, calculatePlatformFee } from './config';
 
 // Inicializar cliente de Stripe
 const stripe = new Stripe(STRIPE_CONFIG.secretKey, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-02-24.acacia',
   typescript: true,
 });
 
@@ -23,19 +23,46 @@ const stripe = new Stripe(STRIPE_CONFIG.secretKey, {
  * @param businessName Nombre del negocio
  * @returns Cuenta de Stripe creada
  */
-export async function createConnectAccount(
-  sellerId: string,
-  email: string,
-  businessName: string
-) {
+export async function createConnectAccount(params: {
+  sellerId: string;
+  email?: string;
+  businessName?: string;
+  website?: string;
+  address?: {
+    street?: string;
+    streetNumber?: string;
+    city?: string;
+    province?: string;
+    postalCode?: string;
+  };
+}) {
+  const { sellerId, email, businessName, website, address } = params;
+
+  const line1 = [address?.street, address?.streetNumber].filter(Boolean).join(' ') || undefined;
+
   try {
     const account = await stripe.accounts.create({
       type: STRIPE_CONFIG.connectConfig.type,
       country: STRIPE_CONFIG.connectConfig.country,
-      email,
+      ...(email ? { email } : {}),
       business_profile: {
-        name: businessName,
+        ...(businessName ? { name: businessName } : {}),
+        ...(website ? { url: website } : {}),
       },
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
+      ...(line1 || address?.city || address?.postalCode ? {
+        individual: {
+          address: {
+            ...(line1 ? { line1 } : {}),
+            ...(address?.city ? { city: address.city } : {}),
+            ...(address?.postalCode ? { postal_code: address.postalCode } : {}),
+            country: 'ES',
+          },
+        },
+      } : {}),
       metadata: {
         sellerId,
         platform: 'origen-marketplace',

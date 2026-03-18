@@ -499,6 +499,16 @@ export default function OnboardingPage() {
           <EnhancedStep6Stripe
             data={formData.step6}
             onChange={handleStep6Change}
+            userEmail={user?.email}
+            businessName={formData.step2.businessName}
+            website={formData.step2.website}
+            address={{
+              street: formData.step1.street,
+              streetNumber: formData.step1.streetNumber,
+              city: formData.step1.city,
+              province: formData.step1.province,
+              postalCode: formData.step1.postalCode,
+            }}
           />
         );
       default:

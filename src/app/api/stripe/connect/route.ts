@@ -21,18 +21,26 @@ import { createConnectAccount, createAccountLink } from '@/lib/stripe/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, businessName } = body as {
+    const { email, businessName, website, address } = body as {
       email?: string;
       businessName?: string;
+      website?: string;
+      address?: {
+        street?: string;
+        streetNumber?: string;
+        city?: string;
+        province?: string;
+        postalCode?: string;
+      };
     };
 
-    // Crear cuenta Express en Stripe (email y businessName son opcionales —
-    // Stripe los solicitará durante el onboarding si no se proporcionan)
-    const account = await createConnectAccount(
-      `producer-${Date.now()}`, // sellerId interno — identificador único provisional
-      email ?? '',
-      businessName ?? '',
-    );
+    const account = await createConnectAccount({
+      sellerId: `producer-${Date.now()}`,
+      email,
+      businessName,
+      website,
+      address,
+    });
 
     // Generar el Account Link con URLs de retorno que incluyen el accountId
     const accountLink = await createAccountLink(account.id);
@@ -45,9 +53,14 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error creando cuenta Stripe Connect:', error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Error creando cuenta Stripe Connect:', message);
     return NextResponse.json(
-      { success: false, error: 'Error al iniciar la conexión con Stripe' },
+      {
+        success: false,
+        error: 'Error al iniciar la conexión con Stripe',
+        ...(process.env.NODE_ENV !== 'production' && { detail: message }),
+      },
       { status: 500 },
     );
   }

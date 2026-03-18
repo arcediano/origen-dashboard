@@ -48,10 +48,20 @@ export interface EnhancedStep6StripeData {
 export interface EnhancedStep6StripeProps {
   data: EnhancedStep6StripeData;
   onChange: (data: EnhancedStep6StripeData) => void;
-  /** Email del usuario — se usa para pre-rellenar la cuenta Stripe */
+  /** Email del usuario — pre-rellena la cuenta Stripe */
   userEmail?: string;
-  /** Nombre del negocio (paso 2) — se usa para pre-rellenar la cuenta Stripe */
+  /** Nombre del negocio (paso 2) — pre-rellena Stripe */
   businessName?: string;
+  /** Web del negocio (paso 2) — pre-rellena Stripe */
+  website?: string;
+  /** Dirección del productor (paso 1) — pre-rellena Stripe */
+  address?: {
+    street?: string;
+    streetNumber?: string;
+    city?: string;
+    province?: string;
+    postalCode?: string;
+  };
 }
 
 // ─── Componente ──────────────────────────────────────────────────────────────
@@ -61,6 +71,8 @@ export function EnhancedStep6Stripe({
   onChange,
   userEmail,
   businessName,
+  website,
+  address,
 }: EnhancedStep6StripeProps) {
   const [isConnecting, setIsConnecting] = React.useState(false);
   const [connectError, setConnectError] = React.useState('');
@@ -85,6 +97,8 @@ export function EnhancedStep6Stripe({
         body: JSON.stringify({
           email: userEmail,
           businessName,
+          website,
+          address,
         }),
       });
 
@@ -92,10 +106,14 @@ export function EnhancedStep6Stripe({
         success: boolean;
         data?: { accountId: string; onboardingUrl: string };
         error?: string;
+        detail?: string;
       };
 
       if (!json.success || !json.data) {
-        throw new Error(json.error ?? 'Error al crear la cuenta Stripe');
+        const errorMsg = json.detail
+          ? `${json.error}: ${json.detail}`
+          : (json.error ?? 'Error al crear la cuenta Stripe');
+        throw new Error(errorMsg);
       }
 
       const { accountId, onboardingUrl } = json.data;
