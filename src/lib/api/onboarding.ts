@@ -131,7 +131,7 @@ export async function saveStep5(
 export async function saveStep6(data: EnhancedStep6StripeData): Promise<StepSaveResponse> {
   return gatewayClient.post('/producers/onboarding/step/6', {
     stripeConnected: data.stripeConnected,
-    stripeAccountId: (data as any).stripeAccountId,
+    stripeAccountId: data.stripeAccountId,
     acceptTerms: data.acceptTerms,
   });
 }

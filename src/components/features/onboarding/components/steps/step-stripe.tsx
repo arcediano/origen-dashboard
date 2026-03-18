@@ -1,8 +1,19 @@
-// 📁 /src/components/onboarding/steps/EnhancedStep6Stripe.tsx
 /**
- * @file EnhancedStep6Stripe.tsx
- * @description Paso 6: Configuración de pagos — Fase 1 (simulación + info post-aprobación)
- * @version 5.0.0 - Diseño 3 cards: Explicación → Conectar → Términos
+ * @file step-stripe.tsx
+ * @description Paso 6 del onboarding: Configuración de pagos con Stripe Connect.
+ *
+ * Flujo real de conexión:
+ *   1. Usuario hace clic en "Conectar con Stripe"
+ *   2. Se llama a POST /api/stripe/connect → crea cuenta Express en Stripe
+ *   3. Se guarda el stripeAccountId en BD (saveStep6) antes de redirigir,
+ *      por si el usuario abandona el flujo de Stripe a mitad
+ *   4. Se redirige a la URL de onboarding de Stripe
+ *   5. Stripe redirige a /onboarding/stripe/complete?accountId=xxx al terminar
+ *   6. La página complete verifica el estado y actualiza stripeConnected=true en BD
+ *
+ * Props opcionales:
+ *   userEmail    — Pre-rellena el email en la cuenta Stripe (del perfil del usuario)
+ *   businessName — Pre-rellena el nombre del negocio en Stripe (del paso 2)
  */
 
 'use client';
@@ -12,6 +23,7 @@ import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui/atoms/button';
 import { Checkbox } from '@/components/ui/atoms/checkbox';
+import { saveStep6 } from '@/lib/api/onboarding';
 
 import {
   CreditCard,
@@ -22,62 +34,105 @@ import {
   Info,
   Euro,
   ArrowRight,
-  Mail,
+  AlertCircle,
 } from 'lucide-react';
 
-// Euro is kept for the "Vende" step icon in the how-it-works grid
-
-// ============================================================================
-// TIPOS
-// ============================================================================
+// ─── Tipos ───────────────────────────────────────────────────────────────────
 
 export interface EnhancedStep6StripeData {
   stripeConnected: boolean;
+  stripeAccountId?: string;
   acceptTerms: boolean;
 }
 
 export interface EnhancedStep6StripeProps {
   data: EnhancedStep6StripeData;
   onChange: (data: EnhancedStep6StripeData) => void;
+  /** Email del usuario — se usa para pre-rellenar la cuenta Stripe */
+  userEmail?: string;
+  /** Nombre del negocio (paso 2) — se usa para pre-rellenar la cuenta Stripe */
+  businessName?: string;
 }
 
-// ============================================================================
-// COMPONENTE PRINCIPAL
-// ============================================================================
+// ─── Componente ──────────────────────────────────────────────────────────────
 
-export function EnhancedStep6Stripe({ data, onChange }: EnhancedStep6StripeProps) {
+export function EnhancedStep6Stripe({
+  data,
+  onChange,
+  userEmail,
+  businessName,
+}: EnhancedStep6StripeProps) {
   const [isConnecting, setIsConnecting] = React.useState(false);
+  const [connectError, setConnectError] = React.useState('');
 
-  // ========================================================================
-  // MANEJADORES
-  // ========================================================================
+  // ── Manejadores ────────────────────────────────────────────────────────────
 
+  /**
+   * Inicia el flujo real de Stripe Connect:
+   *   1. Crea la cuenta Express en Stripe vía API route interna
+   *   2. Guarda el stripeAccountId en BD antes de redirigir (tolerancia a fallos)
+   *   3. Redirige a la URL de onboarding de Stripe
+   */
   const handleConnect = async () => {
     setIsConnecting(true);
-    // Fase 1: simulación — en Fase 2 esto redirigirá al OAuth de Stripe
-    await new Promise(resolve => setTimeout(resolve, 1800));
-    onChange({ ...data, stripeConnected: true });
-    setIsConnecting(false);
+    setConnectError('');
+
+    try {
+      // 1. Crear cuenta Stripe Express
+      const res = await fetch('/api/stripe/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userEmail,
+          businessName,
+        }),
+      });
+
+      const json = await res.json() as {
+        success: boolean;
+        data?: { accountId: string; onboardingUrl: string };
+        error?: string;
+      };
+
+      if (!json.success || !json.data) {
+        throw new Error(json.error ?? 'Error al crear la cuenta Stripe');
+      }
+
+      const { accountId, onboardingUrl } = json.data;
+
+      // 2. Persistir el accountId ANTES de redirigir — si el usuario abandona
+      //    el flujo de Stripe, el ID queda guardado para poder reanudar después
+      await saveStep6({
+        stripeConnected: false,
+        stripeAccountId: accountId,
+        acceptTerms: false,
+      });
+
+      // 3. Redirigir al onboarding de Stripe (misma ventana)
+      window.location.href = onboardingUrl;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error desconocido';
+      setConnectError(msg);
+      setIsConnecting(false);
+    }
   };
 
   const handleDisconnect = () => {
-    onChange({ stripeConnected: false, acceptTerms: false });
+    onChange({ stripeConnected: false, stripeAccountId: undefined, acceptTerms: false });
   };
 
   const handleTermsChange = (checked: boolean | 'indeterminate') => {
     onChange({ ...data, acceptTerms: checked === true });
   };
 
-  // ========================================================================
-  // RENDER
-  // ========================================================================
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="space-y-6">
 
-      {/* ====================================================================
-          CARD 1: CÓMO FUNCIONA
-      ==================================================================== */}
+      {/* ──────────────────────────────────────────────────────────────────────
+          CARD 1: CÓMO FUNCIONAN LOS PAGOS
+      ────────────────────────────────────────────────────────────────────── */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
 
         <div className="flex items-center gap-3 mb-6">
@@ -90,31 +145,28 @@ export function EnhancedStep6Stripe({ data, onChange }: EnhancedStep6StripeProps
           </div>
         </div>
 
-        {/* Steps explicativos */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             {
-              icon: CreditCard,
               title: 'Conecta',
               desc: 'Vincula tu cuenta bancaria a través de Stripe en menos de 5 minutos',
               step: '1',
             },
             {
-              icon: Euro,
               title: 'Vende',
               desc: 'Tus clientes pagan con tarjeta, bizum o transferencia de forma segura',
               step: '2',
             },
             {
-              icon: Zap,
               title: 'Cobra',
               desc: 'El dinero llega a tu cuenta en 1-2 días laborables automáticamente',
               step: '3',
             },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.step} className="flex sm:flex-col items-start sm:items-center sm:text-center gap-3 p-4 bg-origen-crema/20 rounded-xl border border-gray-100">
+          ].map((item) => (
+              <div
+                key={item.step}
+                className="flex sm:flex-col items-start sm:items-center sm:text-center gap-3 p-4 bg-origen-crema/20 rounded-xl border border-gray-100"
+              >
                 <div className="w-10 h-10 rounded-full bg-origen-pradera text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
                   {item.step}
                 </div>
@@ -123,11 +175,9 @@ export function EnhancedStep6Stripe({ data, onChange }: EnhancedStep6StripeProps
                   <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
                 </div>
               </div>
-            );
-          })}
+          ))}
         </div>
 
-        {/* PCI Badge */}
         <div className="mt-5 flex justify-center">
           <div className="inline-flex items-center gap-1.5 text-xs text-green-700 bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
             <Shield className="w-3.5 h-3.5" />
@@ -136,20 +186,20 @@ export function EnhancedStep6Stripe({ data, onChange }: EnhancedStep6StripeProps
         </div>
       </div>
 
-      {/* ====================================================================
+      {/* ──────────────────────────────────────────────────────────────────────
           CARD 2: CONECTAR CUENTA
-      ==================================================================== */}
+      ────────────────────────────────────────────────────────────────────── */}
       <div className={cn(
-        "bg-white rounded-2xl border p-6 md:p-8 shadow-sm transition-all",
-        data.stripeConnected ? "border-green-200" : "border-gray-200 hover:border-origen-pradera/30"
+        'bg-white rounded-2xl border p-6 md:p-8 shadow-sm transition-all',
+        data.stripeConnected ? 'border-green-200' : 'border-gray-200 hover:border-origen-pradera/30',
       )}>
 
         <div className="flex items-center gap-3 mb-6">
           <div className={cn(
-            "w-12 h-12 rounded-xl flex items-center justify-center",
+            'w-12 h-12 rounded-xl flex items-center justify-center',
             data.stripeConnected
-              ? "bg-green-50"
-              : "bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20"
+              ? 'bg-green-50'
+              : 'bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20',
           )}>
             {data.stripeConnected
               ? <CheckCircle2 className="w-6 h-6 text-green-600" />
@@ -173,19 +223,11 @@ export function EnhancedStep6Stripe({ data, onChange }: EnhancedStep6StripeProps
             <div className="p-4 bg-green-50 rounded-xl border border-green-200 flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-green-800">Simulación completada correctamente</p>
+                <p className="text-sm font-medium text-green-800">Cuenta Stripe conectada correctamente</p>
                 <p className="text-xs text-green-700 mt-1">
-                  En producción, aquí se mostrará la cuenta bancaria y el estado real de tu cuenta Stripe.
+                  Tu cuenta bancaria está lista para recibir los pagos de tus pedidos.
                 </p>
               </div>
-            </div>
-
-            {/* Fase 1: aviso de conexión real por email */}
-            <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 flex items-start gap-3">
-              <Mail className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-blue-700">
-                <span className="font-medium">Nota:</span> La conexión real con Stripe se completará por email una vez que tu perfil sea aprobado por nuestro equipo. Te avisaremos en 24-48h.
-              </p>
             </div>
 
             <button
@@ -198,15 +240,25 @@ export function EnhancedStep6Stripe({ data, onChange }: EnhancedStep6StripeProps
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4">
+            {/* Aviso de qué datos necesita el productor */}
             <div className="w-full p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
               <p className="text-xs text-gray-600 flex items-start gap-2">
                 <Info className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
                 <span>
-                  ¿No tienes cuenta Stripe? <span className="font-medium">La crearás durante el proceso, es gratis</span>.
+                  ¿No tienes cuenta Stripe?{' '}
+                  <span className="font-medium">La crearás durante el proceso, es gratis</span>.
                   Solo necesitas un email y tus datos bancarios.
                 </span>
               </p>
             </div>
+
+            {/* Error de conexión */}
+            {connectError && (
+              <div className="w-full p-3 bg-red-50 rounded-xl border border-red-200 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-red-700">{connectError}</p>
+              </div>
+            )}
 
             <Button
               type="button"
@@ -239,13 +291,13 @@ export function EnhancedStep6Stripe({ data, onChange }: EnhancedStep6StripeProps
         )}
       </div>
 
-      {/* ====================================================================
+      {/* ──────────────────────────────────────────────────────────────────────
           CARD 3: TÉRMINOS
-      ==================================================================== */}
+      ────────────────────────────────────────────────────────────────────── */}
       <div className={cn(
-        "bg-white rounded-2xl border p-6 md:p-8 shadow-sm transition-all",
-        !data.stripeConnected && "opacity-60",
-        data.stripeConnected && "border-gray-200 hover:border-origen-pradera/30"
+        'bg-white rounded-2xl border p-6 md:p-8 shadow-sm transition-all',
+        !data.stripeConnected && 'opacity-60',
+        data.stripeConnected && 'border-gray-200 hover:border-origen-pradera/30',
       )}>
 
         <div className="flex items-start gap-4">
@@ -255,28 +307,35 @@ export function EnhancedStep6Stripe({ data, onChange }: EnhancedStep6StripeProps
             onCheckedChange={handleTermsChange}
             disabled={!data.stripeConnected}
             className={cn(
-              "h-5 w-5 rounded-md border-2 mt-0.5 flex-shrink-0",
-              !data.stripeConnected && "cursor-not-allowed"
+              'h-5 w-5 rounded-md border-2 mt-0.5 flex-shrink-0',
+              !data.stripeConnected && 'cursor-not-allowed',
             )}
           />
           <div className="flex-1">
             <label
               htmlFor="accept-terms"
               className={cn(
-                "text-sm font-medium text-origen-bosque",
-                data.stripeConnected ? "cursor-pointer" : "cursor-not-allowed"
+                'text-sm font-medium text-origen-bosque',
+                data.stripeConnected ? 'cursor-pointer' : 'cursor-not-allowed',
               )}
             >
               Acepto los términos y condiciones de Stripe y de Origen
             </label>
             <p className="text-xs text-gray-500 mt-1 leading-relaxed">
               Al conectar, aceptas los{' '}
-              <a href="https://stripe.com/es/legal" target="_blank" rel="noopener noreferrer"
-                className="text-origen-pradera hover:text-origen-bosque underline underline-offset-2">
+              <a
+                href="https://stripe.com/es/legal"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-origen-pradera hover:text-origen-bosque underline underline-offset-2"
+              >
                 Términos de Stripe
               </a>{' '}y la{' '}
-              <a href="#" onClick={(e) => e.preventDefault()}
-                className="text-origen-pradera hover:text-origen-bosque underline underline-offset-2">
+              <a
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className="text-origen-pradera hover:text-origen-bosque underline underline-offset-2"
+              >
                 Política de privacidad de Origen
               </a>.
             </p>
@@ -290,9 +349,9 @@ export function EnhancedStep6Stripe({ data, onChange }: EnhancedStep6StripeProps
         </div>
       </div>
 
-      {/* ====================================================================
+      {/* ──────────────────────────────────────────────────────────────────────
           RESUMEN FINAL
-      ==================================================================== */}
+      ────────────────────────────────────────────────────────────────────── */}
       {data.stripeConnected && data.acceptTerms && (
         <div className="bg-green-50 rounded-2xl border border-green-200 p-6">
           <div className="flex items-center gap-3">
@@ -302,16 +361,14 @@ export function EnhancedStep6Stripe({ data, onChange }: EnhancedStep6StripeProps
             <div>
               <h3 className="font-semibold text-green-800">¡Todo listo para finalizar!</h3>
               <p className="text-sm text-green-700 mt-0.5">
-                Puedes completar tu registro ahora. La conexión real con Stripe llegará por email.
+                Tu cuenta de cobro está conectada y los términos aceptados.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* ====================================================================
-          TRUST BADGES
-      ==================================================================== */}
+      {/* Trust badges */}
       <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-gray-500 border-t border-gray-200">
         <div className="flex items-center gap-1.5">
           <Shield className="w-3.5 h-3.5 text-origen-pradera" />

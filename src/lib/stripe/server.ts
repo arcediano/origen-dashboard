@@ -50,16 +50,22 @@ export async function createConnectAccount(
 }
 
 /**
- * Crea un Account Link para el onboarding del vendedor en Stripe
+ * Crea un Account Link para el onboarding del vendedor en Stripe.
+ *
+ * El accountId se incluye como query param en las URLs de retorno para que
+ * las páginas de destino puedan verificar el estado de la cuenta sin necesidad
+ * de almacenarlo en sesión del lado del servidor.
+ *
  * @param accountId ID de la cuenta de Stripe
  * @returns Link de onboarding
  */
 export async function createAccountLink(accountId: string) {
   try {
+    const base = STRIPE_CONFIG.baseUrl;
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
-      refresh_url: `${STRIPE_CONFIG.baseUrl}/onboarding/stripe/refresh`,
-      return_url: `${STRIPE_CONFIG.baseUrl}/onboarding/stripe/complete`,
+      refresh_url: `${base}/onboarding/stripe/refresh?accountId=${accountId}`,
+      return_url: `${base}/onboarding/stripe/complete?accountId=${accountId}`,
       type: 'account_onboarding',
     });
 
