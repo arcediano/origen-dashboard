@@ -159,6 +159,25 @@ const buttonVariants = cva(
         ),
 
         /**
+         * Link - Texto con apariencia de enlace
+         * Estado default: transparent, text-origen-pradera
+         * Estado hover: text-origen-bosque, underline
+         * Uso: Acciones secundarias inline, enlaces contextuales
+         */
+        link: cn(
+          /* === Estado default === */
+          "bg-transparent",
+          "text-origen-pradera",
+          "underline-offset-4",
+          "h-auto p-0",
+          /* === Estado hover === */
+          "hover:text-origen-bosque",
+          "hover:underline",
+          /* === Estado focus === */
+          "focus-visible:ring-origen-pradera/30"
+        ),
+
+        /**
          * Destructive - Botón destructivo
          * Estado default: bg-red-600, text-white
          * Estado hover: bg-red-700

@@ -101,7 +101,6 @@ export function AdjustStockDialog({
           </Button>
           <Button
             onClick={handleConfirm}
-            className="bg-origen-bosque hover:bg-origen-pino text-white rounded-xl"
             disabled={isLoading}
           >
             {isLoading ? (

@@ -201,9 +201,8 @@ export default function ProductosPage() {
           tooltip="Catálogo de productos"
           tooltipDetailed="Administra todos tus productos, su stock y visibilidad desde esta sección."
           actions={
-            <Button 
-              onClick={handleNewProduct} 
-              className="bg-origen-bosque hover:bg-origen-pino text-white h-10 px-5"
+            <Button
+              onClick={handleNewProduct}
             >
               <span className="flex items-center gap-2">
                 <Plus className="w-4 h-4" />
@@ -271,7 +270,6 @@ export default function ProductosPage() {
                   {hasFilters ? (
                     <Button 
                       onClick={clearFilters} 
-                      className="bg-origen-bosque hover:bg-origen-pino text-white"
                     >
                       <span className="flex items-center gap-2">
                         <RefreshCw className="w-4 h-4" />
@@ -281,7 +279,6 @@ export default function ProductosPage() {
                   ) : (
                     <Button 
                       onClick={handleNewProduct} 
-                      className="bg-origen-bosque hover:bg-origen-pino text-white"
                     >
                       <span className="flex items-center gap-2">
                         <Plus className="w-4 h-4" />

@@ -1,23 +1,26 @@
-// components/forms/SimpleForgotPassword.tsx
 /**
- * @file SimpleForgotPassword.tsx
- * @description Formulario de recuperación de contraseña
- * @version 1.0.0
+ * @file forgot-password-form.tsx
+ * @description Formulario de recuperación de contraseña.
+ *
+ * Usa los componentes de la librería de UI:
+ *   - `Input`  → campo email con validación integrada
+ *   - `Button` → submit con estado de carga nativo
  */
 
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/atoms/button';
-import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+
 import { requestPasswordReset } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
 
+import { Button } from '@/components/ui/atoms/button';
+import { Input } from '@/components/ui/atoms/input';
+
 import {
   Mail,
-  AlertCircle,
   CheckCircle2,
   ArrowLeft,
   Send,
@@ -25,11 +28,8 @@ import {
   Clock,
   Lock,
 } from 'lucide-react';
-import { Spinner } from '@/components/shared';
 
-// ============================================================================
-// ESTADO ÉXITO
-// ============================================================================
+// ─── Estado de éxito ──────────────────────────────────────────────────────────
 
 function SuccessState({ email }: { email: string }) {
   return (
@@ -79,9 +79,7 @@ function SuccessState({ email }: { email: string }) {
   );
 }
 
-// ============================================================================
-// COMPONENTE PRINCIPAL
-// ============================================================================
+// ─── Componente principal ─────────────────────────────────────────────────────
 
 export function SimpleForgotPassword() {
   const [email, setEmail] = useState('');
@@ -110,7 +108,7 @@ export function SimpleForgotPassword() {
       await requestPasswordReset(email);
       setSubmitted(true);
     } catch (err) {
-      // Siempre mostramos éxito aunque el email no exista (evita enumeración de usuarios)
+      // Siempre mostramos éxito salvo error de servidor (evita enumeración de usuarios)
       if (err instanceof GatewayError && err.status >= 500) {
         setError('Error del servidor. Inténtalo de nuevo más tarde.');
       } else {
@@ -123,7 +121,6 @@ export function SimpleForgotPassword() {
 
   return (
     <div className="w-full max-w-md mx-auto px-4 sm:px-0">
-      {/* Tarjeta principal */}
       <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 md:p-8 shadow-lg hover:shadow-xl transition-all">
 
         <AnimatePresence mode="wait">
@@ -150,66 +147,36 @@ export function SimpleForgotPassword() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Campo email */}
-                <div className="space-y-1.5">
-                  <label className="text-xs md:text-sm font-medium text-origen-bosque flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 text-origen-pradera" />
-                    Correo electrónico <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      if (error) setError('');
-                    }}
-                    placeholder="nombre@productor.es"
-                    autoFocus
-                    className={cn(
-                      'w-full h-11 md:h-12 px-3 md:px-4 text-sm',
-                      'bg-white border rounded-xl',
-                      'focus:outline-none focus:ring-2 focus:ring-origen-pradera/20',
-                      'transition-all duration-200',
-                      error
-                        ? 'border-red-300 focus:border-red-400 focus:ring-red-200'
-                        : 'border-gray-200 focus:border-origen-pradera',
-                    )}
-                  />
-                  {error && (
-                    <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {error}
-                    </p>
-                  )}
-                </div>
 
-                {/* Botón */}
-                <div className="flex justify-center">
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className={cn(
-                      "w-full max-w-xs h-12",
-                      "bg-origen-bosque hover:bg-origen-pino",
-                      "text-white text-sm font-semibold",
-                      "rounded-xl shadow-md hover:shadow-lg",
-                      "transition-all transform hover:-translate-y-0.5",
-                      "disabled:opacity-50 disabled:hover:translate-y-0"
-                    )}
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center gap-2">
-                        <Spinner size="sm" variant="white" />
-                        Enviando enlace...
-                      </span>
-                    ) : (
-                      <span className="flex items-center justify-center gap-2">
-                        <Send className="w-4 h-4" />
-                        Enviar enlace de recuperación
-                      </span>
-                    )}
-                  </Button>
-                </div>
+                {/* Email */}
+                <Input
+                  type="email"
+                  label="Correo electrónico"
+                  placeholder="nombre@productor.es"
+                  autoFocus
+                  required
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError('');
+                  }}
+                  leftIcon={<Mail />}
+                  error={error}
+                  inputSize="lg"
+                />
+
+                {/* Submit */}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  loading={isLoading}
+                  loadingText="Enviando enlace..."
+                  className="w-full"
+                  leftIcon={<Send className="w-4 h-4" />}
+                >
+                  Enviar enlace de recuperación
+                </Button>
 
                 {/* Volver al login */}
                 <div className="text-center pt-1">

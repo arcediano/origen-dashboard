@@ -36,7 +36,6 @@ import {
   MapPin,
   Leaf,
   Mail,
-  CheckCircle,
   Phone,
   Heart,
   ShieldCheck,
@@ -46,7 +45,6 @@ import {
   AlertCircle,
   Check,
 } from 'lucide-react';
-import { MobileCardSlider } from '../landing/components/mobile-card-slider';
 
 // ============================================================================
 // IMPORTS FROM NEW REGISTRATION MODULE
@@ -238,68 +236,55 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               badge="Paso 1 de 5"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div className="space-y-1.5">
-                  <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
-                    <User className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
-                    Nombre <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder="Ej: María"
-                    error={errors.contactName?.message}
-                    {...register('contactName')}
-                    className="h-11 md:h-12 text-sm md:text-base border-gray-200 focus:border-origen-hoja focus:ring-1 focus:ring-origen-hoja/30"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
-                    <User className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
-                    Apellidos <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder="Ej: García López"
-                    error={errors.contactSurname?.message}
-                    {...register('contactSurname')}
-                    className="h-11 md:h-12 text-sm md:text-base border-gray-200 focus:border-origen-hoja focus:ring-1 focus:ring-origen-hoja/30"
-                  />
-                </div>
+                <Input
+                  label="Nombre"
+                  leftIcon={<User />}
+                  required
+                  placeholder="Ej: María"
+                  inputSize="lg"
+                  error={errors.contactName?.message}
+                  {...register('contactName')}
+                />
+                <Input
+                  label="Apellidos"
+                  leftIcon={<User />}
+                  required
+                  placeholder="Ej: García López"
+                  inputSize="lg"
+                  error={errors.contactSurname?.message}
+                  {...register('contactSurname')}
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div className="space-y-1.5">
-                  <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
-                    <Mail className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
-                    Email <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder="tu@email.com"
-                    error={errors.email?.message}
-                    {...register('email')}
-                    className="h-11 md:h-12 text-sm md:text-base border-gray-200 focus:border-origen-hoja focus:ring-1 focus:ring-origen-hoja/30"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
-                    <Phone className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
-                    Teléfono <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    type="tel"
-                    placeholder="600 000 000"
-                    error={errors.phone?.message}
-                    {...register('phone')}
-                    className="h-11 md:h-12 text-sm md:text-base border-gray-200 focus:border-origen-hoja focus:ring-1 focus:ring-origen-hoja/30"
-                  />
-                </div>
+                <Input
+                  label="Email"
+                  leftIcon={<Mail />}
+                  required
+                  type="email"
+                  placeholder="tu@email.com"
+                  inputSize="lg"
+                  error={errors.email?.message}
+                  {...register('email')}
+                />
+                <Input
+                  label="Teléfono"
+                  leftIcon={<Phone />}
+                  required
+                  type="tel"
+                  placeholder="600 000 000"
+                  inputSize="lg"
+                  error={errors.phone?.message}
+                  {...register('phone')}
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div className="space-y-1.5">
-                  <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
-                    <Lock className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
-                    Contraseña <span className="text-destructive">*</span>
-                  </label>
+                <div>
                   <Input
+                    label="Contraseña"
+                    leftIcon={<Lock />}
+                    required
                     type="password"
                     placeholder="Mín. 8 caracteres"
                     error={errors.password?.message}
@@ -308,12 +293,11 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   />
                   <PasswordStrengthIndicator password={formValues.password || ''} />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
-                    <Lock className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
-                    Confirmar contraseña <span className="text-destructive">*</span>
-                  </label>
+                <div>
                   <Input
+                    label="Confirmar contraseña"
+                    leftIcon={<Lock />}
+                    required
                     type="password"
                     placeholder="Repite la contraseña"
                     error={errors.confirmPassword?.message}
@@ -324,7 +308,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     <motion.div
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center gap-1.5 text-origen-hoja"
+                      className="flex items-center gap-1.5 text-origen-hoja mt-1"
                     >
                       <Check className="w-3.5 h-3.5" />
                       <span className="text-xs font-medium">Las contraseñas coinciden</span>
@@ -340,18 +324,15 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               description="Cuéntanos sobre tu proyecto"
               badge="Paso 2 de 5"
             >
-              <div className="space-y-1.5">
-                <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
-                  <Store className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
-                  Nombre del negocio <span className="text-destructive">*</span>
-                </label>
-                <Input
-                  placeholder="Ej: Huerta Ecológica del Valle"
-                  error={errors.businessName?.message}
-                  {...register('businessName')}
-                  className="h-11 md:h-12 text-sm md:text-base border-gray-200 focus:border-origen-hoja focus:ring-1 focus:ring-origen-hoja/30"
-                />
-              </div>
+              <Input
+                label="Nombre del negocio"
+                leftIcon={<Store />}
+                required
+                placeholder="Ej: Huerta Ecológica del Valle"
+                inputSize="lg"
+                error={errors.businessName?.message}
+                {...register('businessName')}
+              />
 
               <BusinessTypeSelector
                 value={formValues.businessType}
@@ -371,7 +352,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     placeholder="Selecciona provincia"
                     error={errors.province?.message}
                     searchable
-                    className="h-11 md:h-12 text-sm md:text-base"
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -384,34 +364,28 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
-                    <MapPin className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
-                    Municipio <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder="Tu municipio"
-                    error={errors.municipio?.message}
-                    {...register('municipio')}
-                    className="h-11 md:h-12 text-sm md:text-base border-gray-200 focus:border-origen-hoja focus:ring-1 focus:ring-origen-hoja/30"
-                  />
-                </div>
+                <Input
+                  label="Municipio"
+                  leftIcon={<MapPin />}
+                  required
+                  placeholder="Tu municipio"
+                  inputSize="lg"
+                  error={errors.municipio?.message}
+                  {...register('municipio')}
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div className="space-y-1.5">
-                  <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
-                    <MapPin className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
-                    Código postal <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder="Ej: 28001"
-                    maxLength={5}
-                    error={errors.postalCode?.message}
-                    {...register('postalCode')}
-                    className="h-11 md:h-12 text-sm md:text-base border-gray-200 focus:border-origen-hoja focus:ring-1 focus:ring-origen-hoja/30"
-                  />
-                </div>
+                <Input
+                  label="Código postal"
+                  leftIcon={<MapPin />}
+                  required
+                  placeholder="Ej: 28001"
+                  inputSize="lg"
+                  maxLength={5}
+                  error={errors.postalCode?.message}
+                  {...register('postalCode')}
+                />
               </div>
             </FormSection>
 
@@ -421,22 +395,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               description="Selecciona tu categoría principal"
               badge="Paso 3 de 5"
             >
-              {/* Móvil: Slider horizontal */}
-              <div className="md:hidden">
-                <MobileCardSlider cardWidthClass="w-[70vw] max-w-[280px]">
-                  {PRODUCER_CATEGORIES.map((category) => (
-                    <CategoryCard
-                      key={category.id}
-                      category={category}
-                      isSelected={formValues.producerCategory === category.id}
-                      onSelect={handleCategorySelect}
-                    />
-                  ))}
-                </MobileCardSlider>
-              </div>
-
-              {/* Desktop: Grid */}
-              <div className="hidden md:grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {PRODUCER_CATEGORIES.map((category) => (
                   <CategoryCard
                     key={category.id}
@@ -473,7 +432,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     error={errors.whyOrigin?.message}
                     maxLength={300}
                     {...register('whyOrigin')}
-                    className="min-h-[100px] md:min-h-[120px] text-sm md:text-base border-gray-200 focus:border-origen-hoja focus:ring-1 focus:ring-origen-hoja/30 resize-y"
+                    className="min-h-[100px] md:min-h-[120px] resize-y"
                   />
                 </div>
                 {whyOriginValue.length > 0 && (
@@ -520,15 +479,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 type="submit"
                 size="lg"
                 disabled={!isFormValid}
-                className={cn(
-                  'w-full md:w-auto md:min-w-[280px] relative overflow-hidden',
-                  'bg-origen-bosque hover:bg-origen-pino',
-                  'text-white text-base md:text-lg font-semibold',
-                  'rounded-xl shadow-xl hover:shadow-2xl',
-                  'transition-all transform hover:-translate-y-1',
-                  'disabled:opacity-50 disabled:hover:translate-y-0',
-                  'h-12 md:h-14 px-6 md:px-8'
-                )}
+                className="w-full md:w-auto md:min-w-[280px] relative overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-1 disabled:hover:translate-y-0 h-12 md:h-14 px-6 md:px-8 text-base md:text-lg"
               >
                 {isFormValid ? (
                   <motion.span

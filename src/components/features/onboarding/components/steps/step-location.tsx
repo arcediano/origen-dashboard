@@ -11,7 +11,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 import { Input } from '@/components/ui/atoms/input';
-import { FileUpload, type UploadedFile } from '@/components/shared';
+import { FileUpload, type UploadedFile, CategoryCard } from '@/components/shared';
 
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
@@ -24,12 +24,6 @@ import {
   Leaf,
   Home,
   Store,
-  Sprout,
-  Beef,
-  ChefHat,
-  Wine,
-  Flower,
-  Package,
   Info,
   Calendar,
   Users,
@@ -218,91 +212,7 @@ export interface EnhancedStep1LocationProps {
   onChange: (data: EnhancedLocationData) => void;
 }
 
-// ============================================================================
-// MAPA DE ICONOS - Definido localmente
-// ============================================================================
-
-const CATEGORY_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  'agricola': Sprout,
-  'ganadero': Beef,
-  'artesano': ChefHat,
-  'apicultor': Flower,
-  'viticultor': Wine,
-  'especializado': Package
-};
-
-const getCategoryIcon = (categoryId: string): React.ComponentType<{ className?: string }> => {
-  return CATEGORY_ICON_MAP[categoryId] || Package;
-};
-
-// ============================================================================
-// CATEGORY CARD - Definición local completa
-// ============================================================================
-
-interface CategoryCardProps {
-  category: {
-    id: string;
-    name: string;
-    icon: string;
-    description: string;
-  };
-  isSelected: boolean;
-  onSelect: (id: string) => void;
-}
-
-const CategoryCard: React.FC<CategoryCardProps> = ({
-  category,
-  isSelected,
-  onSelect
-}) => {
-  const IconComponent = getCategoryIcon(category.id);
-
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(category.id)}
-      className={cn(
-        "group relative bg-white rounded-xl border-2 transition-all w-full",
-        "p-3",
-        "hover:shadow-md active:scale-[0.98]",
-        "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
-        isSelected
-          ? "border-origen-pradera shadow-md bg-origen-pradera/[0.03]"
-          : "border-gray-200 hover:border-origen-pradera"
-      )}
-    >
-      {isSelected && (
-        <div className="absolute top-3 right-3">
-          <div className="w-6 h-6 rounded-full bg-origen-pradera flex items-center justify-center shadow-sm">
-            <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-          </div>
-        </div>
-      )}
-      {/* Vertical en todos los breakpoints */}
-      <div className="flex flex-col items-center text-center gap-2">
-        <div className={cn(
-          "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all",
-          isSelected
-            ? "bg-gradient-to-br from-origen-pradera to-origen-hoja text-white shadow-md"
-            : "bg-gradient-to-br from-origen-crema to-origen-pastel text-origen-bosque"
-        )}>
-          <IconComponent className="w-6 h-6" />
-        </div>
-        <div className="w-full">
-          <h3 className={cn(
-            "text-sm font-semibold leading-tight",
-            isSelected ? "text-origen-bosque" : "text-gray-900"
-          )}>
-            {category.name}
-          </h3>
-          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-snug">
-            {category.description}
-          </p>
-        </div>
-      </div>
-    </button>
-  );
-};
+// CategoryCard importado de @/components/shared — componente canónico
 
 // ============================================================================
 // COMPONENTE PRINCIPAL
@@ -414,7 +324,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
               value={data.address || ''}
               onChange={(e) => handleInputChange('address', e.target.value)}
               placeholder="Calle, número, finca, local..."
-              className="h-12 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+              inputSize="lg"
             />
           </div>
           
@@ -428,7 +338,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 value={data.city || ''}
                 onChange={(e) => handleInputChange('city', e.target.value)}
                 placeholder="Ej: Madrid"
-                className="h-12 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+                inputSize="lg"
               />
             </div>
             <div className="space-y-2">
@@ -440,7 +350,8 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 onChange={handlePostalCodeChange}
                 placeholder="28001"
                 maxLength={5}
-                className="h-12 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20 font-mono"
+                inputSize="lg"
+                className="font-mono"
               />
             </div>
           </div>
@@ -482,7 +393,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 placeholder="Ej: 1985"
                 min={1900}
                 max={new Date().getFullYear()}
-                className="h-12 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+                inputSize="lg"
               />
               {data.foundedYear && (
                 <p className="text-xs text-origen-pradera">

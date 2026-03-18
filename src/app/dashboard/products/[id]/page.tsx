@@ -113,9 +113,8 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) 
           </div>
           <h2 className="text-xl font-bold text-origen-bosque mb-2">Error al cargar</h2>
           <p className="text-gray-600 mb-6">{error}</p>
-          <Button 
+          <Button
             onClick={onRetry}
-            className="bg-origen-bosque hover:bg-origen-pino text-white h-10 px-5"
           >
             <span className="flex items-center gap-2">
               <RefreshCw className="w-4 h-4" />
@@ -291,7 +290,7 @@ export default function ProductoDetallePage() {
 
             {/* Botón Editar */}
           <Link href={`/dashboard/products/${product.id}edit`} className="inline-block">
-            <Button className="bg-origen-bosque hover:bg-origen-pino text-white h-10 px-5">
+            <Button>
               <span className="flex items-center gap-2">
                 <Edit className="w-4 h-4" />
                 Editar

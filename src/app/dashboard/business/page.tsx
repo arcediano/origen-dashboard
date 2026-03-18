@@ -529,7 +529,7 @@ export default function BusinessPage() {
                         Cancelaciones gratuitas hasta 24 horas antes. Pasado ese plazo, se aplicará una penalización del 50%.
                       </p>
                       {isEditing && (
-                        <Button variant="link" size="sm" className="text-origen-pradera p-0 h-auto mt-2">
+                        <Button variant="link" className="mt-2">
                           Editar política
                         </Button>
                       )}
@@ -544,7 +544,7 @@ export default function BusinessPage() {
                         Envíos a toda España peninsular en 24-48h. Envío gratuito para pedidos superiores a 50€.
                       </p>
                       {isEditing && (
-                        <Button variant="link" size="sm" className="text-origen-pradera p-0 h-auto mt-2">
+                        <Button variant="link" className="mt-2">
                           Editar información
                         </Button>
                       )}

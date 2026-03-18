@@ -16,3 +16,7 @@ export type { PageLoaderProps } from './loading/page-loader';
 // Upload
 export { FileUpload } from './upload/file-upload';
 export type { UploadedFile, FileUploadProps } from './upload/file-upload';
+
+// Category card
+export { CategoryCard, getCategoryIcon } from './category-card';
+export type { CategoryCardProps } from './category-card';

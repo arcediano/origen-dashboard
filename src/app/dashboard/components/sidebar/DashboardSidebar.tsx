@@ -95,7 +95,7 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
               </div>
               <span className="text-base font-semibold" style={{ color: '#1B4332' }}>origen.</span>
             </Link>
-            <Button variant="ghost" size="icon-sm" onClick={onMobileClose} className="rounded-full">
+            <Button variant="ghost" size="icon-sm" onClick={onMobileClose}>
               <X className="w-5 h-5" />
             </Button>
           </div>

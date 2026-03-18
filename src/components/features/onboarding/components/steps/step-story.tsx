@@ -269,7 +269,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
               value={data.businessName || ''}
               onChange={(e) => handleInputChange('businessName', e.target.value)}
               placeholder="Ej: Huerta Orgánica del Valle"
-              className="h-12 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+              inputSize="lg"
             />
           </div>
           
@@ -283,7 +283,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
               value={data.tagline || ''}
               onChange={(e) => handleInputChange('tagline', e.target.value)}
               placeholder="Una frase que capture la esencia de tu marca"
-              className="h-12 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+              inputSize="lg"
             />
             <p className="text-xs text-gray-500">
               Ej: &ldquo;El sabor de la tradición&rdquo;, &ldquo;De nuestra huerta a tu mesa&rdquo;, &ldquo;Artesanía con corazón&rdquo;
@@ -308,7 +308,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                   onChange={(e) => handleInputChange('website', e.target.value)}
                   placeholder="https://www.tunegocio.com"
                   type="url"
-                  className="h-11 text-sm border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+                  inputSize="md"
                 />
               </div>
               <div className="space-y-2">
@@ -322,7 +322,8 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                     value={data.instagramHandle || ''}
                     onChange={(e) => handleInputChange('instagramHandle', e.target.value.replace(/^@/, ''))}
                     placeholder="tunegocio"
-                    className="h-11 text-sm pl-7 border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+                    inputSize="md"
+                    className="pl-7"
                   />
                 </div>
               </div>
@@ -415,7 +416,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
             value={data.productionPhilosophy || ''}
             onChange={(e) => handleInputChange('productionPhilosophy', e.target.value)}
             placeholder="Ej: Cultivamos siguiendo métodos biodinámicos, respetando los ciclos naturales y sin químicos sintéticos. Cosechamos a mano y fermentamos de forma tradicional..."
-            className="min-h-[100px] text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+            className="min-h-[100px]"
             maxLength={500}
           />
           

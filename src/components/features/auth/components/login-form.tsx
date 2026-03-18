@@ -1,29 +1,29 @@
-// components/forms/SimpleLogin.tsx
 /**
- * @file SimpleLogin.tsx
- * @description Formulario de login premium - v2.0.0
- * @version 2.0.0 - Manual de Marca v3.0 "Bosque Profundo" + Mejoras responsive
+ * @file login-form.tsx
+ * @description Formulario de acceso para productores.
+ *
+ * Usa los componentes de la librería de UI:
+ *   - `Input`             → campos email y contraseña (con validación integrada)
+ *   - `CheckboxWithLabel` → recordar sesión
+ *   - `Button`            → submit con estado de carga nativo
  */
 
 'use client';
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/atoms/button';
-import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+
 import { loginUser } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-// ============================================================================
-// ICONOS
-// ============================================================================
+import { Button } from '@/components/ui/atoms/button';
+import { Input } from '@/components/ui/atoms/input';
+import { CheckboxWithLabel } from '@/components/ui/atoms/checkbox';
 
 import {
-  Eye,
-  EyeOff,
   LogIn,
   Mail,
   Lock,
@@ -31,14 +31,12 @@ import {
   CheckCircle2,
   Shield,
   Store,
-  Clock
+  Clock,
 } from 'lucide-react';
-import { Spinner } from '@/components/shared';
+import { cn } from '@/lib/utils';
 
-// ============================================================================
-// BANNER DE SESIÓN — muestra el motivo del cierre de sesión (si existe)
+// ─── Banner de sesión expirada ────────────────────────────────────────────────
 // Usa useSearchParams → requiere Suspense para SSR/SSG
-// ============================================================================
 
 function SessionBanner() {
   const searchParams = useSearchParams();
@@ -50,50 +48,54 @@ function SessionBanner() {
   const isInactivity = reason === 'inactivity' || reason === 'hidden';
 
   return (
-    <div className={cn(
-      'mb-5 p-3 border rounded-lg flex items-start gap-2 text-sm',
-      isInactivity
-        ? 'bg-amber-50 border-amber-200 text-amber-800'
-        : 'bg-red-50 border-red-200 text-red-700'
-    )}>
+    <div
+      className={cn(
+        'mb-5 p-3 border rounded-lg flex items-start gap-2 text-sm',
+        isInactivity
+          ? 'bg-amber-50 border-amber-200 text-amber-800'
+          : 'bg-red-50 border-red-200 text-red-700',
+      )}
+    >
       <span className="flex-shrink-0 mt-0.5">{isInactivity ? '⏰' : '🔒'}</span>
       <span>{decodeURIComponent(message)}</span>
     </div>
   );
 }
 
-// ============================================================================
-// COMPONENTE PRINCIPAL
-// ============================================================================
+// ─── Componente principal ─────────────────────────────────────────────────────
 
 export function SimpleLogin() {
   const router = useRouter();
   const { setUserFromLogin, clearUser } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // ── Validación ──────────────────────────────────────────────────────────────
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+    const next: Record<string, string> = {};
 
     if (!email.trim()) {
-      newErrors.email = 'El email es requerido';
+      next.email = 'El email es requerido';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'Introduce un email válido';
+      next.email = 'Introduce un email válido';
     }
 
     if (!password) {
-      newErrors.password = 'La contraseña es requerida';
+      next.password = 'La contraseña es requerida';
     } else if (password.length < 8) {
-      newErrors.password = 'Mínimo 8 caracteres';
+      next.password = 'Mínimo 8 caracteres';
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
+
+  // ── Submit ──────────────────────────────────────────────────────────────────
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,24 +103,17 @@ export function SimpleLogin() {
     setIsLoading(true);
 
     try {
-      // Paso 1: Login (solo devuelve tokens, NO user)
       await loginUser({ email, password, rememberMe });
 
-      // Paso 2: Cargar usuario del backend (hace GET /auth/userinfo con retries automáticos)
-      // setUserFromLogin maneja el timing issue automáticamente con 3 intentos
-      // ✅ Capturar el usuario devuelto para validación inmediata
       const loggedUser = await setUserFromLogin(email);
 
-      // Paso 3: Validar rol usando el usuario devuelto (NO el estado del contexto)
       if (!loggedUser || loggedUser.role !== 'PRODUCER') {
         clearUser();
         setErrors({ general: 'Tu cuenta no tiene acceso al panel de productores.' });
-        setIsLoading(false);
         return;
       }
 
-      const destination = loggedUser.onboardingCompleted ? '/dashboard' : '/onboarding';
-      router.push(destination);
+      router.push(loggedUser.onboardingCompleted ? '/dashboard' : '/onboarding');
     } catch (err) {
       if (err instanceof GatewayError && err.status === 401) {
         setErrors({ general: 'Credenciales incorrectas. Revisa tu email y contraseña.' });
@@ -132,9 +127,10 @@ export function SimpleLogin() {
     }
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
+
   return (
     <div className="w-full max-w-md mx-auto px-4 sm:px-0">
-      {/* Tarjeta principal */}
       <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 md:p-8 shadow-lg hover:shadow-xl transition-all">
 
         {/* Header */}
@@ -142,11 +138,13 @@ export function SimpleLogin() {
           <div className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 rounded-2xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
             <Store className="w-7 h-7 md:w-8 md:h-8 text-white" />
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-origen-bosque mb-1">Acceso productores</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-origen-bosque mb-1">
+            Acceso productores
+          </h2>
           <p className="text-xs md:text-sm text-gray-600">Gestiona tu tienda y ventas</p>
         </div>
 
-        {/* Banner de sesión expirada / inactividad */}
+        {/* Banner sesión expirada */}
         <Suspense fallback={null}>
           <SessionBanner />
         </Suspense>
@@ -168,49 +166,28 @@ export function SimpleLogin() {
 
         <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
 
-          {/* Campo Email */}
-          <div className="space-y-1.5">
-            <label className="text-xs md:text-sm font-medium text-origen-bosque flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 text-origen-pradera" />
-              Correo electrónico <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type="email"
-                value={email}
-                autoComplete="email"
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (errors.email) setErrors({ ...errors, email: '' });
-                }}
-                placeholder="nombre@productor.es"
-                className={cn(
-                  "w-full h-11 md:h-12 px-3 md:px-4 text-sm",
-                  "bg-white border rounded-xl",
-                  "focus:outline-none focus:ring-2",
-                  "focus:ring-origen-pradera/20",
-                  "transition-all duration-200",
-                  errors.email
-                    ? "border-red-300 focus:border-red-400 focus:ring-red-200"
-                    : "border-gray-200 focus:border-origen-pradera"
-                )}
-              />
-            </div>
-            {errors.email && (
-              <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
-                <AlertCircle className="w-3 h-3" />
-                {errors.email}
-              </p>
-            )}
-          </div>
+          {/* Email */}
+          <Input
+            type="email"
+            label="Correo electrónico"
+            placeholder="nombre@productor.es"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errors.email) setErrors({ ...errors, email: '' });
+            }}
+            leftIcon={<Mail />}
+            error={errors.email}
+            inputSize="lg"
+          />
 
-          {/* Campo Contraseña */}
-          <div className="space-y-1.5">
+          {/* Contraseña */}
+          <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-xs md:text-sm font-medium text-origen-bosque flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 md:w-4 md:h-4 text-origen-pradera" />
-                Contraseña <span className="text-red-500">*</span>
-              </label>
+              {/* El label lo pinta el componente Input con la prop `label` */}
+              <span /> {/* spacer para alinear el enlace a la derecha */}
               <Link
                 href="/auth/forgot-password"
                 className="text-[10px] md:text-xs text-origen-pradera hover:text-origen-bosque transition-colors"
@@ -218,108 +195,55 @@ export function SimpleLogin() {
                 ¿Olvidaste?
               </Link>
             </div>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                autoComplete="current-password"
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (errors.password) setErrors({ ...errors, password: '' });
-                }}
-                placeholder="••••••••"
-                className={cn(
-                  "w-full h-11 md:h-12 px-3 md:px-4 text-sm",
-                  "bg-white border rounded-xl",
-                  "focus:outline-none focus:ring-2",
-                  "focus:ring-origen-pradera/20",
-                  "transition-all duration-200 pr-10 md:pr-11",
-                  errors.password
-                    ? "border-red-300 focus:border-red-400 focus:ring-red-200"
-                    : "border-gray-200 focus:border-origen-pradera"
-                )}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-origen-bosque p-1"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
-                <AlertCircle className="w-3 h-3" />
-                {errors.password}
-              </p>
-            )}
+            <Input
+              type="password"
+              label="Contraseña"
+              placeholder="••••••••"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errors.password) setErrors({ ...errors, password: '' });
+              }}
+              leftIcon={<Lock />}
+              error={errors.password}
+              inputSize="lg"
+            />
           </div>
 
-          {/* Checkbox personalizado */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              role="checkbox"
-              aria-checked={rememberMe}
-              onClick={() => setRememberMe(!rememberMe)}
-              className={cn(
-                "w-4 h-4 rounded border transition-all",
-                "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
-                rememberMe
-                  ? "bg-origen-bosque border-origen-bosque"
-                  : "border-gray-300 hover:border-origen-pradera"
-              )}
+          {/* Recordar sesión */}
+          <CheckboxWithLabel
+            checked={rememberMe}
+            onCheckedChange={(v) => setRememberMe(v === true)}
+            label="Recordar mi sesión"
+            size="sm"
+          />
+
+          {/* Separador + submit */}
+          <div className="border-t border-origen-crema/40 pt-4 space-y-4">
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              loading={isLoading}
+              loadingText="Iniciando sesión..."
+              className="w-full"
+              leftIcon={<LogIn className="w-4 h-4" />}
             >
-              {rememberMe && (
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                  <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              )}
-            </button>
-            <span className="text-[11px] md:text-xs text-gray-600">Recordar mi sesión</span>
-          </div>
+              Acceder al panel
+            </Button>
 
-          {/* Separador visual - Borde de marca */}
-          <div className="border-t border-origen-crema/40 pt-4">
-
-            {/* Contenedor para centrar botón */}
-            <div className="flex justify-center">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className={cn(
-                  "w-full max-w-xs h-11 md:h-12",
-                  "bg-origen-bosque hover:bg-origen-pino",
-                  "text-white text-sm font-semibold",
-                  "rounded-xl shadow-md hover:shadow-lg",
-                  "transition-all transform hover:-translate-y-0.5",
-                  "disabled:opacity-50 disabled:hover:translate-y-0"
-                )}
+            <p className="text-center text-[11px] md:text-xs text-gray-500">
+              ¿No tienes cuenta?{' '}
+              <Link
+                href="/auth/register"
+                className="text-origen-pradera hover:text-origen-bosque font-medium"
               >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <Spinner size="sm" variant="white" />
-                    Iniciando sesión...
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    <LogIn className="w-4 h-4" />
-                    Acceder al panel
-                  </span>
-                )}
-              </Button>
-            </div>
-
-            {/* Enlace a registro */}
-            <div className="text-center pt-4">
-              <p className="text-[11px] md:text-xs text-gray-500">
-                ¿No tienes cuenta?{' '}
-                <Link href="/auth/register" className="text-origen-pradera hover:text-origen-bosque font-medium">
-                  Regístrate como productor
-                </Link>
-              </p>
-            </div>
-          </div> {/* Cierre del separador visual */}
+                Regístrate como productor
+              </Link>
+            </p>
+          </div>
         </form>
       </div>
 

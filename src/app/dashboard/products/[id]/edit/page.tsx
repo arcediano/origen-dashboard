@@ -99,7 +99,7 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry?: () => void })
           <h2 className="text-xl font-bold text-origen-bosque mb-2">Error al cargar</h2>
           <p className="text-gray-600 mb-6">{error}</p>
           {onRetry && (
-            <Button onClick={onRetry} className="bg-origen-bosque hover:bg-origen-pino text-white">
+            <Button onClick={onRetry}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Reintentar
             </Button>

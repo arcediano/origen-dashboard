@@ -107,7 +107,7 @@ export default function EnviosPage() {
                 {city}
               </span>
             ))}
-            <Button variant="outline" size="sm" className="rounded-full">
+            <Button variant="outline" size="sm">
               <Plus className="w-3 h-3 mr-1" />
               Añadir provincia
             </Button>

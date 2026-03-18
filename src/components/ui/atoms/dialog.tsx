@@ -1,17 +1,81 @@
 /**
- * @file modal.tsx
- * @description Componente de modal simple y fácil de integrar
+ * @file dialog.tsx
+ * @description Modal con portal real + focus trap accesible.
+ *
+ * Mejoras sobre la versión anterior:
+ *   - Renderiza vía `createPortal` → nunca queda cortado por overflow/stacking contexts
+ *   - Focus trap: Tab/Shift+Tab ciclan dentro del modal
+ *   - Al abrirse mueve el foco al primer elemento interactivo
+ *   - Al cerrarse devuelve el foco al elemento que lo tenía antes
  */
 
 'use client';
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 
-// ============================================================================
-// MODAL SIMPLE
-// ============================================================================
+// ─── Selectores de elementos focalizables ─────────────────────────────────────
+
+const FOCUSABLE = [
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  'a[href]',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+// ─── Hook: focus trap ─────────────────────────────────────────────────────────
+
+function useFocusTrap(isOpen: boolean, containerRef: React.RefObject<HTMLDivElement | null>) {
+  React.useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+
+    const container = containerRef.current;
+    const previousFocus = document.activeElement as HTMLElement | null;
+
+    // Mover foco al primer elemento interactivo del modal
+    const focusable = () =>
+      Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+        (el) => getComputedStyle(el).display !== 'none',
+      );
+
+    focusable()[0]?.focus();
+
+    // Ciclar Tab/Shift+Tab dentro del modal
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const els = focusable();
+      if (!els.length) return;
+
+      const first = els[0];
+      const last = els[els.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previousFocus?.focus(); // Devolver foco al abrir el modal
+    };
+  }, [isOpen, containerRef]);
+}
+
+// ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface ModalProps {
   /** Control de apertura */
@@ -38,25 +102,8 @@ export interface ModalProps {
   showCloseButton?: boolean;
 }
 
-/**
- * Modal simple y fácil de integrar
- * 
- * @example
- * <Modal
- *   isOpen={open}
- *   onClose={() => setOpen(false)}
- *   title="Confirmar acción"
- *   description="¿Estás seguro de continuar?"
- *   footer={
- *     <>
- *       <button onClick={() => setOpen(false)}>Cancelar</button>
- *       <button onClick={handleConfirm}>Confirmar</button>
- *     </>
- *   }
- * >
- *   Contenido del modal
- * </Modal>
- */
+// ─── Componente ───────────────────────────────────────────────────────────────
+
 export function Modal({
   isOpen,
   onClose,
@@ -70,11 +117,34 @@ export function Modal({
   closeOnOutsideClick = true,
   showCloseButton = true,
 }: ModalProps) {
-  // Referencias
   const modalRef = React.useRef<HTMLDivElement>(null);
-  const contentRef = React.useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = React.useState(false);
 
-  // Tamaños del modal
+  // Portal sólo funciona en el cliente
+  React.useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  // Focus trap
+  useFocusTrap(isOpen, modalRef);
+
+  // Cerrar con Escape
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
+  // Bloquear scroll del body
+  React.useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
   const sizeClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md',
@@ -82,50 +152,24 @@ export function Modal({
     xl: 'max-w-xl',
   };
 
-  // Cerrar con tecla Escape
-  React.useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
+  if (!isOpen || !mounted) return null;
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
-
-  // Cerrar al hacer clic fuera
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (closeOnOutsideClick && e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  // Bloquear scroll del body cuando el modal está abierto
-  React.useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in-0"
-      onClick={handleBackdropClick}
+      onClick={closeOnOutsideClick ? (e) => { if (e.target === e.currentTarget) onClose(); } : undefined}
+      aria-modal="true"
+      role="dialog"
+      aria-labelledby={title ? 'modal-title' : undefined}
+      aria-describedby={description ? 'modal-description' : undefined}
     >
       <div
         ref={modalRef}
         className={cn(
-          'relative w-full bg-white rounded-2xl shadow-2xl border border-gray-200 animate-in zoom-in-95 slide-in-from-bottom-4',
+          'relative w-full bg-white rounded-2xl shadow-2xl border border-gray-200',
+          'animate-in zoom-in-95 slide-in-from-bottom-4',
           sizeClasses[size],
-          className
+          className,
         )}
       >
         {/* Botón de cierre */}
@@ -139,7 +183,7 @@ export function Modal({
           </button>
         )}
 
-        {/* Header con icono y título */}
+        {/* Header */}
         {(icon || title || description) && (
           <div className="px-6 pt-6 pb-2 border-b border-gray-100">
             <div className="flex items-start gap-4">
@@ -150,28 +194,34 @@ export function Modal({
               )}
               <div className="flex-1 min-w-0">
                 {title && (
-                  <h3 className="text-lg font-semibold text-origen-bosque leading-none tracking-tight">
+                  <h3
+                    id="modal-title"
+                    className="text-lg font-semibold text-origen-bosque leading-none tracking-tight"
+                  >
                     {title}
                   </h3>
                 )}
                 {description && (
-                  <p className="text-sm text-gray-500 mt-1">{description}</p>
+                  <p id="modal-description" className="text-sm text-gray-500 mt-1">
+                    {description}
+                  </p>
                 )}
               </div>
             </div>
           </div>
         )}
 
-        {/* Cuerpo del modal */}
+        {/* Cuerpo */}
         <div className="px-6 py-4">{children}</div>
 
-        {/* Footer con acciones */}
+        {/* Footer */}
         {footer && (
           <div className="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex items-center justify-end gap-3">
             {footer}
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

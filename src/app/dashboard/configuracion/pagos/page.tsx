@@ -45,7 +45,7 @@ export default function PagosPage() {
               Conectado
             </span>
           ) : (
-            <Button className="bg-origen-bosque hover:bg-origen-pino">
+            <Button variant="primary">
               Conectar Stripe
             </Button>
           )}

@@ -261,7 +261,6 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
             value={zoneName}
             onChange={(e) => setZoneName(e.target.value)}
             placeholder="Nombre de la zona (ej: Área metropolitana de Madrid)"
-            className="h-11 text-sm"
           />
         )}
 
@@ -276,14 +275,15 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
                 zoneType === 'postal' ? 'Ej: 28001, 280*, 28000-28050' :
                 'Códigos postales cubiertos (ej: 28001, 280*, 28000-28050)'
               }
-              className={cn("h-11 text-sm", parseError ? "border-red-300 focus:border-red-400" : "")}
+              className={cn(parseError && "border-red-300 focus:border-red-400")}
             />
           </div>
           <Button
             type="button"
             onClick={handleAddZone}
             disabled={zoneType === 'named' ? (!zoneName.trim() || !zoneValue.trim()) : !zoneValue.trim()}
-            className="h-11 px-4 bg-origen-bosque hover:bg-origen-pino text-white flex-shrink-0"
+            variant="primary"
+            className="flex-shrink-0"
           >
             <Plus className="w-4 h-4" />
           </Button>
@@ -779,7 +779,8 @@ export function EnhancedStep4Capacity({
               onChange={(e) => handleInputChange('minOrderAmount', parseFloat(e.target.value) || 0)}
               min={0}
               step={5}
-              className="h-12 pl-8 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+              inputSize="lg"
+              className="pl-8"
             />
           </div>
           <span className="text-sm text-gray-500">euros</span>
@@ -851,7 +852,7 @@ export function EnhancedStep4Capacity({
                 value={data.packagingDescription || ''}
                 onChange={(e) => handleInputChange('packagingDescription', e.target.value)}
                 placeholder="Ej: Cajas de cartón 100% reciclado, papel kraft, etiquetas compostables..."
-                className="h-11 text-base border-gray-200 focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/20"
+                inputSize="md"
               />
               <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
                 <Info className="w-3.5 h-3.5" />
