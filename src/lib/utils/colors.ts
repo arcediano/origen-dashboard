@@ -81,59 +81,68 @@ export const infoStates = {
 // PALETA ORIGEN - Accesos directos a tokens de marca
 // ============================================================================
 
+// Paleta v3.0 "Bosque Profundo" — fuente de verdad para código no-CSS.
+// Los valores HSL deben coincidir exactamente con globals.css.
 export const origenColors = {
   bosque: {
-    hex: '#1B2A4B',
-    hsl: '221 47% 20%',
+    hex: '#1B4332',
+    hsl: '155 48% 18%',
     bg: 'bg-origen-bosque',
     text: 'text-origen-bosque',
     border: 'border-origen-bosque',
   },
   pino: {
-    hex: '#2E4A6E',
-    hsl: '214 41% 31%',
+    hex: '#2D6A4F',
+    hsl: '155 37% 30%',
     bg: 'bg-origen-pino',
     text: 'text-origen-pino',
     border: 'border-origen-pino',
   },
   hoja: {
-    hex: '#4E7456',
-    hsl: '133 20% 38%',
+    hex: '#40916C',
+    hsl: '155 42% 38%',
     bg: 'bg-origen-hoja',
     text: 'text-origen-hoja',
     border: 'border-origen-hoja',
   },
   pradera: {
-    hex: '#6B90B8',
-    hsl: '211 35% 57%',
+    hex: '#74C69D',
+    hsl: '155 42% 65%',
     bg: 'bg-origen-pradera',
     text: 'text-origen-pradera',
     border: 'border-origen-pradera',
   },
   menta: {
-    hex: '#C89B4C',
-    hsl: '39 53% 54%',
+    hex: '#D4A373',
+    hsl: '28 56% 64%',
     bg: 'bg-origen-menta',
     text: 'text-origen-menta',
     border: 'border-origen-menta',
   },
+  mandarina: {
+    hex: '#FFB347',
+    hsl: '34 100% 67%',
+    bg: 'bg-origen-mandarina',
+    text: 'text-origen-mandarina',
+    border: 'border-origen-mandarina',
+  },
   crema: {
-    hex: '#F8F9FC',
-    hsl: '228 38% 98%',
+    hex: '#F1FAEE',
+    hsl: '154 55% 97%',
     bg: 'bg-origen-crema',
     text: 'text-origen-crema',
     border: 'border-origen-crema',
   },
   pastel: {
-    hex: '#E8EEF5',
-    hsl: '213 38% 94%',
+    hex: '#D8F3DC',
+    hsl: '155 60% 91%',
     bg: 'bg-origen-pastel',
     text: 'text-origen-pastel',
     border: 'border-origen-pastel',
   },
   oscuro: {
-    hex: '#0D1626',
-    hsl: '221 49% 10%',
+    hex: '#081C15',
+    hsl: '155 54% 7%',
     bg: 'bg-origen-oscuro',
     text: 'text-origen-oscuro',
     border: 'border-origen-oscuro',
@@ -200,3 +209,4 @@ export type SuccessStatesType = typeof successStates;
 export type WarningStatesType = typeof warningStates;
 export type InfoStatesType = typeof infoStates;
 export type OrigenColorsType = typeof origenColors;
+export type OrigenColorKey = keyof OrigenColorsType;

@@ -5,15 +5,18 @@ import type { Config } from "tailwindcss";
  * Basado en el Manual de Marca v3.0 - Paleta "Bosque Profundo"
  *
  * @version 3.0.0 - NUEVA PALETA:
- *   - origen-bosque  → Verde Bosque     #1B4332
- *   - origen-pino    → Verde Pino       #2D6A4F
- *   - origen-hoja    → Verde Esmeralda  #40916C
- *   - origen-pradera → Verde Menta      #74C69D
- *   - origen-menta   → Beige Arena      #D4A373
- *   - origen-crema   → Blanco Verdeado  #F1FAEE
- *   - origen-oscuro  → Verde Negro      #081C15
- *   - origen-pastel  → Verde Pastel     #D8F3DC
- *   Los nombres de tokens se mantienen por compatibilidad con componentes.
+ *   origen-bosque    #1B4332  Verde Bosque    → Principal
+ *   origen-pino     #2D6A4F  Verde Pino      → H2 / hover
+ *   origen-hoja     #40916C  Verde Esmeralda → H3 / enlaces
+ *   origen-pradera  #74C69D  Verde Menta     → Interactivo
+ *   origen-menta    #D4A373  Beige Arena     → Acento cálido
+ *   origen-mandarina#FFB347  Naranja         → Acento complementario
+ *   origen-crema    #F1FAEE  Blanco Verdeado → Fondo global
+ *   origen-oscuro   #081C15  Verde Negro     → Texto principal
+ *   origen-pastel   #D8F3DC  Verde Pastel    → Fondos suaves
+ *   surface.*                Semántico       → Sustituye bg-white/bg-gray
+ *   border-subtle/strong     Semántico       → Sustituye border-gray-*
+ *   text-subtle/disabled     Semántico       → Sustituye text-gray-*
  *
  * @created Febrero 2026
  * @updated Marzo 2026
@@ -62,20 +65,31 @@ const config: Config = {
           hoja: "hsl(var(--hoja))",          // #40916C - Verde Esmeralda
           pradera: "hsl(var(--pradera))",    // #74C69D - Verde Menta
           crema: "hsl(var(--crema))",        // #F1FAEE - Blanco Verdeado
-          
+
           // Apoyo
           oscuro: "hsl(var(--oscuro))",      // #081C15 - Verde Negro
           pastel: "hsl(var(--pastel))",      // #D8F3DC - Verde Pastel
-          mandarina: "hsl(34, 100%, 67%)",   // #FFB347 - Naranja pastel
+          mandarina: "hsl(var(--mandarina))", // #FFB347 - Naranja Mandarina
         },
 
         // Estados hover
         hover: {
-          bosque: "hsl(var(--hover-bosque))",    // #0D2B1D
-          pradera: "hsl(var(--hover-pradera))",  // #5BB580
-          menta: "hsl(var(--hover-menta))",      // #C4905D
-          mandarina: "hsl(34, 100%, 60%)",       // #E6A040
+          bosque:    "hsl(var(--hover-bosque))",   // #0D2B1D
+          pradera:   "hsl(var(--hover-pradera))",  // #5BB580
+          menta:     "hsl(var(--hover-menta))",    // #C4905D
+          mandarina: "hsl(34 100% 60%)",           // #E6A040
         },
+
+        // Tokens semánticos — sustitutos directos de gray-* de Tailwind
+        surface: {
+          DEFAULT: "hsl(var(--surface))",          // Fondo de página
+          alt:     "hsl(var(--surface-alt))",      // Fondo de tarjetas
+          raised:  "hsl(var(--surface-raised))",   // Modales / popovers
+        },
+        "border-subtle": "hsl(var(--border-subtle))",
+        "border-strong":  "hsl(var(--border-strong))",
+        "text-subtle":    "hsl(var(--text-subtle))",
+        "text-disabled":  "hsl(var(--text-disabled))",
         
         // Variables del sistema (shadcn/ui)
         border: "hsl(var(--border))",

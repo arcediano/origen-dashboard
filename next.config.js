@@ -19,11 +19,13 @@ const nextConfig = {
     ],
   },
   // Proxy API calls through Next.js to avoid cross-origin cookie issues on mobile (iOS Safari)
+  // Falls back to localhost:3000 when NEXT_PUBLIC_API_GATEWAY_URL is not set (e.g. local builds)
   async rewrites() {
+    const apiBase = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
     return [
       {
         source: '/api/v1/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/api/v1/:path*`,
+        destination: `${apiBase}/api/v1/:path*`,
       },
     ];
   },
