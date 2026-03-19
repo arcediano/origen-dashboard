@@ -104,19 +104,19 @@ export function UserMenu({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+            className="absolute right-0 mt-3 w-72 bg-surface-alt rounded-2xl shadow-xl border border-border-subtle overflow-hidden z-50"
           >
             {/* Cabecera con datos del usuario */}
-            <div className="px-5 py-5 bg-gradient-to-r from-origen-crema/40 to-transparent border-b border-gray-100">
+            <div className="px-5 py-5 bg-gradient-to-r from-origen-crema/40 to-transparent border-b border-border-subtle">
               <div className="flex items-start gap-4">
-                <Avatar className="w-14 h-14 ring-2 ring-white shadow-lg">
+                <Avatar className="w-14 h-14 ring-2 ring-surface-alt shadow-lg">
                   <AvatarFallback className="bg-gradient-to-br from-origen-pradera to-origen-hoja text-white text-lg font-semibold">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="text-lg font-semibold text-origen-bosque truncate">{userName}</p>
-                  <p className="text-xs text-gray-500 truncate mt-0.5">{userEmail}</p>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">{userEmail}</p>
                   <div className="flex items-center gap-2 mt-3">
                     <Badge variant="leaf" size="xs" className="px-2 py-0.5">
                       {userType === 'producer' ? 'Productor' : 'Comprador'}
@@ -130,52 +130,52 @@ export function UserMenu({
             <div className="py-2">
               <Link href="/dashboard/profile" onClick={() => setIsOpen(false)}>
                 <div className="flex items-center gap-3 px-4 py-3 hover:bg-origen-crema/50 transition-colors group">
-                  <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-origen-pradera/10">
-                    <User className="w-5 h-5 text-gray-500 group-hover:text-origen-pradera" />
+                  <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
+                    <User className="w-5 h-5 text-text-subtle group-hover:text-origen-pradera" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-origen-bosque">Mi Perfil</p>
-                    <p className="text-xs text-gray-500">Datos personales y negocio</p>
+                    <p className="text-xs text-muted-foreground">Datos personales y negocio</p>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-origen-pradera" />
+                  <ChevronRight className="w-4 h-4 text-border group-hover:text-origen-pradera" />
                 </div>
               </Link>
             </div>
 
             {/* Sección: Configuración (con 2 subopciones) */}
-            <div className="pt-1 pb-2 border-t border-gray-100">
+            <div className="pt-1 pb-2 border-t border-border-subtle">
               <div className="px-4 py-2">
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Configuración</p>
+                <p className="text-xs font-medium text-text-disabled uppercase tracking-wider">Configuración</p>
               </div>
               
               <Link href="/dashboard/profile/settings?tab=security" onClick={() => setIsOpen(false)}>
                 <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
-                  <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover:bg-origen-pradera/10">
-                    <Shield className="w-4 h-4 text-gray-500 group-hover:text-origen-pradera" />
+                  <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
+                    <Shield className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-origen-bosque">Seguridad</p>
-                    <p className="text-xs text-gray-500">Contraseña y 2FA</p>
+                    <p className="text-xs text-muted-foreground">Contraseña y 2FA</p>
                   </div>
                 </div>
               </Link>
               
               <Link href="/dashboard/profile/settings?tab=notifications" onClick={() => setIsOpen(false)}>
                 <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
-                  <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center group-hover:bg-origen-pradera/10">
-                    <Bell className="w-4 h-4 text-gray-500 group-hover:text-origen-pradera" />
+                  <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
+                    <Bell className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-origen-bosque">Notificaciones</p>
-                    <p className="text-xs text-gray-500">Preferencias de avisos</p>
+                    <p className="text-xs text-muted-foreground">Preferencias de avisos</p>
                   </div>
                 </div>
               </Link>
             </div>
 
             {/* Sección de ayuda */}
-            <div className="px-5 py-3 bg-origen-crema/20 border-y border-gray-100">
-              <Link href="/ayuda" className="flex items-center gap-2 text-sm text-gray-600 hover:text-origen-pradera">
+            <div className="px-5 py-3 bg-surface border-y border-border-subtle">
+              <Link href="/ayuda" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-origen-pradera">
                 <HelpCircle className="w-4 h-4" />
                 <span>Centro de ayuda</span>
               </Link>
@@ -193,7 +193,7 @@ export function UserMenu({
                   </div>
                   <div className="flex-1 text-left">
                     <p className="text-sm font-medium text-red-600">Cerrar sesión</p>
-                    <p className="text-xs text-gray-500">Salir de tu cuenta</p>
+                    <p className="text-xs text-muted-foreground">Salir de tu cuenta</p>
                   </div>
                 </div>
               </button>

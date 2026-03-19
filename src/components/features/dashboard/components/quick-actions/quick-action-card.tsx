@@ -38,7 +38,7 @@ export function QuickActionCard({
       )}></div>
       
       <div className={cn(
-        "relative bg-white rounded-2xl p-6 border border-gray-200",
+        "relative bg-surface-alt rounded-2xl p-6 border border-border",
         "shadow-origen group-hover:shadow-origen-lg group-hover:border-origen-pradera",
         "transition-all duration-300",
         className
@@ -62,11 +62,11 @@ export function QuickActionCard({
               )}
             </div>
             {description && (
-              <p className="text-sm text-gray-500 mt-1">{description}</p>
+              <p className="text-sm text-muted-foreground mt-1">{description}</p>
             )}
           </div>
           
-          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-origen-pradera group-hover:translate-x-1 transition-all" />
+          <ChevronRight className="w-5 h-5 text-text-subtle group-hover:text-origen-pradera group-hover:translate-x-1 transition-all" />
         </div>
       </div>
     </Link>

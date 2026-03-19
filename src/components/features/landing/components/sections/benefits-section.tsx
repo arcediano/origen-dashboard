@@ -49,14 +49,14 @@ export function BenefitsSection() {
     return (
       <div className="group relative h-full">
         <div className="absolute inset-0 bg-gradient-to-br from-origen-bosque/4 to-origen-hoja/5 rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
-        <div className="relative bg-white rounded-2xl p-5 md:p-8 shadow-lg border border-gray-200 group-hover:border-origen-hoja group-hover:shadow-xl transition-all duration-300 h-full">
+        <div className="relative bg-surface-alt rounded-2xl p-5 md:p-8 shadow-lg border border-border group-hover:border-origen-hoja group-hover:shadow-xl transition-all duration-300 h-full">
           <div className="w-11 h-11 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center mb-3 md:mb-6 group-hover:scale-110 transition-transform duration-300">
             <Icon className="w-5 h-5 md:w-8 md:h-8 text-origen-bosque" />
           </div>
           <h3 className="text-base md:text-2xl font-bold text-origen-bosque mb-1.5 md:mb-4">
             {benefit.title}
           </h3>
-          <p className="text-gray-600 text-xs md:text-base mb-3 md:mb-6 leading-relaxed">
+          <p className="text-muted-foreground text-xs md:text-base mb-3 md:mb-6 leading-relaxed">
             {benefit.description}
           </p>
           <div className="space-y-1.5 md:space-y-3">
@@ -65,7 +65,7 @@ export function BenefitsSection() {
                 <div className="w-4 h-4 rounded-full bg-origen-hoja/10 flex items-center justify-center flex-shrink-0">
                   <CheckCircle className="w-2.5 h-2.5 text-origen-hoja" />
                 </div>
-                <span className="text-xs md:text-sm text-gray-700">{feature}</span>
+                <span className="text-xs md:text-sm text-foreground">{feature}</span>
               </div>
             ))}
           </div>
@@ -87,7 +87,7 @@ export function BenefitsSection() {
             ¿Por qué vender en Origen?
           </h2>
           {/* Solo visible en desktop */}
-          <p className="hidden md:block text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="hidden md:block text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Ofrecemos herramientas integrales y soporte dedicado para hacer crecer
             tu negocio local de forma sostenible
           </p>
@@ -124,9 +124,9 @@ export function BenefitsSection() {
         </div>
 
         {/* Desktop: resumen estadísticas */}
-        <div className="hidden md:block mt-20 pt-16 border-t border-gray-200">
+        <div className="hidden md:block mt-20 pt-16 border-t border-border">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-3xl p-10 border border-origen-hoja/30 shadow-origen">
+            <div className="bg-surface-alt rounded-3xl p-10 border border-origen-hoja/30 shadow-origen">
               <div className="grid grid-cols-3 gap-8 text-center">
                 {[
                   { value: '15%', title: 'Comisión única', sub: 'Solo pagas cuando vendes' },
@@ -136,7 +136,7 @@ export function BenefitsSection() {
                   <div key={value}>
                     <div className="text-4xl font-bold text-origen-hoja mb-3">{value}</div>
                     <h4 className="font-bold text-origen-bosque text-base mb-2">{title}</h4>
-                    <p className="text-gray-600 text-sm">{sub}</p>
+                    <p className="text-muted-foreground text-sm">{sub}</p>
                   </div>
                 ))}
               </div>

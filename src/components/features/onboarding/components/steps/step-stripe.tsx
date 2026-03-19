@@ -151,7 +151,7 @@ export function EnhancedStep6Stripe({
       {/* ──────────────────────────────────────────────────────────────────────
           CARD 1: CÓMO FUNCIONAN LOS PAGOS
       ────────────────────────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm">
 
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -159,7 +159,7 @@ export function EnhancedStep6Stripe({
           </div>
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">¿Cómo funcionan los pagos?</h2>
-            <p className="text-sm text-gray-600">Stripe es nuestro proveedor de pagos certificado</p>
+            <p className="text-sm text-muted-foreground">Stripe es nuestro proveedor de pagos certificado</p>
           </div>
         </div>
 
@@ -183,14 +183,14 @@ export function EnhancedStep6Stripe({
           ].map((item) => (
               <div
                 key={item.step}
-                className="flex sm:flex-col items-start sm:items-center sm:text-center gap-3 p-4 bg-origen-crema/20 rounded-xl border border-gray-100"
+                className="flex sm:flex-col items-start sm:items-center sm:text-center gap-3 p-4 bg-origen-crema/20 rounded-xl border border-border-subtle"
               >
                 <div className="w-10 h-10 rounded-full bg-origen-pradera text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
                   {item.step}
                 </div>
                 <div>
                   <p className="font-semibold text-origen-bosque text-sm">{item.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
                 </div>
               </div>
           ))}
@@ -208,8 +208,8 @@ export function EnhancedStep6Stripe({
           CARD 2: CONECTAR CUENTA
       ────────────────────────────────────────────────────────────────────── */}
       <div className={cn(
-        'bg-white rounded-2xl border p-6 md:p-8 shadow-sm transition-all',
-        data.stripeConnected ? 'border-green-200' : 'border-gray-200 hover:border-origen-pradera/30',
+        'bg-surface-alt rounded-2xl border p-6 md:p-8 shadow-sm transition-all',
+        data.stripeConnected ? 'border-green-200' : 'border-border hover:border-origen-pradera/30',
       )}>
 
         <div className="flex items-center gap-3 mb-6">
@@ -228,7 +228,7 @@ export function EnhancedStep6Stripe({
             <h2 className="text-xl font-bold text-origen-bosque">
               {data.stripeConnected ? '¡Cuenta conectada!' : 'Conectar cuenta de cobro'}
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {data.stripeConnected
                 ? 'Stripe está configurado y listo para procesar pagos'
                 : 'Necesitarás email, IBAN y DNI/CIF'}
@@ -251,7 +251,7 @@ export function EnhancedStep6Stripe({
             <button
               type="button"
               onClick={handleDisconnect}
-              className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2"
+              className="text-xs text-text-subtle hover:text-muted-foreground underline underline-offset-2"
             >
               Cambiar cuenta
             </button>
@@ -260,7 +260,7 @@ export function EnhancedStep6Stripe({
           <div className="flex flex-col items-center gap-4">
             {/* Aviso de qué datos necesita el productor */}
             <div className="w-full p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
-              <p className="text-xs text-gray-600 flex items-start gap-2">
+              <p className="text-xs text-muted-foreground flex items-start gap-2">
                 <Info className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
                 <span>
                   ¿No tienes cuenta Stripe?{' '}
@@ -297,12 +297,12 @@ export function EnhancedStep6Stripe({
               )}
             </Button>
 
-            <div className="flex items-center gap-2 text-xs text-gray-400">
+            <div className="flex items-center gap-2 text-xs text-text-subtle">
               <Lock className="w-3.5 h-3.5" />
               <span>Conexión segura · Cifrado SSL · Datos protegidos</span>
             </div>
 
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-text-subtle">
               Este paso es opcional — podrás conectarlo más tarde desde tu panel
             </p>
           </div>
@@ -313,9 +313,9 @@ export function EnhancedStep6Stripe({
           CARD 3: TÉRMINOS
       ────────────────────────────────────────────────────────────────────── */}
       <div className={cn(
-        'bg-white rounded-2xl border p-6 md:p-8 shadow-sm transition-all',
+        'bg-surface-alt rounded-2xl border p-6 md:p-8 shadow-sm transition-all',
         !data.stripeConnected && 'opacity-60',
-        data.stripeConnected && 'border-gray-200 hover:border-origen-pradera/30',
+        data.stripeConnected && 'border-border hover:border-origen-pradera/30',
       )}>
 
         <div className="flex items-start gap-4">
@@ -339,7 +339,7 @@ export function EnhancedStep6Stripe({
             >
               Acepto los términos y condiciones de Stripe y de Origen
             </label>
-            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
               Al conectar, aceptas los{' '}
               <a
                 href="https://stripe.com/es/legal"
@@ -387,7 +387,7 @@ export function EnhancedStep6Stripe({
       )}
 
       {/* Trust badges */}
-      <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-gray-500 border-t border-gray-200">
+      <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground border-t border-border">
         <div className="flex items-center gap-1.5">
           <Shield className="w-3.5 h-3.5 text-origen-pradera" />
           <span>Pagos seguros</span>

@@ -22,7 +22,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
   badge
 }) => (
   <div className={cn(
-    'bg-white rounded-xl md:rounded-2xl border border-gray-200',
+    'bg-surface-alt rounded-xl md:rounded-2xl border border-border',
     'p-4 md:p-6',
     'hover:border-origen-hoja/40 transition-all shadow-subtle hover:shadow-origen',
     className
@@ -35,7 +35,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
     )}
     <h3 className="text-base md:text-lg font-bold text-origen-bosque mb-1">{title}</h3>
     {description && (
-      <p className="text-xs md:text-sm text-gray-600 mb-3 md:mb-4">{description}</p>
+      <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">{description}</p>
     )}
     <div className="space-y-3 md:space-y-4">
       {children}

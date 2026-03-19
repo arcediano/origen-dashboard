@@ -199,7 +199,7 @@ export default function CertificationsPage() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <h3 className="font-semibold text-origen-bosque">Estado de verificación</h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     {stats.verifiedCerts + stats.verifiedDocs} de {stats.totalCerts + stats.totalDocs} elementos verificados
                   </p>
                 </div>
@@ -248,7 +248,7 @@ export default function CertificationsPage() {
                     {certifications.map(cert => {
                       const Icon = cert.icon;
                       return (
-                        <div key={cert.id} className="border border-gray-200 rounded-xl p-4 hover:border-origen-pradera transition-all">
+                        <div key={cert.id} className="border border-border rounded-xl p-4 hover:border-origen-pradera transition-all">
                           <div className="flex flex-col md:flex-row md:items-start gap-4">
                             <div className="w-12 h-12 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
                               <Icon className="w-6 h-6 text-origen-pradera" />
@@ -258,12 +258,12 @@ export default function CertificationsPage() {
                               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                                 <div>
                                   <h3 className="font-semibold text-origen-bosque">{cert.name}</h3>
-                                  <p className="text-sm text-gray-500">{cert.issuingBody}</p>
+                                  <p className="text-sm text-muted-foreground">{cert.issuingBody}</p>
                                 </div>
                                 {getStatusBadge(cert.status)}
                               </div>
                               
-                              <p className="text-sm text-gray-600 mt-2">{cert.description}</p>
+                              <p className="text-sm text-muted-foreground mt-2">{cert.description}</p>
                               
                               {cert.status === 'verified' && cert.verifiedDate && (
                                 <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
@@ -328,7 +328,7 @@ export default function CertificationsPage() {
                 <CardContent>
                   <div className="space-y-4">
                     {documents.filter(d => d.required).map(doc => (
-                      <div key={doc.id} className="border border-gray-200 rounded-xl p-4">
+                      <div key={doc.id} className="border border-border rounded-xl p-4">
                         <div className="flex flex-col md:flex-row md:items-start gap-4">
                           <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
                             <FileBadge className="w-5 h-5 text-origen-pradera" />
@@ -338,15 +338,15 @@ export default function CertificationsPage() {
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                               <div>
                                 <h3 className="font-semibold text-origen-bosque">{doc.name}</h3>
-                                <p className="text-sm text-gray-500">{doc.description}</p>
+                                <p className="text-sm text-muted-foreground">{doc.description}</p>
                               </div>
                               {getStatusBadge(doc.status)}
                             </div>
                             
                             {doc.document && (
-                              <div className="mt-3 flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                                <FileBadge className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm text-gray-600 flex-1">{doc.document.name}</span>
+                              <div className="mt-3 flex items-center gap-2 p-2 bg-surface rounded-lg">
+                                <FileBadge className="w-4 h-4 text-text-subtle" />
+                                <span className="text-sm text-muted-foreground flex-1">{doc.document.name}</span>
                                 <Button variant="ghost" size="icon-sm">
                                   <Eye className="w-4 h-4" />
                                 </Button>
@@ -399,13 +399,13 @@ export default function CertificationsPage() {
                 <CardContent>
                   <div className="space-y-4">
                     {documents.filter(d => !d.required).map(doc => (
-                      <div key={doc.id} className="border border-gray-200 rounded-xl p-4">
+                      <div key={doc.id} className="border border-border rounded-xl p-4">
                         <div className="flex flex-col md:flex-row md:items-start gap-4">
                           <div className="flex-1">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                               <div>
                                 <h3 className="font-semibold text-origen-bosque">{doc.name}</h3>
-                                <p className="text-sm text-gray-500">{doc.description}</p>
+                                <p className="text-sm text-muted-foreground">{doc.description}</p>
                               </div>
                               {getStatusBadge(doc.status)}
                             </div>

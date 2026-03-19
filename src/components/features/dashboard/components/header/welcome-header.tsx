@@ -61,7 +61,7 @@ export function WelcomeHeader({
         <h1 className="text-3xl md:text-4xl font-bold text-origen-bosque mb-2">
           {greeting}, {userName}
         </h1>
-        <p className="text-gray-500 flex items-center gap-2">
+        <p className="text-muted-foreground flex items-center gap-2">
           <Clock className="w-4 h-4" />
           {currentTime}
         </p>

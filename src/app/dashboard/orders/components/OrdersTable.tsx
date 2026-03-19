@@ -86,7 +86,7 @@ export function OrdersTable({
       accessor: (item) => (
         <div>
           <p className="text-sm font-medium text-origen-bosque">{item.orderNumber}</p>
-          <p className="text-xs text-gray-500">{format(item.createdAt, 'dd MMM yyyy', { locale: es })}</p>
+          <p className="text-xs text-muted-foreground">{format(item.createdAt, 'dd MMM yyyy', { locale: es })}</p>
         </div>
       ),
       sortable: true,
@@ -98,7 +98,7 @@ export function OrdersTable({
       accessor: (item) => (
         <div>
           <p className="text-sm font-medium text-origen-bosque">{item.customerName}</p>
-          <p className="text-xs text-gray-500">{item.customerEmail}</p>
+          <p className="text-xs text-muted-foreground">{item.customerEmail}</p>
         </div>
       ),
       sortable: true,
@@ -110,7 +110,7 @@ export function OrdersTable({
       accessor: (item) => (
         <div>
           <p className="text-sm font-bold text-origen-pradera">{item.total.toFixed(2)}€</p>
-          <p className="text-xs text-gray-500">{item.items.length} {item.items.length === 1 ? 'producto' : 'productos'}</p>
+          <p className="text-xs text-muted-foreground">{item.items.length} {item.items.length === 1 ? 'producto' : 'productos'}</p>
         </div>
       ),
       sortable: true,
@@ -177,12 +177,12 @@ export function OrdersTable({
                   index === 0 ? 'bg-origen-pradera' : 'bg-gray-300'
                 )} />
                 {index < order.timeline.length - 1 && (
-                  <div className="absolute top-3 left-1 w-0.5 h-8 bg-gray-200 -translate-x-[3px]" />
+                  <div className="absolute top-3 left-1 w-0.5 h-8 bg-border -translate-x-[3px]" />
                 )}
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-origen-bosque">{event.description}</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {format(event.createdAt, 'dd MMM yyyy HH:mm', { locale: es })}
                 </p>
               </div>
@@ -198,12 +198,12 @@ export function OrdersTable({
           {order.items.map((item) => (
             <div key={item.id} className="flex items-center justify-between p-2 bg-origen-crema/30 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center">
-                  <Package className="w-5 h-5 text-gray-400" />
+                <div className="w-10 h-10 rounded-lg bg-surface-alt flex items-center justify-center">
+                  <Package className="w-5 h-5 text-text-subtle" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-origen-bosque">{item.productName}</p>
-                  <p className="text-xs text-gray-500">{item.quantity} x {item.unitPrice.toFixed(2)}€</p>
+                  <p className="text-xs text-muted-foreground">{item.quantity} x {item.unitPrice.toFixed(2)}€</p>
                 </div>
               </div>
               <p className="text-sm font-bold text-origen-pradera">{item.totalPrice.toFixed(2)}€</p>
@@ -216,17 +216,17 @@ export function OrdersTable({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h4 className="text-sm font-medium text-origen-bosque mb-2">Dirección de envío</h4>
-          <p className="text-xs text-gray-600">{order.shipping.address.fullName}</p>
-          <p className="text-xs text-gray-600">{order.shipping.address.addressLine1}</p>
+          <p className="text-xs text-muted-foreground">{order.shipping.address.fullName}</p>
+          <p className="text-xs text-muted-foreground">{order.shipping.address.addressLine1}</p>
           {order.shipping.address.addressLine2 && (
-            <p className="text-xs text-gray-600">{order.shipping.address.addressLine2}</p>
+            <p className="text-xs text-muted-foreground">{order.shipping.address.addressLine2}</p>
           )}
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-muted-foreground">
             {order.shipping.address.city}, {order.shipping.address.postalCode}
           </p>
-          <p className="text-xs text-gray-600">{order.shipping.address.country}</p>
+          <p className="text-xs text-muted-foreground">{order.shipping.address.country}</p>
           {order.shipping.address.phone && (
-            <p className="text-xs text-gray-600 mt-1">Tel: {order.shipping.address.phone}</p>
+            <p className="text-xs text-muted-foreground mt-1">Tel: {order.shipping.address.phone}</p>
           )}
         </div>
 
@@ -234,9 +234,9 @@ export function OrdersTable({
         {order.shipping.trackingNumber && (
           <div>
             <h4 className="text-sm font-medium text-origen-bosque mb-2">Seguimiento</h4>
-            <p className="text-xs text-gray-600">Método: {order.shipping.method}</p>
-            <p className="text-xs text-gray-600">Transportista: {order.shipping.carrier}</p>
-            <p className="text-xs text-gray-600">Nº seguimiento: {order.shipping.trackingNumber}</p>
+            <p className="text-xs text-muted-foreground">Método: {order.shipping.method}</p>
+            <p className="text-xs text-muted-foreground">Transportista: {order.shipping.carrier}</p>
+            <p className="text-xs text-muted-foreground">Nº seguimiento: {order.shipping.trackingNumber}</p>
             {order.shipping.trackingUrl && (
               <a 
                 href={order.shipping.trackingUrl}
@@ -255,20 +255,20 @@ export function OrdersTable({
       {/* Resumen de pago */}
       <div className="mt-4 p-3 bg-origen-crema/30 rounded-lg">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Subtotal</span>
+          <span className="text-muted-foreground">Subtotal</span>
           <span className="font-medium">{order.subtotal.toFixed(2)}€</span>
         </div>
         <div className="flex justify-between text-sm mt-1">
-          <span className="text-gray-600">Gastos de envío</span>
+          <span className="text-muted-foreground">Gastos de envío</span>
           <span className="font-medium">{order.shipping.cost.toFixed(2)}€</span>
         </div>
         {order.tax && (
           <div className="flex justify-between text-sm mt-1">
-            <span className="text-gray-600">IVA</span>
+            <span className="text-muted-foreground">IVA</span>
             <span className="font-medium">{order.tax.toFixed(2)}€</span>
           </div>
         )}
-        <div className="flex justify-between text-base font-bold mt-2 pt-2 border-t border-gray-200">
+        <div className="flex justify-between text-base font-bold mt-2 pt-2 border-t border-border">
           <span className="text-origen-bosque">Total</span>
           <span className="text-origen-pradera">{order.total.toFixed(2)}€</span>
         </div>

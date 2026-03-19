@@ -58,7 +58,7 @@ export function PageHeader({
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           {/* Badge con icono y tooltip */}
           {(BadgeIcon || badgeText) && (
-            <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-origen-pradera/20 shadow-sm">
+            <div className="inline-flex items-center gap-2 bg-surface-alt px-4 py-2 rounded-full border border-origen-pradera/20 shadow-sm">
               {BadgeIcon && (
                 <div className="w-6 h-6 rounded-full bg-origen-pradera/10 flex items-center justify-center">
                   <BadgeIcon className="w-3.5 h-3.5 text-origen-pradera" />
@@ -91,10 +91,10 @@ export function PageHeader({
           {showBackButton && (
             <button
               onClick={handleBack}
-              className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white border border-gray-200 hover:border-origen-pradera hover:bg-origen-pradera/5 transition-all shadow-sm hover:shadow-md group"
+              className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-surface-alt border border-border hover:border-origen-pradera hover:bg-origen-pradera/5 transition-all shadow-sm hover:shadow-md group"
               aria-label="Volver"
             >
-              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500 group-hover:text-origen-pradera transition-colors" />
+              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-text-subtle group-hover:text-origen-pradera transition-colors" />
             </button>
           )}
 
@@ -109,7 +109,7 @@ export function PageHeader({
 
             {/* Descripción - SIN MÁRGENES */}
             {description && (
-              <p className="text-base sm:text-lg text-gray-600 max-w-2xl leading-relaxed">
+              <p className="text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed">
                 {description}
               </p>
             )}

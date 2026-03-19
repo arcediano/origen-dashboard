@@ -85,13 +85,13 @@ function StripeCompleteContent() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center space-y-6">
+    <div className="bg-surface-alt rounded-2xl shadow-lg p-10 max-w-md w-full text-center space-y-6">
 
       {state === 'verifying' && (
         <>
           <Spinner size="xl" variant="primary" className="mx-auto" />
           <h1 className="text-xl font-bold text-origen-bosque">Verificando conexión...</h1>
-          <p className="text-sm text-gray-500">Estamos confirmando tu cuenta con Stripe.</p>
+          <p className="text-sm text-muted-foreground">Estamos confirmando tu cuenta con Stripe.</p>
         </>
       )}
 
@@ -99,7 +99,7 @@ function StripeCompleteContent() {
         <>
           <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto" />
           <h1 className="text-xl font-bold text-origen-bosque">¡Cuenta conectada!</h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Tu cuenta Stripe está lista para recibir pagos. Redirigiendo al onboarding...
           </p>
         </>
@@ -109,7 +109,7 @@ function StripeCompleteContent() {
         <>
           <XCircle className="w-14 h-14 text-amber-500 mx-auto" />
           <h1 className="text-xl font-bold text-origen-bosque">Conexión incompleta</h1>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             No completaste todos los pasos en Stripe. Puedes retomarlo cuando quieras.
           </p>
           <button
@@ -125,7 +125,7 @@ function StripeCompleteContent() {
         <>
           <XCircle className="w-14 h-14 text-red-500 mx-auto" />
           <h1 className="text-xl font-bold text-origen-bosque">Error de conexión</h1>
-          <p className="text-sm text-gray-600 mb-4">{errorMessage}</p>
+          <p className="text-sm text-muted-foreground mb-4">{errorMessage}</p>
           <button
             onClick={() => router.push('/onboarding')}
             className="w-full h-11 bg-origen-bosque text-white rounded-xl text-sm font-medium hover:bg-origen-pino transition-colors"
@@ -146,9 +146,9 @@ export default function StripeCompletePage() {
     <div className="min-h-screen bg-origen-crema flex items-center justify-center p-6">
       <React.Suspense
         fallback={
-          <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center space-y-6">
+          <div className="bg-surface-alt rounded-2xl shadow-lg p-10 max-w-md w-full text-center space-y-6">
             <Spinner size="xl" variant="primary" className="mx-auto" />
-            <p className="text-sm text-gray-500">Cargando...</p>
+            <p className="text-sm text-muted-foreground">Cargando...</p>
           </div>
         }
       >

@@ -104,7 +104,7 @@ export function ReviewStats({ stats, className }: ReviewStatsProps) {
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
               <card.icon className={cn('w-5 h-5', card.iconColor)} />
-              <span className="text-xs font-medium text-gray-500">{card.label}</span>
+              <span className="text-xs font-medium text-muted-foreground">{card.label}</span>
             </div>
           </div>
           
@@ -113,13 +113,13 @@ export function ReviewStats({ stats, className }: ReviewStatsProps) {
               {card.value}
             </p>
             {card.unit && (
-              <span className="text-xs text-gray-400">{card.unit}</span>
+              <span className="text-xs text-text-subtle">{card.unit}</span>
             )}
           </div>
           
           {card.secondaryInfo && (
-            <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
-              <TrendingUp className="w-3 h-3 text-gray-400" />
+            <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+              <TrendingUp className="w-3 h-3 text-text-subtle" />
               <span>{card.secondaryInfo.value}</span>
               <span>{card.secondaryInfo.label}</span>
             </div>

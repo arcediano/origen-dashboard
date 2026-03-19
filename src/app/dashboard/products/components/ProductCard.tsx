@@ -53,7 +53,7 @@ export function ProductCard({
             loading="lazy"
           />
         ) : (
-          <Package className="w-8 h-8 sm:w-12 sm:h-12 text-gray-300" />
+          <Package className="w-8 h-8 sm:w-12 sm:h-12 text-border" />
         )}
       </div>
 
@@ -66,7 +66,7 @@ export function ProductCard({
       </div>
 
       {/* SKU - visible solo en móvil? mejor siempre visible pero pequeño */}
-      <p className="text-[10px] sm:text-xs text-gray-500 mb-2 truncate">{product.sku}</p>
+      <p className="text-[10px] sm:text-xs text-muted-foreground mb-2 truncate">{product.sku}</p>
 
       {/* Precio y stock */}
       <div className="flex justify-between items-center mb-2 sm:mb-3">
@@ -75,14 +75,14 @@ export function ProductCard({
             {product.basePrice.toFixed(2)}€
           </span>
           {product.comparePrice && (
-            <span className="text-[10px] sm:text-xs text-gray-400 line-through ml-1 sm:ml-2">
+            <span className="text-[10px] sm:text-xs text-text-subtle line-through ml-1 sm:ml-2">
               {product.comparePrice.toFixed(2)}€
             </span>
           )}
         </div>
         <div className="flex items-center gap-1">
           <span className={cn('w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full', stockColor)} />
-          <span className="text-[10px] sm:text-xs text-gray-600">{product.stock} uds</span>
+          <span className="text-[10px] sm:text-xs text-muted-foreground">{product.stock} uds</span>
         </div>
       </div>
 
@@ -94,7 +94,7 @@ export function ProductCard({
             {product.rating.toFixed(1)}
           </span>
           {product.reviewCount && (
-            <span className="text-[10px] text-gray-400">({product.reviewCount})</span>
+            <span className="text-[10px] text-text-subtle">({product.reviewCount})</span>
           )}
         </div>
       ) : (
@@ -102,7 +102,7 @@ export function ProductCard({
       )}
 
       {/* Acciones */}
-      <div className="flex gap-2 mt-1 sm:mt-2 pt-2 border-t border-gray-100">
+      <div className="flex gap-2 mt-1 sm:mt-2 pt-2 border-t border-border-subtle">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -118,7 +118,7 @@ export function ProductCard({
             e.stopPropagation();
             onEdit(product.id);
           }}
-          className="p-1.5 sm:p-2 text-gray-500 hover:text-origen-pradera hover:bg-origen-pradera/10 rounded-md transition-colors"
+          className="p-1.5 sm:p-2 text-muted-foreground hover:text-origen-pradera hover:bg-origen-pradera/10 rounded-md transition-colors"
           aria-label="Editar producto"
         >
           <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

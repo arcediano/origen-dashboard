@@ -80,13 +80,13 @@ export function SidebarMenuItem({
               'w-5 h-5 flex-shrink-0 transition-colors',
               (isActive || hasActiveChild)
                 ? 'text-origen-menta'
-                : 'text-gray-400 group-hover:text-origen-pradera'
+                : 'text-text-subtle group-hover:text-origen-pradera'
             )} />
             <span className={cn(
               'truncate',
               (isActive || hasActiveChild)
                 ? 'text-origen-bosque font-semibold'
-                : 'text-gray-500 group-hover:text-origen-bosque'
+                : 'text-muted-foreground group-hover:text-origen-bosque'
             )}>
               {label}
             </span>
@@ -102,7 +102,7 @@ export function SidebarMenuItem({
             <ChevronDown className={cn(
               'w-4 h-4 transition-transform',
               isOpen ? 'rotate-180' : '',
-              (isActive || hasActiveChild) ? 'text-origen-menta' : 'text-gray-400'
+              (isActive || hasActiveChild) ? 'text-origen-menta' : 'text-text-subtle'
             )} />
           </div>
 
@@ -160,11 +160,11 @@ export function SidebarMenuItem({
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <Icon className={cn(
           'w-5 h-5 flex-shrink-0 transition-colors',
-          isActive ? 'text-origen-menta' : 'text-gray-400 group-hover:text-origen-pradera'
+          isActive ? 'text-origen-menta' : 'text-text-subtle group-hover:text-origen-pradera'
         )} />
         <span className={cn(
           'truncate',
-          isActive ? 'text-origen-bosque font-semibold' : 'text-gray-500 group-hover:text-origen-bosque'
+          isActive ? 'text-origen-bosque font-semibold' : 'text-muted-foreground group-hover:text-origen-bosque'
         )}>
           {label}
         </span>

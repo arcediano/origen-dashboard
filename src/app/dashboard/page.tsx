@@ -43,7 +43,7 @@ function OnboardingProgressBanner() {
         </div>
         <div className="min-w-0">
           <p className="text-sm font-semibold text-origen-bosque leading-tight">Completa tu perfil para empezar a vender</p>
-          <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">Configura tu tienda, añade productos y activa los pagos.</p>
+          <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">Configura tu tienda, añade productos y activa los pagos.</p>
         </div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
@@ -56,7 +56,7 @@ function OnboardingProgressBanner() {
         </Link>
         <button
           onClick={() => setDismissed(true)}
-          className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+          className="p-1.5 text-text-subtle hover:text-muted-foreground transition-colors rounded-lg hover:bg-surface"
           aria-label="Cerrar"
         >
           <X className="w-4 h-4" />

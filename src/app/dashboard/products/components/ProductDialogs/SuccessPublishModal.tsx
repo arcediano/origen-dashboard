@@ -71,23 +71,23 @@ export function SuccessPublishModal({
             ¡Felicidades!
           </h4>
           
-          <p className="text-sm text-gray-600 mb-4 max-w-sm">
+          <p className="text-sm text-muted-foreground mb-4 max-w-sm">
             Tu producto ha sido publicado correctamente. Serás redirigido al catálogo en unos segundos...
           </p>
           
           {/* Indicador de carga */}
           <div className="w-12 h-12 rounded-full border-4 border-origen-pradera/20 border-t-origen-pradera animate-spin mb-2" />
           
-          <p className="text-xs text-gray-400">Redirigiendo...</p>
+          <p className="text-xs text-text-subtle">Redirigiendo...</p>
           
           {/* Métricas de ejemplo (simuladas) */}
           <div className="grid grid-cols-2 gap-3 w-full mt-6">
             <div className="p-3 bg-origen-crema/50 rounded-lg border border-origen-pradera/20">
-              <p className="text-xs text-gray-500">Visibilidad</p>
+              <p className="text-xs text-muted-foreground">Visibilidad</p>
               <p className="text-sm font-semibold text-origen-bosque">Inmediata</p>
             </div>
             <div className="p-3 bg-origen-crema/50 rounded-lg border border-origen-pradera/20">
-              <p className="text-xs text-gray-500">Estado</p>
+              <p className="text-xs text-muted-foreground">Estado</p>
               <p className="text-sm font-semibold text-green-600">Activo</p>
             </div>
           </div>

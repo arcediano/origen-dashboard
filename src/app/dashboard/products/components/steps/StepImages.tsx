@@ -50,7 +50,7 @@ export function StepImages({
             </div>
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-origen-bosque truncate">Imágenes</h2>
-              <p className="text-sm text-gray-500 truncate">Añade fotos de tu producto</p>
+              <p className="text-sm text-muted-foreground truncate">Añade fotos de tu producto</p>
             </div>
           </div>
           
@@ -77,7 +77,7 @@ export function StepImages({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Camera className="h-5 w-5 text-origen-pradera" />
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-foreground">
               Galería de imágenes
               <span className="text-red-500 ml-1">*</span>
             </span>

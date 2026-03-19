@@ -112,7 +112,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
         variant="ghost"
         size="icon"
         className={cn(
-          'relative text-gray-700 hover:text-origen-bosque hover:bg-origen-pradera/10 transition-all',
+          'relative text-foreground hover:text-origen-bosque hover:bg-origen-pradera/10 transition-all',
           isOpen && 'bg-origen-pradera/10 text-origen-menta'
         )}
         onClick={toggleOpen}
@@ -136,11 +136,11 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50"
+            className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-alt rounded-xl shadow-xl border border-border-subtle overflow-hidden z-50"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Cabecera */}
-            <div className="bg-gradient-to-r from-origen-crema to-white px-4 py-3 border-b border-gray-100">
+              <div className="bg-gradient-to-r from-origen-crema to-surface-alt px-4 py-3 border-b border-border-subtle">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-origen-menta/10 flex items-center justify-center">
@@ -164,18 +164,18 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
               {isLoading ? (
                 <div className="px-4 py-8 text-center">
                   <div className="w-12 h-12 rounded-full bg-origen-crema mx-auto mb-3 animate-pulse" />
-                  <p className="text-sm text-gray-400">Cargando...</p>
+                  <p className="text-sm text-text-subtle">Cargando...</p>
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="px-4 py-8 text-center">
                   <div className="w-16 h-16 rounded-full bg-origen-crema flex items-center justify-center mx-auto mb-3">
                     <Sparkles className="w-8 h-8 text-origen-pradera/40" />
                   </div>
-                  <p className="text-sm text-gray-500">¡Todo al día!</p>
-                  <p className="text-xs text-gray-400 mt-1">No hay notificaciones nuevas</p>
+                  <p className="text-sm text-muted-foreground">¡Todo al día!</p>
+                  <p className="text-xs text-text-subtle mt-1">No hay notificaciones nuevas</p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-border-subtle">
                   {notifications.map(notification => (
                     <NotificationItem
                       key={notification.id}
@@ -189,10 +189,10 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
             </div>
 
             {/* Footer */}
-            <div className="border-t border-gray-100 p-2 bg-gray-50/50">
+            <div className="border-t border-border-subtle p-2 bg-surface">
               <Link
                 href="/dashboard/notificaciones"
-                className="block w-full text-center text-xs text-gray-600 hover:text-origen-bosque py-2 transition-colors font-medium"
+                className="block w-full text-center text-xs text-muted-foreground hover:text-origen-bosque py-2 transition-colors font-medium"
                 onClick={close}
               >
                 Ver todas las notificaciones

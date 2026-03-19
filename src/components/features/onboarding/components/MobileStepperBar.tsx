@@ -16,7 +16,7 @@ interface MobileStepperBarProps {
 
 export function MobileStepperBar({ steps, currentStep }: MobileStepperBarProps) {
   return (
-    <div className="lg:hidden bg-white border-b border-gray-100 px-4 py-3">
+    <div className="lg:hidden bg-surface-alt border-b border-border-subtle px-4 py-3">
       {/* Dot trail */}
       <div className="flex items-center gap-1 mb-2">
         {steps.map((step, index) => {
@@ -32,12 +32,12 @@ export function MobileStepperBar({ steps, currentStep }: MobileStepperBarProps) 
                 !isCompleted && !isActive && 'w-2.5 h-2.5 bg-gray-300'
               )}>
                 {isCompleted && <CheckCircle className="w-3 h-3 text-white" />}
-                {isActive && <span className="w-2 h-2 rounded-full bg-white" />}
+                {isActive && <span className="w-2 h-2 rounded-full bg-surface-alt" />}
               </div>
               {index < steps.length - 1 && (
                 <div className={cn(
                   'flex-1 h-0.5 transition-all duration-300',
-                  index < currentStep ? 'bg-green-400' : 'bg-gray-200'
+                  index < currentStep ? 'bg-green-400' : 'bg-border'
                 )} />
               )}
             </React.Fragment>
@@ -46,7 +46,7 @@ export function MobileStepperBar({ steps, currentStep }: MobileStepperBarProps) 
       </div>
 
       {/* Step label */}
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         <span className="font-semibold text-origen-bosque">Paso {currentStep + 1} de {steps.length}</span>
         {' · '}
         {steps[currentStep]?.title}

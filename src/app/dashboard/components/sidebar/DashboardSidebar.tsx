@@ -84,10 +84,10 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
           animate={{ x: 0 }}
           exit={{ x: -320 }}
           transition={{ type: 'spring', damping: 30, stiffness: 200 }}
-          className="fixed top-0 left-0 z-50 h-full w-80 bg-white shadow-2xl lg:hidden flex flex-col"
+          className="fixed top-0 left-0 z-50 h-full w-80 bg-surface-alt shadow-2xl lg:hidden flex flex-col"
         >
           {/* Cabecera móvil */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <div className="flex items-center justify-between p-6 border-b border-border-subtle">
             <Link href="/dashboard" className="flex items-center gap-3" onClick={handleItemClick}>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md"
                    style={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #74C69D 100%)' }}>
@@ -112,9 +112,9 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
           </nav>
 
           {/* Footer móvil */}
-          <div className="p-3 border-t border-gray-100">
-            <Link href="/ayuda" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-all">
-              <HelpCircle className="w-5 h-5 text-gray-500" />
+          <div className="p-3 border-t border-border-subtle">
+            <Link href="/ayuda" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-muted-foreground hover:bg-surface transition-all">
+              <HelpCircle className="w-5 h-5 text-text-subtle" />
               <span>Ayuda</span>
             </Link>
             <button
@@ -133,7 +133,7 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
 
   // Versión desktop
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white/90 backdrop-blur-xl border-r border-gray-100 z-40 hidden lg:flex flex-col shadow-xl">
+    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-surface-alt/90 backdrop-blur-xl border-r border-border-subtle z-40 hidden lg:flex flex-col shadow-xl">
       {/* Logo */}
       <div className="flex items-center gap-2 px-5 py-7">
         <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-md"
@@ -141,7 +141,7 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
           <Leaf className="w-5 h-5 text-white" />
         </div>
         <span className="text-lg font-semibold" style={{ color: '#1B4332' }}>origen.</span>
-        <span className="ml-auto text-[10px] font-medium px-2 py-1 bg-gray-100 rounded-full text-gray-600">
+        <span className="ml-auto text-[10px] font-medium px-2 py-1 bg-surface rounded-full text-muted-foreground">
           v2.0
         </span>
       </div>
@@ -157,9 +157,9 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
       </nav>
 
       {/* Footer desktop */}
-      <div className="p-3 border-t border-gray-100">
-        <Link href="/ayuda" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-all">
-          <HelpCircle className="w-5 h-5 text-gray-500" />
+      <div className="p-3 border-t border-border-subtle">
+        <Link href="/ayuda" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-muted-foreground hover:bg-surface transition-all">
+          <HelpCircle className="w-5 h-5 text-text-subtle" />
           <span>Ayuda</span>
         </Link>
         <button

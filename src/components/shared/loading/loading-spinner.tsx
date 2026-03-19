@@ -71,7 +71,7 @@ const spinnerSizes: Record<SpinnerSize, string> = {
 };
 
 const spinnerColors: Record<SpinnerVariant, string> = {
-  default:   'text-gray-400',
+  default:   'text-text-subtle',
   primary:   'text-origen-pradera',
   secondary: 'text-origen-hoja',
   white:     'text-white',
@@ -146,7 +146,7 @@ export function SectionLoader({
     <div className={cn('flex flex-col items-center justify-center gap-3 py-10 px-6', className)}>
       <Spinner size={size} variant="primary" />
       {message && (
-        <p className="text-sm text-gray-400 font-medium">{message}</p>
+        <p className="text-sm text-text-subtle font-medium">{message}</p>
       )}
     </div>
   );

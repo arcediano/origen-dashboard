@@ -33,7 +33,7 @@ export function ProductTableActions({
           e.stopPropagation();
           onAdjustStock(product);
         }}
-        className="p-1.5 sm:p-2 rounded-md text-gray-500 hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
+        className="p-1.5 sm:p-2 rounded-md text-muted-foreground hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
         title="Ajustar stock"
         aria-label="Ajustar stock"
       >
@@ -49,7 +49,7 @@ export function ProductTableActions({
           e.stopPropagation();
           onView(product.id);
         }}
-        className="p-1.5 sm:p-2 rounded-md text-gray-500 hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
+        className="p-1.5 sm:p-2 rounded-md text-muted-foreground hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
         title="Ver producto"
         aria-label="Ver producto"
       >
@@ -65,7 +65,7 @@ export function ProductTableActions({
           e.stopPropagation();
           onEdit(product.id);
         }}
-        className="p-1.5 sm:p-2 rounded-md text-gray-500 hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
+        className="p-1.5 sm:p-2 rounded-md text-muted-foreground hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
         title="Editar producto"
         aria-label="Editar producto"
       >

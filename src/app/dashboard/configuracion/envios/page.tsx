@@ -27,7 +27,7 @@ export default function EnviosPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-origen-bosque">Métodos de envío</h1>
-            <p className="text-sm text-gray-500">Configura cómo entregas tus productos</p>
+            <p className="text-sm text-muted-foreground">Configura cómo entregas tus productos</p>
           </div>
         </div>
         <Button onClick={() => setIsSaving(true)} disabled={isSaving}>
@@ -54,7 +54,7 @@ export default function EnviosPage() {
                 </div>
                 <div>
                   <h3 className="font-medium text-origen-bosque">Envío estándar</h3>
-                  <p className="text-xs text-gray-500">Entrega en 2-3 días laborables</p>
+                  <p className="text-xs text-muted-foreground">Entrega en 2-3 días laborables</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -71,7 +71,7 @@ export default function EnviosPage() {
                 </div>
                 <div>
                   <h3 className="font-medium text-origen-bosque">Envío exprés</h3>
-                  <p className="text-xs text-gray-500">Entrega en 24 horas</p>
+                  <p className="text-xs text-muted-foreground">Entrega en 24 horas</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -88,7 +88,7 @@ export default function EnviosPage() {
                 </div>
                 <div>
                   <h3 className="font-medium text-origen-bosque">Recogida en local</h3>
-                  <p className="text-xs text-gray-500">Sin coste de envío</p>
+                  <p className="text-xs text-muted-foreground">Sin coste de envío</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">

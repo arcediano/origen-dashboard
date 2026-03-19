@@ -68,7 +68,7 @@ export default function SuccessStoriesPage() {
       {/* ================================================================
           HEADER
       ================================================================ */}
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      <header className="sticky top-0 z-40 w-full bg-surface-alt/95 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <Link
@@ -93,7 +93,7 @@ export default function SuccessStoriesPage() {
 
             <Link
               href="/auth/register"
-              className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-white hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2"
+              className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-surface-alt hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2"
             >
               <Store className="w-4 h-4 text-origen-pradera" />
               <span className="hidden sm:inline">Nuevo productor</span>
@@ -120,7 +120,7 @@ export default function SuccessStoriesPage() {
               Casos de{' '}
               <span className="text-origen-hoja">éxito</span>
             </h1>
-            <p className="text-base md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Descubre cómo productores artesanales han transformado sus negocios con Origen Marketplace
             </p>
           </div>
@@ -132,12 +132,12 @@ export default function SuccessStoriesPage() {
               { icon: Users, value: '+500', label: 'Productores activos' },
               { icon: Award, value: '4.9★', label: 'Valoración media' },
             ].map(({ icon: Icon, value, label }) => (
-              <div key={label} className="bg-white rounded-2xl p-4 md:p-6 border border-gray-200 shadow-sm text-center">
+              <div key={label} className="bg-surface-alt rounded-2xl p-4 md:p-6 border border-border shadow-sm text-center">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center mx-auto mb-2 md:mb-3">
                   <Icon className="w-5 h-5 md:w-6 md:h-6 text-origen-bosque" />
                 </div>
                 <div className="text-xl md:text-3xl font-bold text-origen-hoja">{value}</div>
-                <div className="text-xs md:text-sm text-gray-500 mt-1">{label}</div>
+                <div className="text-xs md:text-sm text-muted-foreground mt-1">{label}</div>
               </div>
             ))}
           </div>
@@ -147,7 +147,7 @@ export default function SuccessStoriesPage() {
             {testimonials.map((t, index) => (
               <div key={index} className="group relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-origen-bosque/4 to-origen-hoja/5 rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
-                <div className="relative bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-200 group-hover:border-origen-hoja group-hover:shadow-xl transition-all duration-300">
+                <div className="relative bg-surface-alt rounded-2xl p-6 md:p-8 shadow-lg border border-border group-hover:border-origen-hoja group-hover:shadow-xl transition-all duration-300">
 
                   {/* Cabecera tarjeta */}
                   <div className="flex items-start justify-between mb-5">
@@ -157,7 +157,7 @@ export default function SuccessStoriesPage() {
                       </div>
                       <div>
                         <h3 className="text-sm md:text-base font-bold text-origen-bosque leading-tight">{t.name}</h3>
-                        <p className="text-xs text-gray-500 mt-0.5">{t.location}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{t.location}</p>
                       </div>
                     </div>
                     <span className="inline-flex items-center bg-origen-pastel text-origen-bosque rounded-full px-3 py-1 text-xs font-semibold border border-origen-hoja/30 flex-shrink-0 ml-2">
@@ -173,18 +173,18 @@ export default function SuccessStoriesPage() {
                   </div>
 
                   {/* Quote */}
-                  <blockquote className="text-sm md:text-base text-gray-600 leading-relaxed mb-5 italic">
+                  <blockquote className="text-sm md:text-base text-muted-foreground leading-relaxed mb-5 italic">
                     "{t.quote}"
                   </blockquote>
 
                   {/* Stat */}
-                  <div className="flex items-center gap-2 pt-4 border-t border-gray-100">
+                  <div className="flex items-center gap-2 pt-4 border-t border-border-subtle">
                     <div className="w-8 h-8 rounded-lg bg-origen-hoja/10 flex items-center justify-center">
                       <CheckCircle className="w-4 h-4 text-origen-hoja" />
                     </div>
                     <div>
                       <span className="text-lg font-bold text-origen-hoja">{t.stat}</span>
-                      <span className="text-xs text-gray-500 ml-2">{t.statLabel}</span>
+                      <span className="text-xs text-muted-foreground ml-2">{t.statLabel}</span>
                     </div>
                   </div>
                 </div>
@@ -194,11 +194,11 @@ export default function SuccessStoriesPage() {
 
           {/* CTA final */}
           <div className="mt-12 md:mt-20 text-center">
-            <div className="bg-white rounded-3xl p-8 md:p-12 border border-origen-hoja/30 shadow-origen max-w-2xl mx-auto">
+            <div className="bg-surface-alt rounded-3xl p-8 md:p-12 border border-origen-hoja/30 shadow-origen max-w-2xl mx-auto">
               <h2 className="text-2xl md:text-3xl font-bold text-origen-bosque mb-3">
                 ¿Listo para ser el siguiente caso de éxito?
               </h2>
-              <p className="text-gray-600 mb-6 md:mb-8">
+              <p className="text-muted-foreground mb-6 md:mb-8">
                 Únete a más de 500 productores que ya venden en Origen Marketplace.
               </p>
               <Link

@@ -37,10 +37,10 @@ export function ProcessSection() {
     const Icon = step.icon;
     return (
       <div className="group relative h-full">
-        <div className="bg-white rounded-2xl p-5 md:p-8 shadow-lg md:shadow-xl border border-gray-200 hover:border-origen-hoja hover:shadow-2xl transition-all duration-300 h-full">
+        <div className="bg-surface-alt rounded-2xl p-5 md:p-8 shadow-lg md:shadow-xl border border-border hover:border-origen-hoja hover:shadow-2xl transition-all duration-300 h-full">
           <div className="relative mb-4 md:mb-6">
             <div className="absolute -top-1 -right-1">
-              <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-white shadow-md flex items-center justify-center border border-origen-crema">
+              <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-surface-alt shadow-md flex items-center justify-center border border-origen-crema">
                 <span className="text-xs md:text-sm font-bold text-origen-bosque">0{step.number}</span>
               </div>
             </div>
@@ -51,7 +51,7 @@ export function ProcessSection() {
           <h3 className="text-base md:text-2xl font-bold text-origen-bosque mb-1.5 md:mb-3 text-center">
             {step.title}
           </h3>
-          <p className="text-gray-600 text-xs md:text-base text-center mb-3 md:mb-6">
+          <p className="text-muted-foreground text-xs md:text-base text-center mb-3 md:mb-6">
             {step.description}
           </p>
           <div className="text-center">
@@ -62,7 +62,7 @@ export function ProcessSection() {
                   <span className="text-origen-hoja">Empieza aquí</span>
                 </>
               ) : (
-                <span className="text-gray-500">{index === 3 ? '¡Objetivo!' : 'Paso siguiente'}</span>
+                <span className="text-muted-foreground">{index === 3 ? '¡Objetivo!' : 'Paso siguiente'}</span>
               )}
             </div>
           </div>
@@ -80,7 +80,7 @@ export function ProcessSection() {
             Un camino claro hacia
             <span className="block text-origen-hoja">tu éxito online</span>
           </h2>
-          <p className="hidden md:block text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="hidden md:block text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Desde tu registro hasta tu primera venta, te acompañamos en cada paso
             con herramientas simples y soporte personalizado.
           </p>
@@ -102,7 +102,7 @@ export function ProcessSection() {
               <StepCard step={step} index={index} />
               {index < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 z-10">
-                  <div className="w-6 h-6 bg-white border-2 border-origen-pradera rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 bg-surface-alt border-2 border-origen-pradera rounded-full flex items-center justify-center">
                     <ArrowRight className="w-3 h-3 text-origen-pradera" />
                   </div>
                 </div>
@@ -113,11 +113,11 @@ export function ProcessSection() {
 
         {/* CTA */}
         <div className="text-center mt-10 md:mt-16">
-          <div className="hidden md:block bg-white rounded-3xl p-8 max-w-2xl mx-auto border border-origen-pradera/30 shadow-subtle mb-8">
+          <div className="hidden md:block bg-surface-alt rounded-3xl p-8 max-w-2xl mx-auto border border-origen-pradera/30 shadow-subtle mb-8">
             <p className="text-xl text-origen-bosque mb-4 font-semibold">
               ¿Listo para dar el primer paso?
             </p>
-            <p className="text-gray-600 text-base mb-6">
+            <p className="text-muted-foreground text-base mb-6">
               Completa el formulario de registro y nuestro equipo contactará contigo
               para ayudarte con la configuración inicial.
             </p>

@@ -31,7 +31,7 @@ export function FinalCTASection() {
               <span className="block text-origen-hoja mt-1 md:mt-2">Habla con nuestro equipo</span>
             </h2>
 
-            <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Nuestros especialistas en productores locales te guiarán en cada paso,
               desde el registro hasta tu primera venta. Respuesta garantizada en menos de 24h.
             </p>
@@ -45,9 +45,9 @@ export function FinalCTASection() {
               { value: 'ES/EN', label: 'Idiomas soporte', accent: 'border-l-origen-pradera' },
               { value: '5★', label: 'Valoración', accent: 'border-l-origen-hoja' },
             ].map(({ value, label, accent }) => (
-              <div key={value} className={`bg-white rounded-xl p-4 text-center border border-gray-100 border-l-4 ${accent} shadow-sm hover:shadow-md transition-shadow`}>
+              <div key={value} className={`bg-surface-alt rounded-xl p-4 text-center border border-border-subtle border-l-4 ${accent} shadow-sm hover:shadow-md transition-shadow`}>
                 <div className="text-2xl md:text-3xl font-bold text-origen-bosque mb-1">{value}</div>
-                <div className="text-xs md:text-sm text-gray-500">{label}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">{label}</div>
               </div>
             ))}
           </div>
@@ -61,14 +61,14 @@ export function FinalCTASection() {
             ].map(({ icon: Icon, title, detail, sub, note, badge }) => (
               <div key={title} className="group relative">
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-origen-bosque/4 to-transparent group-hover:scale-[1.02] transition-transform duration-300" />
-                <div className="relative bg-white rounded-2xl p-6 md:p-7 border border-origen-pradera/20 hover:border-origen-hoja/40 transition-all duration-300 shadow-md hover:shadow-lg text-center">
+                <div className="relative bg-surface-alt rounded-2xl p-6 md:p-7 border border-origen-pradera/20 hover:border-origen-hoja/40 transition-all duration-300 shadow-md hover:shadow-lg text-center">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center mb-4 mx-auto shadow-sm">
                     <Icon className="w-6 h-6 text-origen-bosque" />
                   </div>
                   <h3 className="text-base md:text-lg font-bold mb-2 text-origen-bosque">{title}</h3>
                   <p className="text-origen-bosque text-sm font-medium mb-1">{detail}</p>
-                  <p className="text-gray-500 text-xs">{sub}</p>
-                  {note && <p className="text-gray-400 text-xs mt-0.5">{note}</p>}
+                  <p className="text-muted-foreground text-xs">{sub}</p>
+                  {note && <p className="text-text-subtle text-xs mt-0.5">{note}</p>}
                   {badge && (
                     <div className="mt-3">
                       <span className="text-xs bg-gradient-to-r from-origen-bosque to-origen-pino text-white px-3 py-1 rounded-full font-medium">{badge}</span>
@@ -81,8 +81,8 @@ export function FinalCTASection() {
 
           {/* CTA final */}
           <div className="text-center">
-            <div className="bg-white rounded-2xl p-6 md:p-7 max-w-2xl mx-auto mb-6 border border-origen-pradera/20 shadow-md">
-              <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-5">
+            <div className="bg-surface-alt rounded-2xl p-6 md:p-7 max-w-2xl mx-auto mb-6 border border-origen-pradera/20 shadow-md">
+              <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-5">
                 ¿Prefieres explorar por tu cuenta? Tenemos recursos detallados
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -106,17 +106,17 @@ export function FinalCTASection() {
             </div>
 
             {/* Trust badges */}
-            <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 text-gray-400 text-xs">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 text-text-subtle text-xs">
               <div className="flex items-center gap-1.5">
                 <Shield className="w-3 h-3 text-origen-hoja" />
                 <span>Datos protegidos LOPD/RGPD</span>
               </div>
-              <span className="hidden md:block w-px h-3 bg-gray-200" />
+              <span className="hidden md:block w-px h-3 bg-border" />
               <div className="flex items-center gap-1.5">
                 <Clock className="w-3 h-3 text-origen-hoja" />
                 <span>Respuesta garantizada 24h</span>
               </div>
-              <span className="hidden md:block w-px h-3 bg-gray-200" />
+              <span className="hidden md:block w-px h-3 bg-border" />
               <div className="flex items-center gap-1.5">
                 <Users className="w-3 h-3 text-origen-hoja" />
                 <span>Equipo especializado en productores</span>

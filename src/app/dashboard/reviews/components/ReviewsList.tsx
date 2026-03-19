@@ -69,7 +69,7 @@ export function ReviewsList({
             key={star}
             className={cn(
               'w-4 h-4',
-              star <= rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'
+              star <= rating ? 'fill-amber-400 text-amber-400' : 'text-border'
             )}
           />
         ))}
@@ -97,11 +97,11 @@ export function ReviewsList({
     return (
       <Card className="p-12 text-center">
         <div className="flex flex-col items-center">
-          <MessageSquare className="w-12 h-12 text-gray-300 mb-4" />
+          <MessageSquare className="w-12 h-12 text-border mb-4" />
           <h3 className="text-lg font-semibold text-origen-bosque mb-2">
             No hay reseñas
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             No se encontraron reseñas con los filtros seleccionados.
           </p>
         </div>
@@ -137,7 +137,7 @@ export function ReviewsList({
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                   <span>Reseña de {review.type === 'product' ? 'producto' : 'productor'}</span>
                   <span>·</span>
                   <span>{formatDistanceToNow(review.createdAt, { locale: es, addSuffix: true })}</span>
@@ -166,7 +166,7 @@ export function ReviewsList({
 
           {/* Contenido */}
           <p className={cn(
-            'text-sm text-gray-600 mb-3',
+            'text-sm text-muted-foreground mb-3',
             expandedId !== review.id && 'line-clamp-3'
           )}>
             {review.content}
@@ -190,7 +190,7 @@ export function ReviewsList({
                   key={idx}
                   className="w-16 h-16 rounded-lg bg-origen-crema flex items-center justify-center overflow-hidden flex-shrink-0"
                 >
-                  <ImageIcon className="w-6 h-6 text-gray-400" />
+                  <ImageIcon className="w-6 h-6 text-text-subtle" />
                 </div>
               ))}
             </div>
@@ -204,11 +204,11 @@ export function ReviewsList({
                 <span className="text-xs font-medium text-origen-bosque">
                   {review.response.authorName}
                 </span>
-                <span className="text-[10px] text-gray-400">
+                <span className="text-[10px] text-text-subtle">
                   {formatDistanceToNow(review.response.createdAt, { locale: es, addSuffix: true })}
                 </span>
               </div>
-              <p className="text-xs text-gray-600">{review.response.content}</p>
+              <p className="text-xs text-muted-foreground">{review.response.content}</p>
             </div>
           )}
 
@@ -222,7 +222,7 @@ export function ReviewsList({
                     setRespondingTo(null);
                     setResponseText('');
                   }}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-text-subtle hover:text-muted-foreground"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -265,13 +265,13 @@ export function ReviewsList({
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-xs text-gray-600 mb-3">
+              <p className="text-xs text-muted-foreground mb-3">
                 ¿Por qué quieres reportar esta reseña?
               </p>
               <select
                 value={flagReason}
                 onChange={(e) => setFlagReason(e.target.value)}
-                className="w-full p-2 text-sm border border-gray-200 rounded-lg mb-3"
+                className="w-full p-2 text-sm border border-border rounded-lg mb-3"
               >
                 <option value="">Selecciona un motivo</option>
                 <option value="inappropriate">Contenido inapropiado</option>
@@ -313,7 +313,7 @@ export function ReviewsList({
           )}
 
           {/* Footer con acciones - CON ESTRUCTURA CORREGIDA */}
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-border-subtle">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"

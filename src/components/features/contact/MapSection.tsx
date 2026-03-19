@@ -2,8 +2,8 @@
 
 export function MapSection() {
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      <div className="h-64 w-full bg-gray-100 relative">
+    <div className="bg-surface-alt rounded-xl shadow-lg overflow-hidden">
+      <div className="h-64 w-full bg-surface relative">
         {/* Esto sería reemplazado por un componente de mapa real como Google Maps */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
@@ -13,12 +13,12 @@ export function MapSection() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <p className="text-gray-700 font-medium">Calle Ejemplo 123, Madrid</p>
+            <p className="text-foreground font-medium">Calle Ejemplo 123, Madrid</p>
           </div>
         </div>
       </div>
       <div className="p-4 border-t">
-        <p className="text-sm text-gray-600 text-center">
+        <p className="text-sm text-muted-foreground text-center">
           Nuestras oficinas están ubicadas en el centro de Madrid
         </p>
       </div>

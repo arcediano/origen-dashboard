@@ -35,16 +35,16 @@ export function TestimonialsSection() {
   const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] }) => (
     <div className="group relative h-full">
       <div className="absolute inset-0 bg-gradient-to-br from-origen-bosque/4 to-transparent rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
-      <div className="relative bg-white rounded-2xl p-5 md:p-8 shadow-lg md:shadow-xl border border-gray-200 group-hover:border-origen-hoja/50 transition-all h-full flex flex-col">
+      <div className="relative bg-surface-alt rounded-2xl p-5 md:p-8 shadow-lg md:shadow-xl border border-border group-hover:border-origen-hoja/50 transition-all h-full flex flex-col">
         <div className="flex items-center mb-3 md:mb-6">
           {[...Array(5)].map((_, i) => (
             <Star key={i} className="w-4 h-4 md:w-6 md:h-6 text-yellow-400 fill-current" />
           ))}
         </div>
-        <p className="text-gray-700 text-sm md:text-lg italic mb-4 md:mb-8 leading-relaxed flex-1">
+        <p className="text-foreground text-sm md:text-lg italic mb-4 md:mb-8 leading-relaxed flex-1">
           &ldquo;{testimonial.quote}&rdquo;
         </p>
-        <div className="flex items-center gap-3 pt-3 md:pt-6 border-t border-gray-100">
+        <div className="flex items-center gap-3 pt-3 md:pt-6 border-t border-border-subtle">
           <div className={`w-10 h-10 md:w-16 md:h-16 bg-gradient-to-br ${testimonial.bgColor} rounded-xl md:rounded-2xl flex items-center justify-center text-white text-sm md:text-2xl font-bold shadow-md flex-shrink-0`}>
             {testimonial.initials}
           </div>
@@ -52,7 +52,7 @@ export function TestimonialsSection() {
             <h4 className="font-bold text-origen-bosque text-sm md:text-xl truncate">
               {testimonial.name}
             </h4>
-            <p className="text-gray-600 text-xs md:text-base truncate">
+            <p className="text-muted-foreground text-xs md:text-base truncate">
               {testimonial.business}
             </p>
             <p className="text-xs text-origen-hoja font-semibold mt-0.5 truncate">
@@ -76,7 +76,7 @@ export function TestimonialsSection() {
             Historias de éxito que
             <span className="block text-origen-hoja">inspiran</span>
           </h2>
-          <p className="hidden md:block text-xl text-gray-600">
+          <p className="hidden md:block text-xl text-muted-foreground">
             Descubre cómo otros productores locales han transformado su negocio con Origen
           </p>
         </div>
@@ -98,12 +98,12 @@ export function TestimonialsSection() {
         </div>
 
         {/* Badge de confianza */}
-        <div className="text-center mt-8 md:mt-16 md:pt-12 md:border-t md:border-gray-200">
-          <div className="inline-flex items-center gap-3 bg-white rounded-xl px-5 py-3 md:px-8 md:py-4 shadow-lg border border-gray-200">
+        <div className="text-center mt-8 md:mt-16 md:pt-12 md:border-t md:border-border">
+          <div className="inline-flex items-center gap-3 bg-surface-alt rounded-xl px-5 py-3 md:px-8 md:py-4 shadow-lg border border-border">
             <ShieldCheck className="w-6 h-6 md:w-8 md:h-8 text-origen-pradera" />
             <div className="text-left">
               <p className="font-bold text-origen-bosque text-sm md:text-base">+500 productores verificados</p>
-              <p className="text-gray-600 text-xs md:text-sm">Comunidad en crecimiento constante</p>
+              <p className="text-muted-foreground text-xs md:text-sm">Comunidad en crecimiento constante</p>
             </div>
           </div>
         </div>

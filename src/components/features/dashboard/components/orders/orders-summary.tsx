@@ -26,7 +26,7 @@ export function OrdersSummary({ orders, isLoading = false, className }: OrdersSu
       className={`lg:col-span-2 space-y-4 ${className || ''}`}
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+        <h3 className="text-sm font-medium text-text-subtle uppercase tracking-wider">
           Pedidos recientes
         </h3>
         <Link
@@ -40,7 +40,7 @@ export function OrdersSummary({ orders, isLoading = false, className }: OrdersSu
       <div className="space-y-3">
         {isLoading ? (
           // Estado de carga
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-origen">
+          <div className="bg-surface-alt rounded-2xl border border-border shadow-origen">
             <SectionLoader message="Cargando pedidos..." />
           </div>
         ) : orders.length > 0 ? (
@@ -49,12 +49,12 @@ export function OrdersSummary({ orders, isLoading = false, className }: OrdersSu
           ))
         ) : (
           // Estado vacío
-          <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-origen text-center">
+          <div className="bg-surface-alt rounded-2xl p-8 border border-border shadow-origen text-center">
             <div className="w-16 h-16 rounded-xl bg-origen-pastel mx-auto mb-4 flex items-center justify-center">
               <ShoppingBag className="w-8 h-8 text-origen-pino" />
             </div>
-            <p className="text-gray-500 mb-1">No hay pedidos recientes</p>
-            <p className="text-sm text-gray-400">Los nuevos pedidos aparecerán aquí</p>
+            <p className="text-muted-foreground mb-1">No hay pedidos recientes</p>
+            <p className="text-sm text-text-subtle">Los nuevos pedidos aparecerán aquí</p>
           </div>
         )}
       </div>

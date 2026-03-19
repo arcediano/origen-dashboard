@@ -38,7 +38,7 @@ export default function RegisterPage() {
               Regístrate como productor
               <span className="block text-origen-pino">y empieza a vender hoy</span>
             </h2>
-            <p className="text-base md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Completa el formulario en menos de 5 minutos. Sin compromiso,
               sin costes iniciales, solo pagan cuando vendes.
             </p>
@@ -47,7 +47,7 @@ export default function RegisterPage() {
           <div className="max-w-4xl mx-auto">
             <SimpleRegistration />
             <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500 flex items-center justify-center gap-1.5">
+              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
                 <Shield className="w-3 h-3 text-origen-hoja" />
                 <span>Tus datos están protegidos con cifrado SSL de 256 bits</span>
               </p>

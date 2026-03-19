@@ -105,7 +105,7 @@ function DashboardContentWrapper({
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F8FAF5] via-white to-[#F0F7F0]">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-origen-bosque border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm text-gray-600">Validando sesión...</p>
+          <p className="text-sm text-muted-foreground">Validando sesión...</p>
         </div>
       </div>
     );
@@ -115,7 +115,7 @@ function DashboardContentWrapper({
   if (!isAuthenticated || !isProducer) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F8FAF5] via-white to-[#F0F7F0]">
+      <div className="min-h-screen bg-gradient-to-br from-surface via-surface-alt to-surface">
       <SessionExpiredModal isOpen={sessionExpired} />
       <DashboardSidebar
         isMobileOpen={isMobileMenuOpen}

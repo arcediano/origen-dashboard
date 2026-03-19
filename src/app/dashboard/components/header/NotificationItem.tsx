@@ -47,7 +47,7 @@ export function NotificationItem({
       case 'system':
         return <AlertCircle className="w-4 h-4 text-purple-500" />;
       default:
-        return <Bell className="w-4 h-4 text-gray-500" />;
+        return <Bell className="w-4 h-4 text-muted-foreground" />;
     }
   };
 
@@ -65,7 +65,7 @@ export function NotificationItem({
       case 'system':
         return 'bg-purple-50';
       default:
-        return 'bg-gray-50';
+        return 'bg-surface';
     }
   };
 
@@ -109,7 +109,7 @@ export function NotificationItem({
     <Link
       href={notification.actionUrl || '#'}
       className={cn(
-        'block px-4 py-3 hover:bg-gray-50 transition-colors relative group',
+        'block px-4 py-3 hover:bg-surface transition-colors relative group',
         !notification.read && 'bg-origen-crema/20'
       )}
       onClick={handleClick}
@@ -129,7 +129,7 @@ export function NotificationItem({
           <div className="flex items-start justify-between gap-2">
             <p className={cn(
               'text-sm truncate',
-              !notification.read ? 'font-semibold text-origen-bosque' : 'text-gray-700'
+              !notification.read ? 'font-semibold text-origen-bosque' : 'text-foreground'
             )}>
               {notification.title}
             </p>
@@ -141,12 +141,12 @@ export function NotificationItem({
           </div>
           
           {/* Descripción */}
-          <p className="text-xs text-gray-500 truncate mt-0.5">
+          <p className="text-xs text-muted-foreground truncate mt-0.5">
             {notification.description}
           </p>
           
           {/* Timestamp */}
-          <p className="text-[10px] text-gray-400 mt-1">
+          <p className="text-[10px] text-text-subtle mt-1">
             {timeAgo(notification.timestamp)}
           </p>
         </div>
@@ -157,7 +157,7 @@ export function NotificationItem({
 
       {/* Metadata adicional (si existe) - opcional */}
       {notification.metadata && (
-        <div className="mt-2 pl-13 text-[10px] text-gray-400 border-l-2 border-gray-200 pl-3">
+        <div className="mt-2 pl-13 text-[10px] text-text-subtle border-l-2 border-border pl-3">
           {Object.entries(notification.metadata).map(([key, value]) => (
             <span key={key} className="mr-2">
               {key}: {String(value)}

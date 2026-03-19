@@ -44,14 +44,14 @@ export function DashboardBreadcrumb() {
         <li>
           <Link 
             href="/dashboard" 
-            className="text-gray-500 hover:text-origen-pradera transition-colors"
+            className="text-muted-foreground hover:text-origen-pradera transition-colors"
           >
             <Home className="w-4 h-4" />
           </Link>
         </li>
         {breadcrumbs.slice(1).map((crumb, index) => (
           <li key={crumb.href} className="flex items-center">
-            <ChevronRight className="w-4 h-4 text-gray-400 mx-1" />
+            <ChevronRight className="w-4 h-4 text-text-subtle mx-1" />
             {index === breadcrumbs.slice(1).length - 1 ? (
               <span className="font-medium text-origen-bosque" aria-current="page">
                 {crumb.label}
@@ -59,7 +59,7 @@ export function DashboardBreadcrumb() {
             ) : (
               <Link 
                 href={crumb.href}
-                className="text-gray-500 hover:text-origen-pradera transition-colors"
+                className="text-muted-foreground hover:text-origen-pradera transition-colors"
               >
                 {crumb.label}
               </Link>

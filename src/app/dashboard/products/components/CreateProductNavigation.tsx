@@ -97,7 +97,7 @@ export function CreateProductNavigation({
   };
 
   return (
-    <div className={cn('flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-6 border-t border-gray-200', className)}>
+    <div className={cn('flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-6 border-t border-border', className)}>
       {/* Botón anterior */}
       <Button
         variant="outline"

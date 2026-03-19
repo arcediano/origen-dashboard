@@ -58,7 +58,7 @@ export function ContactForm() {
     setErrors(prev => { const n = { ...prev }; delete n[field]; return n; });
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition-shadow p-5 sm:p-6 md:p-8">
+    <div className="w-full bg-surface-alt rounded-2xl border border-border shadow-lg hover:shadow-xl transition-shadow p-5 sm:p-6 md:p-8">
 
       {/* Cabecera */}
       <div className="flex items-center gap-4 mb-6 md:mb-8">
@@ -67,7 +67,7 @@ export function ContactForm() {
         </div>
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-origen-bosque leading-tight">Envíanos un mensaje</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Respondemos en menos de 24 horas</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Respondemos en menos de 24 horas</p>
         </div>
       </div>
 
@@ -103,9 +103,9 @@ export function ContactForm() {
               onChange={e => { setForm(p => ({ ...p, name: e.target.value })); clearError('name'); }}
               placeholder="Tu nombre completo"
               className={cn(
-                "w-full h-11 md:h-12 px-3 md:px-4 text-sm bg-white border rounded-xl",
+                "w-full h-11 md:h-12 px-3 md:px-4 text-sm bg-surface-alt border rounded-xl",
                 "focus:outline-none focus:ring-2 focus:ring-origen-pradera/20 transition-all duration-200",
-                errors.name ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-gray-200 focus:border-origen-pradera"
+                errors.name ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-border focus:border-origen-pradera"
               )}
             />
             {errors.name && (
@@ -127,9 +127,9 @@ export function ContactForm() {
               onChange={e => { setForm(p => ({ ...p, email: e.target.value })); clearError('email'); }}
               placeholder="tu@email.com"
               className={cn(
-                "w-full h-11 md:h-12 px-3 md:px-4 text-sm bg-white border rounded-xl",
+                "w-full h-11 md:h-12 px-3 md:px-4 text-sm bg-surface-alt border rounded-xl",
                 "focus:outline-none focus:ring-2 focus:ring-origen-pradera/20 transition-all duration-200",
-                errors.email ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-gray-200 focus:border-origen-pradera"
+                errors.email ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-border focus:border-origen-pradera"
               )}
             />
             {errors.email && (
@@ -149,7 +149,7 @@ export function ContactForm() {
           <Select onValueChange={v => { setForm(p => ({ ...p, subject: v })); clearError('subject'); }}>
             <SelectTrigger className={cn(
               "h-11 md:h-12 rounded-xl text-sm",
-              errors.subject ? "border-red-300 focus:border-red-400" : "border-gray-200 focus:border-origen-pradera"
+              errors.subject ? "border-red-300 focus:border-red-400" : "border-border focus:border-origen-pradera"
             )}>
               <SelectValue placeholder="Selecciona un asunto" />
             </SelectTrigger>
@@ -178,9 +178,9 @@ export function ContactForm() {
             onChange={e => { setForm(p => ({ ...p, message: e.target.value })); clearError('message'); }}
             placeholder="Describe tu consulta en detalle..."
             className={cn(
-              "w-full px-3 md:px-4 py-3 text-sm bg-white border rounded-xl resize-none",
+              "w-full px-3 md:px-4 py-3 text-sm bg-surface-alt border rounded-xl resize-none",
               "focus:outline-none focus:ring-2 focus:ring-origen-pradera/20 transition-all duration-200",
-              errors.message ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-gray-200 focus:border-origen-pradera"
+              errors.message ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-border focus:border-origen-pradera"
             )}
           />
           {errors.message && (
@@ -214,7 +214,7 @@ export function ContactForm() {
                 </svg>
               )}
             </button>
-            <label className="text-xs text-gray-500 leading-relaxed">
+            <label className="text-xs text-muted-foreground leading-relaxed">
               He leído y acepto la{' '}
               <a href="/privacidad" className="text-origen-pradera hover:text-origen-bosque underline transition-colors">Política de privacidad</a>.
               Mis datos serán usados exclusivamente para responder a esta consulta.
@@ -276,7 +276,7 @@ export function ContactForm() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-origen-bosque">¡Mensaje enviado con éxito!</p>
-                <p className="text-xs text-gray-600 mt-0.5">Nos pondremos en contacto contigo en menos de 24 horas.</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Nos pondremos en contacto contigo en menos de 24 horas.</p>
               </div>
             </motion.div>
           )}

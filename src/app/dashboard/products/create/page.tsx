@@ -268,7 +268,7 @@ export default function CreateProductPage() {
         onBack={() => setShowCancelDialog(true)}
         actions={
           lastSaved && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-text-subtle">
               Último guardado: {lastSaved.toLocaleTimeString()}
             </span>
           )
@@ -387,7 +387,7 @@ export default function CreateProductPage() {
               <Card 
                 variant="elevated" 
                 hoverEffect="organic" 
-                className="overflow-hidden border border-gray-200 shadow-sm"
+                className="overflow-hidden border border-border shadow-sm"
               >
                 <CardHeader spacing="md">
                   <div className="flex items-center justify-between">
@@ -406,7 +406,7 @@ export default function CreateProductPage() {
                 <CardContent spacing="md">
                   <ul className="space-y-3">
                     {tips.map((tip, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                      <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
                         <div className="w-4 h-4 rounded-full bg-origen-pradera/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <div className="w-1.5 h-1.5 rounded-full bg-origen-pradera" />
                         </div>
@@ -422,7 +422,7 @@ export default function CreateProductPage() {
                         <TrendingUp className="w-3.5 h-3.5 text-origen-pradera" />
                         <span className="text-xs font-medium text-origen-bosque">Dato clave</span>
                       </div>
-                      <p className="text-xs text-gray-600">{keyFactByStep[stepNumber]}</p>
+                      <p className="text-xs text-muted-foreground">{keyFactByStep[stepNumber]}</p>
                     </div>
                   )}
                 </CardContent>

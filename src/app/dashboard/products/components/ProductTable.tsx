@@ -64,7 +64,7 @@ export function ProductTable({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <Package className="w-4 h-4 text-gray-400" />
+              <Package className="w-4 h-4 text-text-subtle" />
             )}
           </div>
           {/* Nombre y SKU */}
@@ -72,7 +72,7 @@ export function ProductTable({
             <p className="text-sm font-medium text-origen-bosque truncate max-w-[200px]" title={item.name}>
               {item.name}
             </p>
-            <p className="text-xs text-gray-500 truncate">{item.sku}</p>
+            <p className="text-xs text-muted-foreground truncate">{item.sku}</p>
           </div>
         </div>
       ),
@@ -88,7 +88,7 @@ export function ProductTable({
             {item.basePrice.toFixed(2)}€
           </span>
           {item.comparePrice && item.comparePrice > item.basePrice && (
-            <span className="text-xs text-gray-400 line-through ml-1">
+            <span className="text-xs text-text-subtle line-through ml-1">
               {item.comparePrice.toFixed(2)}€
             </span>
           )}

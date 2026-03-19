@@ -126,7 +126,7 @@ export default function PersonalInfoPage() {
           >
             {/* TARJETA DE AVATAR - COMPACTA Y CUADRADA */}
             <motion.div variants={itemVariants}>
-              <Card className="border border-gray-200 shadow-sm">
+              <Card className="border border-border shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-6">
                     {/* Avatar cuadrado con esquinas redondeadas */}
@@ -146,7 +146,7 @@ export default function PersonalInfoPage() {
                         <>
                           <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <div className="bg-white rounded-full p-2 shadow-lg">
+                            <div className="bg-surface-alt rounded-full p-2 shadow-lg">
                               <Camera className="w-4 h-4 text-origen-bosque" />
                             </div>
                           </div>
@@ -159,7 +159,7 @@ export default function PersonalInfoPage() {
                       <div className="flex items-center justify-between gap-4">
                         <div>
                           <h2 className="text-xl font-bold text-origen-bosque truncate">{form.name}</h2>
-                          <p className="text-sm text-gray-500 truncate">{form.email}</p>
+                          <p className="text-sm text-muted-foreground truncate">{form.email}</p>
                           <div className="flex flex-wrap gap-2 mt-2">
                             <Badge variant="success" size="xs" className="flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
@@ -180,7 +180,7 @@ export default function PersonalInfoPage() {
                             </Button>
                           ) : (
                             <>
-                              <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)} className="text-gray-500">
+                              <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)} className="text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                   <X className="w-3.5 h-3.5" />
                                   Cancelar
@@ -216,8 +216,8 @@ export default function PersonalInfoPage() {
               
               {/* COLUMNA IZQUIERDA - Datos personales */}
               <motion.div variants={itemVariants}>
-                <Card className="border border-gray-200 shadow-sm h-full">
-                  <CardHeader className="pb-3 border-b border-gray-100">
+                <Card className="border border-border shadow-sm h-full">
+                  <CardHeader className="pb-3 border-b border-border-subtle">
                     <CardTitle className="flex items-center gap-2 text-base">
                       <User className="w-4 h-4 text-origen-pradera" />
                       Datos personales
@@ -233,7 +233,7 @@ export default function PersonalInfoPage() {
                         value={form.name}
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
                         disabled={!isEditing}
-                        className={`h-10 ${!isEditing ? 'bg-gray-50' : ''}`}
+                        className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                         placeholder="Tu nombre completo"
                       />
                       {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
@@ -249,7 +249,7 @@ export default function PersonalInfoPage() {
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                         disabled={!isEditing}
-                        className={`h-10 ${!isEditing ? 'bg-gray-50' : ''}`}
+                        className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                         placeholder="tu@email.com"
                       />
                       {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
@@ -264,7 +264,7 @@ export default function PersonalInfoPage() {
                         value={form.phone}
                         onChange={(e) => setForm({ ...form, phone: e.target.value })}
                         disabled={!isEditing}
-                        className={`h-10 ${!isEditing ? 'bg-gray-50' : ''}`}
+                        className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                         placeholder="+34 612 345 678"
                       />
                       {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
@@ -280,7 +280,7 @@ export default function PersonalInfoPage() {
                         value={form.birthDate}
                         onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
                         disabled={!isEditing}
-                        className={`h-10 ${!isEditing ? 'bg-gray-50' : ''}`}
+                        className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                       />
                     </div>
                   </CardContent>
@@ -289,8 +289,8 @@ export default function PersonalInfoPage() {
 
               {/* COLUMNA DERECHA - Dirección */}
               <motion.div variants={itemVariants}>
-                <Card className="border border-gray-200 shadow-sm h-full">
-                  <CardHeader className="pb-3 border-b border-gray-100">
+                <Card className="border border-border shadow-sm h-full">
+                  <CardHeader className="pb-3 border-b border-border-subtle">
                     <CardTitle className="flex items-center gap-2 text-base">
                       <MapPin className="w-4 h-4 text-origen-pradera" />
                       Dirección
@@ -306,7 +306,7 @@ export default function PersonalInfoPage() {
                         value={form.address}
                         onChange={(e) => setForm({ ...form, address: e.target.value })}
                         disabled={!isEditing}
-                        className={`h-10 ${!isEditing ? 'bg-gray-50' : ''}`}
+                        className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                         placeholder="Calle, número, piso..."
                       />
                     </div>
@@ -319,7 +319,7 @@ export default function PersonalInfoPage() {
                           value={form.city}
                           onChange={(e) => setForm({ ...form, city: e.target.value })}
                           disabled={!isEditing}
-                          className={`h-10 ${!isEditing ? 'bg-gray-50' : ''}`}
+                          className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                         />
                       </div>
                       <div className="space-y-1">
@@ -329,7 +329,7 @@ export default function PersonalInfoPage() {
                           value={form.postalCode}
                           onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
                           disabled={!isEditing}
-                          className={`h-10 ${!isEditing ? 'bg-gray-50' : ''}`}
+                          className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                         />
                       </div>
                     </div>
@@ -342,7 +342,7 @@ export default function PersonalInfoPage() {
                           value={form.province}
                           onChange={(e) => setForm({ ...form, province: e.target.value })}
                           disabled={!isEditing}
-                          className={`h-10 ${!isEditing ? 'bg-gray-50' : ''}`}
+                          className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                         />
                       </div>
                       <div className="space-y-1">
@@ -351,7 +351,7 @@ export default function PersonalInfoPage() {
                           id="country"
                           value={form.country}
                           disabled={!isEditing}
-                          className={`h-10 ${!isEditing ? 'bg-gray-50' : ''}`}
+                          className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                         />
                       </div>
                     </div>
@@ -362,8 +362,8 @@ export default function PersonalInfoPage() {
 
             {/* BIOGRAFÍA */}
             <motion.div variants={itemVariants}>
-              <Card className="border border-gray-200 shadow-sm">
-                <CardHeader className="pb-3 border-b border-gray-100">
+              <Card className="border border-border shadow-sm">
+                <CardHeader className="pb-3 border-b border-border-subtle">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <User className="w-4 h-4 text-origen-pradera" />
                     Biografía
@@ -377,10 +377,10 @@ export default function PersonalInfoPage() {
                       onChange={(e) => setForm({ ...form, bio: e.target.value })}
                       disabled={!isEditing}
                       rows={4}
-                      className="w-full p-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-origen-menta/50 focus:border-origen-pradera disabled:bg-gray-50"
+                      className="w-full p-3 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-origen-menta/50 focus:border-origen-pradera disabled:bg-surface"
                       placeholder="Cuéntanos algo sobre ti..."
                     />
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       Esta información aparecerá en tu perfil público
                     </p>
                   </div>

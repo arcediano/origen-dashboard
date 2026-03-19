@@ -30,7 +30,7 @@ export default function RecuperarPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema/30">
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      <header className="sticky top-0 z-40 w-full bg-surface-alt/95 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <Link
@@ -55,7 +55,7 @@ export default function RecuperarPage() {
 
             <Link
               href="/auth/login"
-              className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-white hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2"
+              className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-surface-alt hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2"
             >
               <Store className="w-4 h-4 text-origen-pradera" />
               <span className="hidden sm:inline">Iniciar sesión</span>
@@ -79,7 +79,7 @@ export default function RecuperarPage() {
               Recupera tu{' '}
               <span className="text-origen-pradera">contraseña</span>
             </h1>
-            <p className="text-sm text-gray-600 max-w-sm mx-auto">
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
               Te enviaremos un enlace seguro para restablecer tu contraseña.
             </p>
           </div>
@@ -103,7 +103,7 @@ export default function RecuperarPage() {
                   Recupera el acceso
                   <span className="block text-origen-hoja">a tu panel</span>
                 </h2>
-                <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+                <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
                   Sin acceso a tu cuenta no puedes gestionar tu tienda.
                   Restablece tu contraseña en menos de 2 minutos.
                 </p>
@@ -134,13 +134,13 @@ export default function RecuperarPage() {
                       desc: 'El enlace es válido durante 30 minutos',
                     },
                   ].map((item) => (
-                    <div key={item.step} className="flex items-start gap-4 bg-white rounded-xl p-4 border border-gray-200 hover:border-origen-pradera transition-all hover:shadow-sm">
+                    <div key={item.step} className="flex items-start gap-4 bg-surface-alt rounded-xl p-4 border border-border hover:border-origen-pradera transition-all hover:shadow-sm">
                       <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-origen-pradera/60 to-origen-hoja/60 flex items-center justify-center shadow-sm flex-shrink-0">
                         <span className="text-white text-sm font-bold">{item.step}</span>
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-origen-bosque">{item.title}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -165,7 +165,7 @@ export default function RecuperarPage() {
                       <div className="w-5 h-5 rounded-full bg-origen-pradera/10 flex items-center justify-center">
                         <CheckCircle className="w-3 h-3 text-origen-pradera" />
                       </div>
-                      <span className="text-sm text-gray-700">{benefit}</span>
+                      <span className="text-sm text-foreground">{benefit}</span>
                     </div>
                   ))}
                 </div>
@@ -178,8 +178,8 @@ export default function RecuperarPage() {
                 <SimpleForgotPassword />
 
                 <div className="mt-8 text-center">
-                  <div className="inline-flex items-center gap-3 bg-white rounded-full px-5 py-2.5 border border-gray-200 shadow-sm hover:border-origen-pradera transition-all">
-                    <span className="text-sm text-gray-600">💬 ¿Necesitas ayuda?</span>
+                  <div className="inline-flex items-center gap-3 bg-surface-alt rounded-full px-5 py-2.5 border border-border shadow-sm hover:border-origen-pradera transition-all">
+                    <span className="text-sm text-muted-foreground">💬 ¿Necesitas ayuda?</span>
                     <Link
                       href="/contacto"
                       className="text-sm font-medium text-origen-pradera hover:text-origen-bosque transition-colors flex items-center gap-1"

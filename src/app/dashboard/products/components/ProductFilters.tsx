@@ -76,18 +76,18 @@ function Select({ icon, placeholder, className, children, value, fullWidth, ...p
   return (
     <div className={cn('relative', fullWidth ? 'w-full' : 'w-full sm:w-auto')}>
       {icon && (
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
           {icon}
         </div>
       )}
       <select
         value={value || ''}
         className={cn(
-          'h-10 sm:h-9 text-sm border border-gray-200 bg-white rounded-md appearance-none cursor-pointer',
+          'h-10 sm:h-9 text-sm border border-border bg-surface-alt rounded-md appearance-none cursor-pointer',
           'focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera',
           icon ? 'pl-9' : 'pl-3',
           'pr-8',
-          !value && 'text-gray-400',
+          !value && 'text-text-subtle',
           fullWidth ? 'w-full' : 'w-full sm:w-[160px]',
           className
         )}
@@ -98,7 +98,7 @@ function Select({ icon, placeholder, className, children, value, fullWidth, ...p
         </option>
         {children}
       </select>
-      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle pointer-events-none" />
     </div>
   );
 }
@@ -137,19 +137,19 @@ export function ProductFilters({
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Campo de búsqueda - ocupa todo el ancho en móvil */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Buscar por nombre o SKU..."
-            className="w-full pl-9 pr-7 h-10 sm:h-9 text-sm bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+            className="w-full pl-9 pr-7 h-10 sm:h-9 text-sm bg-surface border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
             aria-label="Buscar productos"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-subtle hover:text-muted-foreground"
               aria-label="Limpiar búsqueda"
             >
               <X className="w-4 h-4" />
@@ -163,8 +163,8 @@ export function ProductFilters({
           <button
             onClick={() => setShowMobileFilters(!showMobileFilters)}
             className={cn(
-              'sm:hidden flex items-center justify-center h-10 px-3 border border-gray-200 rounded-md bg-white',
-              showMobileFilters ? 'bg-origen-crema text-origen-bosque border-origen-pradera/30' : 'text-gray-600'
+              'sm:hidden flex items-center justify-center h-10 px-3 border border-border rounded-md bg-surface-alt',
+              showMobileFilters ? 'bg-origen-crema text-origen-bosque border-origen-pradera/30' : 'text-muted-foreground'
             )}
             aria-label="Mostrar filtros"
             aria-expanded={showMobileFilters}
@@ -179,14 +179,14 @@ export function ProductFilters({
           </button>
 
           {/* Selector de vista */}
-          <div className="flex items-center gap-1 border border-gray-200 rounded-md p-0.5 bg-white h-10 sm:h-9">
+          <div className="flex items-center gap-1 border border-border rounded-md p-0.5 bg-surface-alt h-10 sm:h-9">
             <button
               onClick={() => onViewModeChange('list')}
               className={cn(
                 'p-1.5 sm:p-1 rounded transition-all',
                 viewMode === 'list'
                   ? 'bg-origen-crema text-origen-bosque'
-                  : 'text-gray-400 hover:text-origen-bosque hover:bg-gray-100'
+                  : 'text-text-subtle hover:text-origen-bosque hover:bg-surface'
               )}
               title="Vista tabla"
               aria-label="Vista tabla"
@@ -200,7 +200,7 @@ export function ProductFilters({
                 'p-1.5 sm:p-1 rounded transition-all',
                 viewMode === 'grid'
                   ? 'bg-origen-crema text-origen-bosque'
-                  : 'text-gray-400 hover:text-origen-bosque hover:bg-gray-100'
+                  : 'text-text-subtle hover:text-origen-bosque hover:bg-surface'
               )}
               title="Vista cuadrícula"
               aria-label="Vista cuadrícula"
@@ -285,7 +285,7 @@ export function ProductFilters({
 
       {/* Filtros móviles desplegables */}
       {showMobileFilters && (
-        <div className="sm:hidden mt-3 space-y-3 pt-3 border-t border-gray-100">
+        <div className="sm:hidden mt-3 space-y-3 pt-3 border-t border-border-subtle">
           <Select
             value={selectedCategory}
             onChange={(e) => onCategoryChange(e.target.value)}
@@ -349,7 +349,7 @@ export function ProductFilters({
           {hasFilters && (
             <button
               onClick={onClearFilters}
-              className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-sm text-origen-pradera hover:text-origen-hoja hover:bg-origen-crema/50 rounded-md transition-colors border border-gray-200"
+              className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-sm text-origen-pradera hover:text-origen-hoja hover:bg-origen-crema/50 rounded-md transition-colors border border-border"
               aria-label="Limpiar filtros"
             >
               <RefreshCw className="w-4 h-4" />
@@ -361,16 +361,16 @@ export function ProductFilters({
 
       {/* Badges de filtros activos */}
       {hasFilters && (
-        <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-gray-100">
-          <span className="text-xs font-medium text-gray-500">Filtros activos:</span>
+        <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border-subtle">
+          <span className="text-xs font-medium text-muted-foreground">Filtros activos:</span>
           
           {searchQuery && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-md border border-gray-200 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-md border border-border text-xs">
               <Search className="w-3 h-3" />
               <span className="max-w-[100px] sm:max-w-[150px] truncate">"{searchQuery}"</span>
               <button
                 onClick={() => onSearchChange('')}
-                className="ml-1 text-gray-400 hover:text-gray-600"
+                className="ml-1 text-text-subtle hover:text-muted-foreground"
                 aria-label="Eliminar filtro de búsqueda"
               >
                 <X className="w-3 h-3" />
@@ -379,12 +379,12 @@ export function ProductFilters({
           )}
 
           {selectedCategory && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-md border border-gray-200 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-md border border-border text-xs">
               <Filter className="w-3 h-3" />
               <span className="max-w-[80px] sm:max-w-[120px] truncate">{selectedCategory}</span>
               <button
                 onClick={() => onCategoryChange('')}
-                className="ml-1 text-gray-400 hover:text-gray-600"
+                className="ml-1 text-text-subtle hover:text-muted-foreground"
                 aria-label="Eliminar filtro de categoría"
               >
                 <X className="w-3 h-3" />
@@ -393,14 +393,14 @@ export function ProductFilters({
           )}
 
           {selectedStatus && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-md border border-gray-200 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-md border border-border text-xs">
               <Circle className="w-3 h-3" />
               <span className="max-w-[80px] sm:max-w-[120px] truncate">
                 {STATUS_OPTIONS.find((opt) => opt.value === selectedStatus)?.label}
               </span>
               <button
                 onClick={() => onStatusChange('')}
-                className="ml-1 text-gray-400 hover:text-gray-600"
+                className="ml-1 text-text-subtle hover:text-muted-foreground"
                 aria-label="Eliminar filtro de estado"
               >
                 <X className="w-3 h-3" />
@@ -409,14 +409,14 @@ export function ProductFilters({
           )}
 
           {selectedStock && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-md border border-gray-200 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-md border border-border text-xs">
               <Package className="w-3 h-3" />
               <span className="max-w-[80px] sm:max-w-[120px] truncate">
                 {STOCK_OPTIONS.find((opt) => opt.value === selectedStock)?.label}
               </span>
               <button
                 onClick={() => onStockChange('')}
-                className="ml-1 text-gray-400 hover:text-gray-600"
+                className="ml-1 text-text-subtle hover:text-muted-foreground"
                 aria-label="Eliminar filtro de stock"
               >
                 <X className="w-3 h-3" />
@@ -425,14 +425,14 @@ export function ProductFilters({
           )}
 
           {sortBy && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-md border border-gray-200 text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-md border border-border text-xs">
               <RefreshCw className="w-3 h-3" />
               <span className="max-w-[100px] sm:max-w-[150px] truncate">
                 {SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label}
               </span>
               <button
                 onClick={() => onSortChange('')}
-                className="ml-1 text-gray-400 hover:text-gray-600"
+                className="ml-1 text-text-subtle hover:text-muted-foreground"
                 aria-label="Eliminar ordenación"
               >
                 <X className="w-3 h-3" />
@@ -443,7 +443,7 @@ export function ProductFilters({
       )}
 
       {/* Contador de resultados */}
-      <div className="mt-2 text-xs text-gray-500 text-right">
+      <div className="mt-2 text-xs text-muted-foreground text-right">
         {totalProducts} {totalProducts === 1 ? 'producto encontrado' : 'productos encontrados'}
       </div>
     </Card>

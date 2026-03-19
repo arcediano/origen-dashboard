@@ -105,20 +105,20 @@ export function ImageUploader({
           'border-2 border-dashed rounded-xl p-6 transition-colors cursor-pointer',
           isDragActive
             ? 'border-origen-pradera bg-origen-pradera/5'
-            : 'border-gray-200 hover:border-origen-pradera/50 hover:bg-gray-50',
+            : 'border-border hover:border-origen-pradera/50 hover:bg-surface',
           value.length >= maxFiles && 'opacity-50 cursor-not-allowed'
         )}
       >
         <input {...getInputProps()} />
         <div className="flex flex-col items-center text-center">
-          <Upload className="w-8 h-8 text-gray-400 mb-2" />
-          <p className="text-sm font-medium text-gray-700">
+          <Upload className="w-8 h-8 text-text-subtle mb-2" />
+          <p className="text-sm font-medium text-foreground">
             {isDragActive ? 'Suelta las imágenes aquí' : uploadButtonText}
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             PNG, JPG, WebP hasta {maxSize}MB
           </p>
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-text-subtle mt-2">
             {value.length} de {maxFiles} imágenes
           </p>
         </div>
@@ -130,7 +130,7 @@ export function ImageUploader({
           {value.map((image) => (
             <div
               key={image.id}
-              className="relative group aspect-square rounded-lg border border-gray-200 overflow-hidden bg-gray-50"
+              className="relative group aspect-square rounded-lg border border-border overflow-hidden bg-surface"
             >
               {/* Imagen */}
               {image.url ? (
@@ -141,7 +141,7 @@ export function ImageUploader({
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <ImageIcon className="w-8 h-8 text-gray-300" />
+                  <ImageIcon className="w-8 h-8 text-border" />
                 </div>
               )}
 
@@ -150,15 +150,15 @@ export function ImageUploader({
                 {showMainBadge && !image.isMain && (
                   <button
                     onClick={() => handleSetMain(image.id)}
-                    className="p-1.5 bg-white rounded-lg hover:bg-origen-crema transition-colors"
+                    className="p-1.5 bg-surface-alt rounded-lg hover:bg-origen-crema transition-colors"
                     title="Marcar como principal"
                   >
-                    <Star className="w-4 h-4 text-gray-600" />
+                    <Star className="w-4 h-4 text-muted-foreground" />
                   </button>
                 )}
                 <button
                   onClick={() => handleRemove(image.id)}
-                  className="p-1.5 bg-white rounded-lg hover:bg-red-50 transition-colors"
+                  className="p-1.5 bg-surface-alt rounded-lg hover:bg-red-50 transition-colors"
                   title="Eliminar"
                 >
                   <X className="w-4 h-4 text-red-500" />
@@ -175,7 +175,7 @@ export function ImageUploader({
 
               {/* Indicador de subida */}
               {image.uploading && (
-                <div className="absolute inset-x-0 bottom-0 h-1 bg-gray-200">
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-border">
                   <div
                     className="h-full bg-origen-pradera transition-all duration-300"
                     style={{ width: `${image.progress || 0}%` }}
@@ -189,7 +189,7 @@ export function ImageUploader({
                 value={image.caption || ''}
                 onChange={(e) => handleCaptionChange(image.id, e.target.value)}
                 placeholder="Añadir título..."
-                className="absolute bottom-0 inset-x-0 p-1 text-[10px] bg-white/90 border-t border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute bottom-0 inset-x-0 p-1 text-[10px] bg-surface-alt/90 border-t border-border opacity-0 group-hover:opacity-100 transition-opacity"
               />
             </div>
           ))}

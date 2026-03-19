@@ -36,7 +36,7 @@ export const CustomCheckbox: React.FC<CustomCheckboxProps> = ({
             aria-checked={checked}
             onClick={() => onChange(!checked)}
             className={cn(
-              'h-5 w-5 rounded-md border-2 bg-white transition-all',
+              'h-5 w-5 rounded-md border-2 bg-surface-alt transition-all',
               'focus:outline-none focus:ring-2 focus:ring-origen-pradera/50 focus:ring-offset-2',
               checked ? 'bg-origen-pradera border-origen-pradera' : 'border-gray-300 hover:border-origen-pradera',
               error && 'border-destructive'
@@ -54,7 +54,7 @@ export const CustomCheckbox: React.FC<CustomCheckboxProps> = ({
             {label}
             {required && <span className="text-destructive ml-1">*</span>}
           </label>
-          {description && <p className="text-xs md:text-sm text-gray-500 mt-0.5">{description}</p>}
+          {description && <p className="text-xs md:text-sm text-muted-foreground mt-0.5">{description}</p>}
         </div>
       </div>
       {error && (
