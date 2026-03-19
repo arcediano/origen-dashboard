@@ -154,13 +154,13 @@ const AlertDialogContent = React.forwardRef<HTMLDivElement, AlertDialogContentPr
     return createPortal(
       <div
         ref={overlayRef}
-        className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 animate-in fade-in-0"
+        className="fixed inset-0 z-50 bg-origen-oscuro/60 flex items-center justify-center p-4 animate-in fade-in-0"
         onClick={handleOverlayClick}
       >
         <div
           ref={ref}
           className={cn(
-            "relative w-full bg-white rounded-2xl shadow-2xl border border-gray-200",
+            "relative w-full bg-surface-alt rounded-2xl shadow-2xl border border-border",
             "animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2",
             sizeClasses[size],
             className
@@ -170,7 +170,7 @@ const AlertDialogContent = React.forwardRef<HTMLDivElement, AlertDialogContentPr
           {showClose && (
             <button
               onClick={() => onOpenChange(false)}
-              className="absolute right-3 top-3 sm:right-4 sm:top-4 h-7 w-7 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+              className="absolute right-3 top-3 sm:right-4 sm:top-4 h-7 w-7 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-surface transition-all"
             >
               <X className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>

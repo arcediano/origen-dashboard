@@ -19,7 +19,7 @@ const labelVariants = cva(
         default: "text-origen-bosque",
         error: "text-red-600",
         success: "text-green-600",
-        muted: "text-gray-500 font-normal",
+        muted: "text-muted-foreground font-normal",
       },
       size: {
         sm: "text-xs",
@@ -62,7 +62,7 @@ const Label = React.forwardRef<
         </span>
       )}
       {optional && (
-        <span className="text-gray-400 ml-1 text-[10px] sm:text-xs font-normal">
+        <span className="text-text-disabled ml-1 text-[10px] sm:text-xs font-normal">
           (opcional)
         </span>
       )}
@@ -71,7 +71,7 @@ const Label = React.forwardRef<
     {tooltip && (
       <div className="group relative inline-flex">
         <Info 
-          className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-400 cursor-help" 
+          className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-text-subtle cursor-help" 
           aria-label="información adicional"
         />
         <div 

@@ -71,7 +71,7 @@ const useAvatarContext = () => {
 
 const STATUS_COLORS = {
   online: "bg-green-500",
-  offline: "bg-gray-400",
+  offline: "bg-muted-foreground",
   away: "bg-amber-500",
   busy: "bg-red-500",
   verified: "bg-origen-pradera",

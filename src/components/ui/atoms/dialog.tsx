@@ -156,7 +156,7 @@ export function Modal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in-0"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-origen-oscuro/60 backdrop-blur-sm animate-in fade-in-0"
       onClick={closeOnOutsideClick ? (e) => { if (e.target === e.currentTarget) onClose(); } : undefined}
       aria-modal="true"
       role="dialog"
@@ -166,7 +166,7 @@ export function Modal({
       <div
         ref={modalRef}
         className={cn(
-          'relative w-full bg-white rounded-2xl shadow-2xl border border-gray-200',
+          'relative w-full bg-surface-alt rounded-2xl shadow-2xl border border-border',
           'animate-in zoom-in-95 slide-in-from-bottom-4',
           sizeClasses[size],
           className,
@@ -176,7 +176,7 @@ export function Modal({
         {showCloseButton && (
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all z-10"
+            className="absolute right-4 top-4 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface transition-all z-10"
             aria-label="Cerrar"
           >
             <X className="w-5 h-5" />
@@ -185,7 +185,7 @@ export function Modal({
 
         {/* Header */}
         {(icon || title || description) && (
-          <div className="px-6 pt-6 pb-2 border-b border-gray-100">
+          <div className="px-6 pt-6 pb-2 border-b border-border-subtle">
             <div className="flex items-start gap-4">
               {icon && (
                 <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center shrink-0">
@@ -202,7 +202,7 @@ export function Modal({
                   </h3>
                 )}
                 {description && (
-                  <p id="modal-description" className="text-sm text-gray-500 mt-1">
+                  <p id="modal-description" className="text-sm text-muted-foreground mt-1">
                     {description}
                   </p>
                 )}
@@ -216,7 +216,7 @@ export function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-4 bg-gray-50/80 border-t border-gray-100 flex items-center justify-end gap-3">
+          <div className="px-6 py-4 bg-surface border-t border-border-subtle flex items-center justify-end gap-3">
             {footer}
           </div>
         )}

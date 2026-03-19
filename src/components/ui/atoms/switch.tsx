@@ -79,7 +79,7 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
         className={cn(
           "relative inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent",
           "transition-colors duration-200 ease-in-out",
-          "focus:outline-none focus:ring-2 focus:ring-origen-mandarina/50",
+          "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
           "disabled:cursor-not-allowed disabled:opacity-50",
           sizeClasses[size],
           isChecked ? trackCheckedColor : trackColor,
