@@ -68,7 +68,7 @@ export function QuickActionsGrid({
 
   return (
     <motion.div variants={itemVariants} className={className}>
-      <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">
+      <h3 className="text-sm font-medium text-text-subtle uppercase tracking-wider mb-4">
         Acciones rápidas
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

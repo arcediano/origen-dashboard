@@ -190,7 +190,7 @@ export function AuthFooter({ variant, showLegalNote = false }: AuthFooterProps) 
                 ].map(({ icon: Icon, label }) => (
                   <span
                     key={label}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-xs font-medium text-white border border-white/20"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface-alt/10 text-xs font-medium text-white border border-white/20"
                   >
                     <Icon className="w-3 h-3 text-origen-pradera" />
                     {label}
@@ -258,14 +258,14 @@ export function AuthFooter({ variant, showLegalNote = false }: AuthFooterProps) 
             {/* Columna 4: Contacto */}
             <div className="lg:col-span-4">
               <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Contacto</h3>
-              <div className="bg-white/10 rounded-xl p-5 space-y-3 border border-white/10">
+              <div className="bg-surface-alt/10 rounded-xl p-5 space-y-3 border border-white/10">
                 {[
                   { icon: Mail, label: 'Email', value: 'info@origen.es' },
                   { icon: Phone, label: 'Teléfono', value: '+34 900 123 456' },
                   { icon: Clock, label: 'Horario', value: 'L-V, 9:00 - 18:00' },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-surface-alt/10 flex items-center justify-center flex-shrink-0">
                       <Icon className="w-4 h-4 text-origen-pradera" />
                     </div>
                     <div>

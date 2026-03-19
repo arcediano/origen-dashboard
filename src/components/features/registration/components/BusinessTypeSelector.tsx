@@ -32,13 +32,13 @@ export const BusinessTypeSelector: React.FC<BusinessTypeSelectorProps> = ({ valu
             onClick={() => onChange(option.id as 'individual' | 'company')}
             aria-pressed={isSelected}
             className={cn(
-              'relative bg-white rounded-xl border-2 transition-all duration-200',
+              'relative bg-surface-alt rounded-xl border-2 transition-all duration-200',
               'hover:shadow-md hover:scale-[1.02] active:scale-[0.98]',
               'focus:outline-none focus:ring-2 focus:ring-origen-pradera/50',
               'p-3 md:p-5',
               isSelected
                 ? 'border-origen-pradera bg-origen-pradera/[0.03] shadow-md'
-                : 'border-gray-200 hover:border-origen-pradera'
+                : 'border-border hover:border-origen-pradera'
             )}
           >
             {isSelected && (
@@ -59,10 +59,10 @@ export const BusinessTypeSelector: React.FC<BusinessTypeSelectorProps> = ({ valu
                 <Icon className="w-6 h-6" />
               </div>
               <div>
-                <h3 className={cn('text-sm font-semibold leading-tight', isSelected ? 'text-origen-bosque' : 'text-gray-900')}>
+                <h3 className={cn('text-sm font-semibold leading-tight', isSelected ? 'text-origen-bosque' : 'text-foreground')}>
                   {option.label}
                 </h3>
-                <p className="text-xs text-gray-500 mt-0.5 hidden md:block">{option.desc}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 hidden md:block">{option.desc}</p>
               </div>
             </div>
           </button>

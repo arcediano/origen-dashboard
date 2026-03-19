@@ -148,23 +148,23 @@ export default function BusinessPage() {
       {/* Pestañas de información */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5 p-1 bg-origen-crema/50 rounded-xl mb-6">
-          <TabsTrigger value="general" className="rounded-lg data-[state=active]:bg-white gap-2">
+          <TabsTrigger value="general" className="rounded-lg data-[state=active]:bg-surface-alt gap-2">
             <Store className="w-4 h-4" />
             <span className="hidden sm:inline">General</span>
           </TabsTrigger>
-          <TabsTrigger value="contact" className="rounded-lg data-[state=active]:bg-white gap-2">
+          <TabsTrigger value="contact" className="rounded-lg data-[state=active]:bg-surface-alt gap-2">
             <Phone className="w-4 h-4" />
             <span className="hidden sm:inline">Contacto</span>
           </TabsTrigger>
-          <TabsTrigger value="location" className="rounded-lg data-[state=active]:bg-white gap-2">
+          <TabsTrigger value="location" className="rounded-lg data-[state=active]:bg-surface-alt gap-2">
             <MapPin className="w-4 h-4" />
             <span className="hidden sm:inline">Ubicación</span>
           </TabsTrigger>
-          <TabsTrigger value="schedule" className="rounded-lg data-[state=active]:bg-white gap-2">
+          <TabsTrigger value="schedule" className="rounded-lg data-[state=active]:bg-surface-alt gap-2">
             <Clock className="w-4 h-4" />
             <span className="hidden sm:inline">Horario</span>
           </TabsTrigger>
-          <TabsTrigger value="extras" className="rounded-lg data-[state=active]:bg-white gap-2">
+          <TabsTrigger value="extras" className="rounded-lg data-[state=active]:bg-surface-alt gap-2">
             <Award className="w-4 h-4" />
             <span className="hidden sm:inline">Extras</span>
           </TabsTrigger>
@@ -187,7 +187,7 @@ export default function BusinessPage() {
                     value={generalData.businessName}
                     onChange={(e) => setGeneralData({...generalData, businessName: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                   />
                 </div>
                 <div className="space-y-2">
@@ -196,7 +196,7 @@ export default function BusinessPage() {
                     value={generalData.legalName}
                     onChange={(e) => setGeneralData({...generalData, legalName: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                   />
                 </div>
                 <div className="space-y-2">
@@ -205,7 +205,7 @@ export default function BusinessPage() {
                     value={generalData.taxId}
                     onChange={(e) => setGeneralData({...generalData, taxId: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                   />
                 </div>
                 <div className="space-y-2">
@@ -214,7 +214,7 @@ export default function BusinessPage() {
                     value={generalData.yearFounded}
                     onChange={(e) => setGeneralData({...generalData, yearFounded: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                   />
                 </div>
                 <div className="space-y-2">
@@ -223,7 +223,7 @@ export default function BusinessPage() {
                     value={generalData.employees}
                     onChange={(e) => setGeneralData({...generalData, employees: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -232,10 +232,10 @@ export default function BusinessPage() {
                     value={generalData.shortDescription}
                     onChange={(e) => setGeneralData({...generalData, shortDescription: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                     placeholder="Breve descripción para vista previa"
                   />
-                  <p className="text-[10px] text-gray-400 mt-1">Máximo 160 caracteres</p>
+                  <p className="text-[10px] text-text-subtle mt-1">Máximo 160 caracteres</p>
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label optional>Descripción completa</Label>
@@ -244,7 +244,7 @@ export default function BusinessPage() {
                     onChange={(e) => setGeneralData({...generalData, description: e.target.value})}
                     disabled={!isEditing}
                     rows={5}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                     placeholder="Describe tu negocio, tu historia, tus productos..."
                   />
                 </div>
@@ -270,7 +270,7 @@ export default function BusinessPage() {
                     value={contactData.phone}
                     onChange={(e) => setContactData({...contactData, phone: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                     placeholder="Ej: 956 789 012"
                   />
                 </div>
@@ -281,7 +281,7 @@ export default function BusinessPage() {
                     value={contactData.email}
                     onChange={(e) => setContactData({...contactData, email: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                     placeholder="info@tunegocio.es"
                   />
                 </div>
@@ -291,7 +291,7 @@ export default function BusinessPage() {
                     value={contactData.website}
                     onChange={(e) => setContactData({...contactData, website: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                     placeholder="www.tunegocio.es"
                   />
                 </div>
@@ -301,7 +301,7 @@ export default function BusinessPage() {
                     value={contactData.facebook}
                     onChange={(e) => setContactData({...contactData, facebook: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                     placeholder="usuario o página"
                   />
                 </div>
@@ -311,7 +311,7 @@ export default function BusinessPage() {
                     value={contactData.instagram}
                     onChange={(e) => setContactData({...contactData, instagram: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                     placeholder="@usuario"
                   />
                 </div>
@@ -321,7 +321,7 @@ export default function BusinessPage() {
                     value={contactData.twitter}
                     onChange={(e) => setContactData({...contactData, twitter: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                     placeholder="@usuario"
                   />
                 </div>
@@ -347,7 +347,7 @@ export default function BusinessPage() {
                     value={locationData.address}
                     onChange={(e) => setLocationData({...locationData, address: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -356,7 +356,7 @@ export default function BusinessPage() {
                     value={locationData.addressLine2}
                     onChange={(e) => setLocationData({...locationData, addressLine2: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                     placeholder="Apartamento, local, etc."
                   />
                 </div>
@@ -366,7 +366,7 @@ export default function BusinessPage() {
                     value={locationData.city}
                     onChange={(e) => setLocationData({...locationData, city: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                   />
                 </div>
                 <div className="space-y-2">
@@ -375,7 +375,7 @@ export default function BusinessPage() {
                     value={locationData.province}
                     onChange={(e) => setLocationData({...locationData, province: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                   />
                 </div>
                 <div className="space-y-2">
@@ -384,7 +384,7 @@ export default function BusinessPage() {
                     value={locationData.postalCode}
                     onChange={(e) => setLocationData({...locationData, postalCode: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                   />
                 </div>
                 <div className="space-y-2">
@@ -393,7 +393,7 @@ export default function BusinessPage() {
                     value={locationData.country}
                     onChange={(e) => setLocationData({...locationData, country: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -402,10 +402,10 @@ export default function BusinessPage() {
                     value={locationData.coordinates}
                     onChange={(e) => setLocationData({...locationData, coordinates: e.target.value})}
                     disabled={!isEditing}
-                    className={!isEditing ? 'bg-gray-50' : ''}
+                    className={!isEditing ? 'bg-surface' : ''}
                     placeholder="Ej: 36.7594° N, 5.3694° W"
                   />
-                  <p className="text-[10px] text-gray-400 mt-1">Para mostrar tu ubicación exacta en el mapa</p>
+                  <p className="text-[10px] text-text-subtle mt-1">Para mostrar tu ubicación exacta en el mapa</p>
                 </div>
               </div>
             </CardContent>
@@ -441,7 +441,7 @@ export default function BusinessPage() {
                         value={hours}
                         onChange={(e) => setScheduleData({...scheduleData, [day]: e.target.value})}
                         disabled={!isEditing}
-                        className={!isEditing ? 'bg-gray-50' : ''}
+                        className={!isEditing ? 'bg-surface' : ''}
                         placeholder="Ej: 9:00 - 14:00, 16:00 - 19:00"
                       />
                     </div>
@@ -525,7 +525,7 @@ export default function BusinessPage() {
                     <AlertCircle className="w-4 h-4 text-origen-pradera mt-0.5" />
                     <div>
                       <p className="text-sm font-medium">Política de cancelación</p>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         Cancelaciones gratuitas hasta 24 horas antes. Pasado ese plazo, se aplicará una penalización del 50%.
                       </p>
                       {isEditing && (
@@ -540,7 +540,7 @@ export default function BusinessPage() {
                     <AlertCircle className="w-4 h-4 text-origen-pradera mt-0.5" />
                     <div>
                       <p className="text-sm font-medium">Información de envío</p>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         Envíos a toda España peninsular en 24-48h. Envío gratuito para pedidos superiores a 50€.
                       </p>
                       {isEditing && (
@@ -567,7 +567,7 @@ export default function BusinessPage() {
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-origen-bosque">Vista previa pública</h3>
-                <p className="text-xs text-gray-500">Así verán los clientes tu perfil de negocio</p>
+                <p className="text-xs text-muted-foreground">Así verán los clientes tu perfil de negocio</p>
               </div>
             </div>
             <Button variant="outline" size="sm">

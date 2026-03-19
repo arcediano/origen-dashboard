@@ -269,7 +269,7 @@ export function StepPricing({
             </div>
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-origen-bosque truncate">Precios y ofertas</h2>
-              <p className="text-sm text-gray-500 truncate">Configura el precio y promociones por cantidad</p>
+              <p className="text-sm text-muted-foreground truncate">Configura el precio y promociones por cantidad</p>
             </div>
           </div>
           
@@ -298,7 +298,7 @@ export function StepPricing({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-origen-pradera" />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-foreground">
                 Precio base
                 <span className="text-red-500 ml-1">*</span>
               </span>
@@ -325,7 +325,7 @@ export function StepPricing({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Tag className="h-5 w-5 text-origen-pradera" />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-foreground">
                 Precio de referencia
               </span>
               <Tooltip 
@@ -379,8 +379,8 @@ export function StepPricing({
               className={cn(
                 "inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border-2 transition-all text-xs font-medium",
                 hasBasePrice
-                  ? "border-origen-pradera/30 hover:border-origen-pradera hover:bg-origen-pradera/5 text-origen-bosque bg-white"
-                  : "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
+                  ? "border-origen-pradera/30 hover:border-origen-pradera hover:bg-origen-pradera/5 text-origen-bosque bg-surface-alt"
+                  : "border-border bg-surface text-text-subtle cursor-not-allowed"
               )}
             >
               <Plus className="w-3 h-3" />
@@ -424,15 +424,15 @@ export function StepPricing({
                           "flex flex-col items-center p-3 rounded-lg border-2 transition-all",
                           newTier.type === type.id
                             ? "border-origen-pradera bg-origen-pradera/5"
-                            : "border-gray-200 hover:border-gray-300 bg-white"
+                            : "border-border hover:border-border bg-surface-alt"
                         )}
                       >
                         <type.icon className={cn(
                           "w-5 h-5 mb-1",
-                          newTier.type === type.id ? "text-origen-pradera" : "text-gray-400"
+                          newTier.type === type.id ? "text-origen-pradera" : "text-text-subtle"
                         )} />
                         <span className="text-xs font-medium">{type.label}</span>
-                        <span className="text-[10px] text-gray-400 hidden sm:block">{type.desc}</span>
+                        <span className="text-[10px] text-text-subtle hidden sm:block">{type.desc}</span>
                       </button>
                     ))}
                   </div>
@@ -440,7 +440,7 @@ export function StepPricing({
                   {/* Campos según tipo */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                     <div>
-                      <p className="text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                         <Hash className="w-3 h-3 text-origen-pradera" />
                         Mínimo
                       </p>
@@ -454,7 +454,7 @@ export function StepPricing({
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                         <Hash className="w-3 h-3 text-origen-pradera" />
                         Máximo
                       </p>
@@ -470,7 +470,7 @@ export function StepPricing({
 
                     {newTier.type === 'percentage' && (
                       <div className="lg:col-span-2">
-                        <p className="text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
+                        <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                           <Percent className="w-3 h-3 text-origen-pradera" />
                           Descuento
                         </p>
@@ -486,7 +486,7 @@ export function StepPricing({
 
                     {newTier.type === 'fixed' && (
                       <div className="lg:col-span-2">
-                        <p className="text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
+                        <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                           <DollarSign className="w-3 h-3 text-origen-pradera" />
                           Precio oferta
                         </p>
@@ -503,7 +503,7 @@ export function StepPricing({
                     {newTier.type === 'bundle' && (
                       <>
                         <div>
-                          <p className="text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
+                          <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                             <Package className="w-3 h-3 text-origen-pradera" />
                             Lleva
                           </p>
@@ -516,7 +516,7 @@ export function StepPricing({
                           />
                         </div>
                         <div>
-                          <p className="text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
+                          <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                             <Gift className="w-3 h-3 text-origen-pradera" />
                             Paga
                           </p>
@@ -534,7 +534,7 @@ export function StepPricing({
 
                   {/* Vista previa en tiempo real */}
                   {basePrice > 0 && newTier.type && (
-                    <div className="mt-4 p-4 bg-white rounded-lg border border-origen-pradera/20">
+                    <div className="mt-4 p-4 bg-surface-alt rounded-lg border border-origen-pradera/20">
                       <button
                         onClick={() => setShowPreview(!showPreview)}
                         className="flex items-center gap-2 text-xs font-medium text-origen-bosque mb-2"
@@ -552,13 +552,13 @@ export function StepPricing({
                             className="space-y-2"
                           >
                             <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600">Precio base:</span>
+                              <span className="text-muted-foreground">Precio base:</span>
                               <span className="font-medium">{basePrice.toFixed(2)} €</span>
                             </div>
                             
                             {newTier.type === 'percentage' && newTier.value && (
                               <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600">Precio oferta:</span>
+                                <span className="text-muted-foreground">Precio oferta:</span>
                                 <span className="font-bold text-green-600">
                                   {(basePrice * (1 - newTier.value / 100)).toFixed(2)} €
                                 </span>
@@ -567,7 +567,7 @@ export function StepPricing({
                             
                             {newTier.type === 'fixed' && newTier.value && (
                               <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600">Precio oferta:</span>
+                                <span className="text-muted-foreground">Precio oferta:</span>
                                 <span className="font-bold text-green-600">
                                   {newTier.value.toFixed(2)} €
                                 </span>
@@ -577,7 +577,7 @@ export function StepPricing({
                             {newTier.type === 'bundle' && newTier.buyQuantity && newTier.payQuantity && (
                               <>
                                 <div className="flex items-center justify-between text-sm">
-                                  <span className="text-gray-600">Precio por unidad:</span>
+                                  <span className="text-muted-foreground">Precio por unidad:</span>
                                   <span className="font-bold text-green-600">
                                     {((basePrice * newTier.payQuantity) / newTier.buyQuantity).toFixed(2)} €
                                   </span>
@@ -653,7 +653,7 @@ export function StepPricing({
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        className="p-4 bg-white rounded-xl border border-gray-200 hover:border-origen-pradera/30 hover:shadow-origen transition-all group"
+                        className="p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 hover:shadow-origen transition-all group"
                       >
                         <div className="flex items-start gap-3">
                           <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
@@ -674,7 +674,7 @@ export function StepPricing({
                                     -{discount.toFixed(0)}%
                                   </span>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-muted-foreground mt-1">
                                   Desde {tier.minQuantity} {tier.minQuantity === 1 ? 'unidad' : 'unidades'}
                                   {tier.maxQuantity && ` · hasta ${tier.maxQuantity}`}
                                 </p>
@@ -683,13 +683,13 @@ export function StepPricing({
                               <div className="flex items-center gap-1">
                                 <button
                                   onClick={() => handleEditTier(tier)}
-                                  className="p-1.5 rounded-md text-gray-400 hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
+                                  className="p-1.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
                                 >
                                   <Edit2 className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteTier(tier.id)}
-                                  className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                  className="p-1.5 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -697,16 +697,16 @@ export function StepPricing({
                             </div>
 
                             <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                              <div className="p-2 bg-gray-50 rounded-lg">
-                                <p className="text-[10px] text-gray-500">Precio normal</p>
+                              <div className="p-2 bg-surface rounded-lg">
+                                <p className="text-[10px] text-muted-foreground">Precio normal</p>
                                 <p className="text-sm font-medium">{basePrice.toFixed(2)} €</p>
                               </div>
                               <div className="p-2 bg-green-50 rounded-lg border border-green-200">
-                                <p className="text-[10px] text-gray-500">Oferta</p>
+                                <p className="text-[10px] text-muted-foreground">Oferta</p>
                                 <p className="text-sm font-bold text-green-700">{offerPrice.toFixed(2)} €</p>
                               </div>
                               <div className="p-2 bg-amber-50 rounded-lg col-span-2 sm:col-span-1">
-                                <p className="text-[10px] text-gray-500">Ahorro</p>
+                                <p className="text-[10px] text-muted-foreground">Ahorro</p>
                                 <p className="text-sm font-bold text-amber-700">{savings.toFixed(2)} €</p>
                               </div>
                             </div>
@@ -721,7 +721,7 @@ export function StepPricing({
 
                         {/* Asa para arrastrar */}
                         <div className="absolute left-0 top-1/2 -translate-y-1/2 -ml-6 opacity-0 group-hover:opacity-100 transition-opacity cursor-move">
-                          <GripVertical className="w-4 h-4 text-gray-400" />
+                          <GripVertical className="w-4 h-4 text-text-subtle" />
                         </div>
                       </motion.div>
                     </Reorder.Item>
@@ -735,8 +735,8 @@ export function StepPricing({
           {tiers.length === 0 && !showTierForm && (
             <div className="text-center py-8 bg-origen-crema/20 rounded-xl border-2 border-dashed border-origen-pradera/30">
               <Gift className="w-12 h-12 text-origen-pradera/40 mx-auto mb-3" />
-              <p className="text-sm font-medium text-gray-700">No hay ofertas configuradas</p>
-              <p className="text-xs text-gray-500 max-w-md mx-auto mt-1">
+              <p className="text-sm font-medium text-foreground">No hay ofertas configuradas</p>
+              <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">
                 Las ofertas por cantidad ayudan a aumentar el ticket medio y fidelizar clientes
               </p>
               {hasBasePrice ? (

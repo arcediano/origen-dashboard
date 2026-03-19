@@ -137,7 +137,7 @@ export default function BusinessInfoPage() {
         <div className="mt-8">
           {/* TARJETA DE BANNER Y LOGO */}
           <motion.div variants={itemVariants} initial="hidden" animate="visible" className="mb-6">
-            <Card className="overflow-hidden border border-gray-200 shadow-sm">
+            <Card className="overflow-hidden border border-border shadow-sm">
               {/* Banner */}
               <div className="h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
                 {form.banner ? (
@@ -148,7 +148,7 @@ export default function BusinessInfoPage() {
                   </div>
                 )}
                 {isEditing && (
-                  <button className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-origen-bosque hover:text-origen-pradera transition-colors">
+                  <button className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-surface-alt shadow-lg flex items-center justify-center text-origen-bosque hover:text-origen-pradera transition-colors">
                     <Camera className="w-5 h-5" />
                   </button>
                 )}
@@ -158,7 +158,7 @@ export default function BusinessInfoPage() {
               <CardContent className="relative px-6 pb-6">
                 <div className="flex items-end gap-6 -mt-16 mb-4">
                   <div className="relative group">
-                    <div className="w-28 h-28 rounded-xl bg-white shadow-xl border-4 border-white flex items-center justify-center overflow-hidden">
+                    <div className="w-28 h-28 rounded-xl bg-surface-alt shadow-xl border-4 border-white flex items-center justify-center overflow-hidden">
                       {form.logo ? (
                         <img src={form.logo} alt={form.businessName} className="w-full h-full object-cover" />
                       ) : (
@@ -176,7 +176,7 @@ export default function BusinessInfoPage() {
                   
                   <div className="flex-1 pb-2">
                     <h2 className="text-2xl font-bold text-origen-bosque">{form.businessName}</h2>
-                    <p className="text-sm text-gray-500">CIF: {form.taxId}</p>
+                    <p className="text-sm text-muted-foreground">CIF: {form.taxId}</p>
                   </div>
                 </div>
               </CardContent>
@@ -264,7 +264,7 @@ export default function BusinessInfoPage() {
                           value={form.businessName}
                           onChange={(e) => setForm({ ...form, businessName: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                         />
                         {errors.businessName && <p className="text-xs text-red-500">{errors.businessName}</p>}
                       </div>
@@ -276,7 +276,7 @@ export default function BusinessInfoPage() {
                           value={form.legalName}
                           onChange={(e) => setForm({ ...form, legalName: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                         />
                       </div>
 
@@ -289,7 +289,7 @@ export default function BusinessInfoPage() {
                           value={form.taxId}
                           onChange={(e) => setForm({ ...form, taxId: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                         />
                         {errors.taxId && <p className="text-xs text-red-500">{errors.taxId}</p>}
                       </div>
@@ -301,7 +301,7 @@ export default function BusinessInfoPage() {
                           value={form.foundedYear}
                           onChange={(e) => setForm({ ...form, foundedYear: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                           placeholder="Ej: 1985"
                         />
                       </div>
@@ -313,7 +313,7 @@ export default function BusinessInfoPage() {
                           value={form.teamSize}
                           onChange={(e) => setForm({ ...form, teamSize: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                         />
                       </div>
                     </div>
@@ -370,7 +370,7 @@ export default function BusinessInfoPage() {
                           value={form.phone}
                           onChange={(e) => setForm({ ...form, phone: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                         />
                         {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
                       </div>
@@ -385,7 +385,7 @@ export default function BusinessInfoPage() {
                           value={form.email}
                           onChange={(e) => setForm({ ...form, email: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                         />
                         {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
                       </div>
@@ -397,7 +397,7 @@ export default function BusinessInfoPage() {
                           value={form.website}
                           onChange={(e) => setForm({ ...form, website: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                           placeholder="https://..."
                         />
                       </div>
@@ -421,7 +421,7 @@ export default function BusinessInfoPage() {
                           value={form.address}
                           onChange={(e) => setForm({ ...form, address: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                         />
                       </div>
                       
@@ -432,7 +432,7 @@ export default function BusinessInfoPage() {
                           value={form.city}
                           onChange={(e) => setForm({ ...form, city: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                         />
                       </div>
                       
@@ -443,7 +443,7 @@ export default function BusinessInfoPage() {
                           value={form.postalCode}
                           onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                         />
                       </div>
                       
@@ -454,7 +454,7 @@ export default function BusinessInfoPage() {
                           value={form.province}
                           onChange={(e) => setForm({ ...form, province: e.target.value })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                         />
                       </div>
                       
@@ -464,7 +464,7 @@ export default function BusinessInfoPage() {
                           id="businessCountry"
                           value={form.country}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                         />
                       </div>
                     </div>
@@ -493,7 +493,7 @@ export default function BusinessInfoPage() {
                             socialMedia: { ...form.socialMedia, instagram: e.target.value }
                           })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                           placeholder="@usuario"
                         />
                       </div>
@@ -508,7 +508,7 @@ export default function BusinessInfoPage() {
                             socialMedia: { ...form.socialMedia, facebook: e.target.value }
                           })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                           placeholder="página o perfil"
                         />
                       </div>
@@ -523,7 +523,7 @@ export default function BusinessInfoPage() {
                             socialMedia: { ...form.socialMedia, twitter: e.target.value }
                           })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                           placeholder="@usuario"
                         />
                       </div>
@@ -538,7 +538,7 @@ export default function BusinessInfoPage() {
                             socialMedia: { ...form.socialMedia, youtube: e.target.value }
                           })}
                           disabled={!isEditing}
-                          className={!isEditing ? 'bg-gray-50' : ''}
+                          className={!isEditing ? 'bg-surface' : ''}
                           placeholder="url del canal"
                         />
                       </div>
@@ -565,9 +565,9 @@ export default function BusinessInfoPage() {
                         onChange={(e) => setForm({ ...form, description: e.target.value })}
                         disabled={!isEditing}
                         rows={6}
-                        className={!isEditing ? 'bg-gray-50' : ''}
+                        className={!isEditing ? 'bg-surface' : ''}
                       />
-                      <p className="text-xs text-gray-500 text-right">
+                      <p className="text-xs text-muted-foreground text-right">
                         {form.description.length}/500
                       </p>
                     </div>

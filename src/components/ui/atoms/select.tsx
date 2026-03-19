@@ -175,7 +175,7 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
           'rounded-xl border bg-white px-3 py-2 sm:px-4 sm:py-3 text-left',
           'transition-all duration-200',
           'focus:outline-none focus:ring-2 focus:ring-origen-pradera/50 focus:ring-offset-2',
-          'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50',
+          'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-surface',
           error
             ? 'border-red-500 hover:border-red-600'
             : cn(
@@ -196,7 +196,7 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
             <span className="flex-1 truncate text-sm sm:text-base">Seleccionar</span>
             <ChevronDown
               className={cn(
-                'h-4 w-4 text-gray-500 transition-transform shrink-0',
+                'h-4 w-4 text-text-subtle transition-transform shrink-0',
                 open && 'rotate-180',
               )}
             />
@@ -231,7 +231,7 @@ const SelectValue = ({ placeholder: customPlaceholder, className, children }: Se
 
   return (
     <span
-      className={cn('flex-1 truncate text-sm sm:text-base', !value && 'text-gray-400', className)}
+      className={cn('flex-1 truncate text-sm sm:text-base', !value && 'text-text-disabled', className)}
     >
       {value || display}
     </span>
@@ -307,7 +307,7 @@ const SelectContent = React.forwardRef<HTMLDivElement, SelectContentProps>(
         ref={contentRef}
         style={style}
         className={cn(
-          'rounded-xl border border-gray-200 bg-white',
+          'rounded-xl border border-border bg-white',
           'shadow-lg animate-in fade-in-0 zoom-in-95',
           'max-h-60 sm:max-h-80 overflow-hidden flex flex-col',
           className,
@@ -316,21 +316,21 @@ const SelectContent = React.forwardRef<HTMLDivElement, SelectContentProps>(
       >
         {/* Campo de búsqueda */}
         {searchable && (
-          <div className="p-2 sm:p-3 border-b border-gray-200">
+          <div className="p-2 sm:p-3 border-b border-border">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-3 w-3 sm:h-4 sm:w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-3 w-3 sm:h-4 sm:w-4 -translate-y-1/2 text-text-disabled" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar..."
-                className="w-full rounded-lg border border-gray-200 bg-gray-50 py-1.5 sm:py-2 pl-8 sm:pl-10 pr-3 text-xs sm:text-sm outline-none focus:border-origen-pradera focus:ring-1 focus:ring-origen-pradera/50"
+                className="w-full rounded-lg border border-border bg-surface py-1.5 sm:py-2 pl-8 sm:pl-10 pr-3 text-xs sm:text-sm outline-none focus:border-origen-pradera focus:ring-1 focus:ring-origen-pradera/50"
                 onClick={(e) => e.stopPropagation()}
               />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-disabled hover:text-muted-foreground"
                 >
                   <X className="h-3 w-3 sm:h-4 sm:w-4" />
                 </button>
@@ -413,7 +413,7 @@ export interface SelectGroupProps extends React.HTMLAttributes<HTMLDivElement> {
 const SelectGroup = ({ label, children, className, ...props }: SelectGroupProps) => (
   <div role="group" aria-label={label} className={className} {...props}>
     {label && (
-      <div className="px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50/50">
+      <div className="px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-text-subtle uppercase tracking-wide bg-surface/50">
         {label}
       </div>
     )}

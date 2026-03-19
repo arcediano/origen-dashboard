@@ -83,13 +83,13 @@ export function OrderFilters({
       {/* Primera fila: búsqueda */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle" />
           <input
             type="text"
             value={localSearch}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Buscar por nº pedido, cliente o email..."
-            className="w-full pl-9 pr-7 h-10 sm:h-9 text-sm bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+            className="w-full pl-9 pr-7 h-10 sm:h-9 text-sm bg-surface border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
           />
           {localSearch && (
             <button
@@ -97,7 +97,7 @@ export function OrderFilters({
                 setLocalSearch('');
                 onFilterChange({ ...filters, search: undefined });
               }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-subtle hover:text-muted-foreground"
             >
               <X className="w-4 h-4" />
             </button>
@@ -107,8 +107,8 @@ export function OrderFilters({
         <button
           onClick={() => setShowMobileFilters(!showMobileFilters)}
           className={cn(
-            'sm:hidden flex items-center justify-center h-10 px-3 border border-gray-200 rounded-md bg-white',
-            showMobileFilters ? 'bg-origen-crema text-origen-bosque border-origen-pradera/30' : 'text-gray-600'
+            'sm:hidden flex items-center justify-center h-10 px-3 border border-border rounded-md bg-surface-alt',
+            showMobileFilters ? 'bg-origen-crema text-origen-bosque border-origen-pradera/30' : 'text-muted-foreground'
           )}
         >
           <Filter className="w-4 h-4 mr-2" />
@@ -127,7 +127,7 @@ export function OrderFilters({
         <select
           value={filters.status || ''}
           onChange={(e) => toggleFilter('status', e.target.value || undefined)}
-          className="h-9 px-3 text-sm border border-gray-200 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+          className="h-9 px-3 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
         >
           {STATUS_OPTIONS.map(option => (
             <option key={option.value} value={option.value}>
@@ -139,24 +139,24 @@ export function OrderFilters({
         {/* Rango de fechas - CON PLACEHOLDERS MEJORADOS */}
         <div className="flex items-center gap-2">
           <div className="relative">
-            <CalendarIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <CalendarIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
             <input
               type="date"
               value={formatDateForInput(filters.dateFrom)}
               onChange={(e) => toggleFilter('dateFrom', e.target.value ? new Date(e.target.value) : undefined)}
-              className="pl-8 h-9 text-sm border border-gray-200 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+              className="pl-8 h-9 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
               placeholder="dd/mm/aaaa"
               title="Fecha desde"
             />
           </div>
-          <span className="text-gray-400 text-sm">→</span>
+          <span className="text-text-subtle text-sm">→</span>
           <div className="relative">
-            <CalendarRange className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <CalendarRange className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
             <input
               type="date"
               value={formatDateForInput(filters.dateTo)}
               onChange={(e) => toggleFilter('dateTo', e.target.value ? new Date(e.target.value) : undefined)}
-              className="pl-8 h-9 text-sm border border-gray-200 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+              className="pl-8 h-9 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
               placeholder="dd/mm/aaaa"
               title="Fecha hasta"
             />
@@ -166,26 +166,26 @@ export function OrderFilters({
         {/* Rango de importe - CON PLACEHOLDERS DESCRIPTIVOS */}
         <div className="flex items-center gap-1">
           <div className="relative">
-            <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
             <input
               type="number"
               value={filters.minAmount || ''}
               onChange={(e) => toggleFilter('minAmount', e.target.value ? Number(e.target.value) : undefined)}
               placeholder="Mínimo €"
-              className="w-24 pl-7 h-9 text-sm border border-gray-200 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+              className="w-24 pl-7 h-9 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
               min="0"
               step="0.01"
             />
           </div>
-          <span className="text-gray-400">-</span>
+          <span className="text-text-subtle">-</span>
           <div className="relative">
-            <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
             <input
               type="number"
               value={filters.maxAmount || ''}
               onChange={(e) => toggleFilter('maxAmount', e.target.value ? Number(e.target.value) : undefined)}
               placeholder="Máximo €"
-              className="w-24 pl-7 h-9 text-sm border border-gray-200 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+              className="w-24 pl-7 h-9 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
               min="0"
               step="0.01"
             />
@@ -204,7 +204,7 @@ export function OrderFilters({
       </div>
 
       {/* Contador de resultados */}
-      <div className="mt-2 text-xs text-gray-500 text-right">
+      <div className="mt-2 text-xs text-muted-foreground text-right">
         {totalOrders} {totalOrders === 1 ? 'pedido encontrado' : 'pedidos encontrados'}
       </div>
     </Card>

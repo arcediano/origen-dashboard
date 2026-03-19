@@ -530,7 +530,7 @@ export default function OnboardingPage() {
       {/* ====================================================================
           HEADER - Ultra minimal
       ==================================================================== */}
-      <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-sm border-b border-gray-100">
+      <header className="sticky top-0 z-50 w-full bg-surface-alt/80 backdrop-blur-sm border-b border-border-subtle">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center">
@@ -547,10 +547,10 @@ export default function OnboardingPage() {
             </Link>
             
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {currentStep + 1}/{totalSteps}
               </span>
-              <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="w-20 h-1.5 bg-surface rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-origen-pradera rounded-full transition-all duration-500"
                   style={{ width: `${progress}%` }}
@@ -577,7 +577,7 @@ export default function OnboardingPage() {
             <div className="sticky top-24 space-y-6">
               
               {/* Título de la sección */}
-              <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+              <div className="flex items-center gap-2 pb-2 border-b border-border">
                 <Sparkles className="w-4 h-4 text-origen-pradera" />
                 <h2 className="text-xs font-bold text-origen-bosque uppercase tracking-wider">
                   Configura tu tienda
@@ -602,7 +602,7 @@ export default function OnboardingPage() {
                             "absolute left-5 top-10 w-0.5 h-[calc(100%-1.5rem)]",
                             index < currentStep 
                               ? "bg-gradient-to-b from-origen-pradera to-origen-pradera/40" 
-                              : "bg-gray-200"
+                              : "bg-border"
                           )}
                         />
                       )}
@@ -612,10 +612,10 @@ export default function OnboardingPage() {
                         <div className={cn(
                           "w-10 h-10 rounded-full flex items-center justify-center transition-all",
                           isCompleted && "bg-origen-pradera text-white shadow-sm",
-                          isActive && "bg-white border-2 shadow-sm",
+                          isActive && "bg-surface-alt border-2 shadow-sm",
                           isActive && `border-${step.color.replace('text-', '')}`,
-                          isPending && "bg-gray-100 border border-gray-200 text-gray-400",
-                          !isActive && !isCompleted && !isPending && "bg-white border-2 border-gray-200 text-gray-500"
+                          isPending && "bg-surface border border-border text-text-subtle",
+                          !isActive && !isCompleted && !isPending && "bg-surface-alt border-2 border-border text-muted-foreground"
                         )}>
                           {isCompleted ? (
                             <CheckCircle className="w-5 h-5" />
@@ -629,7 +629,7 @@ export default function OnboardingPage() {
                           "absolute -bottom-2 -right-2 text-[10px] font-medium px-1.5 py-0.5 rounded-full shadow-sm",
                           isCompleted 
                             ? "bg-green-100 text-green-700 border border-green-200" 
-                            : "bg-white text-gray-600 border border-gray-200"
+                            : "bg-surface-alt text-muted-foreground border border-border"
                         )}>
                           {step.time}
                         </span>
@@ -649,7 +649,7 @@ export default function OnboardingPage() {
                             "text-sm font-semibold",
                             isActive && "text-origen-bosque",
                             isCompleted && "text-origen-oscuro",
-                            isPending && "text-gray-500"
+                            isPending && "text-muted-foreground"
                           )}>
                             {step.title}
                           </h3>
@@ -669,13 +669,13 @@ export default function OnboardingPage() {
                           )}
                         </div>
                         
-                        <p className="text-xs text-gray-600 mt-1 line-clamp-1">
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
                           {step.description}
                         </p>
                         
                         {/* Descripción larga - solo paso activo */}
                         {isActive && (
-                          <p className="text-xs text-gray-500 mt-2 italic">
+                          <p className="text-xs text-muted-foreground mt-2 italic">
                             {step.longDescription}
                           </p>
                         )}
@@ -686,13 +686,13 @@ export default function OnboardingPage() {
               </div>
               
               {/* Tiempo total estimado */}
-              <div className="mt-4 bg-white/50 rounded-xl border border-gray-100 p-4">
+              <div className="mt-4 bg-surface-alt/50 rounded-xl border border-border-subtle p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-origen-pradera/5 flex items-center justify-center">
                     <Clock className="w-4 h-4 text-origen-pradera" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Tiempo total</p>
+                    <p className="text-xs text-muted-foreground">Tiempo total</p>
                     <p className="text-sm font-semibold text-origen-bosque">~14 minutos</p>
                   </div>
                 </div>
@@ -706,7 +706,7 @@ export default function OnboardingPage() {
           <div className="w-full lg:w-8/12">
             
             {/* Título del paso actual */}
-            <div className="mb-6 pb-4 border-b border-gray-100">
+            <div className="mb-6 pb-4 border-b border-border-subtle">
               <div className="flex items-center gap-2 mb-1">
                 <div className={cn(
                   "w-6 h-6 rounded-md flex items-center justify-center",
@@ -717,7 +717,7 @@ export default function OnboardingPage() {
                     return <Icon className={cn("w-3.5 h-3.5", STEPS[currentStep].color)} />;
                   })()}
                 </div>
-                <span className="text-xs font-medium text-gray-500">
+                <span className="text-xs font-medium text-muted-foreground">
                   Paso {currentStep + 1} de {totalSteps}
                 </span>
               </div>
@@ -754,10 +754,10 @@ export default function OnboardingPage() {
             {/* ====================================================================
                 NAVEGACIÓN - Botones (solo desktop — mobile usa MobileNavBar)
             ==================================================================== */}
-            <div className="hidden lg:flex items-center justify-between mt-10 pt-6 border-t border-gray-200">
+            <div className="hidden lg:flex items-center justify-between mt-10 pt-6 border-t border-border">
               
               {/* Trust badges */}
-              <div className="flex items-center gap-3 text-xs text-gray-400">
+              <div className="flex items-center gap-3 text-xs text-text-subtle">
                 <div className="flex items-center gap-1">
                   <Shield className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">SSL</span>
@@ -775,7 +775,7 @@ export default function OnboardingPage() {
                     variant="outline"
                     onClick={handleBack}
                     disabled={isSubmitting}
-                    className="h-10 px-4 border-gray-300 text-origen-bosque hover:bg-origen-crema/50 hover:border-origen-pradera"
+                    className="h-10 px-4 border-border text-origen-bosque hover:bg-origen-crema/50 hover:border-origen-pradera"
                   >
                     Anterior
                   </Button>
@@ -786,7 +786,7 @@ export default function OnboardingPage() {
                     variant="outline"
                     onClick={handleSkipOnboarding}
                     disabled={isSubmitting}
-                    className="h-10 px-4 border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300 text-xs"
+                    className="h-10 px-4 border-border text-muted-foreground hover:bg-surface hover:border-border text-xs"
                   >
                     Completar más tarde
                   </Button>

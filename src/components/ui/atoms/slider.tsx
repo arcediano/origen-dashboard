@@ -254,7 +254,7 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
         )}>
           <div className="flex items-center gap-1.5 sm:gap-2">
             {leftIcon && (
-              <div className="text-gray-400">
+              <div className="text-text-disabled">
                 {leftIcon}
               </div>
             )}
@@ -363,11 +363,11 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
                     "h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full border-2",
                     currentValue.some(v => Math.abs(v - mark.value) <= (max - min) * 0.05)
                       ? "bg-origen-pradera border-origen-pradera"
-                      : "bg-white border-gray-300"
+                      : "bg-white border-border"
                   )} />
                   {mark.label && (
                     <span className={cn(
-                      "absolute text-[8px] sm:text-xs text-gray-600 whitespace-nowrap",
+                      "absolute text-[8px] sm:text-xs text-muted-foreground whitespace-nowrap",
                       orientation === "horizontal"
                         ? "top-3 sm:top-4 left-1/2 -translate-x-1/2"
                         : "left-3 sm:left-4 top-1/2 -translate-y-1/2"
@@ -454,18 +454,18 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
           )}
           
           {rightIcon && (
-            <div className="text-gray-400">
+            <div className="text-text-disabled">
               {rightIcon}
             </div>
           )}
         </div>
 
         <div className="flex items-center justify-between text-[8px] sm:text-xs">
-          <span className="text-gray-600">{formatValue(min)}</span>
+          <span className="text-muted-foreground">{formatValue(min)}</span>
           <span className="text-origen-pradera font-medium">
             {isRange ? "Rango seleccionado" : "Valor actual"}
           </span>
-          <span className="text-gray-600">{formatValue(max)}</span>
+          <span className="text-muted-foreground">{formatValue(max)}</span>
         </div>
       </div>
     );

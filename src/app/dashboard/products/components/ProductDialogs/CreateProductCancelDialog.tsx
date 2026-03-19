@@ -46,7 +46,7 @@ export function CreateProductCancelDialog({
         <>
           <button
             onClick={() => onOpenChange(false)}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:border-origen-pradera transition-colors"
+            className="px-4 py-2 text-sm font-medium text-foreground bg-surface-alt border-2 border-border rounded-lg hover:border-origen-pradera transition-colors"
           >
             Continuar
           </button>
@@ -59,7 +59,7 @@ export function CreateProductCancelDialog({
         </>
       }
     >
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-muted-foreground">
         Si cancelas ahora, perderás todos los cambios que no hayas guardado.
         ¿Estás seguro de que quieres salir?
       </p>

@@ -25,7 +25,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm",
+      "fixed inset-0 z-50 bg-origen-oscuro/60 backdrop-blur-sm",
       "data-[state=open]:animate-in data-[state=closed]:animate-out",
       "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
@@ -120,7 +120,7 @@ const SheetFooter = ({
   <div
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      "mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200",
+      "mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border",
       className
     )}
     {...props}
@@ -149,7 +149,7 @@ const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Description
     ref={ref}
-    className={cn("text-xs sm:text-sm text-gray-500", className)}
+    className={cn("text-xs sm:text-sm text-text-subtle", className)}
     {...props}
   />
 ));

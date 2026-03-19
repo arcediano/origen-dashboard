@@ -243,13 +243,13 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
         {submitStatus === 'submitting' && (
           <div
             ref={spinnerRef}
-            className="bg-white rounded-xl md:rounded-2xl p-8 md:p-12 shadow-xl border border-gray-200 text-center"
+            className="bg-surface-alt rounded-xl md:rounded-2xl p-8 md:p-12 shadow-xl border border-border text-center"
           >
             <LoadingSpinner />
-            <p className="text-sm md:text-base text-gray-600 mt-4 font-medium">
+            <p className="text-sm md:text-base text-muted-foreground mt-4 font-medium">
               Procesando tu solicitud...
             </p>
-            <p className="text-xs text-gray-400 mt-1">Esto puede tardar unos segundos</p>
+            <p className="text-xs text-text-subtle mt-1">Esto puede tardar unos segundos</p>
           </div>
         )}
 
@@ -563,17 +563,17 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mt-4 md:mt-6">
                 <div className="flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4 text-origen-hoja" />
-                  <span className="text-xs md:text-sm text-gray-600">SSL 256-bit</span>
+                  <span className="text-xs md:text-sm text-muted-foreground">SSL 256-bit</span>
                 </div>
-                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                <span className="w-1 h-1 rounded-full bg-border" />
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-origen-hoja" />
-                  <span className="text-xs md:text-sm text-gray-600">Respuesta 24h</span>
+                  <span className="text-xs md:text-sm text-muted-foreground">Respuesta 24h</span>
                 </div>
-                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                <span className="w-1 h-1 rounded-full bg-border" />
                 <div className="flex items-center gap-1.5">
                   <Leaf className="w-3.5 h-3.5 md:w-4 md:h-4 text-origen-hoja" />
-                  <span className="text-xs md:text-sm text-gray-600">Kilómetro 0</span>
+                  <span className="text-xs md:text-sm text-muted-foreground">Kilómetro 0</span>
                 </div>
               </div>
             </div>

@@ -62,7 +62,7 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-origen-bosque">Completitud del perfil</h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       Te faltan {pendingItems} elementos por completar
                     </p>
                   </div>
@@ -94,7 +94,7 @@ export default function ProfilePage() {
                 </div>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col">
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Gestiona tus datos personales, información de contacto y dirección.
                 </p>
                 
@@ -128,7 +128,7 @@ export default function ProfilePage() {
                 </div>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col">
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Administra la información de tu empresa, ubicación, categorías y datos comerciales.
                 </p>
                 
@@ -161,7 +161,7 @@ export default function ProfilePage() {
                 </div>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col">
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Gestiona tus certificaciones de calidad, sellos ecológicos y documentos legales.
                 </p>
                 

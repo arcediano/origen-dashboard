@@ -20,7 +20,7 @@ export default function StaticLayout({
         {children}
       </main>
 
-      <footer className="border-t bg-gray-50">
+      <footer className="border-t bg-surface">
         <div className="container mx-auto px-4">
           <DashboardFooter />
         </div>

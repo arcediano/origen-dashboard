@@ -97,7 +97,7 @@ export default function SettingsPage() {
       <div className="container mx-auto px-4 sm:px-6 py-8 max-w-4xl">
         <button 
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-origen-pradera mb-6 transition-colors"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-origen-pradera mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver al perfil
@@ -172,7 +172,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-sm font-medium text-origen-bosque">Verificación en dos pasos</h4>
-                      <p className="text-xs text-gray-500">Añade una capa extra de seguridad</p>
+                      <p className="text-xs text-muted-foreground">Añade una capa extra de seguridad</p>
                     </div>
                     <Toggle
                       checked={twoFactorEnabled}
@@ -209,7 +209,7 @@ export default function SettingsPage() {
                     <Mail className="w-4 h-4 text-origen-pradera mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-origen-bosque">Email - Nuevos pedidos</p>
-                      <p className="text-xs text-gray-500">Confirmaciones y actualizaciones</p>
+                      <p className="text-xs text-muted-foreground">Confirmaciones y actualizaciones</p>
                     </div>
                   </div>
                   <Toggle
@@ -225,7 +225,7 @@ export default function SettingsPage() {
                     <Mail className="w-4 h-4 text-origen-pradera mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-origen-bosque">Email - Marketing</p>
-                      <p className="text-xs text-gray-500">Ofertas y novedades</p>
+                      <p className="text-xs text-muted-foreground">Ofertas y novedades</p>
                     </div>
                   </div>
                   <Toggle
@@ -243,7 +243,7 @@ export default function SettingsPage() {
                     <Smartphone className="w-4 h-4 text-origen-pradera mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-origen-bosque">Push - Nuevos pedidos</p>
-                      <p className="text-xs text-gray-500">Notificaciones en tiempo real</p>
+                      <p className="text-xs text-muted-foreground">Notificaciones en tiempo real</p>
                     </div>
                   </div>
                   <Toggle
@@ -259,7 +259,7 @@ export default function SettingsPage() {
                     <Smartphone className="w-4 h-4 text-origen-pradera mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-origen-bosque">Push - Stock bajo</p>
-                      <p className="text-xs text-gray-500">Alertas de inventario</p>
+                      <p className="text-xs text-muted-foreground">Alertas de inventario</p>
                     </div>
                   </div>
                   <Toggle
@@ -275,7 +275,7 @@ export default function SettingsPage() {
                     <Smartphone className="w-4 h-4 text-origen-pradera mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-origen-bosque">Push - Nuevas reseñas</p>
-                      <p className="text-xs text-gray-500">Cuando te valoren</p>
+                      <p className="text-xs text-muted-foreground">Cuando te valoren</p>
                     </div>
                   </div>
                   <Toggle
@@ -293,7 +293,7 @@ export default function SettingsPage() {
                     <Mail className="w-4 h-4 text-origen-pradera mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-origen-bosque">Informe semanal</p>
-                      <p className="text-xs text-gray-500">Resumen de actividad</p>
+                      <p className="text-xs text-muted-foreground">Resumen de actividad</p>
                     </div>
                   </div>
                   <Toggle

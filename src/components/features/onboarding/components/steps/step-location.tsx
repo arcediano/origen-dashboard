@@ -107,41 +107,41 @@ const Select: React.FC<SelectProps> = ({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
-          "flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 text-left transition-all",
-          "border-gray-200 hover:border-origen-pradera focus:border-origen-pradera focus:outline-none focus:ring-2 focus:ring-origen-pradera/20",
-          disabled && "cursor-not-allowed opacity-50 bg-gray-50 hover:border-gray-200",
+          "flex w-full items-center justify-between rounded-xl border bg-surface-alt px-4 py-3 text-left transition-all",
+          "border-border hover:border-origen-pradera focus:border-origen-pradera focus:outline-none focus:ring-2 focus:ring-origen-pradera/20",
+          disabled && "cursor-not-allowed opacity-50 bg-surface hover:border-border",
           className
         )}
       >
         <span className={cn(
           "text-base",
-          value ? "text-origen-oscuro" : "text-gray-400"
+          value ? "text-origen-oscuro" : "text-text-subtle"
         )}>
           {selectedLabel || placeholder}
         </span>
         <ChevronDown className={cn(
-          "h-5 w-5 text-gray-500 transition-transform",
+          "h-5 w-5 text-muted-foreground transition-transform",
           isOpen && "rotate-180"
         )} />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border border-gray-200 bg-white shadow-lg animate-in fade-in-0 zoom-in-95">
+        <div className="absolute z-50 mt-2 w-full rounded-xl border border-border bg-surface-alt shadow-lg animate-in fade-in-0 zoom-in-95">
           {searchable && (
-            <div className="p-2 border-b border-gray-100">
+            <div className="p-2 border-b border-border-subtle">
               <input
                 ref={searchRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar provincia..."
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-origen-pradera"
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:border-origen-pradera"
               />
             </div>
           )}
           <div className="max-h-56 overflow-auto p-1">
             {filteredChildren.length === 0 && (
-              <p className="px-3 py-2.5 text-sm text-gray-400 text-center">Sin resultados</p>
+              <p className="px-3 py-2.5 text-sm text-text-subtle text-center">Sin resultados</p>
             )}
             {filteredChildren.map((child) => {
               if (React.isValidElement(child)) {
@@ -306,7 +306,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       {/* ====================================================================
           PROGRESS BAR
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
@@ -320,7 +320,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
+        <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
           <Info className="w-3.5 h-3.5 text-origen-pradera" />
           Completa tu ubicación y cuéntanos tu trayectoria
         </p>
@@ -329,7 +329,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       {/* ====================================================================
           CARD 1: UBICACIÓN + AÑO FUNDACIÓN + EQUIPO
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -337,14 +337,14 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           </div>
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">Ubicación y trayectoria</h2>
-            <p className="text-sm text-gray-600">Los clientes confían en negocios con historia</p>
+            <p className="text-sm text-muted-foreground">Los clientes confían en negocios con historia</p>
           </div>
         </div>
 
         {/* Helper contextual */}
         <div className="flex items-start gap-2 p-3 bg-origen-crema/40 rounded-xl border border-origen-pradera/20 mb-6">
           <Info className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-muted-foreground">
             Esta información nos ayuda a conectarte con compradores de tu zona y a verificar tu identidad como productor.
           </p>
         </div>
@@ -382,7 +382,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             <div className="sm:col-span-2 space-y-2">
               <label className="text-sm font-medium text-origen-bosque flex items-center gap-1">
                 Piso / Puerta
-                <span className="text-xs text-gray-400 font-normal">(opcional)</span>
+                <span className="text-xs text-text-subtle font-normal">(opcional)</span>
               </label>
               <Input
                 value={data.streetComplement || ''}
@@ -441,12 +441,12 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           </div>
 
           {/* Año de fundación */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-gray-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-border-subtle">
             <div className="space-y-2">
               <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-origen-pradera" />
                 Año de fundación
-                <span className="text-xs text-gray-500 font-normal">(opcional)</span>
+                <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
               </label>
               <Input
                 type="number"
@@ -469,7 +469,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
               <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
                 <Users className="w-4 h-4 text-origen-pradera" />
                 Tamaño del equipo
-                <span className="text-xs text-gray-500 font-normal">(opcional)</span>
+                <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
               </label>
               <Select
                 value={data.teamSize || ''}
@@ -481,7 +481,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 <SelectItem value="6-10">Equipo mediano (6-10 personas)</SelectItem>
                 <SelectItem value="11+">Gran equipo (más de 11 personas)</SelectItem>
               </Select>
-              <p className="text-xs text-gray-500">Humaniza tu negocio</p>
+              <p className="text-xs text-muted-foreground">Humaniza tu negocio</p>
             </div>
           </div>
         </div>
@@ -490,7 +490,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       {/* ====================================================================
           CARD 2: CATEGORÍAS
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -498,7 +498,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           </div>
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">¿Qué productos vendes?</h2>
-            <p className="text-sm text-gray-600">Selecciona tu categoría principal</p>
+            <p className="text-sm text-muted-foreground">Selecciona tu categoría principal</p>
           </div>
         </div>
 
@@ -531,7 +531,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       {/* ====================================================================
           CARD 3: FOTOS DEL ENTORNO (OPCIONAL)
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -539,7 +539,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           </div>
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">Fotos del entorno</h2>
-            <p className="text-sm text-gray-600">Muestra tu huerta, taller o establecimiento</p>
+            <p className="text-sm text-muted-foreground">Muestra tu huerta, taller o establecimiento</p>
           </div>
         </div>
 
@@ -552,7 +552,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           maxSize={5}
         />
         
-        <div className="mt-4 text-xs text-gray-500 flex items-center gap-2 bg-origen-crema/50 p-3 rounded-lg">
+        <div className="mt-4 text-xs text-muted-foreground flex items-center gap-2 bg-origen-crema/50 p-3 rounded-lg">
           <Leaf className="w-4 h-4 text-origen-pradera flex-shrink-0" />
           <span>Formatos: JPG, PNG, WEBP. Tamaño recomendado: 1200x800px</span>
         </div>

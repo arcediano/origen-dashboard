@@ -106,7 +106,7 @@ export function CreateProductProgress({
                   "relative w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
                   isActive && "border-origen-pradera bg-origen-pradera/10 shadow-lg shadow-origen-pradera/20",
                   isCompleted && !isActive && "border-origen-pradera bg-origen-pradera text-white",
-                  !isActive && !isCompleted && "border-gray-200 bg-white text-gray-400"
+                  !isActive && !isCompleted && "border-border bg-surface-alt text-text-subtle"
                 )}>
                   {isCompleted && !isActive ? (
                     <CheckCircle className="w-4 h-4" />
@@ -118,7 +118,7 @@ export function CreateProductProgress({
                   "text-[8px] sm:text-[10px] font-medium text-center max-w-[40px] sm:max-w-[60px] truncate",
                   isActive && "text-origen-bosque",
                   isCompleted && !isActive && "text-origen-pradera",
-                  !isActive && !isCompleted && "text-gray-400"
+                  !isActive && !isCompleted && "text-text-subtle"
                 )}>
                   {step.label}
                 </span>

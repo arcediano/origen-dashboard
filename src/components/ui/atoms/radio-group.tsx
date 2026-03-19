@@ -135,7 +135,7 @@ const RadioGroupItem = React.forwardRef<
             )}
           </label>
           {description && (
-            <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">
+            <p className="text-[10px] sm:text-xs text-text-subtle mt-0.5">
               {description}
             </p>
           )}

@@ -26,7 +26,7 @@ export function MobileNavBar({
   isLastStep,
 }: MobileNavBarProps) {
   return (
-    <div className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-2">
+    <div className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-surface-alt border-t border-border px-4 py-3 flex items-center gap-2">
       {/* Back button */}
       {currentStep > 0 ? (
         <Button
@@ -34,7 +34,7 @@ export function MobileNavBar({
           variant="outline"
           onClick={onBack}
           disabled={isSubmitting}
-          className="h-12 w-12 p-0 border-gray-300 text-origen-bosque flex-shrink-0"
+          className="h-12 w-12 p-0 border-border text-origen-bosque flex-shrink-0"
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>
@@ -49,7 +49,7 @@ export function MobileNavBar({
           variant="ghost"
           onClick={onSkip}
           disabled={isSubmitting}
-          className="flex-shrink-0 h-12 text-xs text-gray-500 hover:text-gray-700"
+          className="flex-shrink-0 h-12 text-xs text-muted-foreground hover:text-foreground"
         >
           Más tarde
         </Button>

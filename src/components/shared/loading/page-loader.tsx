@@ -33,7 +33,7 @@ export function PageLoader({
         <h3 className="text-lg sm:text-xl font-semibold text-origen-bosque">
           {message}
         </h3>
-        <p className="text-xs text-gray-400">Esto puede tomar unos segundos</p>
+        <p className="text-xs text-text-subtle">Esto puede tomar unos segundos</p>
       </div>
     </div>
   );

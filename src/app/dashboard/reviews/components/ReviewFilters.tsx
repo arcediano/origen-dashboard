@@ -84,13 +84,13 @@ export function ReviewFilters({
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Campo de búsqueda */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle" />
           <input
             type="text"
             value={localSearch}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Buscar por contenido, autor, producto..."
-            className="w-full pl-9 pr-7 h-10 sm:h-9 text-sm bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+            className="w-full pl-9 pr-7 h-10 sm:h-9 text-sm bg-surface border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
           />
           {localSearch && (
             <button
@@ -98,7 +98,7 @@ export function ReviewFilters({
                 setLocalSearch('');
                 onFilterChange({ ...filters, search: undefined });
               }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-subtle hover:text-muted-foreground"
             >
               <X className="w-4 h-4" />
             </button>
@@ -110,8 +110,8 @@ export function ReviewFilters({
           <button
             onClick={() => setShowMobileFilters(!showMobileFilters)}
             className={cn(
-              'sm:hidden flex items-center justify-center h-10 px-3 border border-gray-200 rounded-md bg-white',
-              showMobileFilters ? 'bg-origen-crema text-origen-bosque border-origen-pradera/30' : 'text-gray-600'
+              'sm:hidden flex items-center justify-center h-10 px-3 border border-border rounded-md bg-surface-alt',
+              showMobileFilters ? 'bg-origen-crema text-origen-bosque border-origen-pradera/30' : 'text-muted-foreground'
             )}
           >
             <Filter className="w-4 h-4 mr-2" />
@@ -131,7 +131,7 @@ export function ReviewFilters({
         <select
           value={filters.type || ''}
           onChange={(e) => toggleFilter('type', e.target.value || undefined)}
-          className="h-9 px-3 text-sm border border-gray-200 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+          className="h-9 px-3 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
         >
           {TYPE_OPTIONS.map(option => (
             <option key={option.value} value={option.value}>
@@ -144,7 +144,7 @@ export function ReviewFilters({
         <select
           value={filters.status || ''}
           onChange={(e) => toggleFilter('status', e.target.value || undefined)}
-          className="h-9 px-3 text-sm border border-gray-200 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+          className="h-9 px-3 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
         >
           {STATUS_OPTIONS.map(option => (
             <option key={option.value} value={option.value}>
@@ -157,7 +157,7 @@ export function ReviewFilters({
         <select
           value={filters.rating || ''}
           onChange={(e) => toggleFilter('rating', e.target.value ? Number(e.target.value) : undefined)}
-          className="h-9 px-3 text-sm border border-gray-200 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+          className="h-9 px-3 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
         >
           <option value="">Cualquier rating</option>
           {RATING_OPTIONS.map(rating => (
@@ -174,7 +174,7 @@ export function ReviewFilters({
             'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md border transition-all whitespace-nowrap',
             filters.verifiedOnly
               ? 'bg-origen-pradera/10 text-origen-pradera border-origen-pradera/30'
-              : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+              : 'bg-surface-alt text-muted-foreground border-border hover:border-border'
           )}
         >
           <CheckCircle className="w-3.5 h-3.5" />
@@ -187,7 +187,7 @@ export function ReviewFilters({
             'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md border transition-all whitespace-nowrap',
             filters.hasResponse
               ? 'bg-origen-pradera/10 text-origen-pradera border-origen-pradera/30'
-              : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+              : 'bg-surface-alt text-muted-foreground border-border hover:border-border'
           )}
         >
           <ThumbsUp className="w-3.5 h-3.5" />
@@ -200,7 +200,7 @@ export function ReviewFilters({
             'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md border transition-all whitespace-nowrap',
             filters.hasImages
               ? 'bg-origen-pradera/10 text-origen-pradera border-origen-pradera/30'
-              : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+              : 'bg-surface-alt text-muted-foreground border-border hover:border-border'
           )}
         >
           <Image className="w-3.5 h-3.5" />
@@ -220,13 +220,13 @@ export function ReviewFilters({
 
       {/* Filtros móviles */}
       {showMobileFilters && (
-        <div className="sm:hidden mt-3 space-y-3 pt-3 border-t border-gray-100">
+        <div className="sm:hidden mt-3 space-y-3 pt-3 border-t border-border-subtle">
           {/* ... versión móvil de los filtros ... */}
         </div>
       )}
 
       {/* Contador de resultados */}
-      <div className="mt-2 text-xs text-gray-500 text-right">
+      <div className="mt-2 text-xs text-muted-foreground text-right">
         {totalReviews} {totalReviews === 1 ? 'reseña encontrada' : 'reseñas encontradas'}
       </div>
     </Card>

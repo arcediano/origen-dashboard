@@ -60,10 +60,10 @@ function StripeRefreshContent() {
 
   if (error) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center space-y-6">
-        <RefreshCw className="w-12 h-12 text-gray-400 mx-auto" />
+      <div className="bg-surface-alt rounded-2xl shadow-lg p-10 max-w-md w-full text-center space-y-6">
+        <RefreshCw className="w-12 h-12 text-text-subtle mx-auto" />
         <h1 className="text-xl font-bold text-origen-bosque">Enlace expirado</h1>
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="text-sm text-muted-foreground mb-4">
           No pudimos renovar el enlace de Stripe. Vuelve al onboarding e inténtalo de nuevo.
         </p>
         <button
@@ -77,10 +77,10 @@ function StripeRefreshContent() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center space-y-6">
+    <div className="bg-surface-alt rounded-2xl shadow-lg p-10 max-w-md w-full text-center space-y-6">
       <Spinner size="xl" variant="primary" className="mx-auto" />
       <h1 className="text-xl font-bold text-origen-bosque">Renovando enlace...</h1>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-muted-foreground">
         El enlace anterior expiró. Generando uno nuevo, serás redirigido automáticamente.
       </p>
     </div>
@@ -94,9 +94,9 @@ export default function StripeRefreshPage() {
     <div className="min-h-screen bg-origen-crema flex items-center justify-center p-6">
       <React.Suspense
         fallback={
-          <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center space-y-6">
+          <div className="bg-surface-alt rounded-2xl shadow-lg p-10 max-w-md w-full text-center space-y-6">
             <Spinner size="xl" variant="primary" className="mx-auto" />
-            <p className="text-sm text-gray-500">Cargando...</p>
+            <p className="text-sm text-muted-foreground">Cargando...</p>
           </div>
         }
       >

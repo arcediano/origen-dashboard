@@ -192,7 +192,7 @@ const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
               {finalActiveIcon}
             </span>
           ) : (
-            <span className="text-gray-500">
+            <span className="text-muted-foreground">
               {finalInactiveIcon}
             </span>
           )}
@@ -238,7 +238,7 @@ const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
                 )}
                 {description && (
                   <p className={cn(
-                    "text-[10px] sm:text-xs text-gray-500",
+                    "text-[10px] sm:text-xs text-muted-foreground",
                     disabled && "opacity-50"
                   )}>
                     {description}
@@ -339,7 +339,7 @@ const ToggleGroup = React.forwardRef<HTMLDivElement, ToggleGroupProps>(
               </h4>
             )}
             {groupDescription && (
-              <p className="text-[10px] sm:text-xs text-gray-500">
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
                 {groupDescription}
               </p>
             )}

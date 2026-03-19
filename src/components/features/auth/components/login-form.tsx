@@ -156,7 +156,7 @@ export function SimpleLogin() {
 
   return (
     <div className="w-full max-w-md mx-auto px-4 sm:px-0">
-      <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 md:p-8 shadow-lg hover:shadow-xl transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-5 sm:p-6 md:p-8 shadow-lg hover:shadow-xl transition-all">
 
         {/* Header */}
         <div className="text-center mb-6 md:mb-8">
@@ -166,7 +166,7 @@ export function SimpleLogin() {
           <h2 className="text-xl md:text-2xl font-bold text-origen-bosque mb-1">
             Acceso productores
           </h2>
-          <p className="text-xs md:text-sm text-gray-600">Gestiona tu tienda y ventas</p>
+          <p className="text-xs md:text-sm text-muted-foreground">Gestiona tu tienda y ventas</p>
         </div>
 
         {/* Banner sesión expirada */}
@@ -266,7 +266,7 @@ export function SimpleLogin() {
               Acceder al panel
             </Button>
 
-            <p className="text-center text-[11px] md:text-xs text-gray-500">
+            <p className="text-center text-[11px] md:text-xs text-muted-foreground">
               ¿No tienes cuenta?{' '}
               <Link
                 href="/auth/register"
@@ -283,17 +283,17 @@ export function SimpleLogin() {
       <div className="mt-5 md:mt-6 flex flex-wrap items-center justify-center gap-2 md:gap-3 text-[10px] md:text-xs">
         <div className="flex items-center gap-1">
           <Shield className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera" />
-          <span className="text-gray-600">SSL 256-bit</span>
+          <span className="text-muted-foreground">SSL 256-bit</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300 hidden sm:block" />
+        <span className="w-1 h-1 rounded-full bg-border hidden sm:block" />
         <div className="flex items-center gap-1">
           <CheckCircle2 className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera" />
-          <span className="text-gray-600">+500 productores</span>
+          <span className="text-muted-foreground">+500 productores</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300 hidden sm:block" />
+        <span className="w-1 h-1 rounded-full bg-border hidden sm:block" />
         <div className="flex items-center gap-1">
           <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera" />
-          <span className="text-gray-600">Respuesta 24h</span>
+          <span className="text-muted-foreground">Respuesta 24h</span>
         </div>
       </div>
     </div>

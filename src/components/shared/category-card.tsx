@@ -75,13 +75,13 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       type="button"
       onClick={() => onSelect(category.id)}
       className={cn(
-        'group relative bg-white rounded-xl border-2 w-full p-3',
+        'group relative bg-surface-alt rounded-xl border-2 w-full p-3',
         'transition-all duration-200',
         'hover:shadow-md hover:scale-[1.02] active:scale-[0.98]',
         'focus:outline-none focus:ring-2 focus:ring-origen-pradera/50',
         isSelected
           ? 'border-origen-pradera shadow-md bg-origen-pradera/[0.03]'
-          : 'border-gray-200 hover:border-origen-pradera',
+          : 'border-border hover:border-origen-pradera',
         className,
       )}
       aria-pressed={isSelected}
@@ -113,12 +113,12 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           <h3
             className={cn(
               'text-sm font-semibold leading-tight',
-              isSelected ? 'text-origen-bosque' : 'text-gray-900',
+              isSelected ? 'text-origen-bosque' : 'text-foreground',
             )}
           >
             {category.name}
           </h3>
-          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-snug">
+          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-snug">
             {category.description}
           </p>
         </div>

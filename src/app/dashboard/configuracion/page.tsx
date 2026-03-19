@@ -64,10 +64,10 @@ export default function ConfiguracionPage() {
   return (
     <div className="w-full">
       {/* Cabecera de página */}
-      <div className="px-6 lg:px-8 py-6 border-b border-gray-200/50 bg-white/30">
+      <div className="px-6 lg:px-8 py-6 border-b border-border/50 bg-surface-alt/30">
         <div>
           <h1 className="text-2xl font-semibold text-origen-bosque">Configuración</h1>
-          <p className="text-sm text-gray-500 mt-1">Administra tu cuenta y preferencias</p>
+          <p className="text-sm text-muted-foreground mt-1">Administra tu cuenta y preferencias</p>
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export default function ConfiguracionPage() {
             const Icon = section.icon;
             return (
               <Link key={index} href={section.href}>
-                <Card className="p-6 bg-white border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group">
+                <Card className="p-6 bg-surface-alt border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
                       <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
@@ -88,10 +88,10 @@ export default function ConfiguracionPage() {
                         <h3 className="font-medium text-origen-bosque group-hover:text-origen-pradera transition-colors">
                           {section.title}
                         </h3>
-                        <p className="text-xs text-gray-500 mt-1">{section.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{section.description}</p>
                       </div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-origen-pradera transition-colors" />
+                    <ChevronRight className="w-5 h-5 text-text-subtle group-hover:text-origen-pradera transition-colors" />
                   </div>
                 </Card>
               </Link>

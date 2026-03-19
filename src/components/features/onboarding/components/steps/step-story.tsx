@@ -229,7 +229,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       {/* ====================================================================
           PROGRESS BAR
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
@@ -248,7 +248,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       {/* ====================================================================
           CARD 1: NOMBRE Y ESLOGAN
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -256,7 +256,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           </div>
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">Nombre y eslogan</h2>
-            <p className="text-sm text-gray-600">Cómo quieres que te conozcan</p>
+            <p className="text-sm text-muted-foreground">Cómo quieres que te conozcan</p>
           </div>
         </div>
 
@@ -277,7 +277,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
             <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
               <Quote className="w-4 h-4 text-origen-pradera" />
               Eslogan o frase descriptiva
-              <span className="text-xs text-gray-500 font-normal">(opcional)</span>
+              <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
             </label>
             <Input
               value={data.tagline || ''}
@@ -285,21 +285,21 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
               placeholder="Una frase que capture la esencia de tu marca"
               inputSize="lg"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Ej: &ldquo;El sabor de la tradición&rdquo;, &ldquo;De nuestra huerta a tu mesa&rdquo;, &ldquo;Artesanía con corazón&rdquo;
             </p>
           </div>
 
           {/* Presencia digital */}
-          <div className="pt-4 border-t border-gray-100 space-y-4">
+          <div className="pt-4 border-t border-border-subtle space-y-4">
             <p className="text-sm font-medium text-origen-bosque flex items-center gap-2">
               <Globe className="w-4 h-4 text-origen-pradera" />
               Presencia digital
-              <span className="text-xs text-gray-500 font-normal">(opcional)</span>
+              <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                   <Link className="w-3.5 h-3.5" />
                   Sitio web
                 </label>
@@ -312,12 +312,12 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                   <Instagram className="w-3.5 h-3.5" />
                   Instagram
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 pointer-events-none">@</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-subtle pointer-events-none">@</span>
                   <Input
                     value={data.instagramHandle || ''}
                     onChange={(e) => handleInputChange('instagramHandle', e.target.value.replace(/^@/, ''))}
@@ -335,7 +335,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       {/* ====================================================================
           CARD 2: DESCRIPCIÓN / HISTORIA
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -343,7 +343,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           </div>
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">Cuéntanos tu historia</h2>
-            <p className="text-sm text-gray-600">Los compradores conectan con personas, no solo con productos</p>
+            <p className="text-sm text-muted-foreground">Los compradores conectan con personas, no solo con productos</p>
           </div>
         </div>
 
@@ -356,7 +356,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
               "min-h-[120px] text-base focus:ring-2",
               charCount >= 50
                 ? "border-green-400 focus:border-green-500 focus:ring-green-200"
-                : "border-gray-200 focus:border-origen-pradera focus:ring-origen-pradera/20"
+                : "border-border focus:border-origen-pradera focus:ring-origen-pradera/20"
             )}
             maxLength={500}
           />
@@ -364,11 +364,11 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           {/* Barra de progreso hasta 50 chars */}
           {charCount < 50 && (
             <div className="space-y-1">
-              <div className="flex justify-between text-xs text-gray-400 mb-1">
+              <div className="flex justify-between text-xs text-text-subtle mb-1">
                 <span>{charCount} / 50 mínimos</span>
                 <span>{charCount}/500</span>
               </div>
-              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-surface rounded-full overflow-hidden">
                 <div
                   className="h-full bg-origen-pradera rounded-full transition-all duration-300"
                   style={{ width: `${Math.min((charCount / 50) * 100, 100)}%` }}
@@ -387,7 +387,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 ¡Listo! Ya puedes continuar
               </span>
-              <span className="text-xs text-gray-400">{charCount}/500</span>
+              <span className="text-xs text-text-subtle">{charCount}/500</span>
             </div>
           )}
         </div>
@@ -396,7 +396,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       {/* ====================================================================
           CARD 3: FILOSOFÍA DE PRODUCCIÓN
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -405,9 +405,9 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold text-origen-bosque">Filosofía de producción</h2>
-              <span className="text-xs bg-origen-crema/80 text-gray-600 px-2 py-1 rounded-full">Recomendado</span>
+              <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-1 rounded-full">Recomendado</span>
             </div>
-            <p className="text-sm text-gray-600">Cuenta tus métodos, valores y compromiso con la calidad</p>
+            <p className="text-sm text-muted-foreground">Cuenta tus métodos, valores y compromiso con la calidad</p>
           </div>
         </div>
 
@@ -421,7 +421,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           />
           
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               {philosophyCharCount}/500 caracteres
             </span>
             {data.productionPhilosophy && data.productionPhilosophy.length > 50 && (
@@ -444,7 +444,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       {/* ====================================================================
           CARD 4: VALORES
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -452,7 +452,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           </div>
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">Valores</h2>
-            <p className="text-sm text-gray-600">Selecciona los que mejor te representen</p>
+            <p className="text-sm text-muted-foreground">Selecciona los que mejor te representen</p>
           </div>
         </div>
 
@@ -466,12 +466,12 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                 type="button"
                 onClick={() => handleValueSelect(value.id)}
                 className={cn(
-                  "group relative bg-white rounded-xl p-4 border-2 transition-all",
+                  "group relative bg-surface-alt rounded-xl p-4 border-2 transition-all",
                   "hover:shadow-lg hover:scale-[1.02]",
                   "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
                   isSelected
                     ? "border-origen-pradera bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5 shadow-md"
-                    : "border-gray-200 hover:border-origen-pradera"
+                    : "border-border hover:border-origen-pradera"
                 )}
               >
                 {isSelected && (
@@ -492,11 +492,11 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                   </div>
                   <span className={cn(
                     "text-sm font-medium",
-                    isSelected ? "text-origen-bosque" : "text-gray-700"
+                    isSelected ? "text-origen-bosque" : "text-foreground"
                   )}>
                     {value.name}
                   </span>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                     {value.description}
                   </p>
                 </div>
@@ -523,7 +523,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       {/* ====================================================================
           CARD 5: CERTIFICACIONES
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -536,7 +536,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                 Requiere verificación
               </span>
             </div>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Añade certificaciones oficiales. Nuestro equipo verificará los documentos en el paso 5.
             </p>
           </div>
@@ -559,7 +559,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                   "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
                   isSelected
                     ? "border-origen-pradera bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5"
-                    : "border-gray-200 hover:border-origen-pradera bg-white"
+                    : "border-border hover:border-origen-pradera bg-surface-alt"
                 )}
               >
                 <div className={cn(
@@ -586,8 +586,8 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">{cert.issuingBody}</p>
-                  <p className="text-xs text-gray-600 mt-1">{cert.description}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{cert.issuingBody}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{cert.description}</p>
                 </div>
 
                 {isSelected && (
@@ -625,7 +625,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       {/* ====================================================================
           CARD 6: FOTOS DEL EQUIPO
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -634,9 +634,9 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold text-origen-bosque">Fotos del equipo o proceso</h2>
-              <span className="text-xs bg-origen-crema/80 text-gray-600 px-2 py-1 rounded-full">Recomendado</span>
+              <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-1 rounded-full">Recomendado</span>
             </div>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Las imágenes generan confianza. Los perfiles con fotos del productor reciben <span className="font-semibold text-origen-pradera">+40% visitas</span>.
             </p>
           </div>
@@ -651,7 +651,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           maxSize={5}
         />
         
-        <div className="mt-4 text-xs text-gray-500 flex items-center gap-2 bg-origen-crema/30 p-3 rounded-lg">
+        <div className="mt-4 text-xs text-muted-foreground flex items-center gap-2 bg-origen-crema/30 p-3 rounded-lg">
           <Info className="w-4 h-4 text-origen-pradera flex-shrink-0" />
           <span>
             <strong>Consejo:</strong> Una foto tuya, de tus manos trabajando o de tu equipo genera mucha más confianza que solo productos.

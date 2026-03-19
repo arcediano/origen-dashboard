@@ -251,7 +251,7 @@ export function StepProduction({
             </div>
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-origen-bosque truncate">Historia y producción</h2>
-              <p className="text-sm text-gray-500 truncate">Comparte el origen y proceso de tu producto</p>
+              <p className="text-sm text-muted-foreground truncate">Comparte el origen y proceso de tu producto</p>
             </div>
           </div>
           
@@ -275,7 +275,7 @@ export function StepProduction({
         </div>
 
         {/* Pestañas de navegación */}
-        <div className="mb-6 border-b border-gray-200 overflow-x-auto">
+        <div className="mb-6 border-b border-border overflow-x-auto">
           <div className="flex gap-6 min-w-max">
             {[
               { id: 'story', label: 'Historia', icon: <BookOpen className="w-4 h-4" /> },
@@ -290,7 +290,7 @@ export function StepProduction({
                   "pb-3 text-sm font-medium transition-colors relative flex items-center gap-2",
                   activeTab === tab.id 
                     ? 'text-origen-pradera border-b-2 border-origen-pradera' 
-                    : 'text-gray-500 hover:text-gray-700'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 {tab.icon}
@@ -313,7 +313,7 @@ export function StepProduction({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Historia del productor
                   </span>
                   <Tooltip 
@@ -333,7 +333,7 @@ export function StepProduction({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Sprout className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Proceso artesanal
                   </span>
                   <Tooltip 
@@ -353,7 +353,7 @@ export function StepProduction({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Heart className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Bienestar animal
                   </span>
                   <Tooltip 
@@ -385,7 +385,7 @@ export function StepProduction({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Globe className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-foreground">
                       País
                     </span>
                     <Tooltip 
@@ -404,7 +404,7 @@ export function StepProduction({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-foreground">
                       Finca / Taller
                     </span>
                     <Tooltip 
@@ -424,7 +424,7 @@ export function StepProduction({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Award className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Método de producción
                   </span>
                   <Tooltip 
@@ -450,7 +450,7 @@ export function StepProduction({
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <p className="text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
+                  <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                     <Calendar className="w-3 h-3 text-origen-pradera" />
                     Fecha cosecha
                   </p>
@@ -462,7 +462,7 @@ export function StepProduction({
                   />
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
+                  <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                     <Calendar className="w-3 h-3 text-origen-pradera" />
                     Fecha producción
                   </p>
@@ -474,7 +474,7 @@ export function StepProduction({
                   />
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-gray-700 mb-1 flex items-center gap-1">
+                  <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                     <Clock className="w-3 h-3 text-origen-pradera" />
                     Fecha caducidad
                   </p>
@@ -490,7 +490,7 @@ export function StepProduction({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Package className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Número de lote
                   </span>
                   <Tooltip 
@@ -520,7 +520,7 @@ export function StepProduction({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <TreePine className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Prácticas sostenibles
                   </span>
                   <Tooltip 
@@ -533,7 +533,7 @@ export function StepProduction({
                   {SUSTAINABLE_PRACTICES.map(practice => (
                     <div
                       key={practice.id}
-                      className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:border-origen-pradera/30 transition-all bg-white"
+                      className="flex items-start gap-3 p-3 rounded-lg border border-border hover:border-origen-pradera/30 transition-all bg-surface-alt"
                       onMouseEnter={() => setSelectedPractice(practice.id)}
                       onMouseLeave={() => setSelectedPractice(null)}
                     >
@@ -554,7 +554,7 @@ export function StepProduction({
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: 'auto' }}
                               exit={{ opacity: 0, height: 0 }}
-                              className="text-xs text-gray-500 mt-1"
+                              className="text-xs text-muted-foreground mt-1"
                             >
                               {practice.description}
                             </motion.p>
@@ -569,7 +569,7 @@ export function StepProduction({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Sprout className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Información de sostenibilidad
                   </span>
                   <Tooltip 
@@ -599,7 +599,7 @@ export function StepProduction({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Camera className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Galería del proceso
                   </span>
                   <Tooltip 
@@ -630,7 +630,7 @@ export function StepProduction({
                 {!showVideoInput ? (
                   <button
                     onClick={() => setShowVideoInput(true)}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-origen-pradera/30 hover:border-origen-pradera hover:bg-origen-pradera/5 transition-all text-sm font-medium text-origen-bosque bg-white"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-origen-pradera/30 hover:border-origen-pradera hover:bg-origen-pradera/5 transition-all text-sm font-medium text-origen-bosque bg-surface-alt"
                   >
                     <Film className="w-4 h-4" />
                     Añadir vídeo (YouTube/Vimeo)
@@ -684,7 +684,7 @@ export function StepProduction({
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
-                          className="relative aspect-video bg-gradient-to-br from-origen-crema to-gray-100 rounded-lg border border-gray-200 overflow-hidden group"
+                          className="relative aspect-video bg-gradient-to-br from-origen-crema to-gray-100 rounded-lg border border-border overflow-hidden group"
                         >
                           {video.thumbnail ? (
                             <img
@@ -694,7 +694,7 @@ export function StepProduction({
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <Film className="w-8 h-8 text-gray-400" />
+                              <Film className="w-8 h-8 text-text-subtle" />
                             </div>
                           )}
 

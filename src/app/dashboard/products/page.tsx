@@ -254,7 +254,7 @@ export default function ProductosPage() {
           {/* Resultados */}
           <motion.div variants={itemVariants}>
             {filteredProducts.length === 0 ? (
-              <Card className="p-12 bg-white border border-gray-200">
+              <Card className="p-12 bg-surface-alt border border-border">
                 <div className="flex flex-col items-center justify-center text-center">
                   <div className="w-16 h-16 rounded-full bg-origen-crema flex items-center justify-center mb-4">
                     <Package className="w-8 h-8 text-origen-pradera" />
@@ -262,7 +262,7 @@ export default function ProductosPage() {
                   <h3 className="text-lg font-semibold text-origen-bosque mb-2">
                     No hay productos
                   </h3>
-                  <p className="text-sm text-gray-500 max-w-md mb-6">
+                  <p className="text-sm text-muted-foreground max-w-md mb-6">
                     {hasFilters
                       ? 'No se encontraron productos con los filtros seleccionados.'
                       : 'Comienza añadiendo tu primer producto.'}

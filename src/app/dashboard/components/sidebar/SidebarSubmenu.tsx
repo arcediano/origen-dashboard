@@ -64,7 +64,7 @@ export function SidebarSubmenu({
                       'truncate transition-all',
                       isActive
                         ? 'text-origen-bosque font-semibold pl-0'
-                        : 'text-gray-500 group-hover:text-origen-bosque pl-0'
+                        : 'text-muted-foreground group-hover:text-origen-bosque pl-0'
                     )}>
                       {item.label}
                     </span>

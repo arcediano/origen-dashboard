@@ -33,12 +33,12 @@ export function ProductTableActions({
           e.stopPropagation();
           onAdjustStock(product);
         }}
-        className="p-1.5 sm:p-2 rounded-md text-gray-500 hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
+        className="p-1.5 sm:p-2 rounded-md text-muted-foreground hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
         title="Ajustar stock"
         aria-label="Ajustar stock"
       >
         <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
+        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
           Ajustar stock
         </span>
       </button>
@@ -49,12 +49,12 @@ export function ProductTableActions({
           e.stopPropagation();
           onView(product.id);
         }}
-        className="p-1.5 sm:p-2 rounded-md text-gray-500 hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
+        className="p-1.5 sm:p-2 rounded-md text-muted-foreground hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
         title="Ver producto"
         aria-label="Ver producto"
       >
         <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
+        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
           Ver producto
         </span>
       </button>
@@ -65,12 +65,12 @@ export function ProductTableActions({
           e.stopPropagation();
           onEdit(product.id);
         }}
-        className="p-1.5 sm:p-2 rounded-md text-gray-500 hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
+        className="p-1.5 sm:p-2 rounded-md text-muted-foreground hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
         title="Editar producto"
         aria-label="Editar producto"
       >
         <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
+        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
           Editar producto
         </span>
       </button>

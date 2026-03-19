@@ -33,7 +33,7 @@ export default function LoginPage() {
       {/* ================================================================
           HEADER - Responsive
       ================================================================ */}
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      <header className="sticky top-0 z-40 w-full bg-surface-alt/95 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
@@ -60,7 +60,7 @@ export default function LoginPage() {
             {/* CTA - Solo visible en desktop */}
             <Link
               href="/auth/register"
-              className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-white hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2"
+              className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-surface-alt hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2"
             >
               <Store className="w-4 h-4 text-origen-pradera" />
               <span className="hidden sm:inline">Nuevo productor</span>
@@ -87,7 +87,7 @@ export default function LoginPage() {
               Bienvenido a tu{' '}
               <span className="text-origen-pradera">panel de control</span>
             </h1>
-            <p className="text-sm text-gray-600 max-w-sm mx-auto">
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
               Gestiona tu tienda, analiza tus ventas y haz crecer tu negocio.
             </p>
           </div>
@@ -114,7 +114,7 @@ export default function LoginPage() {
                   Bienvenido a tu
                   <span className="block text-origen-hoja">panel de control</span>
                 </h2>
-                <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+                <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
                   Gestiona tu tienda, analiza tus ventas y haz crecer tu negocio
                   con las herramientas diseñadas para productores locales.
                 </p>
@@ -151,14 +151,14 @@ export default function LoginPage() {
                   const Icon = stat.icon;
                   return (
                     <div key={index} className="group">
-                      <div className="bg-white rounded-xl p-4 border border-gray-200 hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-origen-hoja/50 transition-all duration-300 group-hover:border-origen-hoja">
+                        <div className="bg-surface-alt rounded-xl p-4 border border-border hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-origen-hoja/50 transition-all duration-300 group-hover:border-origen-hoja">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md`}>
                             <Icon className="w-5 h-5 text-white" />
                           </div>
                           <div>
                             <div className="text-xl font-bold text-origen-bosque">{stat.value}</div>
-                            <div className="text-xs text-gray-500">{stat.label}</div>
+                            <div className="text-xs text-muted-foreground">{stat.label}</div>
                           </div>
                         </div>
                       </div>
@@ -185,7 +185,7 @@ export default function LoginPage() {
                       <div className="w-5 h-5 rounded-full bg-origen-pradera/10 flex items-center justify-center">
                         <CheckCircle className="w-3 h-3 text-origen-pradera" />
                       </div>
-                      <span className="text-sm text-gray-700">{benefit}</span>
+                      <span className="text-sm text-foreground">{benefit}</span>
                     </div>
                   ))}
                 </div>
@@ -201,8 +201,8 @@ export default function LoginPage() {
 
                 {/* Ayuda */}
                 <div className="mt-8 text-center">
-                  <div className="inline-flex items-center gap-3 bg-white rounded-full px-5 py-2.5 border border-gray-200 shadow-sm hover:border-origen-pradera transition-all">
-                    <span className="text-sm text-gray-600">¿Problemas para acceder?</span>
+                  <div className="inline-flex items-center gap-3 bg-surface-alt rounded-full px-5 py-2.5 border border-border shadow-sm hover:border-origen-pradera transition-all">
+                    <span className="text-sm text-muted-foreground">¿Problemas para acceder?</span>
                     <Link
                       href="/contacto"
                       className="text-sm font-medium text-origen-pradera hover:text-origen-bosque transition-colors flex items-center gap-1"

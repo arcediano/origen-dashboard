@@ -116,7 +116,7 @@ const Checkbox = React.forwardRef<
         "transition-all duration-200",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera/50 focus-visible:ring-offset-2",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        "disabled:data-[state=checked]:bg-gray-400 disabled:data-[state=checked]:border-gray-400",
+        "disabled:data-[state=checked]:bg-text-disabled disabled:data-[state=checked]:border-text-disabled",
         
         variantClasses[variant],
         sizeClasses[size],
@@ -209,7 +209,7 @@ const CheckboxWithLabel = React.forwardRef<
             </label>
             
             {description && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-text-subtle mt-1">
                 {description}
               </p>
             )}
@@ -262,7 +262,7 @@ const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroupProps>(
               </legend>
             )}
             {description && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-text-subtle">
                 {description}
               </p>
             )}

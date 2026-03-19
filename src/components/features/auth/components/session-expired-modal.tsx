@@ -36,7 +36,7 @@ export function SessionExpiredModal({ isOpen }: SessionExpiredModalProps) {
         </Button>
       }
     >
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-muted-foreground">
         Por seguridad, cerramos tu sesión automáticamente tras un periodo de inactividad.
       </p>
     </Modal>

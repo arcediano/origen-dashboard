@@ -82,7 +82,7 @@ export function DashboardFooter({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
       className={cn(
-        "relative mt-auto border-t border-gray-100 bg-gradient-to-b from-white/50 to-origen-crema/30 backdrop-blur-sm",
+        "relative mt-auto border-t border-border-subtle bg-gradient-to-b from-white/50 to-origen-crema/30 backdrop-blur-sm",
         className
       )}
     >
@@ -117,7 +117,7 @@ export function DashboardFooter({
             </div>
             
             {/* Copyright */}
-            <p className="text-xs text-gray-400 flex items-center justify-center lg:justify-start gap-1">
+            <p className="text-xs text-text-subtle flex items-center justify-center lg:justify-start gap-1">
               <span>©</span>
               <span>{currentYear}</span>
               <span>·</span>
@@ -145,7 +145,7 @@ export function DashboardFooter({
                   <p className="text-sm font-bold text-origen-bosque">{metrics.growth}</p>
                   <span className="text-[10px] text-green-600 font-medium">↑</span>
                 </div>
-                <p className="text-[10px] text-gray-500">crecimiento mensual</p>
+                <p className="text-[10px] text-muted-foreground">crecimiento mensual</p>
               </div>
             </motion.div>
 
@@ -159,7 +159,7 @@ export function DashboardFooter({
               <Users className="w-5 h-5 text-origen-hoja group-hover:scale-110 transition-transform" />
               <div className="text-left">
                 <p className="text-sm font-bold text-origen-bosque">{metrics.producers}</p>
-                <p className="text-[10px] text-gray-500">productores activos</p>
+                <p className="text-[10px] text-muted-foreground">productores activos</p>
               </div>
             </motion.div>
 
@@ -173,7 +173,7 @@ export function DashboardFooter({
               <Clock className="w-5 h-5 text-origen-menta group-hover:scale-110 transition-transform" />
               <div className="text-left">
                 <p className="text-sm font-bold text-origen-bosque">{metrics.support}</p>
-                <p className="text-[10px] text-gray-500">soporte continuo</p>
+                <p className="text-[10px] text-muted-foreground">soporte continuo</p>
               </div>
             </motion.div>
           </div>
@@ -182,27 +182,27 @@ export function DashboardFooter({
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link 
               href="/privacidad" 
-              className="group flex items-center gap-1.5 text-xs text-gray-400 hover:text-origen-pradera transition-all"
+              className="group flex items-center gap-1.5 text-xs text-text-subtle hover:text-origen-pradera transition-all"
             >
               <Shield className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
               <span>Privacidad</span>
               <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
             
-            <span className="text-gray-200">|</span>
+            <span className="text-border-subtle">|</span>
             
             <Link 
               href="/terminos" 
-              className="group text-xs text-gray-400 hover:text-origen-pradera transition-colors"
+              className="group text-xs text-text-subtle hover:text-origen-pradera transition-colors"
             >
               Términos
             </Link>
             
-            <span className="text-gray-200">|</span>
+            <span className="text-border-subtle">|</span>
             
             <Link 
               href="/cookies" 
-              className="group text-xs text-gray-400 hover:text-origen-pradera transition-colors"
+              className="group text-xs text-text-subtle hover:text-origen-pradera transition-colors"
             >
               Cookies
             </Link>
@@ -215,14 +215,14 @@ export function DashboardFooter({
               whileHover={{ scale: 1.05 }}
               className="flex items-center gap-1.5 text-xs"
             >
-              <span className="text-gray-400">Hecho con</span>
+              <span className="text-text-subtle">Hecho con</span>
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
               >
                 <Heart className="w-4 h-4 text-origen-pradera fill-origen-pradera/30" />
               </motion.div>
-              <span className="text-gray-400">para</span>
+              <span className="text-text-subtle">para</span>
               <span className="font-medium text-origen-bosque">productores locales</span>
             </motion.div>
 
@@ -232,7 +232,7 @@ export function DashboardFooter({
                 <CheckCircle className="w-2.5 h-2.5" />
                 Sistema operativo
               </Badge>
-              <span className="text-[10px] text-gray-400 font-mono">
+              <span className="text-[10px] text-text-subtle font-mono">
                 {currentTime} UTC
               </span>
             </div>
@@ -240,8 +240,8 @@ export function DashboardFooter({
         </div>
 
         {/* Línea divisoria sutil con métricas adicionales */}
-        <div className="mt-4 pt-4 border-t border-gray-100/50">
-          <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] text-gray-400">
+        <div className="mt-4 pt-4 border-t border-border-subtle/50">
+          <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] text-text-subtle">
             <div className="flex items-center gap-4">
               <span>✨ Plataforma v2.0</span>
               <span>🌱 Carbon Neutral</span>

@@ -76,7 +76,7 @@ const LoadingSkeleton = () => {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <RefreshCw className="w-12 h-12 text-origen-pradera animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Cargando producto...</p>
+            <p className="text-muted-foreground">Cargando producto...</p>
           </div>
         </div>
       </div>
@@ -97,7 +97,7 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry?: () => void })
             <AlertCircle className="w-8 h-8 text-red-500" />
           </div>
           <h2 className="text-xl font-bold text-origen-bosque mb-2">Error al cargar</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-muted-foreground mb-6">{error}</p>
           {onRetry && (
             <Button onClick={onRetry}>
               <RefreshCw className="w-4 h-4 mr-2" />
@@ -265,7 +265,7 @@ export default function EditProductPage() {
         actions={
           <div className="flex items-center gap-3">
             {lastSaved && (
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-text-disabled">
                 {isAutoSaving ? 'Guardando...' : `Último guardado: ${lastSaved.toLocaleTimeString()}`}
               </span>
             )}
@@ -392,7 +392,7 @@ export default function EditProductPage() {
               <Card 
                 variant="elevated" 
                 hoverEffect="organic" 
-                className="overflow-hidden border border-gray-200 shadow-sm"
+                className="overflow-hidden border border-border shadow-sm"
               >
                 <CardHeader spacing="md">
                   <div className="flex items-center justify-between">
@@ -411,7 +411,7 @@ export default function EditProductPage() {
                 <CardContent spacing="md">
                   <ul className="space-y-3">
                     {tips.map((tip, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                      <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
                         <div className="w-4 h-4 rounded-full bg-origen-pradera/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <div className="w-1.5 h-1.5 rounded-full bg-origen-pradera" />
                         </div>
@@ -427,7 +427,7 @@ export default function EditProductPage() {
                         <TrendingUp className="w-3.5 h-3.5 text-origen-pradera" />
                         <span className="text-xs font-medium text-origen-bosque">Dato clave</span>
                       </div>
-                      <p className="text-xs text-gray-600">{keyFactByStep[stepNumber]}</p>
+                      <p className="text-xs text-muted-foreground">{keyFactByStep[stepNumber]}</p>
                     </div>
                   )}
                 </CardContent>

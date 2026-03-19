@@ -74,7 +74,7 @@ export default function SettingsPage() {
       {/* Botón volver */}
       <button 
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-sm text-gray-600 hover:text-origen-pradera mb-6 transition-colors"
+        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-origen-pradera mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver al perfil
@@ -85,7 +85,7 @@ export default function SettingsPage() {
         <h1 className="text-2xl md:text-3xl font-bold text-origen-bosque">
           Configuración
         </h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-muted-foreground mt-1">
           Gestiona tus preferencias, notificaciones y seguridad
         </p>
       </div>
@@ -119,7 +119,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
                 <div className="space-y-0.5">
                   <p className="font-medium text-origen-bosque">Notificaciones por email</p>
-                  <p className="text-sm text-gray-500">Nuevos pedidos, confirmaciones</p>
+                  <p className="text-sm text-muted-foreground">Nuevos pedidos, confirmaciones</p>
                 </div>
                 <Toggle
                   checked={notifications.emailOrders}
@@ -131,7 +131,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
                 <div className="space-y-0.5">
                   <p className="font-medium text-origen-bosque">Marketing y promociones</p>
-                  <p className="text-sm text-gray-500">Ofertas y novedades</p>
+                  <p className="text-sm text-muted-foreground">Ofertas y novedades</p>
                 </div>
                 <Toggle
                   checked={notifications.emailMarketing}
@@ -145,7 +145,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
                 <div className="space-y-0.5">
                   <p className="font-medium text-origen-bosque">Nuevos pedidos</p>
-                  <p className="text-sm text-gray-500">Notificaciones push en tiempo real</p>
+                  <p className="text-sm text-muted-foreground">Notificaciones push en tiempo real</p>
                 </div>
                 <Toggle
                   checked={notifications.pushNewOrder}
@@ -157,7 +157,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
                 <div className="space-y-0.5">
                   <p className="font-medium text-origen-bosque">Stock bajo</p>
-                  <p className="text-sm text-gray-500">Alertas cuando queden pocas unidades</p>
+                  <p className="text-sm text-muted-foreground">Alertas cuando queden pocas unidades</p>
                 </div>
                 <Toggle
                   checked={notifications.pushLowStock}
@@ -169,7 +169,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
                 <div className="space-y-0.5">
                   <p className="font-medium text-origen-bosque">Nuevas reseñas</p>
-                  <p className="text-sm text-gray-500">Cuando los clientes te valoren</p>
+                  <p className="text-sm text-muted-foreground">Cuando los clientes te valoren</p>
                 </div>
                 <Toggle
                   checked={notifications.pushReviews}
@@ -183,7 +183,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
                 <div className="space-y-0.5">
                   <p className="font-medium text-origen-bosque">Informe semanal</p>
-                  <p className="text-sm text-gray-500">Resumen de actividad cada lunes</p>
+                  <p className="text-sm text-muted-foreground">Resumen de actividad cada lunes</p>
                 </div>
                 <Toggle
                   checked={notifications.weeklyReport}
@@ -262,7 +262,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-medium text-origen-bosque">Verificación en dos pasos</h4>
-                  <p className="text-sm text-gray-500">Añade una capa extra de seguridad a tu cuenta</p>
+                  <p className="text-sm text-muted-foreground">Añade una capa extra de seguridad a tu cuenta</p>
                 </div>
                 <Button variant="outline">Activar</Button>
               </div>
@@ -291,7 +291,7 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   <Label>Idioma</Label>
                   <select 
-                    className="w-full h-10 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-origen-menta/50 focus:border-origen-pradera"
+                    className="w-full h-10 px-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-origen-menta/50 focus:border-origen-pradera"
                     value={preferences.language}
                     onChange={(e) => setPreferences({...preferences, language: e.target.value})}
                   >
@@ -325,7 +325,7 @@ export default function SettingsPage() {
                 
                 <div className="space-y-2">
                   <Label>Modo compacto</Label>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-surface rounded-lg">
                     <span className="text-sm">Reducir espaciado en las vistas</span>
                     <Toggle
                       checked={preferences.compactMode}

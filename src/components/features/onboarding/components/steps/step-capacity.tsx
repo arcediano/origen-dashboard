@@ -234,7 +234,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
   return (
     <div className="space-y-4">
       {/* Tabs de tipo — colores de marca */}
-      <div className="flex gap-0 border border-gray-200 rounded-xl overflow-hidden">
+      <div className="flex gap-0 border border-border rounded-xl overflow-hidden">
         {(['province', 'postal', 'named'] as const).map((type, i) => (
           <button
             key={type}
@@ -242,10 +242,10 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
             onClick={() => { setZoneType(type); setParseError(''); setZoneValue(''); setZoneName(''); }}
             className={cn(
               "flex-1 py-2.5 px-2 text-xs font-semibold transition-all",
-              i > 0 && "border-l border-gray-200",
+              i > 0 && "border-l border-border",
               zoneType === type
                 ? "bg-origen-pradera text-white"
-                : "bg-white text-gray-500 hover:bg-origen-crema/40 hover:text-origen-bosque"
+                : "bg-surface-alt text-muted-foreground hover:bg-origen-crema/40 hover:text-origen-bosque"
             )}
           >
             {type === 'province' ? 'Provincia' : type === 'postal' ? 'Cód. Postal' : 'Zona con nombre'}
@@ -290,7 +290,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
         </div>
 
         {zoneType === 'named' && (
-          <p className="text-xs text-gray-500 flex items-start gap-1">
+          <p className="text-xs text-muted-foreground flex items-start gap-1">
             <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-origen-pradera" />
             <span>Asigna un nombre a la zona y los códigos postales que cubre. Ej: nombre <em>"Cuenca"</em>, CPs <em>16001, 160*</em></span>
           </p>
@@ -304,12 +304,12 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
         )}
 
         {(zoneType === 'postal' || zoneType === 'named') && !parseError && (
-          <p className="text-xs text-gray-500 flex items-start gap-1">
+          <p className="text-xs text-muted-foreground flex items-start gap-1">
             <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-origen-pradera" />
             <span>
-              <strong>Formatos CP:</strong> individual <code className="bg-gray-100 px-1 rounded">28001</code>,
-              comodín <code className="bg-gray-100 px-1 rounded">280*</code>,
-              rango <code className="bg-gray-100 px-1 rounded">28000-28050</code>
+              <strong>Formatos CP:</strong> individual <code className="bg-surface px-1 rounded">28001</code>,
+              comodín <code className="bg-surface px-1 rounded">280*</code>,
+              rango <code className="bg-surface px-1 rounded">28000-28050</code>
             </span>
           </p>
         )}
@@ -334,11 +334,11 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
           </h4>
           {/* Para muchas zonas (>8), usar chips horizontales */}
           {includedZones.length > 8 ? (
-            <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 bg-gray-50 rounded-lg">
+            <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 bg-surface rounded-lg">
               {includedZones.map((zone) => (
-                <span key={zone.id} className="inline-flex items-center gap-1 px-2 py-1 bg-white text-xs text-origen-bosque border border-gray-200 rounded-full">
+                <span key={zone.id} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt text-xs text-origen-bosque border border-border rounded-full">
                   {zone.label}
-                  <button type="button" onClick={() => onRemoveZone(zone.id)} className="text-gray-400 hover:text-red-600">
+                  <button type="button" onClick={() => onRemoveZone(zone.id)} className="text-text-subtle hover:text-red-600">
                     <X className="w-3 h-3" />
                   </button>
                 </span>
@@ -355,7 +355,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
                   <MapPin className="w-4 h-4 text-origen-pradera" />
                   <div>
                     <p className="text-sm font-medium text-origen-bosque">{zone.label}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {zone.type === 'province' && 'Provincia'}
                       {zone.type === 'postal' && 'Código Postal'}
                       {zone.type === 'custom' && 'Zona personalizada'}
@@ -371,7 +371,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
                         "p-1.5 rounded-lg text-xs font-medium transition-colors",
                         excludedZones.some(z => z.id === zone.id)
                           ? "bg-red-100 text-red-700 hover:bg-red-200"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          : "bg-surface text-muted-foreground hover:bg-border"
                       )}
                     >
                       {excludedZones.some(z => z.id === zone.id) ? 'Excluido' : 'Excluir'}
@@ -380,7 +380,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
                   <button
                     type="button"
                     onClick={() => onRemoveZone(zone.id)}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50"
+                    className="p-1.5 rounded-lg text-text-subtle hover:text-red-600 hover:bg-red-50"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -515,7 +515,7 @@ export function EnhancedStep4Capacity({
       {/* ====================================================================
           PROGRESS BAR
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
@@ -534,7 +534,7 @@ export function EnhancedStep4Capacity({
       {/* ====================================================================
           CARD 1: ESTADO DE RUTA
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -542,7 +542,7 @@ export function EnhancedStep4Capacity({
           </div>
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">Rutas de Origen</h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {data.isInOriginRoute 
                 ? '¡Tu negocio está en nuestra ruta de reparto!'
                 : 'Actualmente no estás en nuestras rutas de reparto'}
@@ -588,7 +588,7 @@ export function EnhancedStep4Capacity({
           CARD 2: OPCIONES DE ENVÍO (SOLO SI NO ESTÁ EN RUTA)
       ==================================================================== */}
       {!data.isInOriginRoute && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+        <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
           
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -597,7 +597,7 @@ export function EnhancedStep4Capacity({
               </div>
               <div>
                 <h2 className="text-xl font-bold text-origen-bosque">Tus métodos de envío</h2>
-                <p className="text-sm text-gray-600">Configura precios y tiempos</p>
+                <p className="text-sm text-muted-foreground">Configura precios y tiempos</p>
               </div>
             </div>
             <Button
@@ -619,7 +619,7 @@ export function EnhancedStep4Capacity({
               return (
                 <div
                   key={option.id}
-                  className="p-5 bg-white rounded-xl border-2 border-gray-200 hover:border-origen-pradera/50 transition-all"
+                  className="p-5 bg-surface-alt rounded-xl border-2 border-border hover:border-origen-pradera/50 transition-all"
                 >
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
@@ -641,7 +641,7 @@ export function EnhancedStep4Capacity({
                           />
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="text-xs text-gray-500 mb-1 block">Precio (€)</label>
+                              <label className="text-xs text-muted-foreground mb-1 block">Precio (€)</label>
                               <Input
                                 type="number"
                                 value={option.price}
@@ -652,7 +652,7 @@ export function EnhancedStep4Capacity({
                               />
                             </div>
                             <div>
-                              <label className="text-xs text-gray-500 mb-1 block">Tiempo estimado</label>
+                              <label className="text-xs text-muted-foreground mb-1 block">Tiempo estimado</label>
                               <Input
                                 value={option.estimatedDays}
                                 onChange={(e) => handleDeliveryOptionChange(option.id, 'estimatedDays', e.target.value)}
@@ -668,8 +668,8 @@ export function EnhancedStep4Capacity({
                             <h3 className="text-lg font-semibold text-origen-bosque">{option.name}</h3>
                             <span className="text-xl font-bold text-origen-pradera">{option.price.toFixed(2)}€</span>
                           </div>
-                          <p className="text-sm text-gray-600 mt-1">{option.description}</p>
-                          <p className="text-xs text-gray-500 mt-1">Entrega: {option.estimatedDays} días</p>
+                          <p className="text-sm text-muted-foreground mt-1">{option.description}</p>
+                          <p className="text-xs text-muted-foreground mt-1">Entrega: {option.estimatedDays} días</p>
                         </>
                       )}
                     </div>
@@ -678,7 +678,7 @@ export function EnhancedStep4Capacity({
                       <button
                         type="button"
                         onClick={() => setEditingOption(isEditing ? null : option.id)}
-                        className="p-2 text-gray-400 hover:text-origen-bosque transition-colors"
+                        className="p-2 text-text-subtle hover:text-origen-bosque transition-colors"
                       >
                         {isEditing ? '✓' : '✎'}
                       </button>
@@ -686,7 +686,7 @@ export function EnhancedStep4Capacity({
                         <button
                           type="button"
                           onClick={() => handleRemoveDeliveryOption(option.id)}
-                          className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                          className="p-2 text-text-subtle hover:text-red-600 transition-colors"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -712,7 +712,7 @@ export function EnhancedStep4Capacity({
       {/* ====================================================================
           CARD 3: ZONAS DE ENTREGA (SIEMPRE VISIBLE)
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -720,7 +720,7 @@ export function EnhancedStep4Capacity({
           </div>
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">Zonas de entrega</h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {data.isInOriginRoute
                 ? 'Tu ruta está definida por Origen, pero puedes excluir zonas'
                 : 'Selecciona dónde entregas (y opcionalmente dónde no)'}
@@ -758,7 +758,7 @@ export function EnhancedStep4Capacity({
       {/* ====================================================================
           CARD 4: PEDIDO MÍNIMO
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -766,13 +766,13 @@ export function EnhancedStep4Capacity({
           </div>
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">Pedido mínimo</h2>
-            <p className="text-sm text-gray-600">Importe mínimo por pedido</p>
+            <p className="text-sm text-muted-foreground">Importe mínimo por pedido</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="relative flex-1 max-w-xs">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">€</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">€</span>
             <Input
               type="number"
               value={data.minOrderAmount || 20}
@@ -783,10 +783,10 @@ export function EnhancedStep4Capacity({
               className="pl-8"
             />
           </div>
-          <span className="text-sm text-gray-500">euros</span>
+          <span className="text-sm text-muted-foreground">euros</span>
         </div>
         
-        <p className="text-xs text-gray-500 mt-3">
+        <p className="text-xs text-muted-foreground mt-3">
           Recomendado: 20-30€ para venta al público general
         </p>
       </div>
@@ -794,7 +794,7 @@ export function EnhancedStep4Capacity({
       {/* ====================================================================
           CARD 5: PACKAGING SOSTENIBLE (OPCIONAL)
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -803,9 +803,9 @@ export function EnhancedStep4Capacity({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold text-origen-bosque">Packaging sostenible</h2>
-              <span className="text-xs bg-origen-crema/80 text-gray-600 px-2 py-1 rounded-full">Recomendado</span>
+              <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-1 rounded-full">Recomendado</span>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               El 73% de los consumidores prefiere marcas con embalaje ecológico
             </p>
           </div>
@@ -820,7 +820,7 @@ export function EnhancedStep4Capacity({
               "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
               data.sustainablePackaging
                 ? "border-origen-pradera bg-origen-pradera/5"
-                : "border-gray-200 hover:border-origen-pradera bg-white"
+                : "border-border hover:border-origen-pradera bg-surface-alt"
             )}
           >
             <div className="flex items-center gap-3">
@@ -834,7 +834,7 @@ export function EnhancedStep4Capacity({
               </div>
               <div className="text-left">
                 <p className="font-medium text-origen-bosque">Uso packaging sostenible</p>
-                <p className="text-xs text-gray-500">Materiales reciclados, compostables o reutilizables</p>
+                <p className="text-xs text-muted-foreground">Materiales reciclados, compostables o reutilizables</p>
               </div>
             </div>
             {data.sustainablePackaging && (
@@ -846,7 +846,7 @@ export function EnhancedStep4Capacity({
             <div className="pl-4 animate-in slide-in-from-top-2 duration-300">
               <label className="text-sm font-medium text-origen-bosque block mb-2">
                 Describe tu packaging
-                <span className="text-xs text-gray-500 ml-2">(opcional)</span>
+                <span className="text-xs text-muted-foreground ml-2">(opcional)</span>
               </label>
               <Input
                 value={data.packagingDescription || ''}
@@ -854,7 +854,7 @@ export function EnhancedStep4Capacity({
                 placeholder="Ej: Cajas de cartón 100% reciclado, papel kraft, etiquetas compostables..."
                 inputSize="md"
               />
-              <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
                 <Info className="w-3.5 h-3.5" />
                 Esta información aparecerá destacada en tu perfil
               </p>
@@ -866,12 +866,12 @@ export function EnhancedStep4Capacity({
       {/* ====================================================================
           TRUST BADGES
       ==================================================================== */}
-      <div className="flex items-center gap-4 pt-2 text-xs text-gray-500 border-t border-gray-200">
+      <div className="flex items-center gap-4 pt-2 text-xs text-muted-foreground border-t border-border">
         <div className="flex items-center gap-1.5">
           <Lock className="w-3.5 h-3.5 text-origen-pradera" />
           <span>Configuración guardada</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300" />
+        <span className="w-1 h-1 rounded-full bg-border" />
         <div className="flex items-center gap-1.5">
           <Clock className="w-3.5 h-3.5 text-origen-pradera" />
           <span>Puedes modificarlo después</span>

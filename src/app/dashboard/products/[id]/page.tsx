@@ -94,7 +94,7 @@ const LoadingSkeleton = () => {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <RefreshCw className="w-12 h-12 text-origen-pradera animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Cargando producto...</p>
+            <p className="text-muted-foreground">Cargando producto...</p>
           </div>
         </div>
       </div>
@@ -112,7 +112,7 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) 
             <AlertCircle className="w-8 h-8 text-red-500" />
           </div>
           <h2 className="text-xl font-bold text-origen-bosque mb-2">Error al cargar</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-muted-foreground mb-6">{error}</p>
           <Button
             onClick={onRetry}
           >
@@ -323,12 +323,12 @@ export default function ProductoDetallePage() {
             <div className="p-4 bg-gradient-to-br from-origen-pradera/5 to-transparent rounded-xl border border-origen-pradera/10">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-5 h-5 text-origen-pradera" />
-                <span className="text-xs font-medium text-gray-500">Precio</span>
+                <span className="text-xs font-medium text-text-subtle">Precio</span>
               </div>
               <p className="text-2xl font-bold text-origen-bosque">{formatCurrency(product.basePrice)}</p>
               {hasDiscount && (
                 <div className="flex items-center gap-1 mt-2 text-xs">
-                  <span className="text-gray-400 line-through">{formatCurrency(product.comparePrice)}</span>
+                  <span className="text-text-disabled line-through">{formatCurrency(product.comparePrice)}</span>
                   <span className="text-green-600 font-medium">(-{discountPercentage}%)</span>
                 </div>
               )}
@@ -347,7 +347,7 @@ export default function ProductoDetallePage() {
                   stockColor === 'error' ? "text-red-500" :
                   stockColor === 'warning' ? "text-amber-500" : "text-origen-hoja"
                 )} />
-                <span className="text-xs font-medium text-gray-500">Stock</span>
+                <span className="text-xs font-medium text-text-subtle">Stock</span>
               </div>
               <p className="text-2xl font-bold text-origen-bosque">{stockLevel} uds</p>
               {stockLevel > 0 && stockLevel <= lowStockThreshold && (
@@ -362,20 +362,20 @@ export default function ProductoDetallePage() {
             <div className="p-4 bg-gradient-to-br from-amber-50/50 to-transparent rounded-xl border border-amber-100">
               <div className="flex items-center gap-2 mb-2">
                 <Star className="w-5 h-5 text-amber-500" />
-                <span className="text-xs font-medium text-gray-500">Valoración</span>
+                <span className="text-xs font-medium text-text-subtle">Valoración</span>
               </div>
               <div className="flex items-baseline gap-1">
                 <p className="text-2xl font-bold text-origen-bosque">{product.rating?.toFixed(1) || '0.0'}</p>
-                <span className="text-xs text-gray-400">/5</span>
+                <span className="text-xs text-text-disabled">/5</span>
               </div>
-              <p className="text-xs text-gray-500 mt-2">{product.reviewCount || 0} reseñas</p>
+              <p className="text-xs text-text-subtle mt-2">{product.reviewCount || 0} reseñas</p>
             </div>
 
             {/* Ventas */}
             <div className="p-4 bg-gradient-to-br from-blue-50/50 to-transparent rounded-xl border border-blue-100">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-blue-500" />
-                <span className="text-xs font-medium text-gray-500">Ventas</span>
+                <span className="text-xs font-medium text-text-subtle">Ventas</span>
               </div>
               <p className="text-2xl font-bold text-origen-bosque">{product.sales || 0}</p>
               <div className="flex items-center gap-1 mt-2 text-xs text-blue-600">
@@ -388,7 +388,7 @@ export default function ProductoDetallePage() {
             <div className="p-4 bg-gradient-to-br from-purple-50/50 to-transparent rounded-xl border border-purple-100">
               <div className="flex items-center gap-2 mb-2">
                 <Eye className="w-5 h-5 text-purple-500" />
-                <span className="text-xs font-medium text-gray-500">Vistas</span>
+                <span className="text-xs font-medium text-text-subtle">Vistas</span>
               </div>
               <p className="text-2xl font-bold text-origen-bosque">{product.views || 0}</p>
               {product.conversion && (
@@ -403,7 +403,7 @@ export default function ProductoDetallePage() {
             <div className="p-4 bg-gradient-to-br from-green-50/50 to-transparent rounded-xl border border-green-100">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-green-500" />
-                <span className="text-xs font-medium text-gray-500">Conversión</span>
+                <span className="text-xs font-medium text-text-subtle">Conversión</span>
               </div>
               <p className="text-2xl font-bold text-origen-bosque">{product.conversion?.toFixed(1) || '0.0'}%</p>
               <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
@@ -416,7 +416,7 @@ export default function ProductoDetallePage() {
             <div className="p-4 bg-gradient-to-br from-origen-menta/5 to-transparent rounded-xl border border-origen-menta/20">
               <div className="flex items-center gap-2 mb-2">
                 <Percent className="w-5 h-5 text-origen-menta" />
-                <span className="text-xs font-medium text-gray-500">Margen</span>
+                <span className="text-xs font-medium text-text-subtle">Margen</span>
               </div>
               <p className="text-2xl font-bold text-origen-bosque">
                 {product.comparePrice && product.comparePrice > product.basePrice
@@ -424,7 +424,7 @@ export default function ProductoDetallePage() {
                   : 0}%
               </p>
               {product.comparePrice && product.comparePrice > product.basePrice && (
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-text-subtle mt-2">
                   Ahorro: {formatCurrency(product.comparePrice - product.basePrice)}
                 </p>
               )}
@@ -485,8 +485,8 @@ export default function ProductoDetallePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-                      <span className="text-sm text-gray-600">Categoría</span>
+                    <div className="flex justify-between items-center border-b border-border-subtle pb-2">
+                      <span className="text-sm text-muted-foreground">Categoría</span>
                       <span className="text-sm font-medium text-origen-bosque">
                         {product.categoryName || product.categoryId}
                         {product.subcategoryId && ` / ${product.subcategoryId}`}
@@ -494,8 +494,8 @@ export default function ProductoDetallePage() {
                     </div>
                     
                     {product.productionInfo?.origin && (
-                      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-                        <span className="text-sm text-gray-600">Origen</span>
+                      <div className="flex justify-between items-center border-b border-border-subtle pb-2">
+                        <span className="text-sm text-muted-foreground">Origen</span>
                         <span className="text-sm font-medium text-origen-bosque">
                           {product.productionInfo.origin}
                         </span>
@@ -503,8 +503,8 @@ export default function ProductoDetallePage() {
                     )}
                     
                     {product.productionInfo?.farmName && (
-                      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-                        <span className="text-sm text-gray-600">Productor</span>
+                      <div className="flex justify-between items-center border-b border-border-subtle pb-2">
+                        <span className="text-sm text-muted-foreground">Productor</span>
                         <span className="text-sm font-medium text-origen-bosque">
                           {product.productionInfo.farmName}
                         </span>
@@ -512,14 +512,14 @@ export default function ProductoDetallePage() {
                     )}
                     
                     {(product.weight || product.dimensions) && (
-                      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-                        <span className="text-sm text-gray-600">Peso / dimensiones</span>
+                      <div className="flex justify-between items-center border-b border-border-subtle pb-2">
+                        <span className="text-sm text-muted-foreground">Peso / dimensiones</span>
                         <span className="text-sm font-medium text-origen-bosque text-right">
                           {product.weight && `${product.weight} ${product.weightUnit || 'kg'}`}
                           {product.dimensions && (
                             <>
                               <br />
-                              <span className="text-xs text-gray-400">
+                              <span className="text-xs text-text-disabled">
                                 {product.dimensions.length || 0}x{product.dimensions.width || 0}x{product.dimensions.height || 0} cm
                               </span>
                             </>
@@ -529,8 +529,8 @@ export default function ProductoDetallePage() {
                     )}
                     
                     {product.shippingClass && (
-                      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-                        <span className="text-sm text-gray-600">Clase de envío</span>
+                      <div className="flex justify-between items-center border-b border-border-subtle pb-2">
+                        <span className="text-sm text-muted-foreground">Clase de envío</span>
                         <Badge variant="leaf" size="sm" className="capitalize">
                           {product.shippingClass}
                         </Badge>
@@ -539,7 +539,7 @@ export default function ProductoDetallePage() {
                     
                     {product.productionInfo?.batchNumber && (
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Lote actual</span>
+                        <span className="text-sm text-muted-foreground">Lote actual</span>
                         <span className="text-sm font-mono font-medium text-origen-bosque">
                           {product.productionInfo.batchNumber}
                         </span>
@@ -569,9 +569,9 @@ export default function ProductoDetallePage() {
                               <Award className="w-4 h-4 text-origen-pradera" />
                             )}
                             <div>
-                              <span className="text-sm text-gray-700">{cert.name}</span>
+                              <span className="text-sm text-foreground">{cert.name}</span>
                               {cert.issuingBody && (
-                                <p className="text-xs text-gray-400">{cert.issuingBody}</p>
+                                <p className="text-xs text-text-disabled">{cert.issuingBody}</p>
                               )}
                             </div>
                           </div>
@@ -603,7 +603,7 @@ export default function ProductoDetallePage() {
                         .slice(0, 6)
                         .map(attr => (
                           <div key={attr.id} className="p-2 bg-origen-crema/30 rounded-lg">
-                            <p className="text-xs text-gray-500">{attr.name}</p>
+                            <p className="text-xs text-text-subtle">{attr.name}</p>
                             <p className="text-sm font-medium text-origen-bosque truncate" title={String(attr.value)}>
                               {attr.type === 'boolean' 
                                 ? (attr.value ? 'Sí' : 'No')
@@ -630,11 +630,11 @@ export default function ProductoDetallePage() {
                     </div>
                     <div className="flex-1">
                       <h2 className="text-base font-semibold text-origen-bosque mb-2">Descripción</h2>
-                      <p className="text-sm text-gray-700 leading-relaxed mb-3">
+                      <p className="text-sm text-foreground leading-relaxed mb-3">
                         {product.shortDescription}
                       </p>
                       {product.fullDescription && (
-                        <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                           {product.fullDescription}
                         </p>
                       )}
@@ -644,7 +644,7 @@ export default function ProductoDetallePage() {
 
                 {/* Tags */}
                 {product.tags && product.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-6 pb-6 border-b border-gray-200">
+                  <div className="flex flex-wrap gap-2 mb-6 pb-6 border-b border-border">
                     {product.tags.map(tag => (
                       <Badge key={tag} variant="leaf" icon={<Tag className="h-3 w-3" />}>
                         {tag}
@@ -719,7 +719,7 @@ export default function ProductoDetallePage() {
         }
       >
         <div className="space-y-2">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Se eliminará permanentemente el producto{' '}
             <span className="font-semibold text-origen-bosque">{product.name}</span> del catálogo,
             incluyendo todas sus variantes, imágenes y estadísticas asociadas.

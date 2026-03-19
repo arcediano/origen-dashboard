@@ -308,7 +308,7 @@ export function FileUpload({
           'relative border-2 border-dashed rounded-xl p-8 transition-all duration-200',
           isDragging
             ? 'border-origen-pradera bg-origen-pastel/50'
-            : 'border-gray-300 hover:border-origen-pradera hover:bg-origen-crema/30',
+            : 'border-border hover:border-origen-pradera hover:bg-origen-crema/30',
           disabled && 'opacity-50 cursor-not-allowed'
         )}
         onDragOver={handleDragOver}
@@ -339,12 +339,12 @@ export function FileUpload({
           </h3>
 
           {/* Texto de ayuda */}
-          <p className="text-xs text-gray-600 mb-4">
+          <p className="text-xs text-muted-foreground mb-4">
             {helperText}
           </p>
 
           {/* Información de límites */}
-          <p className="text-[10px] text-gray-500 mb-4">
+          <p className="text-[10px] text-muted-foreground mb-4">
             {acceptHint && <><span className="font-medium">{acceptHint}</span> · </>}
             Máx. {maxSize} MB
             {dimensionsHint && <> · {dimensionsHint}</>}
@@ -377,7 +377,7 @@ export function FileUpload({
       {/* Lista de archivos */}
       {value.length > 0 && (
         <div className="mt-4 space-y-2">
-          <p className="text-xs font-medium text-gray-700 flex items-center gap-2">
+          <p className="text-xs font-medium text-foreground flex items-center gap-2">
             <FileText className="w-4 h-4 text-origen-pradera" />
             Archivos cargados ({value.length}/{maxFiles})
           </p>
@@ -385,11 +385,11 @@ export function FileUpload({
           {value.map((file) => (
             <div
               key={file.id}
-              className="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-origen-pradera/30 transition-all"
+              className="flex items-start gap-3 p-3 bg-surface-alt rounded-lg border border-border hover:border-origen-pradera/30 transition-all"
             >
               {/* Preview o icono */}
               {file.preview && showPreview ? (
-                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-surface">
                   <img
                     src={file.preview}
                     alt={file.name}
@@ -411,7 +411,7 @@ export function FileUpload({
                 <p className="text-sm font-medium text-origen-oscuro truncate">
                   {file.name}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {formatFileSize(file.size)}
                 </p>
               </div>
@@ -423,7 +423,7 @@ export function FileUpload({
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDownloadFile(file)}
-                  className="text-gray-500 hover:text-origen-bosque h-8 w-8 p-0"
+                  className="text-muted-foreground hover:text-origen-bosque h-8 w-8 p-0"
                 >
                   <Download className="w-4 h-4" />
                 </Button>
@@ -432,7 +432,7 @@ export function FileUpload({
                   variant="ghost"
                   size="sm"
                   onClick={() => handleRemoveFile(file.id)}
-                  className="text-gray-500 hover:text-red-600 h-8 w-8 p-0"
+                  className="text-muted-foreground hover:text-red-600 h-8 w-8 p-0"
                 >
                   <X className="w-4 h-4" />
                 </Button>

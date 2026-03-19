@@ -56,8 +56,8 @@ export function DashboardHeader({
     <header className={cn(
       'sticky top-0 z-30 transition-all duration-300',
       isScrolled 
-        ? 'bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-md' 
-        : 'bg-white/50 backdrop-blur-sm border-b border-gray-100'
+        ? 'bg-surface-alt/90 backdrop-blur-md border-b border-border shadow-md' 
+        : 'bg-surface-alt/50 backdrop-blur-sm border-b border-border-subtle'
     )}>
       <div className="flex items-center justify-between px-6 lg:px-8 h-16">
         {/* Zona Izquierda: Menú móvil + Breadcrumb + Título */}

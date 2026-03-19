@@ -632,7 +632,7 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionPr
           /* === Tipografía === */
           "leading-relaxed",
           /* === Color === */
-          "text-gray-600",
+          "text-muted-foreground",
           /* === Tamaño === */
           sizeClasses[size],
           /* === Clases personalizadas === */
@@ -1019,13 +1019,13 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
                   >
                     {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}%
                   </span>
-                  <span className="text-xs text-gray-500">vs mes anterior</span>
+                  <span className="text-xs text-text-subtle">vs mes anterior</span>
                 </div>
               )}
 
               {/* Descripción opcional */}
               {description && (
-                <p className="text-xs sm:text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   {description}
                 </p>
               )}
@@ -1299,14 +1299,14 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
                       "sm:w-4",
                       i < Math.floor(rating)
                         ? "text-amber-400 fill-amber-400"
-                        : "text-gray-300"
+                        : "text-border"
                     )}
                   />
                 ))}
               </div>
               {/* Número de reviews */}
               {reviewCount !== undefined && (
-                <span className="text-xs text-gray-500">({reviewCount})</span>
+                <span className="text-xs text-text-subtle">({reviewCount})</span>
               )}
             </div>
           )}
@@ -1328,7 +1328,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
                 <span className={cn(
                   "text-xs",
                   "sm:text-sm",
-                  "text-gray-400",
+                  "text-text-disabled",
                   "line-through"
                 )}>
                   {typeof originalPrice === 'number' ? `${originalPrice.toFixed(2)}€` : originalPrice}

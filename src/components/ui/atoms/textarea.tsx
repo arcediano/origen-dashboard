@@ -188,7 +188,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             
             {tooltip && (
               <div className="group relative">
-                <Info className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 cursor-help" />
+                <Info className="h-3 w-3 sm:h-4 sm:w-4 text-text-disabled cursor-help" />
                 <div 
                   className={cn(
                     "absolute left-0 top-5 z-50 hidden group-hover:block",
@@ -207,7 +207,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         <div className="relative">
           {icon && (
             <div className={cn(
-              "absolute left-3 top-3 text-gray-400",
+              "absolute left-3 top-3 text-text-disabled",
               isFocused && "text-origen-pradera",
               error && "text-red-500",
               success && !error && "text-green-500"
@@ -229,9 +229,9 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             aria-busy={loading}
             className={cn(
               "flex w-full rounded-xl",
-              "text-origen-oscuro placeholder:text-gray-400",
+              "text-origen-oscuro placeholder:text-text-disabled",
               "transition-all duration-200",
-              "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50",
+              "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-surface",
               "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
               
               variantClasses[variant],
@@ -276,7 +276,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
               {helperText && !error && (
                 <p
                   id={helperId}
-                  className="text-xs text-gray-500"
+                  className="text-xs text-text-subtle"
                 >
                   {helperText}
                 </p>
@@ -296,7 +296,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
                 className={cn(
                   "text-xs tabular-nums",
                   isAtLimit ? "text-red-600" :
-                  isNearLimit ? "text-amber-600" : "text-gray-500"
+                  isNearLimit ? "text-amber-600" : "text-text-subtle"
                 )}
               >
                 {charCount}/{maxLength}

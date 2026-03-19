@@ -87,7 +87,7 @@ export function Table<T>({
     if (!sortable || !column.sortable) return null;
 
     if (sortColumn !== column.key) {
-      return <ChevronsUpDown className="w-4 h-4 ml-1 text-gray-400 flex-shrink-0" />;
+      return <ChevronsUpDown className="w-4 h-4 ml-1 text-muted-foreground flex-shrink-0" />;
     }
     return sortDirection === 'asc' 
       ? <ChevronUp className="w-4 h-4 ml-1 text-origen-pradera flex-shrink-0" />
@@ -121,7 +121,7 @@ export function Table<T>({
     <tr className="animate-pulse">
       {columns.map((_, idx) => (
         <td key={idx} className="px-2 sm:px-4 py-2 sm:py-3">
-          <div className="h-4 bg-gray-200 rounded w-3/4" />
+          <div className="h-4 bg-border rounded w-3/4" />
         </td>
       ))}
     </tr>
@@ -135,7 +135,7 @@ export function Table<T>({
   };
 
   return (
-    <div className={cn('bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100', className)}>
+    <div className={cn('bg-surface-alt rounded-xl shadow-lg overflow-hidden border border-border-subtle', className)}>
       {/* Contenedor con scroll horizontal en móvil */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] md:min-w-full">{/* Ancho mínimo para móvil */}
@@ -165,19 +165,19 @@ export function Table<T>({
           </thead>
 
           {/* Cuerpo */}
-          <tbody className="bg-white divide-y divide-gray-100">
+          <tbody className="bg-surface-alt divide-y divide-border-subtle">
             {loading ? (
               Array.from({ length: loadingRows }).map((_, idx) => (
                 <LoadingRow key={idx} />
               ))
             ) : sortedData.length === 0 ? (
               <tr>
-                <td colSpan={columns.length + (expandable ? 1 : 0)} className="px-4 py-12 text-center text-gray-500">
+                <td colSpan={columns.length + (expandable ? 1 : 0)} className="px-4 py-12 text-center text-muted-foreground">
                   <div className="flex flex-col items-center justify-center">
                     <div className="w-12 h-12 rounded-full bg-origen-crema flex items-center justify-center mb-3">
                       <span className="text-origen-pradera text-lg">📦</span>
                     </div>
-                    <p className="text-sm font-medium text-gray-700">{emptyMessage}</p>
+                    <p className="text-sm font-medium text-foreground">{emptyMessage}</p>
                   </div>
                 </td>
               </tr>
@@ -208,7 +208,7 @@ export function Table<T>({
                               'w-6 h-6 rounded-md flex items-center justify-center transition-all',
                               isExpanded 
                                 ? 'bg-origen-pradera text-white' 
-                                : 'text-gray-500 hover:text-origen-pradera hover:bg-origen-pradera/10'
+                                : 'text-muted-foreground hover:text-origen-pradera hover:bg-origen-pradera/10'
                             )}
                             aria-label={isExpanded ? 'Contraer' : 'Expandir'}
                           >

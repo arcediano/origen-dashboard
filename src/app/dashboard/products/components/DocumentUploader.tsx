@@ -101,8 +101,8 @@ export function DocumentUploader({
       {/* Label */}
       {label && (
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">{label}</span>
-          <span className="text-xs text-gray-500">
+          <span className="text-sm font-medium text-foreground">{label}</span>
+          <span className="text-xs text-muted-foreground">
             {value.length} de {maxFiles}
           </span>
         </div>
@@ -115,17 +115,17 @@ export function DocumentUploader({
           'border-2 border-dashed rounded-xl p-4 transition-colors cursor-pointer',
           isDragActive
             ? 'border-origen-pradera bg-origen-pradera/5'
-            : 'border-gray-200 hover:border-origen-pradera/50 hover:bg-gray-50',
+            : 'border-border hover:border-origen-pradera/50 hover:bg-surface',
           value.length >= maxFiles && 'opacity-50 cursor-not-allowed'
         )}
       >
         <input {...getInputProps()} />
         <div className="flex flex-col items-center text-center">
-          <Upload className="w-6 h-6 text-gray-400 mb-1" />
-          <p className="text-xs font-medium text-gray-700">
+          <Upload className="w-6 h-6 text-text-subtle mb-1" />
+          <p className="text-xs font-medium text-foreground">
             {isDragActive ? 'Suelta los archivos aquí' : 'Arrastra o haz clic para subir'}
           </p>
-          <p className="text-[10px] text-gray-500 mt-0.5">
+          <p className="text-[10px] text-muted-foreground mt-0.5">
             {acceptedFormats.join(', ').toUpperCase()} hasta {maxSize}MB
           </p>
         </div>
@@ -137,13 +137,13 @@ export function DocumentUploader({
           {value.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-origen-pradera/30 transition-all group"
+              className="flex items-center justify-between p-3 bg-surface-alt rounded-lg border border-border hover:border-origen-pradera/30 transition-all group"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <FileText className="w-5 h-5 text-origen-pradera shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-700 truncate">{doc.name}</p>
-                  <p className="text-[10px] text-gray-400">{formatFileSize(doc.size)}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>
+                  <p className="text-[10px] text-text-subtle">{formatFileSize(doc.size)}</p>
                 </div>
               </div>
 
@@ -151,7 +151,7 @@ export function DocumentUploader({
                 {doc.uploading && (
                   <div className="flex items-center gap-1">
                     <Loader2 className="w-3 h-3 text-origen-pradera animate-spin" />
-                    <span className="text-[10px] text-gray-500">{doc.progress}%</span>
+                    <span className="text-[10px] text-muted-foreground">{doc.progress}%</span>
                   </div>
                 )}
                 {doc.error && (
@@ -165,7 +165,7 @@ export function DocumentUploader({
                 )}
                 <button
                   onClick={() => handleRemove(doc.id)}
-                  className="p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  className="p-1 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>

@@ -122,7 +122,7 @@ export function Tooltip({
       <div
         className={cn(
           "inline-flex items-center justify-center rounded-full transition-all duration-200 cursor-help",
-          "text-gray-400 hover:text-origen-pradera"
+          "text-text-disabled hover:text-origen-pradera"
         )}
       >
         <HelpCircle className={sizeClasses[size]} />

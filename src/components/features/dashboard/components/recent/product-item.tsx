@@ -46,7 +46,7 @@ export function ProductItem({
       )}></div>
       
       <div className={cn(
-        "relative bg-white rounded-2xl p-6 border border-gray-200",
+        "relative bg-surface-alt rounded-2xl p-6 border border-border",
         "shadow-origen group-hover:shadow-origen-lg group-hover:border-origen-pradera",
         "transition-all duration-300"
       )}>
@@ -59,7 +59,7 @@ export function ProductItem({
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-lg text-origen-bosque truncate max-w-[200px]">{name}</h3>
-              <span className="text-sm text-gray-500">SKU: {sku}</span>
+              <span className="text-sm text-muted-foreground">SKU: {sku}</span>
             </div>
             
             <div className="flex items-center justify-between">
@@ -73,7 +73,7 @@ export function ProductItem({
                     "w-2 h-2 rounded-full",
                     stockConfig[stockStatus].color
                   )} />
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-muted-foreground">
                     {stock} uds
                   </span>
                 </div>
@@ -81,7 +81,7 @@ export function ProductItem({
               
               <div className="flex items-center gap-3">
                 {sales !== undefined && (
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-muted-foreground">
                     {sales} vendidos
                   </span>
                 )}

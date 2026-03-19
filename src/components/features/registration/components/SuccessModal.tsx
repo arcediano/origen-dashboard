@@ -71,14 +71,14 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             className={cn(
               'relative w-full sm:max-w-lg',
-              'bg-white sm:rounded-2xl rounded-t-2xl',
-              'shadow-2xl border border-gray-100',
+              'bg-surface-alt sm:rounded-2xl rounded-t-2xl',
+              'shadow-2xl border border-border-subtle',
               'overflow-hidden max-h-[95dvh] overflow-y-auto'
             )}
           >
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-origen-bosque via-origen-pino to-origen-hoja" />
             <div className="sm:hidden flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-gray-300" />
+              <div className="w-10 h-1 rounded-full bg-border" />
             </div>
 
             <div className="p-5 sm:p-8">
@@ -93,7 +93,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                 <h2 className="text-lg sm:text-2xl font-bold text-origen-bosque mb-1">
                   ¡Gracias, {contactName}!
                 </h2>
-                <p className="text-xs sm:text-base text-gray-500 leading-relaxed">
+                <p className="text-xs sm:text-base text-muted-foreground leading-relaxed">
                   Hemos recibido tu solicitud. Nuestro equipo la revisará pronto.
                 </p>
               </div>
@@ -104,7 +104,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-origen-bosque mb-0.5">Respuesta en menos de 24 horas</p>
-                  <p className="text-xs text-gray-500 leading-relaxed">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     Te escribiremos a <span className="font-semibold text-origen-bosque">{email}</span>.
                   </p>
                 </div>
@@ -119,7 +119,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                   <button
                     onClick={handleCopyCode}
                     aria-label="Copiar código"
-                    className="flex-shrink-0 w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 active:scale-95 transition-all border border-white/15"
+                    className="flex-shrink-0 w-9 h-9 rounded-lg bg-surface-alt/10 flex items-center justify-center hover:bg-surface-alt/20 active:scale-95 transition-all border border-white/15"
                   >
                     {copied
                       ? <CheckCircle className="w-4 h-4 text-origen-hoja" />
@@ -131,13 +131,13 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-xl p-3 mb-5">
+              <div className="flex items-center gap-3 bg-surface border border-border-subtle rounded-xl p-3 mb-5">
                 <div className="w-9 h-9 rounded-lg bg-origen-hoja flex items-center justify-center flex-shrink-0 shadow">
                   <span className="text-sm font-bold text-white">{initial}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-origen-bosque truncate">{businessName}</p>
-                  <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5 truncate">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
                     <MapPin className="w-3 h-3 flex-shrink-0" />
                     {municipio}, {provinceName}
                   </p>
@@ -146,7 +146,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
 
               <button
                 onClick={onClose}
-                className="w-full py-3 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:text-origen-bosque hover:border-origen-hoja/40 hover:bg-origen-crema/30 active:scale-[.98] transition-all"
+                className="w-full py-3 rounded-xl border border-border text-sm font-semibold text-muted-foreground hover:text-origen-bosque hover:border-origen-hoja/40 hover:bg-origen-crema/30 active:scale-[.98] transition-all"
               >
                 Cerrar
               </button>

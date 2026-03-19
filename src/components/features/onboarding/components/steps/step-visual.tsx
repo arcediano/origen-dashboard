@@ -113,7 +113,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
       {/* ====================================================================
           PROGRESS BAR
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
@@ -127,7 +127,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
+        <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
           <Info className="w-3.5 h-3.5 text-origen-pradera" />
           Las imágenes generan confianza. Un perfil completo multiplica las visitas.
         </p>
@@ -136,7 +136,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
       {/* ====================================================================
           CARD 1: LOGO DEL NEGOCIO (OBLIGATORIO)
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -145,7 +145,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             </div>
             <div>
               <h2 className="text-xl font-bold text-origen-bosque">Logo del negocio</h2>
-              <p className="text-sm text-gray-600">PNG, JPG, WebP o GIF • Fondo transparente ideal</p>
+              <p className="text-sm text-muted-foreground">PNG, JPG, WebP o GIF • Fondo transparente ideal</p>
             </div>
           </div>
           {hasLogo && (
@@ -158,7 +158,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
 
         {data.logo ? (
           <div className="flex items-center gap-4 p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
-            <div className="w-16 h-16 rounded-lg bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-16 h-16 rounded-lg bg-surface-alt border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={data.logo.preview ?? URL.createObjectURL(data.logo.file)}
@@ -168,14 +168,14 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-origen-bosque truncate">{data.logo.name}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{(data.logo.size / 1024).toFixed(1)} KB</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{(data.logo.size / 1024).toFixed(1)} KB</p>
             </div>
             <Button
               type="button"
               variant="ghost"
               size="icon-sm"
               onClick={handleDeleteLogo}
-              className="text-gray-400 hover:text-gray-700"
+              className="text-text-subtle hover:text-foreground"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -201,7 +201,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
       {/* ====================================================================
           CARD 2: IMAGEN DE CABECERA (OPCIONAL)
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -211,9 +211,9 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold text-origen-bosque">Imagen de cabecera</h2>
-                <span className="text-xs bg-origen-crema/80 text-gray-600 px-2 py-1 rounded-full">Opcional</span>
+                <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-1 rounded-full">Opcional</span>
               </div>
-              <p className="text-sm text-gray-600">Recomendado: 1200x400px • JPG o PNG</p>
+              <p className="text-sm text-muted-foreground">Recomendado: 1200x400px • JPG o PNG</p>
             </div>
           </div>
           {hasBanner && (
@@ -226,7 +226,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
 
         {data.banner ? (
           <div className="space-y-3">
-            <div className="w-full h-28 rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+            <div className="w-full h-28 rounded-xl overflow-hidden border border-border bg-surface">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={data.banner.preview ?? URL.createObjectURL(data.banner.file)}
@@ -237,14 +237,14 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             <div className="flex items-center gap-3 px-1">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-origen-bosque truncate">{data.banner.name}</p>
-                <p className="text-xs text-gray-500">{(data.banner.size / 1024).toFixed(1)} KB</p>
+                <p className="text-xs text-muted-foreground">{(data.banner.size / 1024).toFixed(1)} KB</p>
               </div>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon-sm"
                 onClick={handleDeleteBanner}
-                className="text-gray-400 hover:text-gray-700"
+                className="text-text-subtle hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -271,7 +271,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
       {/* ====================================================================
           CARD 3: VIDEO DE PRESENTACIÓN (OPCIONAL)
       ==================================================================== */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
@@ -280,9 +280,9 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold text-origen-bosque">Video de presentación</h2>
-              <span className="text-xs bg-origen-crema/80 text-gray-600 px-2 py-1 rounded-full">Recomendado</span>
+              <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-1 rounded-full">Recomendado</span>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Los perfiles con video reciben +80% más visitas. Cuéntanos tu historia en 1 minuto.
             </p>
           </div>
@@ -300,7 +300,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
                   ? "border-green-400 focus:border-green-500 focus:ring-green-200"
                   : data.introVideo && !isValidVideoUrl(data.introVideo)
                   ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                  : "border-gray-200 focus:border-origen-pradera focus:ring-origen-pradera/20"
+                  : "border-border focus:border-origen-pradera focus:ring-origen-pradera/20"
               )}
             />
             {data.introVideo && isValidVideoUrl(data.introVideo) && (
@@ -336,7 +336,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
 
           <div className="flex items-start gap-2 p-3 bg-origen-crema/30 rounded-lg">
             <Sparkles className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-muted-foreground">
               <span className="font-medium">Consejo:</span> Un video auténtico, sin producción profesional,
               genera más confianza que uno muy editado. Muestra tu taller, tus manos trabajando,
               tu huerta... ¡Sé tú mismo!
@@ -348,11 +348,11 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
       {/* ====================================================================
           TRUST BADGES
       ==================================================================== */}
-      <div className="flex items-center gap-4 pt-2 text-xs text-gray-500 border-t border-gray-200">
+      <div className="flex items-center gap-4 pt-2 text-xs text-muted-foreground border-t border-border">
         <div className="flex items-center gap-1.5">
           <span>✅ {hasLogo ? 'Logo subido' : 'Logo pendiente'}</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300" />
+        <span className="w-1 h-1 rounded-full bg-border" />
         <div className="flex items-center gap-1.5">
           <span>🖼️ {hasBanner ? 'Cabecera subida' : 'Cabecera opcional'}</span>
         </div>

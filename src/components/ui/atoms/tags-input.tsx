@@ -94,7 +94,7 @@ export function TagsInput({
           
           {tooltip && (
             <div className="group relative">
-              <Info className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-400 cursor-help" />
+              <Info className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-text-disabled cursor-help" />
               <div 
                 className={cn(
                   "absolute left-0 top-4 sm:top-5 z-50 hidden group-hover:block",
@@ -149,7 +149,7 @@ export function TagsInput({
           className={cn(
             "flex-1 min-w-[120px] sm:min-w-[150px]",
             "bg-transparent border-0 outline-none",
-            "text-xs sm:text-sm placeholder:text-gray-400",
+            "text-xs sm:text-sm placeholder:text-text-disabled",
             "disabled:cursor-not-allowed disabled:opacity-50",
             "focus:ring-0"
           )}
@@ -161,7 +161,7 @@ export function TagsInput({
       {/* Sugerencias */}
       {showSuggestions && filteredSuggestions.length > 0 && (
         <div className="relative">
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-32 sm:max-h-40 overflow-auto">
+          <div className="absolute z-10 w-full mt-1 bg-white border border-border rounded-xl shadow-lg max-h-32 sm:max-h-40 overflow-auto">
             {filteredSuggestions.map((suggestion) => (
               <button
                 key={suggestion}
@@ -184,7 +184,7 @@ export function TagsInput({
             </p>
           )}
           {helperText && !error && (
-            <p className="text-[10px] sm:text-xs text-gray-500">
+            <p className="text-[10px] sm:text-xs text-text-subtle">
               {helperText}
             </p>
           )}
@@ -192,7 +192,7 @@ export function TagsInput({
         
         <span className={cn(
           "text-[10px] sm:text-xs tabular-nums",
-          value.length >= maxTags ? "text-amber-600" : "text-gray-500"
+          value.length >= maxTags ? "text-amber-600" : "text-text-subtle"
         )}>
           {value.length}/{maxTags}
         </span>

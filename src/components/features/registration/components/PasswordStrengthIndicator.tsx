@@ -39,7 +39,7 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthProps> = ({ pas
       className="mt-2 space-y-1.5"
     >
       <div className="flex items-center justify-between">
-        <span className="text-[10px] md:text-xs text-gray-500">Fortaleza:</span>
+        <span className="text-[10px] md:text-xs text-muted-foreground">Fortaleza:</span>
         <span className={cn(
           "text-[10px] md:text-xs font-semibold",
           strength.level <= 2 ? "text-red-500" :
@@ -55,7 +55,7 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthProps> = ({ pas
             key={i}
             className={cn(
               "h-1 flex-1 rounded-full transition-all duration-300",
-              i <= strength.level ? strength.color : "bg-gray-200"
+              i <= strength.level ? strength.color : "bg-border"
             )}
           />
         ))}

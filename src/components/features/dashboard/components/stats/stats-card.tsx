@@ -40,7 +40,7 @@ export function StatsCard({
       )}></div>
       
       <div className={cn(
-        "relative bg-white rounded-2xl p-6 border border-gray-200",
+        "relative bg-surface-alt rounded-2xl p-6 border border-border",
         "shadow-origen group-hover:shadow-origen-lg group-hover:border-origen-pradera",
         "transition-all duration-300",
         "h-full flex flex-col", // Altura consistente
@@ -56,14 +56,14 @@ export function StatsCard({
           </div>
           
           <div className="flex-1 min-w-0 flex flex-col">
-            <p className="text-sm font-medium text-gray-500 mb-1">{label}</p>
+            <p className="text-sm font-medium text-muted-foreground mb-1">{label}</p>
             
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-bold text-origen-bosque">
                 {value}
               </span>
               {sublabel && (
-                <span className="text-sm text-gray-500">{sublabel}</span>
+                <span className="text-sm text-muted-foreground">{sublabel}</span>
               )}
             </div>
             
@@ -84,7 +84,7 @@ export function StatsCard({
                     )}
                     <span>{trend.value}%</span>
                   </div>
-                  <span className="text-xs text-gray-400">vs ayer</span>
+                  <span className="text-xs text-text-subtle">vs ayer</span>
                 </div>
               ) : (
                 // Placeholder invisible para mantener altura

@@ -41,10 +41,10 @@ export function Pagination({
 
       {/* Información de página */}
       {showPageInfo && (
-        <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white rounded-lg border border-gray-200 text-sm sm:text-base">
+        <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-surface-alt rounded-lg border border-border text-sm sm:text-base">
           <span className="font-medium text-origen-bosque">{currentPage}</span>
-          <span className="text-gray-400 mx-1">/</span>
-          <span className="text-gray-500">{totalPages}</span>
+          <span className="text-muted-foreground mx-1">/</span>
+          <span className="text-muted-foreground">{totalPages}</span>
         </div>
       )}
 

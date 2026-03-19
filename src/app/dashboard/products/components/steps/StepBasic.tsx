@@ -116,7 +116,7 @@ export function StepBasic({
             </div>
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-origen-bosque truncate">Información básica</h2>
-              <p className="text-sm text-gray-500 truncate">Los datos esenciales de tu producto</p>
+              <p className="text-sm text-muted-foreground truncate">Los datos esenciales de tu producto</p>
             </div>
           </div>
           
@@ -145,7 +145,7 @@ export function StepBasic({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Type className="h-5 w-5 text-origen-pradera" />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-foreground">
                 Nombre del producto
                 <span className="text-red-500 ml-1">*</span>
               </span>
@@ -170,7 +170,7 @@ export function StepBasic({
                 <span className={cn(
                   titleLength > 100 ? "text-red-500" : 
                   titleLength >= 80 ? "text-green-600" : 
-                  titleLength >= 50 ? "text-amber-600" : "text-gray-400"
+                  titleLength >= 50 ? "text-amber-600" : "text-text-subtle"
                 )}>
                   {titleLength}/100
                 </span>
@@ -187,7 +187,7 @@ export function StepBasic({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <FolderTree className="h-5 w-5 text-origen-pradera" />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-foreground">
                   Categoría
                   <span className="text-red-500 ml-1">*</span>
                 </span>
@@ -227,7 +227,7 @@ export function StepBasic({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <FolderTree className="h-5 w-5 text-origen-pradera" />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-foreground">
                   Subcategoría
                 </span>
                 <Tooltip 
@@ -257,7 +257,7 @@ export function StepBasic({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <AlignLeft className="h-5 w-5 text-origen-pradera" />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-foreground">
                 Descripción corta
                 <span className="text-red-500 ml-1">*</span>
               </span>
@@ -282,7 +282,7 @@ export function StepBasic({
                 <span className={cn(
                   shortDescLength > 160 ? "text-red-500" : 
                   shortDescLength >= 140 ? "text-amber-600" : 
-                  shortDescLength >= 120 ? "text-green-600" : "text-gray-400"
+                  shortDescLength >= 120 ? "text-green-600" : "text-text-subtle"
                 )}>
                   {shortDescLength}/160
                 </span>
@@ -297,7 +297,7 @@ export function StepBasic({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-origen-pradera" />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-foreground">
                 Descripción detallada
               </span>
               <Tooltip 
@@ -314,7 +314,7 @@ export function StepBasic({
                 placeholder="Describe tu producto con detalle: características, proceso de elaboración, maridajes, historia del productor..."
               />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-2">
-                <p className="text-sm text-gray-400">{fullDescLength} caracteres</p>
+                <p className="text-sm text-text-subtle">{fullDescLength} caracteres</p>
                 {fullDescLength < 300 && (
                   <Badge variant="warning" size="sm" className="flex items-center gap-1">
                     <AlertTriangle className="w-3 h-3" />
@@ -329,7 +329,7 @@ export function StepBasic({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Tag className="h-5 w-5 text-origen-pradera" />
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-foreground">
                 Etiquetas
               </span>
               <Tooltip 

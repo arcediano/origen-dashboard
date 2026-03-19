@@ -78,8 +78,8 @@ const variantStyles = {
     list: "bg-origen-crema/50 p-1 rounded-xl border border-origen-pradera/20 flex-wrap items-center",
     trigger: {
       base: "rounded-lg font-medium transition-all duration-200 whitespace-nowrap",
-      active: "bg-white text-origen-bosque shadow-sm border border-origen-pradera/30",
-      inactive: "text-gray-600 hover:text-origen-bosque hover:bg-white/50",
+      active: "bg-surface-alt text-origen-bosque shadow-sm border border-origen-pradera/30",
+      inactive: "text-muted-foreground hover:text-origen-bosque hover:bg-surface-alt/50",
       disabled: "opacity-50 cursor-not-allowed",
     },
   },
@@ -88,16 +88,16 @@ const variantStyles = {
     trigger: {
       base: "rounded-full font-medium transition-all duration-200 border whitespace-nowrap",
       active: "bg-origen-pradera text-white border-origen-pradera shadow-sm",
-      inactive: "bg-white border-gray-200 text-gray-600 hover:border-origen-pradera hover:text-origen-bosque",
+      inactive: "bg-surface-alt border-border text-muted-foreground hover:border-origen-pradera hover:text-origen-bosque",
       disabled: "opacity-50 cursor-not-allowed",
     },
   },
   underline: {
-    list: "border-b border-gray-200 flex-wrap",
+    list: "border-b border-border flex-wrap",
     trigger: {
       base: "font-medium transition-all duration-200 relative pb-2 whitespace-nowrap",
       active: "text-origen-bosque font-semibold",
-      inactive: "text-gray-500 hover:text-origen-bosque",
+      inactive: "text-muted-foreground hover:text-origen-bosque",
       disabled: "opacity-50 cursor-not-allowed",
     },
   },
@@ -106,16 +106,16 @@ const variantStyles = {
     trigger: {
       base: "font-medium transition-all duration-200 rounded-lg px-3 py-2 whitespace-nowrap",
       active: "text-origen-pradera bg-origen-pradera/10",
-      inactive: "text-gray-500 hover:text-origen-bosque hover:bg-gray-100",
+      inactive: "text-muted-foreground hover:text-origen-bosque hover:bg-surface",
       disabled: "opacity-50 cursor-not-allowed",
     },
   },
   card: {
-    list: "bg-white rounded-xl shadow-sm p-1 border border-gray-200 flex-wrap",
+    list: "bg-surface-alt rounded-xl shadow-sm p-1 border border-border flex-wrap",
     trigger: {
       base: "rounded-lg font-medium transition-all duration-200 whitespace-nowrap",
       active: "bg-origen-pradera/10 text-origen-bosque border border-origen-pradera/30",
-      inactive: "text-gray-500 hover:text-origen-bosque hover:bg-gray-50",
+      inactive: "text-muted-foreground hover:text-origen-bosque hover:bg-surface",
       disabled: "opacity-50 cursor-not-allowed",
     },
   },
@@ -123,8 +123,8 @@ const variantStyles = {
     list: "bg-origen-crema/70 p-1 rounded-xl border border-origen-pradera/20 flex-wrap",
     trigger: {
       base: "rounded-lg font-medium transition-all duration-200 whitespace-nowrap",
-      active: "bg-white text-origen-bosque shadow-sm border border-origen-pradera/30",
-      inactive: "text-gray-500 hover:text-origen-bosque",
+      active: "bg-surface-alt text-origen-bosque shadow-sm border border-origen-pradera/30",
+      inactive: "text-muted-foreground hover:text-origen-bosque",
       disabled: "opacity-50 cursor-not-allowed",
     },
   },
@@ -390,7 +390,7 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
             <span className={cn(
               "shrink-0",
               sizeStyles[size].icon,
-              isActive ? "text-current" : "text-gray-400"
+              isActive ? "text-current" : "text-text-disabled"
             )}>
               {icon}
             </span>

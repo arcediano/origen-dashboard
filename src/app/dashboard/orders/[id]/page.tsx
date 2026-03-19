@@ -176,11 +176,11 @@ export default function OrderDetailPage() {
                     <div key={item.id} className="flex items-center justify-between p-3 bg-origen-crema/30 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center">
-                          <Package className="w-6 h-6 text-gray-400" />
+                          <Package className="w-6 h-6 text-text-disabled" />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-origen-bosque">{item.productName}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-text-subtle">
                             {item.quantity} x {item.unitPrice.toFixed(2)}€
                             {item.discount && <span className="text-green-600 ml-2">-{item.discount}%</span>}
                           </p>
@@ -194,20 +194,20 @@ export default function OrderDetailPage() {
                 {/* Resumen de precios */}
                 <div className="mt-4 p-4 bg-origen-crema/30 rounded-lg">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-600">Subtotal</span>
+                    <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-medium">{order.subtotal.toFixed(2)}€</span>
                   </div>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-600">Gastos de envío</span>
+                    <span className="text-muted-foreground">Gastos de envío</span>
                     <span className="font-medium">{order.shipping.cost.toFixed(2)}€</span>
                   </div>
                   {order.tax && (
                     <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-600">IVA</span>
+                      <span className="text-muted-foreground">IVA</span>
                       <span className="font-medium">{order.tax.toFixed(2)}€</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-base font-bold pt-2 mt-2 border-t border-gray-200">
+                  <div className="flex justify-between text-base font-bold pt-2 mt-2 border-t border-border">
                     <span className="text-origen-bosque">Total</span>
                     <span className="text-origen-pradera">{order.total.toFixed(2)}€</span>
                   </div>
@@ -230,15 +230,15 @@ export default function OrderDetailPage() {
                       <div className="relative">
                         <div className={cn(
                           'w-2.5 h-2.5 rounded-full mt-1.5',
-                          index === 0 ? 'bg-origen-pradera' : 'bg-gray-300'
+                          index === 0 ? 'bg-origen-pradera' : 'bg-border'
                         )} />
                         {index < order.timeline.length - 1 && (
-                          <div className="absolute top-4 left-1 w-0.5 h-10 bg-gray-200 -translate-x-[3px]" />
+                          <div className="absolute top-4 left-1 w-0.5 h-10 bg-border -translate-x-[3px]" />
                         )}
                       </div>
                       <div className="flex-1 pb-3">
                         <p className="text-sm font-medium text-origen-bosque">{event.description}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-text-subtle">
                           {format(event.createdAt, 'dd MMM yyyy HH:mm', { locale: es })}
                         </p>
                       </div>
@@ -262,9 +262,9 @@ export default function OrderDetailPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm font-medium text-origen-bosque">{order.customerName}</p>
-                <p className="text-xs text-gray-600 mt-1">{order.customerEmail}</p>
+                <p className="text-xs text-muted-foreground mt-1">{order.customerEmail}</p>
                 {order.customerPhone && (
-                  <p className="text-xs text-gray-600 mt-1">Tel: {order.customerPhone}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Tel: {order.customerPhone}</p>
                 )}
               </CardContent>
             </Card>
@@ -287,7 +287,7 @@ export default function OrderDetailPage() {
                 {/* Acciones para cambiar estado (solo si no está entregado/cancelado) */}
                 {!['delivered', 'cancelled', 'refunded'].includes(order.status) && (
                   <div className="space-y-2">
-                    <p className="text-xs font-medium text-gray-500 mb-2">Actualizar estado:</p>
+                    <p className="text-xs font-medium text-text-subtle mb-2">Actualizar estado:</p>
                     <div className="flex flex-wrap gap-2">
                       {order.status === 'pending' && (
                         <Button size="sm" onClick={() => handleUpdateStatus('processing')} disabled={updating}>
@@ -321,18 +321,18 @@ export default function OrderDetailPage() {
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Método</span>
+                    <span className="text-xs text-text-subtle">Método</span>
                     <span className="text-xs font-medium capitalize">{order.payment.method}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-xs text-gray-500">Estado</span>
+                    <span className="text-xs text-text-subtle">Estado</span>
                     <Badge variant={order.payment.status === 'paid' ? 'success' : 'warning'} size="xs">
                       {order.payment.status === 'paid' ? 'Pagado' : 'Pendiente'}
                     </Badge>
                   </div>
                   {order.payment.paidAt && (
                     <div className="flex justify-between">
-                      <span className="text-xs text-gray-500">Fecha de pago</span>
+                      <span className="text-xs text-text-subtle">Fecha de pago</span>
                       <span className="text-xs">
                         {format(order.payment.paidAt, 'dd MMM yyyy', { locale: es })}
                       </span>
@@ -353,12 +353,12 @@ export default function OrderDetailPage() {
               <CardContent>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-gray-500">Método</p>
+                    <p className="text-xs text-text-subtle">Método</p>
                     <p className="text-sm font-medium">{order.shipping.method}</p>
                   </div>
                   
                   <div>
-                    <p className="text-xs text-gray-500">Dirección</p>
+                    <p className="text-xs text-text-subtle">Dirección</p>
                     <p className="text-xs">{order.shipping.address.fullName}</p>
                     <p className="text-xs">{order.shipping.address.addressLine1}</p>
                     {order.shipping.address.addressLine2 && (
@@ -372,7 +372,7 @@ export default function OrderDetailPage() {
 
                   {order.shipping.trackingNumber && (
                     <div>
-                      <p className="text-xs text-gray-500">Seguimiento</p>
+                      <p className="text-xs text-text-subtle">Seguimiento</p>
                       <p className="text-xs">{order.shipping.trackingNumber}</p>
                       {order.shipping.trackingUrl && (
                         <a 

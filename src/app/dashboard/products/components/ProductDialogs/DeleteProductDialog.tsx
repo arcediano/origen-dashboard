@@ -99,7 +99,7 @@ export function DeleteProductDialog({
       }
     >
       <div className="space-y-4">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Se eliminará permanentemente el producto{' '}
           <span className="font-semibold text-origen-bosque">{product.name}</span> del catálogo,
           incluyendo todas sus variantes, imágenes y estadísticas asociadas.

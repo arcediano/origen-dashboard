@@ -122,7 +122,7 @@ export function AdjustStockDialog({
         {/* Información del producto */}
         <div className="p-4 bg-origen-crema/30 rounded-lg border border-origen-pradera/20">
           <p className="text-sm font-medium text-origen-bosque">{product.name}</p>
-          <p className="text-xs text-gray-500 mt-1">SKU: {product.sku}</p>
+          <p className="text-xs text-muted-foreground mt-1">SKU: {product.sku}</p>
         </div>
 
         {/* Selector de tipo de ajuste */}
@@ -133,7 +133,7 @@ export function AdjustStockDialog({
               'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border-2',
               adjustmentType === 'set'
                 ? 'bg-origen-pradera text-white border-origen-pradera'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-origen-pradera'
+                : 'bg-surface-alt text-foreground border-border hover:border-origen-pradera'
             )}
           >
             Fijar
@@ -144,7 +144,7 @@ export function AdjustStockDialog({
               'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border-2',
               adjustmentType === 'add'
                 ? 'bg-green-600 text-white border-green-600'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-green-600'
+                : 'bg-surface-alt text-foreground border-border hover:border-green-600'
             )}
           >
             <Plus className="w-4 h-4 inline mr-1" />
@@ -156,7 +156,7 @@ export function AdjustStockDialog({
               'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border-2',
               adjustmentType === 'remove'
                 ? 'bg-amber-600 text-white border-amber-600'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-amber-600'
+                : 'bg-surface-alt text-foreground border-border hover:border-amber-600'
             )}
           >
             <Minus className="w-4 h-4 inline mr-1" />
@@ -166,7 +166,7 @@ export function AdjustStockDialog({
 
         {/* Input de cantidad */}
         <div>
-          <label htmlFor="stock-value" className="text-xs text-gray-500 block mb-1">
+          <label htmlFor="stock-value" className="text-xs text-muted-foreground block mb-1">
             {adjustmentType === 'set' && 'Nuevo stock'}
             {adjustmentType === 'add' && 'Cantidad a añadir'}
             {adjustmentType === 'remove' && 'Cantidad a retirar'}
@@ -177,17 +177,17 @@ export function AdjustStockDialog({
             value={stockValue}
             onChange={(e) => setStockValue(parseInt(e.target.value) || 0)}
             min={0}
-            className="w-full h-10 text-sm border border-gray-200 rounded-lg px-3 focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+            className="w-full h-10 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
             autoFocus
           />
         </div>
 
         {/* Resumen del ajuste */}
         <div className="p-3 bg-origen-crema/30 rounded-lg">
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-muted-foreground">
             <span className="font-medium">Stock actual:</span> {product.stock} unidades
           </p>
-          <p className="text-xs text-gray-600 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             <span className="font-medium">Resultado:</span> {resultValue} unidades
           </p>
         </div>

@@ -78,7 +78,7 @@ export function OrderItem({
       )}></div>
       
       <div className={cn(
-        "relative bg-white rounded-2xl p-6 border border-gray-200",
+        "relative bg-surface-alt rounded-2xl p-6 border border-border",
         "shadow-origen group-hover:shadow-origen-lg group-hover:border-origen-pradera",
         "transition-all duration-300"
       )}>
@@ -92,7 +92,7 @@ export function OrderItem({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
                 <h3 className="font-semibold text-lg text-origen-bosque">{orderNumber}</h3>
-                <span className="text-sm text-gray-500">{date}</span>
+                <span className="text-sm text-muted-foreground">{date}</span>
               </div>
               <span className={cn(
                 "px-3 py-1 text-xs font-medium rounded-full border",
@@ -106,9 +106,9 @@ export function OrderItem({
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-600">{customer}</span>
-                <span className="w-1 h-1 rounded-full bg-gray-300" />
-                <span className="text-gray-600">{items} {items === 1 ? 'producto' : 'productos'}</span>
+                <span className="text-muted-foreground">{customer}</span>
+                <span className="w-1 h-1 rounded-full bg-border" />
+                <span className="text-muted-foreground">{items} {items === 1 ? 'producto' : 'productos'}</span>
               </div>
               <span className="font-semibold text-lg text-origen-bosque">
                 {total.toFixed(2)}€

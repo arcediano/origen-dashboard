@@ -511,7 +511,7 @@ export function StepCertificationsAttributes({
             </div>
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-origen-bosque truncate">Certificaciones y atributos</h2>
-              <p className="text-sm text-gray-500 truncate">Añade sellos de calidad y características</p>
+              <p className="text-sm text-muted-foreground truncate">Añade sellos de calidad y características</p>
             </div>
           </div>
           
@@ -541,7 +541,7 @@ export function StepCertificationsAttributes({
         </div>
 
         {/* Pestañas */}
-        <div className="mb-6 border-b border-gray-200 overflow-x-auto">
+        <div className="mb-6 border-b border-border overflow-x-auto">
           <div className="flex gap-6 min-w-max">
             {[
               { id: 'certifications', label: 'Certificaciones', icon: <Award className="w-4 h-4" /> },
@@ -554,7 +554,7 @@ export function StepCertificationsAttributes({
                   "pb-3 text-sm font-medium transition-colors relative flex items-center gap-2",
                   activeTab === tab.id 
                     ? 'text-origen-pradera border-b-2 border-origen-pradera' 
-                    : 'text-gray-500 hover:text-gray-700'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 {tab.icon}
@@ -616,7 +616,7 @@ export function StepCertificationsAttributes({
 
                       {/* Certificaciones predefinidas */}
                       <div className="mb-4">
-                        <p className="text-xs text-gray-500 mb-2">Selecciona una certificación común:</p>
+                        <p className="text-xs text-muted-foreground mb-2">Selecciona una certificación común:</p>
                         <div className="flex flex-wrap gap-2">
                           {PREDEFINED_CERTIFICATIONS.map((cert) => (
                             <button
@@ -627,7 +627,7 @@ export function StepCertificationsAttributes({
                                 issuingBody: cert.body,
                                 category: cert.category,
                               })}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-white rounded-full border border-gray-200 hover:border-origen-pradera hover:bg-origen-crema/30 transition-all text-xs"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-surface-alt rounded-full border border-border hover:border-origen-pradera hover:bg-origen-crema/30 transition-all text-xs"
                               title={cert.description}
                             >
                               <span className="text-origen-pradera">{cert.icon}</span>
@@ -677,7 +677,7 @@ export function StepCertificationsAttributes({
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">Fecha emisión</p>
+                            <p className="text-xs text-muted-foreground mb-1">Fecha emisión</p>
                             <Input
                               type="date"
                               value={formatDateForInput(newCert.issueDate)}
@@ -686,7 +686,7 @@ export function StepCertificationsAttributes({
                             />
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">Fecha caducidad</p>
+                            <p className="text-xs text-muted-foreground mb-1">Fecha caducidad</p>
                             <Input
                               type="date"
                               value={formatDateForInput(newCert.expiryDate)}
@@ -744,7 +744,7 @@ export function StepCertificationsAttributes({
                           "p-4 rounded-xl border-2 transition-all",
                           cert.verified 
                             ? "border-green-200 bg-green-50/30" 
-                            : "border-gray-200 bg-white hover:border-origen-pradera/30"
+                            : "border-border bg-surface-alt hover:border-origen-pradera/30"
                         )}
                       >
                         <div className="flex items-start gap-3">
@@ -783,7 +783,7 @@ export function StepCertificationsAttributes({
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">{cert.issuingBody}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{cert.issuingBody}</p>
                               </div>
 
                               <div className="flex items-center gap-1">
@@ -811,13 +811,13 @@ export function StepCertificationsAttributes({
                                     });
                                     setShowCertForm(true);
                                   }}
-                                  className="p-1.5 rounded-md text-gray-400 hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
+                                  className="p-1.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
                                 >
                                   <Edit2 className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteCertification(cert.id)}
-                                  className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                  className="p-1.5 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -825,7 +825,7 @@ export function StepCertificationsAttributes({
                             </div>
 
                             {cert.certificateNumber && (
-                              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
                                 <FileText className="w-3 h-3" />
                                 Nº {cert.certificateNumber}
                               </p>
@@ -834,7 +834,7 @@ export function StepCertificationsAttributes({
                             {/* Documentos */}
                             {cert.documents && cert.documents.length > 0 && (
                               <div className="mt-3">
-                                <p className="text-[10px] text-gray-500 mb-1">Documentos:</p>
+                                <p className="text-[10px] text-muted-foreground mb-1">Documentos:</p>
                                 <div className="flex flex-wrap gap-2">
                                   {cert.documents.map(doc => (
                                     <a
@@ -842,7 +842,7 @@ export function StepCertificationsAttributes({
                                       href={doc.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-lg border border-gray-200 text-[10px] text-gray-600 hover:border-origen-pradera transition-colors"
+                                      className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-lg border border-border text-[10px] text-muted-foreground hover:border-origen-pradera transition-colors"
                                     >
                                       <FileText className="w-3 h-3" />
                                       {doc.name}
@@ -863,8 +863,8 @@ export function StepCertificationsAttributes({
               {certifications.length === 0 && !showCertForm && (
                 <div className="text-center py-8 bg-origen-crema/20 rounded-xl border-2 border-dashed border-origen-pradera/30">
                   <Award className="w-12 h-12 text-origen-pradera/40 mx-auto mb-3" />
-                  <p className="text-sm font-medium text-gray-700">No hay certificaciones</p>
-                  <p className="text-xs text-gray-500 max-w-md mx-auto mt-1">
+                  <p className="text-sm font-medium text-foreground">No hay certificaciones</p>
+                  <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">
                     Añade certificaciones para aumentar la confianza de tus clientes y diferenciar tu producto
                   </p>
                   <Button
@@ -895,7 +895,7 @@ export function StepCertificationsAttributes({
                   <Lightbulb className="w-5 h-5 text-origen-pradera shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-origen-bosque">¿Qué son los atributos?</p>
-                    <p className="text-xs text-gray-600 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Los atributos son características específicas de tu producto que no aparecen en otros campos.
                       Ayudan a los clientes a encontrar tu producto y a tomar decisiones de compra.
                     </p>
@@ -913,7 +913,7 @@ export function StepCertificationsAttributes({
                   {categoryExamples.map((example, idx) => (
                     <div
                       key={idx}
-                      className="relative p-4 bg-white rounded-xl border border-gray-200 hover:border-origen-pradera/30 transition-all cursor-pointer group"
+                      className="relative p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 transition-all cursor-pointer group"
                       onClick={() => applyExample(example)}
                       onMouseEnter={() => setShowExampleTooltip(example.name)}
                       onMouseLeave={() => setShowExampleTooltip(null)}
@@ -924,7 +924,7 @@ export function StepCertificationsAttributes({
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium text-origen-bosque">{example.name}</p>
-                          <p className="text-xs text-gray-500 mt-1">{example.description}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{example.description}</p>
                           <div className="mt-2 flex items-center gap-1 text-[10px] text-origen-pradera">
                             <span>Ej: {example.example}{example.unit ? ` ${example.unit}` : ''}</span>
                           </div>
@@ -1064,7 +1064,7 @@ export function StepCertificationsAttributes({
                             onCheckedChange={(checked) => setNewAttr({ ...newAttr, visible: checked as boolean })}
                             className="data-[state=checked]:bg-origen-pradera"
                           />
-                          <label htmlFor="attr-visible" className="text-sm text-gray-700 cursor-pointer">
+                          <label htmlFor="attr-visible" className="text-sm text-foreground cursor-pointer">
                             Visible en la ficha del producto
                           </label>
                         </div>
@@ -1103,7 +1103,7 @@ export function StepCertificationsAttributes({
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-origen-pradera/30 transition-all"
+                        className="flex items-center justify-between p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 transition-all"
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-origen-crema flex items-center justify-center shrink-0">
@@ -1116,13 +1116,13 @@ export function StepCertificationsAttributes({
                                 {attr.type}
                               </Badge>
                               {!attr.visible && (
-                                <Badge variant="seed" size="xs" className="bg-gray-100 flex items-center gap-1">
+                                <Badge variant="seed" size="xs" className="bg-surface flex items-center gap-1">
                                   <EyeOff className="w-3 h-3" />
                                   Oculto
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-sm text-gray-700 mt-1">
+                            <p className="text-sm text-foreground mt-1">
                               {String(attr.value)} {attr.unit}
                             </p>
                           </div>
@@ -1130,7 +1130,7 @@ export function StepCertificationsAttributes({
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleToggleAttributeVisibility(attr.id)}
-                            className="p-2 rounded-lg text-gray-400 hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
+                            className="p-2 rounded-lg text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
                             title={attr.visible ? "Ocultar" : "Mostrar"}
                           >
                             {attr.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -1141,13 +1141,13 @@ export function StepCertificationsAttributes({
                               setNewAttr(attr);
                               setShowAttrForm(true);
                             }}
-                            className="p-2 rounded-lg text-gray-400 hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
+                            className="p-2 rounded-lg text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteAttribute(attr.id)}
-                            className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                            className="p-2 rounded-lg text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1161,8 +1161,8 @@ export function StepCertificationsAttributes({
               {attributes.length === 0 && !showAttrForm && (
                 <div className="text-center py-8 bg-origen-crema/20 rounded-xl border-2 border-dashed border-origen-pradera/30">
                   <Tag className="w-12 h-12 text-origen-pradera/40 mx-auto mb-3" />
-                  <p className="text-sm font-medium text-gray-700">No hay atributos</p>
-                  <p className="text-xs text-gray-500 max-w-md mx-auto mt-1">
+                  <p className="text-sm font-medium text-foreground">No hay atributos</p>
+                  <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">
                     Los atributos ayudan a los clientes a encontrar tu producto y a conocer sus características específicas
                   </p>
                 </div>
@@ -1177,7 +1177,7 @@ export function StepCertificationsAttributes({
             <TrendingUp className="w-4 h-4 text-origen-pradera" />
             <span className="text-xs font-medium text-origen-bosque">Impacto en ventas</span>
           </div>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-muted-foreground">
             Los productos con certificaciones verificadas tienen un <span className="font-bold text-origen-pradera">35% más</span> de clics.
             Los atributos detallados aumentan la confianza del cliente en un <span className="font-bold text-origen-pradera">28%</span>.
           </p>

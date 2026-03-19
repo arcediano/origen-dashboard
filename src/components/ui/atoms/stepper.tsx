@@ -165,7 +165,7 @@ const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
             size === 'sm' && 'h-4 w-4',
             size === 'md' && 'h-5 w-5',
             size === 'lg' && 'h-6 w-6',
-            'text-gray-300'
+            'text-text-disabled'
           )}
         />
       );
@@ -198,7 +198,7 @@ const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           : 'top-0 left-1/2 h-full -translate-x-1/2 w-0.5',
         isCompleted
           ? 'bg-origen-pradera'
-          : 'bg-gray-200'
+          : 'bg-border'
       );
     };
 
@@ -240,7 +240,7 @@ const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                     step.status === 'error' &&
                       'bg-red-50 border-red-500 text-red-500',
                     step.status === 'pending' &&
-                      'bg-white border-gray-300 text-gray-400'
+                      'bg-surface-alt border-border-subtle text-text-disabled'
                   )}
                 >
                   {getStepIcon(step, index)}
@@ -264,7 +264,7 @@ const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                       size === 'lg' && 'text-base',
                       step.status === 'active' && 'text-origen-bosque',
                       step.status === 'completed' && 'text-origen-hoja',
-                      step.status === 'pending' && 'text-gray-500',
+                      step.status === 'pending' && 'text-muted-foreground',
                       step.status === 'error' && 'text-red-500'
                     )}
                   >
@@ -274,7 +274,7 @@ const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                     <p
                       className={cn(
                         'mt-0.5 text-xs',
-                        step.status === 'active' ? 'text-gray-600' : 'text-gray-400'
+                        step.status === 'active' ? 'text-muted-foreground' : 'text-text-disabled'
                       )}
                     >
                       {step.description}
@@ -344,7 +344,7 @@ const StepperFooter = React.forwardRef<HTMLDivElement, StepperFooterProps>(
       <div
         ref={ref}
         className={cn(
-          'flex items-center justify-between pt-6 mt-6 border-t border-gray-200',
+          'flex items-center justify-between pt-6 mt-6 border-t border-border',
           className
         )}
         {...props}
@@ -414,7 +414,7 @@ const StepperHeader = React.forwardRef<HTMLDivElement, StepperHeaderProps>(
       {...props}
     >
       {/* Progress Bar */}
-      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="w-full h-2 bg-border rounded-full overflow-hidden">
         <div
           className={cn(
             'h-full transition-all duration-500 ease-out',
@@ -434,12 +434,12 @@ const StepperHeader = React.forwardRef<HTMLDivElement, StepperHeaderProps>(
           <h2 className="text-2xl font-bold text-origen-bosque">
             {title || currentStepData?.title}
           </h2>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-muted-foreground">
             Paso {currentStep + 1} de {steps.length}
           </span>
         </div>
         {description && (
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             {description}
           </p>
         )}

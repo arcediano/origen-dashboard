@@ -183,7 +183,7 @@ export function StepNutritional({
             </div>
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-origen-bosque truncate">Información nutricional</h2>
-              <p className="text-sm text-gray-500 truncate">Obligatorio para productos alimenticios</p>
+              <p className="text-sm text-muted-foreground truncate">Obligatorio para productos alimenticios</p>
             </div>
           </div>
           
@@ -207,7 +207,7 @@ export function StepNutritional({
         </div>
 
         {/* Pestañas de navegación */}
-        <div className="mb-6 border-b border-gray-200 overflow-x-auto">
+        <div className="mb-6 border-b border-border overflow-x-auto">
           <div className="flex gap-6 min-w-max">
             {[
               { id: 'basicos', label: 'Básicos', icon: <Scale className="w-4 h-4" /> },
@@ -223,7 +223,7 @@ export function StepNutritional({
                   "pb-3 text-sm font-medium transition-colors relative flex items-center gap-2",
                   activeTab === tab.id 
                     ? 'text-origen-pradera border-b-2 border-origen-pradera' 
-                    : 'text-gray-500 hover:text-gray-700'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 {tab.icon}
@@ -248,7 +248,7 @@ export function StepNutritional({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Scale className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-foreground">
                       Tamaño de ración
                       <span className="text-red-500 ml-1">*</span>
                     </span>
@@ -288,7 +288,7 @@ export function StepNutritional({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Flame className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-foreground">
                       Calorías (kcal)
                     </span>
                     <Tooltip 
@@ -323,7 +323,7 @@ export function StepNutritional({
                 <h3 className="text-sm font-medium text-origen-bosque mb-3">Macronutrientes (g)</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Proteínas</p>
+                    <p className="text-xs text-muted-foreground mb-1">Proteínas</p>
                     <Input
                       type="number"
                       value={nutritionalInfo.protein || ''}
@@ -334,7 +334,7 @@ export function StepNutritional({
                     />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Grasas totales</p>
+                    <p className="text-xs text-muted-foreground mb-1">Grasas totales</p>
                     <Input
                       type="number"
                       value={nutritionalInfo.totalFat || ''}
@@ -345,7 +345,7 @@ export function StepNutritional({
                     />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Carbohidratos</p>
+                    <p className="text-xs text-muted-foreground mb-1">Carbohidratos</p>
                     <Input
                       type="number"
                       value={nutritionalInfo.carbohydrates || ''}
@@ -363,7 +363,7 @@ export function StepNutritional({
                 <h3 className="text-sm font-medium text-origen-bosque mb-3">Desglose de grasas</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Saturadas (g)</p>
+                    <p className="text-xs text-muted-foreground mb-1">Saturadas (g)</p>
                     <Input
                       type="number"
                       value={nutritionalInfo.saturatedFat || ''}
@@ -374,7 +374,7 @@ export function StepNutritional({
                     />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Trans (g)</p>
+                    <p className="text-xs text-muted-foreground mb-1">Trans (g)</p>
                     <Input
                       type="number"
                       value={nutritionalInfo.transFat || ''}
@@ -385,7 +385,7 @@ export function StepNutritional({
                     />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Colesterol (mg)</p>
+                    <p className="text-xs text-muted-foreground mb-1">Colesterol (mg)</p>
                     <Input
                       type="number"
                       value={nutritionalInfo.cholesterol || ''}
@@ -403,7 +403,7 @@ export function StepNutritional({
                 <h3 className="text-sm font-medium text-origen-bosque mb-3">Otros nutrientes</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Fibra (g)</p>
+                    <p className="text-xs text-muted-foreground mb-1">Fibra (g)</p>
                     <Input
                       type="number"
                       value={nutritionalInfo.dietaryFiber || ''}
@@ -414,7 +414,7 @@ export function StepNutritional({
                     />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Azúcares (g)</p>
+                    <p className="text-xs text-muted-foreground mb-1">Azúcares (g)</p>
                     <Input
                       type="number"
                       value={nutritionalInfo.sugars || ''}
@@ -425,7 +425,7 @@ export function StepNutritional({
                     />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Sodio (mg)</p>
+                    <p className="text-xs text-muted-foreground mb-1">Sodio (mg)</p>
                     <Input
                       type="number"
                       value={nutritionalInfo.sodium || ''}
@@ -453,7 +453,7 @@ export function StepNutritional({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <AlertCircle className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-foreground">
                       Contiene
                     </span>
                     <Tooltip 
@@ -461,7 +461,7 @@ export function StepNutritional({
                       size="sm"
                     />
                   </div>
-                  <div className="space-y-2 max-h-80 overflow-y-auto pr-2 border border-gray-200 rounded-xl p-3">
+                  <div className="space-y-2 max-h-80 overflow-y-auto pr-2 border border-border rounded-xl p-3">
                     {ALLERGENS.map(allergen => {
                       const Icon = getAllergenIcon(allergen);
                       return (
@@ -476,7 +476,7 @@ export function StepNutritional({
                             }}
                             className="data-[state=checked]:bg-origen-pradera"
                           />
-                          <Icon className="w-4 h-4 text-gray-400" />
+                          <Icon className="w-4 h-4 text-text-subtle" />
                           <span className="text-sm">{allergen}</span>
                         </label>
                       );
@@ -487,7 +487,7 @@ export function StepNutritional({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-foreground">
                       Puede contener
                     </span>
                     <Tooltip 
@@ -495,7 +495,7 @@ export function StepNutritional({
                       size="sm"
                     />
                   </div>
-                  <div className="space-y-2 max-h-80 overflow-y-auto pr-2 border border-gray-200 rounded-xl p-3">
+                  <div className="space-y-2 max-h-80 overflow-y-auto pr-2 border border-border rounded-xl p-3">
                     {ALLERGENS.map(allergen => {
                       const Icon = getAllergenIcon(allergen);
                       return (
@@ -511,7 +511,7 @@ export function StepNutritional({
                             }}
                             className="data-[state=checked]:bg-origen-pradera"
                           />
-                          <Icon className="w-4 h-4 text-gray-400" />
+                          <Icon className="w-4 h-4 text-text-subtle" />
                           <span className="text-sm">{allergen}</span>
                         </label>
                       );
@@ -533,7 +533,7 @@ export function StepNutritional({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Ban className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Declaraciones de ausencia
                   </span>
                   <Tooltip 
@@ -546,7 +546,7 @@ export function StepNutritional({
                   {absenceOptions.map((option) => (
                     <div
                       key={option.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-origen-pradera/30 transition-all bg-white"
+                      className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-origen-pradera/30 transition-all bg-surface-alt"
                     >
                       <Checkbox
                         id={option.id}
@@ -585,7 +585,7 @@ export function StepNutritional({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <FileText className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     Ingredientes
                     <span className="text-red-500 ml-1">*</span>
                   </span>
@@ -626,7 +626,7 @@ export function StepNutritional({
                             <span className="text-sm truncate flex-1">{ingredient}</span>
                             <button
                               onClick={() => removeIngredient(index)}
-                              className="text-gray-400 hover:text-red-600 shrink-0 ml-2"
+                              className="text-text-subtle hover:text-red-600 shrink-0 ml-2"
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -643,7 +643,7 @@ export function StepNutritional({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-foreground">
                       Preparación
                     </span>
                     <Tooltip 
@@ -662,7 +662,7 @@ export function StepNutritional({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Package className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-foreground">
                       Conservación
                     </span>
                     <Tooltip 
@@ -685,7 +685,7 @@ export function StepNutritional({
         {/* Badge de información */}
         <div className="mt-6 flex items-center justify-center gap-2 p-3 bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5 rounded-lg border border-origen-pradera/20">
           <Heart className="h-4 w-4 text-origen-pradera" />
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-muted-foreground">
             La información nutricional completa genera confianza en tus clientes
           </span>
         </div>

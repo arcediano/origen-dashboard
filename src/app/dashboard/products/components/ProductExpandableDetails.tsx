@@ -59,7 +59,7 @@ function SalesChart({
             <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
               <div className="relative w-full">
                 {/* Tooltip con valor al hacer hover */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                   {value} ventas
                 </div>
                 {/* Barra */}
@@ -72,7 +72,7 @@ function SalesChart({
           );
         })}
       </div>
-      <div className="flex justify-between mt-2 text-xs text-gray-500">
+      <div className="flex justify-between mt-2 text-xs text-muted-foreground">
         {labels.map((label, i) => (
           <span key={i} className="flex-1 text-center">{label}</span>
         ))}
@@ -133,14 +133,14 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
           </div>
           <div>
             <h4 className="text-base font-semibold text-origen-bosque">Informe de rendimiento</h4>
-            <p className="text-xs text-gray-500">Análisis detallado del producto</p>
+            <p className="text-xs text-muted-foreground">Análisis detallado del producto</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs bg-origen-pradera/10 text-origen-pradera px-3 py-1.5 rounded-full border border-origen-pradera/30">
             {product.sku}
           </span>
-          <span className="text-xs text-gray-500 flex items-center gap-1">
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
             <Calendar className="w-3 h-3" />
             Últimos 7 días
           </span>
@@ -153,7 +153,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         <div className="p-4 bg-gradient-to-br from-origen-pradera/5 to-transparent rounded-xl border border-origen-pradera/10">
           <div className="flex items-center gap-2 mb-2">
             <ShoppingBag className="w-5 h-5 text-origen-pradera" />
-            <span className="text-xs font-medium text-gray-500">Ventas</span>
+            <span className="text-xs font-medium text-muted-foreground">Ventas</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{product.sales || 0}</p>
           <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
@@ -166,7 +166,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         <div className="p-4 bg-gradient-to-br from-blue-50/50 to-transparent rounded-xl border border-blue-100">
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-5 h-5 text-blue-500" />
-            <span className="text-xs font-medium text-gray-500">Ingresos</span>
+            <span className="text-xs font-medium text-muted-foreground">Ingresos</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{product.revenue?.toFixed(2) || 0}€</p>
           <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
@@ -179,7 +179,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         <div className="p-4 bg-gradient-to-br from-purple-50/50 to-transparent rounded-xl border border-purple-100">
           <div className="flex items-center gap-2 mb-2">
             <Eye className="w-5 h-5 text-purple-500" />
-            <span className="text-xs font-medium text-gray-500">Vistas</span>
+            <span className="text-xs font-medium text-muted-foreground">Vistas</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{product.views || 0}</p>
           <div className="flex items-center gap-1 mt-2 text-xs text-amber-600">
@@ -192,7 +192,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         <div className="p-4 bg-gradient-to-br from-green-50/50 to-transparent rounded-xl border border-green-100">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-5 h-5 text-green-500" />
-            <span className="text-xs font-medium text-gray-500">Conversión</span>
+            <span className="text-xs font-medium text-muted-foreground">Conversión</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{conversionRate || 0}%</p>
           <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
@@ -214,7 +214,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
           </span>
         </div>
         <SalesChart data={salesData} />
-        <div className="flex items-center justify-between mt-4 text-xs text-gray-500">
+        <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <span className="inline-block w-3 h-3 bg-origen-pradera rounded-sm"></span>
             <span>Ventas diarias</span>
@@ -235,30 +235,30 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
             Detalles financieros
           </h5>
           <div className="space-y-3">
-            <div className="flex justify-between items-center pb-2 border-b border-gray-200/50">
-              <span className="text-sm text-gray-600">Precio base</span>
+            <div className="flex justify-between items-center pb-2 border-b border-border/50">
+              <span className="text-sm text-muted-foreground">Precio base</span>
               <span className="text-base font-semibold text-origen-pradera">{product.basePrice.toFixed(2)}€</span>
             </div>
             {product.comparePrice && product.comparePrice > product.basePrice && (
-              <div className="flex justify-between items-center pb-2 border-b border-gray-200/50">
-                <span className="text-sm text-gray-600">PVP referencia</span>
-                <span className="text-base font-medium text-gray-400 line-through">{product.comparePrice.toFixed(2)}€</span>
+              <div className="flex justify-between items-center pb-2 border-b border-border/50">
+                <span className="text-sm text-muted-foreground">PVP referencia</span>
+                <span className="text-base font-medium text-text-subtle line-through">{product.comparePrice.toFixed(2)}€</span>
               </div>
             )}
             {discount && (
-              <div className="flex justify-between items-center pb-2 border-b border-gray-200/50">
-                <span className="text-sm text-gray-600">Dto. sobre PVP</span>
+              <div className="flex justify-between items-center pb-2 border-b border-border/50">
+                <span className="text-sm text-muted-foreground">Dto. sobre PVP</span>
                 <span className="text-base font-semibold text-green-600">-{discount}%</span>
               </div>
             )}
             {revenuePerSale && (
-              <div className="flex justify-between items-center pb-2 border-b border-gray-200/50">
-                <span className="text-sm text-gray-600">Ingreso medio/venta</span>
+              <div className="flex justify-between items-center pb-2 border-b border-border/50">
+                <span className="text-sm text-muted-foreground">Ingreso medio/venta</span>
                 <span className="text-base font-semibold text-origen-bosque">{revenuePerSale}€</span>
               </div>
             )}
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Total ingresos</span>
+              <span className="text-sm text-muted-foreground">Total ingresos</span>
               <span className="text-base font-bold text-origen-bosque">{product.revenue?.toFixed(2) || 0}€</span>
             </div>
           </div>
@@ -271,18 +271,18 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
             Detalles del producto
           </h5>
           <div className="space-y-3">
-            <div className="flex justify-between items-center pb-2 border-b border-gray-200/50">
-              <span className="text-sm text-gray-600">Categoría</span>
+            <div className="flex justify-between items-center pb-2 border-b border-border/50">
+              <span className="text-sm text-muted-foreground">Categoría</span>
               <span className="text-base font-medium text-origen-bosque">{product.categoryName}</span>
             </div>
             {product.subcategoryId && (
-              <div className="flex justify-between items-center pb-2 border-b border-gray-200/50">
-                <span className="text-sm text-gray-600">Subcategoría</span>
-                <span className="text-base font-medium text-gray-600 capitalize">{product.subcategoryId}</span>
+              <div className="flex justify-between items-center pb-2 border-b border-border/50">
+                <span className="text-sm text-muted-foreground">Subcategoría</span>
+                <span className="text-base font-medium text-muted-foreground capitalize">{product.subcategoryId}</span>
               </div>
             )}
-            <div className="flex justify-between items-center pb-2 border-b border-gray-200/50">
-              <span className="text-sm text-gray-600">Stock actual</span>
+            <div className="flex justify-between items-center pb-2 border-b border-border/50">
+              <span className="text-sm text-muted-foreground">Stock actual</span>
               <div className="flex items-center gap-2">
                 <div className={cn(
                   'w-2 h-2 rounded-full',
@@ -293,18 +293,18 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
               </div>
             </div>
             {product.lowStockThreshold && (
-              <div className="flex justify-between items-center pb-2 border-b border-gray-200/50">
-                <span className="text-sm text-gray-600">Umbral bajo</span>
-                <span className="text-base font-medium text-gray-600">{product.lowStockThreshold} uds</span>
+              <div className="flex justify-between items-center pb-2 border-b border-border/50">
+                <span className="text-sm text-muted-foreground">Umbral bajo</span>
+                <span className="text-base font-medium text-muted-foreground">{product.lowStockThreshold} uds</span>
               </div>
             )}
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Valoración</span>
+              <span className="text-sm text-muted-foreground">Valoración</span>
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                 <span className="text-base font-semibold text-origen-bosque">{product.rating?.toFixed(1) || 0}</span>
                 {product.reviewCount && (
-                  <span className="text-xs text-gray-400 ml-1">({product.reviewCount})</span>
+                  <span className="text-xs text-text-subtle ml-1">({product.reviewCount})</span>
                 )}
               </div>
             </div>
@@ -325,7 +325,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
       )}
 
       {/* Fecha de última actualización */}
-      <div className="text-xs text-gray-400 text-right pt-2">
+      <div className="text-xs text-text-subtle text-right pt-2">
         Actualizado: {new Date(product.updatedAt).toLocaleDateString()}
       </div>
     </div>

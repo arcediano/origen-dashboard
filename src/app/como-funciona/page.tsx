@@ -89,7 +89,7 @@ function StepCard({ step }: { step: typeof producerSteps[0] }) {
   return (
     <div className="group relative">
       <div className="absolute inset-0 bg-gradient-to-br from-origen-bosque/4 to-origen-hoja/5 rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
-      <div className="relative bg-white rounded-2xl p-5 md:p-8 shadow-lg border border-gray-200 group-hover:border-origen-hoja group-hover:shadow-xl transition-all duration-300">
+      <div className="relative bg-surface-alt rounded-2xl p-5 md:p-8 shadow-lg border border-border group-hover:border-origen-hoja group-hover:shadow-xl transition-all duration-300">
         <div className="flex items-start gap-4 mb-4">
           <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
             <Icon className="w-5 h-5 md:w-7 md:h-7 text-origen-bosque" />
@@ -99,14 +99,14 @@ function StepCard({ step }: { step: typeof producerSteps[0] }) {
             <h3 className="text-base md:text-xl font-bold text-origen-bosque">{step.title}</h3>
           </div>
         </div>
-        <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-4">{step.description}</p>
+        <p className="text-muted-foreground text-sm md:text-base leading-relaxed mb-4">{step.description}</p>
         <div className="space-y-2">
           {step.features.map((feature, idx) => (
             <div key={idx} className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-origen-hoja/10 flex items-center justify-center flex-shrink-0">
                 <CheckCircle className="w-2.5 h-2.5 text-origen-hoja" />
               </div>
-              <span className="text-xs md:text-sm text-gray-700">{feature}</span>
+              <span className="text-xs md:text-sm text-foreground">{feature}</span>
             </div>
           ))}
         </div>
@@ -122,7 +122,7 @@ export default function HowItWorksPage() {
       {/* ================================================================
           HEADER
       ================================================================ */}
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      <header className="sticky top-0 z-40 w-full bg-surface-alt/95 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <Link
@@ -147,7 +147,7 @@ export default function HowItWorksPage() {
 
             <Link
               href="/auth/register"
-              className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-white hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2"
+              className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-surface-alt hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2"
             >
               <Store className="w-4 h-4 text-origen-pradera" />
               <span className="hidden sm:inline">Nuevo productor</span>
@@ -174,7 +174,7 @@ export default function HowItWorksPage() {
               Cómo{' '}
               <span className="text-origen-hoja">funciona</span>
             </h1>
-            <p className="text-base md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Conectamos directamente a productores artesanales con compradores que valoran la autenticidad
             </p>
           </div>
@@ -184,7 +184,7 @@ export default function HowItWorksPage() {
 
             {/* Productores */}
             <div className="space-y-6">
-              <div className="flex items-center gap-3 pb-2 border-b border-gray-200">
+              <div className="flex items-center gap-3 pb-2 border-b border-border">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center">
                   <Store className="w-5 h-5 text-origen-bosque" />
                 </div>
@@ -199,7 +199,7 @@ export default function HowItWorksPage() {
 
             {/* Compradores */}
             <div className="space-y-6">
-              <div className="flex items-center gap-3 pb-2 border-b border-gray-200">
+              <div className="flex items-center gap-3 pb-2 border-b border-border">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center">
                   <Search className="w-5 h-5 text-origen-bosque" />
                 </div>
@@ -215,7 +215,7 @@ export default function HowItWorksPage() {
 
           {/* CTA final */}
           <div className="mt-12 md:mt-20 text-center">
-            <div className="bg-white rounded-3xl p-8 md:p-12 border border-origen-hoja/30 shadow-origen max-w-2xl mx-auto">
+            <div className="bg-surface-alt rounded-3xl p-8 md:p-12 border border-origen-hoja/30 shadow-origen max-w-2xl mx-auto">
               <div className="flex items-center justify-center gap-2 mb-3">
                 {['15% comisión', '0€ alta', '24h soporte'].map((item) => (
                   <div key={item} className="inline-flex items-center gap-1.5 bg-origen-crema/60 rounded-full px-3 py-1 border border-origen-hoja/20">
@@ -227,7 +227,7 @@ export default function HowItWorksPage() {
               <h2 className="text-2xl md:text-3xl font-bold text-origen-bosque mb-3">
                 Empieza hoy sin compromiso
               </h2>
-              <p className="text-gray-600 mb-6 md:mb-8">
+              <p className="text-muted-foreground mb-6 md:mb-8">
                 Sin costes fijos, sin permanencia. Solo pagas cuando vendes.
               </p>
               <Link

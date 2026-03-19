@@ -151,7 +151,7 @@ export function HeroSection() {
             {/* Columna izquierda - Contenido principal */}
             <div className="flex-1 w-full lg:w-7/12">
               {/* Badge destacado */}
-              <div className="inline-flex items-center gap-2 bg-white/25 backdrop-blur-sm rounded-full px-4 py-2 md:py-2.5 mb-4 md:mb-5 border border-white/40 max-w-max shadow-lg">
+              <div className="inline-flex items-center gap-2 bg-surface-alt/25 backdrop-blur-sm rounded-full px-4 py-2 md:py-2.5 mb-4 md:mb-5 border border-white/40 max-w-max shadow-lg">
                 <div className="flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-origen-hoja" />
                   <span className="text-xs md:text-sm font-semibold text-white whitespace-nowrap">
@@ -183,7 +183,7 @@ export function HeroSection() {
                     const Icon = stat.icon;
                     return (
                       <div key={index} className="group">
-                        <div className="bg-white/20 backdrop-blur-md rounded-xl p-3 md:p-4 border border-white/30 group-hover:border-origen-hoja transition-all duration-300 h-full hover:shadow-lg hover:scale-[1.02]">
+                        <div className="bg-surface-alt/20 backdrop-blur-md rounded-xl p-3 md:p-4 border border-white/30 group-hover:border-origen-hoja transition-all duration-300 h-full hover:shadow-lg hover:scale-[1.02]">
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center flex-shrink-0 shadow-lg`}>
                               <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
@@ -221,7 +221,7 @@ export function HeroSection() {
                 <div className="flex items-center gap-3 text-white/90">
                   <div className="flex -space-x-2">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/30 border-2 border-origen-hoja/50 flex items-center justify-center shadow-md">
+                      <div key={i} className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-surface-alt/30 border-2 border-origen-hoja/50 flex items-center justify-center shadow-md">
                         <Leaf className="w-3.5 h-3.5 text-origen-hoja" />
                       </div>
                     ))}
@@ -245,7 +245,7 @@ export function HeroSection() {
                 <div className="absolute -inset-1 bg-origen-bosque/5 rounded-3xl blur-xl"></div>
 
                 {/* Tarjeta principal */}
-                <div className="relative bg-white rounded-2xl md:rounded-3xl p-6 md:p-7 shadow-2xl border border-gray-200">
+                <div className="relative bg-surface-alt rounded-2xl md:rounded-3xl p-6 md:p-7 shadow-2xl border border-border">
                   {/* Encabezado de la tarjeta */}
                   <div className="text-center mb-5 md:mb-6">
                     <div className="inline-flex items-center justify-center w-16 h-16 md:w-18 md:h-18 mx-auto mb-3 md:mb-4 relative">
@@ -291,7 +291,7 @@ export function HeroSection() {
                                 ? 'bg-origen-hoja/20 text-origen-hoja'
                                 : step.current
                                 ? 'bg-origen-hoja/30 text-origen-hoja'
-                                : 'bg-gray-100 text-gray-400'
+                                : 'bg-surface text-text-subtle'
                             }`}>
                               <Icon className="w-4 h-4" />
                             </div>
@@ -301,7 +301,7 @@ export function HeroSection() {
                                   ? 'text-origen-bosque'
                                   : step.current
                                   ? 'text-origen-pino'
-                                  : 'text-gray-500'
+                                  : 'text-muted-foreground'
                               }`}>
                                 {step.label}
                               </div>
@@ -314,7 +314,7 @@ export function HeroSection() {
                                 ) : step.current ? (
                                   <span className="text-[10px] text-origen-hoja font-medium">En progreso</span>
                                 ) : (
-                                  <span className="text-[10px] text-gray-400">Pendiente</span>
+                                  <span className="text-[10px] text-text-subtle">Pendiente</span>
                                 )}
                               </div>
                             </div>
@@ -331,9 +331,9 @@ export function HeroSection() {
                         <p className="text-xs text-origen-hoja mb-1">Comisión por venta</p>
                         <div className="flex items-baseline gap-1.5">
                           <span className="text-2xl md:text-3xl font-bold text-origen-bosque">15%</span>
-                          <span className="text-sm text-gray-600">por venta</span>
+                          <span className="text-sm text-muted-foreground">por venta</span>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">Solo cuando vendes</p>
+                        <p className="text-xs text-muted-foreground mt-1">Solo cuando vendes</p>
                       </div>
                       <div className="flex items-center gap-2 bg-origen-hoja/10 px-3 py-1.5 rounded-full border border-origen-hoja/20">
                         <ShieldCheck className="w-4 h-4 text-origen-hoja" />
@@ -362,7 +362,7 @@ export function HeroSection() {
 
                   {/* Nota al pie */}
                   <div className="mt-4 text-center">
-                    <p className="text-[10px] text-gray-500">
+                    <p className="text-[10px] text-muted-foreground">
                       Registro 100% online • Sin compromiso • Activación en 24h
                     </p>
                   </div>
@@ -380,7 +380,7 @@ export function HeroSection() {
         <div className="flex flex-col items-center">
           <span className="text-xs text-white/80 mb-1 font-medium drop-shadow-sm">Más información</span>
           <div className="w-5 h-7 rounded-full border border-white/50 flex justify-center pt-1">
-            <div className="w-0.5 h-2 bg-white/80 rounded-full animate-pulse"></div>
+            <div className="w-0.5 h-2 bg-surface-alt/80 rounded-full animate-pulse"></div>
           </div>
         </div>
       </div>

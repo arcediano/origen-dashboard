@@ -83,7 +83,7 @@ export default function NotificationsPage() {
                   <ShoppingBag className="w-5 h-5 text-origen-pradera mt-0.5" />
                   <div>
                     <p className="font-medium">Nuevos pedidos</p>
-                    <p className="text-sm text-gray-500">Recibe un email cuando haya un nuevo pedido</p>
+                    <p className="text-sm text-muted-foreground">Recibe un email cuando haya un nuevo pedido</p>
                   </div>
                 </div>
                 <Toggle
@@ -97,7 +97,7 @@ export default function NotificationsPage() {
                   <Star className="w-5 h-5 text-origen-pradera mt-0.5" />
                   <div>
                     <p className="font-medium">Nuevas reseñas</p>
-                    <p className="text-sm text-gray-500">Cuando un cliente deje una reseña</p>
+                    <p className="text-sm text-muted-foreground">Cuando un cliente deje una reseña</p>
                   </div>
                 </div>
                 <Toggle
@@ -111,7 +111,7 @@ export default function NotificationsPage() {
                   <Megaphone className="w-5 h-5 text-origen-pradera mt-0.5" />
                   <div>
                     <p className="font-medium">Marketing y promociones</p>
-                    <p className="text-sm text-gray-500">Ofertas, novedades y recomendaciones</p>
+                    <p className="text-sm text-muted-foreground">Ofertas, novedades y recomendaciones</p>
                   </div>
                 </div>
                 <Toggle
@@ -125,7 +125,7 @@ export default function NotificationsPage() {
                   <Package className="w-5 h-5 text-origen-pradera mt-0.5" />
                   <div>
                     <p className="font-medium">Stock bajo</p>
-                    <p className="text-sm text-gray-500">Alertas cuando un producto tenga stock bajo</p>
+                    <p className="text-sm text-muted-foreground">Alertas cuando un producto tenga stock bajo</p>
                   </div>
                 </div>
                 <Toggle
@@ -145,7 +145,7 @@ export default function NotificationsPage() {
                   <ShoppingBag className="w-5 h-5 text-origen-pradera mt-0.5" />
                   <div>
                     <p className="font-medium">Nuevos pedidos</p>
-                    <p className="text-sm text-gray-500">Notificaciones push para nuevos pedidos</p>
+                    <p className="text-sm text-muted-foreground">Notificaciones push para nuevos pedidos</p>
                   </div>
                 </div>
                 <Toggle
@@ -159,7 +159,7 @@ export default function NotificationsPage() {
                   <Package className="w-5 h-5 text-origen-pradera mt-0.5" />
                   <div>
                     <p className="font-medium">Stock bajo</p>
-                    <p className="text-sm text-gray-500">Alertas de inventario en tiempo real</p>
+                    <p className="text-sm text-muted-foreground">Alertas de inventario en tiempo real</p>
                   </div>
                 </div>
                 <Toggle
@@ -173,7 +173,7 @@ export default function NotificationsPage() {
                   <Star className="w-5 h-5 text-origen-pradera mt-0.5" />
                   <div>
                     <p className="font-medium">Nuevas reseñas</p>
-                    <p className="text-sm text-gray-500">Notificaciones cuando recibas una reseña</p>
+                    <p className="text-sm text-muted-foreground">Notificaciones cuando recibas una reseña</p>
                   </div>
                 </div>
                 <Toggle
@@ -187,7 +187,7 @@ export default function NotificationsPage() {
                   <Megaphone className="w-5 h-5 text-origen-pradera mt-0.5" />
                   <div>
                     <p className="font-medium">Campañas</p>
-                    <p className="text-sm text-gray-500">Resultados y actualizaciones de campañas</p>
+                    <p className="text-sm text-muted-foreground">Resultados y actualizaciones de campañas</p>
                   </div>
                 </div>
                 <Toggle

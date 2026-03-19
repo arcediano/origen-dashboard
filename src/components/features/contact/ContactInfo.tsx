@@ -4,7 +4,7 @@ import { Phone, Mail, Clock } from 'lucide-react';
 
 export function ContactInfo() {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+    <div className="bg-surface-alt rounded-xl shadow-lg p-6 md:p-8">
       <h2 className="text-2xl font-bold text-origen-bosque mb-6 md:mb-8">Información de Contacto</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -15,8 +15,8 @@ export function ContactInfo() {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-origen-bosque">Teléfono</h3>
-            <p className="text-gray-600 mt-1">+34 91 123 45 67</p>
-            <p className="text-sm text-gray-500 mt-1">Lunes a Viernes: 9:00 - 18:00</p>
+            <p className="text-muted-foreground mt-1">+34 91 123 45 67</p>
+            <p className="text-sm text-muted-foreground mt-1">Lunes a Viernes: 9:00 - 18:00</p>
           </div>
         </div>
 
@@ -27,8 +27,8 @@ export function ContactInfo() {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-origen-bosque">Email</h3>
-            <p className="text-gray-600 mt-1">info@origen.com</p>
-            <p className="text-gray-600">soporte@origen.com</p>
+            <p className="text-muted-foreground mt-1">info@origen.com</p>
+            <p className="text-muted-foreground">soporte@origen.com</p>
           </div>
         </div>
 
@@ -40,12 +40,12 @@ export function ContactInfo() {
           <div>
             <h3 className="text-lg font-semibold text-origen-bosque">Horario</h3>
             <div className="grid grid-cols-2 gap-2 mt-1">
-              <span className="text-gray-600">Lunes-Viernes:</span>
-              <span className="text-gray-900 font-medium">9:00 - 18:00</span>
-              <span className="text-gray-600">Sábados:</span>
-              <span className="text-gray-900 font-medium">10:00 - 14:00</span>
-              <span className="text-gray-600">Domingos:</span>
-              <span className="text-gray-900 font-medium">Cerrado</span>
+              <span className="text-muted-foreground">Lunes-Viernes:</span>
+              <span className="text-foreground font-medium">9:00 - 18:00</span>
+              <span className="text-muted-foreground">Sábados:</span>
+              <span className="text-foreground font-medium">10:00 - 14:00</span>
+              <span className="text-muted-foreground">Domingos:</span>
+              <span className="text-foreground font-medium">Cerrado</span>
             </div>
           </div>
         </div>

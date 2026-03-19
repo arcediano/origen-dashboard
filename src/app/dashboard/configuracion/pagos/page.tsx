@@ -25,7 +25,7 @@ export default function PagosPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-origen-bosque">Configuración de pagos</h1>
-            <p className="text-sm text-gray-500">Gestiona tu conexión con Stripe</p>
+            <p className="text-sm text-muted-foreground">Gestiona tu conexión con Stripe</p>
           </div>
         </div>
       </div>
@@ -37,7 +37,7 @@ export default function PagosPage() {
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-origen-bosque">Stripe Connect</h2>
-            <p className="text-sm text-gray-500">Procesa pagos con tarjeta, transferencia y métodos locales</p>
+            <p className="text-sm text-muted-foreground">Procesa pagos con tarjeta, transferencia y métodos locales</p>
           </div>
           {isConnected ? (
             <span className="flex items-center gap-1.5 text-sm text-green-600 bg-green-50 px-3 py-1.5 rounded-full">
@@ -59,7 +59,7 @@ export default function PagosPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-origen-bosque">Cuenta verificada</p>
-                <p className="text-xs text-gray-600 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Puedes recibir pagos de forma inmediata. Comisión: 1.4% + 0.25€ por transacción.
                 </p>
               </div>

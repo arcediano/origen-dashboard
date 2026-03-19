@@ -70,9 +70,9 @@ const variantStyles: Record<BadgeVariant, string> = {
   warning: 'bg-amber-50 text-amber-700 border-amber-200',
   danger: 'bg-red-50 text-red-700 border-red-200',
   info: 'bg-origen-pradera/10 text-origen-pradera border-origen-pradera/20',
-  neutral: 'bg-gray-50 text-gray-600 border-gray-200',
+  neutral: 'bg-surface text-muted-foreground border-border',
   leaf: 'bg-origen-pastel text-origen-hoja border-origen-pradera/30',
-  outline: 'bg-transparent text-gray-600 border-gray-200',
+  outline: 'bg-transparent text-muted-foreground border-border',
   notification: 'bg-origen-pradera text-white border-transparent shadow-sm',
 };
 
