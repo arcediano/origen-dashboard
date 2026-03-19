@@ -12,8 +12,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Bell, ChevronLeft, Leaf } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/atoms/avatar';
-import { useAuth } from '@/contexts/AuthContext';
 
 const ROOT_TABS = [
   '/dashboard',
@@ -53,7 +51,6 @@ interface MobileTopBarProps {
 export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -68,9 +65,6 @@ export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
 
   const isRoot = isRootTab(pathname);
   const subTitle = getSubPageTitle(pathname);
-  const initials = user?.firstName
-    ? `${user.firstName[0]}${user.lastName?.[0] ?? ''}`.toUpperCase()
-    : 'P';
 
   return (
     <header
@@ -136,30 +130,18 @@ export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
           )}
         </AnimatePresence>
 
-        {/* Zona derecha — siempre visible: bell + avatar */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          <motion.div whileTap={{ scale: 0.82 }}>
-            <Link
-              href="/dashboard/notifications"
-              className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-origen-pradera/10 transition-colors"
-            >
-              <Bell className="w-[18px] h-[18px] text-foreground stroke-[1.8]" />
-              {notificationCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-origen-menta border-2 border-surface-alt" />
-              )}
-            </Link>
-          </motion.div>
-
-          <motion.div whileTap={{ scale: 0.82 }}>
-            <Link href="/dashboard/profile">
-              <Avatar className="w-8 h-8 ring-2 ring-origen-pradera/25">
-                <AvatarFallback className="bg-gradient-to-br from-origen-pradera to-origen-hoja text-white text-[11px] font-bold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
-          </motion.div>
-        </div>
+        {/* Zona derecha — campana de notificaciones (el perfil está en la BottomTabBar) */}
+        <motion.div whileTap={{ scale: 0.82 }} className="flex-shrink-0">
+          <Link
+            href="/dashboard/notifications"
+            className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-origen-pradera/10 transition-colors"
+          >
+            <Bell className="w-[18px] h-[18px] text-foreground stroke-[1.8]" />
+            {notificationCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 border-2 border-surface-alt" />
+            )}
+          </Link>
+        </motion.div>
 
       </div>
     </header>

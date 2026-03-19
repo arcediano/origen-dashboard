@@ -31,11 +31,13 @@ interface Tab {
 
 const TABS: Tab[] = [
   {
-    id: 'inicio',
-    label: 'Inicio',
-    icon: LayoutDashboard,
-    href: '/dashboard',
-    matchPaths: ['/dashboard'],
+    // Pedidos ocupa el slot izquierdo (era el de inicio)
+    id: 'pedidos',
+    label: 'Pedidos',
+    icon: ShoppingBag,
+    href: '/dashboard/orders',
+    badge: 3,
+    matchPaths: ['/dashboard/orders'],
   },
   {
     id: 'productos',
@@ -45,12 +47,12 @@ const TABS: Tab[] = [
     matchPaths: ['/dashboard/products', '/dashboard/inventario'],
   },
   {
-    id: 'pedidos',
-    label: 'Pedidos',
-    icon: ShoppingBag,
-    href: '/dashboard/orders',
-    badge: 3,
-    matchPaths: ['/dashboard/orders'],
+    // Inicio ocupa el centro como FAB elevado — sin literal inferior
+    id: 'inicio',
+    label: '',
+    icon: LayoutDashboard,
+    href: '/dashboard',
+    matchPaths: ['/dashboard'],
     isCentral: true,
   },
   {
@@ -145,25 +147,27 @@ export function BottomTabBar() {
                       <Icon className="w-6 h-6 text-white stroke-[2.2] relative z-10" />
                     </motion.div>
 
-                    {/* Badge */}
+                    {/* Badge — fondo rojo con borde blanco para máximo contraste */}
                     {tab.badge && tab.badge > 0 && (
                       <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold text-white bg-origen-menta border-2 border-surface-alt flex items-center justify-center shadow-sm"
+                        className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-black text-white bg-red-500 border-2 border-white flex items-center justify-center shadow-md"
                       >
                         {tab.badge > 9 ? '9+' : tab.badge}
                       </motion.span>
                     )}
                   </motion.div>
 
-                  {/* Label */}
-                  <span className={cn(
-                    'text-[10px] font-semibold leading-none transition-colors duration-200',
-                    active ? 'text-origen-bosque' : 'text-text-subtle'
-                  )}>
-                    {tab.label}
-                  </span>
+                  {/* Label — solo se muestra si el tab tiene literal asignado */}
+                  {tab.label && (
+                    <span className={cn(
+                      'text-[10px] font-semibold leading-none transition-colors duration-200',
+                      active ? 'text-origen-bosque' : 'text-text-subtle'
+                    )}>
+                      {tab.label}
+                    </span>
+                  )}
                 </motion.div>
               </Link>
             );
@@ -209,12 +213,12 @@ export function BottomTabBar() {
                     )} />
                   </motion.div>
 
-                  {/* Badge */}
+                  {/* Badge — tamaño legible y rojo para contraste sobre la isla clara */}
                   {tab.badge && tab.badge > 0 && (
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute -top-1 -right-2 min-w-[14px] h-3.5 px-0.5 rounded-full text-[8px] font-bold text-white bg-origen-menta flex items-center justify-center shadow-sm"
+                      className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black text-white bg-red-500 border-2 border-white flex items-center justify-center shadow-md"
                     >
                       {tab.badge > 9 ? '9+' : tab.badge}
                     </motion.span>
