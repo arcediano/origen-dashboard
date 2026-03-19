@@ -34,7 +34,7 @@ export function MobileNavBar({
           variant="outline"
           onClick={onBack}
           disabled={isSubmitting}
-          className="h-12 w-12 p-0 border-gray-300 text-origen-bosque flex-shrink-0"
+          className="h-12 w-12 p-0 border-border text-origen-bosque flex-shrink-0"
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>

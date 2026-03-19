@@ -59,7 +59,7 @@ export const BusinessTypeSelector: React.FC<BusinessTypeSelectorProps> = ({ valu
                 <Icon className="w-6 h-6" />
               </div>
               <div>
-                <h3 className={cn('text-sm font-semibold leading-tight', isSelected ? 'text-origen-bosque' : 'text-gray-900')}>
+                <h3 className={cn('text-sm font-semibold leading-tight', isSelected ? 'text-origen-bosque' : 'text-foreground')}>
                   {option.label}
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5 hidden md:block">{option.desc}</p>

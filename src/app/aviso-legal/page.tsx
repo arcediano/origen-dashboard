@@ -113,8 +113,8 @@ export default function LegalNoticePage() {
           {/* Cabecera */}
           <div className="mb-8 md:mb-10">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center">
-                <FileText className="w-6 h-6 text-origen-bosque" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
+                <FileText className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-origen-bosque">Aviso Legal</h1>

@@ -59,7 +59,7 @@ function SalesChart({
             <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
               <div className="relative w-full">
                 {/* Tooltip con valor al hacer hover */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                   {value} ventas
                 </div>
                 {/* Barra */}

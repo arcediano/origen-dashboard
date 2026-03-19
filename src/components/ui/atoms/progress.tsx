@@ -166,7 +166,7 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
         {description && (
           <p className={cn(
             "text-xs leading-relaxed",
-            variant === "forest" ? "text-white/80" : "text-gray-600"
+            variant === "forest" ? "text-white/80" : "text-muted-foreground"
           )}>
             {description}
           </p>
@@ -347,7 +347,7 @@ const SteppedProgress: React.FC<SteppedProgressProps> = ({
                 <div 
                   className={cn(
                     "flex-1 h-0.5 mx-1 sm:mx-2 transition-all duration-300",
-                    isCompleted ? "bg-origen-hoja" : "bg-gray-200"
+                    isCompleted ? "bg-origen-hoja" : "bg-border"
                   )}
                 />
               )}
@@ -375,7 +375,7 @@ const SteppedProgress: React.FC<SteppedProgressProps> = ({
                   ) : (
                     <span className={cn(
                       "font-semibold",
-                      isActive ? "text-white" : "text-gray-600"
+                      isActive ? "text-white" : "text-muted-foreground"
                     )}>
                       {stepNumber}
                     </span>
@@ -386,7 +386,7 @@ const SteppedProgress: React.FC<SteppedProgressProps> = ({
                   <span className={cn(
                     "mt-1 sm:mt-2 text-center max-w-[60px] sm:max-w-[80px]",
                     sizeClasses[size].label,
-                    isActive ? "font-semibold text-origen-bosque" : "text-gray-600"
+                    isActive ? "font-semibold text-origen-bosque" : "text-muted-foreground"
                   )}>
                     {stepLabels[index]}
                   </span>

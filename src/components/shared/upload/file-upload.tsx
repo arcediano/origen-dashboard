@@ -308,7 +308,7 @@ export function FileUpload({
           'relative border-2 border-dashed rounded-xl p-8 transition-all duration-200',
           isDragging
             ? 'border-origen-pradera bg-origen-pastel/50'
-            : 'border-gray-300 hover:border-origen-pradera hover:bg-origen-crema/30',
+            : 'border-border hover:border-origen-pradera hover:bg-origen-crema/30',
           disabled && 'opacity-50 cursor-not-allowed'
         )}
         onDragOver={handleDragOver}

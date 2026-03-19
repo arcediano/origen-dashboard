@@ -352,7 +352,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
         <div className="flex items-center gap-1.5">
           <span>✅ {hasLogo ? 'Logo subido' : 'Logo pendiente'}</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300" />
+        <span className="w-1 h-1 rounded-full bg-border" />
         <div className="flex items-center gap-1.5">
           <span>🖼️ {hasBanner ? 'Cabecera subida' : 'Cabecera opcional'}</span>
         </div>

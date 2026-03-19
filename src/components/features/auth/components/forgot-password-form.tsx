@@ -198,17 +198,17 @@ export function SimpleForgotPassword() {
       <div className="mt-5 md:mt-6 flex flex-wrap items-center justify-center gap-2 md:gap-3 text-[10px] md:text-xs">
         <div className="flex items-center gap-1 group cursor-default">
           <Shield className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera group-hover:text-origen-hoja transition-colors" />
-          <span className="text-muted-foreground group-hover:text-gray-800 transition-colors">SSL 256-bit</span>
+          <span className="text-muted-foreground group-hover:text-foreground transition-colors">SSL 256-bit</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300 hidden sm:block" />
+        <span className="w-1 h-1 rounded-full bg-border hidden sm:block" />
         <div className="flex items-center gap-1 group cursor-default">
           <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera group-hover:text-origen-hoja transition-colors" />
-          <span className="text-muted-foreground group-hover:text-gray-800 transition-colors">Enlace válido 30 min</span>
+          <span className="text-muted-foreground group-hover:text-foreground transition-colors">Enlace válido 30 min</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300 hidden sm:block" />
+        <span className="w-1 h-1 rounded-full bg-border hidden sm:block" />
         <div className="flex items-center gap-1 group cursor-default">
           <Mail className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera group-hover:text-origen-hoja transition-colors" />
-          <span className="text-muted-foreground group-hover:text-gray-800 transition-colors">Email seguro</span>
+          <span className="text-muted-foreground group-hover:text-foreground transition-colors">Email seguro</span>
         </div>
       </div>
     </div>

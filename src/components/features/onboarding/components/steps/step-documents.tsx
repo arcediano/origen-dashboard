@@ -465,12 +465,12 @@ export function EnhancedStep5Documents({
           <Lock className="w-3.5 h-3.5 text-origen-pradera" />
           <span>Cifrado SSL 256-bit</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300" />
+        <span className="w-1 h-1 rounded-full bg-border" />
         <div className="flex items-center gap-1.5">
           <Clock className="w-3.5 h-3.5 text-origen-pradera" />
           <span>Verificación 24-48h</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300" />
+        <span className="w-1 h-1 rounded-full bg-border" />
         <div className="flex items-center gap-1.5">
           <Shield className="w-3.5 h-3.5 text-origen-pradera" />
           <span>Documentos seguros</span>

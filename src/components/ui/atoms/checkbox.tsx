@@ -209,7 +209,7 @@ const CheckboxWithLabel = React.forwardRef<
             </label>
             
             {description && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-text-subtle mt-1">
                 {description}
               </p>
             )}
@@ -262,7 +262,7 @@ const CheckboxGroup = React.forwardRef<HTMLFieldSetElement, CheckboxGroupProps>(
               </legend>
             )}
             {description && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-text-subtle">
                 {description}
               </p>
             )}

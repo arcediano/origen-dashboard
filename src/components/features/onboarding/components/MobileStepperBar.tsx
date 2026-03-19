@@ -27,9 +27,9 @@ export function MobileStepperBar({ steps, currentStep }: MobileStepperBarProps) 
             <React.Fragment key={step.id}>
               <div className={cn(
                 'rounded-full flex items-center justify-center transition-all duration-300 flex-shrink-0',
-                isCompleted && 'w-5 h-5 bg-green-500',
+                isCompleted && 'w-5 h-5 bg-origen-hoja',
                 isActive && 'w-5 h-5 bg-origen-pradera ring-2 ring-origen-pradera/30',
-                !isCompleted && !isActive && 'w-2.5 h-2.5 bg-gray-300'
+                !isCompleted && !isActive && 'w-2.5 h-2.5 bg-border'
               )}>
                 {isCompleted && <CheckCircle className="w-3 h-3 text-white" />}
                 {isActive && <span className="w-2 h-2 rounded-full bg-surface-alt" />}
@@ -37,7 +37,7 @@ export function MobileStepperBar({ steps, currentStep }: MobileStepperBarProps) 
               {index < steps.length - 1 && (
                 <div className={cn(
                   'flex-1 h-0.5 transition-all duration-300',
-                  index < currentStep ? 'bg-green-400' : 'bg-border'
+                  index < currentStep ? 'bg-origen-pradera' : 'bg-border'
                 )} />
               )}
             </React.Fragment>

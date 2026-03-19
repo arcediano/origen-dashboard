@@ -424,7 +424,7 @@ export function StepPricing({
                           "flex flex-col items-center p-3 rounded-lg border-2 transition-all",
                           newTier.type === type.id
                             ? "border-origen-pradera bg-origen-pradera/5"
-                            : "border-border hover:border-gray-300 bg-surface-alt"
+                            : "border-border hover:border-border bg-surface-alt"
                         )}
                       >
                         <type.icon className={cn(

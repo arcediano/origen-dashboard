@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardSidebar } from '@/app/dashboard/components/sidebar/DashboardSidebar';
 import { DashboardHeader } from '@/app/dashboard/components/header/DashboardHeader';
-// import { StatusBanner } from '@/components/shared/status/StatusBanner';
+import { BottomTabBar, MobileTopBar, MobilePageTransition } from '@/components/features/dashboard/components/mobile';
 import { SessionExpiredModal } from '@/components/features/auth/components/session-expired-modal';
 import { cn } from '@/lib/utils';
 import { type SellerStatus } from '@/types/seller';
@@ -117,28 +117,37 @@ function DashboardContentWrapper({
   return (
       <div className="min-h-screen bg-gradient-to-br from-surface via-surface-alt to-surface">
       <SessionExpiredModal isOpen={sessionExpired} />
+
+      {/* Sidebar — solo desktop */}
       <DashboardSidebar
         isMobileOpen={isMobileMenuOpen}
         onMobileClose={() => setIsMobileMenuOpen(false)}
       />
 
+      {/* Header desktop */}
+      <div className="hidden lg:block">
+        <DashboardHeader onMenuClick={() => setIsMobileMenuOpen(true)} />
+      </div>
+
+      {/* Header móvil nativo */}
+      <MobileTopBar />
+
       <main className={cn(
         "transition-all duration-300",
-        !isMobile && "lg:ml-64"
+        // Desktop: desplazar por sidebar
+        !isMobile && "lg:ml-64",
+        // Mobile: espacio para header fijo (56px) y bottom tab (64px + safe-area)
+        isMobile && "pt-14 pb-[calc(64px+env(safe-area-inset-bottom))]"
       )}>
-        <DashboardHeader onMenuClick={() => setIsMobileMenuOpen(true)} />
-
-        {/* BANNER FLOTANTE ULTRA COMPACTO */}
-        {/* <StatusBanner
-          status={MOCK_PRODUCER_STATUS.status}
-          details={MOCK_PRODUCER_STATUS.details}
-          dismissible={true}
-        /> */}
-
-        <div className="w-full">
-          {children}
-        </div>
+        <MobilePageTransition>
+          <div className="w-full">
+            {children}
+          </div>
+        </MobilePageTransition>
       </main>
+
+      {/* Bottom tab bar — solo móvil */}
+      <BottomTabBar />
     </div>
   );
 }

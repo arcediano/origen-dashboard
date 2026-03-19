@@ -107,7 +107,7 @@ export function OrderItem({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-muted-foreground">{customer}</span>
-                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                <span className="w-1 h-1 rounded-full bg-border" />
                 <span className="text-muted-foreground">{items} {items === 1 ? 'producto' : 'productos'}</span>
               </div>
               <span className="font-semibold text-lg text-origen-bosque">

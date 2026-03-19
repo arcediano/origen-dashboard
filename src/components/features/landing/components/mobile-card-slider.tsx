@@ -51,7 +51,7 @@ export function MobileCardSlider({
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 i === activeIndex
                   ? 'bg-origen-pradera w-6'
-                  : 'bg-gray-300 w-1.5'
+                  : 'bg-border w-1.5'
               }`}
             />
           ))}

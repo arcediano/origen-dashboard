@@ -113,7 +113,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           <h3
             className={cn(
               'text-sm font-semibold leading-tight',
-              isSelected ? 'text-origen-bosque' : 'text-gray-900',
+              isSelected ? 'text-origen-bosque' : 'text-foreground',
             )}
           >
             {category.name}

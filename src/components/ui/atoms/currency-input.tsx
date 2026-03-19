@@ -295,7 +295,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
             
             {tooltip && (
               <div className="group relative">
-                <Info className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-400 cursor-help" />
+                <Info className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-text-disabled cursor-help" />
                 <div 
                   className={cn(
                     "absolute left-0 top-4 sm:top-5 z-50 hidden group-hover:block",
@@ -317,7 +317,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
             "absolute top-1/2 -translate-y-1/2",
             getIconPosition(),
             "w-4 h-4",
-            isFocused ? "text-origen-pradera" : "text-gray-400",
+            isFocused ? "text-origen-pradera" : "text-text-disabled",
             error && "text-red-500"
           )} />
           
@@ -337,10 +337,10 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
             aria-describedby={error ? errorId : undefined}
             className={cn(
               "flex w-full rounded-xl border bg-white",
-              "text-origen-oscuro placeholder:text-gray-400",
+              "text-origen-oscuro placeholder:text-text-disabled",
               "transition-all duration-200",
               "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50 focus:border-origen-pradera",
-              "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50",
+              "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-surface",
               
               sizeClasses[inputSize],
               getPaddingLeft(),
@@ -360,7 +360,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
           
           {/* Indicador de moneda */}
           <span className={cn(
-            "absolute top-1/2 -translate-y-1/2 text-xs text-gray-400",
+            "absolute top-1/2 -translate-y-1/2 text-xs text-text-disabled",
             getEurPosition()
           )}>
             EUR
@@ -379,7 +379,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
         )}
         
         {helperText && !error && (
-          <p className="text-[10px] sm:text-xs text-gray-500">
+          <p className="text-[10px] sm:text-xs text-text-subtle">
             {helperText}
           </p>
         )}

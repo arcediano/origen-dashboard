@@ -775,7 +775,7 @@ export default function OnboardingPage() {
                     variant="outline"
                     onClick={handleBack}
                     disabled={isSubmitting}
-                    className="h-10 px-4 border-gray-300 text-origen-bosque hover:bg-origen-crema/50 hover:border-origen-pradera"
+                    className="h-10 px-4 border-border text-origen-bosque hover:bg-origen-crema/50 hover:border-origen-pradera"
                   >
                     Anterior
                   </Button>
@@ -786,7 +786,7 @@ export default function OnboardingPage() {
                     variant="outline"
                     onClick={handleSkipOnboarding}
                     disabled={isSubmitting}
-                    className="h-10 px-4 border-border text-muted-foreground hover:bg-surface hover:border-gray-300 text-xs"
+                    className="h-10 px-4 border-border text-muted-foreground hover:bg-surface hover:border-border text-xs"
                   >
                     Completar más tarde
                   </Button>

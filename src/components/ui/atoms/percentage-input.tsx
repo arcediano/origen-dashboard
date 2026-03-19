@@ -110,7 +110,7 @@ const PercentageInput = React.forwardRef<HTMLInputElement, PercentageInputProps>
             
             {tooltip && (
               <div className="group relative">
-                <Info className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-400 cursor-help" />
+                <Info className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-text-disabled cursor-help" />
                 <div 
                   className={cn(
                     "absolute left-0 top-4 sm:top-5 z-50 hidden group-hover:block",
@@ -142,10 +142,10 @@ const PercentageInput = React.forwardRef<HTMLInputElement, PercentageInputProps>
             aria-describedby={error ? errorId : undefined}
             className={cn(
               "flex h-9 sm:h-10 w-full rounded-xl border bg-white px-3 py-2 pr-8 sm:pr-9",
-              "text-sm sm:text-base placeholder:text-gray-400",
+              "text-sm sm:text-base placeholder:text-text-disabled",
               "transition-all duration-200",
               "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
-              "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50",
+              "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-surface",
               
               error
                 ? "border-red-500 hover:border-red-600 focus:ring-red-500/50"
@@ -163,14 +163,14 @@ const PercentageInput = React.forwardRef<HTMLInputElement, PercentageInputProps>
           <Percent className={cn(
             "absolute right-3 top-1/2 -translate-y-1/2",
             "h-3.5 w-3.5 sm:h-4 sm:w-4",
-            isFocused ? "text-origen-pradera" : "text-gray-400",
+            isFocused ? "text-origen-pradera" : "text-text-disabled",
             error && "text-red-500"
           )} />
         </div>
 
         {/* Barra de progreso visual */}
         {showProgress && !error && value > 0 && (
-          <div className="relative h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="relative h-1 w-full bg-surface-alt rounded-full overflow-hidden">
             <div 
               className={cn(
                 "absolute left-0 top-0 h-full transition-all duration-300",
@@ -193,7 +193,7 @@ const PercentageInput = React.forwardRef<HTMLInputElement, PercentageInputProps>
         )}
         
         {helperText && !error && (
-          <p className="text-[10px] sm:text-xs text-gray-500">
+          <p className="text-[10px] sm:text-xs text-text-subtle">
             {helperText}
           </p>
         )}

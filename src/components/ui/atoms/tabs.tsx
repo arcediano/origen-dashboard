@@ -390,7 +390,7 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
             <span className={cn(
               "shrink-0",
               sizeStyles[size].icon,
-              isActive ? "text-current" : "text-gray-400"
+              isActive ? "text-current" : "text-text-disabled"
             )}>
               {icon}
             </span>

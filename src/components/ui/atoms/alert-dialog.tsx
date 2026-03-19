@@ -243,7 +243,7 @@ const AlertDialogDescription = ({
 }: React.HTMLAttributes<HTMLParagraphElement>) => (
   <p
     className={cn(
-      "text-xs sm:text-sm text-gray-500",
+      "text-xs sm:text-sm text-text-subtle",
       className
     )}
     {...props}

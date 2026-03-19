@@ -174,7 +174,7 @@ export function OrdersTable({
               <div className="relative">
                 <div className={cn(
                   'w-2 h-2 rounded-full mt-1.5',
-                  index === 0 ? 'bg-origen-pradera' : 'bg-gray-300'
+                  index === 0 ? 'bg-origen-pradera' : 'bg-border'
                 )} />
                 {index < order.timeline.length - 1 && (
                   <div className="absolute top-3 left-1 w-0.5 h-8 bg-border -translate-x-[3px]" />

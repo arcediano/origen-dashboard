@@ -189,7 +189,7 @@ export function DashboardFooter({
               <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
             
-            <span className="text-gray-200">|</span>
+            <span className="text-border-subtle">|</span>
             
             <Link 
               href="/terminos" 
@@ -198,7 +198,7 @@ export function DashboardFooter({
               Términos
             </Link>
             
-            <span className="text-gray-200">|</span>
+            <span className="text-border-subtle">|</span>
             
             <Link 
               href="/cookies" 

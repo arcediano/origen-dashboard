@@ -42,7 +42,7 @@ export function ProducerCard({ producer, className }: ProducerCardProps) {
           <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
             <MapPin className="w-4 h-4 text-origen-pradera" />
             <span>{producer.city}, {producer.province}</span>
-            <span className="w-1 h-1 rounded-full bg-gray-300" />
+            <span className="w-1 h-1 rounded-full bg-border" />
             <Calendar className="w-4 h-4 text-origen-pradera" />
             <span>{yearsOfExperience} años</span>
           </div>

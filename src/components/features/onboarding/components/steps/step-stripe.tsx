@@ -392,7 +392,7 @@ export function EnhancedStep6Stripe({
           <Shield className="w-3.5 h-3.5 text-origen-pradera" />
           <span>Pagos seguros</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300" />
+        <span className="w-1 h-1 rounded-full bg-border" />
         <div className="flex items-center gap-1.5">
           <Lock className="w-3.5 h-3.5 text-origen-pradera" />
           <span>Protección contra fraude</span>

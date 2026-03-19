@@ -41,11 +41,11 @@ export function ContactInfo() {
             <h3 className="text-lg font-semibold text-origen-bosque">Horario</h3>
             <div className="grid grid-cols-2 gap-2 mt-1">
               <span className="text-muted-foreground">Lunes-Viernes:</span>
-              <span className="text-gray-900 font-medium">9:00 - 18:00</span>
+              <span className="text-foreground font-medium">9:00 - 18:00</span>
               <span className="text-muted-foreground">Sábados:</span>
-              <span className="text-gray-900 font-medium">10:00 - 14:00</span>
+              <span className="text-foreground font-medium">10:00 - 14:00</span>
               <span className="text-muted-foreground">Domingos:</span>
-              <span className="text-gray-900 font-medium">Cerrado</span>
+              <span className="text-foreground font-medium">Cerrado</span>
             </div>
           </div>
         </div>

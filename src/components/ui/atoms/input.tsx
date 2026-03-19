@@ -304,7 +304,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             
             {tooltip && (
               <div className="group relative">
-                <Info className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 cursor-help" />
+                <Info className="h-3 w-3 sm:h-4 sm:w-4 text-text-disabled cursor-help" />
                 <div 
                   className={cn(
                     "absolute left-0 top-5 z-50 hidden group-hover:block",
@@ -327,7 +327,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               "absolute top-1/2 -translate-y-1/2",
               getIconLeftPosition(),
               "flex items-center justify-center",
-              "text-gray-400 pointer-events-none",
+              "text-text-disabled pointer-events-none",
               "z-10",
               isFocused && "text-origen-pradera",
               error && "text-red-500",
@@ -359,9 +359,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-busy={loading}
             className={cn(
               "flex w-full rounded-xl",
-              "text-origen-oscuro placeholder:text-gray-400",
+              "text-origen-oscuro placeholder:text-text-disabled",
               "transition-all duration-200",
-              "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50",
+              "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-surface",
               "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50 focus:border-origen-pradera",
               
               variantClasses[variant],
@@ -418,7 +418,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             )}
             
             {rightIcon && !validationState && !isPassword && (
-              <div className="text-gray-400">
+              <div className="text-text-disabled">
                 {React.isValidElement(rightIcon)
                   ? React.cloneElement(rightIcon as React.ReactElement, { 
                       className: getIconSize()
@@ -431,7 +431,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           
           {/* Barra de progreso para contador */}
           {showCharCount && maxLength && (
-            <div className="absolute -bottom-1 left-0 right-0 h-1 bg-gray-100 rounded-full overflow-hidden">
+            <div className="absolute -bottom-1 left-0 right-0 h-1 bg-surface-alt rounded-full overflow-hidden">
               <div 
                 className={cn(
                   "h-full transition-all duration-300",
@@ -461,7 +461,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               {helperText && !error && (
                 <p 
                   id={helperId}
-                  className="text-xs text-gray-500"
+                  className="text-xs text-text-subtle"
                 >
                   {helperText}
                 </p>
@@ -477,7 +477,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     ? "text-red-600" 
                     : charCount > maxLength * 0.9 
                     ? "text-amber-600"
-                    : "text-gray-500"
+                    : "text-text-subtle"
                 )}
               >
                 {charCount}/{maxLength}
@@ -523,7 +523,7 @@ const InputGroup = React.forwardRef<HTMLDivElement, InputGroupProps>(
               </h4>
             )}
             {groupDescription && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-text-subtle">
                 {groupDescription}
               </p>
             )}

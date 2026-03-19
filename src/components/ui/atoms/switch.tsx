@@ -28,7 +28,7 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
       onCheckedChange,
       size = "md",
       thumbColor = "bg-white",
-      trackColor = "bg-gray-200",
+      trackColor = "bg-border",
       trackCheckedColor = "bg-origen-mandarina",
       disabled = false,
       ...props

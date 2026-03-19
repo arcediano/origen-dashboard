@@ -565,12 +565,12 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4 text-origen-hoja" />
                   <span className="text-xs md:text-sm text-muted-foreground">SSL 256-bit</span>
                 </div>
-                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                <span className="w-1 h-1 rounded-full bg-border" />
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-origen-hoja" />
                   <span className="text-xs md:text-sm text-muted-foreground">Respuesta 24h</span>
                 </div>
-                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                <span className="w-1 h-1 rounded-full bg-border" />
                 <div className="flex items-center gap-1.5">
                   <Leaf className="w-3.5 h-3.5 md:w-4 md:h-4 text-origen-hoja" />
                   <span className="text-xs md:text-sm text-muted-foreground">Kilómetro 0</span>

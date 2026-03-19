@@ -871,7 +871,7 @@ export function EnhancedStep4Capacity({
           <Lock className="w-3.5 h-3.5 text-origen-pradera" />
           <span>Configuración guardada</span>
         </div>
-        <span className="w-1 h-1 rounded-full bg-gray-300" />
+        <span className="w-1 h-1 rounded-full bg-border" />
         <div className="flex items-center gap-1.5">
           <Clock className="w-3.5 h-3.5 text-origen-pradera" />
           <span>Puedes modificarlo después</span>

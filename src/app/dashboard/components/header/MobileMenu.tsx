@@ -14,7 +14,7 @@ export function MobileMenu({ onClick }: MobileMenuProps) {
       variant="ghost" 
       size="icon" 
       onClick={onClick} 
-      className="lg:hidden text-foreground hover:text-[#1B4332] hover:bg-[#74C69D]/10"
+      className="lg:hidden text-foreground hover:text-origen-bosque hover:bg-origen-pradera/10"
     >
       <Menu className="w-5 h-5" />
     </Button>

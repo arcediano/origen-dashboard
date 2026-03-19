@@ -205,7 +205,7 @@ export function ContactForm() {
                   ? "bg-origen-bosque border-origen-bosque"
                   : errors.privacy
                     ? "border-red-400 hover:border-red-500"
-                    : "border-gray-300 hover:border-origen-pradera"
+                    : "border-border hover:border-origen-pradera"
               )}
             >
               {form.privacy && (

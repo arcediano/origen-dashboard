@@ -38,7 +38,7 @@ export function ProductTableActions({
         aria-label="Ajustar stock"
       >
         <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
+        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
           Ajustar stock
         </span>
       </button>
@@ -54,7 +54,7 @@ export function ProductTableActions({
         aria-label="Ver producto"
       >
         <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
+        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
           Ver producto
         </span>
       </button>
@@ -70,7 +70,7 @@ export function ProductTableActions({
         aria-label="Editar producto"
       >
         <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
+        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
           Editar producto
         </span>
       </button>

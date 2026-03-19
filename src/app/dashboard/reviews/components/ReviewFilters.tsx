@@ -174,7 +174,7 @@ export function ReviewFilters({
             'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md border transition-all whitespace-nowrap',
             filters.verifiedOnly
               ? 'bg-origen-pradera/10 text-origen-pradera border-origen-pradera/30'
-              : 'bg-surface-alt text-muted-foreground border-border hover:border-gray-300'
+              : 'bg-surface-alt text-muted-foreground border-border hover:border-border'
           )}
         >
           <CheckCircle className="w-3.5 h-3.5" />
@@ -187,7 +187,7 @@ export function ReviewFilters({
             'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md border transition-all whitespace-nowrap',
             filters.hasResponse
               ? 'bg-origen-pradera/10 text-origen-pradera border-origen-pradera/30'
-              : 'bg-surface-alt text-muted-foreground border-border hover:border-gray-300'
+              : 'bg-surface-alt text-muted-foreground border-border hover:border-border'
           )}
         >
           <ThumbsUp className="w-3.5 h-3.5" />
@@ -200,7 +200,7 @@ export function ReviewFilters({
             'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md border transition-all whitespace-nowrap',
             filters.hasImages
               ? 'bg-origen-pradera/10 text-origen-pradera border-origen-pradera/30'
-              : 'bg-surface-alt text-muted-foreground border-border hover:border-gray-300'
+              : 'bg-surface-alt text-muted-foreground border-border hover:border-border'
           )}
         >
           <Image className="w-3.5 h-3.5" />
