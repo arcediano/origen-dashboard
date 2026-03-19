@@ -136,8 +136,8 @@ function DashboardContentWrapper({
         "transition-all duration-300",
         // Desktop: desplazar por sidebar
         !isMobile && "lg:ml-64",
-        // Mobile: espacio para header fijo (56px) y bottom tab (64px + safe-area)
-        isMobile && "pt-14 pb-[calc(64px+env(safe-area-inset-bottom))]"
+        // Mobile: espacio para header fijo (56px) y barra flotante (72px + safe-area + margen)
+        isMobile && "pt-14 pb-[calc(88px+env(safe-area-inset-bottom))]"
       )}>
         <MobilePageTransition>
           <div className="w-full">

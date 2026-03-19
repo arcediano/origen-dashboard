@@ -8,6 +8,9 @@ interface MobilePageTransitionProps {
   children: React.ReactNode;
 }
 
+const ENTER = { duration: 0.28, ease: 'easeOut' } as const;
+const EXIT  = { duration: 0.18, ease: 'easeIn'  } as const;
+
 export function MobilePageTransition({ children }: MobilePageTransitionProps) {
   const pathname = usePathname();
 
@@ -15,11 +18,11 @@ export function MobilePageTransition({ children }: MobilePageTransitionProps) {
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={pathname}
-        initial={{ opacity: 0, x: 16 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -16 }}
-        transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+        initial={{ opacity: 0, scale: 0.96, y: 14 }}
+        animate={{ opacity: 1, scale: 1,    y: 0,  transition: ENTER }}
+        exit={{    opacity: 0, scale: 0.98,  y: -8, transition: EXIT  }}
         className="will-change-transform"
+        style={{ transformOrigin: 'top center' }}
       >
         {children}
       </motion.div>
