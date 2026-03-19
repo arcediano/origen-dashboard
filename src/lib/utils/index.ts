@@ -6,6 +6,8 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+export type { ClassValue };
+
 /** Combina clases de Tailwind CSS de forma inteligente */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
