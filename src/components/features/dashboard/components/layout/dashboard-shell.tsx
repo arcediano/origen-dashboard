@@ -31,7 +31,7 @@ export function DashboardShell({ children, className }: DashboardShellProps) {
       initial="hidden"
       animate="visible"
       className={cn(
-        'w-full min-h-screen bg-gradient-to-b from-white to-origen-crema',
+        'w-full min-h-screen bg-gradient-to-b from-surface-alt to-surface',
         className
       )}
     >
