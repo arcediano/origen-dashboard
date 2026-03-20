@@ -100,7 +100,7 @@ export function StatsGrid({
           <p className="text-sm mt-2">Los datos aparecerán cuando tengas visitas o pedidos</p>
         </div>
       ) : !isCollapsed && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
       {isLoading ? (
         // Estado de carga - Spinner centrado
         <div className="col-span-full flex items-center justify-center py-8">

@@ -30,7 +30,7 @@ export function DashboardTabs({
   className,
 }: DashboardTabsProps) {
   return (
-    <motion.div variants={itemVariants} className={className}>
+    <motion.div variants={itemVariants} className={cn('hidden lg:block', className)}>
       <Tabs defaultValue="analytics" variant="minimal" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger

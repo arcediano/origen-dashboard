@@ -25,32 +25,32 @@ export function ProducerCard({ producer, className }: ProducerCardProps) {
   return (
     <motion.div
       variants={itemVariants}
-      className={cn('flex flex-col lg:flex-row gap-6 items-start', className)}
+      className={cn('flex flex-col lg:flex-row gap-4 items-start', className)}
     >
       {/* Avatar + Info */}
-      <div className="flex items-center gap-4">
-        <Avatar className="w-16 h-16 ring-4 ring-white shadow-xl">
+      <div className="flex items-center gap-3">
+        <Avatar className="w-12 h-12 sm:w-16 sm:h-16 ring-4 ring-white shadow-xl flex-shrink-0">
           {producer.logoUrl && <AvatarImage src={producer.logoUrl} alt={producer.businessName} />}
-          <AvatarFallback className="bg-gradient-to-br from-origen-pradera to-origen-hoja text-white text-xl">
+          <AvatarFallback className="bg-gradient-to-br from-origen-pradera to-origen-hoja text-white text-base sm:text-xl">
             {initials}
           </AvatarFallback>
         </Avatar>
-        <div>
-          <h2 className="text-xl font-semibold text-origen-bosque">
+        <div className="min-w-0">
+          <h2 className="text-base sm:text-xl font-semibold text-origen-bosque truncate">
             {producer.businessName}
           </h2>
-          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-            <MapPin className="w-4 h-4 text-origen-pradera" />
+          <div className="flex items-center gap-1.5 mt-1 text-xs sm:text-sm text-text-subtle flex-wrap">
+            <MapPin className="w-3.5 h-3.5 text-origen-pradera flex-shrink-0" />
             <span>{producer.city}, {producer.province}</span>
             <span className="w-1 h-1 rounded-full bg-border" />
-            <Calendar className="w-4 h-4 text-origen-pradera" />
+            <Calendar className="w-3.5 h-3.5 text-origen-pradera flex-shrink-0" />
             <span>{yearsOfExperience} años</span>
           </div>
         </div>
       </div>
 
-      {/* Badges de certificaciones */}
-      <div className="flex flex-wrap gap-2">
+      {/* Badges — ocultos en móvil para no crear ruido visual */}
+      <div className="hidden sm:flex flex-wrap gap-2">
         {producer.certifications.map(cert => (
           <div
             key={cert.id}
@@ -68,6 +68,14 @@ export function ProducerCard({ producer, className }: ProducerCardProps) {
           </div>
         )}
       </div>
+
+      {/* Badge verificado compacto — solo móvil */}
+      {producer.verified && (
+        <div className="sm:hidden inline-flex items-center gap-1.5 bg-green-50 text-green-700 rounded-full px-3 py-1 border border-green-200">
+          <Award className="w-3.5 h-3.5" />
+          <span className="text-xs font-medium">Verificado</span>
+        </div>
+      )}
     </motion.div>
   );
 }

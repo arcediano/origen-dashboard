@@ -35,7 +35,7 @@ export function DashboardShell({ children, className }: DashboardShellProps) {
         className
       )}
     >
-      <div className="container mx-auto px-6 py-8 space-y-8">
+      <div className="container mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8">
         {children}
       </div>
     </motion.div>

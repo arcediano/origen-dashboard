@@ -40,37 +40,37 @@ export function StatsCard({
       )}></div>
       
       <div className={cn(
-        "relative bg-surface-alt rounded-2xl p-6 border border-border",
+        "relative bg-surface-alt rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-border",
         "shadow-origen group-hover:shadow-origen-lg group-hover:border-origen-pradera",
         "transition-all duration-300",
-        "h-full flex flex-col", // Altura consistente
+        "h-full flex flex-col",
         className
       )}>
-        <div className="flex items-start gap-4 flex-1">
+        <div className="flex items-start gap-2 sm:gap-4 flex-1">
           {/* Icono circular */}
           <div className={cn(
-            "w-14 h-14 rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0 shadow-subtle",
+            "w-9 h-9 sm:w-11 sm:h-11 lg:w-14 lg:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0 shadow-subtle",
             gradient
           )}>
-            <Icon className="w-7 h-7 text-white" />
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-7 lg:h-7 text-white" />
           </div>
           
           <div className="flex-1 min-w-0 flex flex-col">
-            <p className="text-sm font-medium text-muted-foreground mb-1">{label}</p>
+            <p className="text-[11px] sm:text-xs lg:text-sm font-medium text-text-subtle mb-0.5 sm:mb-1 leading-tight">{label}</p>
             
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-origen-bosque">
+            <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
+              <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-origen-bosque">
                 {value}
               </span>
               {sublabel && (
-                <span className="text-sm text-muted-foreground">{sublabel}</span>
+                <span className="text-[10px] sm:text-sm text-text-subtle">{sublabel}</span>
               )}
             </div>
             
-            {/* Área de trend con altura fija para consistencia */}
-            <div className="mt-3 min-h-[28px]">
+            {/* Trend — oculto en móvil para ahorrar espacio */}
+            <div className="mt-1.5 sm:mt-3 min-h-0 sm:min-h-[28px]">
               {trend ? (
-                <div className="flex items-center gap-2">
+                <div className="hidden sm:flex items-center gap-2">
                   <div className={cn(
                     "flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
                     trend.isPositive 
@@ -86,10 +86,7 @@ export function StatsCard({
                   </div>
                   <span className="text-xs text-text-subtle">vs ayer</span>
                 </div>
-              ) : (
-                // Placeholder invisible para mantener altura
-                <div className="h-7" />
-              )}
+              ) : null}
             </div>
           </div>
         </div>

@@ -78,24 +78,24 @@ export function OrderItem({
       )}></div>
       
       <div className={cn(
-        "relative bg-surface-alt rounded-2xl p-6 border border-border",
+        "relative bg-surface-alt rounded-xl sm:rounded-2xl p-3.5 sm:p-5 lg:p-6 border border-border",
         "shadow-origen group-hover:shadow-origen-lg group-hover:border-origen-pradera",
         "transition-all duration-300"
       )}>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           {/* Icono circular */}
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-origen-pradera to-origen-hoja flex items-center justify-center flex-shrink-0 shadow-subtle">
-            <ShoppingBag className="w-7 h-7 text-white" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-origen-pradera to-origen-hoja flex items-center justify-center flex-shrink-0 shadow-subtle">
+            <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-3">
-                <h3 className="font-semibold text-lg text-origen-bosque">{orderNumber}</h3>
-                <span className="text-sm text-muted-foreground">{date}</span>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <h3 className="font-semibold text-sm sm:text-base lg:text-lg text-origen-bosque truncate">{orderNumber}</h3>
+                <span className="text-xs text-text-subtle hidden sm:inline">{date}</span>
               </div>
               <span className={cn(
-                "px-3 py-1 text-xs font-medium rounded-full border",
+                "px-2 py-0.5 text-[10px] sm:text-xs font-medium rounded-full border flex-shrink-0 ml-2",
                 config.bg,
                 config.text,
                 config.border
@@ -105,12 +105,12 @@ export function OrderItem({
             </div>
             
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">{customer}</span>
-                <span className="w-1 h-1 rounded-full bg-border" />
-                <span className="text-muted-foreground">{items} {items === 1 ? 'producto' : 'productos'}</span>
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm">
+                <span className="text-text-subtle truncate max-w-[100px] sm:max-w-none">{customer}</span>
+                <span className="hidden sm:inline w-1 h-1 rounded-full bg-border" />
+                <span className="text-text-subtle hidden sm:inline">{items} {items === 1 ? 'producto' : 'productos'}</span>
               </div>
-              <span className="font-semibold text-lg text-origen-bosque">
+              <span className="font-semibold text-sm sm:text-lg text-origen-bosque flex-shrink-0">
                 {total.toFixed(2)}€
               </span>
             </div>

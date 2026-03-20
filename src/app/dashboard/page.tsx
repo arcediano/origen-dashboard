@@ -36,27 +36,27 @@ function OnboardingProgressBanner() {
   if (dismissed) return null;
 
   return (
-    <div className="mx-6 mt-4 flex items-center justify-between gap-4 bg-origen-crema/60 border border-origen-pradera/30 rounded-xl px-5 py-3.5">
+    <div className="mx-4 sm:mx-6 mt-3 sm:mt-4 flex items-center justify-between gap-3 bg-origen-crema/60 border border-origen-pradera/30 rounded-xl px-4 py-3">
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
           <Leaf className="w-4 h-4 text-origen-pradera" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-origen-bosque leading-tight">Completa tu perfil para empezar a vender</p>
-          <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">Configura tu tienda, añade productos y activa los pagos.</p>
+          <p className="text-xs sm:text-sm font-semibold text-origen-bosque leading-tight">Completa tu perfil</p>
+          <p className="text-[11px] sm:text-xs text-text-subtle mt-0.5 hidden xs:block">Configura tu tienda y activa los pagos.</p>
         </div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         <Link
           href="/onboarding"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-origen-bosque hover:bg-origen-pino px-3 py-1.5 rounded-lg transition-colors"
+          className="inline-flex items-center gap-1 text-xs font-medium text-white bg-origen-bosque hover:bg-origen-pino px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap"
         >
-          Continuar configuración
-          <ArrowRight className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Continuar </span>configuración
+          <ArrowRight className="w-3 h-3" />
         </Link>
         <button
           onClick={() => setDismissed(true)}
-          className="p-1.5 text-text-subtle hover:text-muted-foreground transition-colors rounded-lg hover:bg-surface"
+          className="p-1 text-text-subtle hover:text-texto-subtle transition-colors rounded-lg hover:bg-surface"
           aria-label="Cerrar"
         >
           <X className="w-4 h-4" />
@@ -88,7 +88,7 @@ export default function ProducerDashboard() {
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
       {/* Header integrado en el gradiente */}
       <div className="bg-transparent">
-        <div className="container mx-auto px-6 py-8">
+        <div className="container mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:py-8">
           <WelcomeHeader userName={userName} />
         </div>
       </div>

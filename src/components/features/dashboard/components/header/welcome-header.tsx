@@ -50,34 +50,37 @@ export function WelcomeHeader({
   if (!mounted) return null;
 
   return (
-    <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
-        {/* Badge Panel de control */}
-        <div className="inline-flex items-center gap-2 bg-origen-pradera/10 text-origen-bosque rounded-full px-4 py-2 mb-4 border border-origen-pradera/30">
+        {/* Badge Panel de control — solo desktop */}
+        <div className="hidden sm:inline-flex items-center gap-2 bg-origen-pradera/10 text-origen-bosque rounded-full px-4 py-2 mb-3 border border-origen-pradera/30">
           <Sparkles className="w-4 h-4 text-origen-pradera" />
           <span className="text-sm font-medium">Panel de control</span>
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-bold text-origen-bosque mb-2">
+        <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-origen-bosque mb-1 sm:mb-2">
           {greeting}, {userName}
         </h1>
-        <p className="text-muted-foreground flex items-center gap-2">
+        {/* Fecha — solo sm+ para no ocupar espacio en 375px */}
+        <p className="hidden sm:flex items-center gap-2 text-sm text-text-subtle">
           <Clock className="w-4 h-4" />
           {currentTime}
         </p>
       </div>
 
       {showViewStoreButton && (
-        <Button
-          variant="outline"
-          size="lg"
-          className="border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10 h-auto py-3 px-6"
-        >
-          <span className="flex items-center gap-2">
-            <Eye className="w-4 h-4" />
-            Ver tienda pública
-          </span>
-        </Button>
+        <div className="hidden sm:block">
+          <Button
+            variant="outline"
+            size="lg"
+            className="border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10 h-auto py-3 px-6"
+          >
+            <span className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              Ver tienda pública
+            </span>
+          </Button>
+        </div>
       )}
     </motion.div>
   );
