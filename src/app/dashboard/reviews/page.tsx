@@ -21,7 +21,7 @@ import { ReviewCard } from './components/ReviewCard';
 import { Pagination } from '@/components/ui/atoms/pagination';
 
 // Hooks y API
-import { fetchReviews } from '@/lib/api/reviews'; // Eliminamos approveReview y rejectReview
+import { fetchReviews } from '@/lib/api/reviews';
 import type { Review, ReviewFilters as ReviewFiltersType } from '@/types/review';
 
 // ============================================================================
@@ -32,7 +32,7 @@ const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { 
+    transition: {
       staggerChildren: 0.05,
       delayChildren: 0.1
     }
@@ -40,18 +40,11 @@ const containerVariants: Variants = {
 };
 
 const itemVariants: Variants = {
-  hidden: { 
-    opacity: 0, 
-    y: 20 
-  },
-  visible: { 
-    opacity: 1, 
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
     y: 0,
-    transition: { 
-      type: "spring",
-      stiffness: 300, 
-      damping: 25
-    }
+    transition: { type: 'spring', stiffness: 300, damping: 25 }
   }
 };
 
@@ -61,8 +54,7 @@ const itemVariants: Variants = {
 
 export default function ReviewsPage() {
   const router = useRouter();
-  
-  // Estados
+
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,10 +64,6 @@ export default function ReviewsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalReviews, setTotalReviews] = useState(0);
 
-  // ==========================================================================
-  // CARGA DE DATOS
-  // ==========================================================================
-
   useEffect(() => {
     loadReviews();
   }, [filters, currentPage]);
@@ -83,14 +71,8 @@ export default function ReviewsPage() {
   const loadReviews = async () => {
     setIsLoading(true);
     setError(null);
-
     try {
-      const response = await fetchReviews({
-        page: currentPage,
-        limit: 10,
-        filters
-      });
-
+      const response = await fetchReviews({ page: currentPage, limit: 10, filters });
       if (response.error) {
         setError(response.error);
       } else if (response.data) {
@@ -99,44 +81,30 @@ export default function ReviewsPage() {
         setTotalPages(Math.ceil(response.data.stats.total / 10));
         setTotalReviews(response.data.stats.total);
       }
-    } catch (err) {
+    } catch {
       setError('Error al cargar las reseñas');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ==========================================================================
-  // HANDLERS
-  // ==========================================================================
-
   const handleRespond = async (reviewId: string, response: string) => {
-    // Aquí iría la llamada a la API para responder
     console.log('Responder a reseña:', reviewId, response);
-    // Después de responder, recargar para ver la respuesta
     loadReviews();
   };
 
   const handleFlag = async (reviewId: string, reason?: string) => {
-    // Aquí iría la llamada a la API para reportar
     console.log('Reportar reseña:', reviewId, reason);
-    // Después de reportar, recargar para actualizar estado
     loadReviews();
   };
 
   const handleHelpful = async (reviewId: string, helpful: boolean) => {
-    // Aquí iría la llamada a la API para marcar como útil/no útil
     console.log('Marcar como útil:', reviewId, helpful);
-    // Actualizar el contador localmente para mejor UX
-    setReviews(prevReviews => 
-      prevReviews.map(review => 
-        review.id === reviewId
-          ? { 
-              ...review, 
-              helpful: helpful ? review.helpful + 1 : review.helpful,
-              notHelpful: !helpful ? review.notHelpful + 1 : review.notHelpful
-            }
-          : review
+    setReviews(prev =>
+      prev.map(r =>
+        r.id === reviewId
+          ? { ...r, helpful: helpful ? r.helpful + 1 : r.helpful, notHelpful: !helpful ? r.notHelpful + 1 : r.notHelpful }
+          : r
       )
     );
   };
@@ -151,23 +119,9 @@ export default function ReviewsPage() {
     setCurrentPage(1);
   };
 
-  // ==========================================================================
-  // RENDER
-  // ==========================================================================
+  if (isLoading && !reviews.length) return <PageLoader message="Cargando reseñas..." />;
 
-  if (isLoading && !reviews.length) {
-    return <PageLoader message="Cargando reseñas..." />;
-  }
-
-  if (error) {
-    return (
-      <PageError
-        title="Error al cargar"
-        message={error}
-        onRetry={loadReviews}
-      />
-    );
-  }
+  if (error) return <PageError title="Error al cargar" message={error} onRetry={loadReviews} />;
 
   return (
     <>
@@ -187,58 +141,56 @@ export default function ReviewsPage() {
         animate="visible"
         className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(24px+env(safe-area-inset-bottom))]"
       >
-      {/* Estadísticas */}
-      {stats && (
+        {/* Estadísticas */}
+        {stats && (
+          <motion.div variants={itemVariants}>
+            <ReviewStats stats={stats} />
+          </motion.div>
+        )}
+
+        {/* Filtros */}
         <motion.div variants={itemVariants}>
-          <ReviewStats stats={stats} />
+          <ReviewFilters
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onClearFilters={handleClearFilters}
+            totalReviews={totalReviews}
+          />
         </motion.div>
-      )}
 
-      {/* Filtros */}
-      <motion.div variants={itemVariants}>
-        <ReviewFilters
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onClearFilters={handleClearFilters}
-          totalReviews={totalReviews}
-        />
-      </motion.div>
+        {/* Lista de reseñas */}
+        <motion.div variants={itemVariants}>
+          {reviews.length > 0 && (
+            <div className="block lg:hidden rounded-xl border border-border-subtle bg-surface overflow-hidden mb-4">
+              {reviews.map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  onRespond={handleRespond}
+                  onFlag={(id) => handleFlag(id)}
+                />
+              ))}
+            </div>
+          )}
 
-      {/* Lista de reseñas */}
-      <motion.div variants={itemVariants}>
-        {/* Móvil: tarjetas compactas con bottom sheet para respuesta */}
-        {reviews.length > 0 && (
-          <div className="block lg:hidden rounded-xl border border-border-subtle bg-surface overflow-hidden mb-4">
-            {reviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-                onRespond={handleRespond}
-                onFlag={(id) => handleFlag(id)}
-              />
-            ))}
+          <div className="hidden lg:block">
+            <ReviewsList
+              reviews={reviews}
+              onRespond={handleRespond}
+              onFlag={handleFlag}
+              onHelpful={handleHelpful}
+            />
           </div>
-        )}
 
-        {/* Desktop: tarjetas expandibles originales */}
-        <div className="hidden lg:block">
-          <ReviewsList
-            reviews={reviews}
-            onRespond={handleRespond}
-            onFlag={handleFlag}
-            onHelpful={handleHelpful}
-          />
-        </div>
-
-        {/* Paginación */}
-        {totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            className="mt-6"
-          />
-        )}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              className="mt-6"
+            />
+          )}
+        </motion.div>
       </motion.div>
     </>
   );
