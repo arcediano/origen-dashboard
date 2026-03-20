@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/atoms/card';
+import { ScrollChipFilter, type ChipItem } from '@/components/shared/mobile';
 
 export interface ProductFiltersProps {
   searchQuery: string;
@@ -40,6 +41,15 @@ export interface ProductFiltersProps {
 }
 
 const DEFAULT_CATEGORIES = ['Quesos', 'Aceites', 'Mieles', 'Embutidos', 'Vinos', 'Panadería'];
+
+// Chips de estado para móvil (ScrollChipFilter)
+const STATUS_CHIPS: ChipItem[] = [
+  { label: 'Todos',       value: '' },
+  { label: 'Activos',     value: 'active' },
+  { label: 'Borradores',  value: 'draft' },
+  { label: 'Sin stock',   value: 'out_of_stock' },
+  { label: 'Inactivos',   value: 'inactive' },
+];
 
 const STATUS_OPTIONS = [
   { value: 'active', label: 'Activos' },
@@ -133,6 +143,15 @@ export function ProductFilters({
 
   return (
     <Card variant="elevated" className={cn('p-3', className)}>
+      {/* Chips de estado — sólo móvil */}
+      <div className="sm:hidden mb-3">
+        <ScrollChipFilter
+          items={STATUS_CHIPS}
+          active={selectedStatus}
+          onChange={onStatusChange}
+        />
+      </div>
+
       {/* Primera fila: búsqueda y acciones principales */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Campo de búsqueda - ocupa todo el ancho en móvil */}
@@ -178,8 +197,8 @@ export function ProductFilters({
             )}
           </button>
 
-          {/* Selector de vista */}
-          <div className="flex items-center gap-1 border border-border rounded-md p-0.5 bg-surface-alt h-10 sm:h-9">
+          {/* Selector de vista — sólo desktop */}
+          <div className="hidden sm:flex items-center gap-1 border border-border rounded-md p-0.5 bg-surface-alt h-10 sm:h-9">
             <button
               onClick={() => onViewModeChange('list')}
               className={cn(
@@ -362,7 +381,7 @@ export function ProductFilters({
       {/* Badges de filtros activos */}
       {hasFilters && (
         <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border-subtle">
-          <span className="text-xs font-medium text-muted-foreground">Filtros activos:</span>
+          <span className="text-xs font-medium text-text-subtle">Filtros activos:</span>
           
           {searchQuery && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-md border border-border text-xs">
@@ -443,7 +462,7 @@ export function ProductFilters({
       )}
 
       {/* Contador de resultados */}
-      <div className="mt-2 text-xs text-muted-foreground text-right">
+      <div className="mt-2 text-xs text-text-subtle text-right">
         {totalProducts} {totalProducts === 1 ? 'producto encontrado' : 'productos encontrados'}
       </div>
     </Card>

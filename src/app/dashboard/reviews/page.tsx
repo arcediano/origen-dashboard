@@ -17,6 +17,7 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ReviewStats } from './components/ReviewStats';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
+import { ReviewCard } from './components/ReviewCard';
 import { Pagination } from '@/components/ui/atoms/pagination';
 
 // Hooks y API
@@ -173,7 +174,7 @@ export default function ReviewsPage() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="container mx-auto px-6 py-8 space-y-8"
+      className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8"
     >
       {/* Cabecera */}
       <PageHeader
@@ -204,12 +205,29 @@ export default function ReviewsPage() {
 
       {/* Lista de reseñas */}
       <motion.div variants={itemVariants}>
-        <ReviewsList
-          reviews={reviews}
-          onRespond={handleRespond}
-          onFlag={handleFlag}
-          onHelpful={handleHelpful}
-        />
+        {/* Móvil: tarjetas compactas con bottom sheet para respuesta */}
+        {reviews.length > 0 && (
+          <div className="block lg:hidden rounded-xl border border-border-subtle bg-surface overflow-hidden mb-4">
+            {reviews.map((review) => (
+              <ReviewCard
+                key={review.id}
+                review={review}
+                onRespond={handleRespond}
+                onFlag={(id) => handleFlag(id)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Desktop: tarjetas expandibles originales */}
+        <div className="hidden lg:block">
+          <ReviewsList
+            reviews={reviews}
+            onRespond={handleRespond}
+            onFlag={handleFlag}
+            onHelpful={handleHelpful}
+          />
+        </div>
 
         {/* Paginación */}
         {totalPages > 1 && (

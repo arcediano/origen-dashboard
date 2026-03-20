@@ -20,6 +20,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/atoms/card';
 import { Badge } from '@/components/ui/atoms/badge';
+import { ScrollChipFilter, type ChipItem } from '@/components/shared/mobile';
 import type { ReviewFilters as ReviewFiltersType, ReviewType, ReviewStatus } from '@/types/review';
 
 export interface ReviewFiltersProps {
@@ -42,6 +43,14 @@ const STATUS_OPTIONS: { value: ReviewStatus | ''; label: string; icon: React.Ele
   { value: 'approved', label: 'Aprobadas', icon: CheckCircle, color: 'green' },
   { value: 'rejected', label: 'Rechazadas', icon: XCircle, color: 'red' },
   { value: 'flagged', label: 'Reportadas', icon: AlertCircle, color: 'red' }
+];
+
+const STATUS_CHIPS: ChipItem[] = [
+  { label: 'Todas',      value: '' },
+  { label: 'Pendientes', value: 'pending' },
+  { label: 'Aprobadas',  value: 'approved' },
+  { label: 'Rechazadas', value: 'rejected' },
+  { label: 'Reportadas', value: 'flagged' },
 ];
 
 const RATING_OPTIONS = [5, 4, 3, 2, 1];
@@ -80,6 +89,15 @@ export function ReviewFilters({
 
   return (
     <Card variant="elevated" className={cn('p-3', className)}>
+      {/* Chips de estado — sólo móvil */}
+      <div className="sm:hidden mb-3">
+        <ScrollChipFilter
+          items={STATUS_CHIPS}
+          active={filters.status ?? ''}
+          onChange={(val) => toggleFilter('status', val || undefined)}
+        />
+      </div>
+
       {/* Primera fila: búsqueda y acciones principales */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Campo de búsqueda */}
@@ -226,7 +244,7 @@ export function ReviewFilters({
       )}
 
       {/* Contador de resultados */}
-      <div className="mt-2 text-xs text-muted-foreground text-right">
+      <div className="mt-2 text-xs text-text-subtle text-right">
         {totalReviews} {totalReviews === 1 ? 'reseña encontrada' : 'reseñas encontradas'}
       </div>
     </Card>

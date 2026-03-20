@@ -17,7 +17,7 @@ import { PageError } from '@/components/shared/error/page-error';
 import { Card } from '@/components/ui/atoms/card'
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Pagination } from '@/components/ui/atoms/pagination';
-import { ProductStats, ProductFilters, ProductTable, ProductCard } from './components';
+import { ProductStats, ProductFilters, ProductTable, ProductCard, ProductMobileList } from './components';
 import { AdjustStockDialog } from './components/ProductDialogs/AdjustStockDialog';
 import { DeleteProductDialog } from './components/ProductDialogs/DeleteProductDialog';
 
@@ -187,10 +187,7 @@ export default function ProductosPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
-        {/* Elementos decorativos */}
-        <div className="fixed top-0 right-0 w-64 h-64 bg-origen-pradera/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-        <div className="fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+      <div className="min-h-screen bg-surface">
 
         {/* Cabecera */}
         <PageHeader
@@ -217,7 +214,7 @@ export default function ProductosPage() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="container mx-auto px-6 py-8 space-y-8"
+          className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8"
         >
           {/* Estadísticas */}
           <motion.div variants={itemVariants}>
@@ -254,32 +251,28 @@ export default function ProductosPage() {
           {/* Resultados */}
           <motion.div variants={itemVariants}>
             {filteredProducts.length === 0 ? (
-              <Card className="p-12 bg-surface-alt border border-border">
+              <Card className="py-8 sm:p-12 bg-surface-alt border border-border-subtle">
                 <div className="flex flex-col items-center justify-center text-center">
-                  <div className="w-16 h-16 rounded-full bg-origen-crema flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-origen-pastel flex items-center justify-center mb-3 sm:mb-4">
                     <Package className="w-8 h-8 text-origen-pradera" />
                   </div>
                   <h3 className="text-lg font-semibold text-origen-bosque mb-2">
                     No hay productos
                   </h3>
-                  <p className="text-sm text-muted-foreground max-w-md mb-6">
+                  <p className="text-sm text-text-subtle max-w-md mb-6">
                     {hasFilters
                       ? 'No se encontraron productos con los filtros seleccionados.'
                       : 'Comienza añadiendo tu primer producto.'}
                   </p>
                   {hasFilters ? (
-                    <Button 
-                      onClick={clearFilters} 
-                    >
+                    <Button onClick={clearFilters}>
                       <span className="flex items-center gap-2">
                         <RefreshCw className="w-4 h-4" />
                         Limpiar filtros
                       </span>
                     </Button>
                   ) : (
-                    <Button 
-                      onClick={handleNewProduct} 
-                    >
+                    <Button onClick={handleNewProduct}>
                       <span className="flex items-center gap-2">
                         <Plus className="w-4 h-4" />
                         Nuevo producto
@@ -288,27 +281,41 @@ export default function ProductosPage() {
                   )}
                 </div>
               </Card>
-            ) : viewMode === 'grid' ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {paginatedProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onAdjustStock={handleAdjustStock}
-                    onView={handleView}
-                    onEdit={handleEdit}
-                  />
-                ))}
-              </div>
             ) : (
               <>
-                <ProductTable
+                {/* ── MOBILE list (< lg) ── */}
+                <ProductMobileList
                   products={paginatedProducts}
-                  onAdjustStock={handleAdjustStock}
                   onView={handleView}
                   onEdit={handleEdit}
                   isLoading={isLoading}
+                  className="block lg:hidden"
                 />
+
+                {/* ── DESKTOP: grid / table (≥ lg) ── */}
+                {viewMode === 'grid' ? (
+                  <div className="hidden lg:grid grid-cols-3 xl:grid-cols-4 gap-4">
+                    {paginatedProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        onAdjustStock={handleAdjustStock}
+                        onView={handleView}
+                        onEdit={handleEdit}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="hidden lg:block">
+                    <ProductTable
+                      products={paginatedProducts}
+                      onAdjustStock={handleAdjustStock}
+                      onView={handleView}
+                      onEdit={handleEdit}
+                      isLoading={isLoading}
+                    />
+                  </div>
+                )}
 
                 {/* Paginación */}
                 {totalPages > 1 && (

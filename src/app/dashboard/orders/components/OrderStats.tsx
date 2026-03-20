@@ -18,6 +18,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MobileKPIRow, type KpiItem } from '@/components/shared/mobile';
 import type { OrderStats as OrderStatsType } from '@/types/order';
 
 interface OrderStatsProps {
@@ -93,11 +94,23 @@ export function OrderStats({ stats, className }: OrderStatsProps) {
     }
   ];
 
+  // KPIs para móvil (4 principales)
+  const mobileKpis: KpiItem[] = [
+    { label: 'Total', value: stats.total, icon: ShoppingBag, accent: 'pradera' },
+    { label: 'Ingresos', value: `${stats.totalRevenue.toFixed(0)}€`, icon: DollarSign, accent: 'green', secondary: `media ${stats.averageOrderValue.toFixed(0)}€` },
+    { label: 'Pendientes', value: stats.pending, icon: Clock, accent: 'amber' },
+    { label: 'Hoy', value: stats.todayOrders, icon: Calendar, accent: 'bosque', secondary: `${stats.todayRevenue.toFixed(0)}€` },
+  ];
+
   return (
-    <div className={cn(
-      'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4',
-      className
-    )}>
+    <div className={cn(className)}>
+      {/* Móvil: fila scrollable */}
+      <MobileKPIRow items={mobileKpis} className="block lg:hidden" />
+
+      {/* Desktop: grid completo */}
+      <div className={cn(
+        'hidden lg:grid grid-cols-4 xl:grid-cols-8 gap-4',
+      )}>
       {statsCards.map((card, index) => (
         <div
           key={index}
@@ -110,12 +123,12 @@ export function OrderStats({ stats, className }: OrderStatsProps) {
         >
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
-              <card.icon className={cn('w-5 h-5', card.iconColor)} />
-              <span className="text-xs font-medium text-muted-foreground">{card.label}</span>
+              <card.icon className={cn('w-4 h-4 sm:w-5 sm:h-5', card.iconColor)} />
+              <span className="text-xs font-medium text-text-subtle">{card.label}</span>
             </div>
           </div>
           
-          <p className="text-2xl font-bold text-origen-bosque">
+          <p className="text-xl sm:text-2xl font-bold text-origen-bosque">
             {card.value}
           </p>
           
@@ -130,6 +143,7 @@ export function OrderStats({ stats, className }: OrderStatsProps) {
           )}
         </div>
       ))}
+      </div>{/* end desktop grid */}
     </div>
   );
 }

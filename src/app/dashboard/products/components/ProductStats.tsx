@@ -123,8 +123,8 @@ function StatsCard({
     )}>
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Icon className={cn('w-5 h-5', styles.icon)} />
-          <span className="text-xs font-medium text-muted-foreground">{label}</span>
+          <Icon className={cn('w-4 h-4 sm:w-5 sm:h-5', styles.icon)} />
+          <span className="text-xs font-medium text-text-subtle">{label}</span>
         </div>
         {tooltip && (
           <Tooltip 
@@ -135,12 +135,12 @@ function StatsCard({
         )}
       </div>
       
-      <p className={cn('text-2xl font-bold', styles.value)}>
+      <p className={cn('text-xl sm:text-2xl font-bold', styles.value)}>
         {value}
       </p>
       
       {secondaryInfo && (
-        <div className={cn('flex items-center gap-1 mt-2 text-xs', secondaryInfo.color || 'text-muted-foreground')}>
+          <div className={cn('flex items-center gap-1 mt-2 text-xs', secondaryInfo.color || 'text-text-subtle')}>
           {secondaryInfo.label}
           <span className="font-medium">{secondaryInfo.value}</span>
         </div>

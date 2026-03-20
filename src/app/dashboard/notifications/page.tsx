@@ -1,204 +1,203 @@
 /**
  * @page NotificationsPage
- * @description Preferencias de notificaciones
+ * @description Preferencias de notificaciones — HV06 mobile-first
  */
 
 'use client';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Bell, 
-  Mail, 
-  Smartphone, 
-  ShoppingBag, 
-  Star, 
+import {
+  Bell,
+  Mail,
+  Smartphone,
+  ShoppingBag,
+  Star,
   Package,
   Megaphone,
-  Save
+  Save,
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Card, CardContent } from '@/components/ui/atoms/card';
 import { Button } from '@/components/ui/atoms/button';
-import { Toggle } from '@/components/ui/atoms/toggle';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/tabs';
+import { NotificationToggleRow } from './components/NotificationToggleRow';
+import { SegmentedControl, type SegmentItem } from './components/SegmentedControl';
+
+// ─── TABS CONFIG ──────────────────────────────────────────────────────────────
+
+const SEGMENTS: SegmentItem[] = [
+  { value: 'email', label: 'Email',       icon: Mail       },
+  { value: 'push',  label: 'Push',        icon: Smartphone },
+];
+
+// ─── COMPONENT ────────────────────────────────────────────────────────────────
 
 export default function NotificationsPage() {
+  const [activeTab, setActiveTab] = useState<'email' | 'push'>('email');
+
   const [emailSettings, setEmailSettings] = useState({
-    orders: true,
+    orders:    true,
+    reviews:   true,
     marketing: false,
-    reviews: true,
-    security: true
+    stock:     true,
   });
 
   const [pushSettings, setPushSettings] = useState({
-    orders: true,
-    lowStock: true,
-    reviews: true,
-    campaigns: false
+    orders:    true,
+    lowStock:  true,
+    reviews:   true,
+    campaigns: false,
   });
 
+  const [saved, setSaved] = useState(false);
+
   const handleSave = () => {
-    console.log('Guardar preferencias');
+    // Aquí iría la llamada a la API
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="container mx-auto px-6 py-8 space-y-8"
-    >
-      <PageHeader
-        title="Notificaciones"
-        description="Configura cómo y cuándo quieres recibir notificaciones"
-        badgeIcon={Bell}
-        badgeText="Preferencias"
-        tooltip="Notificaciones"
-        tooltipDetailed="Elige qué notificaciones recibir por email y push."
-        actions={
-          <Button onClick={handleSave}>
-            <Save className="w-4 h-4 mr-2" />
-            Guardar preferencias
-          </Button>
-        }
-      />
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8"
+      >
+        <PageHeader
+          title="Notificaciones"
+          description="Configura cómo y cuándo quieres recibir notificaciones"
+          badgeIcon={Bell}
+          badgeText="Preferencias"
+          tooltip="Notificaciones"
+          tooltipDetailed="Elige qué notificaciones recibir por email y push."
+          actions={
+            /* Botón guardar — solo visible en desktop (lg+) */
+            <div className="hidden lg:block">
+              <Button onClick={handleSave}>
+                <Save className="w-4 h-4 mr-2" />
+                Guardar preferencias
+              </Button>
+            </div>
+          }
+        />
 
-      <Tabs defaultValue="email" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
-          <TabsTrigger value="email">
-            <Mail className="w-4 h-4 mr-2" />
-            Email
-          </TabsTrigger>
-          <TabsTrigger value="push">
-            <Smartphone className="w-4 h-4 mr-2" />
-            Push
-          </TabsTrigger>
-        </TabsList>
+        {/* Control segmentado (reemplaza TabsList) */}
+        <SegmentedControl
+          items={SEGMENTS}
+          active={activeTab}
+          onChange={(v) => setActiveTab(v as 'email' | 'push')}
+          className="max-w-md"
+        />
 
-        <TabsContent value="email" className="mt-6">
-          <Card variant="elevated">
-            <CardContent className="p-6 space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-start gap-3">
-                  <ShoppingBag className="w-5 h-5 text-origen-pradera mt-0.5" />
-                  <div>
-                    <p className="font-medium">Nuevos pedidos</p>
-                    <p className="text-sm text-muted-foreground">Recibe un email cuando haya un nuevo pedido</p>
-                  </div>
-                </div>
-                <Toggle
+        {/* Contenido del tab activo */}
+        <Card variant="elevated">
+          <CardContent className="p-0">
+            {activeTab === 'email' && (
+              <div className="px-4 sm:px-6 divide-y divide-border-subtle">
+                <NotificationToggleRow
+                  icon={ShoppingBag}
+                  title="Nuevos pedidos"
+                  description="Recibe un email cuando llegue un nuevo pedido"
                   checked={emailSettings.orders}
-                  onCheckedChange={(checked) => setEmailSettings({...emailSettings, orders: checked})}
+                  onChange={(v) => setEmailSettings((s) => ({ ...s, orders: v }))}
+                  divider={false}
                 />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-start gap-3">
-                  <Star className="w-5 h-5 text-origen-pradera mt-0.5" />
-                  <div>
-                    <p className="font-medium">Nuevas reseñas</p>
-                    <p className="text-sm text-muted-foreground">Cuando un cliente deje una reseña</p>
-                  </div>
-                </div>
-                <Toggle
+                <NotificationToggleRow
+                  icon={Star}
+                  title="Nuevas reseñas"
+                  description="Cuando un cliente deje una reseña"
                   checked={emailSettings.reviews}
-                  onCheckedChange={(checked) => setEmailSettings({...emailSettings, reviews: checked})}
+                  onChange={(v) => setEmailSettings((s) => ({ ...s, reviews: v }))}
+                  divider={false}
                 />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-start gap-3">
-                  <Megaphone className="w-5 h-5 text-origen-pradera mt-0.5" />
-                  <div>
-                    <p className="font-medium">Marketing y promociones</p>
-                    <p className="text-sm text-muted-foreground">Ofertas, novedades y recomendaciones</p>
-                  </div>
-                </div>
-                <Toggle
+                <NotificationToggleRow
+                  icon={Package}
+                  title="Stock bajo"
+                  description="Alertas cuando un producto esté por agotarse"
+                  checked={emailSettings.stock}
+                  onChange={(v) => setEmailSettings((s) => ({ ...s, stock: v }))}
+                  divider={false}
+                />
+                <NotificationToggleRow
+                  icon={Megaphone}
+                  title="Marketing y promociones"
+                  description="Ofertas, novedades y recomendaciones"
                   checked={emailSettings.marketing}
-                  onCheckedChange={(checked) => setEmailSettings({...emailSettings, marketing: checked})}
+                  onChange={(v) => setEmailSettings((s) => ({ ...s, marketing: v }))}
+                  divider={false}
                 />
               </div>
+            )}
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-start gap-3">
-                  <Package className="w-5 h-5 text-origen-pradera mt-0.5" />
-                  <div>
-                    <p className="font-medium">Stock bajo</p>
-                    <p className="text-sm text-muted-foreground">Alertas cuando un producto tenga stock bajo</p>
-                  </div>
-                </div>
-                <Toggle
-                  checked={emailSettings.orders}
-                  onCheckedChange={(checked) => setEmailSettings({...emailSettings, orders: checked})}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="push" className="mt-6">
-          <Card variant="elevated">
-            <CardContent className="p-6 space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-start gap-3">
-                  <ShoppingBag className="w-5 h-5 text-origen-pradera mt-0.5" />
-                  <div>
-                    <p className="font-medium">Nuevos pedidos</p>
-                    <p className="text-sm text-muted-foreground">Notificaciones push para nuevos pedidos</p>
-                  </div>
-                </div>
-                <Toggle
+            {activeTab === 'push' && (
+              <div className="px-4 sm:px-6 divide-y divide-border-subtle">
+                <NotificationToggleRow
+                  icon={ShoppingBag}
+                  title="Nuevos pedidos"
+                  description="Notificación push para nuevos pedidos"
                   checked={pushSettings.orders}
-                  onCheckedChange={(checked) => setPushSettings({...pushSettings, orders: checked})}
+                  onChange={(v) => setPushSettings((s) => ({ ...s, orders: v }))}
+                  divider={false}
                 />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-start gap-3">
-                  <Package className="w-5 h-5 text-origen-pradera mt-0.5" />
-                  <div>
-                    <p className="font-medium">Stock bajo</p>
-                    <p className="text-sm text-muted-foreground">Alertas de inventario en tiempo real</p>
-                  </div>
-                </div>
-                <Toggle
+                <NotificationToggleRow
+                  icon={Package}
+                  title="Stock bajo"
+                  description="Alertas de inventario en tiempo real"
                   checked={pushSettings.lowStock}
-                  onCheckedChange={(checked) => setPushSettings({...pushSettings, lowStock: checked})}
+                  onChange={(v) => setPushSettings((s) => ({ ...s, lowStock: v }))}
+                  divider={false}
                 />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-start gap-3">
-                  <Star className="w-5 h-5 text-origen-pradera mt-0.5" />
-                  <div>
-                    <p className="font-medium">Nuevas reseñas</p>
-                    <p className="text-sm text-muted-foreground">Notificaciones cuando recibas una reseña</p>
-                  </div>
-                </div>
-                <Toggle
+                <NotificationToggleRow
+                  icon={Star}
+                  title="Nuevas reseñas"
+                  description="Notificaciones cuando recibas una reseña"
                   checked={pushSettings.reviews}
-                  onCheckedChange={(checked) => setPushSettings({...pushSettings, reviews: checked})}
+                  onChange={(v) => setPushSettings((s) => ({ ...s, reviews: v }))}
+                  divider={false}
                 />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-start gap-3">
-                  <Megaphone className="w-5 h-5 text-origen-pradera mt-0.5" />
-                  <div>
-                    <p className="font-medium">Campañas</p>
-                    <p className="text-sm text-muted-foreground">Resultados y actualizaciones de campañas</p>
-                  </div>
-                </div>
-                <Toggle
+                <NotificationToggleRow
+                  icon={Megaphone}
+                  title="Campañas"
+                  description="Resultados y actualizaciones de campañas"
                   checked={pushSettings.campaigns}
-                  onCheckedChange={(checked) => setPushSettings({...pushSettings, campaigns: checked})}
+                  onChange={(v) => setPushSettings((s) => ({ ...s, campaigns: v }))}
+                  divider={false}
                 />
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </motion.div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Espacio extra en móvil para el botón sticky */}
+        <div className="h-4 lg:hidden" />
+      </motion.div>
+
+      {/* ── Botón guardar sticky en móvil ── */}
+      <div
+        className={`
+          fixed bottom-[calc(88px+env(safe-area-inset-bottom))]
+          left-4 right-4
+          lg:hidden z-30
+        `}
+      >
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={handleSave}
+          className={`
+            w-full flex items-center justify-center gap-2
+            rounded-2xl py-3.5
+            text-sm font-semibold shadow-lg
+            transition-colors
+            ${saved
+              ? 'bg-origen-pradera text-white'
+              : 'bg-origen-bosque text-white active:bg-origen-pino'}
+          `}
+        >
+          <Save className="w-4 h-4" />
+          {saved ? '¡Guardado!' : 'Guardar preferencias'}
+        </motion.button>
+      </div>
+    </>
   );
 }

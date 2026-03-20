@@ -20,3 +20,7 @@ export type { UploadedFile, FileUploadProps } from './upload/file-upload';
 // Category card
 export { CategoryCard, getCategoryIcon } from './category-card';
 export type { CategoryCardProps } from './category-card';
+
+// Mobile components
+export { ScrollChipFilter, MobileStatCard, MobileKPIRow, EmptyState, SectionTitle } from './mobile';
+export type { ChipItem, StatCardAccent, MobileStatCardProps, KpiItem, MobileKPIRowProps, EmptyStateProps, SectionTitleProps } from './mobile';

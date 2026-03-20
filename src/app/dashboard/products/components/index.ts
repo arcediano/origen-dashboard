@@ -10,6 +10,7 @@ export { ProductTable } from './ProductTable';
 export { ProductTableActions } from './ProductTableActions';
 export { ProductExpandableDetails } from './ProductExpandableDetails';
 export { ProductCard } from './ProductCard';
+export { ProductMobileList } from './ProductMobileList';
 export { CreateProductProgress } from './CreateProductProgress';
 export { CreateProductNavigation } from './CreateProductNavigation';
 export { CreateProductCancelDialog } from './ProductDialogs/CreateProductCancelDialog';

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/atoms/card';
+import { ScrollChipFilter, type ChipItem } from '@/components/shared/mobile';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
 
 export interface OrderFiltersProps {
@@ -39,6 +40,16 @@ const STATUS_OPTIONS: { value: OrderStatus | ''; label: string; icon: React.Elem
   { value: 'shipped', label: 'Enviados', icon: Truck, color: 'purple' },
   { value: 'delivered', label: 'Entregados', icon: CheckCircle, color: 'green' },
   { value: 'cancelled', label: 'Cancelados', icon: XCircle, color: 'red' }
+];
+
+// Chips móvil
+const STATUS_CHIPS: ChipItem[] = [
+  { label: 'Todos',      value: '' },
+  { label: 'Pendientes', value: 'pending' },
+  { label: 'Procesando', value: 'processing' },
+  { label: 'Enviados',   value: 'shipped' },
+  { label: 'Entregados', value: 'delivered' },
+  { label: 'Cancelados', value: 'cancelled' },
 ];
 
 export function OrderFilters({
@@ -80,6 +91,15 @@ export function OrderFilters({
 
   return (
     <Card variant="elevated" className={cn('p-3', className)}>
+      {/* Chips de estado — sólo móvil */}
+      <div className="sm:hidden mb-3">
+        <ScrollChipFilter
+          items={STATUS_CHIPS}
+          active={filters.status ?? ''}
+          onChange={(val) => toggleFilter('status', val || undefined)}
+        />
+      </div>
+
       {/* Primera fila: búsqueda */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="relative flex-1">
@@ -204,7 +224,7 @@ export function OrderFilters({
       </div>
 
       {/* Contador de resultados */}
-      <div className="mt-2 text-xs text-muted-foreground text-right">
+      <div className="mt-2 text-xs text-text-subtle text-right">
         {totalOrders} {totalOrders === 1 ? 'pedido encontrado' : 'pedidos encontrados'}
       </div>
     </Card>

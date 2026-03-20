@@ -95,13 +95,13 @@ export function ReviewsList({
 
   if (reviews.length === 0) {
     return (
-      <Card className="p-12 text-center">
+      <Card className="py-8 sm:p-12 text-center">
         <div className="flex flex-col items-center">
-          <MessageSquare className="w-12 h-12 text-border mb-4" />
+          <MessageSquare className="w-8 h-8 sm:w-12 sm:h-12 text-text-disabled mb-3 sm:mb-4" />
           <h3 className="text-lg font-semibold text-origen-bosque mb-2">
             No hay reseñas
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-text-subtle">
             No se encontraron reseñas con los filtros seleccionados.
           </p>
         </div>
@@ -112,9 +112,9 @@ export function ReviewsList({
   return (
     <div className={cn('space-y-4', className)}>
       {reviews.map((review) => (
-        <Card key={review.id} variant="elevated" className="p-5">
+        <Card key={review.id} variant="elevated" className="p-4 sm:p-5">
           {/* Cabecera */}
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex items-start justify-between mb-3 sm:mb-4">
             <div className="flex items-start gap-3">
               {/* Avatar */}
               <Avatar className="w-10 h-10">
@@ -137,7 +137,7 @@ export function ReviewsList({
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                <div className="flex items-center gap-2 text-xs text-text-subtle mt-1">
                   <span>Reseña de {review.type === 'product' ? 'producto' : 'productor'}</span>
                   <span>·</span>
                   <span>{formatDistanceToNow(review.createdAt, { locale: es, addSuffix: true })}</span>
@@ -166,7 +166,7 @@ export function ReviewsList({
 
           {/* Contenido */}
           <p className={cn(
-            'text-sm text-muted-foreground mb-3',
+            'text-sm text-text-subtle mb-3',
             expandedId !== review.id && 'line-clamp-3'
           )}>
             {review.content}

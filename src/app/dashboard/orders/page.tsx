@@ -13,10 +13,12 @@ import { ShoppingBag } from 'lucide-react';
 // Componentes UI
 import { PageLoader } from '@/components/shared';
 import { PageError } from '@/components/shared';
+import { Card } from '@/components/ui/atoms/card';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { OrderStats } from './components/OrderStats';
 import { OrderFilters } from './components/OrderFilters';
 import { OrdersTable } from './components/OrdersTable';
+import { OrderCard } from './components/OrderCard';
 import { Pagination } from '@/components/ui/atoms/pagination';
 
 // Hooks y API
@@ -143,7 +145,7 @@ export default function OrdersPage() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="container mx-auto px-6 py-8 space-y-8"
+      className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8"
     >
       {/* Cabecera */}
       <PageHeader
@@ -172,22 +174,52 @@ export default function OrdersPage() {
         />
       </motion.div>
 
-      {/* Tabla de pedidos */}
+      {/* Lista móvil / Tabla desktop */}
       <motion.div variants={itemVariants}>
-        <OrdersTable
-          orders={orders}
-          onViewDetails={handleViewDetails}
-          isLoading={isLoading}
-        />
+        {orders.length === 0 ? (
+          <Card className="py-8 sm:p-12 bg-surface-alt border border-border-subtle">
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-origen-pastel flex items-center justify-center mb-3 sm:mb-4">
+                <ShoppingBag className="w-7 h-7 text-origen-pino" />
+              </div>
+              <p className="text-sm font-semibold text-origen-bosque mb-1">Sin pedidos</p>
+              <p className="text-xs text-text-subtle max-w-[240px]">
+                Aún no tienes pedidos con los filtros seleccionados.
+              </p>
+            </div>
+          </Card>
+        ) : (
+          <>
+            {/* Móvil: lista de tarjetas */}
+            <div className="block lg:hidden rounded-xl border border-border-subtle bg-surface overflow-hidden">
+              {orders.map((order) => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  onPress={handleViewDetails}
+                />
+              ))}
+            </div>
 
-        {/* Paginación */}
-        {totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            className="mt-6"
-          />
+            {/* Desktop: tabla */}
+            <div className="hidden lg:block">
+              <OrdersTable
+                orders={orders}
+                onViewDetails={handleViewDetails}
+                isLoading={isLoading}
+              />
+            </div>
+
+            {/* Paginación */}
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                className="mt-6"
+              />
+            )}
+          </>
         )}
       </motion.div>
     </motion.div>
