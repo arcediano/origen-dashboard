@@ -92,8 +92,8 @@ export function ReviewFilters({
       {/* Chips de estado — sólo móvil */}
       <div className="sm:hidden mb-3">
         <ScrollChipFilter
-          items={STATUS_CHIPS}
-          active={filters.status ?? ''}
+          chips={STATUS_CHIPS}
+          value={filters.status ?? ''}
           onChange={(val) => toggleFilter('status', val || undefined)}
         />
       </div>

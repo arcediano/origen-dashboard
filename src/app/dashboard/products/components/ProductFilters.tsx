@@ -146,8 +146,8 @@ export function ProductFilters({
       {/* Chips de estado — sólo móvil */}
       <div className="sm:hidden mb-3">
         <ScrollChipFilter
-          items={STATUS_CHIPS}
-          active={selectedStatus}
+          chips={STATUS_CHIPS}
+          value={selectedStatus}
           onChange={onStatusChange}
         />
       </div>
