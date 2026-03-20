@@ -1,27 +1,16 @@
 /**
- * @component OrderFilters
- * @description Filtros para la lista de pedidos
+ * @file OrderFilters.tsx
+ * @description Filtros de pedidos — mobile-first, estilo app nativa.
+ *
+ * Móvil  → barra de búsqueda + botón "Filtros" → FilterBottomSheet (pantalla completa)
+ * Desktop → barra de búsqueda + chips pill para estado + inputs de fecha e importe
  */
 
 'use client';
 
 import React from 'react';
-import { 
-  Search, 
-  X, 
-  Filter, 
-  Clock, 
-  Package, 
-  Truck, 
-  CheckCircle, 
-  XCircle,
-  DollarSign,
-  Calendar,
-  Calendar as CalendarIcon,
-  CalendarRange
-} from 'lucide-react';
+import { Search, X, SlidersHorizontal, CalendarIcon, CalendarRange, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card } from '@/components/ui/atoms/card';
 import { FilterBottomSheet } from '@/components/shared/mobile';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
 
@@ -33,43 +22,42 @@ export interface OrderFiltersProps {
   className?: string;
 }
 
-const STATUS_OPTIONS: { value: OrderStatus | ''; label: string; icon: React.ElementType; color: string }[] = [
-  { value: '', label: 'Todos los estados', icon: Filter, color: 'gray' },
-  { value: 'pending', label: 'Pendientes', icon: Clock, color: 'amber' },
-  { value: 'processing', label: 'Procesando', icon: Package, color: 'blue' },
-  { value: 'shipped', label: 'Enviados', icon: Truck, color: 'purple' },
-  { value: 'delivered', label: 'Entregados', icon: CheckCircle, color: 'green' },
-  { value: 'cancelled', label: 'Cancelados', icon: XCircle, color: 'red' }
+const STATUS_OPTIONS = [
+  { value: 'pending',    label: 'Pendientes' },
+  { value: 'processing', label: 'Procesando' },
+  { value: 'shipped',    label: 'Enviados' },
+  { value: 'delivered',  label: 'Entregados' },
+  { value: 'cancelled',  label: 'Cancelados' },
 ];
 
-// Chips móvil
-const STATUS_CHIPS: ChipItem[] = [
-  { label: 'Todos',      value: '' },
-  { label: 'Pendientes', value: 'pending' },
-  { label: 'Procesando', value: 'processing' },
-  { label: 'Enviados',   value: 'shipped' },
-  { label: 'Entregados', value: 'delivered' },
-  { label: 'Cancelados', value: 'cancelled' },
-];
+const pillCls = (active: boolean) => cn(
+  'inline-flex items-center px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
+  active
+    ? 'bg-origen-bosque border-origen-bosque text-white'
+    : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50',
+);
+
+const dateInputCls = 'h-9 px-3 text-sm border border-border bg-surface-alt rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera';
 
 export function OrderFilters({
   filters,
   onFilterChange,
   onClearFilters,
   totalOrders,
-  className
+  className,
 }: OrderFiltersProps) {
-  const [showFilterSheet, setShowFilterSheet] = React.useState(false);
-  const [localSearch, setLocalSearch] = React.useState(filters.search || '');
+  const [sheetOpen, setSheetOpen] = React.useState(false);
+  const [localSearch, setLocalSearch] = React.useState(filters.search ?? '');
 
-  const hasFilters = Boolean(
-    filters.status ||
-    filters.search ||
-    filters.dateFrom ||
-    filters.dateTo ||
-    filters.minAmount ||
-    filters.maxAmount
-  );
+  const activeCount = [
+    filters.status,
+    filters.dateFrom,
+    filters.dateTo,
+    filters.minAmount,
+    filters.maxAmount,
+  ].filter(v => v !== undefined && v !== '').length;
+
+  const hasAnyFilter = Boolean(filters.search) || activeCount > 0;
 
   const handleSearchChange = (value: string) => {
     setLocalSearch(value);
@@ -79,195 +67,154 @@ export function OrderFilters({
     return () => clearTimeout(timer);
   };
 
-  const toggleFilter = (key: keyof OrderFiltersType, value: any) => {
-    onFilterChange({ ...filters, [key]: value });
-  };
+  const set = (key: keyof OrderFiltersType, value: any) =>
+    onFilterChange({ ...filters, [key]: value || undefined });
 
-  // Formatear fecha para input type="date" (YYYY-MM-DD)
-  const formatDateForInput = (date?: Date) => {
-    if (!date) return '';
-    return date.toISOString().split('T')[0];
-  };
+  const formatDate = (date?: Date) => date ? date.toISOString().split('T')[0] : '';
 
   return (
-    <>
-    <Card variant="elevated" className={cn('p-3 sm:p-4', className)}>
-      {/* Primera fila: búsqueda */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+    <div className={cn('space-y-2', className)}>
+
+      {/* ── Barra de búsqueda + botón filtros ─────────────────────────── */}
+      <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle pointer-events-none" />
           <input
             type="text"
             value={localSearch}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Buscar pedido o cliente..."
-            className="w-full pl-9 pr-7 h-10 sm:h-9 text-sm bg-surface border border-border-subtle rounded-xl sm:rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera"
+            className="w-full h-10 pl-9 pr-8 text-sm bg-surface-alt border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
           />
           {localSearch && (
             <button
-              onClick={() => {
-                setLocalSearch('');
-                onFilterChange({ ...filters, search: undefined });
-              }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque"
+              onClick={() => { setLocalSearch(''); onFilterChange({ ...filters, search: undefined }); }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque transition-colors"
+              aria-label="Limpiar búsqueda"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
+        {/* Botón Filtros — móvil */}
         <button
-          onClick={() => setShowFilterSheet(true)}
+          onClick={() => setSheetOpen(true)}
           className={cn(
-            'sm:hidden flex items-center justify-center h-10 px-3.5 rounded-xl text-sm font-medium transition-colors',
-            hasFilters
-              ? 'bg-origen-bosque text-white border border-origen-bosque'
-              : 'bg-surface-alt text-origen-bosque border border-border-subtle'
+            'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors',
+            activeCount > 0
+              ? 'bg-origen-bosque border-origen-bosque text-white'
+              : 'bg-surface-alt border-border text-origen-bosque',
           )}
+          aria-label="Abrir filtros"
         >
-          <Filter className="w-4 h-4 mr-1.5" />
+          <SlidersHorizontal className="w-4 h-4" />
           <span>Filtros</span>
-          {hasFilters && (
-            <span className="ml-2 w-5 h-5 rounded-full bg-white/25 text-white text-xs flex items-center justify-center font-bold">
-              {Object.values(filters).filter(v => v !== undefined && v !== '').length}
+          {activeCount > 0 && (
+            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/25 text-[10px] font-bold">
+              {activeCount}
             </span>
           )}
         </button>
       </div>
 
-      {/* FilterBottomSheet se renderiza fuera del Card — ver abajo */}
-
-      {/* Filtros desktop */}
-      <div className="hidden sm:flex flex-wrap items-center gap-3 mt-3">
+      {/* ── Filtros desktop: estado + fechas + importe ────────────────── */}
+      <div className="hidden lg:flex flex-wrap items-center gap-2 pt-1">
         {/* Estado */}
-        <select
-          value={filters.status || ''}
-          onChange={(e) => toggleFilter('status', e.target.value || undefined)}
-          className="h-9 px-3 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
-        >
-          {STATUS_OPTIONS.map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        {STATUS_OPTIONS.map(opt => (
+          <button key={opt.value}
+            onClick={() => set('status', filters.status === opt.value ? undefined : opt.value as OrderStatus)}
+            className={pillCls(filters.status === opt.value)}>{opt.label}</button>
+        ))}
 
-        {/* Rango de fechas - CON PLACEHOLDERS MEJORADOS */}
-        <div className="flex items-center gap-2">
+        <div className="w-px h-4 bg-border-subtle mx-1" />
+
+        {/* Rango de fechas */}
+        <div className="flex items-center gap-1.5">
           <div className="relative">
-            <CalendarIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
-            <input
-              type="date"
-              value={formatDateForInput(filters.dateFrom)}
-              onChange={(e) => toggleFilter('dateFrom', e.target.value ? new Date(e.target.value) : undefined)}
-              className="pl-8 h-9 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
-              placeholder="dd/mm/aaaa"
-              title="Fecha desde"
-            />
+            <CalendarIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+            <input type="date" value={formatDate(filters.dateFrom)}
+              onChange={(e) => set('dateFrom', e.target.value ? new Date(e.target.value) : undefined)}
+              className={cn(dateInputCls, 'pl-8')} title="Desde" />
           </div>
-          <span className="text-text-subtle text-sm">→</span>
+          <span className="text-text-subtle text-xs">—</span>
           <div className="relative">
-            <CalendarRange className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
-            <input
-              type="date"
-              value={formatDateForInput(filters.dateTo)}
-              onChange={(e) => toggleFilter('dateTo', e.target.value ? new Date(e.target.value) : undefined)}
-              className="pl-8 h-9 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
-              placeholder="dd/mm/aaaa"
-              title="Fecha hasta"
-            />
+            <CalendarRange className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+            <input type="date" value={formatDate(filters.dateTo)}
+              onChange={(e) => set('dateTo', e.target.value ? new Date(e.target.value) : undefined)}
+              className={cn(dateInputCls, 'pl-8')} title="Hasta" />
           </div>
         </div>
 
-        {/* Rango de importe - CON PLACEHOLDERS DESCRIPTIVOS */}
-        <div className="flex items-center gap-1">
+        <div className="w-px h-4 bg-border-subtle mx-1" />
+
+        {/* Rango de importe */}
+        <div className="flex items-center gap-1.5">
           <div className="relative">
-            <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
-            <input
-              type="number"
-              value={filters.minAmount || ''}
-              onChange={(e) => toggleFilter('minAmount', e.target.value ? Number(e.target.value) : undefined)}
-              placeholder="Mínimo €"
-              className="w-24 pl-7 h-9 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
-              min="0"
-              step="0.01"
-            />
+            <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+            <input type="number" value={filters.minAmount ?? ''} min="0" placeholder="Mín €"
+              onChange={(e) => set('minAmount', e.target.value ? Number(e.target.value) : undefined)}
+              className={cn(dateInputCls, 'pl-8 w-24')} />
           </div>
-          <span className="text-text-subtle">-</span>
+          <span className="text-text-subtle text-xs">—</span>
           <div className="relative">
-            <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
-            <input
-              type="number"
-              value={filters.maxAmount || ''}
-              onChange={(e) => toggleFilter('maxAmount', e.target.value ? Number(e.target.value) : undefined)}
-              placeholder="Máximo €"
-              className="w-24 pl-7 h-9 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
-              min="0"
-              step="0.01"
-            />
+            <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+            <input type="number" value={filters.maxAmount ?? ''} min="0" placeholder="Máx €"
+              onChange={(e) => set('maxAmount', e.target.value ? Number(e.target.value) : undefined)}
+              className={cn(dateInputCls, 'pl-8 w-24')} />
           </div>
         </div>
 
-        {hasFilters && (
-          <button
-            onClick={onClearFilters}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-origen-pradera hover:text-origen-hoja hover:bg-origen-crema/50 rounded-md transition-colors"
-          >
-            <X className="w-3.5 h-3.5" />
-            <span>Limpiar filtros</span>
-          </button>
+        {hasAnyFilter && (
+          <>
+            <div className="w-px h-4 bg-border-subtle mx-1" />
+            <button onClick={onClearFilters}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-text-subtle hover:text-origen-bosque transition-colors">
+              <X className="w-3 h-3" />Limpiar
+            </button>
+          </>
         )}
       </div>
 
-      {/* Contador de resultados */}
-      <div className="mt-2 text-xs text-text-subtle text-right">
-        {totalOrders} {totalOrders === 1 ? 'pedido encontrado' : 'pedidos encontrados'}
-      </div>
-    </Card>
-
-    <FilterBottomSheet
-      isOpen={showFilterSheet}
-      onClose={() => setShowFilterSheet(false)}
-      sections={[
-        {
-          type: 'chips',
-          id: 'status',
-          title: 'Estado',
-          options: [
-            { label: 'Todos', value: '' },
-            { label: 'Pendientes', value: 'pending' },
-            { label: 'Procesando', value: 'processing' },
-            { label: 'Enviados', value: 'shipped' },
-            { label: 'Entregados', value: 'delivered' },
-            { label: 'Cancelados', value: 'cancelled' },
-          ],
-          value: filters.status ?? '',
-          onChange: (val) => toggleFilter('status', val || undefined),
-        },
-        {
-          type: 'daterange',
-          id: 'period',
-          title: 'Período',
-          valueFrom: formatDateForInput(filters.dateFrom),
-          valueTo: formatDateForInput(filters.dateTo),
-          onChangeFrom: (val) => toggleFilter('dateFrom', val ? new Date(val) : undefined),
-          onChangeTo: (val) => toggleFilter('dateTo', val ? new Date(val) : undefined),
-        },
-        {
-          type: 'numberrange',
-          id: 'amount',
-          title: 'Importe',
-          valueMin: filters.minAmount?.toString() ?? '',
-          valueMax: filters.maxAmount?.toString() ?? '',
-          onChangeMin: (val) => toggleFilter('minAmount', val ? Number(val) : undefined),
-          onChangeMax: (val) => toggleFilter('maxAmount', val ? Number(val) : undefined),
-          prefix: '€',
-        },
-      ]}
-      onClearAll={() => { onClearFilters(); setShowFilterSheet(false); }}
-      resultCount={totalOrders}
-      resultLabel={totalOrders === 1 ? 'pedido' : 'pedidos'}
-    />
-    </>
+      {/* ── FilterBottomSheet (pantalla completa) — solo móvil ────────── */}
+      <FilterBottomSheet
+        isOpen={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title="Filtrar pedidos"
+        sections={[
+          {
+            type: 'chips', id: 'status', title: 'Estado',
+            options: [
+              { label: 'Todos', value: '' },
+              { label: 'Pendientes', value: 'pending' },
+              { label: 'Procesando', value: 'processing' },
+              { label: 'Enviados', value: 'shipped' },
+              { label: 'Entregados', value: 'delivered' },
+              { label: 'Cancelados', value: 'cancelled' },
+            ],
+            value: filters.status ?? '',
+            onChange: (v) => set('status', v as OrderStatus),
+          },
+          {
+            type: 'daterange', id: 'period', title: 'Período',
+            valueFrom: formatDate(filters.dateFrom),
+            valueTo: formatDate(filters.dateTo),
+            onChangeFrom: (v) => set('dateFrom', v ? new Date(v) : undefined),
+            onChangeTo: (v) => set('dateTo', v ? new Date(v) : undefined),
+          },
+          {
+            type: 'numberrange', id: 'amount', title: 'Importe',
+            valueMin: filters.minAmount?.toString() ?? '',
+            valueMax: filters.maxAmount?.toString() ?? '',
+            onChangeMin: (v) => set('minAmount', v ? Number(v) : undefined),
+            onChangeMax: (v) => set('maxAmount', v ? Number(v) : undefined),
+            prefix: '€',
+          },
+        ]}
+        onClearAll={onClearFilters}
+        resultCount={totalOrders}
+        resultLabel={totalOrders === 1 ? 'pedido' : 'pedidos'}
+      />
+    </div>
   );
 }

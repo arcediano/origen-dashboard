@@ -110,7 +110,8 @@ function ChipsSection({
       <h3 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-3">
         {section.title}
       </h3>
-      <div className="flex flex-wrap gap-2">
+      {/* Carrusel horizontal — mismo patrón que apps nativas */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-none">
         {section.options.map((option) => {
           const isActive = draftValue === option.value;
           const Icon = option.icon;
@@ -121,7 +122,7 @@ function ChipsSection({
               whileTap={{ scale: 0.95 }}
               onClick={() => onDraftChange(option.value)}
               className={cn(
-                'inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium border',
+                'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium border',
                 'min-h-[44px] transition-colors duration-150',
                 isActive
                   ? 'bg-origen-bosque border-origen-bosque text-white'

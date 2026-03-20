@@ -1,24 +1,19 @@
 /**
  * @file ProductFilters.tsx
- * @description Barra de filtros para la lista de productos - VERSIÓN RESPONSIVE
+ * @description Filtros de productos — mobile-first, estilo app nativa.
+ *
+ * Móvil  → barra de búsqueda + botón "Filtros" → FilterBottomSheet (pantalla completa)
+ * Desktop → barra de búsqueda + chips pill para todos los filtros en línea
  */
 
 'use client';
 
 import React from 'react';
-import { 
-  Search, 
-  X, 
-  Filter, 
-  Circle, 
-  Package, 
-  RefreshCw,
-  Grid3x3,
-  List,
-  ChevronDown
+import {
+  Search, X, SlidersHorizontal,
+  Grid3x3, List,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card } from '@/components/ui/atoms/card';
 import { FilterBottomSheet } from '@/components/shared/mobile';
 
 export interface ProductFiltersProps {
@@ -42,76 +37,38 @@ export interface ProductFiltersProps {
 
 const DEFAULT_CATEGORIES = ['Quesos', 'Aceites', 'Mieles', 'Embutidos', 'Vinos', 'Panadería'];
 
-// Chips de estado para móvil (ScrollChipFilter)
-const STATUS_CHIPS: ChipItem[] = [
-  { label: 'Todos',       value: '' },
-  { label: 'Activos',     value: 'active' },
-  { label: 'Borradores',  value: 'draft' },
-  { label: 'Sin stock',   value: 'out_of_stock' },
-  { label: 'Inactivos',   value: 'inactive' },
-];
-
 const STATUS_OPTIONS = [
-  { value: 'active', label: 'Activos' },
-  { value: 'inactive', label: 'Inactivos' },
+  { value: 'active',       label: 'Activos' },
+  { value: 'draft',        label: 'Borradores' },
   { value: 'out_of_stock', label: 'Sin stock' },
-  { value: 'draft', label: 'Borradores' },
+  { value: 'inactive',     label: 'Inactivos' },
 ];
 
 const STOCK_OPTIONS = [
-  { value: 'bajo', label: 'Stock bajo' },
-  { value: 'agotado', label: 'Agotados' },
   { value: 'disponible', label: 'Con stock' },
+  { value: 'bajo',       label: 'Stock bajo' },
+  { value: 'agotado',    label: 'Agotados' },
 ];
 
 const SORT_OPTIONS = [
-  { value: 'newest', label: 'Más recientes' },
-  { value: 'oldest', label: 'Más antiguos' },
-  { value: 'name-asc', label: 'Nombre A-Z' },
-  { value: 'name-desc', label: 'Nombre Z-A' },
-  { value: 'price-asc', label: 'Precio (menor a mayor)' },
-  { value: 'price-desc', label: 'Precio (mayor a menor)' },
-  { value: 'stock-asc', label: 'Stock (menor a mayor)' },
-  { value: 'stock-desc', label: 'Stock (mayor a menor)' },
+  { value: 'newest',     label: 'Más recientes' },
+  { value: 'oldest',     label: 'Más antiguos' },
+  { value: 'name-asc',   label: 'Nombre A-Z' },
+  { value: 'name-desc',  label: 'Nombre Z-A' },
+  { value: 'price-asc',  label: 'Precio ↑' },
+  { value: 'price-desc', label: 'Precio ↓' },
+  { value: 'stock-asc',  label: 'Stock ↑' },
+  { value: 'stock-desc', label: 'Stock ↓' },
   { value: 'sales-desc', label: 'Más vendidos' },
 ];
 
-interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  icon?: React.ReactNode;
-  placeholder: string;
-  fullWidth?: boolean;
-}
-
-function Select({ icon, placeholder, className, children, value, fullWidth, ...props }: SelectProps) {
-  return (
-    <div className={cn('relative', fullWidth ? 'w-full' : 'w-full sm:w-auto')}>
-      {icon && (
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-          {icon}
-        </div>
-      )}
-      <select
-        value={value || ''}
-        className={cn(
-          'h-10 sm:h-9 text-sm border border-border bg-surface-alt rounded-md appearance-none cursor-pointer',
-          'focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera',
-          icon ? 'pl-9' : 'pl-3',
-          'pr-8',
-          !value && 'text-text-subtle',
-          fullWidth ? 'w-full' : 'w-full sm:w-[160px]',
-          className
-        )}
-        {...props}
-      >
-        <option value="">
-          {placeholder}
-        </option>
-        {children}
-      </select>
-      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle pointer-events-none" />
-    </div>
-  );
-}
+// Clase reutilizable para pills en desktop
+const pillCls = (active: boolean) => cn(
+  'inline-flex items-center px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
+  active
+    ? 'bg-origen-bosque border-origen-bosque text-white'
+    : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50',
+);
 
 export function ProductFilters({
   searchQuery,
@@ -131,328 +88,172 @@ export function ProductFilters({
   categories = DEFAULT_CATEGORIES,
   className,
 }: ProductFiltersProps) {
-  const [showFilterSheet, setShowFilterSheet] = React.useState(false);
-  
-  const hasFilters = Boolean(
-    searchQuery ||
-      selectedCategory ||
-      selectedStatus ||
-      selectedStock
-  );
+  const [sheetOpen, setSheetOpen] = React.useState(false);
 
-  const activeFilterCount = [searchQuery, selectedCategory, selectedStatus, selectedStock].filter(Boolean).length;
+  const activeCount = [selectedCategory, selectedStatus, selectedStock, sortBy].filter(Boolean).length;
+  const hasAnyFilter = Boolean(searchQuery) || activeCount > 0;
 
   return (
-    <>
-    <Card variant="elevated" className={cn('p-3 sm:p-4', className)}>
-      {/* Primera fila: búsqueda y acciones principales */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
-        {/* Campo de búsqueda - ocupa todo el ancho en móvil */}
+    <div className={cn('space-y-2', className)}>
+
+      {/* ── Barra de búsqueda + botón filtros + toggle vista ──────────── */}
+      <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Buscar por nombre o SKU..."
-            className="w-full pl-9 pr-7 h-10 sm:h-9 text-sm bg-surface border border-border-subtle rounded-xl sm:rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera"
+            className="w-full h-10 pl-9 pr-8 text-sm bg-surface-alt border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
             aria-label="Buscar productos"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque transition-colors"
               aria-label="Limpiar búsqueda"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        {/* Acciones: botón de filtros móvil y selector de vista */}
-        <div className="flex items-center gap-2">
-          {/* Botón de filtros para móvil */}
-          <button
-            onClick={() => setShowFilterSheet(true)}
-            className={cn(
-              'sm:hidden flex items-center justify-center h-10 px-3.5 rounded-xl text-sm font-medium transition-colors',
-              hasFilters
-                ? 'bg-origen-bosque text-white border border-origen-bosque'
-                : 'bg-surface-alt text-origen-bosque border border-border-subtle'
-            )}
-            aria-label="Mostrar filtros"
-          >
-            <Filter className="w-4 h-4 mr-1.5" />
-            <span>Filtros</span>
-            {hasFilters && (
-              <span className="ml-2 w-5 h-5 rounded-full bg-white/25 text-white text-xs flex items-center justify-center font-bold">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
+        {/* Botón Filtros — móvil */}
+        <button
+          onClick={() => setSheetOpen(true)}
+          className={cn(
+            'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors',
+            activeCount > 0
+              ? 'bg-origen-bosque border-origen-bosque text-white'
+              : 'bg-surface-alt border-border text-origen-bosque',
+          )}
+          aria-label="Abrir filtros"
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+          <span>Filtros</span>
+          {activeCount > 0 && (
+            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/25 text-[10px] font-bold">
+              {activeCount}
+            </span>
+          )}
+        </button>
 
-          {/* Selector de vista — sólo desktop */}
-          <div className="hidden sm:flex items-center gap-1 border border-border rounded-md p-0.5 bg-surface-alt h-10 sm:h-9">
-            <button
-              onClick={() => onViewModeChange('list')}
-              className={cn(
-                'p-1.5 sm:p-1 rounded transition-all',
-                viewMode === 'list'
-                  ? 'bg-origen-crema text-origen-bosque'
-                  : 'text-text-subtle hover:text-origen-bosque hover:bg-surface'
-              )}
-              title="Vista tabla"
-              aria-label="Vista tabla"
-              aria-pressed={viewMode === 'list'}
-            >
-              <List className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onViewModeChange('grid')}
-              className={cn(
-                'p-1.5 sm:p-1 rounded transition-all',
-                viewMode === 'grid'
-                  ? 'bg-origen-crema text-origen-bosque'
-                  : 'text-text-subtle hover:text-origen-bosque hover:bg-surface'
-              )}
-              title="Vista cuadrícula"
-              aria-label="Vista cuadrícula"
-              aria-pressed={viewMode === 'grid'}
-            >
-              <Grid3x3 className="w-4 h-4" />
-            </button>
-          </div>
+        {/* Toggle vista — desktop */}
+        <div className="hidden lg:flex items-center gap-0.5 border border-border rounded-xl p-0.5 bg-surface-alt h-10">
+          <button
+            onClick={() => onViewModeChange('list')}
+            className={cn('p-2 rounded-lg transition-colors', viewMode === 'list' ? 'bg-surface shadow-sm text-origen-bosque' : 'text-text-subtle hover:text-origen-bosque')}
+            aria-label="Vista tabla" aria-pressed={viewMode === 'list'}
+          >
+            <List className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onViewModeChange('grid')}
+            className={cn('p-2 rounded-lg transition-colors', viewMode === 'grid' ? 'bg-surface shadow-sm text-origen-bosque' : 'text-text-subtle hover:text-origen-bosque')}
+            aria-label="Vista cuadrícula" aria-pressed={viewMode === 'grid'}
+          >
+            <Grid3x3 className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
-      {/* Filtros en línea para desktop */}
-      <div className="hidden sm:flex flex-wrap items-center gap-3 mt-3">
-        <Select
-          value={selectedCategory}
-          onChange={(e) => onCategoryChange(e.target.value)}
-          icon={<Filter className="w-4 h-4" />}
-          placeholder="Categoría"
-          aria-label="Filtrar por categoría"
-        >
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </Select>
+      {/* ── Filtros desktop: pills en línea ───────────────────────────── */}
+      <div className="hidden lg:flex flex-wrap items-center gap-2 pt-1">
+        {/* Categoría */}
+        {categories.map(cat => (
+          <button key={cat} onClick={() => onCategoryChange(selectedCategory === cat ? '' : cat)}
+            className={pillCls(selectedCategory === cat)}>{cat}</button>
+        ))}
 
-        <Select
-          value={selectedStatus}
-          onChange={(e) => onStatusChange(e.target.value)}
-          icon={<Circle className="w-4 h-4" />}
-          placeholder="Estado"
-          aria-label="Filtrar por estado"
-        >
-          {STATUS_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
+        <div className="w-px h-4 bg-border-subtle mx-1" />
 
-        <Select
-          value={selectedStock}
-          onChange={(e) => onStockChange(e.target.value)}
-          icon={<Package className="w-4 h-4" />}
-          placeholder="Stock"
-          aria-label="Filtrar por stock"
-        >
-          {STOCK_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
+        {/* Estado */}
+        {STATUS_OPTIONS.map(opt => (
+          <button key={opt.value} onClick={() => onStatusChange(selectedStatus === opt.value ? '' : opt.value)}
+            className={pillCls(selectedStatus === opt.value)}>{opt.label}</button>
+        ))}
 
-        <Select
-          value={sortBy}
-          onChange={(e) => onSortChange(e.target.value)}
-          icon={<RefreshCw className="w-4 h-4" />}
-          placeholder="Ordenar por"
-          aria-label="Ordenar por"
-        >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
+        <div className="w-px h-4 bg-border-subtle mx-1" />
 
-        {hasFilters && (
-          <button
-            onClick={onClearFilters}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-origen-pradera hover:text-origen-hoja hover:bg-origen-crema/50 rounded-md transition-colors whitespace-nowrap h-9"
-            title="Limpiar filtros"
-            aria-label="Limpiar filtros"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Limpiar</span>
-          </button>
+        {/* Stock */}
+        {STOCK_OPTIONS.map(opt => (
+          <button key={opt.value} onClick={() => onStockChange(selectedStock === opt.value ? '' : opt.value)}
+            className={pillCls(selectedStock === opt.value)}>{opt.label}</button>
+        ))}
+
+        <div className="w-px h-4 bg-border-subtle mx-1" />
+
+        {/* Ordenar */}
+        {SORT_OPTIONS.map(opt => (
+          <button key={opt.value} onClick={() => onSortChange(sortBy === opt.value ? '' : opt.value)}
+            className={pillCls(sortBy === opt.value)}>{opt.label}</button>
+        ))}
+
+        {hasAnyFilter && (
+          <>
+            <div className="w-px h-4 bg-border-subtle mx-1" />
+            <button onClick={onClearFilters}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-text-subtle hover:text-origen-bosque transition-colors">
+              <X className="w-3 h-3" />Limpiar
+            </button>
+          </>
         )}
       </div>
 
-      {/* FilterBottomSheet se renderiza fuera del Card — ver abajo */}
-
-      {/* Badges de filtros activos */}
-      {hasFilters && (
-        <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border-subtle">
-          <span className="text-xs font-medium text-text-subtle">Filtros activos:</span>
-          
-          {searchQuery && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-md border border-border text-xs">
-              <Search className="w-3 h-3" />
-              <span className="max-w-[100px] sm:max-w-[150px] truncate">"{searchQuery}"</span>
-              <button
-                onClick={() => onSearchChange('')}
-                className="ml-1 text-text-subtle hover:text-muted-foreground"
-                aria-label="Eliminar filtro de búsqueda"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
-
-          {selectedCategory && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-md border border-border text-xs">
-              <Filter className="w-3 h-3" />
-              <span className="max-w-[80px] sm:max-w-[120px] truncate">{selectedCategory}</span>
-              <button
-                onClick={() => onCategoryChange('')}
-                className="ml-1 text-text-subtle hover:text-muted-foreground"
-                aria-label="Eliminar filtro de categoría"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
-
-          {selectedStatus && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-md border border-border text-xs">
-              <Circle className="w-3 h-3" />
-              <span className="max-w-[80px] sm:max-w-[120px] truncate">
-                {STATUS_OPTIONS.find((opt) => opt.value === selectedStatus)?.label}
-              </span>
-              <button
-                onClick={() => onStatusChange('')}
-                className="ml-1 text-text-subtle hover:text-muted-foreground"
-                aria-label="Eliminar filtro de estado"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
-
-          {selectedStock && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-md border border-border text-xs">
-              <Package className="w-3 h-3" />
-              <span className="max-w-[80px] sm:max-w-[120px] truncate">
-                {STOCK_OPTIONS.find((opt) => opt.value === selectedStock)?.label}
-              </span>
-              <button
-                onClick={() => onStockChange('')}
-                className="ml-1 text-text-subtle hover:text-muted-foreground"
-                aria-label="Eliminar filtro de stock"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
-
-          {sortBy && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-md border border-border text-xs">
-              <RefreshCw className="w-3 h-3" />
-              <span className="max-w-[100px] sm:max-w-[150px] truncate">
-                {SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label}
-              </span>
-              <button
-                onClick={() => onSortChange('')}
-                className="ml-1 text-text-subtle hover:text-muted-foreground"
-                aria-label="Eliminar ordenación"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Contador de resultados */}
-      <div className="mt-2 text-xs text-text-subtle text-right">
-        {totalProducts} {totalProducts === 1 ? 'producto encontrado' : 'productos encontrados'}
-      </div>
-    </Card>
-
-    <FilterBottomSheet
-      isOpen={showFilterSheet}
-      onClose={() => setShowFilterSheet(false)}
-      sections={[
-        {
-          type: 'chips',
-          id: 'category',
-          title: 'Categoría',
-          options: [
-            { label: 'Todas', value: '' },
-            ...categories.map(cat => ({ label: cat, value: cat })),
-          ],
-          value: selectedCategory,
-          onChange: onCategoryChange,
-        },
-        {
-          type: 'chips',
-          id: 'status',
-          title: 'Estado',
-          options: [
-            { label: 'Todos', value: '' },
-            { label: 'Activos', value: 'active' },
-            { label: 'Borradores', value: 'draft' },
-            { label: 'Sin stock', value: 'out_of_stock' },
-            { label: 'Inactivos', value: 'inactive' },
-          ],
-          value: selectedStatus,
-          onChange: onStatusChange,
-        },
-        {
-          type: 'chips',
-          id: 'stock',
-          title: 'Stock',
-          options: [
-            { label: 'Todo', value: '' },
-            { label: 'Con stock', value: 'disponible' },
-            { label: 'Stock bajo', value: 'bajo' },
-            { label: 'Agotados', value: 'agotado' },
-          ],
-          value: selectedStock,
-          onChange: onStockChange,
-        },
-        {
-          type: 'chips',
-          id: 'sort',
-          title: 'Ordenar por',
-          options: [
-            { label: 'Por defecto', value: '' },
-            { label: 'Más recientes', value: 'newest' },
-            { label: 'Más antiguos', value: 'oldest' },
-            { label: 'Nombre A-Z', value: 'name-asc' },
-            { label: 'Nombre Z-A', value: 'name-desc' },
-            { label: 'Precio ↑', value: 'price-asc' },
-            { label: 'Precio ↓', value: 'price-desc' },
-            { label: 'Stock ↑', value: 'stock-asc' },
-            { label: 'Stock ↓', value: 'stock-desc' },
-            { label: 'Más vendidos', value: 'sales-desc' },
-          ],
-          value: sortBy,
-          onChange: onSortChange,
-        },
-      ]}
-      onClearAll={() => { onClearFilters(); setShowFilterSheet(false); }}
-      resultCount={totalProducts}
-      resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
-    />
-    </>
+      {/* ── FilterBottomSheet (pantalla completa) — solo móvil ────────── */}
+      <FilterBottomSheet
+        isOpen={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title="Filtrar productos"
+        sections={[
+          {
+            type: 'chips', id: 'category', title: 'Categoría',
+            options: [{ label: 'Todas', value: '' }, ...categories.map(c => ({ label: c, value: c }))],
+            value: selectedCategory, onChange: onCategoryChange,
+          },
+          {
+            type: 'chips', id: 'status', title: 'Estado',
+            options: [
+              { label: 'Todos', value: '' },
+              { label: 'Activos', value: 'active' },
+              { label: 'Borradores', value: 'draft' },
+              { label: 'Sin stock', value: 'out_of_stock' },
+              { label: 'Inactivos', value: 'inactive' },
+            ],
+            value: selectedStatus, onChange: onStatusChange,
+          },
+          {
+            type: 'chips', id: 'stock', title: 'Stock',
+            options: [
+              { label: 'Todo', value: '' },
+              { label: 'Con stock', value: 'disponible' },
+              { label: 'Stock bajo', value: 'bajo' },
+              { label: 'Agotados', value: 'agotado' },
+            ],
+            value: selectedStock, onChange: onStockChange,
+          },
+          {
+            type: 'chips', id: 'sort', title: 'Ordenar por',
+            options: [
+              { label: 'Por defecto', value: '' },
+              { label: 'Más recientes', value: 'newest' },
+              { label: 'Más antiguos', value: 'oldest' },
+              { label: 'Nombre A-Z', value: 'name-asc' },
+              { label: 'Nombre Z-A', value: 'name-desc' },
+              { label: 'Precio ↑', value: 'price-asc' },
+              { label: 'Precio ↓', value: 'price-desc' },
+              { label: 'Stock ↑', value: 'stock-asc' },
+              { label: 'Stock ↓', value: 'stock-desc' },
+              { label: 'Más vendidos', value: 'sales-desc' },
+            ],
+            value: sortBy, onChange: onSortChange,
+          },
+        ]}
+        onClearAll={onClearFilters}
+        resultCount={totalProducts}
+        resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
+      />
+    </div>
   );
 }
