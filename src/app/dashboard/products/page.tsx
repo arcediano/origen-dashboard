@@ -288,6 +288,7 @@ export default function ProductosPage() {
                   products={paginatedProducts}
                   onView={handleView}
                   onEdit={handleEdit}
+                  onAdjustStock={handleAdjustStock}
                   isLoading={isLoading}
                   className="block lg:hidden"
                 />

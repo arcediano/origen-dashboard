@@ -28,6 +28,7 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/atoms/avatar';
 import type { Review } from '@/types/review';
 import { ReviewResponseSheet } from './ReviewResponseSheet';
+import { SwipeableRow } from '@/components/shared/mobile';
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
@@ -95,13 +96,29 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
     addSuffix: true,
   });
 
+  const swipeActions = [
+    ...(!review.response ? [{
+      label:   'Responder',
+      icon:    MessageSquare,
+      color:   'bosque' as const,
+      onPress: () => setSheetOpen(true),
+    }] : []),
+    {
+      label:   'Reportar',
+      icon:    Flag,
+      color:   'red' as const,
+      onPress: () => onFlag?.(review.id),
+    },
+  ];
+
   return (
     <>
+      <SwipeableRow actions={swipeActions} className="border-b border-border-subtle last:border-0">
       <motion.div
         whileTap={{ scale: 0.99 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         className={cn(
-          'px-4 py-3.5 border-b border-border-subtle last:border-0',
+          'px-4 py-3.5',
           className,
         )}
       >
@@ -165,8 +182,9 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
           </div>
         )}
 
-        {/* Acciones */}
-        <div className="flex items-center gap-2 mt-3">
+        {/* Hint swipe + acciones rápidas */}
+        <div className="flex items-center justify-between mt-3">
+          <span className="text-[9px] text-text-disabled select-none">← desliza para acciones</span>
           {!review.response && (
             <button
               onClick={() => setSheetOpen(true)}
@@ -176,15 +194,9 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
               Responder
             </button>
           )}
-          <button
-            onClick={() => onFlag?.(review.id)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-alt text-text-subtle text-xs"
-          >
-            <Flag className="w-3.5 h-3.5" />
-            Reportar
-          </button>
         </div>
       </motion.div>
+      </SwipeableRow>
 
       {/* Bottom sheet — solo móvil */}
       <ReviewResponseSheet

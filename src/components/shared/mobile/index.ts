@@ -12,3 +12,6 @@ export type { EmptyStateProps } from './EmptyState';
 
 export { SectionTitle } from './SectionTitle';
 export type { SectionTitleProps } from './SectionTitle';
+
+export { SwipeableRow } from './SwipeableRow';
+export type { SwipeAction, SwipeableRowProps } from './SwipeableRow';

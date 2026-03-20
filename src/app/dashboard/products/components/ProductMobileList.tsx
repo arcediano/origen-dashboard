@@ -17,12 +17,12 @@ import {
   CheckCircle2,
   FileEdit,
   Eye,
-  MoreVertical,
-  ChevronRight,
   XCircle,
+  BarChart2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
+import { SwipeableRow } from '@/components/shared/mobile';
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
@@ -92,155 +92,107 @@ function StatusBadge({ status }: { status: ProductStatus }) {
 // ─── ROW ──────────────────────────────────────────────────────────────────────
 
 interface ProductRowProps {
-  product: Product;
-  onView:  (id: string) => void;
-  onEdit:  (id: string) => void;
+  product:        Product;
+  onView:         (id: string) => void;
+  onEdit:         (id: string) => void;
+  onAdjustStock?: (product: Product) => void;
 }
 
-function ProductRow({ product, onView, onEdit }: ProductRowProps) {
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const menuRef = React.useRef<HTMLDivElement>(null);
+function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps) {
+  const mainImg    = product.mainImage?.url;
+  const isLowStock = product.stock > 0 && product.stock <= product.lowStockThreshold;
 
-  // Cierra el menú al hacer clic fuera
-  React.useEffect(() => {
-    if (!menuOpen) return;
-    const handle = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
-  }, [menuOpen]);
-
-  const mainImg = product.mainImage?.url;
-  const isLowStock =
-    product.stock > 0 && product.stock <= product.lowStockThreshold;
+  const swipeActions = [
+    {
+      label:   'Ver',
+      icon:    Eye,
+      color:   'bosque' as const,
+      onPress: () => onView(product.id),
+    },
+    {
+      label:   'Editar',
+      icon:    FileEdit,
+      color:   'blue' as const,
+      onPress: () => onEdit(product.id),
+    },
+    {
+      label:    'Stock',
+      icon:     BarChart2,
+      color:    'amber' as const,
+      onPress:  () => onAdjustStock?.(product),
+      disabled: !onAdjustStock,
+    },
+  ];
 
   return (
-    <motion.div
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-      className="flex items-center gap-3 px-3 py-3 border-b border-border-subtle last:border-0 relative"
-    >
-      {/* Thumbnail */}
-      <button
-        onClick={() => onView(product.id)}
-        className="w-16 h-16 rounded-xl overflow-hidden bg-origen-pastel flex-shrink-0 focus:outline-none"
-        aria-label={`Ver ${product.name}`}
+    <SwipeableRow actions={swipeActions} className="border-b border-border-subtle last:border-0">
+      <motion.div
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        className="flex items-center gap-3 px-3 py-3"
       >
-        {mainImg ? (
-          <img
-            src={mainImg}
-            alt={product.name}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Package className="w-7 h-7 text-origen-pradera/60" />
-          </div>
-        )}
-      </button>
-
-      {/* Info — clickable area */}
-      <button
-        onClick={() => onView(product.id)}
-        className="flex-1 min-w-0 text-left focus:outline-none"
-      >
-        {/* Nombre */}
-        <p className="text-sm font-semibold text-origen-bosque truncate leading-tight">
-          {product.name}
-        </p>
-
-        {/* SKU + categoría */}
-        <p className="text-[11px] text-text-subtle truncate mt-0.5">
-          {product.sku} · {product.categoryName}
-        </p>
-
-        {/* Precio + stock */}
-        <div className="flex items-center gap-3 mt-1.5">
-          <span className="text-sm font-bold text-origen-bosque">
-            {product.basePrice.toFixed(2)} €
-          </span>
-
-          {/* Stock badge */}
-          {product.status === 'out_of_stock' ? (
-            <span className="text-[10px] font-medium text-red-600">Sin stock</span>
-          ) : isLowStock ? (
-            <span className="text-[10px] font-medium text-amber-600">
-              Stock: {product.stock}
-            </span>
-          ) : (
-            <span className="text-[10px] text-text-subtle">
-              Stock: {product.stock}
-            </span>
-          )}
-        </div>
-      </button>
-
-      {/* Status badge + kebab */}
-      <div className="flex flex-col items-end gap-2 flex-shrink-0" ref={menuRef}>
-        <StatusBadge status={product.status} />
-
+        {/* Thumbnail */}
         <button
-          onClick={() => setMenuOpen((v) => !v)}
-          className="w-7 h-7 rounded-full flex items-center justify-center text-text-subtle hover:bg-surface-alt"
-          aria-label="Más acciones"
-          aria-haspopup="true"
-          aria-expanded={menuOpen}
+          onClick={() => onView(product.id)}
+          className="w-16 h-16 rounded-xl overflow-hidden bg-origen-pastel flex-shrink-0 focus:outline-none"
+          aria-label={`Ver ${product.name}`}
         >
-          <MoreVertical className="w-4 h-4" />
+          {mainImg ? (
+            <img src={mainImg} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Package className="w-7 h-7 text-origen-pradera/60" />
+            </div>
+          )}
         </button>
 
-        {/* Dropdown */}
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -4 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.12 }}
-            className="absolute right-0 top-14 z-20 w-40 bg-surface rounded-xl shadow-lg border border-border-subtle overflow-hidden"
-          >
-            <button
-              onClick={() => { onView(product.id); setMenuOpen(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-origen-bosque hover:bg-surface-alt"
-            >
-              <Eye className="w-4 h-4 text-origen-pino" />
-              Ver detalle
-            </button>
-            <button
-              onClick={() => { onEdit(product.id); setMenuOpen(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-origen-bosque hover:bg-surface-alt"
-            >
-              <FileEdit className="w-4 h-4 text-origen-pino" />
-              Editar
-            </button>
-          </motion.div>
-        )}
-      </div>
-    </motion.div>
+        {/* Info */}
+        <button onClick={() => onView(product.id)} className="flex-1 min-w-0 text-left focus:outline-none">
+          <p className="text-sm font-semibold text-origen-bosque truncate leading-tight">{product.name}</p>
+          <p className="text-[11px] text-text-subtle truncate mt-0.5">{product.sku} · {product.categoryName}</p>
+          <div className="flex items-center gap-3 mt-1.5">
+            <span className="text-sm font-bold text-origen-bosque">{product.basePrice.toFixed(2)} €</span>
+            {product.status === 'out_of_stock' ? (
+              <span className="text-[10px] font-medium text-red-600">Sin stock</span>
+            ) : isLowStock ? (
+              <span className="text-[10px] font-medium text-amber-600">Stock: {product.stock}</span>
+            ) : (
+              <span className="text-[10px] text-text-subtle">Stock: {product.stock}</span>
+            )}
+          </div>
+        </button>
+
+        {/* Status badge + hint de swipe */}
+        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+          <StatusBadge status={product.status} />
+          <span className="text-[9px] text-text-disabled select-none">← desliza</span>
+        </div>
+      </motion.div>
+    </SwipeableRow>
   );
 }
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 
 export interface ProductMobileListProps {
-  products:  Product[];
-  onView:    (id: string) => void;
-  onEdit:    (id: string) => void;
-  isLoading?: boolean;
-  className?: string;
+  products:       Product[];
+  onView:         (id: string) => void;
+  onEdit:         (id: string) => void;
+  onAdjustStock?: (product: Product) => void;
+  isLoading?:     boolean;
+  className?:     string;
 }
 
 /**
  * Lista compacta de productos para pantallas móvil (< lg).
+ * Cada fila tiene swipe-to-reveal: Ver · Editar · Stock
  * Se muestra con `block lg:hidden` en la página padre.
  */
 export function ProductMobileList({
   products,
   onView,
   onEdit,
+  onAdjustStock,
   isLoading = false,
   className,
 }: ProductMobileListProps) {
@@ -262,6 +214,7 @@ export function ProductMobileList({
           product={product}
           onView={onView}
           onEdit={onEdit}
+          onAdjustStock={onAdjustStock}
         />
       ))}
     </div>
