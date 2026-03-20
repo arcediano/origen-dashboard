@@ -30,6 +30,7 @@ export type BadgeVariant =
   | 'info'      // Azul - Para estados informativos (procesando, enviado)
   | 'neutral'   // Gris - Para estados neutros (inactivo, borrador)
   | 'leaf'      // Verde pastel - Para badges decorativos (certificaciones, tags)
+  | 'seed'      // Variante semilla - Para atributos y tags de producto
   | 'outline'   // Borde - Para badges secundarios
   | 'notification'; // Índigo - Para badges de notificación (contador circular)
 
@@ -72,6 +73,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   info: 'bg-origen-pradera/10 text-origen-pradera border-origen-pradera/20',
   neutral: 'bg-surface text-muted-foreground border-border',
   leaf: 'bg-origen-pastel text-origen-hoja border-origen-pradera/30',
+  seed: 'bg-origen-pradera/10 text-origen-pradera border-origen-pradera/20',
   outline: 'bg-transparent text-muted-foreground border-border',
   notification: 'bg-origen-pradera text-white border-transparent shadow-sm',
 };

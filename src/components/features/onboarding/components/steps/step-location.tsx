@@ -212,6 +212,7 @@ export interface EnhancedLocationData {
   // Confianza inicial
   foundedYear?: number;
   teamSize?: '1-2' | '3-5' | '6-10' | '11+';
+  taxId?: string;
 }
 
 export interface EnhancedStep1LocationProps {

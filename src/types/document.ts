@@ -3,6 +3,8 @@
  * @module types/document
  */
 
+import type { ProducerCategory } from './seller';
+
 /** Tipos de documentos requeridos para vender en España */
 export type DocumentType =
   | 'cif_nie'                  // CIF/NIF/NIE

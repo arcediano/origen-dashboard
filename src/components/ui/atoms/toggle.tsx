@@ -13,12 +13,14 @@ import { Check, X, Leaf, Sprout, Loader2 } from "lucide-react";
 // TIPOS
 // ============================================================================
 
-export interface ToggleProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'> {
+export interface ToggleProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'size'> {
   checked?: boolean;
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   variant?: "leaf" | "seed" | "forest" | "accent";
   toggleSize?: "sm" | "md" | "lg";
+  /** Alias for toggleSize */
+  size?: "sm" | "md" | "lg";
   activeIcon?: React.ReactNode;
   inactiveIcon?: React.ReactNode;
   label?: string;
@@ -39,7 +41,8 @@ const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
     {
       className = "",
       variant = "leaf",
-      toggleSize = "md",
+      toggleSize,
+      size,
       activeIcon,
       inactiveIcon,
       label,
@@ -95,9 +98,11 @@ const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
     };
     
     const config = variantConfig[variant];
-    
+
     const finalActiveIcon = activeIcon || config.defaultActiveIcon;
     const finalInactiveIcon = inactiveIcon || config.defaultInactiveIcon;
+
+    const resolvedSize = toggleSize ?? size ?? "md";
 
     const sizeConfig = {
       sm: {
@@ -117,7 +122,7 @@ const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
       },
     };
     
-    const size = sizeConfig[toggleSize];
+    const sizeStyles = sizeConfig[resolvedSize];
 
     const handleToggle = () => {
       if (disabled || loading) return;
@@ -160,7 +165,7 @@ const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
           
           error && !disabled && "border-red-500",
           
-          size.switch,
+          sizeStyles.switch,
           isChecked ? config.checkedBackground : config.background,
           
           !disabled && !loading && isHovered && "scale-105",
@@ -179,9 +184,9 @@ const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
             "pointer-events-none inline-block transform rounded-full transition-all duration-300 ease-out",
             "flex items-center justify-center",
             "shadow-md",
-            size.thumb,
+            sizeStyles.thumb,
             config.thumb,
-            isChecked && size.thumbTranslate,
+            isChecked && sizeStyles.thumbTranslate,
             loading && "animate-pulse"
           )}
         >

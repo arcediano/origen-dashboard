@@ -161,7 +161,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             <div className="w-16 h-16 rounded-lg bg-surface-alt border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={data.logo.preview ?? URL.createObjectURL(data.logo.file)}
+                src={data.logo.preview ?? (data.logo.file ? URL.createObjectURL(data.logo.file) : '')}
                 alt="Logo preview"
                 className="w-full h-full object-contain"
               />
@@ -229,7 +229,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             <div className="w-full h-28 rounded-xl overflow-hidden border border-border bg-surface">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={data.banner.preview ?? URL.createObjectURL(data.banner.file)}
+                src={data.banner.preview ?? (data.banner.file ? URL.createObjectURL(data.banner.file) : '')}
                 alt="Banner preview"
                 className="w-full h-full object-cover"
               />

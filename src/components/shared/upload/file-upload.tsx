@@ -33,12 +33,13 @@ import {
 
 export interface UploadedFile {
   id: string;
-  file: File;
+  file?: File;
   name: string;
   size: number;
   type: string;
   url?: string;
   preview?: string;
+  status?: string;
 }
 
 export interface FileUploadProps {
@@ -288,7 +289,7 @@ export function FileUpload({
   // Descargar archivo
   const handleDownloadFile = useCallback(
     (file: UploadedFile) => {
-      const url = file.preview || URL.createObjectURL(file.file);
+      const url = file.preview || (file.file ? URL.createObjectURL(file.file) : '');
       const a = document.createElement('a');
       a.href = url;
       a.download = file.name;

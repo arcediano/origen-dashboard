@@ -36,6 +36,58 @@ export interface SellerStatusConfig {
   icon: React.ElementType;
 }
 
+// ─── PRODUCER CATEGORY ───────────────────────────────────────────────────────
+
+export type ProducerCategory =
+  | 'agricola'
+  | 'ganadero'
+  | 'artesano'
+  | 'apicultor'
+  | 'viticultor'
+  | 'especializado';
+
+// ─── TOURISTIC REGION ────────────────────────────────────────────────────────
+
+export interface TouristicRegion {
+  id: string;
+  name: string;
+  province: string;
+  description: string;
+}
+
+// ─── SELLER ──────────────────────────────────────────────────────────────────
+
+export interface SellerLocation {
+  street?: string;
+  number?: string;
+  postalCode?: string;
+  city?: string;
+  province?: string;
+  autonomousCommunity?: string;
+  country?: string;
+  touristicRegion?: TouristicRegion;
+}
+
+export interface Seller {
+  id: string;
+  userId: string;
+  status: SellerStatus;
+  businessName: string;
+  slug: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  location?: SellerLocation;
+  producerCategory: ProducerCategory;
+  subcategories: string[];
+  stripeAccountId?: string;
+  stripeAccountStatus?: string;
+  canPublishProducts: boolean;
+  canReceivePayments: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export const SELLER_STATUS_CONFIG: Record<SellerStatus, SellerStatusConfig> = {
   pending_approval: {
     label: 'Pendiente de aprobación',

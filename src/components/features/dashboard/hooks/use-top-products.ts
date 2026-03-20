@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import type { TopProduct } from '../types';
-import { MOCK_TOP_PRODUCTS } from '../data';
+import { MOCK_PRODUCTS as MOCK_TOP_PRODUCTS } from '../data';
 
 interface UseTopProductsResult {
   products: TopProduct[];

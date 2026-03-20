@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Order } from '../types';
-import { MOCK_RECENT_ORDERS } from '../data';
+import { MOCK_ORDERS as MOCK_RECENT_ORDERS } from '../data';
 
 interface UseRecentOrdersResult {
   orders: Order[];

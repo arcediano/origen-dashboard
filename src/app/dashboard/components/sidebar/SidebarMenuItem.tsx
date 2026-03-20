@@ -110,7 +110,6 @@ export function SidebarMenuItem({
           {(isActive || hasActiveChild) && (
             <motion.div
               layoutId="activeNav"
-              className="absolute left-0 w-1 h-6 rounded-full"
               className="absolute left-0 w-1 h-6 rounded-full bg-origen-menta shadow-menta-glow"
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             />

@@ -305,7 +305,7 @@ export default function SettingsPage() {
                   <Label>Tema</Label>
                   <div className="flex gap-2">
                     <Button 
-                      variant={preferences.theme === 'light' ? 'default' : 'outline'}
+                      variant={preferences.theme === 'light' ? 'primary' : 'outline'}
                       className="flex-1"
                       onClick={() => setPreferences({...preferences, theme: 'light'})}
                     >
@@ -313,7 +313,7 @@ export default function SettingsPage() {
                       Claro
                     </Button>
                     <Button 
-                      variant={preferences.theme === 'dark' ? 'default' : 'outline'}
+                      variant={preferences.theme === 'dark' ? 'primary' : 'outline'}
                       className="flex-1"
                       onClick={() => setPreferences({...preferences, theme: 'dark'})}
                     >

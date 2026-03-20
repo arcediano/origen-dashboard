@@ -246,7 +246,9 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
 
     React.useEffect(() => {
       setImageLoadingStatus(status);
-      onLoadingStatusChange?.(status);
+      if (status !== 'idle') {
+        onLoadingStatusChange?.(status);
+      }
     }, [status, setImageLoadingStatus, onLoadingStatusChange]);
 
     if (!src) return null;

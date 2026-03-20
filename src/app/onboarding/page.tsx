@@ -310,23 +310,23 @@ export default function OnboardingPage() {
     switch (step) {
       case 0: {
         const locationImageKeys = await Promise.all(
-          formData.step1.locationImages.map((f) => uploadFile(f.file, 'visual/location').then((r) => r.key)),
+          formData.step1.locationImages.filter((f) => f.file).map((f) => uploadFile(f.file!, 'visual/location').then((r) => r.key)),
         );
         await saveStep1(formData.step1, locationImageKeys);
         break;
       }
       case 1: {
         const teamPhotoKeys = await Promise.all(
-          formData.step2.photos.map((f) => uploadFile(f.file, 'visual/team').then((r) => r.key)),
+          formData.step2.photos.filter((f) => f.file).map((f) => uploadFile(f.file!, 'visual/team').then((r) => r.key)),
         );
         await saveStep2(formData.step2, teamPhotoKeys);
         break;
       }
       case 2: {
-        const logoKey = formData.step3.logo
+        const logoKey = formData.step3.logo?.file
           ? (await uploadFile(formData.step3.logo.file, 'visual/logo')).key
           : undefined;
-        const bannerKey = formData.step3.banner
+        const bannerKey = formData.step3.banner?.file
           ? (await uploadFile(formData.step3.banner.file, 'visual/banner')).key
           : undefined;
         await saveStep3({ logoKey, bannerKey, introVideoUrl: formData.step3.introVideo });
@@ -337,13 +337,13 @@ export default function OnboardingPage() {
         break;
       }
       case 4: {
-        const cifKey = formData.step5.cif
+        const cifKey = formData.step5.cif?.file
           ? (await uploadFile(formData.step5.cif.file, 'documents/cif')).key
           : undefined;
-        const seguroRcKey = formData.step5.seguroRC
+        const seguroRcKey = formData.step5.seguroRC?.file
           ? (await uploadFile(formData.step5.seguroRC.file, 'documents/seguro-rc')).key
           : undefined;
-        const manipuladorAlimentosKey = formData.step5.manipuladorAlimentos
+        const manipuladorAlimentosKey = formData.step5.manipuladorAlimentos?.file
           ? (await uploadFile(formData.step5.manipuladorAlimentos.file, 'documents/manipulador-alimentos')).key
           : undefined;
         const certificationDocumentKeys = await Promise.all(
@@ -500,15 +500,10 @@ export default function OnboardingPage() {
             data={formData.step6}
             onChange={handleStep6Change}
             userEmail={user?.email}
+            firstName={user?.firstName}
+            lastName={user?.lastName}
             businessName={formData.step2.businessName}
             website={formData.step2.website}
-            address={{
-              street: formData.step1.street,
-              streetNumber: formData.step1.streetNumber,
-              city: formData.step1.city,
-              province: formData.step1.province,
-              postalCode: formData.step1.postalCode,
-            }}
           />
         );
       default:

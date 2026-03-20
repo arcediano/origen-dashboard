@@ -30,7 +30,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify, importSPKI, type KeyLike } from 'jose';
+import { jwtVerify, importSPKI, type CryptoKey, type KeyObject } from 'jose';
 
 // ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
 
@@ -41,9 +41,10 @@ const AUTH_PREFIXES      = ['/auth/login', '/auth/register'];
 // La clave pública se importa una sola vez por instancia del Edge Worker y se
 // cachea en memoria. Reimportarla en cada request sería innecesariamente costoso.
 
-let _cachedPublicKey: KeyLike | null = null;
+type PublicKey = CryptoKey | KeyObject;
+let _cachedPublicKey: PublicKey | null = null;
 
-async function getPublicKey(): Promise<KeyLike | null> {
+async function getPublicKey(): Promise<PublicKey | null> {
   if (_cachedPublicKey) return _cachedPublicKey;
 
   const rawPem = process.env.JWT_PUBLIC_KEY;
