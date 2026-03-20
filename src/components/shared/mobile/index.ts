@@ -18,3 +18,6 @@ export type { SectionTitleProps } from './SectionTitle';
 
 export { SwipeableRow } from './SwipeableRow';
 export type { SwipeAction, SwipeableRowProps } from './SwipeableRow';
+
+export { StatStrip } from './StatStrip';
+export type { StatStripItem, StatStripProps, StatStripVariant } from './StatStrip';
