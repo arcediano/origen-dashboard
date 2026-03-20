@@ -211,7 +211,7 @@ export default function ProductosPage() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8"
+          className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(100px+env(safe-area-inset-bottom))] sm:pb-8"
         >
           {/* Estadísticas */}
           <motion.div variants={itemVariants}>
@@ -332,10 +332,11 @@ export default function ProductosPage() {
       {/* FAB — solo móvil */}
       <button
         onClick={handleNewProduct}
-        className="sm:hidden fixed bottom-[calc(84px+env(safe-area-inset-bottom))] right-4 z-30 w-14 h-14 rounded-full bg-origen-pradera text-white shadow-lg shadow-origen-pradera/30 flex items-center justify-center active:scale-95 transition-transform"
+        className="sm:hidden fixed bottom-[calc(80px+env(safe-area-inset-bottom))] right-4 z-30 flex items-center gap-2 px-5 h-14 rounded-full bg-origen-pradera text-white shadow-origen flex-shrink-0 active:scale-95 transition-transform"
         aria-label="Nuevo producto"
       >
-        <Plus className="w-6 h-6" />
+        <Plus className="w-5 h-5" />
+        <span className="text-sm font-semibold">Nuevo</span>
       </button>
 
       {/* Diálogos */}

@@ -141,12 +141,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8"
-    >
+    <>
       {/* Cabecera */}
       <PageHeader
         title="Gestión de pedidos"
@@ -157,71 +152,79 @@ export default function OrdersPage() {
         tooltipDetailed="Gestiona todos los pedidos, su estado y seguimiento."
       />
 
-      {/* Estadísticas */}
-      {stats && (
-        <motion.div variants={itemVariants}>
-          <OrderStats stats={stats} />
-        </motion.div>
-      )}
-
-      {/* Filtros */}
-      <motion.div variants={itemVariants}>
-        <OrderFilters
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onClearFilters={handleClearFilters}
-          totalOrders={totalOrders}
-        />
-      </motion.div>
-
-      {/* Lista móvil / Tabla desktop */}
-      <motion.div variants={itemVariants}>
-        {orders.length === 0 ? (
-          <Card className="p-8 sm:p-12 bg-surface-alt border border-border-subtle">
-            <div className="flex flex-col items-center justify-center text-center">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-origen-pastel flex items-center justify-center mb-3 sm:mb-4">
-                <ShoppingBag className="w-7 h-7 text-origen-pino" />
-              </div>
-              <p className="text-sm font-semibold text-origen-bosque mb-1">Sin pedidos</p>
-              <p className="text-xs text-text-subtle max-w-[240px]">
-                Aún no tienes pedidos con los filtros seleccionados.
-              </p>
-            </div>
-          </Card>
-        ) : (
-          <>
-            {/* Móvil: lista de tarjetas */}
-            <div className="block lg:hidden rounded-xl border border-border-subtle bg-surface overflow-hidden">
-              {orders.map((order) => (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  onPress={handleViewDetails}
-                />
-              ))}
-            </div>
-
-            {/* Desktop: tabla */}
-            <div className="hidden lg:block">
-              <OrdersTable
-                orders={orders}
-                onViewDetails={handleViewDetails}
-                isLoading={isLoading}
-              />
-            </div>
-
-            {/* Paginación */}
-            {totalPages > 1 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                className="mt-6"
-              />
-            )}
-          </>
+      {/* Contenido principal */}
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(24px+env(safe-area-inset-bottom))]"
+      >
+        {/* Estadísticas */}
+        {stats && (
+          <motion.div variants={itemVariants}>
+            <OrderStats stats={stats} />
+          </motion.div>
         )}
+
+        {/* Filtros */}
+        <motion.div variants={itemVariants}>
+          <OrderFilters
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onClearFilters={handleClearFilters}
+            totalOrders={totalOrders}
+          />
+        </motion.div>
+
+        {/* Lista móvil / Tabla desktop */}
+        <motion.div variants={itemVariants}>
+          {orders.length === 0 ? (
+            <Card className="p-8 sm:p-12 bg-surface-alt border border-border-subtle">
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-origen-pastel flex items-center justify-center mb-3 sm:mb-4">
+                  <ShoppingBag className="w-7 h-7 text-origen-pino" />
+                </div>
+                <p className="text-sm font-semibold text-origen-bosque mb-1">Sin pedidos</p>
+                <p className="text-xs text-text-subtle max-w-[240px]">
+                  Aún no tienes pedidos con los filtros seleccionados.
+                </p>
+              </div>
+            </Card>
+          ) : (
+            <>
+              {/* Móvil: lista de tarjetas */}
+              <div className="block lg:hidden rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden shadow-subtle">
+                {orders.map((order) => (
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    onPress={handleViewDetails}
+                  />
+                ))}
+              </div>
+
+              {/* Desktop: tabla */}
+              <div className="hidden lg:block">
+                <OrdersTable
+                  orders={orders}
+                  onViewDetails={handleViewDetails}
+                  isLoading={isLoading}
+                />
+              </div>
+
+              {/* Paginación */}
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  className="mt-6"
+                />
+              )}
+            </>
+          )}
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </>
   );
 }

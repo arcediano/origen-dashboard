@@ -46,10 +46,10 @@ function KpiSkeleton() {
   return (
     <div className="flex-shrink-0 w-[130px] p-3 rounded-xl border border-border-subtle bg-surface-alt animate-pulse">
       <div className="flex items-center gap-1.5 mb-2">
-        <div className="w-6 h-6 rounded-lg bg-gray-200" />
-        <div className="w-14 h-2.5 rounded bg-gray-200" />
+        <div className="w-6 h-6 rounded-lg bg-origen-pastel" />
+        <div className="w-14 h-2.5 rounded bg-origen-pastel" />
       </div>
-      <div className="w-10 h-5 rounded bg-gray-200" />
+      <div className="w-10 h-5 rounded bg-origen-pastel" />
     </div>
   );
 }

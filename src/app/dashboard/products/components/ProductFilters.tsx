@@ -144,7 +144,7 @@ export function ProductFilters({
 
   return (
     <>
-    <Card variant="elevated" className={cn('p-3', className)}>
+    <Card variant="elevated" className={cn('p-3 sm:p-4', className)}>
       {/* Chips de estado — sólo móvil */}
       <div className="sm:hidden mb-3">
         <ScrollChipFilter
@@ -155,7 +155,7 @@ export function ProductFilters({
       </div>
 
       {/* Primera fila: búsqueda y acciones principales */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
         {/* Campo de búsqueda - ocupa todo el ancho en móvil */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle" />
@@ -164,13 +164,13 @@ export function ProductFilters({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Buscar por nombre o SKU..."
-            className="w-full pl-9 pr-7 h-10 sm:h-9 text-sm bg-surface border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
+            className="w-full pl-9 pr-7 h-10 sm:h-9 text-sm bg-surface border border-border-subtle rounded-xl sm:rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera"
             aria-label="Buscar productos"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-subtle hover:text-muted-foreground"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque"
               aria-label="Limpiar búsqueda"
             >
               <X className="w-4 h-4" />
@@ -183,13 +183,18 @@ export function ProductFilters({
           {/* Botón de filtros para móvil */}
           <button
             onClick={() => setShowFilterSheet(true)}
-            className="sm:hidden flex items-center justify-center h-10 px-3 border border-border rounded-md bg-surface-alt text-muted-foreground"
+            className={cn(
+              'sm:hidden flex items-center justify-center h-10 px-3.5 rounded-xl text-sm font-medium transition-colors',
+              hasFilters
+                ? 'bg-origen-bosque text-white border border-origen-bosque'
+                : 'bg-surface-alt text-origen-bosque border border-border-subtle'
+            )}
             aria-label="Mostrar filtros"
           >
-            <Filter className="w-4 h-4 mr-2" />
+            <Filter className="w-4 h-4 mr-1.5" />
             <span>Filtros</span>
             {hasFilters && (
-              <span className="ml-2 w-5 h-5 rounded-full bg-origen-pradera text-white text-xs flex items-center justify-center">
+              <span className="ml-2 w-5 h-5 rounded-full bg-white/25 text-white text-xs flex items-center justify-center font-bold">
                 {activeFilterCount}
               </span>
             )}

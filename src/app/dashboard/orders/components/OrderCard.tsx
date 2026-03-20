@@ -14,7 +14,6 @@ import { motion } from 'framer-motion';
 import {
   ShoppingBag,
   ChevronRight,
-  ChevronsLeft,
   CreditCard,
   Banknote,
   Eye,
@@ -31,10 +30,10 @@ const PAYMENT_CONFIG: Record<
   PaymentStatus,
   { label: string; cls: string }
 > = {
-  paid:     { label: 'Pagado',      cls: 'text-origen-bosque bg-origen-pastel'    },
-  pending:  { label: 'Pdte. pago',  cls: 'text-amber-700 bg-amber-50'            },
-  failed:   { label: 'Fallido',     cls: 'text-red-700 bg-red-50'                },
-  refunded: { label: 'Reembolsado', cls: 'text-gray-600 bg-gray-100'             },
+  paid:     { label: 'Pagado',      cls: 'text-origen-bosque bg-origen-pastel'         },
+  pending:  { label: 'Pdte. pago',  cls: 'text-origen-mandarina bg-origen-mandarina/10'},
+  failed:   { label: 'Fallido',     cls: 'text-red-700 bg-red-50'                      },
+  refunded: { label: 'Reembolsado', cls: 'text-text-subtle bg-surface'                 },
 };
 
 function PaymentBadge({ status }: { status: PaymentStatus }) {
@@ -94,51 +93,51 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
       className={cn('border-b border-border-subtle last:border-0', className)}
     >
       <motion.button
-        whileTap={{ scale: 0.98 }}
+        whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema))' }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         onClick={() => onPress?.(order.id)}
         className={cn(
-          'w-full text-left flex items-center gap-3 px-4 py-3.5',
-          'focus:outline-none',
+          'w-full text-left flex items-center gap-3.5 px-4 py-4',
+          'focus:outline-none active:bg-surface',
         )}
         aria-label={`Pedido ${order.orderNumber}`}
       >
       {/* Icono del pedido */}
-      <div className="w-10 h-10 rounded-xl bg-origen-pastel flex items-center justify-center flex-shrink-0">
+      <div className="w-11 h-11 rounded-2xl bg-origen-pastel flex items-center justify-center flex-shrink-0 shadow-subtle">
         <ShoppingBag className="w-5 h-5 text-origen-pino" />
       </div>
 
       {/* Info principal */}
       <div className="flex-1 min-w-0">
-        {/* Fila 1: nº pedido + estado */}
+        {/* Fila 1: nº pedido + estado chip */}
         <div className="flex items-center justify-between gap-2 mb-0.5">
-          <span className="text-sm font-semibold text-origen-bosque truncate">
+          <span className="text-sm font-bold text-origen-bosque truncate">
             {order.orderNumber}
           </span>
           <OrderStatusChip status={order.status} size="sm" />
         </div>
 
-        {/* Fila 2: cliente */}
-        <p className="text-xs text-text-subtle truncate">{order.customerName}</p>
+        {/* Fila 2: cliente (prominente) */}
+        <p className="text-sm font-medium text-origen-bosque truncate">{order.customerName}</p>
 
         {/* Fila 3: items + fecha + pago */}
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-[10px] text-text-subtle">
-            {itemCount} {itemCount === 1 ? 'artículo' : 'artículos'}
+        <div className="flex items-center gap-1.5 mt-1.5">
+          <span className="text-[11px] text-text-subtle">
+            {itemCount} {itemCount === 1 ? 'art.' : 'arts.'}
           </span>
-          <span className="text-text-disabled">·</span>
-          <span className="text-[10px] text-text-subtle">{shortDate}</span>
-          <span className="text-text-disabled">·</span>
+          <span className="text-border-subtle">·</span>
+          <span className="text-[11px] text-text-subtle">{shortDate}</span>
+          <span className="text-border-subtle">·</span>
           <PaymentBadge status={order.payment.status} />
         </div>
       </div>
 
-      {/* Importe + hint swipe */}
-      <div className="flex flex-col items-end gap-1 flex-shrink-0">
-        <span className="text-sm font-bold text-origen-bosque">
+      {/* Importe (prominente) + chevron */}
+      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+        <span className="text-base font-bold text-origen-bosque">
           {order.total.toFixed(2)} €
         </span>
-        <ChevronsLeft className="w-4 h-4 text-text-subtle/40" aria-hidden />
+        <ChevronRight className="w-4 h-4 text-text-subtle/40" aria-hidden />
       </div>
     </motion.button>
     </SwipeableRow>

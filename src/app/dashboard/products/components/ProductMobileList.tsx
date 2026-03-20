@@ -2,9 +2,9 @@
  * @component ProductMobileList
  * @description Lista de productos optimizada para móvil.
  *              Reemplaza ProductTable en pantallas < lg.
- *              Layout: thumbnail 64×64 a la izquierda, info a la derecha, badge top-right.
+ *              Layout: thumbnail 72×72 a la izquierda, info a la derecha, badge top-right.
  *
- * Tokens Origen v3.0.
+ * Tokens Origen v3.0. Diseño nativo mobile-first.
  */
 
 'use client';
@@ -19,7 +19,7 @@ import {
   Eye,
   XCircle,
   BarChart2,
-  ChevronsLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
@@ -46,7 +46,7 @@ const STATUS_CONFIG: Record<
   inactive: {
     label: 'Inactivo',
     icon: XCircle,
-    chip: 'bg-amber-50 text-amber-700 border-amber-200',
+    chip: 'bg-origen-mandarina/10 text-origen-mandarina border-origen-mandarina/30',
   },
   out_of_stock: {
     label: 'Agotado',
@@ -59,14 +59,17 @@ const STATUS_CONFIG: Record<
 
 function ProductRowSkeleton() {
   return (
-    <div className="flex items-center gap-3 p-3 animate-pulse">
-      <div className="w-16 h-16 rounded-xl bg-gray-200 flex-shrink-0" />
-      <div className="flex-1 min-w-0 space-y-2">
-        <div className="h-3 bg-gray-200 rounded w-3/4" />
-        <div className="h-2.5 bg-gray-100 rounded w-1/2" />
-        <div className="h-2.5 bg-gray-100 rounded w-1/3" />
+    <div className="flex items-center gap-3 px-4 py-3.5 animate-pulse">
+      <div className="w-[72px] h-[72px] rounded-2xl bg-origen-pastel/60 flex-shrink-0" />
+      <div className="flex-1 min-w-0 space-y-2.5">
+        <div className="h-3.5 bg-origen-pastel rounded-lg w-3/4" />
+        <div className="h-2.5 bg-origen-pastel/60 rounded-lg w-1/2" />
+        <div className="flex items-center gap-3">
+          <div className="h-4 bg-origen-pastel rounded-lg w-16" />
+          <div className="h-3 bg-origen-pastel/60 rounded-lg w-12" />
+        </div>
       </div>
-      <div className="flex-shrink-0 w-16 h-6 bg-gray-200 rounded-full" />
+      <div className="flex-shrink-0 w-14 h-5 bg-origen-pastel/60 rounded-full" />
     </div>
   );
 }
@@ -128,44 +131,47 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
   return (
     <SwipeableRow actions={swipeActions} className="border-b border-border-subtle last:border-0">
       <motion.button
-        whileTap={{ scale: 0.98 }}
+        whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema))' }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         onClick={() => onView(product.id)}
-        className="flex items-center gap-3 px-3 py-3 w-full text-left"
+        className="flex items-center gap-3.5 px-4 py-3.5 w-full text-left active:bg-surface"
         aria-label={`Ver ${product.name}`}
       >
         {/* Thumbnail */}
-        <div className="w-16 h-16 rounded-xl overflow-hidden bg-origen-pastel flex-shrink-0">
+        <div className="w-[72px] h-[72px] rounded-2xl overflow-hidden bg-origen-pastel flex-shrink-0 shadow-subtle">
           {mainImg ? (
             <img src={mainImg} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Package className="w-7 h-7 text-origen-pradera/60" />
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-origen-pastel to-origen-pradera/10">
+              <Package className="w-8 h-8 text-origen-pradera/50" />
             </div>
           )}
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-origen-bosque truncate leading-tight">{product.name}</p>
-          <p className="text-[11px] text-text-subtle truncate mt-0.5">{product.sku} · {product.categoryName}</p>
-          <div className="flex items-center gap-3 mt-1.5">
-            <span className="text-sm font-bold text-origen-bosque">{product.basePrice.toFixed(2)} €</span>
+          {/* Badge encima del nombre en móvil */}
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <p className="text-sm font-semibold text-origen-bosque truncate leading-tight flex-1">{product.name}</p>
+            <StatusBadge status={product.status} />
+          </div>
+          <p className="text-[11px] text-text-subtle truncate">{product.sku} · {product.categoryName}</p>
+          {/* Precio y stock en la misma fila, prominentes */}
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-base font-bold text-origen-bosque">{product.basePrice.toFixed(2)} €</span>
+            <span className="text-border-subtle">·</span>
             {product.status === 'out_of_stock' ? (
-              <span className="text-[10px] font-medium text-red-600">Sin stock</span>
+              <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-md">Sin stock</span>
             ) : isLowStock ? (
-              <span className="text-[10px] font-medium text-amber-600">Stock: {product.stock}</span>
+              <span className="text-[11px] font-semibold text-origen-mandarina bg-origen-mandarina/10 px-1.5 py-0.5 rounded-md">Stock: {product.stock}</span>
             ) : (
-              <span className="text-[10px] text-text-subtle">Stock: {product.stock}</span>
+              <span className="text-[11px] text-text-subtle">Stock: {product.stock}</span>
             )}
           </div>
         </div>
 
-        {/* Status badge + hint de swipe */}
-        <div className="flex flex-col items-end gap-2 flex-shrink-0">
-          <StatusBadge status={product.status} />
-          <ChevronsLeft className="w-4 h-4 text-text-subtle/40" aria-hidden />
-        </div>
+        {/* Chevron derecha */}
+        <ChevronRight className="w-4 h-4 text-text-subtle/50 flex-shrink-0" aria-hidden />
       </motion.button>
     </SwipeableRow>
   );
@@ -197,7 +203,7 @@ export function ProductMobileList({
 }: ProductMobileListProps) {
   if (isLoading) {
     return (
-      <div className={cn('rounded-xl border border-border-subtle bg-surface overflow-hidden', className)}>
+      <div className={cn('rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden shadow-subtle', className)}>
         {Array.from({ length: 5 }).map((_, i) => <ProductRowSkeleton key={i} />)}
       </div>
     );
@@ -206,7 +212,7 @@ export function ProductMobileList({
   if (products.length === 0) return null;
 
   return (
-    <div className={cn('rounded-xl border border-border-subtle bg-surface overflow-hidden', className)}>
+    <div className={cn('rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden shadow-subtle', className)}>
       {products.map((product) => (
         <ProductRow
           key={product.id}

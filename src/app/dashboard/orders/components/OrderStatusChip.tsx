@@ -52,7 +52,7 @@ const STATUS_CONFIG: Record<
   refunded: {
     label: 'Reembolsado',
     icon: RefreshCw,
-    chip: 'bg-gray-100 text-gray-600 border-gray-200',
+    chip: 'bg-surface text-text-subtle border-border-subtle',
   },
 };
 
