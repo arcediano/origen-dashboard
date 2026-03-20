@@ -70,18 +70,18 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 sm:px-6 py-8">
-      {/* Botón volver */}
+    <div className="px-4 py-5 sm:px-6 sm:py-6 lg:py-8 lg:max-w-4xl lg:mx-auto">
+      {/* Botón volver — solo desktop (MobileTopBar lo gestiona en móvil) */}
       <button 
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-origen-pradera mb-6 transition-colors"
+        className="hidden lg:flex items-center gap-2 text-sm text-muted-foreground hover:text-origen-pradera mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver al perfil
       </button>
 
-      {/* Cabecera */}
-      <div className="mb-8">
+      {/* Cabecera — solo desktop (MobileTopBar muestra "Seguridad" en móvil) */}
+      <div className="hidden lg:block mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-origen-bosque">
           Configuración
         </h1>
@@ -92,17 +92,17 @@ export default function SettingsPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell className="w-4 h-4" />
-            Notificaciones
+          <TabsTrigger value="notifications" className="flex items-center gap-1.5 px-2 sm:px-4">
+            <Bell className="w-4 h-4 flex-shrink-0" />
+            <span className="text-xs sm:text-sm">Avisos</span>
           </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
-            <Shield className="w-4 h-4" />
-            Seguridad
+          <TabsTrigger value="security" className="flex items-center gap-1.5 px-2 sm:px-4">
+            <Shield className="w-4 h-4 flex-shrink-0" />
+            <span className="text-xs sm:text-sm">Seguridad</span>
           </TabsTrigger>
-          <TabsTrigger value="preferences" className="flex items-center gap-2">
-            <Globe className="w-4 h-4" />
-            Preferencias
+          <TabsTrigger value="preferences" className="flex items-center gap-1.5 px-2 sm:px-4">
+            <Globe className="w-4 h-4 flex-shrink-0" />
+            <span className="text-xs sm:text-sm">Ajustes</span>
           </TabsTrigger>
         </TabsList>
 

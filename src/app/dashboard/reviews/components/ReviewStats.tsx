@@ -20,6 +20,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MobileKPIRow, type KpiItem } from '@/components/shared/mobile';
 import type { ReviewStats as ReviewStatsType } from '@/types/review';
 
 interface ReviewStatsProps {
@@ -86,11 +87,20 @@ export function ReviewStats({ stats, className }: ReviewStatsProps) {
     }
   ];
 
+  const mobileKpis: KpiItem[] = [
+    { label: 'Total',       value: stats.total,                  icon: MessageSquare, accent: 'pradera' },
+    { label: 'Valoración',  value: stats.averageRating.toFixed(1), icon: Star,         accent: 'amber'   },
+    { label: 'Respondidas', value: respondedCount,               icon: CheckCircle,   accent: 'green'   },
+    { label: 'Útiles',      value: stats.helpful,                icon: ThumbsUp,      accent: 'blue'    },
+  ];
+
   return (
-    <div className={cn(
-      'grid grid-cols-2 md:grid-cols-4 gap-4',
-      className
-    )}>
+    <div className={cn(className)}>
+      {/* Móvil: fila KPI scrollable */}
+      <MobileKPIRow items={mobileKpis} className="block lg:hidden" />
+
+      {/* Desktop: grid completo */}
+      <div className={cn('hidden lg:grid grid-cols-2 md:grid-cols-4 gap-4')}>
       {statsCards.map((card, index) => (
         <div
           key={index}
@@ -126,6 +136,7 @@ export function ReviewStats({ stats, className }: ReviewStatsProps) {
           )}
         </div>
       ))}
+      </div>
     </div>
   );
 }

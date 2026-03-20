@@ -11,6 +11,7 @@
 
 import Link from 'next/link';
 import { Card } from '@/components/ui/atoms/card';
+import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { 
   User, 
   Truck, 
@@ -18,6 +19,7 @@ import {
   Bell, 
   Shield, 
   Globe,
+  Settings,
   ChevronRight 
 } from 'lucide-react';
 
@@ -63,17 +65,46 @@ export default function ConfiguracionPage() {
 
   return (
     <div className="w-full">
-      {/* Cabecera de página */}
-      <div className="px-6 lg:px-8 py-6 border-b border-border/50 bg-surface-alt/30">
-        <div>
-          <h1 className="text-2xl font-semibold text-origen-bosque">Configuración</h1>
-          <p className="text-sm text-muted-foreground mt-1">Administra tu cuenta y preferencias</p>
-        </div>
-      </div>
 
-      {/* Contenido principal */}
-      <div className="p-6 lg:p-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Cabecera — solo desktop (MobileTopBar maneja el título en móvil) */}
+      <PageHeader
+        className="hidden lg:block"
+        title="Configuración"
+        description="Administra tu cuenta y preferencias"
+        badgeIcon={Settings}
+        badgeText="Ajustes"
+        tooltip="Configuración"
+        tooltipDetailed="Gestiona todos los aspectos de tu cuenta desde esta sección."
+      />
+
+      {/* Contenido */}
+      <div className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+
+        {/* Móvil: lista nativa de navegación */}
+        <div className="lg:hidden rounded-2xl border border-border-subtle overflow-hidden bg-surface divide-y divide-border-subtle">
+          {sections.map((section, index) => {
+            const Icon = section.icon;
+            return (
+              <Link
+                key={index}
+                href={section.href}
+                className="flex items-center gap-3 px-4 py-4 active:bg-surface-alt transition-colors"
+              >
+                <div className="w-9 h-9 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-4 h-4 text-origen-pradera" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[15px] font-semibold text-origen-bosque leading-tight">{section.title}</p>
+                  <p className="text-xs text-text-subtle mt-0.5">{section.description}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-text-subtle flex-shrink-0" />
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Desktop: grid de cards */}
+        <div className="hidden lg:grid grid-cols-2 lg:grid-cols-3 gap-6">
           {sections.map((section, index) => {
             const Icon = section.icon;
             return (
@@ -98,6 +129,7 @@ export default function ConfiguracionPage() {
             );
           })}
         </div>
+
       </div>
     </div>
   );

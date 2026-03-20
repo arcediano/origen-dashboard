@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip } from '@/components/ui/atoms/tooltip';
+import { MobileKPIRow, type KpiItem } from '@/components/shared/mobile';
 
 export interface ProductStatsProps {
   total: number;
@@ -176,12 +177,21 @@ export function ProductStats({
     return 'md:grid-cols-4 lg:grid-cols-7';
   };
 
+  // KPIs clave para la fila scrollable en móvil
+  const mobileKpis: KpiItem[] = [
+    { label: 'Total',     value: total,       icon: Package,       accent: 'pradera' },
+    { label: 'Activos',   value: active,      icon: CheckCircle,   accent: 'green'   },
+    { label: 'Stock bajo',value: lowStock,    icon: AlertCircle,   accent: 'amber'   },
+    { label: 'Agotados',  value: outOfStock,  icon: AlertCircle,   accent: 'red'     },
+  ];
+
   return (
-    <div className={cn(
-      'grid grid-cols-2 gap-3 sm:gap-4',
-      getGridCols(),
-      className
-    )}>
+    <div className={cn(className)}>
+      {/* Móvil: fila KPI scrollable */}
+      <MobileKPIRow items={mobileKpis} className="block lg:hidden" />
+
+      {/* Desktop: grid completo */}
+      <div className={cn('hidden lg:grid grid-cols-2 gap-3', getGridCols())}>
       {/* Total productos */}
       <StatsCard
         label="Total productos"
@@ -309,6 +319,7 @@ export function ProductStats({
           }}
         />
       )}
+      </div>
     </div>
   );
 }
