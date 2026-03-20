@@ -262,11 +262,11 @@ export default function ProductoDetallePage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-gradient-to-b from-white to-origen-crema"
+      className="lg:min-h-screen lg:bg-gradient-to-b lg:from-white lg:to-origen-crema"
     >
-      {/* Elementos decorativos */}
-      <div className="fixed top-0 right-0 w-96 h-96 bg-origen-pradera/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-      <div className="fixed bottom-0 left-0 w-96 h-96 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+      {/* Elementos decorativos — solo desktop */}
+      <div className="hidden lg:block fixed top-0 right-0 w-96 h-96 bg-origen-pradera/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+      <div className="hidden lg:block fixed bottom-0 left-0 w-96 h-96 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       {/* ===== CABECERA CON PAGEHEADER ===== */}
       <PageHeader
@@ -288,8 +288,8 @@ export default function ProductoDetallePage() {
               </Badge>
             )}
 
-            {/* Botón Editar */}
-          <Link href={`/dashboard/products/${product.id}edit`} className="inline-block">
+            {/* Botón Editar — solo desktop */}
+          <Link href={`/dashboard/products/${product.id}edit`} className="hidden lg:inline-block">
             <Button>
               <span className="flex items-center gap-2">
                 <Edit className="w-4 h-4" />
@@ -298,11 +298,11 @@ export default function ProductoDetallePage() {
             </Button>
           </Link>
 
-            {/* Botón Eliminar */}
+            {/* Botón Eliminar — solo desktop */}
             <Button
               onClick={() => setShowDeleteDialog(true)}
               disabled={isDeleting}
-              className="bg-transparent text-origen-bosque border-2 border-origen-bosque hover:bg-origen-crema hover:border-origen-pradera h-10 px-5"
+              className="hidden lg:flex bg-transparent text-origen-bosque border-2 border-origen-bosque hover:bg-origen-crema hover:border-origen-pradera h-10 px-5"
             >
               <span className="flex items-center gap-2">
                 <Trash2 className="w-4 h-4" />
@@ -318,14 +318,15 @@ export default function ProductoDetallePage() {
         <div className="max-w-7xl mx-auto">
           
           {/* ===== MÉTRICAS CLAVE - ESTILO PRODUCTEXPANDABLEDETAILS (UNA SOLA FILA) ===== */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 mb-6 lg:mb-8 scrollbar-hide">
+          <div className="flex gap-3 lg:grid lg:grid-cols-7 lg:gap-4 w-max lg:w-auto">
             {/* Precio */}
-            <div className="p-4 bg-gradient-to-br from-origen-pradera/5 to-transparent rounded-xl border border-origen-pradera/10">
+            <div className="w-32 shrink-0 lg:w-auto p-3 lg:p-4 bg-gradient-to-br from-origen-pradera/5 to-transparent rounded-xl border border-origen-pradera/10">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-5 h-5 text-origen-pradera" />
                 <span className="text-xs font-medium text-text-subtle">Precio</span>
               </div>
-              <p className="text-2xl font-bold text-origen-bosque">{formatCurrency(product.basePrice)}</p>
+              <p className="text-lg lg:text-2xl font-bold text-origen-bosque">{formatCurrency(product.basePrice)}</p>
               {hasDiscount && (
                 <div className="flex items-center gap-1 mt-2 text-xs">
                   <span className="text-text-disabled line-through">{formatCurrency(product.comparePrice)}</span>
@@ -336,7 +337,7 @@ export default function ProductoDetallePage() {
 
             {/* Stock */}
             <div className={cn(
-              "p-4 rounded-xl border",
+              "w-32 shrink-0 lg:w-auto p-3 lg:p-4 rounded-xl border",
               stockColor === 'error' ? "bg-gradient-to-br from-red-50/50 to-transparent border-red-100" :
               stockColor === 'warning' ? "bg-gradient-to-br from-amber-50/50 to-transparent border-amber-100" :
               "bg-gradient-to-br from-origen-hoja/5 to-transparent border-origen-hoja/20"
@@ -349,7 +350,7 @@ export default function ProductoDetallePage() {
                 )} />
                 <span className="text-xs font-medium text-text-subtle">Stock</span>
               </div>
-              <p className="text-2xl font-bold text-origen-bosque">{stockLevel} uds</p>
+              <p className="text-lg lg:text-2xl font-bold text-origen-bosque">{stockLevel} uds</p>
               {stockLevel > 0 && stockLevel <= lowStockThreshold && (
                 <div className="flex items-center gap-1 mt-2 text-xs text-amber-600">
                   <AlertCircle className="w-3 h-3" />
@@ -359,25 +360,25 @@ export default function ProductoDetallePage() {
             </div>
 
             {/* Valoración */}
-            <div className="p-4 bg-gradient-to-br from-amber-50/50 to-transparent rounded-xl border border-amber-100">
+            <div className="w-32 shrink-0 lg:w-auto p-3 lg:p-4 bg-gradient-to-br from-amber-50/50 to-transparent rounded-xl border border-amber-100">
               <div className="flex items-center gap-2 mb-2">
                 <Star className="w-5 h-5 text-amber-500" />
                 <span className="text-xs font-medium text-text-subtle">Valoración</span>
               </div>
               <div className="flex items-baseline gap-1">
-                <p className="text-2xl font-bold text-origen-bosque">{product.rating?.toFixed(1) || '0.0'}</p>
+                <p className="text-lg lg:text-2xl font-bold text-origen-bosque">{product.rating?.toFixed(1) || '0.0'}</p>
                 <span className="text-xs text-text-disabled">/5</span>
               </div>
               <p className="text-xs text-text-subtle mt-2">{product.reviewCount || 0} reseñas</p>
             </div>
 
             {/* Ventas */}
-            <div className="p-4 bg-gradient-to-br from-blue-50/50 to-transparent rounded-xl border border-blue-100">
+            <div className="w-32 shrink-0 lg:w-auto p-3 lg:p-4 bg-gradient-to-br from-blue-50/50 to-transparent rounded-xl border border-blue-100">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-blue-500" />
                 <span className="text-xs font-medium text-text-subtle">Ventas</span>
               </div>
-              <p className="text-2xl font-bold text-origen-bosque">{product.sales || 0}</p>
+              <p className="text-lg lg:text-2xl font-bold text-origen-bosque">{product.sales || 0}</p>
               <div className="flex items-center gap-1 mt-2 text-xs text-blue-600">
                 <DollarSign className="w-3 h-3" />
                 <span>{formatCurrency(product.revenue)}</span>
@@ -385,12 +386,12 @@ export default function ProductoDetallePage() {
             </div>
 
             {/* Vistas */}
-            <div className="p-4 bg-gradient-to-br from-purple-50/50 to-transparent rounded-xl border border-purple-100">
+            <div className="w-32 shrink-0 lg:w-auto p-3 lg:p-4 bg-gradient-to-br from-purple-50/50 to-transparent rounded-xl border border-purple-100">
               <div className="flex items-center gap-2 mb-2">
                 <Eye className="w-5 h-5 text-purple-500" />
                 <span className="text-xs font-medium text-text-subtle">Vistas</span>
               </div>
-              <p className="text-2xl font-bold text-origen-bosque">{product.views || 0}</p>
+              <p className="text-lg lg:text-2xl font-bold text-origen-bosque">{product.views || 0}</p>
               {product.conversion && (
                 <div className="flex items-center gap-1 mt-2 text-xs text-purple-600">
                   <TrendingUp className="w-3 h-3" />
@@ -400,12 +401,12 @@ export default function ProductoDetallePage() {
             </div>
 
             {/* Conversión */}
-            <div className="p-4 bg-gradient-to-br from-green-50/50 to-transparent rounded-xl border border-green-100">
+            <div className="w-32 shrink-0 lg:w-auto p-3 lg:p-4 bg-gradient-to-br from-green-50/50 to-transparent rounded-xl border border-green-100">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-green-500" />
                 <span className="text-xs font-medium text-text-subtle">Conversión</span>
               </div>
-              <p className="text-2xl font-bold text-origen-bosque">{product.conversion?.toFixed(1) || '0.0'}%</p>
+              <p className="text-lg lg:text-2xl font-bold text-origen-bosque">{product.conversion?.toFixed(1) || '0.0'}%</p>
               <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
                 <ShoppingBag className="w-3 h-3" />
                 <span>{product.sales || 0} ventas</span>
@@ -413,12 +414,12 @@ export default function ProductoDetallePage() {
             </div>
 
             {/* Margen */}
-            <div className="p-4 bg-gradient-to-br from-origen-menta/5 to-transparent rounded-xl border border-origen-menta/20">
+            <div className="w-32 shrink-0 lg:w-auto p-3 lg:p-4 bg-gradient-to-br from-origen-menta/5 to-transparent rounded-xl border border-origen-menta/20">
               <div className="flex items-center gap-2 mb-2">
                 <Percent className="w-5 h-5 text-origen-menta" />
                 <span className="text-xs font-medium text-text-subtle">Margen</span>
               </div>
-              <p className="text-2xl font-bold text-origen-bosque">
+              <p className="text-lg lg:text-2xl font-bold text-origen-bosque">
                 {product.comparePrice && product.comparePrice > product.basePrice
                   ? Math.round(((product.comparePrice - product.basePrice) / product.comparePrice) * 100)
                   : 0}%
@@ -429,6 +430,7 @@ export default function ProductoDetallePage() {
                 </p>
               )}
             </div>
+          </div>
           </div>
 
           {/* ===== DOS COLUMNAS ===== */}
@@ -460,9 +462,9 @@ export default function ProductoDetallePage() {
                   
                   {/* Miniaturas si hay más imágenes */}
                   {product.gallery && product.gallery.length > 1 && (
-                    <div className="grid grid-cols-4 gap-2 mt-4">
+                    <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-hide lg:grid lg:grid-cols-4">
                       {product.gallery.slice(1, 5).map((img, idx) => (
-                        <div key={img.id} className="aspect-square rounded-lg bg-origen-crema/50 overflow-hidden">
+                        <div key={img.id} className="w-16 h-16 shrink-0 lg:w-auto lg:h-auto lg:aspect-square rounded-lg bg-origen-crema/50 overflow-hidden">
                           <img
                             src={img.url}
                             alt={img.alt || `Imagen ${idx + 2}`}
@@ -620,7 +622,7 @@ export default function ProductoDetallePage() {
 
             {/* COLUMNA DERECHA (8/12) */}
             <div className="lg:col-span-8">
-              <Card variant="elevated" hoverEffect="organic" className="p-6">
+              <Card variant="elevated" hoverEffect="organic" className="p-4 lg:p-6">
                 
                 {/* Descripción */}
                 <div className="mb-6">
@@ -655,28 +657,30 @@ export default function ProductoDetallePage() {
 
                 {/* TABS */}
                 <Tabs defaultValue="nutritional" className="w-full">
-                  <TabsList className="grid w-full grid-cols-5 p-1 bg-origen-crema/50 rounded-xl mb-6">
-                    <TabsTrigger value="nutritional" className="rounded-lg data-[state=active]:bg-white">
-                      <FlaskConical className="w-4 h-4 mr-2" />
-                      Nutricional
+                  <div className="overflow-x-auto scrollbar-hide mb-6">
+                  <TabsList className="flex lg:grid w-max lg:w-full lg:grid-cols-5 p-1 bg-origen-crema/50 rounded-xl">
+                    <TabsTrigger value="nutritional" className="rounded-lg data-[state=active]:bg-white shrink-0 px-4">
+                      <FlaskConical className="w-4 h-4 lg:mr-2" />
+                      <span className="hidden lg:inline">Nutricional</span>
                     </TabsTrigger>
-                    <TabsTrigger value="production" className="rounded-lg data-[state=active]:bg-white">
-                      <Leaf className="w-4 h-4 mr-2" />
-                      Producción
+                    <TabsTrigger value="production" className="rounded-lg data-[state=active]:bg-white shrink-0 px-4">
+                      <Leaf className="w-4 h-4 lg:mr-2" />
+                      <span className="hidden lg:inline">Producción</span>
                     </TabsTrigger>
-                    <TabsTrigger value="pricing" className="rounded-lg data-[state=active]:bg-white">
-                      <DollarSign className="w-4 h-4 mr-2" />
-                      Precios
+                    <TabsTrigger value="pricing" className="rounded-lg data-[state=active]:bg-white shrink-0 px-4">
+                      <DollarSign className="w-4 h-4 lg:mr-2" />
+                      <span className="hidden lg:inline">Precios</span>
                     </TabsTrigger>
-                    <TabsTrigger value="inventory" className="rounded-lg data-[state=active]:bg-white">
-                      <Package className="w-4 h-4 mr-2" />
-                      Inventario
+                    <TabsTrigger value="inventory" className="rounded-lg data-[state=active]:bg-white shrink-0 px-4">
+                      <Package className="w-4 h-4 lg:mr-2" />
+                      <span className="hidden lg:inline">Inventario</span>
                     </TabsTrigger>
-                    <TabsTrigger value="attributes" className="rounded-lg data-[state=active]:bg-white">
-                      <Tag className="w-4 h-4 mr-2" />
-                      Atributos
+                    <TabsTrigger value="attributes" className="rounded-lg data-[state=active]:bg-white shrink-0 px-4">
+                      <Tag className="w-4 h-4 lg:mr-2" />
+                      <span className="hidden lg:inline">Atributos</span>
                     </TabsTrigger>
                   </TabsList>
+                  </div>
 
                   {/* ... contenido de las tabs (sin cambios) ... */}
                 </Tabs>
@@ -684,6 +688,28 @@ export default function ProductoDetallePage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ===== ACCIONES STICKY — SOLO MÓVIL ===== */}
+      <div className="lg:hidden fixed bottom-[calc(72px+env(safe-area-inset-bottom))] left-4 right-4 z-30 flex gap-3">
+        <Button
+          onClick={() => setShowDeleteDialog(true)}
+          disabled={isDeleting}
+          className="flex-1 bg-transparent text-origen-bosque border-2 border-origen-bosque hover:bg-origen-crema hover:border-origen-pradera h-12"
+        >
+          <span className="flex items-center justify-center gap-2">
+            <Trash2 className="w-4 h-4" />
+            Eliminar
+          </span>
+        </Button>
+        <Link href={`/dashboard/products/${product.id}edit`} className="flex-1">
+          <Button className="w-full h-12">
+            <span className="flex items-center justify-center gap-2">
+              <Edit className="w-4 h-4" />
+              Editar producto
+            </span>
+          </Button>
+        </Link>
       </div>
 
       {/* ===== DIÁLOGO DE ELIMINACIÓN USANDO MODAL ===== */}

@@ -23,8 +23,9 @@ export function PageLoader({
   return (
     <div
       className={cn(
-        'min-h-screen bg-gradient-to-b from-white to-origen-crema',
         'flex items-center justify-center p-4',
+        'min-h-[calc(100dvh-144px)] lg:min-h-screen',
+        'lg:bg-gradient-to-b lg:from-white lg:to-origen-crema',
         className,
       )}
     >

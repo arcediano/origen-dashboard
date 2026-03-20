@@ -14,6 +14,7 @@ import { motion } from 'framer-motion';
 import {
   ShoppingBag,
   ChevronRight,
+  ChevronsLeft,
   CreditCard,
   Banknote,
   Eye,
@@ -137,7 +138,7 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
         <span className="text-sm font-bold text-origen-bosque">
           {order.total.toFixed(2)} €
         </span>
-        <span className="text-[9px] text-text-disabled select-none">← desliza</span>
+        <ChevronsLeft className="w-4 h-4 text-text-subtle/40" aria-hidden />
       </div>
     </motion.button>
     </SwipeableRow>

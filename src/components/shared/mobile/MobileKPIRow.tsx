@@ -69,7 +69,7 @@ export function MobileKPIRow({
   if (isLoading) {
     return (
       <div className={cn(
-        'flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-none lg:hidden',
+        'flex gap-3 overflow-x-auto pb-1 -mx-4 sm:mx-0 px-4 sm:px-0 scrollbar-none lg:hidden',
         className,
       )}>
         {Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)}
@@ -80,7 +80,7 @@ export function MobileKPIRow({
   return (
     <div
       className={cn(
-        'flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-none lg:hidden',
+        'flex gap-3 overflow-x-auto pb-1 -mx-4 sm:mx-0 px-4 sm:px-0 scrollbar-none lg:hidden',
         className,
       )}
     >

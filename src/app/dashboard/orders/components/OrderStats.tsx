@@ -105,7 +105,7 @@ export function OrderStats({ stats, className }: OrderStatsProps) {
   return (
     <div className={cn(className)}>
       {/* Móvil: fila scrollable */}
-      <MobileKPIRow items={mobileKpis} className="block lg:hidden" />
+      <MobileKPIRow items={mobileKpis} />
 
       {/* Desktop: grid completo */}
       <div className={cn(

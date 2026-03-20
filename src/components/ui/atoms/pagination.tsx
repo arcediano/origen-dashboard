@@ -33,7 +33,7 @@ export function Pagination({
         variant="outline"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-lg border-2 hover:border-origen-pradera"
+        className="h-11 w-11 sm:h-10 sm:w-10 p-0 rounded-lg border-2 hover:border-origen-pradera"
         aria-label="Página anterior"
       >
         <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -54,7 +54,7 @@ export function Pagination({
         variant="outline"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-lg border-2 hover:border-origen-pradera"
+        className="h-11 w-11 sm:h-10 sm:w-10 p-0 rounded-lg border-2 hover:border-origen-pradera"
         aria-label="Página siguiente"
       >
         <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />

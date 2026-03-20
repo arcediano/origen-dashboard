@@ -108,7 +108,7 @@ export function OrderFilters({
             type="text"
             value={localSearch}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Buscar por nº pedido, cliente o email..."
+            placeholder="Buscar pedido o cliente..."
             className="w-full pl-9 pr-7 h-10 sm:h-9 text-sm bg-surface border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
           />
           {localSearch && (
@@ -135,11 +135,89 @@ export function OrderFilters({
           <span>Filtros</span>
           {hasFilters && (
             <span className="ml-2 w-5 h-5 rounded-full bg-origen-pradera text-white text-xs flex items-center justify-center">
-              {Object.values(filters).filter(Boolean).length}
+              {Object.values(filters).filter(v => v !== undefined && v !== '').length}
             </span>
           )}
         </button>
       </div>
+
+      {/* Panel expandible de filtros — solo móvil */}
+      {showMobileFilters && (
+        <div className="sm:hidden mt-3 space-y-3 pt-3 border-t border-border-subtle">
+
+          {/* Estado */}
+          <div>
+            <label className="text-xs font-medium text-text-subtle mb-1.5 block">Estado</label>
+            <select
+              value={filters.status || ''}
+              onChange={(e) => toggleFilter('status', e.target.value || undefined)}
+              className="w-full h-10 px-3 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera"
+            >
+              {STATUS_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Rango de fechas */}
+          <div>
+            <label className="text-xs font-medium text-text-subtle mb-1.5 block">Período</label>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="date"
+                value={formatDateForInput(filters.dateFrom)}
+                onChange={(e) => toggleFilter('dateFrom', e.target.value ? new Date(e.target.value) : undefined)}
+                className="h-10 px-3 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera"
+              />
+              <input
+                type="date"
+                value={formatDateForInput(filters.dateTo)}
+                onChange={(e) => toggleFilter('dateTo', e.target.value ? new Date(e.target.value) : undefined)}
+                className="h-10 px-3 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera"
+              />
+            </div>
+          </div>
+
+          {/* Rango de importe */}
+          <div>
+            <label className="text-xs font-medium text-text-subtle mb-1.5 block">Importe (€)</label>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="relative">
+                <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
+                <input
+                  type="number"
+                  value={filters.minAmount || ''}
+                  onChange={(e) => toggleFilter('minAmount', e.target.value ? Number(e.target.value) : undefined)}
+                  placeholder="Mín."
+                  className="w-full pl-7 h-10 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera"
+                  min="0"
+                />
+              </div>
+              <div className="relative">
+                <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
+                <input
+                  type="number"
+                  value={filters.maxAmount || ''}
+                  onChange={(e) => toggleFilter('maxAmount', e.target.value ? Number(e.target.value) : undefined)}
+                  placeholder="Máx."
+                  className="w-full pl-7 h-10 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera"
+                  min="0"
+                />
+              </div>
+            </div>
+          </div>
+
+          {hasFilters && (
+            <button
+              onClick={() => { onClearFilters(); setShowMobileFilters(false); }}
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-origen-pradera border border-origen-pradera/30 hover:bg-origen-crema/50 rounded-lg transition-colors"
+            >
+              <X className="w-4 h-4" />
+              Limpiar todos los filtros
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Filtros desktop */}
       <div className="hidden sm:flex flex-wrap items-center gap-3 mt-3">
