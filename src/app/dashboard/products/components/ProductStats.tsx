@@ -16,6 +16,8 @@ import {
   DollarSign,
   Star,
 } from 'lucide-react';
+
+// Los iconos Package, CheckCircle, AlertCircle se usan solo en el grid desktop.
 import { cn } from '@/lib/utils';
 import { StatStrip } from '@/components/shared/mobile/StatStrip';
 import { StatsCard } from '@/components/features/dashboard/components/stats/stats-card';
@@ -61,10 +63,10 @@ export function ProductStats({
       <div className="lg:hidden">
         <StatStrip
           items={[
-            { label: 'Total',      value: total,      icon: Package,      gradient: 'from-origen-pradera to-origen-hoja', variant: 'default' },
-            { label: 'Activos',    value: active,     icon: CheckCircle,  gradient: 'from-origen-hoja to-origen-pino',    variant: 'success' },
-            { label: 'Stock bajo', value: lowStock,   icon: AlertCircle,  gradient: 'from-origen-mandarina to-amber-500', variant: lowStock   > 0 ? 'warning' : 'default' },
-            { label: 'Agotados',   value: outOfStock, icon: AlertCircle,  gradient: 'from-red-400 to-red-600',            variant: outOfStock > 0 ? 'danger'  : 'default' },
+            { label: 'Total',      value: total,      variant: 'default' },
+            { label: 'Activos',    value: active,     variant: 'success' },
+            { label: 'Stock bajo', value: lowStock,   variant: lowStock   > 0 ? 'warning' : 'default' },
+            { label: 'Agotados',   value: outOfStock, variant: outOfStock > 0 ? 'danger'  : 'default' },
           ]}
         />
       </div>

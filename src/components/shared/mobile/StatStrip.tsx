@@ -1,15 +1,11 @@
 /**
  * @component StatStrip
- * @description Tira compacta de KPIs para móvil — versión reducida del StatsCard del dashboard.
+ * @description Tira compacta de KPIs para móvil.
  *
- * Mantiene el mismo lenguaje visual (icono con gradiente, tipografía, tokens de marca)
- * en un formato de franja horizontal que ocupa ~90px en lugar de las tarjetas completas.
- *
- * Uso:
- *   <StatStrip items={[
- *     { label: 'Total',   value: 24, icon: Package,     gradient: 'from-origen-pradera to-origen-hoja' },
- *     { label: 'Activos', value: 18, icon: CheckCircle, gradient: 'from-origen-hoja to-origen-pino', variant: 'success' },
- *   ]} />
+ * Mismo estilo de card que el dashboard principal (bg-surface-alt, rounded-xl,
+ * border border-border, shadow-origen) con los KPIs en una sola fila:
+ * número grande + etiqueta pequeña, separados por divisores verticales.
+ * Sin iconos, sin scroll horizontal.
  */
 
 'use client';
@@ -23,14 +19,10 @@ export type StatStripVariant = 'default' | 'success' | 'warning' | 'danger';
 export interface StatStripItem {
   label: string;
   value: string | number;
-  /** Icono de lucide-react */
-  icon: React.ElementType;
-  /** Clases Tailwind del gradiente del icono (igual que en StatsCard) */
-  gradient: string;
-  /** Color del valor numérico */
-  variant?: StatStripVariant;
-  /** Información secundaria pequeña bajo el valor */
+  /** Información secundaria bajo el valor */
   sublabel?: string;
+  /** Color del valor numérico para destacar estados de alerta */
+  variant?: StatStripVariant;
 }
 
 export interface StatStripProps {
@@ -53,51 +45,37 @@ export function StatStrip({ items, className }: StatStripProps) {
   return (
     <div
       className={cn(
-        'grid bg-surface-alt rounded-xl border border-border shadow-subtle overflow-hidden',
+        'grid bg-surface-alt rounded-xl border border-border shadow-origen overflow-hidden',
         className,
       )}
       style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
     >
-      {items.map((item, i) => {
-        const Icon = item.icon;
-        return (
-          <div
-            key={item.label}
-            className={cn(
-              'flex flex-col items-center justify-center gap-1.5 py-3 px-2',
-              i < items.length - 1 && 'border-r border-border-subtle',
-            )}
-          >
-            {/* Icono con gradiente — mismo patrón que StatsCard */}
-            <div className={cn(
-              'w-7 h-7 rounded-lg bg-gradient-to-br flex items-center justify-center shadow-subtle flex-shrink-0',
-              item.gradient,
-            )}>
-              <Icon className="w-3.5 h-3.5 text-white" />
-            </div>
+      {items.map((item, i) => (
+        <div
+          key={item.label}
+          className={cn(
+            'flex flex-col items-center justify-center py-3.5 px-2',
+            i < items.length - 1 && 'border-r border-border-subtle',
+          )}
+        >
+          <span className={cn(
+            'text-2xl font-bold leading-none tabular-nums',
+            valueColor[item.variant ?? 'default'],
+          )}>
+            {item.value}
+          </span>
 
-            {/* Valor */}
-            <span className={cn(
-              'text-lg font-bold leading-none tabular-nums',
-              valueColor[item.variant ?? 'default'],
-            )}>
-              {item.value}
+          {item.sublabel && (
+            <span className="mt-0.5 text-[10px] text-text-subtle tabular-nums">
+              {item.sublabel}
             </span>
+          )}
 
-            {/* Etiqueta */}
-            <span className="text-[10px] font-medium text-text-subtle text-center leading-tight">
-              {item.label}
-            </span>
-
-            {/* Sublabel opcional */}
-            {item.sublabel && (
-              <span className="text-[9px] text-text-subtle/70 text-center leading-none">
-                {item.sublabel}
-              </span>
-            )}
-          </div>
-        );
-      })}
+          <span className="mt-1 text-[11px] font-medium text-text-subtle text-center leading-tight">
+            {item.label}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }

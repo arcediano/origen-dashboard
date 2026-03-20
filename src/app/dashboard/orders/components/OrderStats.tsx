@@ -20,6 +20,8 @@ import {
   Calendar,
   ChevronDown,
 } from 'lucide-react';
+
+// Los iconos ShoppingBag..Calendar se usan solo en el grid desktop.
 import { cn } from '@/lib/utils';
 import { StatStrip } from '@/components/shared/mobile/StatStrip';
 import { StatsCard } from '@/components/features/dashboard/components/stats/stats-card';
@@ -40,11 +42,11 @@ export function OrderStats({ stats, className }: OrderStatsProps) {
         {/* 4 KPIs principales */}
         <StatStrip
           items={[
-            { label: 'Total',      value: stats.total,                         icon: ShoppingBag, gradient: 'from-origen-pradera to-origen-hoja', variant: 'default' },
-            { label: 'Ingresos',   value: `${stats.totalRevenue.toFixed(0)}€`, icon: DollarSign,  gradient: 'from-green-400 to-green-600',         variant: 'success',
+            { label: 'Total',      value: stats.total,                         variant: 'default' },
+            { label: 'Ingresos',   value: `${stats.totalRevenue.toFixed(0)}€`, variant: 'success',
               sublabel: `media ${stats.averageOrderValue.toFixed(0)}€` },
-            { label: 'Pendientes', value: stats.pending,                       icon: Clock,       gradient: 'from-origen-mandarina to-amber-500',  variant: stats.pending > 0 ? 'warning' : 'default' },
-            { label: 'Hoy',        value: stats.todayOrders,                   icon: Calendar,    gradient: 'from-origen-pino to-origen-bosque',   variant: 'default',
+            { label: 'Pendientes', value: stats.pending,                       variant: stats.pending > 0 ? 'warning' : 'default' },
+            { label: 'Hoy',        value: stats.todayOrders,                   variant: 'default',
               sublabel: `${stats.todayRevenue.toFixed(0)}€` },
           ]}
         />
@@ -62,10 +64,10 @@ export function OrderStats({ stats, className }: OrderStatsProps) {
           <StatStrip
             className="mt-2"
             items={[
-              { label: 'Procesando', value: stats.processing,                 icon: Package,     gradient: 'from-origen-hoja to-origen-pino',    variant: 'default' },
-              { label: 'Enviados',   value: stats.shipped,                    icon: Truck,       gradient: 'from-origen-pino to-origen-bosque',  variant: 'default' },
-              { label: 'Entregados', value: stats.delivered,                  icon: CheckCircle, gradient: 'from-green-500 to-green-700',        variant: 'success' },
-              { label: 'Cancelados', value: stats.cancelled + stats.refunded, icon: XCircle,     gradient: 'from-red-400 to-red-600',
+              { label: 'Procesando', value: stats.processing,                 variant: 'default' },
+              { label: 'Enviados',   value: stats.shipped,                    variant: 'default' },
+              { label: 'Entregados', value: stats.delivered,                  variant: 'success' },
+              { label: 'Cancelados', value: stats.cancelled + stats.refunded,
                 variant: stats.cancelled + stats.refunded > 0 ? 'danger' : 'default' },
             ]}
           />
