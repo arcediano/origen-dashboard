@@ -86,18 +86,32 @@ export function DashboardFooter({
         className
       )}
     >
-      {/* Elementos decorativos sutiles */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* Elementos decorativos sutiles — solo desktop */}
+      <div className="hidden lg:block absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-origen-pradera/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative px-6 lg:px-8 py-6">
+      {/* ── MÓVIL: footer mínimo (< lg) ── */}
+      <div className="lg:hidden relative px-4 py-3 flex items-center justify-between gap-3">
+        {/* Copyright + versión */}
+        <p className="text-[11px] text-text-subtle">
+          © {currentYear} Origen · v2.0
+        </p>
+
+        {/* Estado del sistema */}
+        <Badge variant="success" size="xs" className="gap-1 flex-shrink-0">
+          <CheckCircle className="w-2.5 h-2.5" />
+          Operativo
+        </Badge>
+      </div>
+
+      {/* ── DESKTOP: footer completo (≥ lg) ── */}
+      <div className="hidden lg:block relative px-6 lg:px-8 py-6">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
           
-          {/* ===== COLUMNA 1: Copyright + marca ===== */}
+          {/* COLUMNA 1: Copyright + marca */}
           <div className="text-center lg:text-left space-y-2">
-            {/* Logo y nombre */}
             <div className="flex items-center justify-center lg:justify-start gap-2.5">
               <motion.div 
                 whileHover={{ scale: 1.05, rotate: 5 }}
@@ -115,8 +129,6 @@ export function DashboardFooter({
                 </div>
               </div>
             </div>
-            
-            {/* Copyright */}
             <p className="text-xs text-text-subtle flex items-center justify-center lg:justify-start gap-1">
               <span>©</span>
               <span>{currentYear}</span>
@@ -125,9 +137,8 @@ export function DashboardFooter({
             </p>
           </div>
 
-          {/* ===== COLUMNA 2: Métricas rápidas con badges ===== */}
+          {/* COLUMNA 2: Métricas rápidas */}
           <div className="flex flex-wrap items-center justify-center gap-6">
-            {/* Crecimiento */}
             <motion.div 
               whileHover={{ y: -2 }}
               className="flex items-center gap-2.5 group cursor-default"
@@ -151,7 +162,6 @@ export function DashboardFooter({
 
             <div className="h-8 w-px bg-gradient-to-b from-transparent via-gray-200 to-transparent" />
 
-            {/* Productores */}
             <motion.div 
               whileHover={{ y: -2 }}
               className="flex items-center gap-2.5 group cursor-default"
@@ -165,7 +175,6 @@ export function DashboardFooter({
 
             <div className="h-8 w-px bg-gradient-to-b from-transparent via-gray-200 to-transparent" />
 
-            {/* Soporte */}
             <motion.div 
               whileHover={{ y: -2 }}
               className="flex items-center gap-2.5 group cursor-default"
@@ -178,7 +187,7 @@ export function DashboardFooter({
             </motion.div>
           </div>
 
-          {/* ===== COLUMNA 3: Enlaces legales con diseño mejorado ===== */}
+          {/* COLUMNA 3: Enlaces legales */}
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link 
               href="/privacidad" 
@@ -188,29 +197,18 @@ export function DashboardFooter({
               <span>Privacidad</span>
               <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
-            
             <span className="text-border-subtle">|</span>
-            
-            <Link 
-              href="/terminos" 
-              className="group text-xs text-text-subtle hover:text-origen-pradera transition-colors"
-            >
+            <Link href="/terminos" className="text-xs text-text-subtle hover:text-origen-pradera transition-colors">
               Términos
             </Link>
-            
             <span className="text-border-subtle">|</span>
-            
-            <Link 
-              href="/cookies" 
-              className="group text-xs text-text-subtle hover:text-origen-pradera transition-colors"
-            >
+            <Link href="/cookies" className="text-xs text-text-subtle hover:text-origen-pradera transition-colors">
               Cookies
             </Link>
           </div>
 
-          {/* ===== COLUMNA 4: Made with love + estado ===== */}
+          {/* COLUMNA 4: Made with love + estado */}
           <div className="flex flex-col items-center lg:items-end gap-2">
-            {/* Made with love */}
             <motion.div 
               whileHover={{ scale: 1.05 }}
               className="flex items-center gap-1.5 text-xs"
@@ -225,8 +223,6 @@ export function DashboardFooter({
               <span className="text-text-subtle">para</span>
               <span className="font-medium text-origen-bosque">productores locales</span>
             </motion.div>
-
-            {/* Badge de estado */}
             <div className="flex items-center gap-2">
               <Badge variant="success" size="xs" className="gap-1.5">
                 <CheckCircle className="w-2.5 h-2.5" />
@@ -239,7 +235,7 @@ export function DashboardFooter({
           </div>
         </div>
 
-        {/* Línea divisoria sutil con métricas adicionales */}
+        {/* Sub-línea con métricas adicionales */}
         <div className="mt-4 pt-4 border-t border-border-subtle/50">
           <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] text-text-subtle">
             <div className="flex items-center gap-4">
@@ -254,6 +250,7 @@ export function DashboardFooter({
           </div>
         </div>
       </div>
+
     </motion.footer>
   );
 }
