@@ -1,15 +1,18 @@
 /**
  * @component FilterBottomSheet
  * @description Bottom sheet de filtros estilo nativo para móvil.
- *              Sube desde abajo con animación spring, overlay semitransparente.
- *              Soporta secciones: chips (selección táctil), daterange y numberrange.
+ *              - z-[60] para estar sobre el BottomTabBar (z-50)
+ *              - Estado draft interno: filtros se aplican SOLO al pulsar "Ver resultados"
+ *              - onPointerDown con stopPropagation en el sheet para evitar que el overlay
+ *                capture eventos de foco en inputs
+ *              - Fechas apiladas verticalmente (full-width) para evitar overflow
  *
  * Tokens Origen v3.0.
  */
 
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -62,9 +65,46 @@ export interface FilterBottomSheetProps {
   title?: string;
 }
 
+// ─── ESTADO DRAFT INTERNO ─────────────────────────────────────────────────────
+
+type DraftValue =
+  | { type: 'chips'; value: string }
+  | { type: 'daterange'; from: string; to: string }
+  | { type: 'numberrange'; min: string; max: string };
+
+type Draft = Record<string, DraftValue>;
+
+function buildInitialDraft(sections: FilterSection[]): Draft {
+  const d: Draft = {};
+  sections.forEach((s) => {
+    if (s.type === 'chips')       d[s.id] = { type: 'chips',       value: s.value };
+    if (s.type === 'daterange')   d[s.id] = { type: 'daterange',   from: s.valueFrom, to: s.valueTo };
+    if (s.type === 'numberrange') d[s.id] = { type: 'numberrange', min: s.valueMin,   max: s.valueMax };
+  });
+  return d;
+}
+
+function buildClearedDraft(sections: FilterSection[]): Draft {
+  const d: Draft = {};
+  sections.forEach((s) => {
+    if (s.type === 'chips')       d[s.id] = { type: 'chips',       value: ''  };
+    if (s.type === 'daterange')   d[s.id] = { type: 'daterange',   from: '', to: ''   };
+    if (s.type === 'numberrange') d[s.id] = { type: 'numberrange', min: '',   max: '' };
+  });
+  return d;
+}
+
 // ─── SECCIÓN: CHIPS ───────────────────────────────────────────────────────────
 
-function ChipsSection({ section }: { section: FilterSection & { type: 'chips' } }) {
+function ChipsSection({
+  section,
+  draftValue,
+  onDraftChange,
+}: {
+  section: FilterSection & { type: 'chips' };
+  draftValue: string;
+  onDraftChange: (value: string) => void;
+}) {
   return (
     <div>
       <h3 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-3">
@@ -72,14 +112,14 @@ function ChipsSection({ section }: { section: FilterSection & { type: 'chips' } 
       </h3>
       <div className="flex flex-wrap gap-2">
         {section.options.map((option) => {
-          const isActive = section.value === option.value;
+          const isActive = draftValue === option.value;
           const Icon = option.icon;
           return (
             <motion.button
               key={option.value}
               type="button"
               whileTap={{ scale: 0.95 }}
-              onClick={() => section.onChange(option.value)}
+              onClick={() => onDraftChange(option.value)}
               className={cn(
                 'inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium border',
                 'min-h-[44px] transition-colors duration-150',
@@ -107,20 +147,33 @@ function ChipsSection({ section }: { section: FilterSection & { type: 'chips' } 
 }
 
 // ─── SECCIÓN: RANGO DE FECHAS ─────────────────────────────────────────────────
+// Apiladas verticalmente para evitar overflow en pantallas ~375px
 
-function DateRangeSection({ section }: { section: FilterSection & { type: 'daterange' } }) {
+function DateRangeSection({
+  section,
+  from,
+  to,
+  onFromChange,
+  onToChange,
+}: {
+  section: FilterSection & { type: 'daterange' };
+  from: string;
+  to: string;
+  onFromChange: (v: string) => void;
+  onToChange: (v: string) => void;
+}) {
   return (
     <div>
       <h3 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-3">
         {section.title}
       </h3>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="flex flex-col gap-3">
         <div>
           <label className="text-[11px] text-text-subtle mb-1.5 block">Desde</label>
           <input
             type="date"
-            value={section.valueFrom}
-            onChange={(e) => section.onChangeFrom(e.target.value)}
+            value={from}
+            onChange={(e) => onFromChange(e.target.value)}
             className="w-full h-11 px-3 text-sm border border-border-subtle bg-surface-alt rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera"
           />
         </div>
@@ -128,8 +181,8 @@ function DateRangeSection({ section }: { section: FilterSection & { type: 'dater
           <label className="text-[11px] text-text-subtle mb-1.5 block">Hasta</label>
           <input
             type="date"
-            value={section.valueTo}
-            onChange={(e) => section.onChangeTo(e.target.value)}
+            value={to}
+            onChange={(e) => onToChange(e.target.value)}
             className="w-full h-11 px-3 text-sm border border-border-subtle bg-surface-alt rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera"
           />
         </div>
@@ -140,7 +193,25 @@ function DateRangeSection({ section }: { section: FilterSection & { type: 'dater
 
 // ─── SECCIÓN: RANGO NUMÉRICO ──────────────────────────────────────────────────
 
-function NumberRangeSection({ section }: { section: FilterSection & { type: 'numberrange' } }) {
+function NumberRangeSection({
+  section,
+  min,
+  max,
+  onMinChange,
+  onMaxChange,
+}: {
+  section: FilterSection & { type: 'numberrange' };
+  min: string;
+  max: string;
+  onMinChange: (v: string) => void;
+  onMaxChange: (v: string) => void;
+}) {
+  const inputCls = cn(
+    'w-full h-11 text-sm border border-border-subtle bg-surface-alt rounded-xl',
+    'focus:outline-none focus:ring-1 focus:ring-origen-pradera',
+    section.prefix ? 'pl-7 pr-3' : 'px-3',
+  );
+
   return (
     <div>
       <h3 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-3">
@@ -157,15 +228,12 @@ function NumberRangeSection({ section }: { section: FilterSection & { type: 'num
             )}
             <input
               type="number"
-              value={section.valueMin}
-              onChange={(e) => section.onChangeMin(e.target.value)}
+              value={min}
+              onChange={(e) => onMinChange(e.target.value)}
               placeholder="0"
-              className={cn(
-                'w-full h-11 text-sm border border-border-subtle bg-surface-alt rounded-xl',
-                'focus:outline-none focus:ring-1 focus:ring-origen-pradera',
-                section.prefix ? 'pl-7 pr-3' : 'px-3',
-              )}
+              className={inputCls}
               min="0"
+              inputMode="decimal"
             />
           </div>
         </div>
@@ -179,15 +247,12 @@ function NumberRangeSection({ section }: { section: FilterSection & { type: 'num
             )}
             <input
               type="number"
-              value={section.valueMax}
-              onChange={(e) => section.onChangeMax(e.target.value)}
+              value={max}
+              onChange={(e) => onMaxChange(e.target.value)}
               placeholder="∞"
-              className={cn(
-                'w-full h-11 text-sm border border-border-subtle bg-surface-alt rounded-xl',
-                'focus:outline-none focus:ring-1 focus:ring-origen-pradera',
-                section.prefix ? 'pl-7 pr-3' : 'px-3',
-              )}
+              className={inputCls}
               min="0"
+              inputMode="decimal"
             />
           </div>
         </div>
@@ -207,10 +272,78 @@ export function FilterBottomSheet({
   resultLabel = 'resultados',
   title = 'Filtros',
 }: FilterBottomSheetProps) {
+  // ── Estado draft: se inicializa al abrir, se aplica al confirmar ──────────
+  const [draft, setDraft] = useState<Draft>({});
+
+  useEffect(() => {
+    if (isOpen) {
+      setDraft(buildInitialDraft(sections));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  // ── Helpers de draft ──────────────────────────────────────────────────────
+  const setChips = (id: string, value: string) =>
+    setDraft((prev) => ({ ...prev, [id]: { type: 'chips', value } }));
+
+  const setDateFrom = (id: string, from: string) =>
+    setDraft((prev) => {
+      const cur = prev[id] as { type: 'daterange'; from: string; to: string } | undefined;
+      return { ...prev, [id]: { type: 'daterange', from, to: cur?.to ?? '' } };
+    });
+
+  const setDateTo = (id: string, to: string) =>
+    setDraft((prev) => {
+      const cur = prev[id] as { type: 'daterange'; from: string; to: string } | undefined;
+      return { ...prev, [id]: { type: 'daterange', from: cur?.from ?? '', to } };
+    });
+
+  const setNumMin = (id: string, min: string) =>
+    setDraft((prev) => {
+      const cur = prev[id] as { type: 'numberrange'; min: string; max: string } | undefined;
+      return { ...prev, [id]: { type: 'numberrange', min, max: cur?.max ?? '' } };
+    });
+
+  const setNumMax = (id: string, max: string) =>
+    setDraft((prev) => {
+      const cur = prev[id] as { type: 'numberrange'; min: string; max: string } | undefined;
+      return { ...prev, [id]: { type: 'numberrange', min: cur?.min ?? '', max } };
+    });
+
+  // ── Aplicar: llama onChange del padre solo al confirmar ───────────────────
+  const handleApply = () => {
+    sections.forEach((s) => {
+      const d = draft[s.id];
+      if (!d) return;
+      if (s.type === 'chips' && d.type === 'chips') {
+        s.onChange(d.value);
+      }
+      if (s.type === 'daterange' && d.type === 'daterange') {
+        s.onChangeFrom(d.from);
+        s.onChangeTo(d.to);
+      }
+      if (s.type === 'numberrange' && d.type === 'numberrange') {
+        s.onChangeMin(d.min);
+        s.onChangeMax(d.max);
+      }
+    });
+    onClose();
+  };
+
+  // ── Limpiar: resetea draft Y llama al padre ───────────────────────────────
+  const handleClearAll = () => {
+    setDraft(buildClearedDraft(sections));
+    onClearAll();
+    onClose();
+  };
+
+  // ── ¿Hay algo activo en el draft? ─────────────────────────────────────────
   const hasAnyActive = sections.some((s) => {
-    if (s.type === 'chips') return Boolean(s.value);
-    if (s.type === 'daterange') return Boolean(s.valueFrom || s.valueTo);
-    if (s.type === 'numberrange') return Boolean(s.valueMin || s.valueMax);
+    const d = draft[s.id];
+    if (!d) return false;
+    if (d.type === 'chips')       return Boolean(d.value);
+    if (d.type === 'daterange')   return Boolean(d.from || d.to);
+    if (d.type === 'numberrange') return Boolean(d.min || d.max);
     return false;
   });
 
@@ -218,26 +351,27 @@ export function FilterBottomSheet({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Overlay */}
+          {/* Overlay — z-[55] para estar sobre BottomTabBar (z-50) */}
           <motion.div
             key="overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
-            onClick={onClose}
+            className="fixed inset-0 z-[55] bg-black/40 backdrop-blur-[2px]"
+            onPointerDown={onClose}
             aria-hidden
           />
 
-          {/* Sheet */}
+          {/* Sheet — z-[60], stopPropagation evita que overlay capture foco de inputs */}
           <motion.div
             key="sheet"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-surface rounded-t-3xl shadow-2xl max-h-[85dvh] flex flex-col"
+            onPointerDown={(e) => e.stopPropagation()}
+            className="fixed bottom-0 left-0 right-0 z-[60] bg-surface rounded-t-3xl shadow-2xl max-h-[85dvh] flex flex-col"
             role="dialog"
             aria-modal
             aria-label={title}
@@ -262,25 +396,64 @@ export function FilterBottomSheet({
             {/* Content — scrollable */}
             <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 space-y-6">
               {sections.map((section) => {
-                if (section.type === 'chips')       return <ChipsSection       key={section.id} section={section} />;
-                if (section.type === 'daterange')   return <DateRangeSection   key={section.id} section={section} />;
-                if (section.type === 'numberrange') return <NumberRangeSection key={section.id} section={section} />;
+                const d = draft[section.id];
+
+                if (section.type === 'chips') {
+                  const dv = (d?.type === 'chips' ? d.value : '') ?? '';
+                  return (
+                    <ChipsSection
+                      key={section.id}
+                      section={section}
+                      draftValue={dv}
+                      onDraftChange={(val) => setChips(section.id, val)}
+                    />
+                  );
+                }
+
+                if (section.type === 'daterange') {
+                  const dd = d?.type === 'daterange' ? d : { from: '', to: '' };
+                  return (
+                    <DateRangeSection
+                      key={section.id}
+                      section={section}
+                      from={dd.from}
+                      to={dd.to}
+                      onFromChange={(v) => setDateFrom(section.id, v)}
+                      onToChange={(v) => setDateTo(section.id, v)}
+                    />
+                  );
+                }
+
+                if (section.type === 'numberrange') {
+                  const dn = d?.type === 'numberrange' ? d : { min: '', max: '' };
+                  return (
+                    <NumberRangeSection
+                      key={section.id}
+                      section={section}
+                      min={dn.min}
+                      max={dn.max}
+                      onMinChange={(v) => setNumMin(section.id, v)}
+                      onMaxChange={(v) => setNumMax(section.id, v)}
+                    />
+                  );
+                }
+
                 return null;
               })}
             </div>
 
             {/* Footer CTA */}
-            <div className="flex gap-3 px-5 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] border-t border-border-subtle flex-shrink-0 bg-surface">
+            <div className="flex gap-3 px-5 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))] border-t border-border-subtle flex-shrink-0 bg-surface">
               {hasAnyActive && (
                 <button
-                  onClick={onClearAll}
+                  onClick={handleClearAll}
                   className="flex-1 h-12 rounded-2xl border-2 border-origen-pradera/40 text-sm font-medium text-origen-pradera active:scale-95 transition-transform"
                 >
                   Limpiar todo
                 </button>
               )}
               <button
-                onClick={onClose}
+                onClick={handleApply}
                 className={cn(
                   'h-12 rounded-2xl bg-origen-pradera text-white text-sm font-semibold active:scale-95 transition-transform',
                   hasAnyActive ? 'flex-[2]' : 'flex-1',
