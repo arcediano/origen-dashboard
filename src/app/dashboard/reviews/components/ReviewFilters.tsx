@@ -3,7 +3,7 @@
  * @description Filtros de reseñas — mobile-first, estilo app nativa.
  *
  * Móvil  → barra de búsqueda + botón "Filtros" → FilterBottomSheet (pantalla completa)
- * Desktop → barra de búsqueda + chips pill para todos los filtros en línea
+ * Desktop → barra de búsqueda + Select por grupo + pill toggles para booleanos
  */
 
 'use client';
@@ -12,6 +12,10 @@ import React from 'react';
 import { Search, X, SlidersHorizontal, CheckCircle, ThumbsUp, ImageIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FilterBottomSheet, type FilterSection } from '@/components/shared/mobile/FilterBottomSheet';
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from '@/components/ui/atoms/select';
+import { Button } from '@/components/ui/atoms/button';
 import type { ReviewFilters as ReviewFiltersType, ReviewType, ReviewStatus } from '@/types/review';
 
 // ─── Opciones ─────────────────────────────────────────────────────────────────
@@ -49,14 +53,8 @@ export interface ReviewFiltersProps {
   className?: string;
 }
 
-// ─── Estilos compartidos ───────────────────────────────────────────────────────
-
-const selectCls = [
-  'h-9 pl-3 pr-8 text-sm border border-border bg-surface-alt rounded-xl',
-  'text-origen-bosque font-medium appearance-none cursor-pointer',
-  'focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera',
-  'transition-colors',
-].join(' ');
+// Clases del trigger de Select adaptadas al filtro
+const triggerCls = 'h-9 py-0 sm:py-0 px-3 sm:px-3 text-sm bg-surface-alt border-border w-auto';
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
@@ -167,40 +165,61 @@ export function ReviewFilters({
         </button>
       </div>
 
-      {/* ── Filtros desktop: selects + booleanos ──────────────────────── */}
+      {/* ── Filtros desktop: Select + pill toggles booleanos ──────────── */}
       <div className="hidden lg:flex items-center gap-2 pt-1">
 
         {/* Estado */}
-        <div className="relative">
-          <select value={filters.status ?? ''} onChange={e => set('status', e.target.value as ReviewStatus || undefined)}
-            className={selectCls}>
-            {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-        </div>
+        <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as ReviewStatus || undefined)} className="w-auto">
+          <SelectTrigger className={triggerCls}>
+            <SelectValue className="text-sm">
+              {filters.status
+                ? STATUS_OPTIONS.find(o => o.value === filters.status)?.label
+                : <span className="text-text-disabled">Estado</span>}
+            </SelectValue>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         {/* Tipo */}
-        <div className="relative">
-          <select value={filters.type ?? ''} onChange={e => set('type', e.target.value as ReviewType || undefined)}
-            className={selectCls}>
-            {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-        </div>
+        <Select value={filters.type ?? ''} onValueChange={(v) => set('type', v as ReviewType || undefined)} className="w-auto">
+          <SelectTrigger className={triggerCls}>
+            <SelectValue className="text-sm">
+              {filters.type
+                ? TYPE_OPTIONS.find(o => o.value === filters.type)?.label
+                : <span className="text-text-disabled">Tipo</span>}
+            </SelectValue>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
+          </SelectTrigger>
+          <SelectContent>
+            {TYPE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         {/* Valoración */}
-        <div className="relative">
-          <select value={filters.rating ? String(filters.rating) : ''}
-            onChange={e => onFilterChange({ ...filters, rating: e.target.value ? Number(e.target.value) as any : undefined })}
-            className={selectCls}>
-            {RATING_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-        </div>
+        <Select
+          value={filters.rating ? String(filters.rating) : ''}
+          onValueChange={(v) => onFilterChange({ ...filters, rating: v ? Number(v) as any : undefined })}
+          className="w-auto"
+        >
+          <SelectTrigger className={triggerCls}>
+            <SelectValue className="text-sm">
+              {filters.rating
+                ? RATING_OPTIONS.find(o => o.value === String(filters.rating))?.label
+                : <span className="text-text-disabled">Valoración</span>}
+            </SelectValue>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
+          </SelectTrigger>
+          <SelectContent>
+            {RATING_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         <div className="w-px h-4 bg-border-subtle mx-1" />
 
-        {/* Booleanos como pills compactas */}
+        {/* Booleanos — pill toggles (on/off, sin valor placeholder → no se usan Select) */}
         <button onClick={() => onFilterChange({ ...filters, verifiedOnly: !filters.verifiedOnly })}
           className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
             filters.verifiedOnly ? 'bg-origen-bosque border-origen-bosque text-white' : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50')}
@@ -217,10 +236,9 @@ export function ReviewFilters({
         ><ImageIcon className="w-3 h-3" />Con imágenes</button>
 
         {hasAnyFilter && (
-          <button onClick={onClearFilters}
-            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-text-subtle hover:text-origen-bosque transition-colors">
-            <X className="w-3 h-3" />Limpiar
-          </button>
+          <Button variant="ghost" size="xs" onClick={onClearFilters} leftIcon={<X className="w-3 h-3" />}>
+            Limpiar
+          </Button>
         )}
       </div>
 

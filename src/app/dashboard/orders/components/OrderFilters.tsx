@@ -3,15 +3,20 @@
  * @description Filtros de pedidos — mobile-first, estilo app nativa.
  *
  * Móvil  → barra de búsqueda + botón "Filtros" → FilterBottomSheet (pantalla completa)
- * Desktop → barra de búsqueda + chips pill para estado + inputs de fecha e importe
+ * Desktop → barra de búsqueda + Select para estado + inputs de fecha e importe
  */
 
 'use client';
 
 import React from 'react';
-import { Search, X, SlidersHorizontal, CalendarIcon, CalendarRange, DollarSign, ChevronDown } from 'lucide-react';
+import { Search, X, SlidersHorizontal, CalendarIcon, CalendarRange, Euro, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FilterBottomSheet } from '@/components/shared/mobile';
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from '@/components/ui/atoms/select';
+import { Input } from '@/components/ui/atoms/input';
+import { Button } from '@/components/ui/atoms/button';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
 
 export interface OrderFiltersProps {
@@ -30,14 +35,8 @@ const STATUS_OPTIONS = [
   { value: 'cancelled',  label: 'Cancelados' },
 ];
 
-const selectCls = [
-  'h-9 pl-3 pr-8 text-sm border border-border bg-surface-alt rounded-xl',
-  'text-origen-bosque font-medium appearance-none cursor-pointer',
-  'focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera',
-  'transition-colors',
-].join(' ');
-
-const dateInputCls = 'h-9 px-3 text-sm border border-border bg-surface-alt rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera';
+// Clases del trigger de Select adaptadas al filtro
+const triggerCls = 'h-9 py-0 sm:py-0 px-3 sm:px-3 text-sm bg-surface-alt border-border w-auto';
 
 export function OrderFilters({
   filters,
@@ -120,32 +119,49 @@ export function OrderFilters({
 
       {/* ── Filtros desktop: estado + fechas + importe ────────────────── */}
       <div className="hidden lg:flex flex-wrap items-center gap-2 pt-1">
+
         {/* Estado */}
-        <div className="relative">
-          <select value={filters.status ?? ''} onChange={e => set('status', e.target.value as OrderStatus || undefined)}
-            className={selectCls}>
-            <option value="">Todos los estados</option>
-            {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-        </div>
+        <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as OrderStatus || undefined)} className="w-auto">
+          <SelectTrigger className={triggerCls}>
+            <SelectValue className="text-sm">
+              {filters.status
+                ? STATUS_OPTIONS.find(o => o.value === filters.status)?.label
+                : <span className="text-text-disabled">Todos los estados</span>}
+            </SelectValue>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todos los estados</SelectItem>
+            {STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         <div className="w-px h-4 bg-border-subtle mx-1" />
 
         {/* Rango de fechas */}
         <div className="flex items-center gap-1.5">
-          <div className="relative">
-            <CalendarIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-            <input type="date" value={formatDate(filters.dateFrom)}
+          <div className="w-40">
+            <Input
+              type="date"
+              value={formatDate(filters.dateFrom)}
               onChange={(e) => set('dateFrom', e.target.value ? new Date(e.target.value) : undefined)}
-              className={cn(dateInputCls, 'pl-8')} title="Desde" />
+              inputSize="sm"
+              leftIcon={<CalendarIcon />}
+              className="bg-surface-alt border-border"
+              title="Desde"
+            />
           </div>
           <span className="text-text-subtle text-xs">—</span>
-          <div className="relative">
-            <CalendarRange className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-            <input type="date" value={formatDate(filters.dateTo)}
+          <div className="w-40">
+            <Input
+              type="date"
+              value={formatDate(filters.dateTo)}
               onChange={(e) => set('dateTo', e.target.value ? new Date(e.target.value) : undefined)}
-              className={cn(dateInputCls, 'pl-8')} title="Hasta" />
+              inputSize="sm"
+              leftIcon={<CalendarRange />}
+              className="bg-surface-alt border-border"
+              title="Hasta"
+            />
           </div>
         </div>
 
@@ -153,28 +169,39 @@ export function OrderFilters({
 
         {/* Rango de importe */}
         <div className="flex items-center gap-1.5">
-          <div className="relative">
-            <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-            <input type="number" value={filters.minAmount ?? ''} min="0" placeholder="Mín €"
+          <div className="w-28">
+            <Input
+              type="number"
+              value={filters.minAmount ?? ''}
+              min={0}
+              placeholder="Mín €"
               onChange={(e) => set('minAmount', e.target.value ? Number(e.target.value) : undefined)}
-              className={cn(dateInputCls, 'pl-8 w-24')} />
+              inputSize="sm"
+              leftIcon={<Euro />}
+              className="bg-surface-alt border-border"
+            />
           </div>
           <span className="text-text-subtle text-xs">—</span>
-          <div className="relative">
-            <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-            <input type="number" value={filters.maxAmount ?? ''} min="0" placeholder="Máx €"
+          <div className="w-28">
+            <Input
+              type="number"
+              value={filters.maxAmount ?? ''}
+              min={0}
+              placeholder="Máx €"
               onChange={(e) => set('maxAmount', e.target.value ? Number(e.target.value) : undefined)}
-              className={cn(dateInputCls, 'pl-8 w-24')} />
+              inputSize="sm"
+              leftIcon={<Euro />}
+              className="bg-surface-alt border-border"
+            />
           </div>
         </div>
 
         {hasAnyFilter && (
           <>
             <div className="w-px h-4 bg-border-subtle mx-1" />
-            <button onClick={onClearFilters}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-text-subtle hover:text-origen-bosque transition-colors">
-              <X className="w-3 h-3" />Limpiar
-            </button>
+            <Button variant="ghost" size="xs" onClick={onClearFilters} leftIcon={<X className="w-3 h-3" />}>
+              Limpiar
+            </Button>
           </>
         )}
       </div>

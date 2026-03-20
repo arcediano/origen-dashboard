@@ -3,18 +3,19 @@
  * @description Filtros de productos — mobile-first, estilo app nativa.
  *
  * Móvil  → barra de búsqueda + botón "Filtros" → FilterBottomSheet (pantalla completa)
- * Desktop → barra de búsqueda + chips pill para todos los filtros en línea
+ * Desktop → barra de búsqueda + Select por grupo + toggle de vista
  */
 
 'use client';
 
 import React from 'react';
-import {
-  Search, X, SlidersHorizontal,
-  Grid3x3, List, ChevronDown,
-} from 'lucide-react';
+import { Search, X, SlidersHorizontal, Grid3x3, List, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FilterBottomSheet } from '@/components/shared/mobile';
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from '@/components/ui/atoms/select';
+import { Button } from '@/components/ui/atoms/button';
 
 export interface ProductFiltersProps {
   searchQuery: string;
@@ -62,13 +63,8 @@ const SORT_OPTIONS = [
   { value: 'sales-desc', label: 'Más vendidos' },
 ];
 
-// Select estilizado para filtros desktop
-const selectCls = [
-  'h-9 pl-3 pr-8 text-sm border border-border bg-surface-alt rounded-xl',
-  'text-origen-bosque font-medium appearance-none cursor-pointer',
-  'focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera',
-  'transition-colors',
-].join(' ');
+// Clases del trigger de Select adaptadas al filtro
+const triggerCls = 'h-9 py-0 sm:py-0 px-3 sm:px-3 text-sm bg-surface-alt border-border w-auto';
 
 export function ProductFilters({
   searchQuery,
@@ -158,50 +154,75 @@ export function ProductFilters({
         </div>
       </div>
 
-      {/* ── Filtros desktop: selects por grupo ───────────────────────── */}
+      {/* ── Filtros desktop: Select por grupo ─────────────────────────── */}
       <div className="hidden lg:flex items-center gap-2 pt-1">
 
         {/* Categoría */}
-        <div className="relative">
-          <select value={selectedCategory} onChange={e => onCategoryChange(e.target.value)} className={selectCls}>
-            <option value="">Todas las categorías</option>
-            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-        </div>
+        <Select value={selectedCategory} onValueChange={onCategoryChange} className="w-auto">
+          <SelectTrigger className={triggerCls}>
+            <SelectValue className="text-sm">
+              {selectedCategory || <span className="text-text-disabled">Todas las categorías</span>}
+            </SelectValue>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todas las categorías</SelectItem>
+            {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         {/* Estado */}
-        <div className="relative">
-          <select value={selectedStatus} onChange={e => onStatusChange(e.target.value)} className={selectCls}>
-            <option value="">Todos los estados</option>
-            {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-        </div>
+        <Select value={selectedStatus} onValueChange={onStatusChange} className="w-auto">
+          <SelectTrigger className={triggerCls}>
+            <SelectValue className="text-sm">
+              {selectedStatus
+                ? STATUS_OPTIONS.find(o => o.value === selectedStatus)?.label
+                : <span className="text-text-disabled">Todos los estados</span>}
+            </SelectValue>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todos los estados</SelectItem>
+            {STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         {/* Stock */}
-        <div className="relative">
-          <select value={selectedStock} onChange={e => onStockChange(e.target.value)} className={selectCls}>
-            <option value="">Todo el stock</option>
-            {STOCK_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-        </div>
+        <Select value={selectedStock} onValueChange={onStockChange} className="w-auto">
+          <SelectTrigger className={triggerCls}>
+            <SelectValue className="text-sm">
+              {selectedStock
+                ? STOCK_OPTIONS.find(o => o.value === selectedStock)?.label
+                : <span className="text-text-disabled">Todo el stock</span>}
+            </SelectValue>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todo el stock</SelectItem>
+            {STOCK_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         {/* Ordenar */}
-        <div className="relative">
-          <select value={sortBy} onChange={e => onSortChange(e.target.value)} className={selectCls}>
-            <option value="">Ordenar por</option>
-            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
-        </div>
+        <Select value={sortBy} onValueChange={onSortChange} className="w-auto">
+          <SelectTrigger className={triggerCls}>
+            <SelectValue className="text-sm">
+              {sortBy
+                ? SORT_OPTIONS.find(o => o.value === sortBy)?.label
+                : <span className="text-text-disabled">Ordenar por</span>}
+            </SelectValue>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Ordenar por</SelectItem>
+            {SORT_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         {hasAnyFilter && (
-          <button onClick={onClearFilters}
-            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-text-subtle hover:text-origen-bosque transition-colors">
-            <X className="w-3 h-3" />Limpiar
-          </button>
+          <Button variant="ghost" size="xs" onClick={onClearFilters} leftIcon={<X className="w-3 h-3" />}>
+            Limpiar
+          </Button>
         )}
       </div>
 
