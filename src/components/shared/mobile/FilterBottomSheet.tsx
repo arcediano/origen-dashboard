@@ -148,7 +148,16 @@ function ChipsSection({
 }
 
 // ─── SECCIÓN: RANGO DE FECHAS ─────────────────────────────────────────────────
-// Apiladas verticalmente para evitar overflow en pantallas ~375px
+
+const dateInputCls = [
+  'w-full h-12 px-3 text-sm font-medium text-origen-bosque',
+  'bg-surface border border-border-subtle rounded-xl',
+  'focus:outline-none focus:ring-2 focus:ring-origen-pradera/25 focus:border-origen-pradera',
+  'transition-colors',
+  '[&::-webkit-calendar-picker-indicator]:opacity-40',
+  '[&::-webkit-calendar-picker-indicator]:cursor-pointer',
+  '[&::-webkit-calendar-picker-indicator]:hover:opacity-70',
+].join(' ');
 
 function DateRangeSection({
   section,
@@ -168,23 +177,27 @@ function DateRangeSection({
       <h3 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-3">
         {section.title}
       </h3>
-      <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-[11px] text-text-subtle mb-1.5 block">Desde</label>
+          <label className="text-[11px] font-medium text-text-subtle mb-1.5 block tracking-wide uppercase">
+            Desde
+          </label>
           <input
             type="date"
             value={from}
             onChange={(e) => onFromChange(e.target.value)}
-            className="w-full h-11 px-3 text-sm border border-border-subtle bg-surface-alt rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera"
+            className={dateInputCls}
           />
         </div>
         <div>
-          <label className="text-[11px] text-text-subtle mb-1.5 block">Hasta</label>
+          <label className="text-[11px] font-medium text-text-subtle mb-1.5 block tracking-wide uppercase">
+            Hasta
+          </label>
           <input
             type="date"
             value={to}
             onChange={(e) => onToChange(e.target.value)}
-            className="w-full h-11 px-3 text-sm border border-border-subtle bg-surface-alt rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera"
+            className={dateInputCls}
           />
         </div>
       </div>
@@ -208,8 +221,8 @@ function NumberRangeSection({
   onMaxChange: (v: string) => void;
 }) {
   const inputCls = cn(
-    'w-full h-11 text-sm border border-border-subtle bg-surface-alt rounded-xl',
-    'focus:outline-none focus:ring-1 focus:ring-origen-pradera',
+    'w-full h-12 text-sm font-medium text-origen-bosque border border-border-subtle bg-surface rounded-xl',
+    'focus:outline-none focus:ring-2 focus:ring-origen-pradera/25 focus:border-origen-pradera transition-colors',
     section.prefix ? 'pl-7 pr-3' : 'px-3',
   );
 
@@ -220,10 +233,10 @@ function NumberRangeSection({
       </h3>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-[11px] text-text-subtle mb-1.5 block">Mínimo</label>
+          <label className="text-[11px] font-medium text-text-subtle mb-1.5 block tracking-wide uppercase">Mínimo</label>
           <div className="relative">
             {section.prefix && (
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-subtle pointer-events-none">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-text-subtle pointer-events-none">
                 {section.prefix}
               </span>
             )}
@@ -239,7 +252,7 @@ function NumberRangeSection({
           </div>
         </div>
         <div>
-          <label className="text-[11px] text-text-subtle mb-1.5 block">Máximo</label>
+          <label className="text-[11px] font-medium text-text-subtle mb-1.5 block tracking-wide uppercase">Máximo</label>
           <div className="relative">
             {section.prefix && (
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-subtle pointer-events-none">
