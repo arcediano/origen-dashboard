@@ -103,7 +103,7 @@ function Select({ icon, placeholder, className, children, value, fullWidth, ...p
         )}
         {...props}
       >
-        <option value="" disabled>
+        <option value="">
           {placeholder}
         </option>
         {children}
@@ -137,9 +137,10 @@ export function ProductFilters({
     searchQuery ||
       selectedCategory ||
       selectedStatus ||
-      selectedStock ||
-      sortBy
+      selectedStock
   );
+
+  const activeFilterCount = [searchQuery, selectedCategory, selectedStatus, selectedStock].filter(Boolean).length;
 
   return (
     <Card variant="elevated" className={cn('p-3', className)}>
@@ -192,7 +193,7 @@ export function ProductFilters({
             <span>Filtros</span>
             {hasFilters && (
               <span className="ml-2 w-5 h-5 rounded-full bg-origen-pradera text-white text-xs flex items-center justify-center">
-                {[searchQuery, selectedCategory, selectedStatus, selectedStock, sortBy].filter(Boolean).length}
+                {activeFilterCount}
               </span>
             )}
           </button>

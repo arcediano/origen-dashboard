@@ -19,6 +19,7 @@ import {
   Eye,
   XCircle,
   BarChart2,
+  ChevronsLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
@@ -126,17 +127,15 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
 
   return (
     <SwipeableRow actions={swipeActions} className="border-b border-border-subtle last:border-0">
-      <motion.div
+      <motion.button
         whileTap={{ scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className="flex items-center gap-3 px-3 py-3"
+        onClick={() => onView(product.id)}
+        className="flex items-center gap-3 px-3 py-3 w-full text-left"
+        aria-label={`Ver ${product.name}`}
       >
         {/* Thumbnail */}
-        <button
-          onClick={() => onView(product.id)}
-          className="w-16 h-16 rounded-xl overflow-hidden bg-origen-pastel flex-shrink-0 focus:outline-none"
-          aria-label={`Ver ${product.name}`}
-        >
+        <div className="w-16 h-16 rounded-xl overflow-hidden bg-origen-pastel flex-shrink-0">
           {mainImg ? (
             <img src={mainImg} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
           ) : (
@@ -144,10 +143,10 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
               <Package className="w-7 h-7 text-origen-pradera/60" />
             </div>
           )}
-        </button>
+        </div>
 
         {/* Info */}
-        <button onClick={() => onView(product.id)} className="flex-1 min-w-0 text-left focus:outline-none">
+        <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-origen-bosque truncate leading-tight">{product.name}</p>
           <p className="text-[11px] text-text-subtle truncate mt-0.5">{product.sku} · {product.categoryName}</p>
           <div className="flex items-center gap-3 mt-1.5">
@@ -160,14 +159,14 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
               <span className="text-[10px] text-text-subtle">Stock: {product.stock}</span>
             )}
           </div>
-        </button>
+        </div>
 
         {/* Status badge + hint de swipe */}
         <div className="flex flex-col items-end gap-2 flex-shrink-0">
           <StatusBadge status={product.status} />
-          <span className="text-[9px] text-text-disabled select-none">← desliza</span>
+          <ChevronsLeft className="w-4 h-4 text-text-subtle/40" aria-hidden />
         </div>
-      </motion.div>
+      </motion.button>
     </SwipeableRow>
   );
 }

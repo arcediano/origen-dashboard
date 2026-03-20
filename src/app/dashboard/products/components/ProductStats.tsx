@@ -188,10 +188,10 @@ export function ProductStats({
   return (
     <div className={cn(className)}>
       {/* Móvil: fila KPI scrollable */}
-      <MobileKPIRow items={mobileKpis} className="block lg:hidden" />
+      <MobileKPIRow items={mobileKpis} />
 
       {/* Desktop: grid completo */}
-      <div className={cn('hidden lg:grid grid-cols-2 gap-3', getGridCols())}>
+      <div className={cn('hidden lg:grid sm:grid-cols-2 lg:grid-cols-4 gap-3', getGridCols())}>
       {/* Total productos */}
       <StatsCard
         label="Total productos"

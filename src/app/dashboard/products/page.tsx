@@ -187,9 +187,7 @@ export default function ProductosPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-surface">
-
-        {/* Cabecera */}
+      {/* Cabecera */}
         <PageHeader
           title="Mi catálogo"
           description={`${filteredProducts.length} productos en total`}
@@ -200,11 +198,10 @@ export default function ProductosPage() {
           actions={
             <Button
               onClick={handleNewProduct}
+              className="hidden sm:flex items-center gap-2"
             >
-              <span className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Nuevo producto
-              </span>
+              <Plus className="w-4 h-4" />
+              Nuevo producto
             </Button>
           }
         />
@@ -251,7 +248,7 @@ export default function ProductosPage() {
           {/* Resultados */}
           <motion.div variants={itemVariants}>
             {filteredProducts.length === 0 ? (
-              <Card className="py-8 sm:p-12 bg-surface-alt border border-border-subtle">
+              <Card className="p-8 sm:p-12 bg-surface-alt border border-border-subtle">
                 <div className="flex flex-col items-center justify-center text-center">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-origen-pastel flex items-center justify-center mb-3 sm:mb-4">
                     <Package className="w-8 h-8 text-origen-pradera" />
@@ -331,7 +328,15 @@ export default function ProductosPage() {
             )}
           </motion.div>
         </motion.div>
-      </div>
+
+      {/* FAB — solo móvil */}
+      <button
+        onClick={handleNewProduct}
+        className="sm:hidden fixed bottom-[calc(84px+env(safe-area-inset-bottom))] right-4 z-30 w-14 h-14 rounded-full bg-origen-pradera text-white shadow-lg shadow-origen-pradera/30 flex items-center justify-center active:scale-95 transition-transform"
+        aria-label="Nuevo producto"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
 
       {/* Diálogos */}
       <AdjustStockDialog
