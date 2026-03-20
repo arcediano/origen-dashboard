@@ -456,26 +456,25 @@ export function FilterBottomSheet({
               })}
             </div>
 
-            {/* Footer CTA */}
+            {/* Footer — ambos botones siempre visibles */}
             <div className="flex gap-3 px-5 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))] border-t border-border-subtle flex-shrink-0 bg-surface">
-              {hasAnyActive && (
-                <button
-                  onClick={handleClearAll}
-                  className="flex-1 h-12 rounded-2xl border-2 border-origen-pradera/40 text-sm font-medium text-origen-pradera active:scale-95 transition-transform"
-                >
-                  Limpiar todo
-                </button>
-              )}
               <button
-                onClick={handleApply}
+                onClick={handleClearAll}
+                disabled={!hasAnyActive}
                 className={cn(
-                  'h-12 rounded-2xl bg-origen-pradera text-white text-sm font-semibold active:scale-95 transition-transform',
-                  hasAnyActive ? 'flex-[2]' : 'flex-1',
+                  'flex-1 h-12 rounded-2xl border-2 text-sm font-medium transition-all active:scale-95',
+                  hasAnyActive
+                    ? 'border-origen-pradera/40 text-origen-pradera'
+                    : 'border-border text-text-subtle opacity-40 cursor-not-allowed',
                 )}
               >
-                {resultCount !== undefined
-                  ? `Ver ${resultCount} ${resultLabel}`
-                  : 'Aplicar filtros'}
+                Limpiar filtros
+              </button>
+              <button
+                onClick={handleApply}
+                className="flex-[2] h-12 rounded-2xl bg-origen-pradera text-white text-sm font-semibold active:scale-95 transition-transform"
+              >
+                Aplicar filtros
               </button>
             </div>
           </motion.div>

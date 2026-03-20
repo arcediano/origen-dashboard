@@ -19,20 +19,45 @@ import { type Product } from '@/types/product';
 // ============================================================================
 
 export interface ProductTableProps {
-  /** Lista de productos a mostrar */
   products: Product[];
-  /** Función para ajustar stock */
   onAdjustStock: (product: Product) => void;
-  /** Función para ver producto */
   onView: (id: string) => void;
-  /** Función para editar producto */
   onEdit: (id: string) => void;
-  /** Clase CSS adicional */
   className?: string;
-  /** Si está cargando */
   isLoading?: boolean;
-  /** Número de filas de carga */
   loadingRows?: number;
+}
+
+// ============================================================================
+// CELDA DE PRODUCTO — maneja imagen rota con fallback al icono Package
+// ============================================================================
+
+function ProductCell({ item }: { item: Product }) {
+  const [imgError, setImgError] = React.useState(false);
+  const showImage = item.mainImage && !imgError;
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-origen-crema to-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+        {showImage ? (
+          <img
+            src={item.mainImage!.url}
+            alt={item.mainImage!.alt || item.name}
+            className="w-full h-full object-cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <Package className="w-4 h-4 text-text-subtle" />
+        )}
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-origen-bosque truncate max-w-[200px]" title={item.name}>
+          {item.name}
+        </p>
+        <p className="text-xs text-muted-foreground truncate">{item.sku}</p>
+      </div>
+    </div>
+  );
 }
 
 // ============================================================================
@@ -48,34 +73,11 @@ export function ProductTable({
   isLoading = false,
   loadingRows = 5,
 }: ProductTableProps) {
-  // Columnas de la tabla
   const columns: Column<Product>[] = [
     {
       key: 'producto',
       header: 'Producto',
-      accessor: (item) => (
-        <div className="flex items-center gap-3">
-          {/* Miniatura */}
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-origen-crema to-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-            {item.mainImage ? (
-              <img
-                src={item.mainImage.url}
-                alt={item.mainImage.alt || item.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <Package className="w-4 h-4 text-text-subtle" />
-            )}
-          </div>
-          {/* Nombre y SKU */}
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-origen-bosque truncate max-w-[200px]" title={item.name}>
-              {item.name}
-            </p>
-            <p className="text-xs text-muted-foreground truncate">{item.sku}</p>
-          </div>
-        </div>
-      ),
+      accessor: (item) => <ProductCell item={item} />,
       sortable: true,
       sortValue: (item) => item.name,
     },
@@ -101,11 +103,10 @@ export function ProductTable({
       key: 'stock',
       header: 'Stock',
       accessor: (item) => {
-        const stockColor = 
+        const stockColor =
           item.stock === 0 ? 'bg-red-500' :
           item.lowStockThreshold && item.stock <= item.lowStockThreshold ? 'bg-amber-500' :
           'bg-green-500';
-
         return (
           <div className="flex items-center gap-2">
             <div className={cn('w-2 h-2 rounded-full', stockColor)} />
@@ -126,9 +127,7 @@ export function ProductTable({
     {
       key: 'ventas',
       header: 'Ventas',
-      accessor: (item) => (
-        <span className="text-sm">{item.sales || 0}</span>
-      ),
+      accessor: (item) => <span className="text-sm">{item.sales || 0}</span>,
       sortable: true,
       sortValue: (item) => item.sales || 0,
     },
@@ -158,11 +157,7 @@ export function ProductTable({
       loading={isLoading}
       loadingRows={loadingRows}
       expandable={{
-        renderExpand: (item) => (
-          <ProductExpandableDetails
-            product={item}
-          />
-        ),
+        renderExpand: (item) => <ProductExpandableDetails product={item} />,
       }}
       onRowClick={(item) => onView(item.id)}
       rowClassName="cursor-pointer hover:bg-origen-crema/30 transition-colors"
