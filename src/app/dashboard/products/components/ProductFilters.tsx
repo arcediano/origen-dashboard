@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/atoms/card';
-import { ScrollChipFilter, type ChipItem, FilterBottomSheet } from '@/components/shared/mobile';
+import { FilterBottomSheet } from '@/components/shared/mobile';
 
 export interface ProductFiltersProps {
   searchQuery: string;
@@ -145,15 +145,6 @@ export function ProductFilters({
   return (
     <>
     <Card variant="elevated" className={cn('p-3 sm:p-4', className)}>
-      {/* Chips de estado — sólo móvil */}
-      <div className="sm:hidden mb-3">
-        <ScrollChipFilter
-          chips={STATUS_CHIPS}
-          value={selectedStatus}
-          onChange={onStatusChange}
-        />
-      </div>
-
       {/* Primera fila: búsqueda y acciones principales */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
         {/* Campo de búsqueda - ocupa todo el ancho en móvil */}

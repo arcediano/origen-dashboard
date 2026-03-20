@@ -363,7 +363,7 @@ export function FilterBottomSheet({
             aria-hidden
           />
 
-          {/* Sheet — z-[60], stopPropagation evita que overlay capture foco de inputs */}
+          {/* Sheet — z-[60], pantalla completa para tapar header */}
           <motion.div
             key="sheet"
             initial={{ y: '100%' }}
@@ -371,7 +371,7 @@ export function FilterBottomSheet({
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="fixed bottom-0 left-0 right-0 z-[60] bg-surface rounded-t-3xl shadow-2xl max-h-[85dvh] flex flex-col"
+            className="fixed inset-0 z-[60] bg-surface flex flex-col"
             role="dialog"
             aria-modal
             aria-label={title}
