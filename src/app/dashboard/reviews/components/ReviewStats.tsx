@@ -1,12 +1,6 @@
-/**
- * @component ReviewStats
- * @description Estadísticas de reseñas — 4 KPIs en grid 2×2 (móvil) / 1×4 (desktop).
- */
-
 'use client';
 
 import { MessageSquare, Star, CheckCircle, ThumbsUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { SoftStatCard } from '@/components/shared/SoftStatCard';
 import type { ReviewStats as ReviewStatsType } from '@/types/review';
 
@@ -16,10 +10,8 @@ interface ReviewStatsProps {
 }
 
 export function ReviewStats({ stats, className }: ReviewStatsProps) {
-  const respondedCount = stats.total - stats.pending;
-
   return (
-    <div className={cn('grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4', className)}>
+    <div className={`grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4${className ? ` ${className}` : ''}`}>
       <SoftStatCard
         label="Total reseñas"
         value={stats.total}
@@ -32,13 +24,13 @@ export function ReviewStats({ stats, className }: ReviewStatsProps) {
         label="Valoración media"
         value={`${stats.averageRating.toFixed(1)}/5`}
         icon={Star}
-        bg="from-amber-400/8 to-transparent"
-        border="border-amber-200/60"
+        bg="from-amber-400/10 to-transparent"
+        border="border-amber-200/50"
         iconColor="text-amber-500"
       />
       <SoftStatCard
         label="Respondidas"
-        value={respondedCount}
+        value={stats.total - stats.pending}
         icon={CheckCircle}
         bg="from-origen-hoja/5 to-transparent"
         border="border-origen-hoja/10"
@@ -48,8 +40,8 @@ export function ReviewStats({ stats, className }: ReviewStatsProps) {
         label="Útiles"
         value={stats.helpful}
         icon={ThumbsUp}
-        bg="from-blue-400/8 to-transparent"
-        border="border-blue-200/60"
+        bg="from-blue-400/10 to-transparent"
+        border="border-blue-200/50"
         iconColor="text-blue-500"
       />
     </div>
