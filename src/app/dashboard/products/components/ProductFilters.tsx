@@ -11,7 +11,7 @@
 import React from 'react';
 import {
   Search, X, SlidersHorizontal,
-  Grid3x3, List,
+  Grid3x3, List, ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FilterBottomSheet } from '@/components/shared/mobile';
@@ -62,13 +62,13 @@ const SORT_OPTIONS = [
   { value: 'sales-desc', label: 'Más vendidos' },
 ];
 
-// Clase reutilizable para pills en desktop
-const pillCls = (active: boolean) => cn(
-  'inline-flex items-center px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
-  active
-    ? 'bg-origen-bosque border-origen-bosque text-white'
-    : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50',
-);
+// Select estilizado para filtros desktop
+const selectCls = [
+  'h-9 pl-3 pr-8 text-sm border border-border bg-surface-alt rounded-xl',
+  'text-origen-bosque font-medium appearance-none cursor-pointer',
+  'focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera',
+  'transition-colors',
+].join(' ');
 
 export function ProductFilters({
   searchQuery,
@@ -158,46 +158,50 @@ export function ProductFilters({
         </div>
       </div>
 
-      {/* ── Filtros desktop: pills en línea ───────────────────────────── */}
-      <div className="hidden lg:flex flex-wrap items-center gap-2 pt-1">
-        {/* Categoría */}
-        {categories.map(cat => (
-          <button key={cat} onClick={() => onCategoryChange(selectedCategory === cat ? '' : cat)}
-            className={pillCls(selectedCategory === cat)}>{cat}</button>
-        ))}
+      {/* ── Filtros desktop: selects por grupo ───────────────────────── */}
+      <div className="hidden lg:flex items-center gap-2 pt-1">
 
-        <div className="w-px h-4 bg-border-subtle mx-1" />
+        {/* Categoría */}
+        <div className="relative">
+          <select value={selectedCategory} onChange={e => onCategoryChange(e.target.value)} className={selectCls}>
+            <option value="">Todas las categorías</option>
+            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+        </div>
 
         {/* Estado */}
-        {STATUS_OPTIONS.map(opt => (
-          <button key={opt.value} onClick={() => onStatusChange(selectedStatus === opt.value ? '' : opt.value)}
-            className={pillCls(selectedStatus === opt.value)}>{opt.label}</button>
-        ))}
-
-        <div className="w-px h-4 bg-border-subtle mx-1" />
+        <div className="relative">
+          <select value={selectedStatus} onChange={e => onStatusChange(e.target.value)} className={selectCls}>
+            <option value="">Todos los estados</option>
+            {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+        </div>
 
         {/* Stock */}
-        {STOCK_OPTIONS.map(opt => (
-          <button key={opt.value} onClick={() => onStockChange(selectedStock === opt.value ? '' : opt.value)}
-            className={pillCls(selectedStock === opt.value)}>{opt.label}</button>
-        ))}
-
-        <div className="w-px h-4 bg-border-subtle mx-1" />
+        <div className="relative">
+          <select value={selectedStock} onChange={e => onStockChange(e.target.value)} className={selectCls}>
+            <option value="">Todo el stock</option>
+            {STOCK_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+        </div>
 
         {/* Ordenar */}
-        {SORT_OPTIONS.map(opt => (
-          <button key={opt.value} onClick={() => onSortChange(sortBy === opt.value ? '' : opt.value)}
-            className={pillCls(sortBy === opt.value)}>{opt.label}</button>
-        ))}
+        <div className="relative">
+          <select value={sortBy} onChange={e => onSortChange(e.target.value)} className={selectCls}>
+            <option value="">Ordenar por</option>
+            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+        </div>
 
         {hasAnyFilter && (
-          <>
-            <div className="w-px h-4 bg-border-subtle mx-1" />
-            <button onClick={onClearFilters}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-text-subtle hover:text-origen-bosque transition-colors">
-              <X className="w-3 h-3" />Limpiar
-            </button>
-          </>
+          <button onClick={onClearFilters}
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-text-subtle hover:text-origen-bosque transition-colors">
+            <X className="w-3 h-3" />Limpiar
+          </button>
         )}
       </div>
 

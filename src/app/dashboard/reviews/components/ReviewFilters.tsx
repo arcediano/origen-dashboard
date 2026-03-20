@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, SlidersHorizontal, CheckCircle, ThumbsUp, ImageIcon } from 'lucide-react';
+import { Search, X, SlidersHorizontal, CheckCircle, ThumbsUp, ImageIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FilterBottomSheet, type FilterSection } from '@/components/shared/mobile/FilterBottomSheet';
 import type { ReviewFilters as ReviewFiltersType, ReviewType, ReviewStatus } from '@/types/review';
@@ -48,6 +48,15 @@ export interface ReviewFiltersProps {
   totalReviews: number;
   className?: string;
 }
+
+// ─── Estilos compartidos ───────────────────────────────────────────────────────
+
+const selectCls = [
+  'h-9 pl-3 pr-8 text-sm border border-border bg-surface-alt rounded-xl',
+  'text-origen-bosque font-medium appearance-none cursor-pointer',
+  'focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera',
+  'transition-colors',
+].join(' ');
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
@@ -158,75 +167,60 @@ export function ReviewFilters({
         </button>
       </div>
 
-      {/* ── Filtros desktop: estado + tipo + rating + booleanos ───────── */}
-      <div className="hidden lg:flex items-center gap-2 pt-1 overflow-x-auto pb-1 scrollbar-none">
-        {/* Estado */}
-        {STATUS_OPTIONS.filter(o => o.value).map(opt => (
-          <button key={opt.value}
-            onClick={() => set('status', filters.status === opt.value ? undefined : opt.value as ReviewStatus)}
-            className={cn(
-              'flex-shrink-0 inline-flex items-center px-3 py-1.5 rounded-full border text-xs font-medium transition-colors',
-              filters.status === opt.value
-                ? 'bg-origen-bosque border-origen-bosque text-white'
-                : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50',
-            )}
-          >{opt.label}</button>
-        ))}
+      {/* ── Filtros desktop: selects + booleanos ──────────────────────── */}
+      <div className="hidden lg:flex items-center gap-2 pt-1">
 
-        <div className="flex-shrink-0 w-px h-4 bg-border-subtle mx-1" />
+        {/* Estado */}
+        <div className="relative">
+          <select value={filters.status ?? ''} onChange={e => set('status', e.target.value as ReviewStatus || undefined)}
+            className={selectCls}>
+            {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+        </div>
 
         {/* Tipo */}
-        {TYPE_OPTIONS.filter(o => o.value).map(opt => (
-          <button key={opt.value}
-            onClick={() => set('type', filters.type === opt.value ? undefined : opt.value as ReviewType)}
-            className={cn(
-              'flex-shrink-0 inline-flex items-center px-3 py-1.5 rounded-full border text-xs font-medium transition-colors',
-              filters.type === opt.value
-                ? 'bg-origen-bosque border-origen-bosque text-white'
-                : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50',
-            )}
-          >{opt.label}</button>
-        ))}
+        <div className="relative">
+          <select value={filters.type ?? ''} onChange={e => set('type', e.target.value as ReviewType || undefined)}
+            className={selectCls}>
+            {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+        </div>
 
-        <div className="flex-shrink-0 w-px h-4 bg-border-subtle mx-1" />
+        {/* Valoración */}
+        <div className="relative">
+          <select value={filters.rating ? String(filters.rating) : ''}
+            onChange={e => onFilterChange({ ...filters, rating: e.target.value ? Number(e.target.value) as any : undefined })}
+            className={selectCls}>
+            {RATING_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+        </div>
 
-        {/* Rating */}
-        {RATING_OPTIONS.filter(o => o.value).map(opt => (
-          <button key={opt.value}
-            onClick={() => onFilterChange({ ...filters, rating: filters.rating === Number(opt.value) ? undefined : Number(opt.value) as any })}
-            className={cn(
-              'flex-shrink-0 inline-flex items-center px-3 py-1.5 rounded-full border text-xs font-medium transition-colors',
-              filters.rating === Number(opt.value)
-                ? 'bg-origen-bosque border-origen-bosque text-white'
-                : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50',
-            )}
-          >{opt.label}</button>
-        ))}
+        <div className="w-px h-4 bg-border-subtle mx-1" />
 
-        <div className="flex-shrink-0 w-px h-4 bg-border-subtle mx-1" />
-
+        {/* Booleanos como pills compactas */}
         <button onClick={() => onFilterChange({ ...filters, verifiedOnly: !filters.verifiedOnly })}
-          className={cn('flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
+          className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
             filters.verifiedOnly ? 'bg-origen-bosque border-origen-bosque text-white' : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50')}
         ><CheckCircle className="w-3 h-3" />Verificadas</button>
 
         <button onClick={() => onFilterChange({ ...filters, hasResponse: !filters.hasResponse })}
-          className={cn('flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
+          className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
             filters.hasResponse ? 'bg-origen-bosque border-origen-bosque text-white' : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50')}
         ><ThumbsUp className="w-3 h-3" />Con respuesta</button>
 
         <button onClick={() => onFilterChange({ ...filters, hasImages: !filters.hasImages })}
-          className={cn('flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
+          className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
             filters.hasImages ? 'bg-origen-bosque border-origen-bosque text-white' : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50')}
         ><ImageIcon className="w-3 h-3" />Con imágenes</button>
 
         {hasAnyFilter && (
-          <>
-            <div className="flex-shrink-0 w-px h-4 bg-border-subtle mx-1" />
-            <button onClick={onClearFilters}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-text-subtle hover:text-origen-bosque transition-colors"
-            ><X className="w-3 h-3" />Limpiar</button>
-          </>
+          <button onClick={onClearFilters}
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-text-subtle hover:text-origen-bosque transition-colors">
+            <X className="w-3 h-3" />Limpiar
+          </button>
         )}
       </div>
 

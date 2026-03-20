@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, SlidersHorizontal, CalendarIcon, CalendarRange, DollarSign } from 'lucide-react';
+import { Search, X, SlidersHorizontal, CalendarIcon, CalendarRange, DollarSign, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FilterBottomSheet } from '@/components/shared/mobile';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
@@ -30,12 +30,12 @@ const STATUS_OPTIONS = [
   { value: 'cancelled',  label: 'Cancelados' },
 ];
 
-const pillCls = (active: boolean) => cn(
-  'inline-flex items-center px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
-  active
-    ? 'bg-origen-bosque border-origen-bosque text-white'
-    : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50',
-);
+const selectCls = [
+  'h-9 pl-3 pr-8 text-sm border border-border bg-surface-alt rounded-xl',
+  'text-origen-bosque font-medium appearance-none cursor-pointer',
+  'focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera',
+  'transition-colors',
+].join(' ');
 
 const dateInputCls = 'h-9 px-3 text-sm border border-border bg-surface-alt rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera';
 
@@ -121,11 +121,14 @@ export function OrderFilters({
       {/* ── Filtros desktop: estado + fechas + importe ────────────────── */}
       <div className="hidden lg:flex flex-wrap items-center gap-2 pt-1">
         {/* Estado */}
-        {STATUS_OPTIONS.map(opt => (
-          <button key={opt.value}
-            onClick={() => set('status', filters.status === opt.value ? undefined : opt.value as OrderStatus)}
-            className={pillCls(filters.status === opt.value)}>{opt.label}</button>
-        ))}
+        <div className="relative">
+          <select value={filters.status ?? ''} onChange={e => set('status', e.target.value as OrderStatus || undefined)}
+            className={selectCls}>
+            <option value="">Todos los estados</option>
+            {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle pointer-events-none" />
+        </div>
 
         <div className="w-px h-4 bg-border-subtle mx-1" />
 
