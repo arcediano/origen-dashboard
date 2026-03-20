@@ -54,25 +54,26 @@ export function StatStrip({ items, className }: StatStripProps) {
         <div
           key={item.label}
           className={cn(
-            'flex flex-col items-center justify-center py-3.5 px-2',
+            'flex flex-col items-center py-3.5 px-2',
             i < items.length - 1 && 'border-r border-border-subtle',
           )}
         >
+          {/* Etiqueta arriba — mismo orden que StatsCard del dashboard */}
+          <span className="text-[11px] font-medium text-text-subtle text-center leading-tight">
+            {item.label}
+          </span>
+
+          {/* Valor — siempre en el mismo punto vertical */}
           <span className={cn(
-            'text-2xl font-bold leading-none tabular-nums',
+            'mt-1 text-2xl font-bold leading-none tabular-nums',
             valueColor[item.variant ?? 'default'],
           )}>
             {item.value}
           </span>
 
-          {item.sublabel && (
-            <span className="mt-0.5 text-[10px] text-text-subtle tabular-nums">
-              {item.sublabel}
-            </span>
-          )}
-
-          <span className="mt-1 text-[11px] font-medium text-text-subtle text-center leading-tight">
-            {item.label}
+          {/* Sublabel — espacio reservado aunque esté vacío para alinear todas las celdas */}
+          <span className="mt-0.5 h-3.5 text-[10px] text-text-subtle tabular-nums text-center">
+            {item.sublabel ?? ''}
           </span>
         </div>
       ))}
