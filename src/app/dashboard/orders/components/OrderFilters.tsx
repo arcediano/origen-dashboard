@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/atoms/card';
-import { ScrollChipFilter, type ChipItem } from '@/components/shared/mobile';
+import { ScrollChipFilter, type ChipItem, FilterBottomSheet } from '@/components/shared/mobile';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
 
 export interface OrderFiltersProps {
@@ -59,7 +59,7 @@ export function OrderFilters({
   totalOrders,
   className
 }: OrderFiltersProps) {
-  const [showMobileFilters, setShowMobileFilters] = React.useState(false);
+  const [showFilterSheet, setShowFilterSheet] = React.useState(false);
   const [localSearch, setLocalSearch] = React.useState(filters.search || '');
 
   const hasFilters = Boolean(
@@ -90,6 +90,7 @@ export function OrderFilters({
   };
 
   return (
+    <>
     <Card variant="elevated" className={cn('p-3', className)}>
       {/* Chips de estado — sólo móvil */}
       <div className="sm:hidden mb-3">
@@ -125,11 +126,8 @@ export function OrderFilters({
         </div>
 
         <button
-          onClick={() => setShowMobileFilters(!showMobileFilters)}
-          className={cn(
-            'sm:hidden flex items-center justify-center h-10 px-3 border border-border rounded-md bg-surface-alt',
-            showMobileFilters ? 'bg-origen-crema text-origen-bosque border-origen-pradera/30' : 'text-muted-foreground'
-          )}
+          onClick={() => setShowFilterSheet(true)}
+          className="sm:hidden flex items-center justify-center h-10 px-3 border border-border rounded-md bg-surface-alt text-muted-foreground"
         >
           <Filter className="w-4 h-4 mr-2" />
           <span>Filtros</span>
@@ -141,83 +139,7 @@ export function OrderFilters({
         </button>
       </div>
 
-      {/* Panel expandible de filtros — solo móvil */}
-      {showMobileFilters && (
-        <div className="sm:hidden mt-3 space-y-3 pt-3 border-t border-border-subtle">
-
-          {/* Estado */}
-          <div>
-            <label className="text-xs font-medium text-text-subtle mb-1.5 block">Estado</label>
-            <select
-              value={filters.status || ''}
-              onChange={(e) => toggleFilter('status', e.target.value || undefined)}
-              className="w-full h-10 px-3 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera"
-            >
-              {STATUS_OPTIONS.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Rango de fechas */}
-          <div>
-            <label className="text-xs font-medium text-text-subtle mb-1.5 block">Período</label>
-            <div className="grid grid-cols-2 gap-2">
-              <input
-                type="date"
-                value={formatDateForInput(filters.dateFrom)}
-                onChange={(e) => toggleFilter('dateFrom', e.target.value ? new Date(e.target.value) : undefined)}
-                className="h-10 px-3 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera"
-              />
-              <input
-                type="date"
-                value={formatDateForInput(filters.dateTo)}
-                onChange={(e) => toggleFilter('dateTo', e.target.value ? new Date(e.target.value) : undefined)}
-                className="h-10 px-3 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera"
-              />
-            </div>
-          </div>
-
-          {/* Rango de importe */}
-          <div>
-            <label className="text-xs font-medium text-text-subtle mb-1.5 block">Importe (€)</label>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="relative">
-                <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
-                <input
-                  type="number"
-                  value={filters.minAmount || ''}
-                  onChange={(e) => toggleFilter('minAmount', e.target.value ? Number(e.target.value) : undefined)}
-                  placeholder="Mín."
-                  className="w-full pl-7 h-10 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera"
-                  min="0"
-                />
-              </div>
-              <div className="relative">
-                <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-subtle" />
-                <input
-                  type="number"
-                  value={filters.maxAmount || ''}
-                  onChange={(e) => toggleFilter('maxAmount', e.target.value ? Number(e.target.value) : undefined)}
-                  placeholder="Máx."
-                  className="w-full pl-7 h-10 text-sm border border-border bg-surface-alt rounded-md focus:outline-none focus:ring-1 focus:ring-origen-pradera"
-                  min="0"
-                />
-              </div>
-            </div>
-          </div>
-
-          {hasFilters && (
-            <button
-              onClick={() => { onClearFilters(); setShowMobileFilters(false); }}
-              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-origen-pradera border border-origen-pradera/30 hover:bg-origen-crema/50 rounded-lg transition-colors"
-            >
-              <X className="w-4 h-4" />
-              Limpiar todos los filtros
-            </button>
-          )}
-        </div>
-      )}
+      {/* FilterBottomSheet se renderiza fuera del Card — ver abajo */}
 
       {/* Filtros desktop */}
       <div className="hidden sm:flex flex-wrap items-center gap-3 mt-3">
@@ -306,5 +228,50 @@ export function OrderFilters({
         {totalOrders} {totalOrders === 1 ? 'pedido encontrado' : 'pedidos encontrados'}
       </div>
     </Card>
+
+    <FilterBottomSheet
+      isOpen={showFilterSheet}
+      onClose={() => setShowFilterSheet(false)}
+      sections={[
+        {
+          type: 'chips',
+          id: 'status',
+          title: 'Estado',
+          options: [
+            { label: 'Todos', value: '' },
+            { label: 'Pendientes', value: 'pending' },
+            { label: 'Procesando', value: 'processing' },
+            { label: 'Enviados', value: 'shipped' },
+            { label: 'Entregados', value: 'delivered' },
+            { label: 'Cancelados', value: 'cancelled' },
+          ],
+          value: filters.status ?? '',
+          onChange: (val) => toggleFilter('status', val || undefined),
+        },
+        {
+          type: 'daterange',
+          id: 'period',
+          title: 'Período',
+          valueFrom: formatDateForInput(filters.dateFrom),
+          valueTo: formatDateForInput(filters.dateTo),
+          onChangeFrom: (val) => toggleFilter('dateFrom', val ? new Date(val) : undefined),
+          onChangeTo: (val) => toggleFilter('dateTo', val ? new Date(val) : undefined),
+        },
+        {
+          type: 'numberrange',
+          id: 'amount',
+          title: 'Importe',
+          valueMin: filters.minAmount?.toString() ?? '',
+          valueMax: filters.maxAmount?.toString() ?? '',
+          onChangeMin: (val) => toggleFilter('minAmount', val ? Number(val) : undefined),
+          onChangeMax: (val) => toggleFilter('maxAmount', val ? Number(val) : undefined),
+          prefix: '€',
+        },
+      ]}
+      onClearAll={() => { onClearFilters(); setShowFilterSheet(false); }}
+      resultCount={totalOrders}
+      resultLabel={totalOrders === 1 ? 'pedido' : 'pedidos'}
+    />
+    </>
   );
 }

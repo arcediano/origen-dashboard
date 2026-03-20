@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/atoms/card';
-import { ScrollChipFilter, type ChipItem } from '@/components/shared/mobile';
+import { ScrollChipFilter, type ChipItem, FilterBottomSheet } from '@/components/shared/mobile';
 
 export interface ProductFiltersProps {
   searchQuery: string;
@@ -131,7 +131,7 @@ export function ProductFilters({
   categories = DEFAULT_CATEGORIES,
   className,
 }: ProductFiltersProps) {
-  const [showMobileFilters, setShowMobileFilters] = React.useState(false);
+  const [showFilterSheet, setShowFilterSheet] = React.useState(false);
   
   const hasFilters = Boolean(
     searchQuery ||
@@ -143,6 +143,7 @@ export function ProductFilters({
   const activeFilterCount = [searchQuery, selectedCategory, selectedStatus, selectedStock].filter(Boolean).length;
 
   return (
+    <>
     <Card variant="elevated" className={cn('p-3', className)}>
       {/* Chips de estado — sólo móvil */}
       <div className="sm:hidden mb-3">
@@ -181,13 +182,9 @@ export function ProductFilters({
         <div className="flex items-center gap-2">
           {/* Botón de filtros para móvil */}
           <button
-            onClick={() => setShowMobileFilters(!showMobileFilters)}
-            className={cn(
-              'sm:hidden flex items-center justify-center h-10 px-3 border border-border rounded-md bg-surface-alt',
-              showMobileFilters ? 'bg-origen-crema text-origen-bosque border-origen-pradera/30' : 'text-muted-foreground'
-            )}
+            onClick={() => setShowFilterSheet(true)}
+            className="sm:hidden flex items-center justify-center h-10 px-3 border border-border rounded-md bg-surface-alt text-muted-foreground"
             aria-label="Mostrar filtros"
-            aria-expanded={showMobileFilters}
           >
             <Filter className="w-4 h-4 mr-2" />
             <span>Filtros</span>
@@ -303,81 +300,7 @@ export function ProductFilters({
         )}
       </div>
 
-      {/* Filtros móviles desplegables */}
-      {showMobileFilters && (
-        <div className="sm:hidden mt-3 space-y-3 pt-3 border-t border-border-subtle">
-          <Select
-            value={selectedCategory}
-            onChange={(e) => onCategoryChange(e.target.value)}
-            icon={<Filter className="w-4 h-4" />}
-            placeholder="Categoría"
-            fullWidth
-            aria-label="Filtrar por categoría"
-          >
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </Select>
-
-          <Select
-            value={selectedStatus}
-            onChange={(e) => onStatusChange(e.target.value)}
-            icon={<Circle className="w-4 h-4" />}
-            placeholder="Estado"
-            fullWidth
-            aria-label="Filtrar por estado"
-          >
-            {STATUS_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
-
-          <Select
-            value={selectedStock}
-            onChange={(e) => onStockChange(e.target.value)}
-            icon={<Package className="w-4 h-4" />}
-            placeholder="Stock"
-            fullWidth
-            aria-label="Filtrar por stock"
-          >
-            {STOCK_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
-
-          <Select
-            value={sortBy}
-            onChange={(e) => onSortChange(e.target.value)}
-            icon={<RefreshCw className="w-4 h-4" />}
-            placeholder="Ordenar por"
-            fullWidth
-            aria-label="Ordenar por"
-          >
-            {SORT_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
-
-          {hasFilters && (
-            <button
-              onClick={onClearFilters}
-              className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-sm text-origen-pradera hover:text-origen-hoja hover:bg-origen-crema/50 rounded-md transition-colors border border-border"
-              aria-label="Limpiar filtros"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span>Limpiar todos los filtros</span>
-            </button>
-          )}
-        </div>
-      )}
+      {/* FilterBottomSheet se renderiza fuera del Card — ver abajo */}
 
       {/* Badges de filtros activos */}
       {hasFilters && (
@@ -467,5 +390,73 @@ export function ProductFilters({
         {totalProducts} {totalProducts === 1 ? 'producto encontrado' : 'productos encontrados'}
       </div>
     </Card>
+
+    <FilterBottomSheet
+      isOpen={showFilterSheet}
+      onClose={() => setShowFilterSheet(false)}
+      sections={[
+        {
+          type: 'chips',
+          id: 'category',
+          title: 'Categoría',
+          options: [
+            { label: 'Todas', value: '' },
+            ...categories.map(cat => ({ label: cat, value: cat })),
+          ],
+          value: selectedCategory,
+          onChange: onCategoryChange,
+        },
+        {
+          type: 'chips',
+          id: 'status',
+          title: 'Estado',
+          options: [
+            { label: 'Todos', value: '' },
+            { label: 'Activos', value: 'active' },
+            { label: 'Borradores', value: 'draft' },
+            { label: 'Sin stock', value: 'out_of_stock' },
+            { label: 'Inactivos', value: 'inactive' },
+          ],
+          value: selectedStatus,
+          onChange: onStatusChange,
+        },
+        {
+          type: 'chips',
+          id: 'stock',
+          title: 'Stock',
+          options: [
+            { label: 'Todo', value: '' },
+            { label: 'Con stock', value: 'disponible' },
+            { label: 'Stock bajo', value: 'bajo' },
+            { label: 'Agotados', value: 'agotado' },
+          ],
+          value: selectedStock,
+          onChange: onStockChange,
+        },
+        {
+          type: 'chips',
+          id: 'sort',
+          title: 'Ordenar por',
+          options: [
+            { label: 'Por defecto', value: '' },
+            { label: 'Más recientes', value: 'newest' },
+            { label: 'Más antiguos', value: 'oldest' },
+            { label: 'Nombre A-Z', value: 'name-asc' },
+            { label: 'Nombre Z-A', value: 'name-desc' },
+            { label: 'Precio ↑', value: 'price-asc' },
+            { label: 'Precio ↓', value: 'price-desc' },
+            { label: 'Stock ↑', value: 'stock-asc' },
+            { label: 'Stock ↓', value: 'stock-desc' },
+            { label: 'Más vendidos', value: 'sales-desc' },
+          ],
+          value: sortBy,
+          onChange: onSortChange,
+        },
+      ]}
+      onClearAll={() => { onClearFilters(); setShowFilterSheet(false); }}
+      resultCount={totalProducts}
+      resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
+    />
+    </>
   );
 }
