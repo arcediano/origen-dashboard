@@ -157,7 +157,7 @@ export default function OrdersPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(24px+env(safe-area-inset-bottom))]"
+        className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(24px+env(safe-area-inset-bottom))]"
       >
         {/* Estadísticas */}
         {stats && (
