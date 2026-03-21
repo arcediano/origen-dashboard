@@ -21,25 +21,21 @@ import { createConnectAccount, createAccountLink } from '@/lib/stripe/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, businessName, website, address } = body as {
+    const { email, firstName, lastName, businessName, website } = body as {
       email?: string;
+      firstName?: string;
+      lastName?: string;
       businessName?: string;
       website?: string;
-      address?: {
-        street?: string;
-        streetNumber?: string;
-        city?: string;
-        province?: string;
-        postalCode?: string;
-      };
     };
 
     const account = await createConnectAccount({
       sellerId: `producer-${Date.now()}`,
       email,
+      firstName,
+      lastName,
       businessName,
       website,
-      address,
     });
 
     // Generar el Account Link con URLs de retorno que incluyen el accountId

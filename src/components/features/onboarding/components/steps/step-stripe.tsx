@@ -50,18 +50,14 @@ export interface EnhancedStep6StripeProps {
   onChange: (data: EnhancedStep6StripeData) => void;
   /** Email del usuario — pre-rellena la cuenta Stripe */
   userEmail?: string;
+  /** Nombre del usuario */
+  firstName?: string;
+  /** Apellidos del usuario */
+  lastName?: string;
   /** Nombre del negocio (paso 2) — pre-rellena Stripe */
   businessName?: string;
   /** Web del negocio (paso 2) — pre-rellena Stripe */
   website?: string;
-  /** Dirección del productor (paso 1) — pre-rellena Stripe */
-  address?: {
-    street?: string;
-    streetNumber?: string;
-    city?: string;
-    province?: string;
-    postalCode?: string;
-  };
 }
 
 // ─── Componente ──────────────────────────────────────────────────────────────
@@ -70,9 +66,10 @@ export function EnhancedStep6Stripe({
   data,
   onChange,
   userEmail,
+  firstName,
+  lastName,
   businessName,
   website,
-  address,
 }: EnhancedStep6StripeProps) {
   const [isConnecting, setIsConnecting] = React.useState(false);
   const [connectError, setConnectError] = React.useState('');
@@ -96,9 +93,10 @@ export function EnhancedStep6Stripe({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: userEmail,
+          firstName,
+          lastName,
           businessName,
           website,
-          address,
         }),
       });
 

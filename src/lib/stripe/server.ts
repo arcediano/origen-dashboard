@@ -26,17 +26,12 @@ const stripe = new Stripe(STRIPE_CONFIG.secretKey, {
 export async function createConnectAccount(params: {
   sellerId: string;
   email?: string;
+  firstName?: string;
+  lastName?: string;
   businessName?: string;
   website?: string;
-  address?: {
-    street?: string;
-    streetNumber?: string;
-    city?: string;
-    province?: string;
-    postalCode?: string;
-  };
 }) {
-  const { sellerId, email, businessName, website } = params;
+  const { sellerId, email, firstName, lastName, businessName, website } = params;
 
   try {
     const account = await stripe.accounts.create({
@@ -56,6 +51,8 @@ export async function createConnectAccount(params: {
       metadata: {
         sellerId,
         platform: 'origen-marketplace',
+        ...(firstName ? { firstName } : {}),
+        ...(lastName ? { lastName } : {}),
       },
     });
 
