@@ -61,13 +61,13 @@ export function OrderFilters({
   const handleSearchChange = (value: string) => {
     setLocalSearch(value);
     const timer = setTimeout(() => {
-      onFilterChange({ ...filters, search: value || undefined });
+      onFilterChange({ search: value || undefined } as OrderFiltersType);
     }, 300);
     return () => clearTimeout(timer);
   };
 
   const set = (key: keyof OrderFiltersType, value: any) =>
-    onFilterChange({ ...filters, [key]: value || undefined });
+    onFilterChange({ [key]: value || undefined } as OrderFiltersType);
 
   const formatDate = (date?: Date) => date ? date.toISOString().split('T')[0] : '';
 
@@ -87,7 +87,7 @@ export function OrderFilters({
           />
           {localSearch && (
             <button
-              onClick={() => { setLocalSearch(''); onFilterChange({ ...filters, search: undefined }); }}
+              onClick={() => { setLocalSearch(''); onFilterChange({ search: undefined } as OrderFiltersType); }}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque transition-colors"
               aria-label="Limpiar búsqueda"
             >

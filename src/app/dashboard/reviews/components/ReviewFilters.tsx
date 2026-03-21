@@ -11,7 +11,7 @@
 import React from 'react';
 import { Search, X, SlidersHorizontal, CheckCircle, ThumbsUp, ImageIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { FilterBottomSheet, type FilterSection } from '@/components/shared/mobile';
+import { FilterBottomSheet, type FilterSection, type ToggleOption } from '@/components/shared/mobile';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/atoms/select';
@@ -82,13 +82,13 @@ export function ReviewFilters({
   const handleSearchChange = (value: string) => {
     setLocalSearch(value);
     const timer = setTimeout(() => {
-      onFilterChange({ ...filters, search: value || undefined });
+      onFilterChange({ search: value || undefined } as ReviewFiltersType);
     }, 300);
     return () => clearTimeout(timer);
   };
 
   const set = (key: keyof ReviewFiltersType, value: any) =>
-    onFilterChange({ ...filters, [key]: value || undefined });
+    onFilterChange({ [key]: value || undefined } as ReviewFiltersType);
 
   // ── Secciones del bottom sheet ───────────────────────────────────────────────
 
@@ -115,7 +115,35 @@ export function ReviewFilters({
       title: 'Valoración',
       options: RATING_OPTIONS,
       value: filters.rating ? String(filters.rating) : '',
-      onChange: (v) => onFilterChange({ ...filters, rating: v ? Number(v) as any : undefined }),
+      onChange: (v) => onFilterChange({ rating: v ? Number(v) as any : undefined } as ReviewFiltersType),
+    },
+    {
+      type: 'toggles',
+      id: 'booleans',
+      title: 'Opciones',
+      options: [
+        {
+          id: 'verifiedOnly',
+          label: 'Verificadas',
+          icon: CheckCircle,
+          value: filters.verifiedOnly ?? false,
+          onChange: (v) => onFilterChange({ verifiedOnly: v || undefined } as ReviewFiltersType),
+        },
+        {
+          id: 'hasResponse',
+          label: 'Con respuesta',
+          icon: ThumbsUp,
+          value: filters.hasResponse ?? false,
+          onChange: (v) => onFilterChange({ hasResponse: v || undefined } as ReviewFiltersType),
+        },
+        {
+          id: 'hasImages',
+          label: 'Con imágenes',
+          icon: ImageIcon,
+          value: filters.hasImages ?? false,
+          onChange: (v) => onFilterChange({ hasImages: v || undefined } as ReviewFiltersType),
+        },
+      ],
     },
   ];
 
@@ -135,7 +163,7 @@ export function ReviewFilters({
           />
           {localSearch && (
             <button
-              onClick={() => { setLocalSearch(''); onFilterChange({ ...filters, search: undefined }); }}
+              onClick={() => { setLocalSearch(''); onFilterChange({ search: undefined } as ReviewFiltersType); }}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque transition-colors"
               aria-label="Limpiar búsqueda"
             >

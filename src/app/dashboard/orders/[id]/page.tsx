@@ -1,17 +1,17 @@
 /**
  * @page OrderDetailPage
- * @description Página de detalle de pedido
+ * @description Página de detalle de pedido — experiencia app nativa
  */
 
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { ShoppingBag, ArrowLeft, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink } from 'lucide-react';
 
 // Componentes UI
 import { Button } from '@/components/ui/atoms/button';
@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/atoms/badge';
 import { PageLoader } from '@/components/shared';
 import { PageError } from '@/components/shared';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
+import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 
 // Hooks y API
 import { fetchOrderById, updateOrderStatus } from '@/lib/api/orders';
@@ -30,13 +31,17 @@ const statusConfig: Record<Order['status'], {
   icon: React.ElementType;
   color: string;
   bandBg: string;
+  heroBg: string;
+  heroBorder: string;
 }> = {
   pending: {
     variant: 'warning',
     label: 'Pendiente',
     icon: Clock,
-    color: 'text-origen-mandarina',
+    color: 'text-amber-700',
     bandBg: 'bg-origen-mandarina/10',
+    heroBg: 'bg-gradient-to-br from-origen-mandarina/20 to-origen-mandarina/8',
+    heroBorder: 'border-origen-mandarina/30',
   },
   processing: {
     variant: 'info',
@@ -44,6 +49,8 @@ const statusConfig: Record<Order['status'], {
     icon: Package,
     color: 'text-origen-pino',
     bandBg: 'bg-origen-pastel',
+    heroBg: 'bg-gradient-to-br from-origen-pastel to-origen-crema/60',
+    heroBorder: 'border-origen-pradera/30',
   },
   shipped: {
     variant: 'info',
@@ -51,6 +58,8 @@ const statusConfig: Record<Order['status'], {
     icon: Truck,
     color: 'text-origen-hoja',
     bandBg: 'bg-origen-pastel',
+    heroBg: 'bg-gradient-to-br from-origen-pastel to-origen-crema/60',
+    heroBorder: 'border-origen-hoja/30',
   },
   delivered: {
     variant: 'success',
@@ -58,6 +67,8 @@ const statusConfig: Record<Order['status'], {
     icon: CheckCircle,
     color: 'text-origen-bosque',
     bandBg: 'bg-origen-pastel',
+    heroBg: 'bg-gradient-to-br from-origen-bosque/10 to-origen-pastel/80',
+    heroBorder: 'border-origen-bosque/20',
   },
   cancelled: {
     variant: 'danger',
@@ -65,6 +76,8 @@ const statusConfig: Record<Order['status'], {
     icon: XCircle,
     color: 'text-red-700',
     bandBg: 'bg-red-50',
+    heroBg: 'bg-gradient-to-br from-red-50 to-red-50/60',
+    heroBorder: 'border-red-200',
   },
   refunded: {
     variant: 'danger',
@@ -72,19 +85,29 @@ const statusConfig: Record<Order['status'], {
     icon: XCircle,
     color: 'text-red-700',
     bandBg: 'bg-red-50',
+    heroBg: 'bg-gradient-to-br from-red-50 to-red-50/60',
+    heroBorder: 'border-red-200',
   }
+};
+
+// Animaciones de entrada
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { type: 'spring', stiffness: 300, damping: 28, delay: i * 0.08 },
+  }),
 };
 
 export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
   const orderId = params.id as string;
-  
+
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
-  const [timelineOpen, setTimelineOpen] = useState(false);
 
   useEffect(() => {
     loadOrder();
@@ -93,7 +116,7 @@ export default function OrderDetailPage() {
   const loadOrder = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetchOrderById(orderId);
       if (response.error) {
@@ -110,7 +133,7 @@ export default function OrderDetailPage() {
 
   const handleUpdateStatus = async (newStatus: Order['status']) => {
     if (!order) return;
-    
+
     setUpdating(true);
     try {
       const response = await updateOrderStatus(order.id, newStatus);
@@ -142,19 +165,17 @@ export default function OrderDetailPage() {
   const canUpdate = !['delivered', 'cancelled', 'refunded'].includes(order.status);
 
   // Acción principal según estado
-  const nextAction: { label: string; next: Order['status'] } | null =
-    order.status === 'pending'    ? { label: 'Marcar como procesando', next: 'processing' } :
-    order.status === 'processing' ? { label: 'Marcar como enviado',     next: 'shipped'    } :
-    order.status === 'shipped'    ? { label: 'Marcar como entregado',   next: 'delivered'  } :
+  const nextAction: { label: string; next: Order['status']; icon: React.ElementType } | null =
+    order.status === 'pending'    ? { label: 'Marcar como procesando', next: 'processing', icon: Package } :
+    order.status === 'processing' ? { label: 'Marcar como enviado',    next: 'shipped',    icon: Truck   } :
+    order.status === 'shipped'    ? { label: 'Marcar como entregado',  next: 'delivered',  icon: CheckCircle } :
     null;
 
+  const handleRefresh = async () => { await loadOrder(); };
+
   return (
-    <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className={canUpdate && nextAction ? "pb-[calc(136px+env(safe-area-inset-bottom))] lg:pb-8" : "pb-4 lg:pb-8"}
-      >
+    <MobilePullRefresh onRefresh={handleRefresh}>
+      <>
         {/* Cabecera */}
         <PageHeader
           title={`Pedido ${order.orderNumber}`}
@@ -167,16 +188,62 @@ export default function OrderDetailPage() {
           onBack={() => router.back()}
         />
 
-        {/* Contenido */}
-        <div className="px-4 sm:px-6 lg:px-8 mt-2 lg:mt-6">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          className={cn(
+            'px-4 sm:px-6 lg:px-8 mt-2 lg:mt-6',
+            canUpdate && nextAction
+              ? 'pb-[calc(152px+env(safe-area-inset-bottom))] lg:pb-8'
+              : 'pb-6 lg:pb-8'
+          )}
+        >
           <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-8">
 
-            {/* ══ BLOQUE DERECHO ══ En móvil aparece primero (order-first) */}
+            {/* ══ BLOQUE DERECHO ══ En móvil aparece primero */}
             <div className="lg:col-span-1 lg:order-2 flex flex-col gap-4 mb-4 lg:mb-0">
 
-              {/* ── Estado + acción (móvil: hero card prominente) ── */}
-              <div className="rounded-2xl border border-border-subtle bg-surface overflow-hidden">
-                {/* Banda de color por estado */}
+              {/* ── Hero card de estado (móvil prominente) ── */}
+
+              {/* Mobile hero — borde y fondo de color semántico */}
+              <motion.div
+                custom={0}
+                variants={cardVariants}
+                className={cn(
+                  'lg:hidden rounded-2xl border overflow-hidden',
+                  status.heroBg, status.heroBorder,
+                )}
+              >
+                <div className="px-5 py-5">
+                  {/* Estado + fecha */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <status.icon className={cn('w-5 h-5', status.color)} />
+                      <span className={cn('text-base font-bold', status.color)}>{status.label}</span>
+                    </div>
+                    <span className="text-xs text-text-subtle">
+                      {format(order.createdAt, 'dd MMM yyyy', { locale: es })}
+                    </span>
+                  </div>
+                  {/* Número de pedido */}
+                  <p className="text-xs font-semibold text-text-subtle uppercase tracking-widest mb-0.5">Pedido</p>
+                  <p className="text-xl font-bold text-origen-bosque">{order.orderNumber}</p>
+                  {/* Total destacado */}
+                  <div className="mt-3 pt-3 border-t border-border-subtle flex items-end justify-between">
+                    <span className="text-xs text-text-subtle">Total</span>
+                    <span className={cn('text-3xl font-extrabold tabular-nums leading-none', status.color)}>
+                      {order.total.toFixed(2)}€
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Desktop card — más compacta, con el action button */}
+              <motion.div
+                custom={0}
+                variants={cardVariants}
+                className="hidden lg:block rounded-2xl border border-border-subtle bg-surface overflow-hidden"
+              >
                 <div className={cn('px-4 py-3 flex items-center justify-between', status.bandBg)}>
                   <div className="flex items-center gap-2">
                     <status.icon className={cn('w-4 h-4', status.color)} />
@@ -185,24 +252,9 @@ export default function OrderDetailPage() {
                   <Badge variant={status.variant} size="xs">{status.label}</Badge>
                 </div>
 
-                {/* Acción inline — visible solo si hay siguiente estado */}
-                {canUpdate && nextAction && (
-                  <div className="px-4 py-3 border-t border-border-subtle lg:hidden">
-                    <p className="text-xs text-text-subtle mb-2">Acción rápida</p>
-                    <Button
-                      className="w-full"
-                      size="sm"
-                      onClick={() => handleUpdateStatus(nextAction.next)}
-                      disabled={updating}
-                    >
-                      {updating ? 'Actualizando...' : nextAction.label}
-                    </Button>
-                  </div>
-                )}
-
                 {/* Acción en desktop */}
                 {canUpdate && nextAction && (
-                  <div className="hidden lg:block px-4 py-3 border-t border-border-subtle">
+                  <div className="px-4 py-3 border-t border-border-subtle">
                     <p className="text-xs text-text-subtle mb-2">Actualizar estado</p>
                     <Button
                       className="w-full"
@@ -214,35 +266,47 @@ export default function OrderDetailPage() {
                     </Button>
                   </div>
                 )}
-              </div>
+              </motion.div>
 
-              {/* ── Cliente, Pago y Envío: lista compacta ── */}
-              <div className="rounded-2xl border border-border-subtle bg-surface overflow-hidden divide-y divide-border-subtle">
-
-                {/* Cliente */}
+              {/* ── Cliente ── */}
+              <motion.div custom={1} variants={cardVariants} className="rounded-2xl border border-border-subtle bg-surface overflow-hidden">
+                <div className="px-4 py-3 border-b border-border-subtle">
+                  <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider">Cliente</p>
+                </div>
                 <div className="px-4 py-3">
-                  <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider mb-2">Cliente</p>
-                  <p className="text-sm font-semibold text-origen-bosque">{order.customerName}</p>
-                  <div className="mt-1.5 space-y-1">
-                    <a href={`mailto:${order.customerEmail}`} className="flex items-center gap-1.5 text-xs text-text-subtle hover:text-origen-pradera transition-colors">
-                      <Mail className="w-3 h-3 flex-shrink-0" />
+                  {/* Avatar de iniciales */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-origen-pastel flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm font-bold text-origen-bosque">
+                        {order.customerName.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                      </span>
+                    </div>
+                    <p className="text-sm font-semibold text-origen-bosque leading-tight">{order.customerName}</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <a href={`mailto:${order.customerEmail}`} className="flex items-center gap-2 text-xs text-text-subtle hover:text-origen-pradera transition-colors">
+                      <Mail className="w-3.5 h-3.5 flex-shrink-0 text-origen-pradera" />
                       {order.customerEmail}
                     </a>
                     {order.customerPhone && (
-                      <a href={`tel:${order.customerPhone}`} className="flex items-center gap-1.5 text-xs text-text-subtle hover:text-origen-pradera transition-colors">
-                        <Phone className="w-3 h-3 flex-shrink-0" />
+                      <a href={`tel:${order.customerPhone}`} className="flex items-center gap-2 text-xs text-text-subtle hover:text-origen-pradera transition-colors">
+                        <Phone className="w-3.5 h-3.5 flex-shrink-0 text-origen-pradera" />
                         {order.customerPhone}
                       </a>
                     )}
                   </div>
                 </div>
+              </motion.div>
 
-                {/* Pago */}
+              {/* ── Pago ── */}
+              <motion.div custom={2} variants={cardVariants} className="rounded-2xl border border-border-subtle bg-surface overflow-hidden">
+                <div className="px-4 py-3 border-b border-border-subtle">
+                  <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider">Pago</p>
+                </div>
                 <div className="px-4 py-3">
-                  <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider mb-2">Pago</p>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <CreditCard className="w-3.5 h-3.5 text-text-subtle" />
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 text-origen-pradera" />
                       <span className="text-sm capitalize">{order.payment.method}</span>
                     </div>
                     <Badge variant={order.payment.status === 'paid' ? 'success' : 'warning'} size="xs">
@@ -250,20 +314,24 @@ export default function OrderDetailPage() {
                     </Badge>
                   </div>
                   {order.payment.paidAt && (
-                    <p className="text-xs text-text-subtle mt-1">
+                    <p className="text-xs text-text-subtle mt-2">
                       {format(order.payment.paidAt, 'dd MMM yyyy', { locale: es })}
                     </p>
                   )}
                 </div>
+              </motion.div>
 
-                {/* Envío */}
+              {/* ── Envío ── */}
+              <motion.div custom={3} variants={cardVariants} className="rounded-2xl border border-border-subtle bg-surface overflow-hidden">
+                <div className="px-4 py-3 border-b border-border-subtle">
+                  <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider">Envío</p>
+                </div>
                 <div className="px-4 py-3">
-                  <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider mb-2">Envío</p>
-                  <div className="flex items-start gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-text-subtle mt-0.5 flex-shrink-0" />
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-origen-pradera mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-origen-bosque">{order.shipping.address.fullName}</p>
-                      <p className="text-xs text-text-subtle">{order.shipping.address.addressLine1}</p>
+                      <p className="text-xs text-text-subtle mt-0.5">{order.shipping.address.addressLine1}</p>
                       {order.shipping.address.addressLine2 && (
                         <p className="text-xs text-text-subtle">{order.shipping.address.addressLine2}</p>
                       )}
@@ -273,30 +341,31 @@ export default function OrderDetailPage() {
                     </div>
                   </div>
                   {order.shipping.trackingNumber && (
-                    <div className="mt-2 pt-2 border-t border-border-subtle">
-                      <p className="text-xs text-text-subtle">Nº seguimiento: <span className="font-mono text-origen-bosque">{order.shipping.trackingNumber}</span></p>
+                    <div className="mt-3 pt-3 border-t border-border-subtle">
+                      <p className="text-xs text-text-subtle mb-1">
+                        Nº seguimiento: <span className="font-mono text-origen-bosque">{order.shipping.trackingNumber}</span>
+                      </p>
                       {order.shipping.trackingUrl && (
                         <a
                           href={order.shipping.trackingUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-origen-pradera hover:underline mt-1"
+                          className="inline-flex items-center gap-1 text-xs font-medium text-origen-pradera hover:underline"
                         >
-                          Ver seguimiento <ExternalLink className="w-3 h-3" />
+                          Seguir envío <ExternalLink className="w-3 h-3" />
                         </a>
                       )}
                     </div>
                   )}
                 </div>
-
-              </div>
+              </motion.div>
             </div>
 
             {/* ══ BLOQUE IZQUIERDO ══ En móvil aparece segundo */}
             <div className="lg:col-span-2 lg:order-1 flex flex-col gap-4">
 
               {/* ── Productos ── */}
-              <div className="rounded-2xl border border-border-subtle bg-surface overflow-hidden">
+              <motion.div custom={1} variants={cardVariants} className="rounded-2xl border border-border-subtle bg-surface overflow-hidden">
                 <div className="px-4 py-3 border-b border-border-subtle flex items-center gap-2">
                   <Package className="w-4 h-4 text-origen-pradera" />
                   <span className="text-sm font-semibold text-origen-bosque">Productos</span>
@@ -305,10 +374,10 @@ export default function OrderDetailPage() {
 
                 <div className="divide-y divide-border-subtle">
                   {order.items.map((item) => (
-                    <div key={item.id} className="flex items-center gap-3 px-4 py-3">
-                      {/* Imagen */}
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-origen-crema/60 flex items-center justify-center flex-shrink-0">
-                        <Package className="w-5 h-5 text-text-disabled" />
+                    <div key={item.id} className="flex items-center gap-3 px-4 py-3.5">
+                      {/* Imagen — mayor tamaño, más impacto visual */}
+                      <div className="w-14 h-14 rounded-2xl bg-origen-crema/60 flex items-center justify-center flex-shrink-0">
+                        <Package className="w-6 h-6 text-text-disabled" />
                       </div>
                       {/* Info */}
                       <div className="flex-1 min-w-0">
@@ -345,71 +414,67 @@ export default function OrderDetailPage() {
                     <span className="text-origen-bosque tabular-nums">{order.total.toFixed(2)}€</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
-              {/* ── Línea de tiempo (colapsable en móvil) ── */}
-              <div className="rounded-2xl border border-border-subtle bg-surface overflow-hidden">
-                <button
-                  onClick={() => setTimelineOpen(v => !v)}
-                  className="w-full flex items-center gap-2 px-4 py-3 border-b border-border-subtle lg:cursor-default"
-                >
+              {/* ── Línea de tiempo — siempre visible en móvil ── */}
+              <motion.div custom={2} variants={cardVariants} className="rounded-2xl border border-border-subtle bg-surface overflow-hidden">
+                <div className="px-4 py-3 border-b border-border-subtle flex items-center gap-2">
                   <Clock className="w-4 h-4 text-origen-pradera" />
-                  <span className="text-sm font-semibold text-origen-bosque flex-1 text-left">Línea de tiempo</span>
-                  <span className="lg:hidden">
-                    {timelineOpen
-                      ? <ChevronUp className="w-4 h-4 text-text-subtle" />
-                      : <ChevronDown className="w-4 h-4 text-text-subtle" />
-                    }
-                  </span>
-                </button>
+                  <span className="text-sm font-semibold text-origen-bosque">Línea de tiempo</span>
+                </div>
 
-                <div className={cn(
-                  'lg:block',
-                  timelineOpen ? 'block' : 'hidden',
-                )}>
-                  <div className="px-4 py-3 space-y-0">
-                    {order.timeline.map((event, index) => (
-                      <div key={event.id} className="flex items-start gap-3">
-                        <div className="relative flex flex-col items-center">
-                          <div className={cn(
-                            'w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0',
-                            index === 0 ? 'bg-origen-pradera' : 'bg-border'
-                          )} />
-                          {index < order.timeline.length - 1 && (
-                            <div className="w-0.5 h-8 bg-border mt-0.5" />
-                          )}
-                        </div>
-                        <div className="flex-1 pb-2">
-                          <p className="text-sm font-medium text-origen-bosque leading-tight">{event.description}</p>
-                          <p className="text-xs text-text-subtle mt-0.5">
-                            {format(event.createdAt, 'dd MMM yyyy · HH:mm', { locale: es })}
+                <div className="px-4 py-4">
+                  {order.timeline.map((event, index) => (
+                    <div key={event.id} className="flex items-start gap-3">
+                      {/* Dot + connector */}
+                      <div className="relative flex flex-col items-center flex-shrink-0">
+                        <div className={cn(
+                          'w-3 h-3 rounded-full mt-0.5 flex-shrink-0',
+                          index === 0
+                            ? 'bg-origen-bosque ring-4 ring-origen-bosque/15'
+                            : 'bg-origen-pradera/40',
+                        )} />
+                        {index < order.timeline.length - 1 && (
+                          <div className="w-0.5 h-8 bg-border-subtle mt-1" />
+                        )}
+                      </div>
+                      {/* Contenido */}
+                      <div className="flex-1 pb-2">
+                        <p className="text-sm font-medium text-origen-bosque leading-tight">{event.description}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-xs text-text-subtle">
+                            {format(event.createdAt, 'dd MMM · HH:mm', { locale: es })}
+                          </p>
+                          <span className="text-text-disabled text-xs">·</span>
+                          <p className="text-xs text-text-subtle">
+                            {formatDistanceToNow(event.createdAt, { addSuffix: true, locale: es })}
                           </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              </motion.div>
 
             </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
 
-      {/* ── Sticky CTA móvil — solo si hay acción disponible ── */}
-      {canUpdate && nextAction && (
-        <div className="lg:hidden fixed bottom-[calc(72px+env(safe-area-inset-bottom))] left-4 right-4 z-30">
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={() => handleUpdateStatus(nextAction.next)}
-            disabled={updating}
-            className="w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold bg-origen-bosque text-white shadow-lg active:bg-origen-pino disabled:opacity-60 transition-colors"
-          >
-            <Truck className="w-4 h-4" />
-            {updating ? 'Actualizando...' : nextAction.label}
-          </motion.button>
-        </div>
-      )}
-    </>
+        {/* ── Sticky CTA — único CTA en móvil ── */}
+        {canUpdate && nextAction && (
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 px-4 pb-[calc(env(safe-area-inset-bottom)+80px)] pt-3 bg-gradient-to-t from-surface via-surface/95 to-transparent pointer-events-none">
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={() => handleUpdateStatus(nextAction.next)}
+              disabled={updating}
+              className="pointer-events-auto w-full flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-semibold bg-origen-bosque text-white shadow-origen active:bg-origen-pino disabled:opacity-60 transition-colors"
+            >
+              <nextAction.icon className="w-4 h-4" />
+              {updating ? 'Actualizando...' : nextAction.label}
+            </motion.button>
+          </div>
+        )}
+      </>
+    </MobilePullRefresh>
   );
 }

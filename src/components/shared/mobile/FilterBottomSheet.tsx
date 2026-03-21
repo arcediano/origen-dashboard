@@ -1,10 +1,11 @@
 /**
  * @component FilterBottomSheet
- * @description Bottom sheet de filtros para móvil.
+ * @description Panel de filtros a pantalla completa para móvil.
  *
  * ARQUITECTURA DEFINITIVA — dos elementos fixed independientes:
  *
- *  1. Sheet (z-60):  position:fixed, bottom:-90vh → bottom:0
+ *  1. Sheet (z-60):  position:fixed, bottom:-100vh → bottom:0
+ *     - Pantalla completa (100dvh/100vh).
  *     - Contenedor de scroll simple. Sin flex, sin grid, sin overflow:hidden.
  *     - padding-bottom reserva espacio para el footer.
  *
@@ -18,6 +19,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,6 +30,14 @@ export interface ChipOption {
   value: string;
   icon?: React.ElementType;
   count?: number;
+}
+
+export interface ToggleOption {
+  id: string;
+  label: string;
+  icon?: React.ElementType;
+  value: boolean;
+  onChange: (value: boolean) => void;
 }
 
 export type FilterSection =
@@ -57,6 +67,12 @@ export type FilterSection =
       onChangeMin: (value: string) => void;
       onChangeMax: (value: string) => void;
       prefix?: string;
+    }
+  | {
+      type: 'toggles';
+      id: string;
+      title: string;
+      options: ToggleOption[];
     };
 
 export interface FilterBottomSheetProps {
@@ -74,7 +90,8 @@ export interface FilterBottomSheetProps {
 type DraftValue =
   | { type: 'chips'; value: string }
   | { type: 'daterange'; from: string; to: string }
-  | { type: 'numberrange'; min: string; max: string };
+  | { type: 'numberrange'; min: string; max: string }
+  | { type: 'toggles'; values: Record<string, boolean> };
 
 type Draft = Record<string, DraftValue>;
 
@@ -84,6 +101,7 @@ function buildDraft(sections: FilterSection[]): Draft {
     if (s.type === 'chips')       d[s.id] = { type: 'chips',       value: s.value };
     if (s.type === 'daterange')   d[s.id] = { type: 'daterange',   from: s.valueFrom, to: s.valueTo };
     if (s.type === 'numberrange') d[s.id] = { type: 'numberrange', min: s.valueMin,   max: s.valueMax };
+    if (s.type === 'toggles')    d[s.id] = { type: 'toggles',     values: Object.fromEntries(s.options.map((o) => [o.id, o.value])) };
   });
   return d;
 }
@@ -94,6 +112,7 @@ function clearDraft(sections: FilterSection[]): Draft {
     if (s.type === 'chips')       d[s.id] = { type: 'chips',       value: '' };
     if (s.type === 'daterange')   d[s.id] = { type: 'daterange',   from: '', to: '' };
     if (s.type === 'numberrange') d[s.id] = { type: 'numberrange', min: '',  max: '' };
+    if (s.type === 'toggles')    d[s.id] = { type: 'toggles',     values: Object.fromEntries(s.options.map((o) => [o.id, false])) };
   });
   return d;
 }
@@ -203,6 +222,55 @@ function NumberRangeSection({ section, min, max, onMin, onMax }: {
   );
 }
 
+function TogglesSection({ section, values, onToggle }: {
+  section: FilterSection & { type: 'toggles' };
+  values: Record<string, boolean>;
+  onToggle: (optionId: string, value: boolean) => void;
+}) {
+  return (
+    <div>
+      <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wide mb-3">
+        {section.title}
+      </p>
+      <div className="flex flex-col gap-1">
+        {section.options.map((opt) => {
+          const active = values[opt.id] ?? false;
+          const Icon = opt.icon;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onToggle(opt.id, !active)}
+              className={cn(
+                'flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium transition-colors min-h-[44px]',
+                active
+                  ? 'bg-origen-bosque/10 text-origen-bosque'
+                  : 'bg-surface text-origen-bosque/70',
+              )}
+            >
+              {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
+              <span className="flex-1 text-left">{opt.label}</span>
+              <div
+                className={cn(
+                  'w-10 h-6 rounded-full p-0.5 transition-colors',
+                  active ? 'bg-origen-bosque' : 'bg-border',
+                )}
+              >
+                <div
+                  className={cn(
+                    'w-5 h-5 rounded-full bg-white shadow-sm transition-transform',
+                    active ? 'translate-x-4' : 'translate-x-0',
+                  )}
+                />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 
 export function FilterBottomSheet({
@@ -282,6 +350,8 @@ export function FilterBottomSheet({
     setDraft((p) => { const c = p[id] as { type:'numberrange'; min:string; max:string }|undefined; return { ...p, [id]: { type:'numberrange', min:v, max:c?.max??'' } }; });
   const setNumMax = (id: string, v: string) =>
     setDraft((p) => { const c = p[id] as { type:'numberrange'; min:string; max:string }|undefined; return { ...p, [id]: { type:'numberrange', min:c?.min??'', max:v } }; });
+  const setToggle = (sectionId: string, optionId: string, v: boolean) =>
+    setDraft((p) => { const c = p[sectionId] as { type:'toggles'; values:Record<string,boolean> }|undefined; return { ...p, [sectionId]: { type:'toggles', values: { ...c?.values, [optionId]: v } } }; });
 
   const handleApply = () => {
     sections.forEach((s) => {
@@ -290,6 +360,7 @@ export function FilterBottomSheet({
       if (s.type === 'chips' && d.type === 'chips') s.onChange(d.value);
       if (s.type === 'daterange' && d.type === 'daterange') { s.onChangeFrom(d.from); s.onChangeTo(d.to); }
       if (s.type === 'numberrange' && d.type === 'numberrange') { s.onChangeMin(d.min); s.onChangeMax(d.max); }
+      if (s.type === 'toggles' && d.type === 'toggles') { s.options.forEach((opt) => opt.onChange(d.values[opt.id] ?? false)); }
     });
     onClose();
   };
@@ -306,22 +377,16 @@ export function FilterBottomSheet({
     if (d.type === 'chips')       return Boolean(d.value);
     if (d.type === 'daterange')   return Boolean(d.from || d.to);
     if (d.type === 'numberrange') return Boolean(d.min || d.max);
+    if (d.type === 'toggles')    return Object.values(d.values).some(Boolean);
     return false;
   });
 
-  // ── Transición CSS compartida ─────────────────────────────────────────────
-  const transition = 'bottom 0.38s cubic-bezier(0.32, 0.72, 0, 1)';
-
-  // ── Altura: dvh (dynamic) > svh (small) > vh (fallback) ──────────────────
-  // dvh se adapta cuando la barra de direcciones aparece/desaparece en móvil.
-  // No se puede usar min(90svh, 90vh) porque Safari antiguo rechaza todo el min().
-  const sheetHeight = typeof CSS !== 'undefined' && CSS.supports('height', '1dvh')
-    ? '90dvh'
-    : '90vh';
+  // ── Transición CSS: animar top (más fiable que bottom+height en móvil) ───
+  const transition = 'top 0.38s cubic-bezier(0.32, 0.72, 0, 1)';
 
   if (!mounted) return null;
 
-  return (
+  return createPortal(
     <>
       {/* ── Overlay ── */}
       <div
@@ -336,11 +401,11 @@ export function FilterBottomSheet({
         aria-hidden
       />
 
-      {/* ── Sheet ────────────────────────────────────────────────────────────
-          Contenedor de scroll simple. Sin flex, sin grid, sin overflow:hidden.
-          - bottom animado: -90vh (oculto) → 0 (visible)
-          - padding-bottom reserva exactamente el espacio del footer
-          - overflow-y:auto en un position:fixed sin transform = funciona en iOS
+      {/* ── Sheet (pantalla completa, flex column) ──────────────────────────
+          Usa display:flex para que el footer sea parte del layout y siempre
+          quede visible en la parte inferior sin trucos de z-index.
+          - top animado: 100% (oculto) → 0 (visible)
+          - overflow:hidden en el contenedor; scroll solo en el área de contenido
           ─────────────────────────────────────────────────────────────────── */}
       <div
         role="dialog"
@@ -349,29 +414,18 @@ export function FilterBottomSheet({
         onPointerDown={(e) => e.stopPropagation()}
         style={{
           position: 'fixed',
-          left: 0, right: 0,
-          bottom: visible ? 0 : `-${sheetHeight}`,
-          height: sheetHeight,
+          top: visible ? 0 : '100%',
+          left: 0, right: 0, bottom: 0,
           zIndex: 60,
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          overscrollBehavior: 'contain',
-          WebkitOverflowScrolling: 'touch',
-          // Espacio para el footer fijo (borde+padding+botón+safe-area ≈ 88px + safe-area)
-          paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))',
+          display: 'flex',
+          flexDirection: 'column',
           backgroundColor: 'hsl(var(--surface))',
-          borderRadius: '24px 24px 0 0',
-          boxShadow: '0 -8px 40px rgba(0,0,0,0.18)',
+          paddingTop: 'env(safe-area-inset-top, 0px)',
           transition,
         } as React.CSSProperties}
       >
-        {/* Handle */}
-        <div style={{ display:'flex', justifyContent:'center', padding:'12px 0 8px' }}>
-          <div style={{ width:40, height:4, borderRadius:9999, backgroundColor:'hsl(var(--border))' }} />
-        </div>
-
         {/* Header */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 20px', borderBottom:'1px solid hsl(var(--border-subtle))' }}>
+        <div style={{ flexShrink: 0, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 20px', borderBottom:'1px solid hsl(var(--border-subtle))' }}>
           <h2 style={{ fontSize:16, fontWeight:600, color:'hsl(var(--bosque))' }}>{title}</h2>
           <button
             onClick={onClose}
@@ -382,92 +436,97 @@ export function FilterBottomSheet({
           </button>
         </div>
 
-        {/* Secciones de filtros */}
-        <div style={{ padding:'20px', display:'flex', flexDirection:'column', gap:24 }}>
-          {sections.map((section) => {
-            const d = draft[section.id];
+        {/* Secciones de filtros — área scrollable */}
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+          <div style={{ padding:'20px', display:'flex', flexDirection:'column', gap:24 }}>
+            {sections.map((section) => {
+              const d = draft[section.id];
 
-            if (section.type === 'chips') {
-              return (
-                <ChipsSection
-                  key={section.id}
-                  section={section}
-                  value={(d?.type === 'chips' ? d.value : '') ?? ''}
-                  onChange={(v) => setChips(section.id, v)}
-                />
-              );
-            }
-            if (section.type === 'daterange') {
-              const dd = d?.type === 'daterange' ? d : { from: '', to: '' };
-              return (
-                <DateRangeSection
-                  key={section.id}
-                  section={section}
-                  from={dd.from}
-                  to={dd.to}
-                  onFrom={(v) => setDateFrom(section.id, v)}
-                  onTo={(v) => setDateTo(section.id, v)}
-                />
-              );
-            }
-            if (section.type === 'numberrange') {
-              const dn = d?.type === 'numberrange' ? d : { min: '', max: '' };
-              return (
-                <NumberRangeSection
-                  key={section.id}
-                  section={section}
-                  min={dn.min}
-                  max={dn.max}
-                  onMin={(v) => setNumMin(section.id, v)}
-                  onMax={(v) => setNumMax(section.id, v)}
-                />
-              );
-            }
-            return null;
-          })}
+              if (section.type === 'chips') {
+                return (
+                  <ChipsSection
+                    key={section.id}
+                    section={section}
+                    value={(d?.type === 'chips' ? d.value : '') ?? ''}
+                    onChange={(v) => setChips(section.id, v)}
+                  />
+                );
+              }
+              if (section.type === 'daterange') {
+                const dd = d?.type === 'daterange' ? d : { from: '', to: '' };
+                return (
+                  <DateRangeSection
+                    key={section.id}
+                    section={section}
+                    from={dd.from}
+                    to={dd.to}
+                    onFrom={(v) => setDateFrom(section.id, v)}
+                    onTo={(v) => setDateTo(section.id, v)}
+                  />
+                );
+              }
+              if (section.type === 'numberrange') {
+                const dn = d?.type === 'numberrange' ? d : { min: '', max: '' };
+                return (
+                  <NumberRangeSection
+                    key={section.id}
+                    section={section}
+                    min={dn.min}
+                    max={dn.max}
+                    onMin={(v) => setNumMin(section.id, v)}
+                    onMax={(v) => setNumMax(section.id, v)}
+                  />
+                );
+              }
+              if (section.type === 'toggles') {
+                const dt = d?.type === 'toggles' ? d.values : {};
+                return (
+                  <TogglesSection
+                    key={section.id}
+                    section={section}
+                    values={dt}
+                    onToggle={(optId, v) => setToggle(section.id, optId, v)}
+                  />
+                );
+              }
+              return null;
+            })}
+          </div>
+        </div>
+
+        {/* Footer — parte del flex layout, siempre al fondo */}
+        <div
+          style={{
+            flexShrink: 0,
+            display: 'flex',
+            gap: 12,
+            padding: '16px 20px',
+            paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+            backgroundColor: 'hsl(var(--surface))',
+            borderTop: '1px solid hsl(var(--border-subtle))',
+          } as React.CSSProperties}
+        >
+          <button
+            onClick={handleClear}
+            disabled={!hasActive}
+            className={cn(
+              'flex-1 h-12 rounded-2xl border-2 text-sm font-medium transition-all active:scale-95',
+              hasActive
+                ? 'border-origen-bosque/40 text-origen-bosque hover:border-origen-bosque/70'
+                : 'border-border text-text-subtle opacity-40 cursor-not-allowed',
+            )}
+          >
+            Limpiar filtros
+          </button>
+          <button
+            onClick={handleApply}
+            className="flex-[2] h-12 rounded-2xl bg-origen-bosque text-white text-sm font-semibold active:scale-95 transition-all hover:bg-origen-pino"
+          >
+            {resultCount !== undefined ? `Ver ${resultCount} ${resultLabel}` : 'Aplicar filtros'}
+          </button>
         </div>
       </div>
-
-      {/* ── Footer — elemento fixed INDEPENDIENTE ────────────────────────────
-          z-62: por encima del sheet (z-60). Anclado al viewport, no al sheet.
-          Imposible que quede fuera de pantalla: es position:fixed bottom:0.
-          Aparece/desaparece con opacity (sin transform, sin bottom animation).
-          ─────────────────────────────────────────────────────────────────── */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 0, left: 0, right: 0,
-          zIndex: 62,
-          display: 'flex',
-          gap: 12,
-          padding: '16px 20px',
-          paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
-          backgroundColor: 'hsl(var(--surface))',
-          borderTop: '1px solid hsl(var(--border-subtle))',
-          opacity: visible ? 1 : 0,
-          transition: 'opacity 0.2s ease',
-          pointerEvents: visible ? 'auto' : 'none',
-        } as React.CSSProperties}
-      >
-        <button
-          onClick={handleClear}
-          disabled={!hasActive}
-          className={cn(
-            'flex-1 h-12 rounded-2xl border-2 text-sm font-medium transition-all active:scale-95',
-            hasActive
-              ? 'border-origen-bosque/40 text-origen-bosque hover:border-origen-bosque/70'
-              : 'border-border text-text-subtle opacity-40 cursor-not-allowed',
-          )}
-        >
-          Limpiar filtros
-        </button>
-        <button
-          onClick={handleApply}
-          className="flex-[2] h-12 rounded-2xl bg-origen-bosque text-white text-sm font-semibold active:scale-95 transition-all hover:bg-origen-pino"
-        >
-          {resultCount !== undefined ? `Ver ${resultCount} ${resultLabel}` : 'Aplicar filtros'}
-        </button>
-      </div>
-    </>
+    </>,
+    document.body,
   );
 }

@@ -111,7 +111,7 @@ export default function ReviewsPage() {
   };
 
   const handleFilterChange = (newFilters: ReviewFiltersType) => {
-    setFilters(newFilters);
+    setFilters(prev => ({ ...prev, ...newFilters }));
     setCurrentPage(1);
   };
 

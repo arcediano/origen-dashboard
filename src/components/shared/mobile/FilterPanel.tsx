@@ -16,9 +16,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { FilterSection, ChipOption } from './FilterBottomSheet';
+import type { FilterSection, ChipOption, ToggleOption } from './FilterBottomSheet';
 
-export type { FilterSection, ChipOption };
+export type { FilterSection, ChipOption, ToggleOption };
 
 // ─── PROPS ────────────────────────────────────────────────────────────────────
 
@@ -36,7 +36,8 @@ export interface FilterPanelProps {
 type DraftValue =
   | { type: 'chips'; value: string }
   | { type: 'daterange'; from: string; to: string }
-  | { type: 'numberrange'; min: string; max: string };
+  | { type: 'numberrange'; min: string; max: string }
+  | { type: 'toggles'; values: Record<string, boolean> };
 
 type Draft = Record<string, DraftValue>;
 
@@ -46,6 +47,7 @@ function buildDraft(sections: FilterSection[]): Draft {
     if (s.type === 'chips')       d[s.id] = { type: 'chips',       value: s.value };
     if (s.type === 'daterange')   d[s.id] = { type: 'daterange',   from: s.valueFrom, to: s.valueTo };
     if (s.type === 'numberrange') d[s.id] = { type: 'numberrange', min: s.valueMin,   max: s.valueMax };
+    if (s.type === 'toggles')    d[s.id] = { type: 'toggles',     values: Object.fromEntries(s.options.map((o) => [o.id, o.value])) };
   });
   return d;
 }
@@ -56,6 +58,7 @@ function clearDraft(sections: FilterSection[]): Draft {
     if (s.type === 'chips')       d[s.id] = { type: 'chips',       value: '' };
     if (s.type === 'daterange')   d[s.id] = { type: 'daterange',   from: '', to: '' };
     if (s.type === 'numberrange') d[s.id] = { type: 'numberrange', min: '', max: '' };
+    if (s.type === 'toggles')    d[s.id] = { type: 'toggles',     values: Object.fromEntries(s.options.map((o) => [o.id, false])) };
   });
   return d;
 }
@@ -204,6 +207,57 @@ function NumberRangeSection({
   );
 }
 
+// ─── SECCIÓN: TOGGLES ────────────────────────────────────────────────────────
+
+function TogglesSection({ section, values, onToggle }: {
+  section: FilterSection & { type: 'toggles' };
+  values: Record<string, boolean>;
+  onToggle: (optionId: string, value: boolean) => void;
+}) {
+  return (
+    <div>
+      <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wide mb-2">
+        {section.title}
+      </p>
+      <div className="flex flex-col gap-1">
+        {section.options.map((opt) => {
+          const active = values[opt.id] ?? false;
+          const Icon = opt.icon;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onToggle(opt.id, !active)}
+              className={cn(
+                'flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors min-h-[40px]',
+                active
+                  ? 'bg-origen-bosque/10 text-origen-bosque'
+                  : 'bg-surface text-origen-bosque/70',
+              )}
+            >
+              {Icon && <Icon className="w-3.5 h-3.5 flex-shrink-0" />}
+              <span className="flex-1 text-left">{opt.label}</span>
+              <div
+                className={cn(
+                  'w-9 h-5 rounded-full p-0.5 transition-colors',
+                  active ? 'bg-origen-bosque' : 'bg-border',
+                )}
+              >
+                <div
+                  className={cn(
+                    'w-4 h-4 rounded-full bg-white shadow-sm transition-transform',
+                    active ? 'translate-x-4' : 'translate-x-0',
+                  )}
+                />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 
 export function FilterPanel({
@@ -239,6 +293,10 @@ export function FilterPanel({
     const cur = p[id] as { type: 'numberrange'; min: string; max: string } | undefined;
     return { ...p, [id]: { type: 'numberrange', min: cur?.min ?? '', max: v } };
   });
+  const setToggle = (sectionId: string, optionId: string, v: boolean) => setDraft((p) => {
+    const cur = p[sectionId] as { type: 'toggles'; values: Record<string, boolean> } | undefined;
+    return { ...p, [sectionId]: { type: 'toggles', values: { ...cur?.values, [optionId]: v } } };
+  });
 
   const handleApply = () => {
     sections.forEach((s) => {
@@ -247,6 +305,7 @@ export function FilterPanel({
       if (s.type === 'chips' && d.type === 'chips') s.onChange(d.value);
       if (s.type === 'daterange' && d.type === 'daterange') { s.onChangeFrom(d.from); s.onChangeTo(d.to); }
       if (s.type === 'numberrange' && d.type === 'numberrange') { s.onChangeMin(d.min); s.onChangeMax(d.max); }
+      if (s.type === 'toggles' && d.type === 'toggles') { s.options.forEach((opt) => opt.onChange(d.values[opt.id] ?? false)); }
     });
     onClose();
   };
@@ -263,6 +322,7 @@ export function FilterPanel({
     if (d.type === 'chips')       return Boolean(d.value);
     if (d.type === 'daterange')   return Boolean(d.from || d.to);
     if (d.type === 'numberrange') return Boolean(d.min || d.max);
+    if (d.type === 'toggles')    return Object.values(d.values).some(Boolean);
     return false;
   });
 
@@ -315,6 +375,17 @@ export function FilterPanel({
                     max={dn.max}
                     onMin={(v) => setNumMin(section.id, v)}
                     onMax={(v) => setNumMax(section.id, v)}
+                  />
+                );
+              }
+              if (section.type === 'toggles') {
+                const dt = d?.type === 'toggles' ? d.values : {};
+                return (
+                  <TogglesSection
+                    key={section.id}
+                    section={section}
+                    values={dt}
+                    onToggle={(optId, v) => setToggle(section.id, optId, v)}
                   />
                 );
               }

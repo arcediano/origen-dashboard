@@ -114,7 +114,7 @@ export default function OrdersPage() {
   };
 
   const handleFilterChange = (newFilters: OrderFiltersType) => {
-    setFilters(newFilters);
+    setFilters(prev => ({ ...prev, ...newFilters }));
     setCurrentPage(1);
   };
 
