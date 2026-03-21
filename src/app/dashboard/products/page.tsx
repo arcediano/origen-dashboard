@@ -196,13 +196,24 @@ export default function ProductosPage() {
           tooltip="Catálogo de productos"
           tooltipDetailed="Administra todos tus productos, su stock y visibilidad desde esta sección."
           actions={
-            <Button
-              onClick={handleNewProduct}
-              leftIcon={<Plus className="w-4 h-4" />}
-              className="hidden sm:inline-flex"
-            >
-              Nuevo producto
-            </Button>
+            <>
+              {/* Desktop: botón completo con texto */}
+              <Button
+                onClick={handleNewProduct}
+                leftIcon={<Plus className="w-4 h-4" />}
+                className="hidden sm:inline-flex"
+              >
+                Nuevo producto
+              </Button>
+              {/* Móvil: icon-only, sin solapamiento con la lista */}
+              <button
+                onClick={handleNewProduct}
+                aria-label="Nuevo producto"
+                className="sm:hidden w-10 h-10 rounded-xl bg-origen-bosque flex items-center justify-center active:scale-95 transition-transform shadow-sm"
+              >
+                <Plus className="w-5 h-5 text-white" />
+              </button>
+            </>
           }
         />
 
@@ -211,7 +222,7 @@ export default function ProductosPage() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(100px+env(safe-area-inset-bottom))] sm:pb-8"
+          className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8"
         >
           {/* Estadísticas */}
           <motion.div variants={itemVariants}>
@@ -328,16 +339,6 @@ export default function ProductosPage() {
             )}
           </motion.div>
         </motion.div>
-
-      {/* FAB — solo móvil */}
-      <Button
-        onClick={handleNewProduct}
-        leftIcon={<Plus className="w-5 h-5" />}
-        aria-label="Nuevo producto"
-        className="sm:hidden fixed bottom-[calc(80px+env(safe-area-inset-bottom))] right-4 z-30 w-auto h-14 px-5 rounded-full bg-origen-pradera border-origen-pradera hover:bg-origen-pradera/90 shadow-origen"
-      >
-        Nuevo
-      </Button>
 
       {/* Diálogos */}
       <AdjustStockDialog
