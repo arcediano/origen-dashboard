@@ -97,7 +97,7 @@ export function CreateProductNavigation({
   };
 
   return (
-    <div className={cn('flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-6 border-t border-border', className)}>
+    <div className={cn('flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 pt-6 mt-6 border-t border-border', className)}>
       {/* Botón anterior */}
       <Button
         variant="outline"
@@ -110,7 +110,7 @@ export function CreateProductNavigation({
       </Button>
 
       {/* Acciones centrales */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
         {/* Botón guardar */}
         <Button
           variant="outline"

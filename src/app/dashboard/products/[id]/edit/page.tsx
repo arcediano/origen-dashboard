@@ -1,147 +1,45 @@
 /**
  * @page EditProductPage
- * @description Página de edición de productos - USANDO HOOK MEJORADO
+ * @description Página de edición de productos.
  */
 
 'use client';
 
-import React from 'react';
 import { useParams } from 'next/navigation';
-import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { Package, Sparkles, TrendingUp } from 'lucide-react';
+import { motion, type Variants } from 'framer-motion';
+import { Package } from 'lucide-react';
 
-// Componentes UI
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
 import { Badge } from '@/components/ui/atoms/badge';
-import { Button } from '@/components/ui/atoms/button';
 import { PageHeader } from '../../../components/PageHeader';
 import { PageLoader } from '@/components/shared/loading/page-loader';
 import { PageError } from '@/components/shared/error/page-error';
 
-// Steps del formulario
-import { StepBasic } from '../../components/steps/StepBasic';
-import { StepImages } from '../../components/steps/StepImages';
-import { StepPricing } from '../../components/steps/StepPricing';
-import { StepNutritional } from '../../components/steps/StepNutritional';
-import { StepProduction } from '../../components/steps/StepProduction';
-import { StepInventory } from '../../components/steps/StepInventory';
-import { StepCertificationsAttributes } from '../../components/steps/StepCertificationsAttributes';
-
-// Componentes de creación
 import {
   CreateProductProgress,
   CreateProductNavigation,
   CreateProductCancelDialog,
   SuccessPublishModal,
 } from '../../components';
+import { ProductFormSteps } from '../../components/ProductFormSteps';
+import { ProductFormSidebar } from '../../components/ProductFormSidebar';
 
-// Hooks
 import { useProductForm } from '@/hooks/useProductForm';
-import { FORM_STEPS, defaultNutritionalInfo, defaultProductionInfo, type FormStepId } from '@/types/product';
+import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
+import { FORM_STEPS, type FormStepId } from '@/types/product';
 
-// ============================================================================
-// ANIMACIONES
-// ============================================================================
+// ─── Animaciones ──────────────────────────────────────────────────────────────
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
-  visible: { 
-    opacity: 1,
-    transition: { 
-      staggerChildren: 0.1, 
-      delayChildren: 0.2 
-    }
-  }
+  visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
 };
 
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { 
-      type: "spring", 
-      stiffness: 300, 
-      damping: 25 
-    }
-  }
-};
-
-// ============================================================================
-// HOOK PARA GENERAR CONSEJOS POR PASO
-// ============================================================================
-
-const useStepTips = (step: number, formData: any) => {
-  const getTipsForStep = (): Array<{ description: string; category?: string }> => {
-    switch (step) {
-      case 1:
-        return [
-          { description: 'Usa palabras clave que tus clientes buscarían' },
-          { description: 'Incluye variedad, tiempo de curación o características únicas' },
-          { description: formData?.shortDescription && formData.shortDescription.length < 100
-              ? 'La descripción corta es lo primero que ven en búsquedas. La tuya es demasiado corta.'
-              : 'La descripción corta es lo primero que ven en búsquedas' },
-          { description: 'Las categorías ayudan a los clientes a encontrarte' },
-        ];
-      case 2:
-        return [
-          { description: 'Usa fondo blanco o neutro para la imagen principal' },
-          { description: 'Muestra diferentes ángulos del producto' },
-          { description: 'Incluye una foto del producto empaquetado' },
-          { description: 'Las imágenes de alta calidad generan más confianza' },
-        ];
-      case 3:
-        return [
-          { description: 'El precio base debe incluir tu margen de beneficio' },
-          { description: 'Las ofertas por cantidad animan a comprar más' },
-          { description: 'El precio de referencia (tachado) crea sensación de ahorro' },
-          { description: 'Revisa los precios de productos similares' },
-        ];
-      case 4:
-        return [
-          { description: 'Indica siempre los alérgenos principales' },
-          { description: 'Los valores por 100g/ml son el estándar' },
-          { description: 'Incluye ingredientes en orden descendente' },
-          { description: 'La información completa genera confianza' },
-        ];
-      case 5:
-        return [
-          { description: 'Comparte tu historia: conecta emocionalmente' },
-          { description: 'Las fotos del proceso generan transparencia' },
-          { description: 'Los vídeos cortos (30s) funcionan muy bien' },
-          { description: 'Destaca métodos tradicionales o certificaciones' },
-        ];
-      case 6:
-        return [
-          { description: 'Mantén el stock actualizado para evitar cancelaciones' },
-          { description: 'El SKU te ayuda a organizar tu inventario interno' },
-          { description: 'Activa el control de stock para recibir alertas' },
-          { description: 'Pesa tus productos para calcular envíos correctamente' },
-        ];
-      case 7:
-        return [
-          { description: 'Las certificaciones ecológicas generan confianza' },
-          { description: 'Añade atributos específicos de tu producto' },
-          { description: 'Los sellos de calidad diferencian tu producto' },
-          { description: 'Los atributos dinámicos permiten personalización total' },
-        ];
-      default:
-        return [];
-    }
-  };
-
-  return getTipsForStep();
-};
-
-// ============================================================================
-// COMPONENTE PRINCIPAL
-// ============================================================================
+// ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function EditProductPage() {
   const params = useParams();
   const productId = params.id as string;
-  
-  // Usar el hook mejorado con el ID del producto
+
   const {
     formData,
     activeTab,
@@ -173,36 +71,20 @@ export default function EditProductPage() {
     reloadProduct,
   } = useProductForm(productId);
 
-  // Obtener tips para el paso actual
   const stepNumber = FORM_STEPS.findIndex(s => s.id === activeTab) + 1;
   const tips = useStepTips(stepNumber, formData);
 
-  // Datos clave por paso
-  const keyFactByStep: Record<number, string> = {
-    1: 'Los productos con descripción completa tienen un 30% más de conversión',
-    2: 'Los productos con 3+ imágenes tienen un 40% más de ventas',
-    3: 'Las ofertas 3x2 aumentan el ticket medio un 25%',
-    4: 'Los productos con información nutricional completa tienen un 40% más de confianza',
-    5: 'Los productos con historia tienen un 50% más de reseñas positivas',
-    6: 'El 15% de los pedidos cancelados son por falta de stock',
-    7: 'Los productos con certificaciones tienen un 35% más de confianza',
-  };
-
-  // Función para manejar el cambio de tab
-  const handleTabChange = (tab: FormStepId) => {
-    setActiveTab(tab);
-  };
+  const handleTabChange = (tab: FormStepId) => setActiveTab(tab);
 
   if (isLoading) return <PageLoader message="Cargando producto..." />;
   if (error) return <PageError title="Error al cargar" message={error} onRetry={reloadProduct} />;
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
-      {/* Elementos decorativos */}
-      <div className="fixed top-0 right-0 w-64 h-64 bg-origen-pradera/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-      <div className="fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
-      
-      {/* Cabecera con PageHeader */}
+      {/* Elementos decorativos — solo desktop */}
+      <div className="hidden lg:block fixed top-0 right-0 w-64 h-64 bg-origen-pradera/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+      <div className="hidden lg:block fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
       <PageHeader
         title="Editar producto"
         description={`Editando: ${formData.name || 'Producto sin nombre'} · ${formData.sku || 'SKU no asignado'}`}
@@ -229,7 +111,6 @@ export default function EditProductPage() {
         }
       />
 
-      {/* Contenido principal */}
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <CreateProductProgress
           currentTab={activeTab}
@@ -237,89 +118,23 @@ export default function EditProductPage() {
           onTabChange={handleTabChange}
         />
 
-        <motion.div 
+        <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-6"
         >
-          {/* Formulario */}
           <div className="lg:col-span-2 space-y-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                variants={itemVariants}
-                initial="hidden"
-                animate="visible"
-                exit={{ opacity: 0, y: -20 }}
-              >
-                {activeTab === 'basic' && (
-                  <StepBasic
-                    formData={formData}
-                    errors={{}}
-                    touched={{}}
-                    onInputChange={handleInputChange}
-                    completed={completedTabs.basic}
-                  />
-                )}
-
-                {activeTab === 'images' && (
-                  <StepImages
-                    gallery={formData.gallery}
-                    onImagesChange={handleImagesChange}
-                    completed={completedTabs.images}
-                  />
-                )}
-
-                {activeTab === 'pricing' && (
-                  <StepPricing
-                    formData={formData}
-                    errors={{}}
-                    touched={{}}
-                    onInputChange={handleInputChange}
-                    onPriceTiersChange={handlePriceTiersChange}
-                    completed={completedTabs.pricing}
-                  />
-                )}
-
-                {activeTab === 'nutritional' && (
-                  <StepNutritional
-                    nutritionalInfo={formData.nutritionalInfo || defaultNutritionalInfo}
-                    onNestedChange={handleNestedChange}
-                    completed={completedTabs.nutritional}
-                  />
-                )}
-
-                {activeTab === 'production' && (
-                  <StepProduction
-                    productionInfo={formData.productionInfo || defaultProductionInfo}
-                    onNestedChange={handleNestedChange}
-                    completed={completedTabs.production}
-                  />
-                )}
-
-                {activeTab === 'inventory' && (
-                  <StepInventory
-                    formData={formData}
-                    onInputChange={handleInputChange}
-                    onNestedChange={handleNestedChange}
-                    completed={completedTabs.inventory}
-                    skuSuggestion={skuSuggestion}
-                  />
-                )}
-
-                {activeTab === 'certifications' && (
-                  <StepCertificationsAttributes
-                    certifications={formData.certifications}
-                    attributes={formData.attributes}
-                    onCertificationsChange={(certs) => handleInputChange('certifications', certs)}
-                    onAttributesChange={(attrs) => handleInputChange('attributes', attrs)}
-                    completed={completedTabs.certifications}
-                    productCategory={formData.categoryId}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
+            <ProductFormSteps
+              activeTab={activeTab}
+              formData={formData}
+              completedTabs={completedTabs}
+              onInputChange={handleInputChange}
+              onNestedChange={handleNestedChange}
+              onPriceTiersChange={handlePriceTiersChange}
+              onImagesChange={handleImagesChange}
+              skuSuggestion={skuSuggestion}
+            />
 
             <CreateProductNavigation
               currentTab={activeTab}
@@ -336,65 +151,19 @@ export default function EditProductPage() {
             />
           </div>
 
-          {/* Card de consejos */}
-          <div className="hidden lg:block lg:col-span-1">
-            <div className="sticky top-[calc(65px+140px+80px)]">
-              <Card 
-                variant="elevated" 
-                hoverEffect="organic" 
-                className="overflow-hidden border border-border shadow-sm"
-              >
-                <CardHeader spacing="md">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-origen-pradera" />
-                      </div>
-                      <CardTitle size="sm">Consejos útiles</CardTitle>
-                    </div>
-                    <Badge variant="leaf" size="xs">
-                      {tips.length} consejos
-                    </Badge>
-                  </div>
-                </CardHeader>
-                
-                <CardContent spacing="md">
-                  <ul className="space-y-3">
-                    {tips.map((tip, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <div className="w-4 h-4 rounded-full bg-origen-pradera/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <div className="w-1.5 h-1.5 rounded-full bg-origen-pradera" />
-                        </div>
-                        <span className="flex-1">{tip.description}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Dato clave con estadística */}
-                  {keyFactByStep[stepNumber] && (
-                    <div className="mt-4 p-3 bg-origen-crema/30 rounded-lg border border-origen-pradera/20">
-                      <div className="flex items-center gap-2 mb-1">
-                        <TrendingUp className="w-3.5 h-3.5 text-origen-pradera" />
-                        <span className="text-xs font-medium text-origen-bosque">Dato clave</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{keyFactByStep[stepNumber]}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <ProductFormSidebar
+            tips={tips}
+            keyFact={KEY_FACTS_BY_STEP[stepNumber]}
+          />
         </motion.div>
       </div>
 
-      {/* Diálogo de cancelación */}
       <CreateProductCancelDialog
         open={showCancelDialog}
         onOpenChange={setShowCancelDialog}
         onConfirm={handleCancel}
       />
 
-      {/* Modal de éxito al publicar */}
       <SuccessPublishModal
         open={showSuccessModal}
         onOpenChange={setShowSuccessModal}

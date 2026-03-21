@@ -60,7 +60,7 @@ export function CreateProductProgress({
   const progress = ((currentIndex + 1) / FORM_STEPS.length) * 100;
 
   return (
-    <div className={cn('sticky top-[65px] z-20 bg-gradient-to-b from-origen-crema/30 to-transparent pt-2 pb-4 -mx-4 sm:-mx-6 px-4 sm:px-6', className)}>
+    <div className={cn('sticky top-16 z-20 bg-gradient-to-b from-origen-crema/30 to-transparent pt-2 pb-4 -mx-4 sm:-mx-6 px-4 sm:px-6', className)}>
       <Card variant="elevated" hoverEffect="organic" className="p-4 sm:p-5">
         {/* Cabecera con progreso */}
         <div className="flex items-center justify-between mb-3">
