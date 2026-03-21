@@ -13,7 +13,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import {
   ShoppingBag,
-  ChevronRight,
   CreditCard,
   Banknote,
   Eye,
@@ -81,7 +80,7 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
     {
       label:    'Enviar',
       icon:     Truck,
-      color:    'blue' as const,
+      color:    'pino' as const,
       onPress:  () => onMarkShipped?.(order.id),
       disabled: !canShip || !onMarkShipped,
     },
@@ -120,24 +119,22 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
         {/* Fila 2: cliente (prominente) */}
         <p className="text-sm font-medium text-origen-bosque truncate">{order.customerName}</p>
 
-        {/* Fila 3: items + fecha + pago */}
+        {/* Fila 3: items + fecha */}
         <div className="flex items-center gap-1.5 mt-1.5">
           <span className="text-[11px] text-text-subtle">
             {itemCount} {itemCount === 1 ? 'art.' : 'arts.'}
           </span>
-          <span className="text-border-subtle">·</span>
+          <span className="text-border-subtle" aria-hidden>·</span>
           <span className="text-[11px] text-text-subtle">{shortDate}</span>
-          <span className="text-border-subtle">·</span>
-          <PaymentBadge status={order.payment.status} />
         </div>
       </div>
 
-      {/* Importe (prominente) + chevron */}
+      {/* Importe + badge de pago */}
       <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-        <span className="text-base font-bold text-origen-bosque">
+        <span className="text-base font-bold text-origen-bosque tabular-nums">
           {order.total.toFixed(2)} €
         </span>
-        <ChevronRight className="w-4 h-4 text-text-subtle/40" aria-hidden />
+        <PaymentBadge status={order.payment.status} />
       </div>
     </motion.button>
     </SwipeableRow>
