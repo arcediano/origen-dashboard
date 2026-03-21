@@ -23,9 +23,9 @@ import { MobilePullRefresh } from '@/components/features/dashboard/components/mo
 // Iconos
 import {
   Package, Eye, Trash2, DollarSign, TrendingUp, Star, Tag, CheckCircle, AlertCircle,
-  Clock, Barcode, Calendar, FileText, Award, Leaf, MapPin, FlaskConical, Droplet,
+  Clock, FileText, Award, Leaf, FlaskConical, Droplet,
   Milk, Percent, Info, AlertTriangle, ShoppingBag, Wheat, Bean, Nut, Egg, Fish,
-  Shell, Sprout, RefreshCw, Edit, ChevronDown, Thermometer, Archive,
+  Shell, Sprout, RefreshCw, Edit, ChevronDown, Thermometer, Archive, ArrowLeft,
 } from 'lucide-react';
 
 import { type Product } from '@/types/product';
@@ -334,6 +334,19 @@ function AttributesContent({ product }: { product: Product }) {
   );
 }
 
+// ── Imagen con fallback para imágenes rotas ───────────────────────────────────
+function ProductImg({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [broken, setBroken] = useState(false);
+  if (broken) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <Package className="w-20 h-20 text-origen-pradera/30" />
+      </div>
+    );
+  }
+  return <img src={src} alt={alt} className={className} onError={() => setBroken(true)} />;
+}
+
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
@@ -413,10 +426,12 @@ export default function ProductoDetallePage() {
         <h2 className="text-lg font-bold text-origen-bosque mb-2">Error al cargar</h2>
         <p className="text-sm text-text-subtle mb-6 max-w-xs">{error || 'Producto no encontrado'}</p>
         <div className="flex gap-3">
-          <Button onClick={() => router.back()} className="bg-transparent text-origen-bosque border-2 border-origen-bosque hover:bg-origen-crema h-10 px-5">
+          <Button variant="secondary" leftIcon={<ArrowLeft className="w-4 h-4" />} onClick={() => router.back()}>
             Volver
           </Button>
-          <Button onClick={loadProduct}><RefreshCw className="w-4 h-4 mr-2" />Reintentar</Button>
+          <Button variant="primary" leftIcon={<RefreshCw className="w-4 h-4" />} onClick={loadProduct}>
+            Reintentar
+          </Button>
         </div>
       </div>
     );
@@ -498,16 +513,19 @@ export default function ProductoDetallePage() {
                   {product.certifications.length} certificaciones
                 </Badge>
               )}
-              <Link href={`/dashboard/products/${product.id}/edit`} className="hidden lg:inline-block">
-                <Button><Edit className="w-4 h-4 mr-2" />Editar</Button>
-              </Link>
-              <Button
-                onClick={() => setShowDeleteDialog(true)}
-                disabled={isDeleting}
-                className="hidden lg:flex bg-transparent text-red-600 border-2 border-red-200 hover:bg-red-50 hover:border-red-400 h-10 px-4"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />Eliminar
-              </Button>
+              <div className="hidden lg:flex items-center gap-2">
+                <Link href={`/dashboard/products/${product.id}/edit`}>
+                  <Button variant="primary" leftIcon={<Edit className="w-4 h-4" />}>Editar</Button>
+                </Link>
+                <Button
+                  variant="destructive"
+                  leftIcon={<Trash2 className="w-4 h-4" />}
+                  onClick={() => setShowDeleteDialog(true)}
+                  disabled={isDeleting}
+                >
+                  Eliminar
+                </Button>
+              </div>
             </div>
           }
         />
@@ -667,9 +685,9 @@ export default function ProductoDetallePage() {
                   <CardContent className="p-4">
                     <div className="aspect-[4/3] lg:aspect-square rounded-xl bg-gradient-to-br from-origen-crema to-gray-100 flex items-center justify-center overflow-hidden">
                       {product.mainImage ? (
-                        <img src={product.mainImage.url} alt={product.mainImage.alt || product.name} className="w-full h-full object-cover" />
+                        <ProductImg src={product.mainImage.url} alt={product.mainImage.alt || product.name} className="w-full h-full object-cover" />
                       ) : product.gallery && product.gallery.length > 0 ? (
-                        <img src={product.gallery[0].url} alt={product.gallery[0].alt || product.name} className="w-full h-full object-cover" />
+                        <ProductImg src={product.gallery[0].url} alt={product.gallery[0].alt || product.name} className="w-full h-full object-cover" />
                       ) : (
                         <Package className="w-20 h-20 text-origen-pradera/30" />
                       )}
@@ -678,7 +696,7 @@ export default function ProductoDetallePage() {
                       <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide lg:grid lg:grid-cols-4">
                         {product.gallery.slice(1, 5).map((img, idx) => (
                           <div key={img.id} className="w-16 h-16 shrink-0 lg:w-auto lg:h-auto lg:aspect-square rounded-lg bg-origen-crema/50 overflow-hidden">
-                            <img src={img.url} alt={img.alt || `Imagen ${idx + 2}`} className="w-full h-full object-cover" />
+                            <ProductImg src={img.url} alt={img.alt || `Imagen ${idx + 2}`} className="w-full h-full object-cover" />
                           </div>
                         ))}
                       </div>
@@ -822,19 +840,20 @@ export default function ProductoDetallePage() {
           <div className="pointer-events-auto flex items-center gap-3">
             {/* Editar — CTA principal */}
             <Link href={`/dashboard/products/${product.id}/edit`} className="flex-1">
-              <Button className="w-full h-12 rounded-2xl text-sm font-semibold">
-                <Edit className="w-4 h-4 mr-2" />Editar producto
+              <Button variant="primary" size="lg" leftIcon={<Edit className="w-4 h-4" />}>
+                Editar producto
               </Button>
             </Link>
-            {/* Eliminar — icono solo, menos prominente */}
-            <button
+            {/* Eliminar — icono solo, acción destructiva controlada */}
+            <Button
+              variant="destructive"
+              size="icon"
               onClick={() => setShowDeleteDialog(true)}
               disabled={isDeleting}
-              className="w-12 h-12 rounded-2xl border-2 border-red-200 bg-surface flex items-center justify-center text-red-500 hover:bg-red-50 hover:border-red-400 transition-colors flex-shrink-0 shadow-subtle"
               aria-label="Eliminar producto"
             >
               <Trash2 className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -849,19 +868,19 @@ export default function ProductoDetallePage() {
           footer={
             <>
               <Button
+                variant="secondary"
                 onClick={() => setShowDeleteDialog(false)}
                 disabled={isDeleting}
-                className="bg-transparent text-origen-bosque border-2 border-origen-bosque hover:bg-origen-crema h-10 px-5"
               >
                 Cancelar
               </Button>
               <Button
+                variant="destructive"
                 onClick={handleDelete}
-                disabled={isDeleting}
-                className="bg-red-600 hover:bg-red-700 text-white h-10 px-5"
+                loading={isDeleting}
+                loadingText="Eliminando..."
               >
-                {isDeleting && <RefreshCw className="w-4 h-4 mr-2 animate-spin" />}
-                {isDeleting ? 'Eliminando...' : 'Eliminar permanentemente'}
+                Eliminar permanentemente
               </Button>
             </>
           }

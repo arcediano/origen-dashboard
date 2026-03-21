@@ -257,12 +257,13 @@ export default function OrderDetailPage() {
                   <div className="px-4 py-3 border-t border-border-subtle">
                     <p className="text-xs text-text-subtle mb-2">Actualizar estado</p>
                     <Button
-                      className="w-full"
+                      variant="primary"
                       size="sm"
                       onClick={() => handleUpdateStatus(nextAction.next)}
-                      disabled={updating}
+                      loading={updating}
+                      loadingText="Actualizando..."
                     >
-                      {updating ? 'Actualizando...' : nextAction.label}
+                      {nextAction.label}
                     </Button>
                   </div>
                 )}
@@ -463,15 +464,18 @@ export default function OrderDetailPage() {
         {/* ── Sticky CTA — único CTA en móvil ── */}
         {canUpdate && nextAction && (
           <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 px-4 pb-[calc(env(safe-area-inset-bottom)+80px)] pt-3 bg-gradient-to-t from-surface via-surface/95 to-transparent pointer-events-none">
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={() => handleUpdateStatus(nextAction.next)}
-              disabled={updating}
-              className="pointer-events-auto w-full flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-semibold bg-origen-bosque text-white shadow-origen active:bg-origen-pino disabled:opacity-60 transition-colors"
-            >
-              <nextAction.icon className="w-4 h-4" />
-              {updating ? 'Actualizando...' : nextAction.label}
-            </motion.button>
+            <div className="pointer-events-auto">
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={() => handleUpdateStatus(nextAction.next)}
+                loading={updating}
+                loadingText="Actualizando..."
+                leftIcon={<nextAction.icon className="w-4 h-4" />}
+              >
+                {nextAction.label}
+              </Button>
+            </div>
           </div>
         )}
       </>
