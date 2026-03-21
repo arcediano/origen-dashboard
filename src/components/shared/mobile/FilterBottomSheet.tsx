@@ -236,10 +236,31 @@ export function FilterBottomSheet({
     }
   }, [isOpen]);
 
-  // ── Bloquear scroll del body ──────────────────────────────────────────────
+  // ── Bloquear scroll del body (iOS-safe) ──────────────────────────────────
+  // iOS Safari ignora overflow:hidden en body. La técnica correcta es position:fixed + top:-scrollY.
   useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (isOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflowY = 'scroll'; // evita salto de scrollbar en desktop
+    } else {
+      const scrollY = Math.abs(parseInt(document.body.style.top || '0', 10));
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflowY = '';
+      window.scrollTo(0, scrollY);
+    }
+    return () => {
+      const scrollY = Math.abs(parseInt(document.body.style.top || '0', 10));
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflowY = '';
+      if (scrollY) window.scrollTo(0, scrollY);
+    };
   }, [isOpen]);
 
   // ── Notificar BottomTabBar ────────────────────────────────────────────────
@@ -291,6 +312,13 @@ export function FilterBottomSheet({
   // ── Transición CSS compartida ─────────────────────────────────────────────
   const transition = 'bottom 0.38s cubic-bezier(0.32, 0.72, 0, 1)';
 
+  // ── Altura: dvh (dynamic) > svh (small) > vh (fallback) ──────────────────
+  // dvh se adapta cuando la barra de direcciones aparece/desaparece en móvil.
+  // No se puede usar min(90svh, 90vh) porque Safari antiguo rechaza todo el min().
+  const sheetHeight = typeof CSS !== 'undefined' && CSS.supports('height', '1dvh')
+    ? '90dvh'
+    : '90vh';
+
   if (!mounted) return null;
 
   return (
@@ -322,8 +350,8 @@ export function FilterBottomSheet({
         style={{
           position: 'fixed',
           left: 0, right: 0,
-          bottom: visible ? 0 : '-90vh',
-          height: '90vh',
+          bottom: visible ? 0 : `-${sheetHeight}`,
+          height: sheetHeight,
           zIndex: 60,
           overflowY: 'auto',
           overflowX: 'hidden',

@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, SlidersHorizontal, CheckCircle, ThumbsUp, ImageIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, X, SlidersHorizontal, CheckCircle, ThumbsUp, ImageIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FilterBottomSheet, type FilterSection } from '@/components/shared/mobile';
 import {
@@ -144,29 +144,24 @@ export function ReviewFilters({
           )}
         </div>
 
-        {/* Botón toggle filtros — solo móvil */}
+        {/* Botón abrir filtros — solo móvil */}
         <button
           onClick={() => setPanelOpen(prev => !prev)}
           className={cn(
             'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors',
-            panelOpen || activeCount > 0
+            activeCount > 0
               ? 'bg-origen-bosque border-origen-bosque text-white'
               : 'bg-surface-alt border-border text-origen-bosque',
           )}
-          aria-expanded={panelOpen}
-          aria-label={panelOpen ? 'Cerrar filtros' : 'Abrir filtros'}
+          aria-label="Abrir filtros"
         >
           <SlidersHorizontal className="w-4 h-4" />
           <span>Filtros</span>
-          {activeCount > 0 && !panelOpen && (
+          {activeCount > 0 && (
             <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/25 text-[10px] font-bold">
               {activeCount}
             </span>
           )}
-          {panelOpen
-            ? <ChevronUp className="w-3.5 h-3.5 opacity-70" />
-            : <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-          }
         </button>
       </div>
 
