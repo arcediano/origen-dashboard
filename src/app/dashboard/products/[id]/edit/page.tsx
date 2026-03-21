@@ -8,13 +8,15 @@
 import React from 'react';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { Package, Sparkles, TrendingUp, AlertCircle, RefreshCw } from 'lucide-react';
+import { Package, Sparkles, TrendingUp } from 'lucide-react';
 
 // Componentes UI
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
 import { Badge } from '@/components/ui/atoms/badge';
 import { Button } from '@/components/ui/atoms/button';
 import { PageHeader } from '../../../components/PageHeader';
+import { PageLoader } from '@/components/shared/loading/page-loader';
+import { PageError } from '@/components/shared/error/page-error';
 
 // Steps del formulario
 import { StepBasic } from '../../components/steps/StepBasic';
@@ -63,51 +65,6 @@ const itemVariants: Variants = {
       damping: 25 
     }
   }
-};
-
-// ============================================================================
-// COMPONENTE DE CARGA
-// ============================================================================
-
-const LoadingSkeleton = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
-      <div className="container mx-auto px-6 py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <RefreshCw className="w-12 h-12 text-origen-pradera animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">Cargando producto...</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ============================================================================
-// COMPONENTE DE ERROR
-// ============================================================================
-
-const ErrorState = ({ error, onRetry }: { error: string; onRetry?: () => void }) => {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
-      <div className="container mx-auto px-6 py-8">
-        <Card className="p-8 max-w-md mx-auto text-center">
-          <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-8 h-8 text-red-500" />
-          </div>
-          <h2 className="text-xl font-bold text-origen-bosque mb-2">Error al cargar</h2>
-          <p className="text-muted-foreground mb-6">{error}</p>
-          {onRetry && (
-            <Button onClick={onRetry}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Reintentar
-            </Button>
-          )}
-        </Card>
-      </div>
-    </div>
-  );
 };
 
 // ============================================================================
@@ -236,15 +193,8 @@ export default function EditProductPage() {
     setActiveTab(tab);
   };
 
-  // Mostrar carga
-  if (isLoading) {
-    return <LoadingSkeleton />;
-  }
-
-  // Mostrar error
-  if (error) {
-    return <ErrorState error={error} onRetry={reloadProduct} />;
-  }
+  if (isLoading) return <PageLoader message="Cargando producto..." />;
+  if (error) return <PageError title="Error al cargar" message={error} onRetry={reloadProduct} />;
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">

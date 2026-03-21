@@ -198,9 +198,9 @@ export default function ProductosPage() {
           actions={
             <Button
               onClick={handleNewProduct}
-              className="hidden sm:flex items-center gap-2"
+              leftIcon={<Plus className="w-4 h-4" />}
+              className="hidden sm:inline-flex"
             >
-              <Plus className="w-4 h-4" />
               Nuevo producto
             </Button>
           }
@@ -330,14 +330,14 @@ export default function ProductosPage() {
         </motion.div>
 
       {/* FAB — solo móvil */}
-      <button
+      <Button
         onClick={handleNewProduct}
-        className="sm:hidden fixed bottom-[calc(80px+env(safe-area-inset-bottom))] right-4 z-30 flex items-center gap-2 px-5 h-14 rounded-full bg-origen-pradera text-white shadow-origen flex-shrink-0 active:scale-95 transition-transform"
+        leftIcon={<Plus className="w-5 h-5" />}
         aria-label="Nuevo producto"
+        className="sm:hidden fixed bottom-[calc(80px+env(safe-area-inset-bottom))] right-4 z-30 w-auto h-14 px-5 rounded-full bg-origen-pradera border-origen-pradera hover:bg-origen-pradera/90 shadow-origen"
       >
-        <Plus className="w-5 h-5" />
-        <span className="text-sm font-semibold">Nuevo</span>
-      </button>
+        Nuevo
+      </Button>
 
       {/* Diálogos */}
       <AdjustStockDialog

@@ -94,8 +94,6 @@ export function StepBasic({
     setLocalTouched(prev => ({ ...prev, [field]: true }));
   };
 
-  const titleLength = formData?.name?.length || 0;
-  const shortDescLength = formData?.shortDescription?.length || 0;
   const fullDescLength = formData?.fullDescription?.length || 0;
 
   return (
@@ -134,7 +132,7 @@ export function StepBasic({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 1 de 8
+              Paso 1 de 7
             </Badge>
           </div>
         </div>
@@ -155,27 +153,17 @@ export function StepBasic({
                 size="sm"
               />
             </div>
-            <div className="relative">
-              <Input
-                value={formData?.name || ''}
-                onChange={(e) => handleChange('name', e.target.value)}
-                className={cn(
-                  "h-12 pr-20 text-base w-full rounded-xl",
-                  (allTouched?.name && (errors?.name || validationErrors?.name)) && "border-red-500"
-                )}
-                placeholder="Ej: Queso Manchego Curado 12 meses"
-                maxLength={100}
-              />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium">
-                <span className={cn(
-                  titleLength > 100 ? "text-red-500" : 
-                  titleLength >= 80 ? "text-green-600" : 
-                  titleLength >= 50 ? "text-amber-600" : "text-text-subtle"
-                )}>
-                  {titleLength}/100
-                </span>
-              </div>
-            </div>
+            <Input
+              value={formData?.name || ''}
+              onChange={(e) => handleChange('name', e.target.value)}
+              className={cn(
+                "h-12 text-base w-full rounded-xl",
+                (allTouched?.name && (errors?.name || validationErrors?.name)) && "border-red-500"
+              )}
+              placeholder="Ej: Queso Manchego Curado 12 meses"
+              maxLength={100}
+              showCharCount
+            />
             {allTouched?.name && (errors?.name || validationErrors?.name) && (
               <p className="text-xs text-red-600 mt-1">{errors?.name || validationErrors?.name}</p>
             )}
@@ -267,27 +255,17 @@ export function StepBasic({
                 size="sm"
               />
             </div>
-            <div className="relative">
-              <Textarea
-                value={formData?.shortDescription || ''}
-                onChange={(e) => handleChange('shortDescription', e.target.value)}
-                className={cn(
-                  "min-h-[100px] pr-20 text-base w-full rounded-xl p-4",
-                  (allTouched?.shortDescription && errors?.shortDescription) && "border-red-500"
-                )}
-                placeholder="Describe tu producto en 2-3 líneas..."
-                maxLength={160}
-              />
-              <div className="absolute right-4 bottom-4 text-sm font-medium">
-                <span className={cn(
-                  shortDescLength > 160 ? "text-red-500" : 
-                  shortDescLength >= 140 ? "text-amber-600" : 
-                  shortDescLength >= 120 ? "text-green-600" : "text-text-subtle"
-                )}>
-                  {shortDescLength}/160
-                </span>
-              </div>
-            </div>
+            <Textarea
+              value={formData?.shortDescription || ''}
+              onChange={(e) => handleChange('shortDescription', e.target.value)}
+              className={cn(
+                "min-h-[100px] text-base w-full rounded-xl p-4",
+                (allTouched?.shortDescription && errors?.shortDescription) && "border-red-500"
+              )}
+              placeholder="Describe tu producto en 2-3 líneas..."
+              maxLength={160}
+              showCharCount
+            />
             {allTouched?.shortDescription && errors?.shortDescription && (
               <p className="text-xs text-red-600 mt-1">{errors.shortDescription}</p>
             )}
