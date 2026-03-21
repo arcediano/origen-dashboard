@@ -1,13 +1,18 @@
 /**
  * @component FilterBottomSheet
- * @description Bottom sheet de filtros estilo nativo para móvil.
- *              - z-[60] para estar sobre el BottomTabBar (z-50)
- *              - Estado draft interno: filtros se aplican SOLO al pulsar "Ver resultados"
- *              - onPointerDown con stopPropagation en el sheet para evitar que el overlay
- *                capture eventos de foco en inputs
- *              - Fechas apiladas verticalmente (full-width) para evitar overflow
+ * @description Bottom sheet de filtros para móvil.
  *
- * Tokens Origen v3.0.
+ * ARQUITECTURA DEFINITIVA — dos elementos fixed independientes:
+ *
+ *  1. Sheet (z-60):  position:fixed, bottom:-90vh → bottom:0
+ *     - Contenedor de scroll simple. Sin flex, sin grid, sin overflow:hidden.
+ *     - padding-bottom reserva espacio para el footer.
+ *
+ *  2. Footer (z-62): position:fixed, bottom:0, SIEMPRE en el viewport.
+ *     - Elemento completamente independiente del sheet.
+ *     - Garantía absoluta: nunca puede quedar fuera de pantalla.
+ *
+ *  Sin Framer Motion, sin CSS transform → sin bug iOS Safari overflow.
  */
 
 'use client';
@@ -64,7 +69,7 @@ export interface FilterBottomSheetProps {
   title?: string;
 }
 
-// ─── ESTADO DRAFT INTERNO ─────────────────────────────────────────────────────
+// ─── DRAFT STATE ──────────────────────────────────────────────────────────────
 
 type DraftValue =
   | { type: 'chips'; value: string }
@@ -73,7 +78,7 @@ type DraftValue =
 
 type Draft = Record<string, DraftValue>;
 
-function buildInitialDraft(sections: FilterSection[]): Draft {
+function buildDraft(sections: FilterSection[]): Draft {
   const d: Draft = {};
   sections.forEach((s) => {
     if (s.type === 'chips')       d[s.id] = { type: 'chips',       value: s.value };
@@ -83,58 +88,49 @@ function buildInitialDraft(sections: FilterSection[]): Draft {
   return d;
 }
 
-function buildClearedDraft(sections: FilterSection[]): Draft {
+function clearDraft(sections: FilterSection[]): Draft {
   const d: Draft = {};
   sections.forEach((s) => {
-    if (s.type === 'chips')       d[s.id] = { type: 'chips',       value: ''  };
-    if (s.type === 'daterange')   d[s.id] = { type: 'daterange',   from: '', to: ''   };
-    if (s.type === 'numberrange') d[s.id] = { type: 'numberrange', min: '',   max: '' };
+    if (s.type === 'chips')       d[s.id] = { type: 'chips',       value: '' };
+    if (s.type === 'daterange')   d[s.id] = { type: 'daterange',   from: '', to: '' };
+    if (s.type === 'numberrange') d[s.id] = { type: 'numberrange', min: '',  max: '' };
   });
   return d;
 }
 
-// ─── SECCIÓN: CHIPS ───────────────────────────────────────────────────────────
+// ─── SECCIONES ────────────────────────────────────────────────────────────────
 
-function ChipsSection({
-  section,
-  draftValue,
-  onDraftChange,
-}: {
+function ChipsSection({ section, value, onChange }: {
   section: FilterSection & { type: 'chips' };
-  draftValue: string;
-  onDraftChange: (value: string) => void;
+  value: string;
+  onChange: (v: string) => void;
 }) {
   return (
     <div>
-      <h3 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-3">
+      <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wide mb-3">
         {section.title}
-      </h3>
-      {/* Carrusel horizontal — mismo patrón que apps nativas */}
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-none">
-        {section.options.map((option) => {
-          const isActive = draftValue === option.value;
-          const Icon = option.icon;
+      </p>
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-hide">
+        {section.options.map((opt) => {
+          const active = value === opt.value;
+          const Icon = opt.icon;
           return (
             <button
-              key={option.value}
+              key={opt.value}
               type="button"
-              onClick={() => onDraftChange(option.value)}
+              onClick={() => onChange(opt.value)}
               className={cn(
-                'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium border',
-                'min-h-[44px] transition-colors duration-150',
-                isActive
+                'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium border min-h-[44px] transition-colors',
+                active
                   ? 'bg-origen-bosque border-origen-bosque text-white'
-                  : 'bg-surface-alt border-border-subtle text-origen-bosque hover:border-origen-pradera/50',
+                  : 'bg-surface border-border-subtle text-origen-bosque',
               )}
             >
               {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
-              {option.label}
-              {option.count !== undefined && option.count > 0 && (
-                <span className={cn(
-                  'text-xs font-bold',
-                  isActive ? 'text-white/70' : 'text-text-subtle',
-                )}>
-                  {option.count}
+              {opt.label}
+              {opt.count !== undefined && opt.count > 0 && (
+                <span className={cn('text-xs font-bold', active ? 'text-white/70' : 'text-text-subtle')}>
+                  {opt.count}
                 </span>
               )}
             </button>
@@ -145,127 +141,61 @@ function ChipsSection({
   );
 }
 
-// ─── SECCIÓN: RANGO DE FECHAS ─────────────────────────────────────────────────
-
 const dateInputCls = [
   'w-full h-12 px-3 text-sm font-medium text-origen-bosque',
   'bg-surface border border-border-subtle rounded-xl',
-  'focus:outline-none focus:ring-2 focus:ring-origen-pradera/25 focus:border-origen-pradera',
-  'transition-colors',
+  'focus:outline-none focus:ring-2 focus:ring-origen-pradera/25 focus:border-origen-pradera transition-colors',
   '[&::-webkit-calendar-picker-indicator]:opacity-40',
-  '[&::-webkit-calendar-picker-indicator]:cursor-pointer',
-  '[&::-webkit-calendar-picker-indicator]:hover:opacity-70',
 ].join(' ');
 
-function DateRangeSection({
-  section,
-  from,
-  to,
-  onFromChange,
-  onToChange,
-}: {
+function DateRangeSection({ section, from, to, onFrom, onTo }: {
   section: FilterSection & { type: 'daterange' };
-  from: string;
-  to: string;
-  onFromChange: (v: string) => void;
-  onToChange: (v: string) => void;
+  from: string; to: string;
+  onFrom: (v: string) => void; onTo: (v: string) => void;
 }) {
   return (
     <div>
-      <h3 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-3">
-        {section.title}
-      </h3>
+      <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wide mb-3">{section.title}</p>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-[11px] font-medium text-text-subtle mb-1.5 block tracking-wide uppercase">
-            Desde
-          </label>
-          <input
-            type="date"
-            value={from}
-            onChange={(e) => onFromChange(e.target.value)}
-            className={dateInputCls}
-          />
+          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Desde</label>
+          <input type="date" value={from} onChange={(e) => onFrom(e.target.value)} className={dateInputCls} />
         </div>
         <div>
-          <label className="text-[11px] font-medium text-text-subtle mb-1.5 block tracking-wide uppercase">
-            Hasta
-          </label>
-          <input
-            type="date"
-            value={to}
-            onChange={(e) => onToChange(e.target.value)}
-            className={dateInputCls}
-          />
+          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Hasta</label>
+          <input type="date" value={to} onChange={(e) => onTo(e.target.value)} className={dateInputCls} />
         </div>
       </div>
     </div>
   );
 }
 
-// ─── SECCIÓN: RANGO NUMÉRICO ──────────────────────────────────────────────────
-
-function NumberRangeSection({
-  section,
-  min,
-  max,
-  onMinChange,
-  onMaxChange,
-}: {
+function NumberRangeSection({ section, min, max, onMin, onMax }: {
   section: FilterSection & { type: 'numberrange' };
-  min: string;
-  max: string;
-  onMinChange: (v: string) => void;
-  onMaxChange: (v: string) => void;
+  min: string; max: string;
+  onMin: (v: string) => void; onMax: (v: string) => void;
 }) {
   const inputCls = cn(
     'w-full h-12 text-sm font-medium text-origen-bosque border border-border-subtle bg-surface rounded-xl',
     'focus:outline-none focus:ring-2 focus:ring-origen-pradera/25 focus:border-origen-pradera transition-colors',
     section.prefix ? 'pl-7 pr-3' : 'px-3',
   );
-
   return (
     <div>
-      <h3 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-3">
-        {section.title}
-      </h3>
+      <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wide mb-3">{section.title}</p>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-[11px] font-medium text-text-subtle mb-1.5 block tracking-wide uppercase">Mínimo</label>
+          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Mínimo</label>
           <div className="relative">
-            {section.prefix && (
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-text-subtle pointer-events-none">
-                {section.prefix}
-              </span>
-            )}
-            <input
-              type="number"
-              value={min}
-              onChange={(e) => onMinChange(e.target.value)}
-              placeholder="0"
-              className={inputCls}
-              min="0"
-              inputMode="decimal"
-            />
+            {section.prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-text-subtle pointer-events-none">{section.prefix}</span>}
+            <input type="number" value={min} onChange={(e) => onMin(e.target.value)} placeholder="0" className={inputCls} min="0" inputMode="decimal" />
           </div>
         </div>
         <div>
-          <label className="text-[11px] font-medium text-text-subtle mb-1.5 block tracking-wide uppercase">Máximo</label>
+          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Máximo</label>
           <div className="relative">
-            {section.prefix && (
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-subtle pointer-events-none">
-                {section.prefix}
-              </span>
-            )}
-            <input
-              type="number"
-              value={max}
-              onChange={(e) => onMaxChange(e.target.value)}
-              placeholder="∞"
-              className={inputCls}
-              min="0"
-              inputMode="decimal"
-            />
+            {section.prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-subtle pointer-events-none">{section.prefix}</span>}
+            <input type="number" value={max} onChange={(e) => onMax(e.target.value)} placeholder="∞" className={inputCls} min="0" inputMode="decimal" />
           </div>
         </div>
       </div>
@@ -284,117 +214,20 @@ export function FilterBottomSheet({
   resultLabel = 'resultados',
   title = 'Filtros',
 }: FilterBottomSheetProps) {
-  // ── Estado draft: se inicializa al abrir, se aplica al confirmar ──────────
   const [draft, setDraft] = useState<Draft>({});
+  const [mounted, setMounted]   = useState(false);
+  const [visible, setVisible]   = useState(false);
 
+  // ── Sincronizar draft al abrir ────────────────────────────────────────────
   useEffect(() => {
-    if (isOpen) {
-      setDraft(buildInitialDraft(sections));
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (isOpen) setDraft(buildDraft(sections));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  // ── Bloquear scroll del body mientras el sheet está abierto ─────────────
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
-
-  // ── Notificar al BottomTabBar para que se oculte mientras el sheet está abierto ──
-  useEffect(() => {
-    window.dispatchEvent(
-      new CustomEvent('filter-sheet:toggle', { detail: { open: isOpen } }),
-    );
-    return () => {
-      if (isOpen) {
-        window.dispatchEvent(
-          new CustomEvent('filter-sheet:toggle', { detail: { open: false } }),
-        );
-      }
-    };
-  }, [isOpen]);
-
-  // ── Helpers de draft ──────────────────────────────────────────────────────
-  const setChips = (id: string, value: string) =>
-    setDraft((prev) => ({ ...prev, [id]: { type: 'chips', value } }));
-
-  const setDateFrom = (id: string, from: string) =>
-    setDraft((prev) => {
-      const cur = prev[id] as { type: 'daterange'; from: string; to: string } | undefined;
-      return { ...prev, [id]: { type: 'daterange', from, to: cur?.to ?? '' } };
-    });
-
-  const setDateTo = (id: string, to: string) =>
-    setDraft((prev) => {
-      const cur = prev[id] as { type: 'daterange'; from: string; to: string } | undefined;
-      return { ...prev, [id]: { type: 'daterange', from: cur?.from ?? '', to } };
-    });
-
-  const setNumMin = (id: string, min: string) =>
-    setDraft((prev) => {
-      const cur = prev[id] as { type: 'numberrange'; min: string; max: string } | undefined;
-      return { ...prev, [id]: { type: 'numberrange', min, max: cur?.max ?? '' } };
-    });
-
-  const setNumMax = (id: string, max: string) =>
-    setDraft((prev) => {
-      const cur = prev[id] as { type: 'numberrange'; min: string; max: string } | undefined;
-      return { ...prev, [id]: { type: 'numberrange', min: cur?.min ?? '', max } };
-    });
-
-  // ── Aplicar: llama onChange del padre solo al confirmar ───────────────────
-  const handleApply = () => {
-    sections.forEach((s) => {
-      const d = draft[s.id];
-      if (!d) return;
-      if (s.type === 'chips' && d.type === 'chips') {
-        s.onChange(d.value);
-      }
-      if (s.type === 'daterange' && d.type === 'daterange') {
-        s.onChangeFrom(d.from);
-        s.onChangeTo(d.to);
-      }
-      if (s.type === 'numberrange' && d.type === 'numberrange') {
-        s.onChangeMin(d.min);
-        s.onChangeMax(d.max);
-      }
-    });
-    onClose();
-  };
-
-  // ── Limpiar: resetea draft Y llama al padre ───────────────────────────────
-  const handleClearAll = () => {
-    setDraft(buildClearedDraft(sections));
-    onClearAll();
-    onClose();
-  };
-
-  // ── ¿Hay algo activo en el draft? ─────────────────────────────────────────
-  const hasAnyActive = sections.some((s) => {
-    const d = draft[s.id];
-    if (!d) return false;
-    if (d.type === 'chips')       return Boolean(d.value);
-    if (d.type === 'daterange')   return Boolean(d.from || d.to);
-    if (d.type === 'numberrange') return Boolean(d.min || d.max);
-    return false;
-  });
-
-  // ── Animación CSS pura — SIN transform (evita el bug iOS Safari) ──────────
-  // Framer Motion aplica transform:translateY() como inline style permanente.
-  // iOS Safari tiene un bug: overflow-y:auto en cualquier descendiente de un
-  // elemento con transform inline no funciona. Solución: animar con la propiedad
-  // CSS `bottom` en lugar de `transform`. Sin transform = sin bug.
-  const [mounted, setMounted] = useState(false);
-  const [visible, setVisible] = useState(false);
-
+  // ── Animación: mounted controla si el DOM existe, visible dispara la transición CSS
   useEffect(() => {
     if (isOpen) {
       setMounted(true);
-      // Doble rAF para que el DOM monte antes de disparar la transición CSS
       requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
     } else {
       setVisible(false);
@@ -403,78 +236,139 @@ export function FilterBottomSheet({
     }
   }, [isOpen]);
 
+  // ── Bloquear scroll del body ──────────────────────────────────────────────
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  // ── Notificar BottomTabBar ────────────────────────────────────────────────
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('filter-sheet:toggle', { detail: { open: isOpen } }));
+    return () => {
+      if (isOpen) window.dispatchEvent(new CustomEvent('filter-sheet:toggle', { detail: { open: false } }));
+    };
+  }, [isOpen]);
+
+  // ── Helpers draft ─────────────────────────────────────────────────────────
+  const setChips  = (id: string, v: string) =>
+    setDraft((p) => ({ ...p, [id]: { type: 'chips', value: v } }));
+  const setDateFrom = (id: string, v: string) =>
+    setDraft((p) => { const c = p[id] as { type:'daterange'; from:string; to:string }|undefined; return { ...p, [id]: { type:'daterange', from:v, to:c?.to??'' } }; });
+  const setDateTo = (id: string, v: string) =>
+    setDraft((p) => { const c = p[id] as { type:'daterange'; from:string; to:string }|undefined; return { ...p, [id]: { type:'daterange', from:c?.from??'', to:v } }; });
+  const setNumMin = (id: string, v: string) =>
+    setDraft((p) => { const c = p[id] as { type:'numberrange'; min:string; max:string }|undefined; return { ...p, [id]: { type:'numberrange', min:v, max:c?.max??'' } }; });
+  const setNumMax = (id: string, v: string) =>
+    setDraft((p) => { const c = p[id] as { type:'numberrange'; min:string; max:string }|undefined; return { ...p, [id]: { type:'numberrange', min:c?.min??'', max:v } }; });
+
+  const handleApply = () => {
+    sections.forEach((s) => {
+      const d = draft[s.id];
+      if (!d) return;
+      if (s.type === 'chips' && d.type === 'chips') s.onChange(d.value);
+      if (s.type === 'daterange' && d.type === 'daterange') { s.onChangeFrom(d.from); s.onChangeTo(d.to); }
+      if (s.type === 'numberrange' && d.type === 'numberrange') { s.onChangeMin(d.min); s.onChangeMax(d.max); }
+    });
+    onClose();
+  };
+
+  const handleClear = () => {
+    setDraft(clearDraft(sections));
+    onClearAll();
+    onClose();
+  };
+
+  const hasActive = sections.some((s) => {
+    const d = draft[s.id];
+    if (!d) return false;
+    if (d.type === 'chips')       return Boolean(d.value);
+    if (d.type === 'daterange')   return Boolean(d.from || d.to);
+    if (d.type === 'numberrange') return Boolean(d.min || d.max);
+    return false;
+  });
+
+  // ── Transición CSS compartida ─────────────────────────────────────────────
+  const transition = 'bottom 0.38s cubic-bezier(0.32, 0.72, 0, 1)';
+
   if (!mounted) return null;
 
   return (
     <>
       {/* ── Overlay ── */}
       <div
-        className="fixed inset-0 z-[55] bg-black/50"
         style={{
+          position: 'fixed', inset: 0, zIndex: 55,
+          backgroundColor: 'rgba(0,0,0,0.5)',
           opacity: visible ? 1 : 0,
           transition: 'opacity 0.25s ease',
           pointerEvents: visible ? 'auto' : 'none',
-        } as React.CSSProperties}
+        }}
         onPointerDown={onClose}
         aria-hidden
       />
 
-      {/* ── Bottom Sheet ─────────────────────────────────────────────────────
-          CLAVE: animated via `bottom` CSS property, NOT `transform`.
-          - Sin transform → sin bug iOS Safari con overflow-y en flex children.
-          - flex flex-col funciona porque el contenedor NO tiene transform.
-          - flex-1 + min-h-0 en la zona de scroll: patrón estándar que funciona
-            correctamente cuando el padre flex no tiene transform activo.
-          ───────────────────────────────────────────────────────────────────── */}
+      {/* ── Sheet ────────────────────────────────────────────────────────────
+          Contenedor de scroll simple. Sin flex, sin grid, sin overflow:hidden.
+          - bottom animado: -90vh (oculto) → 0 (visible)
+          - padding-bottom reserva exactamente el espacio del footer
+          - overflow-y:auto en un position:fixed sin transform = funciona en iOS
+          ─────────────────────────────────────────────────────────────────── */}
       <div
-        className="fixed left-0 right-0 z-[60] bg-surface rounded-t-3xl shadow-2xl flex flex-col overflow-hidden"
-        style={{
-          height: '90vh',
-          bottom: visible ? 0 : '-90vh',
-          transition: 'bottom 0.38s cubic-bezier(0.32, 0.72, 0, 1)',
-        } as React.CSSProperties}
         role="dialog"
         aria-modal
         aria-label={title}
         onPointerDown={(e) => e.stopPropagation()}
+        style={{
+          position: 'fixed',
+          left: 0, right: 0,
+          bottom: visible ? 0 : '-90vh',
+          height: '90vh',
+          zIndex: 60,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          overscrollBehavior: 'contain',
+          WebkitOverflowScrolling: 'touch',
+          // Espacio para el footer fijo (borde+padding+botón+safe-area ≈ 88px + safe-area)
+          paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))',
+          backgroundColor: 'hsl(var(--surface))',
+          borderRadius: '24px 24px 0 0',
+          boxShadow: '0 -8px 40px rgba(0,0,0,0.18)',
+          transition,
+        } as React.CSSProperties}
       >
         {/* Handle */}
-        <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
-          <div className="w-10 h-1 rounded-full bg-border" />
+        <div style={{ display:'flex', justifyContent:'center', padding:'12px 0 8px' }}>
+          <div style={{ width:40, height:4, borderRadius:9999, backgroundColor:'hsl(var(--border))' }} />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-border-subtle flex-shrink-0">
-          <h2 className="text-base font-semibold text-origen-bosque">{title}</h2>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 20px', borderBottom:'1px solid hsl(var(--border-subtle))' }}>
+          <h2 style={{ fontSize:16, fontWeight:600, color:'hsl(var(--bosque))' }}>{title}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-surface-alt flex items-center justify-center active:scale-95 transition-transform"
+            style={{ width:32, height:32, borderRadius:9999, backgroundColor:'hsl(var(--surface-alt))', display:'flex', alignItems:'center', justifyContent:'center', border:'none', cursor:'pointer' }}
             aria-label="Cerrar filtros"
           >
-            <X className="w-4 h-4 text-text-subtle" />
+            <X style={{ width:16, height:16, color:'hsl(var(--hoja))' }} />
           </button>
         </div>
 
-        {/* Zona de scroll — flex-1 + min-h-0 funciona sin transform en el padre */}
-        <div
-          className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 space-y-6"
-          style={{ minHeight: 0, WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
-        >
+        {/* Secciones de filtros */}
+        <div style={{ padding:'20px', display:'flex', flexDirection:'column', gap:24 }}>
           {sections.map((section) => {
             const d = draft[section.id];
 
             if (section.type === 'chips') {
-              const dv = (d?.type === 'chips' ? d.value : '') ?? '';
               return (
                 <ChipsSection
                   key={section.id}
                   section={section}
-                  draftValue={dv}
-                  onDraftChange={(val) => setChips(section.id, val)}
+                  value={(d?.type === 'chips' ? d.value : '') ?? ''}
+                  onChange={(v) => setChips(section.id, v)}
                 />
               );
             }
-
             if (section.type === 'daterange') {
               const dd = d?.type === 'daterange' ? d : { from: '', to: '' };
               return (
@@ -483,12 +377,11 @@ export function FilterBottomSheet({
                   section={section}
                   from={dd.from}
                   to={dd.to}
-                  onFromChange={(v) => setDateFrom(section.id, v)}
-                  onToChange={(v) => setDateTo(section.id, v)}
+                  onFrom={(v) => setDateFrom(section.id, v)}
+                  onTo={(v) => setDateTo(section.id, v)}
                 />
               );
             }
-
             if (section.type === 'numberrange') {
               const dn = d?.type === 'numberrange' ? d : { min: '', max: '' };
               return (
@@ -497,42 +390,55 @@ export function FilterBottomSheet({
                   section={section}
                   min={dn.min}
                   max={dn.max}
-                  onMinChange={(v) => setNumMin(section.id, v)}
-                  onMaxChange={(v) => setNumMax(section.id, v)}
+                  onMin={(v) => setNumMin(section.id, v)}
+                  onMax={(v) => setNumMax(section.id, v)}
                 />
               );
             }
-
             return null;
           })}
         </div>
+      </div>
 
-        {/* Footer — flex-shrink-0, siempre visible al ser hermano del scroll */}
-        <div
-          className="flex gap-3 px-5 pt-4 border-t border-border-subtle bg-surface flex-shrink-0"
-          style={{ paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' } as React.CSSProperties}
+      {/* ── Footer — elemento fixed INDEPENDIENTE ────────────────────────────
+          z-62: por encima del sheet (z-60). Anclado al viewport, no al sheet.
+          Imposible que quede fuera de pantalla: es position:fixed bottom:0.
+          Aparece/desaparece con opacity (sin transform, sin bottom animation).
+          ─────────────────────────────────────────────────────────────────── */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 0, left: 0, right: 0,
+          zIndex: 62,
+          display: 'flex',
+          gap: 12,
+          padding: '16px 20px',
+          paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+          backgroundColor: 'hsl(var(--surface))',
+          borderTop: '1px solid hsl(var(--border-subtle))',
+          opacity: visible ? 1 : 0,
+          transition: 'opacity 0.2s ease',
+          pointerEvents: visible ? 'auto' : 'none',
+        } as React.CSSProperties}
+      >
+        <button
+          onClick={handleClear}
+          disabled={!hasActive}
+          className={cn(
+            'flex-1 h-12 rounded-2xl border-2 text-sm font-medium transition-all active:scale-95',
+            hasActive
+              ? 'border-origen-bosque/40 text-origen-bosque hover:border-origen-bosque/70'
+              : 'border-border text-text-subtle opacity-40 cursor-not-allowed',
+          )}
         >
-          <button
-            onClick={handleClearAll}
-            disabled={!hasAnyActive}
-            className={cn(
-              'flex-1 h-12 rounded-2xl border-2 text-sm font-medium transition-all active:scale-95',
-              hasAnyActive
-                ? 'border-origen-bosque/40 text-origen-bosque hover:border-origen-bosque/70'
-                : 'border-border text-text-subtle opacity-40 cursor-not-allowed',
-            )}
-          >
-            Limpiar filtros
-          </button>
-          <button
-            onClick={handleApply}
-            className="flex-[2] h-12 rounded-2xl bg-origen-bosque text-white text-sm font-semibold active:scale-95 transition-all hover:bg-origen-pino"
-          >
-            {resultCount !== undefined
-              ? `Ver ${resultCount} ${resultLabel}`
-              : 'Aplicar filtros'}
-          </button>
-        </div>
+          Limpiar filtros
+        </button>
+        <button
+          onClick={handleApply}
+          className="flex-[2] h-12 rounded-2xl bg-origen-bosque text-white text-sm font-semibold active:scale-95 transition-all hover:bg-origen-pino"
+        >
+          {resultCount !== undefined ? `Ver ${resultCount} ${resultLabel}` : 'Aplicar filtros'}
+        </button>
       </div>
     </>
   );

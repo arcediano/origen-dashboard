@@ -11,7 +11,7 @@
 import React from 'react';
 import { Search, X, SlidersHorizontal, Grid3x3, List, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { FilterPanel } from '@/components/shared/mobile';
+import { FilterBottomSheet } from '@/components/shared/mobile';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/atoms/select';
@@ -231,8 +231,8 @@ export function ProductFilters({
         )}
       </div>
 
-      {/* ── Panel de filtros inline — solo móvil ──────────────────────── */}
-      <FilterPanel
+      {/* ── Bottom sheet de filtros — solo móvil ──────────────────────── */}
+      <FilterBottomSheet
         isOpen={panelOpen}
         onClose={() => setPanelOpen(false)}
         sections={[

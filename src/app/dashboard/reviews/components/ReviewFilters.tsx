@@ -11,7 +11,7 @@
 import React from 'react';
 import { Search, X, SlidersHorizontal, CheckCircle, ThumbsUp, ImageIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { FilterPanel, type FilterSection } from '@/components/shared/mobile';
+import { FilterBottomSheet, type FilterSection } from '@/components/shared/mobile';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/atoms/select';
@@ -247,8 +247,8 @@ export function ReviewFilters({
         )}
       </div>
 
-      {/* ── Panel de filtros inline — solo móvil ──────────────────────── */}
-      <FilterPanel
+      {/* ── Bottom sheet de filtros — solo móvil ──────────────────────── */}
+      <FilterBottomSheet
         isOpen={panelOpen}
         onClose={() => setPanelOpen(false)}
         sections={sheetSections}
