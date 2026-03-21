@@ -6,7 +6,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowLeft, HelpCircle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Tooltip } from '@/components/ui/atoms/tooltip';
@@ -52,25 +52,15 @@ export function PageHeader({
     <div className={cn('relative', className)}>
 
       {/* ── MÓVIL: header compacto estilo app (< lg) ── */}
+      {/* El botón volver NO se muestra aquí: MobileTopBar ya lo gestiona en todas las sub-rutas */}
       <div className="lg:hidden px-4 pt-4 pb-3">
         <div className="flex items-center justify-between gap-3 min-h-[44px]">
-          {/* Izquierda: botón atrás + título */}
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            {showBackButton && (
-              <button
-                onClick={handleBack}
-                className="w-9 h-9 rounded-full flex items-center justify-center bg-surface-alt border border-border-subtle flex-shrink-0 active:opacity-70 transition-opacity"
-                aria-label="Volver"
-              >
-                <ArrowLeft className="w-5 h-5 text-origen-bosque" />
-              </button>
+          {/* Izquierda: título */}
+          <div className="min-w-0 flex-1">
+            <h1 className="text-[18px] leading-snug font-bold text-origen-bosque truncate">{title}</h1>
+            {description && (
+              <p className="text-xs text-muted-foreground mt-0.5 truncate">{description}</p>
             )}
-            <div className="min-w-0 flex-1">
-              <h1 className="text-[18px] leading-snug font-bold text-origen-bosque truncate">{title}</h1>
-              {description && (
-                <p className="text-xs text-muted-foreground mt-0.5 truncate">{description}</p>
-              )}
-            </div>
           </div>
           {/* Derecha: acciones */}
           {actions && (
