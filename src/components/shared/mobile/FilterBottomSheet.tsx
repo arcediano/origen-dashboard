@@ -296,6 +296,20 @@ export function FilterBottomSheet({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  // ── Notificar al BottomTabBar para que se oculte mientras el sheet está abierto ──
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent('filter-sheet:toggle', { detail: { open: isOpen } }),
+    );
+    return () => {
+      if (isOpen) {
+        window.dispatchEvent(
+          new CustomEvent('filter-sheet:toggle', { detail: { open: false } }),
+        );
+      }
+    };
+  }, [isOpen]);
+
   // ── Helpers de draft ──────────────────────────────────────────────────────
   const setChips = (id: string, value: string) =>
     setDraft((prev) => ({ ...prev, [id]: { type: 'chips', value } }));
@@ -464,7 +478,7 @@ export function FilterBottomSheet({
                 className={cn(
                   'flex-1 h-12 rounded-2xl border-2 text-sm font-medium transition-all active:scale-95',
                   hasAnyActive
-                    ? 'border-origen-pradera/40 text-origen-pradera'
+                    ? 'border-origen-bosque/40 text-origen-bosque hover:border-origen-bosque/70'
                     : 'border-border text-text-subtle opacity-40 cursor-not-allowed',
                 )}
               >
@@ -472,9 +486,11 @@ export function FilterBottomSheet({
               </button>
               <button
                 onClick={handleApply}
-                className="flex-[2] h-12 rounded-2xl bg-origen-pradera text-white text-sm font-semibold active:scale-95 transition-transform"
+                className="flex-[2] h-12 rounded-2xl bg-origen-bosque text-white text-sm font-semibold active:scale-95 transition-transform hover:bg-origen-pino"
               >
-                Aplicar filtros
+                {resultCount !== undefined
+                  ? `Ver ${resultCount} ${resultLabel}`
+                  : 'Aplicar filtros'}
               </button>
             </div>
           </motion.div>

@@ -75,8 +75,19 @@ const TABS: Tab[] = [
 export function BottomTabBar() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
+
+  // Esconder la barra cuando el FilterBottomSheet esté abierto
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setFilterOpen((e as CustomEvent<{ open: boolean }>).detail.open);
+    };
+    window.addEventListener('filter-sheet:toggle', handler);
+    return () => window.removeEventListener('filter-sheet:toggle', handler);
+  }, []);
+
   if (!mounted) return null;
 
   const isActive = (tab: Tab) => {
@@ -89,7 +100,14 @@ export function BottomTabBar() {
   };
 
   return (
-    <nav
+    <AnimatePresence>
+    {!filterOpen && (
+    <motion.nav
+      key="bottom-tab-bar"
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 100, opacity: 0 }}
+      transition={{ type: 'spring', damping: 30, stiffness: 300 }}
       aria-label="Navegación principal"
       className="lg:hidden fixed bottom-0 inset-x-0 z-50 flex justify-center items-end px-4"
       style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 10px)' }}
@@ -238,6 +256,8 @@ export function BottomTabBar() {
         })}
 
       </div>
-    </nav>
+    </motion.nav>
+    )}
+    </AnimatePresence>
   );
 }
