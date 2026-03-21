@@ -296,6 +296,16 @@ export function FilterBottomSheet({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  // ── Bloquear scroll del body mientras el sheet está abierto ─────────────
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
   // ── Notificar al BottomTabBar para que se oculte mientras el sheet está abierto ──
   useEffect(() => {
     window.dispatchEvent(
@@ -375,104 +385,134 @@ export function FilterBottomSheet({
     return false;
   });
 
+  // ── Altura del footer (fija, sin safe-area) ──────────────────────────────
+  // border-t(1) + pt-4(16) + h-12(48) + pb-5(20) = 85px → 88px con margen
+  const FOOTER_BASE_H = 88;
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Overlay — z-[55] para estar sobre BottomTabBar (z-50) */}
+          {/* ── Overlay ── */}
           <motion.div
             key="overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[55] bg-black/40 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[55] bg-black/50"
             onPointerDown={onClose}
             aria-hidden
           />
 
-          {/* Sheet — z-[60], pantalla completa para tapar header */}
+          {/* ── Bottom Sheet ─────────────────────────────────────────────────────
+              ARQUITECTURA NATIVA MOBILE:
+              · fixed bottom-0 (anclado al borde inferior, nunca inset-0)
+              · height: 90svh con fallback 90vh — altura explícita y acotada
+              · Sin flex-col en el elemento con transform (bug iOS Safari)
+              · Scroll area: height = calc(100% - footer) → CSS puro, sin flexbox
+              · Footer: bloque natural después del scroll, no absolute
+              ────────────────────────────────────────────────────────────────── */}
           <motion.div
             key="sheet"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            transition={{ type: 'spring', damping: 32, stiffness: 320 }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="fixed inset-0 z-[60] bg-surface flex flex-col"
+            className="fixed bottom-0 left-0 right-0 z-[60] bg-surface rounded-t-3xl shadow-2xl overflow-hidden"
+            style={{ height: 'min(90svh, 90vh)' } as React.CSSProperties}
             role="dialog"
             aria-modal
             aria-label={title}
           >
-            {/* Handle */}
-            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-              <div className="w-10 h-1 rounded-full bg-border" />
+            {/* ── Zona de scroll (Handle + Header + Filtros) ──
+                Altura = 100% del sheet MENOS el footer.
+                env(safe-area-inset-bottom) se suma al footer, se resta aquí. */}
+            <div
+              className="overflow-y-auto overscroll-contain"
+              style={{
+                height: `calc(100% - ${FOOTER_BASE_H}px - env(safe-area-inset-bottom, 0px))`,
+                WebkitOverflowScrolling: 'touch',
+              } as React.CSSProperties}
+            >
+              {/* Handle — visual drag indicator */}
+              <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
+                <div className="w-10 h-1 rounded-full bg-border" />
+              </div>
+
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-3 border-b border-border-subtle">
+                <h2 className="text-base font-semibold text-origen-bosque">{title}</h2>
+                <button
+                  onClick={onClose}
+                  className="w-8 h-8 rounded-full bg-surface-alt flex items-center justify-center active:scale-95 transition-transform"
+                  aria-label="Cerrar filtros"
+                >
+                  <X className="w-4 h-4 text-text-subtle" />
+                </button>
+              </div>
+
+              {/* Secciones de filtros */}
+              <div className="px-5 py-5 space-y-6">
+                {sections.map((section) => {
+                  const d = draft[section.id];
+
+                  if (section.type === 'chips') {
+                    const dv = (d?.type === 'chips' ? d.value : '') ?? '';
+                    return (
+                      <ChipsSection
+                        key={section.id}
+                        section={section}
+                        draftValue={dv}
+                        onDraftChange={(val) => setChips(section.id, val)}
+                      />
+                    );
+                  }
+
+                  if (section.type === 'daterange') {
+                    const dd = d?.type === 'daterange' ? d : { from: '', to: '' };
+                    return (
+                      <DateRangeSection
+                        key={section.id}
+                        section={section}
+                        from={dd.from}
+                        to={dd.to}
+                        onFromChange={(v) => setDateFrom(section.id, v)}
+                        onToChange={(v) => setDateTo(section.id, v)}
+                      />
+                    );
+                  }
+
+                  if (section.type === 'numberrange') {
+                    const dn = d?.type === 'numberrange' ? d : { min: '', max: '' };
+                    return (
+                      <NumberRangeSection
+                        key={section.id}
+                        section={section}
+                        min={dn.min}
+                        max={dn.max}
+                        onMinChange={(v) => setNumMin(section.id, v)}
+                        onMaxChange={(v) => setNumMax(section.id, v)}
+                      />
+                    );
+                  }
+
+                  return null;
+                })}
+              </div>
             </div>
 
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-border-subtle flex-shrink-0">
-              <h2 className="text-base font-semibold text-origen-bosque">{title}</h2>
-              <button
-                onClick={onClose}
-                className="w-8 h-8 rounded-full bg-surface-alt flex items-center justify-center active:scale-95 transition-transform"
-                aria-label="Cerrar filtros"
-              >
-                <X className="w-4 h-4 text-text-subtle" />
-              </button>
-            </div>
-
-            {/* Content — scrollable. min-h-0 es imprescindible: sin él, el flex-item
-                ignora su límite flex-1 y empuja el footer fuera del viewport */}
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-5 space-y-6">
-              {sections.map((section) => {
-                const d = draft[section.id];
-
-                if (section.type === 'chips') {
-                  const dv = (d?.type === 'chips' ? d.value : '') ?? '';
-                  return (
-                    <ChipsSection
-                      key={section.id}
-                      section={section}
-                      draftValue={dv}
-                      onDraftChange={(val) => setChips(section.id, val)}
-                    />
-                  );
-                }
-
-                if (section.type === 'daterange') {
-                  const dd = d?.type === 'daterange' ? d : { from: '', to: '' };
-                  return (
-                    <DateRangeSection
-                      key={section.id}
-                      section={section}
-                      from={dd.from}
-                      to={dd.to}
-                      onFromChange={(v) => setDateFrom(section.id, v)}
-                      onToChange={(v) => setDateTo(section.id, v)}
-                    />
-                  );
-                }
-
-                if (section.type === 'numberrange') {
-                  const dn = d?.type === 'numberrange' ? d : { min: '', max: '' };
-                  return (
-                    <NumberRangeSection
-                      key={section.id}
-                      section={section}
-                      min={dn.min}
-                      max={dn.max}
-                      onMinChange={(v) => setNumMin(section.id, v)}
-                      onMaxChange={(v) => setNumMax(section.id, v)}
-                    />
-                  );
-                }
-
-                return null;
-              })}
-            </div>
-
-            {/* Footer — ambos botones siempre visibles */}
-            <div className="flex gap-3 px-5 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))] border-t border-border-subtle flex-shrink-0 bg-surface">
+            {/* ── Footer — bloque fijo al final del sheet ──────────────────────
+                NO es absolute ni fixed: es un bloque normal cuya posición está
+                garantizada porque la zona de scroll tiene altura explícita con
+                calc(), dejando exactamente FOOTER_BASE_H px para este elemento. */}
+            <div
+              className="flex gap-3 px-5 pt-4 border-t border-border-subtle bg-surface"
+              style={{
+                paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+              } as React.CSSProperties}
+            >
               <button
                 onClick={handleClearAll}
                 disabled={!hasAnyActive}
