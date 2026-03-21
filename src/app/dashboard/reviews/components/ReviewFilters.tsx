@@ -9,9 +9,9 @@
 'use client';
 
 import React from 'react';
-import { Search, X, SlidersHorizontal, CheckCircle, ThumbsUp, ImageIcon, ChevronDown } from 'lucide-react';
+import { Search, X, SlidersHorizontal, CheckCircle, ThumbsUp, ImageIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { FilterBottomSheet, type FilterSection } from '@/components/shared/mobile/FilterBottomSheet';
+import { FilterPanel, type FilterSection } from '@/components/shared/mobile';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/atoms/select';
@@ -65,7 +65,7 @@ export function ReviewFilters({
   totalReviews,
   className,
 }: ReviewFiltersProps) {
-  const [sheetOpen, setSheetOpen] = React.useState(false);
+  const [panelOpen, setPanelOpen] = React.useState(false);
   const [localSearch, setLocalSearch] = React.useState(filters.search ?? '');
 
   const activeCount = [
@@ -144,24 +144,29 @@ export function ReviewFilters({
           )}
         </div>
 
-        {/* Botón "Filtros" — solo móvil */}
+        {/* Botón toggle filtros — solo móvil */}
         <button
-          onClick={() => setSheetOpen(true)}
+          onClick={() => setPanelOpen(prev => !prev)}
           className={cn(
-            'lg:hidden relative flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors',
-            activeCount > 0
+            'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors',
+            panelOpen || activeCount > 0
               ? 'bg-origen-bosque border-origen-bosque text-white'
               : 'bg-surface-alt border-border text-origen-bosque',
           )}
-          aria-label="Abrir filtros"
+          aria-expanded={panelOpen}
+          aria-label={panelOpen ? 'Cerrar filtros' : 'Abrir filtros'}
         >
           <SlidersHorizontal className="w-4 h-4" />
           <span>Filtros</span>
-          {activeCount > 0 && (
+          {activeCount > 0 && !panelOpen && (
             <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/25 text-[10px] font-bold">
               {activeCount}
             </span>
           )}
+          {panelOpen
+            ? <ChevronUp className="w-3.5 h-3.5 opacity-70" />
+            : <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+          }
         </button>
       </div>
 
@@ -242,11 +247,10 @@ export function ReviewFilters({
         )}
       </div>
 
-      {/* ── FilterBottomSheet (pantalla completa) — solo móvil ────────── */}
-      <FilterBottomSheet
-        isOpen={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        title="Filtrar reseñas"
+      {/* ── Panel de filtros inline — solo móvil ──────────────────────── */}
+      <FilterPanel
+        isOpen={panelOpen}
+        onClose={() => setPanelOpen(false)}
         sections={sheetSections}
         onClearAll={onClearFilters}
         resultCount={totalReviews}

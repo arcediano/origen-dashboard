@@ -4,6 +4,9 @@ export type { ChipItem } from './ScrollChipFilter';
 export { FilterBottomSheet } from './FilterBottomSheet';
 export type { FilterSection, ChipOption, FilterBottomSheetProps } from './FilterBottomSheet';
 
+export { FilterPanel } from './FilterPanel';
+export type { FilterPanelProps } from './FilterPanel';
+
 export { MobileStatCard } from './MobileStatCard';
 export type { StatCardAccent, MobileStatCardProps } from './MobileStatCard';
 

@@ -9,9 +9,9 @@
 'use client';
 
 import React from 'react';
-import { Search, X, SlidersHorizontal, Grid3x3, List, ChevronDown } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Grid3x3, List, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { FilterBottomSheet } from '@/components/shared/mobile';
+import { FilterPanel } from '@/components/shared/mobile';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/atoms/select';
@@ -84,7 +84,7 @@ export function ProductFilters({
   categories = DEFAULT_CATEGORIES,
   className,
 }: ProductFiltersProps) {
-  const [sheetOpen, setSheetOpen] = React.useState(false);
+  const [panelOpen, setPanelOpen] = React.useState(false);
 
   const activeCount = [selectedCategory, selectedStatus, selectedStock, sortBy].filter(Boolean).length;
   const hasAnyFilter = Boolean(searchQuery) || activeCount > 0;
@@ -115,24 +115,29 @@ export function ProductFilters({
           )}
         </div>
 
-        {/* Botón Filtros — móvil */}
+        {/* Botón toggle filtros — móvil */}
         <button
-          onClick={() => setSheetOpen(true)}
+          onClick={() => setPanelOpen(prev => !prev)}
           className={cn(
             'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors',
-            activeCount > 0
+            panelOpen || activeCount > 0
               ? 'bg-origen-bosque border-origen-bosque text-white'
               : 'bg-surface-alt border-border text-origen-bosque',
           )}
-          aria-label="Abrir filtros"
+          aria-expanded={panelOpen}
+          aria-label={panelOpen ? 'Cerrar filtros' : 'Abrir filtros'}
         >
           <SlidersHorizontal className="w-4 h-4" />
           <span>Filtros</span>
-          {activeCount > 0 && (
+          {activeCount > 0 && !panelOpen && (
             <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/25 text-[10px] font-bold">
               {activeCount}
             </span>
           )}
+          {panelOpen
+            ? <ChevronUp className="w-3.5 h-3.5 opacity-70" />
+            : <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+          }
         </button>
 
         {/* Toggle vista — desktop */}
@@ -226,11 +231,10 @@ export function ProductFilters({
         )}
       </div>
 
-      {/* ── FilterBottomSheet (pantalla completa) — solo móvil ────────── */}
-      <FilterBottomSheet
-        isOpen={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        title="Filtrar productos"
+      {/* ── Panel de filtros inline — solo móvil ──────────────────────── */}
+      <FilterPanel
+        isOpen={panelOpen}
+        onClose={() => setPanelOpen(false)}
         sections={[
           {
             type: 'chips', id: 'category', title: 'Categoría',
