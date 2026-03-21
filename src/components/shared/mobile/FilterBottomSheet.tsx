@@ -421,8 +421,9 @@ export function FilterBottomSheet({
               </button>
             </div>
 
-            {/* Content — scrollable */}
-            <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 space-y-6">
+            {/* Content — scrollable. min-h-0 es imprescindible: sin él, el flex-item
+                ignora su límite flex-1 y empuja el footer fuera del viewport */}
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-5 space-y-6">
               {sections.map((section) => {
                 const d = draft[section.id];
 
