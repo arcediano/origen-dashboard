@@ -323,9 +323,14 @@ export function FilterBottomSheet({
           position: 'fixed',
           left: 0, right: 0,
           bottom: visible ? 0 : '-90vh',
-height: '100dvh',
-        bottom: visible ? 0 : '-100dvh',
-        paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))',
+          height: '90vh',
+          zIndex: 60,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          overscrollBehavior: 'contain',
+          WebkitOverflowScrolling: 'touch',
+          // Espacio para el footer fijo (borde+padding+botón+safe-area ≈ 88px + safe-area)
+          paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))',
           backgroundColor: 'hsl(var(--surface))',
           borderRadius: '24px 24px 0 0',
           boxShadow: '0 -8px 40px rgba(0,0,0,0.18)',
@@ -333,8 +338,8 @@ height: '100dvh',
         } as React.CSSProperties}
       >
         {/* Handle */}
-<div style={{ display:'flex', justifyContent:'center', padding:'16px 0 12px', touchAction:'none' }}>
-          <div style={{ width:48, height:5, borderRadius:9999, backgroundColor:'rgba(0,0,0,0.12)' }} />
+        <div style={{ display:'flex', justifyContent:'center', padding:'12px 0 8px' }}>
+          <div style={{ width:40, height:4, borderRadius:9999, backgroundColor:'hsl(var(--border))' }} />
         </div>
 
         {/* Header */}
@@ -408,7 +413,7 @@ height: '100dvh',
           display: 'flex',
           gap: 12,
           padding: '16px 20px',
-          paddingBottom: 'calc(24px + max(env(safe-area-inset-bottom, 16px), 16px))',
+          paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
           backgroundColor: 'hsl(var(--surface))',
           borderTop: '1px solid hsl(var(--border-subtle))',
           opacity: visible ? 1 : 0,
