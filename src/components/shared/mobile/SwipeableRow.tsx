@@ -21,8 +21,8 @@ export interface SwipeAction {
   label:     string;
   /** Icono Lucide */
   icon:      React.ElementType;
-  /** Color de fondo del botón */
-  color:     'bosque' | 'amber' | 'red' | 'blue' | 'gray';
+  /** Color de fondo del botón — usar tokens de marca cuando sea posible */
+  color:     'bosque' | 'pino' | 'hoja' | 'pradera' | 'mandarina' | 'red' | 'gray' | 'amber' | 'blue';
   /** Callback al pulsar */
   onPress:   () => void;
   /** Deshabilitar esta acción */
@@ -43,11 +43,16 @@ export interface SwipeableRowProps {
 // ─── COLORES ──────────────────────────────────────────────────────────────────
 
 const COLOR_MAP: Record<SwipeAction['color'], { bg: string; text: string }> = {
-  bosque: { bg: 'bg-origen-bosque',  text: 'text-white'      },
-  amber:  { bg: 'bg-amber-500',      text: 'text-white'      },
-  red:    { bg: 'bg-red-500',        text: 'text-white'      },
-  blue:   { bg: 'bg-blue-500',       text: 'text-white'      },
-  gray:   { bg: 'bg-gray-400',       text: 'text-white'      },
+  bosque:    { bg: 'bg-origen-bosque',    text: 'text-white' },
+  pino:      { bg: 'bg-origen-pino',      text: 'text-white' },
+  hoja:      { bg: 'bg-origen-hoja',      text: 'text-white' },
+  pradera:   { bg: 'bg-origen-pradera',   text: 'text-origen-bosque' },
+  mandarina: { bg: 'bg-origen-mandarina', text: 'text-white' },
+  red:       { bg: 'bg-red-500',          text: 'text-white' },
+  gray:      { bg: 'bg-gray-400',         text: 'text-white' },
+  // Colores genéricos — usar tokens de marca si es posible
+  amber:     { bg: 'bg-origen-mandarina', text: 'text-white' },
+  blue:      { bg: 'bg-origen-pino',      text: 'text-white' },
 };
 
 // ─── HOOK INTERNO ─────────────────────────────────────────────────────────────

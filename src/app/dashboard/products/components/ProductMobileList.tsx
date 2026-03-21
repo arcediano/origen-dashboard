@@ -60,16 +60,19 @@ const STATUS_CONFIG: Record<
 function ProductRowSkeleton() {
   return (
     <div className="flex items-center gap-3 px-4 py-3.5 animate-pulse">
-      <div className="w-[72px] h-[72px] rounded-2xl bg-origen-pastel/60 flex-shrink-0" />
-      <div className="flex-1 min-w-0 space-y-2.5">
+      <div className="w-14 h-14 rounded-xl bg-origen-pastel/60 flex-shrink-0" />
+      <div className="flex-1 min-w-0 space-y-2">
         <div className="h-3.5 bg-origen-pastel rounded-lg w-3/4" />
-        <div className="h-2.5 bg-origen-pastel/60 rounded-lg w-1/2" />
-        <div className="flex items-center gap-3">
-          <div className="h-4 bg-origen-pastel rounded-lg w-16" />
-          <div className="h-3 bg-origen-pastel/60 rounded-lg w-12" />
+        <div className="flex items-center justify-between gap-2">
+          <div className="h-2.5 bg-origen-pastel/60 rounded-lg w-1/3" />
+          <div className="h-4 bg-origen-pastel/60 rounded-full w-14" />
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-3 bg-origen-pastel rounded-lg w-12" />
+          <div className="h-2.5 bg-origen-pastel/60 rounded-lg w-16" />
         </div>
       </div>
-      <div className="flex-shrink-0 w-14 h-5 bg-origen-pastel/60 rounded-full" />
+      <div className="w-4 h-4 bg-origen-pastel/40 rounded flex-shrink-0" />
     </div>
   );
 }
@@ -116,13 +119,13 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
     {
       label:   'Editar',
       icon:    FileEdit,
-      color:   'blue' as const,
+      color:   'pino' as const,
       onPress: () => onEdit(product.id),
     },
     {
       label:    'Stock',
       icon:     BarChart2,
-      color:    'amber' as const,
+      color:    'mandarina' as const,
       onPress:  () => onAdjustStock?.(product),
       disabled: !onAdjustStock,
     },
@@ -138,34 +141,50 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
         aria-label={`Ver ${product.name}`}
       >
         {/* Thumbnail */}
-        <div className="w-[72px] h-[72px] rounded-2xl overflow-hidden bg-origen-pastel flex-shrink-0 shadow-subtle">
+        <div className="w-14 h-14 rounded-xl overflow-hidden bg-origen-pastel flex-shrink-0 shadow-subtle">
           {mainImg ? (
             <img src={mainImg} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-origen-pastel to-origen-pradera/10">
-              <Package className="w-8 h-8 text-origen-pradera/50" />
+              <Package className="w-6 h-6 text-origen-pradera/50" />
             </div>
           )}
         </div>
 
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          {/* Badge encima del nombre en móvil */}
-          <div className="flex items-center justify-between gap-2 mb-1">
-            <p className="text-sm font-semibold text-origen-bosque truncate leading-tight flex-1">{product.name}</p>
+        {/* Info — 3 líneas con jerarquía clara */}
+        <div className="flex-1 min-w-0 space-y-0.5">
+          {/* L1: nombre — línea completa sin competencia */}
+          <p className="text-sm font-semibold text-origen-bosque truncate leading-snug">
+            {product.name}
+          </p>
+
+          {/* L2: categoría (izq) + estado (der) */}
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[11px] text-text-subtle truncate flex-1">{product.categoryName}</p>
             <StatusBadge status={product.status} />
           </div>
-          <p className="text-[11px] text-text-subtle truncate">{product.sku} · {product.categoryName}</p>
-          {/* Precio y stock en la misma fila, prominentes */}
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-base font-bold text-origen-bosque">{product.basePrice.toFixed(2)} €</span>
-            <span className="text-border-subtle">·</span>
+
+          {/* L3: precio + indicador de stock */}
+          <div className="flex items-center gap-2 pt-0.5">
+            <span className="text-sm font-bold text-origen-bosque tabular-nums">
+              {product.basePrice.toFixed(2)} €
+            </span>
+            <span className="text-border-subtle" aria-hidden>·</span>
             {product.status === 'out_of_stock' ? (
-              <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-md">Sin stock</span>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                Sin stock
+              </span>
             ) : isLowStock ? (
-              <span className="text-[11px] font-semibold text-origen-mandarina bg-origen-mandarina/10 px-1.5 py-0.5 rounded-md">Stock: {product.stock}</span>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-origen-mandarina">
+                <span className="w-1.5 h-1.5 rounded-full bg-origen-mandarina flex-shrink-0" />
+                Stock: {product.stock}
+              </span>
             ) : (
-              <span className="text-[11px] text-text-subtle">Stock: {product.stock}</span>
+              <span className="inline-flex items-center gap-1 text-[11px] text-text-subtle">
+                <span className="w-1.5 h-1.5 rounded-full bg-origen-pradera/60 flex-shrink-0" />
+                Stock: {product.stock}
+              </span>
             )}
           </div>
         </div>
