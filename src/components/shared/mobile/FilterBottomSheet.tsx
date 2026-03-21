@@ -13,7 +13,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -116,10 +115,9 @@ function ChipsSection({
           const isActive = draftValue === option.value;
           const Icon = option.icon;
           return (
-            <motion.button
+            <button
               key={option.value}
               type="button"
-              whileTap={{ scale: 0.95 }}
               onClick={() => onDraftChange(option.value)}
               className={cn(
                 'flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium border',
@@ -139,7 +137,7 @@ function ChipsSection({
                   {option.count}
                 </span>
               )}
-            </motion.button>
+            </button>
           );
         })}
       </div>
@@ -385,156 +383,157 @@ export function FilterBottomSheet({
     return false;
   });
 
-  // ── Altura del sheet y del footer ────────────────────────────────────────
-  // Sheet = 90vh (compatible con todos los browsers)
-  // Footer = border-t(1) + pt-4(16) + h-12(48) + pb-5(20) = 85px → 88 con margen
-  // Scroll = calc(90vh - 88px - env(safe-area-inset-bottom))
-  // Usamos 90vh explícito en el calc (no 100%) para no depender de que el browser
-  // resuelva correctamente height:100% sobre un elemento con CSS transform activo.
-  const SHEET_H = '90vh';
-  const FOOTER_BASE_H = 88;
+  // ── Animación CSS pura — SIN transform (evita el bug iOS Safari) ──────────
+  // Framer Motion aplica transform:translateY() como inline style permanente.
+  // iOS Safari tiene un bug: overflow-y:auto en cualquier descendiente de un
+  // elemento con transform inline no funciona. Solución: animar con la propiedad
+  // CSS `bottom` en lugar de `transform`. Sin transform = sin bug.
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true);
+      // Doble rAF para que el DOM monte antes de disparar la transición CSS
+      requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
+    } else {
+      setVisible(false);
+      const id = setTimeout(() => setMounted(false), 380);
+      return () => clearTimeout(id);
+    }
+  }, [isOpen]);
+
+  if (!mounted) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* ── Overlay ── */}
-          <motion.div
-            key="overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[55] bg-black/50"
-            onPointerDown={onClose}
-            aria-hidden
-          />
+    <>
+      {/* ── Overlay ── */}
+      <div
+        className="fixed inset-0 z-[55] bg-black/50"
+        style={{
+          opacity: visible ? 1 : 0,
+          transition: 'opacity 0.25s ease',
+          pointerEvents: visible ? 'auto' : 'none',
+        } as React.CSSProperties}
+        onPointerDown={onClose}
+        aria-hidden
+      />
 
-          {/* ── Bottom Sheet ──────────────────────────────────────────────────── */}
-          <motion.div
-            key="sheet"
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 32, stiffness: 320 }}
-            onPointerDown={(e) => e.stopPropagation()}
-            className="fixed bottom-0 left-0 right-0 z-[60] bg-surface rounded-t-3xl shadow-2xl overflow-hidden"
-            style={{ height: SHEET_H } as React.CSSProperties}
-            role="dialog"
-            aria-modal
-            aria-label={title}
+      {/* ── Bottom Sheet ─────────────────────────────────────────────────────
+          CLAVE: animated via `bottom` CSS property, NOT `transform`.
+          - Sin transform → sin bug iOS Safari con overflow-y en flex children.
+          - flex flex-col funciona porque el contenedor NO tiene transform.
+          - flex-1 + min-h-0 en la zona de scroll: patrón estándar que funciona
+            correctamente cuando el padre flex no tiene transform activo.
+          ───────────────────────────────────────────────────────────────────── */}
+      <div
+        className="fixed left-0 right-0 z-[60] bg-surface rounded-t-3xl shadow-2xl flex flex-col overflow-hidden"
+        style={{
+          height: '90vh',
+          bottom: visible ? 0 : '-90vh',
+          transition: 'bottom 0.38s cubic-bezier(0.32, 0.72, 0, 1)',
+        } as React.CSSProperties}
+        role="dialog"
+        aria-modal
+        aria-label={title}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
+          <div className="w-10 h-1 rounded-full bg-border" />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-border-subtle flex-shrink-0">
+          <h2 className="text-base font-semibold text-origen-bosque">{title}</h2>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-surface-alt flex items-center justify-center active:scale-95 transition-transform"
+            aria-label="Cerrar filtros"
           >
-            {/* ── Zona de scroll ──
-                Altura explícita con 90vh (mismo valor que el sheet) para no
-                depender de height:100% — que puede fallar en iOS con transform. */}
-            <div
-              className="overflow-y-auto overscroll-contain"
-              style={{
-                height: `calc(${SHEET_H} - ${FOOTER_BASE_H}px - env(safe-area-inset-bottom, 0px))`,
-                WebkitOverflowScrolling: 'touch',
-              } as React.CSSProperties}
-            >
-              {/* Handle — visual drag indicator */}
-              <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
-                <div className="w-10 h-1 rounded-full bg-border" />
-              </div>
+            <X className="w-4 h-4 text-text-subtle" />
+          </button>
+        </div>
 
-              {/* Header */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-border-subtle">
-                <h2 className="text-base font-semibold text-origen-bosque">{title}</h2>
-                <button
-                  onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-surface-alt flex items-center justify-center active:scale-95 transition-transform"
-                  aria-label="Cerrar filtros"
-                >
-                  <X className="w-4 h-4 text-text-subtle" />
-                </button>
-              </div>
+        {/* Zona de scroll — flex-1 + min-h-0 funciona sin transform en el padre */}
+        <div
+          className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 space-y-6"
+          style={{ minHeight: 0, WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+        >
+          {sections.map((section) => {
+            const d = draft[section.id];
 
-              {/* Secciones de filtros */}
-              <div className="px-5 py-5 space-y-6">
-                {sections.map((section) => {
-                  const d = draft[section.id];
+            if (section.type === 'chips') {
+              const dv = (d?.type === 'chips' ? d.value : '') ?? '';
+              return (
+                <ChipsSection
+                  key={section.id}
+                  section={section}
+                  draftValue={dv}
+                  onDraftChange={(val) => setChips(section.id, val)}
+                />
+              );
+            }
 
-                  if (section.type === 'chips') {
-                    const dv = (d?.type === 'chips' ? d.value : '') ?? '';
-                    return (
-                      <ChipsSection
-                        key={section.id}
-                        section={section}
-                        draftValue={dv}
-                        onDraftChange={(val) => setChips(section.id, val)}
-                      />
-                    );
-                  }
+            if (section.type === 'daterange') {
+              const dd = d?.type === 'daterange' ? d : { from: '', to: '' };
+              return (
+                <DateRangeSection
+                  key={section.id}
+                  section={section}
+                  from={dd.from}
+                  to={dd.to}
+                  onFromChange={(v) => setDateFrom(section.id, v)}
+                  onToChange={(v) => setDateTo(section.id, v)}
+                />
+              );
+            }
 
-                  if (section.type === 'daterange') {
-                    const dd = d?.type === 'daterange' ? d : { from: '', to: '' };
-                    return (
-                      <DateRangeSection
-                        key={section.id}
-                        section={section}
-                        from={dd.from}
-                        to={dd.to}
-                        onFromChange={(v) => setDateFrom(section.id, v)}
-                        onToChange={(v) => setDateTo(section.id, v)}
-                      />
-                    );
-                  }
+            if (section.type === 'numberrange') {
+              const dn = d?.type === 'numberrange' ? d : { min: '', max: '' };
+              return (
+                <NumberRangeSection
+                  key={section.id}
+                  section={section}
+                  min={dn.min}
+                  max={dn.max}
+                  onMinChange={(v) => setNumMin(section.id, v)}
+                  onMaxChange={(v) => setNumMax(section.id, v)}
+                />
+              );
+            }
 
-                  if (section.type === 'numberrange') {
-                    const dn = d?.type === 'numberrange' ? d : { min: '', max: '' };
-                    return (
-                      <NumberRangeSection
-                        key={section.id}
-                        section={section}
-                        min={dn.min}
-                        max={dn.max}
-                        onMinChange={(v) => setNumMin(section.id, v)}
-                        onMaxChange={(v) => setNumMax(section.id, v)}
-                      />
-                    );
-                  }
+            return null;
+          })}
+        </div>
 
-                  return null;
-                })}
-              </div>
-            </div>
-
-            {/* ── Footer — bloque fijo al final del sheet ──────────────────────
-                NO es absolute ni fixed: es un bloque normal cuya posición está
-                garantizada porque la zona de scroll tiene altura explícita con
-                calc(), dejando exactamente FOOTER_BASE_H px para este elemento. */}
-            <div
-              className="flex gap-3 px-5 pt-4 border-t border-border-subtle bg-surface"
-              style={{
-                paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
-              } as React.CSSProperties}
-            >
-              <button
-                onClick={handleClearAll}
-                disabled={!hasAnyActive}
-                className={cn(
-                  'flex-1 h-12 rounded-2xl border-2 text-sm font-medium transition-all active:scale-95',
-                  hasAnyActive
-                    ? 'border-origen-bosque/40 text-origen-bosque hover:border-origen-bosque/70'
-                    : 'border-border text-text-subtle opacity-40 cursor-not-allowed',
-                )}
-              >
-                Limpiar filtros
-              </button>
-              <button
-                onClick={handleApply}
-                className="flex-[2] h-12 rounded-2xl bg-origen-bosque text-white text-sm font-semibold active:scale-95 transition-transform hover:bg-origen-pino"
-              >
-                {resultCount !== undefined
-                  ? `Ver ${resultCount} ${resultLabel}`
-                  : 'Aplicar filtros'}
-              </button>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+        {/* Footer — flex-shrink-0, siempre visible al ser hermano del scroll */}
+        <div
+          className="flex gap-3 px-5 pt-4 border-t border-border-subtle bg-surface flex-shrink-0"
+          style={{ paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' } as React.CSSProperties}
+        >
+          <button
+            onClick={handleClearAll}
+            disabled={!hasAnyActive}
+            className={cn(
+              'flex-1 h-12 rounded-2xl border-2 text-sm font-medium transition-all active:scale-95',
+              hasAnyActive
+                ? 'border-origen-bosque/40 text-origen-bosque hover:border-origen-bosque/70'
+                : 'border-border text-text-subtle opacity-40 cursor-not-allowed',
+            )}
+          >
+            Limpiar filtros
+          </button>
+          <button
+            onClick={handleApply}
+            className="flex-[2] h-12 rounded-2xl bg-origen-bosque text-white text-sm font-semibold active:scale-95 transition-all hover:bg-origen-pino"
+          >
+            {resultCount !== undefined
+              ? `Ver ${resultCount} ${resultLabel}`
+              : 'Aplicar filtros'}
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
