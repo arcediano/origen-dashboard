@@ -24,47 +24,54 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { fetchOrderById, updateOrderStatus } from '@/lib/api/orders';
 import type { Order } from '@/types/order';
 
-const statusConfig: Record<Order['status'], { 
-  variant: 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'leaf'; 
-  label: string; 
-  icon: React.ElementType; 
-  color: string 
+const statusConfig: Record<Order['status'], {
+  variant: 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'leaf';
+  label: string;
+  icon: React.ElementType;
+  color: string;
+  bandBg: string;
 }> = {
-  pending: { 
-    variant: 'warning',     // Ámbar
-    label: 'Pendiente', 
-    icon: Clock, 
-    color: 'text-amber-600' 
+  pending: {
+    variant: 'warning',
+    label: 'Pendiente',
+    icon: Clock,
+    color: 'text-origen-mandarina',
+    bandBg: 'bg-origen-mandarina/10',
   },
-  processing: { 
-    variant: 'info',        // Azul
-    label: 'Procesando', 
-    icon: Package, 
-    color: 'text-blue-600' 
+  processing: {
+    variant: 'info',
+    label: 'Procesando',
+    icon: Package,
+    color: 'text-origen-pino',
+    bandBg: 'bg-origen-pastel',
   },
-  shipped: { 
-    variant: 'info',        // También info (o podríamos crear una variante 'purple' si fuera necesario)
-    label: 'Enviado', 
-    icon: Truck, 
-    color: 'text-purple-600' 
+  shipped: {
+    variant: 'info',
+    label: 'Enviado',
+    icon: Truck,
+    color: 'text-origen-hoja',
+    bandBg: 'bg-origen-pastel',
   },
-  delivered: { 
-    variant: 'success',     // Verde
-    label: 'Entregado', 
-    icon: CheckCircle, 
-    color: 'text-green-600' 
+  delivered: {
+    variant: 'success',
+    label: 'Entregado',
+    icon: CheckCircle,
+    color: 'text-origen-bosque',
+    bandBg: 'bg-origen-pastel',
   },
-  cancelled: { 
-    variant: 'danger',      // Rojo
-    label: 'Cancelado', 
-    icon: XCircle, 
-    color: 'text-red-600' 
+  cancelled: {
+    variant: 'danger',
+    label: 'Cancelado',
+    icon: XCircle,
+    color: 'text-red-700',
+    bandBg: 'bg-red-50',
   },
-  refunded: { 
-    variant: 'danger',      // Rojo
-    label: 'Reembolsado', 
-    icon: XCircle, 
-    color: 'text-red-600' 
+  refunded: {
+    variant: 'danger',
+    label: 'Reembolsado',
+    icon: XCircle,
+    color: 'text-red-700',
+    bandBg: 'bg-red-50',
   }
 };
 
@@ -146,7 +153,7 @@ export default function OrderDetailPage() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="pb-4 lg:pb-8"
+        className={canUpdate && nextAction ? "pb-[calc(136px+env(safe-area-inset-bottom))] lg:pb-8" : "pb-4 lg:pb-8"}
       >
         {/* Cabecera */}
         <PageHeader
@@ -170,14 +177,7 @@ export default function OrderDetailPage() {
               {/* ── Estado + acción (móvil: hero card prominente) ── */}
               <div className="rounded-2xl border border-border-subtle bg-surface overflow-hidden">
                 {/* Banda de color por estado */}
-                <div className={cn(
-                  'px-4 py-3 flex items-center justify-between',
-                  order.status === 'delivered' && 'bg-green-50',
-                  order.status === 'shipped'   && 'bg-purple-50',
-                  order.status === 'processing'&& 'bg-blue-50',
-                  order.status === 'pending'   && 'bg-amber-50',
-                  ['cancelled','refunded'].includes(order.status) && 'bg-red-50',
-                )}>
+                <div className={cn('px-4 py-3 flex items-center justify-between', status.bandBg)}>
                   <div className="flex items-center gap-2">
                     <status.icon className={cn('w-4 h-4', status.color)} />
                     <span className={cn('text-sm font-semibold', status.color)}>{status.label}</span>
@@ -319,7 +319,7 @@ export default function OrderDetailPage() {
                         </p>
                       </div>
                       {/* Precio */}
-                      <p className="text-sm font-bold text-origen-pradera flex-shrink-0">{item.totalPrice.toFixed(2)}€</p>
+                      <p className="text-sm font-bold text-origen-bosque flex-shrink-0 tabular-nums">{item.totalPrice.toFixed(2)}€</p>
                     </div>
                   ))}
                 </div>
@@ -342,7 +342,7 @@ export default function OrderDetailPage() {
                   )}
                   <div className="flex justify-between text-sm font-bold pt-1.5 border-t border-border-subtle">
                     <span className="text-origen-bosque">Total</span>
-                    <span className="text-origen-pradera">{order.total.toFixed(2)}€</span>
+                    <span className="text-origen-bosque tabular-nums">{order.total.toFixed(2)}€</span>
                   </div>
                 </div>
               </div>

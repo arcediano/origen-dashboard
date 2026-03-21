@@ -66,9 +66,8 @@ export default function ConfiguracionPage() {
   return (
     <div className="w-full">
 
-      {/* Cabecera — solo desktop (MobileTopBar maneja el título en móvil) */}
+      {/* Cabecera */}
       <PageHeader
-        className="hidden lg:block"
         title="Configuración"
         description="Administra tu cuenta y preferencias"
         badgeIcon={Settings}
@@ -78,7 +77,7 @@ export default function ConfiguracionPage() {
       />
 
       {/* Contenido */}
-      <div className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+      <div className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
 
         {/* Móvil: lista nativa de navegación */}
         <div className="lg:hidden rounded-2xl border border-border-subtle overflow-hidden bg-surface divide-y divide-border-subtle">

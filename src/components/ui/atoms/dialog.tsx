@@ -156,7 +156,7 @@ export function Modal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-origen-oscuro/60 backdrop-blur-sm animate-in fade-in-0"
+      className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-origen-oscuro/60 backdrop-blur-sm animate-in fade-in-0"
       onClick={closeOnOutsideClick ? (e) => { if (e.target === e.currentTarget) onClose(); } : undefined}
       aria-modal="true"
       role="dialog"

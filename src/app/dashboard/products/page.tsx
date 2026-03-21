@@ -25,6 +25,7 @@ import { DeleteProductDialog } from './components/ProductDialogs/DeleteProductDi
 import { useProductFilters } from '@/hooks/useProductFilters';
 import { fetchProducts, fetchProductStats } from '@/lib/api/products';
 import { type Product } from '@/types/product';
+import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 
 // ============================================================================
 // ANIMACIONES
@@ -185,7 +186,10 @@ export default function ProductosPage() {
     );
   }
 
+  const handleRefresh = async () => { await loadData(); };
+
   return (
+    <MobilePullRefresh onRefresh={handleRefresh}>
     <>
       {/* Cabecera */}
         <PageHeader
@@ -355,5 +359,6 @@ export default function ProductosPage() {
         onConfirm={handleConfirmDelete}
       />
     </>
+    </MobilePullRefresh>
   );
 }

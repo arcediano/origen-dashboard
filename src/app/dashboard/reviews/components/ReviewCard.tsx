@@ -76,6 +76,31 @@ function StatusChip({ status }: { status: Review['status'] }) {
   );
 }
 
+// ─── SKELETON ─────────────────────────────────────────────────────────────────
+
+export function ReviewCardSkeleton() {
+  return (
+    <div className="px-4 py-3.5 border-b border-border-subtle last:border-0 animate-pulse">
+      <div className="flex items-start gap-2.5 mb-2">
+        <div className="w-8 h-8 rounded-full bg-origen-pastel/60 flex-shrink-0" />
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="h-3.5 bg-origen-pastel rounded-lg w-1/3" />
+            <div className="h-4 bg-origen-pastel/60 rounded-full w-16" />
+          </div>
+          <div className="h-2.5 bg-origen-pastel/60 rounded-lg w-24" />
+        </div>
+      </div>
+      <div className="h-3 bg-origen-pastel rounded-lg w-2/3 mb-1.5" />
+      <div className="h-2.5 bg-origen-pastel/60 rounded-lg w-1/2 mb-2" />
+      <div className="space-y-1.5">
+        <div className="h-2.5 bg-origen-pastel/40 rounded-lg w-full" />
+        <div className="h-2.5 bg-origen-pastel/40 rounded-lg w-4/5" />
+      </div>
+    </div>
+  );
+}
+
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 
 export interface ReviewCardProps {

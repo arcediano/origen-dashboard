@@ -130,7 +130,8 @@ function DashboardContentWrapper({
       </div>
 
       {/* Header móvil nativo */}
-      <MobileTopBar />
+      {/* @todo: reemplazar notificationCount=3 con dato real de la API */}
+      <MobileTopBar notificationCount={3} />
 
       <main className={cn(
         "transition-all duration-300",

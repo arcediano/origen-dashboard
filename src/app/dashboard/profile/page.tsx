@@ -35,8 +35,7 @@ export default function ProfilePage() {
   const completion = 85;
 
   return (
-    <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-
+    <div>
       {/* Cabecera de página */}
       <PageHeader
         title="Mi perfil"
@@ -48,7 +47,7 @@ export default function ProfilePage() {
       />
 
       {/* ── Barra de completitud ── */}
-      <div className="mt-4 mb-5 sm:mt-6 sm:mb-8">
+      <div className="px-4 sm:px-6 lg:px-8 mt-4 mb-5 sm:mt-6 sm:mb-8">
 
         {/* Móvil: fila compacta */}
         <div className="lg:hidden flex items-center gap-3 p-4 rounded-2xl bg-surface-alt border border-border-subtle">
@@ -88,7 +87,7 @@ export default function ProfilePage() {
       </div>
 
       {/* ── Móvil: lista de navegación nativa ── */}
-      <div className="lg:hidden rounded-2xl border border-border-subtle overflow-hidden bg-surface divide-y divide-border-subtle">
+      <div className="lg:hidden mx-4 rounded-2xl border border-border-subtle overflow-hidden bg-surface divide-y divide-border-subtle">
 
         <Link href="/dashboard/profile/personal" className="flex items-center gap-3 px-4 py-4 active:bg-surface-alt transition-colors">
           <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
@@ -135,7 +134,7 @@ export default function ProfilePage() {
       </div>
 
       {/* ── Desktop: grid de cards ── */}
-      <div className="hidden lg:grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      <div className="hidden lg:grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 px-8">
 
         {/* CARD 1: Información personal */}
         <motion.div variants={itemVariants} initial="hidden" animate="visible" className="flex">

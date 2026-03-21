@@ -18,12 +18,13 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { OrderStats } from './components/OrderStats';
 import { OrderFilters } from './components/OrderFilters';
 import { OrdersTable } from './components/OrdersTable';
-import { OrderCard } from './components/OrderCard';
+import { OrderCard, OrderCardSkeleton } from './components/OrderCard';
 import { Pagination } from '@/components/ui/atoms/pagination';
 
 // Hooks y API
 import { fetchOrders } from '@/lib/api/orders';
 import type { Order, OrderFilters as OrderFiltersType } from '@/types/order';
+import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 
 // ============================================================================
 // ANIMACIONES
@@ -140,7 +141,10 @@ export default function OrdersPage() {
     );
   }
 
+  const handleRefresh = async () => { await loadOrders(); };
+
   return (
+    <MobilePullRefresh onRefresh={handleRefresh}>
     <>
       {/* Cabecera */}
       <PageHeader
@@ -157,7 +161,7 @@ export default function OrdersPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(24px+env(safe-area-inset-bottom))]"
+        className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8"
       >
         {/* Estadísticas */}
         {stats && (
@@ -194,13 +198,16 @@ export default function OrdersPage() {
             <>
               {/* Móvil: lista de tarjetas */}
               <div className="block lg:hidden rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden shadow-subtle">
-                {orders.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onPress={handleViewDetails}
-                  />
-                ))}
+                {isLoading
+                  ? Array.from({ length: 5 }).map((_, i) => <OrderCardSkeleton key={i} />)
+                  : orders.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        onPress={handleViewDetails}
+                      />
+                    ))
+                }
               </div>
 
               {/* Desktop: tabla */}
@@ -226,5 +233,6 @@ export default function OrdersPage() {
         </motion.div>
       </motion.div>
     </>
+    </MobilePullRefresh>
   );
 }

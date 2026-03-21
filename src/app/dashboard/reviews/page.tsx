@@ -17,12 +17,13 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ReviewStats } from './components/ReviewStats';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
-import { ReviewCard } from './components/ReviewCard';
+import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
 import { Pagination } from '@/components/ui/atoms/pagination';
 
 // Hooks y API
 import { fetchReviews } from '@/lib/api/reviews';
 import type { Review, ReviewFilters as ReviewFiltersType } from '@/types/review';
+import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 
 // ============================================================================
 // ANIMACIONES
@@ -123,7 +124,10 @@ export default function ReviewsPage() {
 
   if (error) return <PageError title="Error al cargar" message={error} onRetry={loadReviews} />;
 
+  const handleRefresh = async () => { await loadReviews(); };
+
   return (
+    <MobilePullRefresh onRefresh={handleRefresh}>
     <>
       {/* Cabecera */}
       <PageHeader
@@ -139,7 +143,7 @@ export default function ReviewsPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(24px+env(safe-area-inset-bottom))]"
+        className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8"
       >
         {/* Estadísticas */}
         {stats && (
@@ -160,18 +164,19 @@ export default function ReviewsPage() {
 
         {/* Lista de reseñas */}
         <motion.div variants={itemVariants}>
-          {reviews.length > 0 && (
-            <div className="block lg:hidden rounded-xl border border-border-subtle bg-surface overflow-hidden mb-4">
-              {reviews.map((review) => (
-                <ReviewCard
-                  key={review.id}
-                  review={review}
-                  onRespond={handleRespond}
-                  onFlag={(id) => handleFlag(id)}
-                />
-              ))}
-            </div>
-          )}
+          <div className="block lg:hidden rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden shadow-subtle mb-4">
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, i) => <ReviewCardSkeleton key={i} />)
+              : reviews.map((review) => (
+                  <ReviewCard
+                    key={review.id}
+                    review={review}
+                    onRespond={handleRespond}
+                    onFlag={(id) => handleFlag(id)}
+                  />
+                ))
+            }
+          </div>
 
           <div className="hidden lg:block">
             <ReviewsList
@@ -193,5 +198,6 @@ export default function ReviewsPage() {
         </motion.div>
       </motion.div>
     </>
+    </MobilePullRefresh>
   );
 }

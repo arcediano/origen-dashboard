@@ -34,13 +34,26 @@ const SUB_PAGE_TITLES: Record<string, string> = {
   '/dashboard/profile/certifications': 'Certificaciones',
   '/dashboard/notifications': 'Notificaciones',
   '/dashboard/configuracion': 'Configuración',
+  '/dashboard/configuracion/perfil': 'Perfil público',
+  '/dashboard/configuracion/envios': 'Envíos',
+  '/dashboard/configuracion/pagos': 'Pagos',
+  '/dashboard/configuracion/notificaciones': 'Notificaciones',
+  '/dashboard/configuracion/privacidad': 'Privacidad',
+  '/dashboard/configuracion/idioma': 'Idioma y región',
   '/dashboard/security': 'Seguridad',
+  '/dashboard/business': 'Mi negocio',
 };
 
 function getSubPageTitle(pathname: string): string {
   if (SUB_PAGE_TITLES[pathname]) return SUB_PAGE_TITLES[pathname];
   if (pathname.startsWith('/dashboard/products/') && pathname.endsWith('/edit')) return 'Editar producto';
   if (pathname.startsWith('/dashboard/orders/')) return 'Detalle del pedido';
+  // Detalle de producto: /dashboard/products/[id] (no es create ni edit)
+  if (
+    pathname.startsWith('/dashboard/products/') &&
+    !pathname.endsWith('/edit') &&
+    pathname !== '/dashboard/products/create'
+  ) return 'Detalle del producto';
   return '';
 }
 
