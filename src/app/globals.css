@@ -248,6 +248,31 @@
     background-color: hsl(var(--hoja));
   }
 
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PREVENIR AUTO-ZOOM EN iOS / ANDROID — fuera de @layer para máxima especificidad
+   ═══════════════════════════════════════════════════════════════════════════════
+   Debe estar FUERA de @layer utilities para sobrescribir text-xs y text-sm
+   de Tailwind (que sí están en @layer utilities).
+
+   Afecta solo a dispositivos táctiles:
+     - (hover: none)       → el dispositivo no tiene hover real (sin ratón)
+     - (pointer: coarse)   → puntero impreciso (dedo), no ratón ni trackpad
+
+   Excluimos checkbox, radio, range y file porque esos no muestran teclado.
+   ─────────────────────────────────────────────────────────────────────────── */
+@media (hover: none) and (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Re-abrimos @layer utilities para no romper el orden de capas de Tailwind */
+@layer utilities {
+
   /* === SAFE-AREA (PWA / iPhone notch / home indicator) === */
   .safe-area-top {
     padding-top: env(safe-area-inset-top, 0px);
@@ -278,6 +303,21 @@
   .no-select {
     -webkit-user-select: none;
     user-select: none;
+  }
+
+  /* ── PREVENIR AUTO-ZOOM EN iOS / ANDROID AL ENFOCAR INPUTS ─────────────────
+     iOS Safari y Chrome en iOS hacen zoom automático cuando un input tiene
+     font-size < 16px. El media query (hover:none + pointer:coarse) identifica
+     dispositivos táctiles sin afectar escritorio ni trackpads.
+
+     !important necesario: las clases Tailwind (text-xs, text-sm) tienen
+     mayor especificidad que un selector CSS normal.
+
+     NO usamos user-scalable=no ni maximum-scale=1 en el viewport porque
+     eso bloquea el zoom de accesibilidad, lo cual viola WCAG 1.4.4.
+     ──────────────────────────────────────────────────────────────────────── */
+  .no-zoom-fix {
+    /* placeholder — la regla real está fuera de @layer para mayor especificidad */
   }
 
 }
