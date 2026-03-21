@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/
 import { Modal } from '@/components/ui/atoms/dialog';
 import { PageHeader } from '../../components/PageHeader';
 import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
+import { ProductImage } from '@/components/ui/atoms/product-image';
 
 // Iconos
 import {
@@ -332,19 +333,6 @@ function AttributesContent({ product }: { product: Product }) {
       ))}
     </div>
   );
-}
-
-// ── Imagen con fallback para imágenes rotas ───────────────────────────────────
-function ProductImg({ src, alt, className }: { src: string; alt: string; className?: string }) {
-  const [broken, setBroken] = useState(false);
-  if (broken) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <Package className="w-20 h-20 text-origen-pradera/30" />
-      </div>
-    );
-  }
-  return <img src={src} alt={alt} className={className} onError={() => setBroken(true)} />;
 }
 
 // ============================================================================
@@ -685,9 +673,9 @@ export default function ProductoDetallePage() {
                   <CardContent className="p-4">
                     <div className="aspect-[4/3] lg:aspect-square rounded-xl bg-gradient-to-br from-origen-crema to-gray-100 flex items-center justify-center overflow-hidden">
                       {product.mainImage ? (
-                        <ProductImg src={product.mainImage.url} alt={product.mainImage.alt || product.name} className="w-full h-full object-cover" />
+                        <ProductImage src={product.mainImage.url} alt={product.mainImage.alt || product.name} className="w-full h-full object-cover" />
                       ) : product.gallery && product.gallery.length > 0 ? (
-                        <ProductImg src={product.gallery[0].url} alt={product.gallery[0].alt || product.name} className="w-full h-full object-cover" />
+                        <ProductImage src={product.gallery[0].url} alt={product.gallery[0].alt || product.name} className="w-full h-full object-cover" />
                       ) : (
                         <Package className="w-20 h-20 text-origen-pradera/30" />
                       )}
@@ -696,7 +684,7 @@ export default function ProductoDetallePage() {
                       <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide lg:grid lg:grid-cols-4">
                         {product.gallery.slice(1, 5).map((img, idx) => (
                           <div key={img.id} className="w-16 h-16 shrink-0 lg:w-auto lg:h-auto lg:aspect-square rounded-lg bg-origen-crema/50 overflow-hidden">
-                            <ProductImg src={img.url} alt={img.alt || `Imagen ${idx + 2}`} className="w-full h-full object-cover" />
+                            <ProductImage src={img.url} alt={img.alt || `Imagen ${idx + 2}`} className="w-full h-full object-cover" />
                           </div>
                         ))}
                       </div>

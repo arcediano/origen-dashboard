@@ -23,6 +23,7 @@ export { Switch } from './switch';
 export { Slider } from './slider';
 
 // Display
+export { ProductImage } from './product-image';
 export { Badge, StatusBadge } from './badge';
 export { Avatar, AvatarFallback, AvatarImage, AvatarGroup } from './avatar';
 export { Progress, CircularProgress, SteppedProgress } from './progress';

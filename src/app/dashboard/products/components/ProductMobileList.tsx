@@ -12,7 +12,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  Package,
   AlertCircle,
   CheckCircle2,
   FileEdit,
@@ -24,6 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
 import { SwipeableRow } from '@/components/shared/mobile';
+import { ProductImage } from '@/components/ui/atoms/product-image';
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
@@ -142,13 +142,7 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
       >
         {/* Thumbnail */}
         <div className="w-14 h-14 rounded-xl overflow-hidden bg-origen-pastel flex-shrink-0 shadow-subtle">
-          {mainImg ? (
-            <img src={mainImg} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-origen-pastel to-origen-pradera/10">
-              <Package className="w-6 h-6 text-origen-pradera/50" />
-            </div>
-          )}
+          <ProductImage src={mainImg} alt={product.name} />
         </div>
 
         {/* Info — 3 líneas con jerarquía clara */}

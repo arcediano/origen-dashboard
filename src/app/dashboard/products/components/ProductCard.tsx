@@ -6,11 +6,12 @@
 'use client';
 
 import React from 'react';
-import { Package, Eye, Edit, PlusCircle, Star } from 'lucide-react';
+import { Eye, Edit, PlusCircle, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/atoms/card';
 import { StatusBadge } from '@/components/ui/atoms/badge';
 import { Button } from '@/components/ui/atoms/button';
+import { ProductImage } from '@/components/ui/atoms/product-image';
 import { type Product } from '@/types/product';
 
 export interface ProductCardProps {
@@ -44,17 +45,8 @@ export function ProductCard({
       onClick={() => onView(product.id)}
     >
       {/* Imagen del producto - responsive */}
-      <div className="aspect-square w-full bg-gradient-to-br from-origen-crema to-gray-100 rounded-lg mb-2 sm:mb-3 flex items-center justify-center overflow-hidden">
-        {mainImage ? (
-          <img
-            src={mainImage.url}
-            alt={mainImage.alt || product.name}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <Package className="w-8 h-8 sm:w-12 sm:h-12 text-border" />
-        )}
+      <div className="aspect-square w-full bg-gradient-to-br from-origen-crema to-gray-100 rounded-lg mb-2 sm:mb-3 overflow-hidden">
+        <ProductImage src={mainImage?.url} alt={mainImage?.alt || product.name} />
       </div>
 
       {/* Cabecera con nombre y estado */}

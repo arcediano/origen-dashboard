@@ -6,10 +6,10 @@
 'use client';
 
 import React from 'react';
-import { Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Table, type Column } from '@/components/ui/atoms/table';
 import { StatusBadge } from '@/components/ui/atoms/badge';
+import { ProductImage } from '@/components/ui/atoms/product-image';
 import { ProductTableActions } from './ProductTableActions';
 import { ProductExpandableDetails } from './ProductExpandableDetails';
 import { type Product } from '@/types/product';
@@ -29,26 +29,14 @@ export interface ProductTableProps {
 }
 
 // ============================================================================
-// CELDA DE PRODUCTO — maneja imagen rota con fallback al icono Package
+// CELDA DE PRODUCTO
 // ============================================================================
 
 function ProductCell({ item }: { item: Product }) {
-  const [imgError, setImgError] = React.useState(false);
-  const showImage = item.mainImage && !imgError;
-
   return (
     <div className="flex items-center gap-3">
-      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-origen-crema to-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-        {showImage ? (
-          <img
-            src={item.mainImage!.url}
-            alt={item.mainImage!.alt || item.name}
-            className="w-full h-full object-cover"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <Package className="w-4 h-4 text-text-subtle" />
-        )}
+      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-origen-crema to-gray-100 overflow-hidden shrink-0">
+        <ProductImage src={item.mainImage?.url} alt={item.mainImage?.alt || item.name} />
       </div>
       <div className="min-w-0">
         <p className="text-sm font-medium text-origen-bosque truncate max-w-[200px]" title={item.name}>
