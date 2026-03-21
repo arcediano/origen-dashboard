@@ -385,8 +385,13 @@ export function FilterBottomSheet({
     return false;
   });
 
-  // ── Altura del footer (fija, sin safe-area) ──────────────────────────────
-  // border-t(1) + pt-4(16) + h-12(48) + pb-5(20) = 85px → 88px con margen
+  // ── Altura del sheet y del footer ────────────────────────────────────────
+  // Sheet = 90vh (compatible con todos los browsers)
+  // Footer = border-t(1) + pt-4(16) + h-12(48) + pb-5(20) = 85px → 88 con margen
+  // Scroll = calc(90vh - 88px - env(safe-area-inset-bottom))
+  // Usamos 90vh explícito en el calc (no 100%) para no depender de que el browser
+  // resuelva correctamente height:100% sobre un elemento con CSS transform activo.
+  const SHEET_H = '90vh';
   const FOOTER_BASE_H = 88;
 
   return (
@@ -405,14 +410,7 @@ export function FilterBottomSheet({
             aria-hidden
           />
 
-          {/* ── Bottom Sheet ─────────────────────────────────────────────────────
-              ARQUITECTURA NATIVA MOBILE:
-              · fixed bottom-0 (anclado al borde inferior, nunca inset-0)
-              · height: 90svh con fallback 90vh — altura explícita y acotada
-              · Sin flex-col en el elemento con transform (bug iOS Safari)
-              · Scroll area: height = calc(100% - footer) → CSS puro, sin flexbox
-              · Footer: bloque natural después del scroll, no absolute
-              ────────────────────────────────────────────────────────────────── */}
+          {/* ── Bottom Sheet ──────────────────────────────────────────────────── */}
           <motion.div
             key="sheet"
             initial={{ y: '100%' }}
@@ -421,18 +419,18 @@ export function FilterBottomSheet({
             transition={{ type: 'spring', damping: 32, stiffness: 320 }}
             onPointerDown={(e) => e.stopPropagation()}
             className="fixed bottom-0 left-0 right-0 z-[60] bg-surface rounded-t-3xl shadow-2xl overflow-hidden"
-            style={{ height: 'min(90svh, 90vh)' } as React.CSSProperties}
+            style={{ height: SHEET_H } as React.CSSProperties}
             role="dialog"
             aria-modal
             aria-label={title}
           >
-            {/* ── Zona de scroll (Handle + Header + Filtros) ──
-                Altura = 100% del sheet MENOS el footer.
-                env(safe-area-inset-bottom) se suma al footer, se resta aquí. */}
+            {/* ── Zona de scroll ──
+                Altura explícita con 90vh (mismo valor que el sheet) para no
+                depender de height:100% — que puede fallar en iOS con transform. */}
             <div
               className="overflow-y-auto overscroll-contain"
               style={{
-                height: `calc(100% - ${FOOTER_BASE_H}px - env(safe-area-inset-bottom, 0px))`,
+                height: `calc(${SHEET_H} - ${FOOTER_BASE_H}px - env(safe-area-inset-bottom, 0px))`,
                 WebkitOverflowScrolling: 'touch',
               } as React.CSSProperties}
             >
