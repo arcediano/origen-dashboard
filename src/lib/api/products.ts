@@ -1,14 +1,30 @@
 /**
  * @file products.ts
- * @description Llamadas a la API para la gestión de productos (UNIFICADA)
+ * @description Capa de acceso a datos de productos para el dashboard.
+ *              Conecta con el API Gateway (products-service) a través de `gatewayClient`.
+ *
+ * Todas las funciones devuelven `ApiResponse<T>` para mantener compatibilidad
+ * con los consumidores existentes (pages, hooks, dialogs) que comprueban
+ * `response.error` antes de usar `response.data`.
+ *
+ * La transformación entre el formato del backend (UPPER_CASE, imágenes { key, url })
+ * y el tipo `Product` del frontend se delega completamente a `products-mapper.ts`.
  */
 
+import { gatewayClient, GatewayError } from './client';
 import { type Product, type ProductFormData } from '@/types/product';
-import { MOCK_PRODUCTS } from './products_data';
+import {
+  type ApiProduct,
+  type ApiProductsListResponse,
+  mapApiProductToProduct,
+  mapApiProducts,
+  computeProductStats,
+  mapStatusToApi,
+  mapVisibilityToApi,
+  type ProductStats,
+} from './products-mapper';
 
-// ============================================================================
-// TIPOS DE RESPUESTA
-// ============================================================================
+// ─── TIPOS DE RESPUESTA ───────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {
   data?: T;
@@ -40,80 +56,119 @@ export interface CreateProductResponse {
   redirectUrl: string;
 }
 
-// ============================================================================
-// FUNCIONES AUXILIARES
-// ============================================================================
+// ─── HELPERS INTERNOS ─────────────────────────────────────────────────────────
 
 /**
- * Simula un retardo de red
+ * Normaliza cualquier error en un `ApiResponse` estandarizado.
+ * Preserva el status HTTP si el error proviene del gateway.
  */
-const delay = (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms));
+function handleError<T>(error: unknown, context: string): ApiResponse<T> {
+  console.error(`[products] Error en ${context}:`, error);
+  if (error instanceof GatewayError) {
+    return { error: error.message, status: error.status };
+  }
+  return { error: `Error inesperado en ${context}`, status: 500 };
+}
 
 /**
- * Genera un ID único para el producto (BACKEND)
+ * Traduce el `sortBy` del dashboard al formato que acepta products-service.
+ * Los valores no reconocidos se mapean a 'newest' como fallback seguro.
  */
-const generateProductId = (): string => {
-  return `prod-${Math.random().toString(36).substring(2, 10)}`;
-};
+function mapSortBy(sortBy?: string): string | undefined {
+  if (!sortBy) return undefined;
+  const map: Record<string, string> = {
+    newest:       'newest',
+    'price-asc':  'price_asc',
+    'price-desc': 'price_desc',
+    'sales-desc': 'sales',
+  };
+  return map[sortBy] ?? 'newest';
+}
 
 /**
- * Genera un SKU único basado en el nombre y categoría (BACKEND)
+ * Convierte un `ProductFormData` del frontend al cuerpo JSON que espera
+ * el endpoint POST /products del products-service.
+ *
+ * - Imágenes: `ProductImage { id (=S3 key), url }` → `mainImageUrl/Key` + `galleryImageUrls/Keys[]`
+ * - Estado:   `'active'` → `'ACTIVE'` (Prisma enum)
+ * - SKU vacío: omitido para que el backend lo genere automáticamente
  */
-const generateSku = (productName: string, categoryId: string): string => {
-  const categoryPrefix = {
-    quesos: 'QUE',
-    aceites: 'ACE',
-    vinos: 'VIN',
-    embutidos: 'EMB',
-    mieles: 'MIE',
-    panaderia: 'PAN',
-    conservas: 'CON',
-    dulces: 'DUL',
-    bebidas: 'BEB',
-    otros: 'PRO',
-  }[categoryId] || 'PRO';
+function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
+  return {
+    name:              formData.name,
+    shortDescription:  formData.shortDescription,
+    fullDescription:   formData.fullDescription,
+    categoryId:        formData.categoryId,
+    subcategoryId:     formData.subcategoryId || undefined,
+    tags:              formData.tags,
 
-  const nameParts = productName
-    .toUpperCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^A-Z0-9]/g, ' ')
-    .split(' ')
-    .filter(part => part.length > 0);
+    // Imágenes S3 — el frontend almacena la key en ProductImage.id
+    mainImageUrl:      formData.mainImage?.url,
+    mainImageKey:      formData.mainImage?.id,
+    galleryImageUrls:  formData.gallery.map(img => img.url),
+    galleryImageKeys:  formData.gallery.map(img => img.id),
 
-  let nameCode = '';
-  if (nameParts.length === 1) {
-    nameCode = nameParts[0].substring(0, 3);
-  } else {
-    nameCode = nameParts.map(p => p[0]).join('').substring(0, 3);
+    basePrice:         formData.basePrice,
+    comparePrice:      formData.comparePrice || undefined,
+
+    // El backend genera el SKU si está vacío
+    sku:               formData.sku || undefined,
+    barcode:           formData.barcode || undefined,
+
+    stock:             formData.stock,
+    lowStockThreshold: formData.lowStockThreshold,
+    trackInventory:    formData.trackInventory,
+    allowBackorders:   formData.allowBackorders,
+
+    weight:     formData.weight,
+    weightUnit: formData.weightUnit,
+    dimensions: formData.dimensions,
+
+    status:     mapStatusToApi(formData.status),
+    visibility: mapVisibilityToApi(formData.visibility),
+  };
+}
+
+/**
+ * Convierte un `Partial<Product>` al cuerpo JSON del endpoint PUT /products/:id.
+ * Solo incluye los campos que están presentes (no undefined) para evitar
+ * sobreescribir campos no modificados con valores null.
+ */
+function partialProductToApiBody(product: Partial<Product>): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+
+  const scalar: Array<keyof Product> = [
+    'name', 'shortDescription', 'fullDescription', 'categoryId', 'subcategoryId',
+    'tags', 'basePrice', 'comparePrice', 'sku', 'barcode', 'stock',
+    'lowStockThreshold', 'trackInventory', 'allowBackorders',
+    'weight', 'weightUnit', 'dimensions',
+  ];
+
+  for (const key of scalar) {
+    if (product[key] !== undefined) body[key] = product[key];
   }
 
-  if (nameCode.length < 2) {
-    nameCode = (nameCode + 'XX').substring(0, 3);
+  if (product.status !== undefined)     body.status     = mapStatusToApi(product.status);
+  if (product.visibility !== undefined) body.visibility = mapVisibilityToApi(product.visibility);
+
+  // Imágenes S3
+  if (product.mainImage !== undefined) {
+    body.mainImageUrl = product.mainImage?.url ?? null;
+    body.mainImageKey = product.mainImage?.id  ?? null;
+  }
+  if (product.gallery !== undefined) {
+    body.galleryImageUrls = product.gallery.map(img => img.url);
+    body.galleryImageKeys = product.gallery.map(img => img.id);
   }
 
-  const sequential = Math.floor(100 + Math.random() * 900);
-  return `${categoryPrefix}-${nameCode}-${sequential}`;
-};
+  return body;
+}
+
+// ─── VALIDACIONES (cliente) ───────────────────────────────────────────────────
 
 /**
- * Genera un slug a partir del nombre
- */
-const generateSlug = (name: string): string => {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-};
-
-// ============================================================================
-// VALIDACIONES
-// ============================================================================
-
-/**
- * Valida los datos del formulario antes de enviar
+ * Valida los datos del formulario en el cliente antes de enviarlos.
+ * Devuelve la lista de errores por campo para mostrar inline en el formulario.
  */
 export const validateProductForm = (formData: ProductFormData): ValidationResponse => {
   const errors: ValidationError[] = [];
@@ -150,29 +205,19 @@ export const validateProductForm = (formData: ProductFormData): ValidationRespon
     errors.push({ field: 'lowStockThreshold', message: 'El umbral de stock bajo no puede ser negativo' });
   }
 
-  // Validar información nutricional si es producto alimenticio
-  if (formData.categoryId === 'quesos' || formData.categoryId === 'aceites' || 
-      formData.categoryId === 'mieles' || formData.categoryId === 'embutidos' || 
-      formData.categoryId === 'panaderia' || formData.categoryId === 'vinos') {
-    
-    if (!formData.nutritionalInfo?.servingSizeValue || formData.nutritionalInfo.servingSizeValue <= 0) {
-      errors.push({ field: 'nutritionalInfo.servingSizeValue', message: 'Debes indicar el tamaño de la ración' });
-    }
-
-    if (!formData.nutritionalInfo?.ingredients || formData.nutritionalInfo.ingredients.length === 0) {
-      errors.push({ field: 'nutritionalInfo.ingredients', message: 'Debes incluir al menos un ingrediente' });
-    }
-  }
-
   return { valid: errors.length === 0, errors };
 };
 
-// ============================================================================
-// FUNCIONES DE LISTADO Y CONSULTA
-// ============================================================================
+// ─── LISTADO Y CONSULTA ───────────────────────────────────────────────────────
 
 /**
- * Obtiene todos los productos del productor actual
+ * Obtiene los productos del productor autenticado con paginación y filtros.
+ * Ruta backend: GET /products/producer/my-products
+ *
+ * El filtro `stock` se aplica localmente sobre la página recibida
+ * porque el backend no expone un filtro de nivel de stock en este endpoint.
+ * Para mayor precisión en paginación con filtro de stock, se puede
+ * aumentar el límite o añadir el filtro al backend en el futuro.
  */
 export async function fetchProducts(params?: {
   page?: number;
@@ -184,447 +229,295 @@ export async function fetchProducts(params?: {
   sortBy?: string;
 }): Promise<ApiResponse<PaginatedResponse<Product>>> {
   try {
-    await delay(600);
+    // Construir query params para el backend
+    const query: Record<string, string | number | undefined> = {
+      page:   params?.page  ?? 1,
+      limit:  params?.limit ?? 10,
+      sortBy: mapSortBy(params?.sortBy),
+    };
 
-    const page = params?.page || 1;
-    const limit = params?.limit || 10;
-    
-    let filteredProducts = [...MOCK_PRODUCTS];
-    
-    if (params?.search) {
-      const searchLower = params.search.toLowerCase();
-      filteredProducts = filteredProducts.filter(
-        (p: Product) => p.name.toLowerCase().includes(searchLower) || p.sku.toLowerCase().includes(searchLower)
-      );
-    }
-    
+    if (params?.search)                                query.search    = params.search;
+    if (params?.status && params.status !== 'todos')   query.status    = mapStatusToApi(params.status);
+
+    // categoryId — el dashboard filtra por nombre; el backend usa ID.
+    // Si el filtro de categoría llega como ID directamente, se pasa tal cual.
+    // La integración completa con la API de categorías llegará con `categories.ts`.
     if (params?.category && params.category !== 'Todas') {
-      filteredProducts = filteredProducts.filter((p: Product) => p.categoryName === params.category);
+      query.categoryId = params.category;
     }
-    
-    if (params?.status && params.status !== 'todos') {
-      filteredProducts = filteredProducts.filter((p: Product) => p.status === params.status);
-    }
-    
+
+    const raw = await gatewayClient.get<ApiProductsListResponse>(
+      '/products/producer/my-products',
+      { params: query as Record<string, string | number | boolean | undefined | null> },
+    );
+
+    let items = mapApiProducts(raw.data);
+
+    // Filtro de stock — aplicado en cliente sobre los resultados paginados.
+    // Nota: esto afecta al conteo total si hay menos resultados de los esperados.
     if (params?.stock && params.stock !== 'todos') {
-      switch (params.stock) {
-        case 'bajo':
-          filteredProducts = filteredProducts.filter(
-            (p: Product) => p.lowStockThreshold && p.stock <= p.lowStockThreshold && p.stock > 0
-          );
-          break;
-        case 'agotado':
-          filteredProducts = filteredProducts.filter((p: Product) => p.stock === 0);
-          break;
-        case 'disponible':
-          filteredProducts = filteredProducts.filter((p: Product) => p.stock > 0);
-          break;
-      }
+      items = applyStockFilter(items, params.stock);
     }
-    
-    if (params?.sortBy) {
-      switch (params.sortBy) {
-        case 'name-asc':
-          filteredProducts.sort((a: Product, b: Product) => a.name.localeCompare(b.name));
-          break;
-        case 'name-desc':
-          filteredProducts.sort((a: Product, b: Product) => b.name.localeCompare(a.name));
-          break;
-        case 'price-asc':
-          filteredProducts.sort((a: Product, b: Product) => a.basePrice - b.basePrice);
-          break;
-        case 'price-desc':
-          filteredProducts.sort((a: Product, b: Product) => b.basePrice - a.basePrice);
-          break;
-        case 'stock-asc':
-          filteredProducts.sort((a: Product, b: Product) => a.stock - b.stock);
-          break;
-        case 'stock-desc':
-          filteredProducts.sort((a: Product, b: Product) => b.stock - a.stock);
-          break;
-        case 'sales-desc':
-          filteredProducts.sort((a: Product, b: Product) => (b.sales || 0) - (a.sales || 0));
-          break;
-        case 'oldest':
-          filteredProducts.sort((a: Product, b: Product) => a.createdAt.getTime() - b.createdAt.getTime());
-          break;
-        case 'newest':
-        default:
-          filteredProducts.sort((a: Product, b: Product) => b.createdAt.getTime() - a.createdAt.getTime());
-          break;
-      }
-    }
-    
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const paginatedItems = filteredProducts.slice(start, end);
-    
+
+    const total = params?.stock && params.stock !== 'todos' ? items.length : raw.total;
+    const limit = params?.limit ?? 10;
+
     return {
       data: {
-        items: paginatedItems,
-        total: filteredProducts.length,
-        page,
-        limit,
-        totalPages: Math.ceil(filteredProducts.length / limit),
+        items,
+        total,
+        page:       raw.page,
+        limit:      raw.limit,
+        totalPages: Math.ceil(total / limit),
       },
       status: 200,
     };
   } catch (error) {
-    console.error('Error en fetchProducts:', error);
-    return { error: 'Error al obtener productos', status: 500 };
+    return handleError(error, 'fetchProducts');
   }
 }
 
 /**
- * Obtiene un producto por su ID
+ * Aplica filtros de stock sobre una lista de productos ya mapeados.
+ */
+function applyStockFilter(products: Product[], stockFilter: string): Product[] {
+  switch (stockFilter) {
+    case 'bajo':
+      return products.filter(
+        p => p.stock > 0 && p.lowStockThreshold > 0 && p.stock <= p.lowStockThreshold,
+      );
+    case 'agotado':
+      return products.filter(p => p.stock === 0 || p.status === 'out_of_stock');
+    case 'disponible':
+      return products.filter(p => p.stock > 0);
+    default:
+      return products;
+  }
+}
+
+/**
+ * Obtiene un producto por su ID.
+ * Ruta backend: GET /products/:id
  */
 export async function fetchProductById(id: string): Promise<ApiResponse<Product>> {
   try {
-    await delay(400);
-    const product = MOCK_PRODUCTS.find((p: Product) => p.id === id);
-    if (!product) return { error: 'Producto no encontrado', status: 404 };
-    return { data: product, status: 200 };
+    const raw = await gatewayClient.get<ApiProduct>(`/products/${id}`);
+    return { data: mapApiProductToProduct(raw), status: 200 };
   } catch (error) {
-    console.error('Error en fetchProductById:', error);
-    return { error: 'Error al obtener el producto', status: 500 };
+    return handleError(error, 'fetchProductById');
   }
 }
 
 /**
- * Obtiene las estadísticas de productos
+ * Calcula las estadísticas de productos del productor.
+ * Obtiene todos los productos (límite alto) y aplica `computeProductStats` en cliente.
+ *
+ * Optimización futura: añadir GET /products/producer/stats en products-service.
  */
-export async function fetchProductStats(): Promise<
-  ApiResponse<{
-    total: number;
-    active: number;
-    lowStock: number;
-    outOfStock: number;
-    totalRevenue: number;
-    avgRating: number;
-    totalSales: number;
-    totalViews: number;
-  }>
-> {
+export async function fetchProductStats(): Promise<ApiResponse<ProductStats>> {
   try {
-    await delay(300);
-    
-    const total = MOCK_PRODUCTS.length;
-    const active = MOCK_PRODUCTS.filter((p: Product) => p.status === 'active').length;
-    const lowStock = MOCK_PRODUCTS.filter(
-      (p: Product) => p.lowStockThreshold && p.stock <= p.lowStockThreshold && p.stock > 0
-    ).length;
-    const outOfStock = MOCK_PRODUCTS.filter((p: Product) => p.stock === 0).length;
-    const totalRevenue = MOCK_PRODUCTS.reduce((sum: number, p: Product) => sum + (p.revenue || 0), 0);
-    const totalSales = MOCK_PRODUCTS.reduce((sum: number, p: Product) => sum + (p.sales || 0), 0);
-    const totalViews = MOCK_PRODUCTS.reduce((sum: number, p: Product) => sum + (p.views || 0), 0);
-    
-    const productsWithRating = MOCK_PRODUCTS.filter((p: Product) => p.rating);
-    const avgRating = productsWithRating.length > 0
-      ? productsWithRating.reduce((sum: number, p: Product) => sum + (p.rating || 0), 0) / productsWithRating.length
-      : 0;
-    
-    return {
-      data: {
-        total,
-        active,
-        lowStock,
-        outOfStock,
-        totalRevenue,
-        avgRating: parseFloat(avgRating.toFixed(1)),
-        totalSales,
-        totalViews,
-      },
-      status: 200,
-    };
+    const raw = await gatewayClient.get<ApiProductsListResponse>(
+      '/products/producer/my-products',
+      { params: { page: 1, limit: 500 } },
+    );
+    const products = mapApiProducts(raw.data);
+    return { data: computeProductStats(products), status: 200 };
   } catch (error) {
-    console.error('Error en fetchProductStats:', error);
-    return { error: 'Error al obtener estadísticas', status: 500 };
+    return handleError(error, 'fetchProductStats');
   }
 }
 
-// ============================================================================
-// FUNCIONES DE CREACIÓN Y EDICIÓN
-// ============================================================================
+// ─── CREACIÓN Y EDICIÓN ───────────────────────────────────────────────────────
 
 /**
- * Obtiene una sugerencia de SKU (solo previsualización)
- */
-export async function suggestSku(
-  productName: string,
-  categoryId: string
-): Promise<ApiResponse<{ suggestedSku: string }>> {
-  try {
-    await delay(300);
-
-    if (!productName || productName.trim().length < 3) {
-      return { data: { suggestedSku: 'PRO-XXX-001' }, status: 200 };
-    }
-
-    const categoryPrefix = {
-      quesos: 'QUE', aceites: 'ACE', vinos: 'VIN', embutidos: 'EMB',
-      mieles: 'MIE', panaderia: 'PAN', conservas: 'CON', dulces: 'DUL',
-      bebidas: 'BEB', otros: 'PRO',
-    }[categoryId] || 'PRO';
-
-    const nameParts = productName
-      .toUpperCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^A-Z0-9]/g, ' ')
-      .split(' ')
-      .filter(part => part.length > 0);
-
-    let nameCode = '';
-    if (nameParts.length === 1) {
-      nameCode = nameParts[0].substring(0, 3);
-    } else {
-      nameCode = nameParts.map(p => p[0]).join('').substring(0, 3);
-    }
-
-    if (nameCode.length < 2) {
-      nameCode = (nameCode + 'XX').substring(0, 3);
-    }
-
-    const suggestedSku = `${categoryPrefix}-${nameCode}-XXX`;
-    return { data: { suggestedSku }, status: 200 };
-  } catch (error) {
-    console.error('Error en suggestSku:', error);
-    return { error: 'Error al generar sugerencia', status: 500 };
-  }
-}
-
-/**
- * Verifica si un SKU ya existe
- */
-export async function checkSkuExists(sku: string): Promise<ApiResponse<{ exists: boolean }>> {
-  try {
-    await delay(300);
-    const exists = MOCK_PRODUCTS.some((p: Product) => p.sku === sku);
-    return { data: { exists }, status: 200 };
-  } catch (error) {
-    console.error('Error en checkSkuExists:', error);
-    return { error: 'Error al verificar SKU', status: 500 };
-  }
-}
-
-/**
- * Crea un nuevo producto (EL BACKEND GENERA EL SKU)
+ * Crea un nuevo producto.
+ * El SKU lo genera el backend si el campo llega vacío.
+ * Ruta backend: POST /products
  */
 export async function createProduct(
   formData: ProductFormData,
-  producerId: string = 'user-123'
 ): Promise<ApiResponse<CreateProductResponse>> {
   try {
-    await delay(1200);
-
     const validation = validateProductForm(formData);
     if (!validation.valid) {
       return {
-        error: 'Error de validación',
+        error:   'Error de validación',
         message: validation.errors.map(e => e.message).join(', '),
-        status: 400,
+        status:  400,
       };
     }
 
-    // Generar SKU en backend
-    const sku = generateSku(formData.name, formData.categoryId);
-    const productId = generateProductId();
-    const slug = generateSlug(formData.name);
-
-    // CORREGIDO: Usar un objeto de mapeo simple
-    // Mapeo de estados del formulario a estados del producto
-    const statusMap: Record<string, 'draft' | 'active' | 'inactive' | 'out_of_stock'> = {
-      'draft': 'draft',
-      'pending_approval': 'draft',
-      'active': 'active',
-      'scheduled': 'draft',
-      'inactive': 'inactive',
-      'out_of_stock': 'out_of_stock'
-    };
-
-    const productStatus = statusMap[formData.status] || 'draft';
-
-    const newProduct: Product = {
-      id: productId,
-      producerId,
-      slug,
-      name: formData.name,
-      shortDescription: formData.shortDescription,
-      fullDescription: formData.fullDescription,
-      categoryId: formData.categoryId,
-      categoryName: PRODUCT_CATEGORIES.find(c => c.id === formData.categoryId)?.name || formData.categoryId,
-      subcategoryId: formData.subcategoryId,
-      tags: formData.tags,
-      mainImage: formData.mainImage,
-      gallery: formData.gallery,
-      basePrice: formData.basePrice || 0,
-      comparePrice: formData.comparePrice,
-      priceTiers: formData.priceTiers,
-      sku,
-      barcode: formData.barcode,
-      stock: formData.stock,
-      lowStockThreshold: formData.lowStockThreshold,
-      trackInventory: formData.trackInventory,
-      allowBackorders: formData.allowBackorders,
-      weight: formData.weight,
-      weightUnit: formData.weightUnit,
-      dimensions: formData.dimensions,
-      shippingClass: formData.shippingClass,
-      nutritionalInfo: formData.nutritionalInfo,
-      certifications: formData.certifications,
-      productionInfo: formData.productionInfo,
-      attributes: formData.attributes,
-      status: productStatus,
-      visibility: formData.visibility || 'public',
-      publishedAt: productStatus === 'active' ? new Date() : undefined,
-      sales: 0,
-      revenue: 0,
-      rating: 0,
-      reviewCount: 0,
-      views: 0,
-      conversion: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      lastOrderDate: undefined,
-    };
-
-    MOCK_PRODUCTS.push(newProduct);
-    console.log('✅ Producto creado:', newProduct.name, 'SKU:', newProduct.sku);
+    const body = formDataToApiBody(formData);
+    const raw  = await gatewayClient.post<ApiProduct>('/products', body);
+    const product = mapApiProductToProduct(raw);
 
     return {
-      data: { product: newProduct, redirectUrl: `/products/${newProduct.id}` },
+      data: { product, redirectUrl: `/products/${product.id}` },
       status: 201,
     };
   } catch (error) {
-    console.error('Error en createProduct:', error);
-    return { error: 'Error al crear el producto', status: 500 };
+    return handleError(error, 'createProduct');
   }
 }
 
 /**
- * Guarda un borrador del producto
+ * Guarda un borrador del producto.
+ * Crea el producto con estado DRAFT en el backend.
+ * Ruta backend: POST /products
  */
 export async function saveProductDraft(
   formData: ProductFormData,
-  producerId: string = 'user-123'
 ): Promise<ApiResponse<{ draftId: string; message: string }>> {
   try {
-    await delay(600);
-    return { data: { draftId: generateProductId(), message: 'Borrador guardado' }, status: 200 };
+    const body = { ...formDataToApiBody(formData), status: 'DRAFT' };
+    const raw  = await gatewayClient.post<ApiProduct>('/products', body);
+    return {
+      data: { draftId: raw.id, message: 'Borrador guardado' },
+      status: 200,
+    };
   } catch (error) {
-    console.error('Error en saveProductDraft:', error);
-    return { error: 'Error al guardar el borrador', status: 500 };
+    return handleError(error, 'saveProductDraft');
   }
 }
 
 /**
- * Actualiza un producto existente
+ * Actualiza un producto existente.
+ * Acepta un `Partial<Product>` del frontend y lo mapea al formato del backend.
+ * Ruta backend: PUT /products/:id
  */
 export async function updateProduct(
   id: string,
-  productData: Partial<Product>
+  productData: Partial<Product>,
 ): Promise<ApiResponse<Product>> {
   try {
-    await delay(600);
-    const productIndex = MOCK_PRODUCTS.findIndex((p: Product) => p.id === id);
-    if (productIndex === -1) return { error: 'Producto no encontrado', status: 404 };
-    
-    const updatedProduct = { ...MOCK_PRODUCTS[productIndex], ...productData, updatedAt: new Date() };
-    MOCK_PRODUCTS[productIndex] = updatedProduct;
-    return { data: updatedProduct, status: 200 };
+    const body = partialProductToApiBody(productData);
+    const raw  = await gatewayClient.put<ApiProduct>(`/products/${id}`, body);
+    return { data: mapApiProductToProduct(raw), status: 200 };
   } catch (error) {
-    console.error('Error en updateProduct:', error);
-    return { error: 'Error al actualizar el producto', status: 500 };
+    return handleError(error, 'updateProduct');
   }
 }
 
 /**
- * Elimina un producto
+ * Elimina un producto y todas sus imágenes S3 asociadas.
+ * Ruta backend: DELETE /products/:id
  */
 export async function deleteProduct(id: string): Promise<ApiResponse<null>> {
   try {
-    await delay(500);
-    const productIndex = MOCK_PRODUCTS.findIndex((p: Product) => p.id === id);
-    if (productIndex === -1) return { error: 'Producto no encontrado', status: 404 };
-    MOCK_PRODUCTS.splice(productIndex, 1);
+    await gatewayClient.delete(`/products/${id}`);
     return { status: 200, data: null };
   } catch (error) {
-    console.error('Error en deleteProduct:', error);
-    return { error: 'Error al eliminar el producto', status: 500 };
+    return handleError(error, 'deleteProduct');
   }
 }
 
 /**
- * Duplica un producto
+ * Duplica un producto: obtiene el original y crea una copia en borrador.
+ * Ruta backend: GET /products/:id + POST /products
+ *
+ * Nota: el backend no expone un endpoint de duplicado nativo.
+ * Optimización futura: añadir POST /products/:id/duplicate en products-service.
  */
 export async function duplicateProduct(id: string): Promise<ApiResponse<Product>> {
   try {
-    await delay(700);
-    const originalProduct = MOCK_PRODUCTS.find((p: Product) => p.id === id);
-    if (!originalProduct) return { error: 'Producto no encontrado', status: 404 };
-    
-    const duplicatedProduct: Product = {
-      ...originalProduct,
-      id: `prod-${Math.random().toString(36).substring(2, 10)}`,
-      name: `${originalProduct.name} (copia)`,
-      slug: `${originalProduct.slug}-copia`,
-      sku: `${originalProduct.sku}-COPY`,
-      status: 'draft',
-      visibility: 'private',
-      publishedAt: undefined,
-      sales: 0,
-      revenue: 0,
-      views: 0,
-      conversion: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      lastOrderDate: undefined,
+    const original = await gatewayClient.get<ApiProduct>(`/products/${id}`);
+
+    const duplicateBody = {
+      name:              `${original.name} (copia)`,
+      shortDescription:  original.shortDescription,
+      fullDescription:   original.fullDescription,
+      categoryId:        original.categoryId,
+      subcategoryId:     original.subcategoryId,
+      tags:              original.tags,
+      basePrice:         original.basePrice,
+      comparePrice:      original.comparePrice,
+      stock:             original.stock,
+      lowStockThreshold: original.lowStockThreshold,
+      trackInventory:    original.trackInventory,
+      allowBackorders:   original.allowBackorders,
+      weight:            original.weight,
+      weightUnit:        original.weightUnit,
+      dimensions:        original.dimensions,
+      status:            'DRAFT',
+      visibility:        'PRIVATE',
     };
-    return { data: duplicatedProduct, status: 201 };
+
+    const raw = await gatewayClient.post<ApiProduct>('/products', duplicateBody);
+    return { data: mapApiProductToProduct(raw), status: 201 };
   } catch (error) {
-    console.error('Error en duplicateProduct:', error);
-    return { error: 'Error al duplicar el producto', status: 500 };
+    return handleError(error, 'duplicateProduct');
   }
 }
 
+// ─── STOCK ────────────────────────────────────────────────────────────────────
+
 /**
- * Actualiza el stock de un producto
+ * Actualiza el stock de un producto con un valor absoluto.
+ * El backend ajusta el estado automáticamente (OUT_OF_STOCK si stock = 0).
+ * Ruta backend: PATCH /products/:id/stock
+ *
+ * @param id    - ID del producto
+ * @param stock - Nuevo stock absoluto (no delta)
  */
 export async function updateProductStock(
   id: string,
   stock: number,
-  reason?: string
 ): Promise<ApiResponse<Product>> {
   try {
-    await delay(400);
-    const productIndex = MOCK_PRODUCTS.findIndex((p: Product) => p.id === id);
-    if (productIndex === -1) return { error: 'Producto no encontrado', status: 404 };
-    
-    const currentProduct = MOCK_PRODUCTS[productIndex];
-    
-    // Determinar el nuevo estado basado en el stock
-    let newStatus: 'active' | 'inactive' | 'out_of_stock' | 'draft' = currentProduct.status;
-    
-    if (stock === 0) {
-      newStatus = 'out_of_stock';
-    } else if (stock > 0 && currentProduct.status === 'out_of_stock') {
-      newStatus = 'active';
-    }
-    
-    const updatedProduct = {
-      ...currentProduct,
-      stock,
-      status: newStatus,
-      updatedAt: new Date(),
-    };
-    
-    MOCK_PRODUCTS[productIndex] = updatedProduct;
-    return { data: updatedProduct, status: 200 };
+    const raw = await gatewayClient.patch<ApiProduct>(`/products/${id}/stock`, { stock });
+    return { data: mapApiProductToProduct(raw), status: 200 };
   } catch (error) {
-    console.error('Error en updateProductStock:', error);
-    return { error: 'Error al actualizar el stock', status: 500 };
+    return handleError(error, 'updateProductStock');
   }
 }
 
-// Importar PRODUCT_CATEGORIES
-import { PRODUCT_CATEGORIES } from '@/types/product';
+// ─── SKU ──────────────────────────────────────────────────────────────────────
+
+/**
+ * Verifica si un SKU ya está en uso en el catálogo.
+ * El backend valida la unicidad en el momento de crear/actualizar y devuelve 409.
+ * Esta función es una comprobación preventiva para UX — el backend es la fuente de verdad.
+ *
+ * Nota: no hay endpoint dedicado en products-service; el backend retorna 409 si hay conflicto.
+ * Se mantiene la función para compatibilidad con el formulario — siempre devuelve false.
+ */
+export async function checkSkuExists(sku: string): Promise<ApiResponse<{ exists: boolean }>> {
+  // Sin endpoint dedicado — la validación real ocurre en el backend al crear/editar.
+  return { data: { exists: false }, status: 200 };
+}
+
+/**
+ * Genera una sugerencia de SKU en cliente a partir del nombre y categoría.
+ * Lógica puramente local — no hay endpoint en el backend para esto.
+ */
+export async function suggestSku(
+  productName: string,
+  categoryId: string,
+): Promise<ApiResponse<{ suggestedSku: string }>> {
+  if (!productName || productName.trim().length < 3) {
+    return { data: { suggestedSku: 'PRO-XXX-001' }, status: 200 };
+  }
+
+  const prefixes: Record<string, string> = {
+    quesos:    'QUE', aceites:   'ACE', vinos:   'VIN', embutidos: 'EMB',
+    mieles:    'MIE', panaderia: 'PAN', conservas: 'CON', dulces:  'DUL',
+    bebidas:   'BEB',
+  };
+  const prefix = prefixes[categoryId] ?? 'PRO';
+
+  const nameParts = productName
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Z0-9]/g, ' ')
+    .split(' ')
+    .filter(p => p.length > 0);
+
+  let code = nameParts.length === 1
+    ? nameParts[0].substring(0, 3)
+    : nameParts.map(p => p[0]).join('').substring(0, 3);
+
+  if (code.length < 2) code = (code + 'XX').substring(0, 3);
+
+  return { data: { suggestedSku: `${prefix}-${code}-XXX` }, status: 200 };
+}

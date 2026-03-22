@@ -14,6 +14,7 @@ const SERVICES = [
   { name: 'Auth',          url: 'https://origen-auth-dev.onrender.com/health' },
   { name: 'Producers',     url: 'https://origen-producers-dev.onrender.com/health' },
   { name: 'Products',      url: 'https://origen-products-dev.onrender.com/health' },
+  { name: 'Media',         url: 'https://origen-media-dev.onrender.com/health' },
   { name: 'Notifications', url: 'https://origen-notifications.onrender.com/health' },
 ];
 
