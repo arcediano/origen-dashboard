@@ -10,10 +10,28 @@
 import Stripe from 'stripe';
 import { STRIPE_CONFIG, calculatePlatformFee } from './config';
 
-// Inicializar cliente de Stripe
-const stripe = new Stripe(STRIPE_CONFIG.secretKey, {
-  apiVersion: '2025-02-24.acacia',
-  typescript: true,
+// Inicialización lazy — evita que next build falle cuando STRIPE_SECRET_KEY
+// no está definida durante el análisis estático de páginas.
+let _stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!_stripe) {
+    if (!STRIPE_CONFIG.secretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not defined');
+    }
+    _stripe = new Stripe(STRIPE_CONFIG.secretKey, {
+      apiVersion: '2025-02-24.acacia',
+      typescript: true,
+    });
+  }
+  return _stripe;
+}
+
+// Re-export para compatibilidad con cualquier importación directa de `stripe`
+const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    return (getStripe() as unknown as Record<string | symbol, unknown>)[prop];
+  },
 });
 
 /**

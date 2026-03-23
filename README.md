@@ -341,16 +341,42 @@ Ver [`docs/STRIPE-INTEGRATION.md`](./docs/STRIPE-INTEGRATION.md) para guía de i
 | **Stripe** | 17.3.0 | Pagos |
 | **Lucide React** | 0.468.0 | Iconos |
 | **Radix UI** | Latest | Componentes accesibles |
+| **Vitest** | 4.1.0 | Tests unitarios e integración |
+| **@testing-library/react** | 16.3 | Render y queries de componentes |
+| **MSW** | 2.x | Mock de API en tests |
+| **Playwright** | 1.58 | Tests E2E en navegador real |
 
 ---
 
-## 🧪 Testing (Próximamente)
+## 🧪 Testing
+
+**287 tests activos** — unitarios + integración. Se ejecutan automáticamente antes de cada deploy en Vercel.
 
 ```bash
-npm run test          # Ejecutar tests
-npm run test:watch    # Modo watch
-npm run test:coverage # Cobertura
+npm test                  # Todos los tests (lo que corre en Vercel)
+npm run test:watch        # Modo watch en desarrollo
+npm run test:coverage     # Informe de cobertura
+npm run test:unit         # Solo tests unitarios (209 tests)
+npm run test:integration  # Solo tests de integración (78 tests)
+npm run test:e2e          # E2E Playwright (requiere app corriendo)
 ```
+
+### Cobertura actual
+
+| Módulo | Tests | Qué cubre |
+|--------|-------|-----------|
+| Schemas Zod (`seller.ts`) | 53 | Registro, onboarding pasos 1, 2, 3 y 4 |
+| Utilidades (`lib/utils`) | 55 | cn, formatCurrency, formatDate, formatFileSize, truncate, capitalize, getInitials, debounce, etc. |
+| `useProductFilters` | 40 | Filtros por texto/categoría/estado/stock, ordenamiento, paginación, combinaciones |
+| `useInactivityTimeout` | 9 | Timeout 15 min, reinicio con eventos del DOM, cleanup, ref pattern |
+| `useSessionVisibilityGuard` | 10 | Expiración 30 min, ciclos múltiples, cleanup, ref pattern |
+| API Auth (`lib/api/auth`) | 19 | loginUser, getCurrentUser, registerProducer, logoutUser, requestPasswordReset |
+| API Pedidos (`lib/api/orders`) | 31 | fetchOrders, fetchOrderById, updateOrderStatus, fetchOrderStats + filtros |
+| Formulario de login | 12 | Validación, login OK/KO, redirección, roles, errores 401/403/500 |
+| Formulario de registro | 13 | Renderizado, validación, MSW 409/200 |
+| Formulario recuperar contraseña | 12 | Validación, éxito, error 500, anti-enumeración de usuarios |
+
+> Ver documentación completa: [`docs/testing.md`](./docs/testing.md)
 
 ---
 
@@ -358,8 +384,12 @@ npm run test:coverage # Cobertura
 
 ### Vercel (Recomendado)
 
+> **Los tests se ejecutan automáticamente antes de cada deploy.** Si algún test falla, Vercel cancela el despliegue y producción queda intacta.
+
 ```bash
-vercel deploy
+# Simula exactamente lo que hará Vercel
+npm run build
+# → npm test (78 tests) → next build → deploy
 ```
 
 ### Docker
