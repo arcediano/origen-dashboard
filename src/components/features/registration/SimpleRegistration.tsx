@@ -10,7 +10,6 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/atoms/button';
 import { Input } from '@/components/ui/atoms/input';
 import { Textarea } from '@/components/ui/atoms/textarea';
-import { AlertWithIcon } from '@/components/ui/atoms/alert';
 import {
   Select,
   SelectTrigger,
@@ -85,7 +84,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
   const [submittedData, setSubmittedData] = useState<InitialRegistrationFormData | null>(null);
   const [trackingCode, setTrackingCode] = useState<string>('');
 
-  const errorRef = useRef<HTMLDivElement>(null);
   const spinnerRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -160,12 +158,10 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
     }
   }, [formValues.password]);
 
-  // Scroll automático al spinner o al error según el estado del envío
+  // Scroll automático al spinner al iniciar el envío
   useEffect(() => {
     if (submitStatus === 'submitting') {
       spinnerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else if (submitStatus === 'error') {
-      errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [submitStatus]);
 
@@ -250,19 +246,57 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
         )}
       </AnimatePresence>
 
-      <div className={cn('w-full', className)}>
-
-        {/* Error */}
-        {submitStatus === 'error' && errorMessage && (
-          <div ref={errorRef} className="mb-4 md:mb-6">
-            <AlertWithIcon
-              variant="error"
-              description={errorMessage}
-              dismissible
-              onDismiss={() => setSubmitStatus('idle')}
+      {/* Error modal — centrado en pantalla */}
+      <AnimatePresence>
+        {submitStatus === 'error' && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setSubmitStatus('idle')}
             />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-sm bg-surface-alt rounded-2xl shadow-2xl border border-border-subtle overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-red-400" />
+              <div className="p-6 flex flex-col items-center text-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center">
+                  <AlertCircle className="w-7 h-7 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-origen-bosque mb-2">
+                    No se pudo procesar tu solicitud
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Ha ocurrido un error al enviar tu solicitud. Por favor, ponte en contacto con nuestro equipo de soporte desde la{' '}
+                    <a
+                      href="/contacto"
+                      className="font-semibold text-origen-hoja hover:underline"
+                    >
+                      sección de contacto
+                    </a>
+                    {' '}de nuestra página web.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSubmitStatus('idle')}
+                  className="w-full py-2.5 rounded-xl border border-border text-sm font-semibold text-muted-foreground hover:text-origen-bosque hover:border-red-200 hover:bg-red-50/30 active:scale-[.98] transition-all"
+                >
+                  Cerrar e intentarlo de nuevo
+                </button>
+              </div>
+            </motion.div>
           </div>
         )}
+      </AnimatePresence>
+
+      <div className={cn('w-full', className)}>
 
         {/* Spinner — con ref para scroll automático */}
         {submitStatus === 'submitting' && (
