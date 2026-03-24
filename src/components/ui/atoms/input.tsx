@@ -391,11 +391,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               <Loader2 className={cn(getIconSize(), "animate-spin text-origen-pradera")} />
             )}
             
-            {validationState === "error" && (
+            {validationState === "error" && !isPassword && (
               <AlertCircle className={cn(getIconSize(), "text-red-500")} />
             )}
-            
-            {isPassword && !validationState && (
+
+            {isPassword && (
               <Button
                 type="button"
                 size="icon-sm"
