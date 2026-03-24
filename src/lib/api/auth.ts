@@ -41,6 +41,7 @@ export interface LoginResponse {
 export interface RegisterResponse {
   success: boolean;
   message: string;
+  errorCode?: 'DUPLICATE_EMAIL' | 'SERVER_ERROR';
   data: AuthUser & { trackingCode: string | null };
 }
 

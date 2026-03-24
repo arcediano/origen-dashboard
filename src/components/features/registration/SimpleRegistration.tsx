@@ -175,45 +175,47 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
     }
   }, []);
 
-  const onSubmit = useCallback(async (data: InitialRegistrationFormData) => {
+  const onSubmit = useCallback((data: InitialRegistrationFormData) => {
     setSubmitStatus('submitting');
     setErrorMessage('');
 
-    try {
-      const result = await registerProducer({
-        email: data.email,
-        password: data.password,
-        firstName: data.contactName,
-        lastName: data.contactSurname,
-        phone: data.phone,
-        businessName: data.businessName,
-        businessType: data.businessType as 'individual' | 'company',
-        producerCategory: data.producerCategory,
-        street: data.street,
-        streetNumber: data.streetNumber,
-        streetComplement: data.streetComplement || undefined,
-        province: data.province,
-        municipio: data.municipio,
-        postalCode: data.postalCode,
-        whyOrigin: data.whyOrigin,
-        acceptsTerms: true,
-        acceptsPrivacy: true,
-      });
+    setTimeout(async () => {
+      try {
+        const result = await registerProducer({
+          email: data.email,
+          password: data.password,
+          firstName: data.contactName,
+          lastName: data.contactSurname,
+          phone: data.phone,
+          businessName: data.businessName,
+          businessType: data.businessType as 'individual' | 'company',
+          producerCategory: data.producerCategory,
+          street: data.street,
+          streetNumber: data.streetNumber,
+          streetComplement: data.streetComplement || undefined,
+          province: data.province,
+          municipio: data.municipio,
+          postalCode: data.postalCode,
+          whyOrigin: data.whyOrigin,
+          acceptsTerms: true,
+          acceptsPrivacy: true,
+        });
 
-      setTrackingCode(result.data.trackingCode ?? '');
-      setSubmittedData(data);
-      setSubmitStatus('success');
-      setIsModalOpen(true);
-      clearDraft(); // Limpiar borrador tras envío exitoso
-      onSuccess?.(data);
-    } catch (err) {
-      setSubmitStatus('error');
-      if (err instanceof GatewayError) {
-        setErrorMessage(err.message);
-      } else {
-        setErrorMessage('No hemos podido procesar tu solicitud. Inténtalo de nuevo.');
+        setTrackingCode(result.data.trackingCode ?? '');
+        setSubmittedData(data);
+        setSubmitStatus('success');
+        setIsModalOpen(true);
+        clearDraft();
+        onSuccess?.(data);
+      } catch (err) {
+        setSubmitStatus('error');
+        if (err instanceof GatewayError && err.status === 409) {
+          setErrorMessage('duplicate_email');
+        } else {
+          setErrorMessage('server_error');
+        }
       }
-    }
+    }, 0);
   }, [onSuccess, clearDraft]);
 
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
@@ -301,17 +303,29 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-origen-bosque mb-2">
-                    No se pudo procesar tu solicitud
+                    {errorMessage === 'duplicate_email'
+                      ? 'Ya tienes una solicitud en curso'
+                      : 'No se pudo procesar tu solicitud'}
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Ha ocurrido un error al enviar tu solicitud. Por favor, ponte en contacto con nuestro equipo de soporte desde la{' '}
-                    <a
-                      href="/contacto"
-                      className="font-semibold text-origen-hoja hover:underline"
-                    >
-                      sección de contacto
-                    </a>
-                    {' '}de nuestra página web.
+                    {errorMessage === 'duplicate_email' ? (
+                      <>
+                        Ya existe una solicitud pendiente de revisión con este email.
+                        Si tienes alguna duda, contacta con nosotros desde la{' '}
+                        <a href="/contacto" className="font-semibold text-origen-hoja hover:underline">
+                          sección de contacto
+                        </a>.
+                      </>
+                    ) : (
+                      <>
+                        Ha ocurrido un error al enviar tu solicitud. Por favor, ponte en contacto
+                        con nuestro equipo de soporte desde la{' '}
+                        <a href="/contacto" className="font-semibold text-origen-hoja hover:underline">
+                          sección de contacto
+                        </a>
+                        {' '}de nuestra página web.
+                      </>
+                    )}
                   </p>
                 </div>
                 <button
