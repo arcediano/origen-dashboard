@@ -160,6 +160,15 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
     }
   }, [formValues.password]);
 
+  // Scroll automático al spinner o al error según el estado del envío
+  useEffect(() => {
+    if (submitStatus === 'submitting') {
+      spinnerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (submitStatus === 'error') {
+      errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [submitStatus]);
+
   // ============================================================================
   // AUTOSAVE - Guardado automático de borrador
   // ============================================================================
