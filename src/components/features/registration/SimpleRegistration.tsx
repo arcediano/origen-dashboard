@@ -93,6 +93,8 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
     handleSubmit,
     watch,
     setValue,
+    getValues,
+    trigger,
     formState: { errors, isValid }
   } = useForm<InitialRegistrationFormData>({
     resolver: zodResolver(initialRegistrationSchema),
@@ -124,6 +126,13 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
   const textareaValid = whyOriginValue.length >= 50;
   const isFormValid = isValid && textareaValid;
 
+  const isProvinceAutoFilled = useMemo(() => {
+    const cp = formValues.postalCode || '';
+    if (cp.length !== 5) return false;
+    const expected = getProvinciaFromCP(cp);
+    return expected !== null && expected === formValues.province;
+  }, [formValues.postalCode, formValues.province]);
+
   const cpError = useMemo(() => {
     const cp = formValues.postalCode || '';
     const prov = formValues.province;
@@ -143,6 +152,13 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
       if (expected !== null) setValue('province', expected, { shouldValidate: true });
     }
   }, [formValues.postalCode]);
+
+  // Re-validate confirmPassword when password changes so the mismatch error shows
+  useEffect(() => {
+    if (getValues('confirmPassword')) {
+      trigger('confirmPassword');
+    }
+  }, [formValues.password]);
 
   // ============================================================================
   // AUTOSAVE - Guardado automático de borrador
@@ -421,12 +437,13 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   <label className="text-sm md:text-base font-medium text-origen-bosque">
                     Provincia <span className="text-destructive">*</span>
                   </label>
+                  <input type="hidden" {...register('province')} />
                   <Select
                     value={formValues.province}
                     onValueChange={(value) => setValue('province', value, { shouldValidate: true })}
                     placeholder="Ej: Madrid"
                     error={errors.province?.message}
-                    disabled
+                    disabled={isProvinceAutoFilled}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -446,9 +463,9 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   inputSize="lg"
                   error={errors.municipio?.message}
                   {...register('municipio')}
-                  onBlur={() => {
-                    const v = formValues.municipio;
-                    if (v) setValue('municipio', v.trim().toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()));
+                  onBlur={(e) => {
+                    const v = e.target.value;
+                    if (v) setValue('municipio', v.trim().toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()), { shouldValidate: true });
                   }}
                 />
               </div>
