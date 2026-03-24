@@ -1,7 +1,7 @@
 // components/landing/SimpleRegistration.tsx
 'use client';
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -84,7 +84,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
   const [submittedData, setSubmittedData] = useState<InitialRegistrationFormData | null>(null);
   const [trackingCode, setTrackingCode] = useState<string>('');
 
-  const spinnerRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
@@ -158,12 +157,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
     }
   }, [formValues.password]);
 
-  // Scroll automático al spinner al iniciar el envío
-  useEffect(() => {
-    if (submitStatus === 'submitting') {
-      spinnerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [submitStatus]);
 
   // ============================================================================
   // AUTOSAVE - Guardado automático de borrador
@@ -246,6 +239,43 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
         )}
       </AnimatePresence>
 
+      {/* Spinner overlay — centrado en pantalla, no dismissible */}
+      <AnimatePresence>
+        {submitStatus === 'submitting' && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-origen-bosque/70 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-xs bg-surface-alt rounded-2xl shadow-2xl border border-border-subtle overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-origen-bosque via-origen-pino to-origen-hoja" />
+              <div className="p-8 flex flex-col items-center text-center gap-4">
+                <div className="relative w-16 h-16 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-origen-hoja/10 animate-ping" />
+                  <LoadingSpinner size="xl" variant="secondary" />
+                </div>
+                <div>
+                  <p className="text-base font-bold text-origen-bosque">
+                    Procesando tu solicitud
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Esto puede tardar unos segundos
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Error modal — centrado en pantalla */}
       <AnimatePresence>
         {submitStatus === 'error' && (
@@ -298,22 +328,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
 
       <div className={cn('w-full', className)}>
 
-        {/* Spinner — con ref para scroll automático */}
-        {submitStatus === 'submitting' && (
-          <div
-            ref={spinnerRef}
-            className="bg-surface-alt rounded-xl md:rounded-2xl p-8 md:p-12 shadow-xl border border-border text-center"
-          >
-            <LoadingSpinner />
-            <p className="text-sm md:text-base text-muted-foreground mt-4 font-medium">
-              Procesando tu solicitud...
-            </p>
-            <p className="text-xs text-text-subtle mt-1">Esto puede tardar unos segundos</p>
-          </div>
-        )}
-
-        {submitStatus !== 'submitting' && (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
 
             {/* SECCIÓN 1: Contacto */}
             <FormSection
@@ -638,7 +653,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               </div>
             </div>
           </form>
-        )}
       </div>
     </>
   );
