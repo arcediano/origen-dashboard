@@ -534,10 +534,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   inputSize="lg"
                   error={errors.municipio?.message}
                   {...register('municipio')}
-                  onBlur={(e) => {
-                    const v = e.target.value;
-                    if (v) setValue('municipio', v.trim().toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()), { shouldValidate: true });
-                  }}
                 />
               </div>
             </FormSection>
