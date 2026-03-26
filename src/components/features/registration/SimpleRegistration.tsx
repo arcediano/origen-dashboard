@@ -123,6 +123,12 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
   const textareaValid = whyOriginValue.length >= 50;
   const isFormValid = isValid && textareaValid;
 
+  const confirmPasswordError =
+    errors.confirmPassword?.message ||
+    (formValues.confirmPassword && formValues.password !== formValues.confirmPassword
+      ? 'Las contraseñas no coinciden'
+      : undefined);
+
   const isProvinceAutoFilled = useMemo(() => {
     const cp = formValues.postalCode || '';
     if (cp.length !== 5) return false;
@@ -150,14 +156,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
     }
   }, [formValues.postalCode]);
 
-  // Re-validate confirmPassword when password changes so the mismatch error shows
-  useEffect(() => {
-    if (getValues('confirmPassword')) {
-      trigger('confirmPassword');
-    }
-  }, [formValues.password]);
-
-
   // ============================================================================
   // AUTOSAVE - Guardado automático de borrador
   // ============================================================================
@@ -172,6 +170,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
           setValue(key as any, value as any, { shouldValidate: false });
         }
       });
+      trigger();
     }
   }, []);
 
@@ -415,7 +414,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     required
                     type="password"
                     placeholder="Repite la contraseña"
-                    error={errors.confirmPassword?.message}
+                    error={confirmPasswordError}
                     inputSize="lg"
                     {...register('confirmPassword')}
                   />
