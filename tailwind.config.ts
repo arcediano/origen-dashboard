@@ -10,7 +10,7 @@ import type { Config } from "tailwindcss";
  *   origen-hoja     #40916C  Verde Esmeralda → H3 / enlaces
  *   origen-pradera  #74C69D  Verde Menta     → Interactivo
  *   origen-menta    #D4A373  Beige Arena     → Acento cálido
- *   origen-mandarina#FFB347  Naranja         → Acento complementario
+ *   origen-mandarina #FFB347  Naranja         → Acento complementario
  *   origen-crema    #F1FAEE  Blanco Verdeado → Fondo global
  *   origen-oscuro   #081C15  Verde Negro     → Texto principal
  *   origen-pastel   #D8F3DC  Verde Pastel    → Fondos suaves

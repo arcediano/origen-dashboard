@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/atoms/label';
 import { Toggle } from '@/components/ui/atoms/toggle';
 import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
 import { Separator } from '@/components/ui/atoms/separator';
+import { gatewayClient } from '@/lib/api/client';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -68,7 +69,18 @@ export default function SettingsPage() {
   const handleSaveNotifications = async () => {
     setIsSaving(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await gatewayClient.put('/notifications/preferences', {
+        preferences: [
+          { eventType: 'NEW_ORDER',  channel: 'EMAIL', enabled: notifications.emailOrders },
+          { eventType: 'MARKETING', channel: 'EMAIL', enabled: notifications.emailMarketing },
+          { eventType: 'NEW_ORDER', channel: 'PUSH',  enabled: notifications.pushNewOrder },
+          { eventType: 'LOW_STOCK', channel: 'PUSH',  enabled: notifications.pushLowStock },
+          { eventType: 'NEW_REVIEW',channel: 'PUSH',  enabled: notifications.pushReviews },
+          { eventType: 'REPORT',    channel: 'EMAIL', enabled: notifications.weeklyReport },
+        ],
+      });
+    } catch (err) {
+      console.error('[settings] Error guardando preferencias de notificación:', err);
     } finally {
       setIsSaving(false);
     }

@@ -1,116 +1,81 @@
 /**
  * @file notifications.ts
- * @description Llamadas a la API para el sistema de notificaciones
+ * @description API del Notification Center â€” llamadas reales al gateway.
+ * Sprint 10: reemplaza el mock en-memoria por fetch real.
+ *
+ * Mantiene compatibilidad con la interfaz `Notification` de @/types/notification
+ * para no romper NotificationBell ni NotificationItem.
  */
 
-import { type Notification, type NotificationsResponse } from '@/types/notification';
-import { ApiResponse } from './products';
+import { gatewayClient } from './client';
+import type { Notification, NotificationStats, NotificationsResponse } from '@/types/notification';
+import type { ApiResponse } from './products';
 
-// ============================================================================
-// DATOS MOCK - Hacerlos constantes y no mutables
-// ============================================================================
+// â”€â”€â”€ Tipos internos (forma real del backend) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// Datos base (constantes)
-const BASE_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    type: 'product',
-    title: 'Producto agotado',
-    description: 'Queso Manchego Curado 12 meses',
-    timestamp: new Date(Date.now() - 1000 * 60 * 30),
-    read: false,
-    actionUrl: '/products/prod-001'
-  },
-  {
-    id: '2',
-    type: 'product',
-    title: 'Stock bajo',
-    description: 'Aceite de Oliva Virgen Extra (3 uds)',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    read: false,
-    actionUrl: '/products/prod-002'
-  },
-  {
-    id: '3',
-    type: 'order',
-    title: 'Nuevo pedido',
-    description: 'Pedido #1234 - 89,50€',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5),
-    read: true,
-    actionUrl: '/dashboard/pedidos/1234'
-  },
-  {
-    id: '4',
-    type: 'order',
-    title: 'Pedido enviado',
-    description: 'Pedido #1230 en camino',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    read: false,
-    actionUrl: '/dashboard/pedidos/1230'
-  },
-  {
-    id: '5',
-    type: 'certification',
-    title: 'Certificación aceptada',
-    description: 'Agricultura Ecológica UE',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
-    read: true,
-    actionUrl: '/dashboard/profile/certificaciones'
-  },
-  {
-    id: '6',
-    type: 'certification',
-    title: 'Certificación por caducar',
-    description: 'D.O. caduca en 30 días',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-    read: false,
-    actionUrl: '/dashboard/profile/certificaciones'
-  },
-  {
-    id: '7',
-    type: 'system',
-    title: 'Documentación requerida',
-    description: 'Revisa los documentos pendientes',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
-    read: false,
-    actionUrl: '/dashboard/configuracion/documentos'
-  }
-];
+interface BackendNotification {
+  id: string;
+  eventType: string;
+  category?: string;
+  title: string;
+  body: string;
+  actionUrl?: string;
+  isRead: boolean;
+  createdAt: string;
+  metadata?: Record<string, unknown>;
+}
 
-// Copia de trabajo que podemos modificar (in-memory)
-let currentNotifications = [...BASE_NOTIFICATIONS];
-
-// ============================================================================
-// FUNCIONES AUXILIARES
-// ============================================================================
-
-const delay = (ms: number = 300) => new Promise(resolve => setTimeout(resolve, ms));
-
-const calculateStats = (notifications: Notification[]) => {
-  const unread = notifications.filter(n => !n.read).length;
-  const byType = notifications.reduce((acc, n) => {
-    acc[n.type] = (acc[n.type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  return {
-    total: notifications.length,
-    unread,
-    byType: {
-      product: byType.product || 0,
-      order: byType.order || 0,
-      certification: byType.certification || 0,
-      system: byType.system || 0
-    }
+interface BackendListResponse {
+  data: BackendNotification[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    unread: number;
   };
-};
+}
 
-// ============================================================================
-// FUNCIONES DE LA API
-// ============================================================================
+// â”€â”€â”€ Mappers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+function mapCategory(eventType: string, category?: string): Notification['type'] {
+  const cat = category?.toUpperCase() ?? '';
+  if (cat === 'ORDER' || eventType.startsWith('ORDER') || eventType === 'NEW_ORDER') return 'order';
+  if (
+    cat === 'REVIEW' ||
+    eventType.startsWith('REVIEW') ||
+    eventType === 'NEW_REVIEW'
+  ) {
+    return 'product';
+  }
+  if (cat === 'PRODUCT' || eventType.startsWith('PRODUCT')) return 'product';
+  if (
+    cat === 'MARKETING' ||
+    eventType === 'PROMOTION_CREATED' ||
+    eventType === 'CAMPAIGN'
+  ) {
+    return 'product';
+  }
+  return 'system';
+}
+
+function mapBackendNotification(n: BackendNotification): Notification {
+  return {
+    id: n.id,
+    type: mapCategory(n.eventType, n.category),
+    title: n.title,
+    description: n.body,
+    timestamp: new Date(n.createdAt),
+    read: n.isRead,
+    actionUrl: n.actionUrl,
+    metadata: n.metadata,
+  };
+}
+
+// â”€â”€â”€ API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
- * Obtiene las notificaciones del usuario
+ * Obtiene las notificaciones paginadas del usuario.
  */
 export async function fetchNotifications(params?: {
   page?: number;
@@ -119,162 +84,114 @@ export async function fetchNotifications(params?: {
   read?: boolean;
 }): Promise<ApiResponse<NotificationsResponse>> {
   try {
-    await delay(500);
+    const query = new URLSearchParams();
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.read !== undefined) query.set('unreadOnly', params.read ? 'false' : 'true');
+    const qs = query.toString();
 
-    let filtered = [...currentNotifications]; // Usar copia
-    
-    if (params?.type) {
-      filtered = filtered.filter(n => n.type === params.type);
+    const res = await gatewayClient.get<BackendListResponse>(
+      `/notifications${qs ? `?${qs}` : ''}`,
+    );
+
+    const notifications = (res.data ?? []).map(mapBackendNotification);
+    const meta = res.meta;
+    const byType: Record<string, number> = {
+      product: 0,
+      order: 0,
+      certification: 0,
+      system: 0,
+    };
+    for (const n of notifications) {
+      if (n.type in byType) {
+        byType[n.type] = (byType[n.type] ?? 0) + 1;
+      }
     }
-    
-    if (params?.read !== undefined) {
-      filtered = filtered.filter(n => n.read === params.read);
-    }
-
-    // Ordenar por fecha (más recientes primero)
-    filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
-    const page = params?.page || 1;
-    const limit = params?.limit || 20;
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const paginated = filtered.slice(start, end);
+    const stats: NotificationStats = {
+      total: meta?.total ?? 0,
+      unread: meta?.unread ?? 0,
+      byType: byType as NotificationStats['byType'],
+    };
 
     return {
       data: {
-        notifications: paginated,
-        stats: calculateStats(currentNotifications),
-        hasMore: end < filtered.length
+        notifications,
+        stats,
+        hasMore: meta ? meta.page * meta.limit < meta.total : false,
       },
-      status: 200
+      status: 200,
     };
-  } catch (error) {
-    console.error('Error en fetchNotifications:', error);
+  } catch (err) {
+    console.error('[notifications] fetchNotifications', err);
     return { error: 'Error al cargar notificaciones', status: 500 };
   }
 }
 
 /**
- * Obtiene las notificaciones no leídas (para la campana)
+ * Obtiene solo las notificaciones no leÃ­das (mÃ¡x. 50) para la campana.
  */
 export async function fetchUnreadNotifications(): Promise<ApiResponse<Notification[]>> {
   try {
-    await delay(300);
-    // Siempre devolver una NUEVA copia del array filtrado
-    const unread = currentNotifications.filter(n => !n.read);
-    return { 
-      data: [...unread], // <- Importante: devolver copia
-      status: 200 
-    };
-  } catch (error) {
-    console.error('Error en fetchUnreadNotifications:', error);
-    return { error: 'Error al cargar notificaciones no leídas', status: 500 };
+    const res = await gatewayClient.get<BackendListResponse>(
+      '/notifications?unreadOnly=true&limit=50',
+    );
+    const notifications = (res.data ?? []).map(mapBackendNotification);
+    return { data: notifications, status: 200 };
+  } catch (err) {
+    console.error('[notifications] fetchUnreadNotifications', err);
+    return { error: 'Error al cargar notificaciones no leÃ­das', status: 500 };
   }
 }
 
 /**
- * Marca una notificación como leída
- */
-export async function markNotificationAsRead(id: string): Promise<ApiResponse<Notification>> {
-  try {
-    await delay(200);
-    
-    // Buscar la notificación en el array actual
-    const index = currentNotifications.findIndex(n => n.id === id);
-    if (index === -1) {
-      return { error: 'Notificación no encontrada', status: 404 };
-    }
-    
-    // Crear una copia de la notificación con read = true
-    const updatedNotification = {
-      ...currentNotifications[index],
-      read: true
-    };
-    
-    // Actualizar el array (in-memory)
-    currentNotifications = [
-      ...currentNotifications.slice(0, index),
-      updatedNotification,
-      ...currentNotifications.slice(index + 1)
-    ];
-    
-    return { 
-      data: { ...updatedNotification }, // <- Devolver copia
-      status: 200 
-    };
-  } catch (error) {
-    console.error('Error en markNotificationAsRead:', error);
-    return { error: 'Error al marcar notificación', status: 500 };
-  }
-}
-
-/**
- * Marca todas las notificaciones como leídas
- */
-export async function markAllNotificationsAsRead(): Promise<ApiResponse<{ count: number }>> {
-  try {
-    await delay(400);
-    
-    const unreadCount = currentNotifications.filter(n => !n.read).length;
-    
-    // Actualizar todas las notificaciones (in-memory)
-    currentNotifications = currentNotifications.map(n => ({
-      ...n,
-      read: true
-    }));
-    
-    return { 
-      data: { count: unreadCount }, 
-      status: 200 
-    };
-  } catch (error) {
-    console.error('Error en markAllNotificationsAsRead:', error);
-    return { error: 'Error al marcar notificaciones', status: 500 };
-  }
-}
-
-/**
- * Elimina una notificación
- */
-export async function deleteNotification(id: string): Promise<ApiResponse<null>> {
-  try {
-    await delay(300);
-    
-    const index = currentNotifications.findIndex(n => n.id === id);
-    if (index === -1) {
-      return { error: 'Notificación no encontrada', status: 404 };
-    }
-    
-    // Eliminar la notificación (in-memory)
-    currentNotifications = [
-      ...currentNotifications.slice(0, index),
-      ...currentNotifications.slice(index + 1)
-    ];
-    
-    return { status: 200, data: null };
-  } catch (error) {
-    console.error('Error en deleteNotification:', error);
-    return { error: 'Error al eliminar notificación', status: 500 };
-  }
-}
-
-/**
- * Obtiene el contador de notificaciones no leídas
+ * Obtiene el contador de notificaciones no leÃ­das de forma eficiente.
  */
 export async function getUnreadCount(): Promise<ApiResponse<{ count: number }>> {
   try {
-    await delay(100);
-    const count = currentNotifications.filter(n => !n.read).length;
-    return { data: { count }, status: 200 };
-  } catch (error) {
-    console.error('Error en getUnreadCount:', error);
+    const res = await gatewayClient.get<{ data: { count: number } }>(
+      '/notifications/unread-count',
+    );
+    return { data: { count: res?.data?.count ?? 0 }, status: 200 };
+  } catch (err) {
+    console.error('[notifications] getUnreadCount', err);
     return { error: 'Error al obtener contador', status: 500 };
   }
 }
 
 /**
- * Resetea las notificaciones al estado inicial (útil para desarrollo)
+ * Marca una notificaciÃ³n como leÃ­da.
  */
-export function resetNotifications() {
-  currentNotifications = [...BASE_NOTIFICATIONS];
+export async function markNotificationAsRead(
+  id: string,
+): Promise<ApiResponse<Notification>> {
+  try {
+    const res = await gatewayClient.patch<{ success: boolean; data?: BackendNotification }>(
+      `/notifications/${id}/read`,
+      {},
+    );
+    const mapped = res?.data ? mapBackendNotification(res.data) : undefined;
+    return { data: mapped, status: 200 };
+  } catch (err) {
+    console.error('[notifications] markNotificationAsRead', err);
+    return { error: 'Error al marcar notificaciÃ³n', status: 500 };
+  }
 }
+
+/**
+ * Marca todas las notificaciones del usuario como leÃ­das.
+ */
+export async function markAllNotificationsAsRead(): Promise<
+  ApiResponse<{ count: number }>
+> {
+  try {
+    const res = await gatewayClient.patch<{ success: boolean; data?: { updated: number } }>(
+      '/notifications/read-all',
+      {},
+    );
+    return { data: { count: res?.data?.updated ?? 0 }, status: 200 };
+  } catch (err) {
+    console.error('[notifications] markAllNotificationsAsRead', err);
+    return { error: 'Error al marcar todas las notificaciones', status: 500 };
+  }
+}
+

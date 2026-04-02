@@ -22,6 +22,7 @@ import { Card, CardContent } from '@/components/ui/atoms/card';
 import { Button } from '@/components/ui/atoms/button';
 import { NotificationToggleRow } from './components/NotificationToggleRow';
 import { SegmentedControl, type SegmentItem } from './components/SegmentedControl';
+import { gatewayClient } from '@/lib/api/client';
 
 // ─── TABS CONFIG ──────────────────────────────────────────────────────────────
 
@@ -51,8 +52,23 @@ export default function NotificationsPage() {
 
   const [saved, setSaved] = useState(false);
 
-  const handleSave = () => {
-    // Aquí iría la llamada a la API
+  const handleSave = async () => {
+    try {
+      await gatewayClient.put('/notifications/preferences', {
+        preferences: [
+          { eventType: 'NEW_ORDER',   channel: 'EMAIL', enabled: emailSettings.orders },
+          { eventType: 'NEW_REVIEW',  channel: 'EMAIL', enabled: emailSettings.reviews },
+          { eventType: 'MARKETING',   channel: 'EMAIL', enabled: emailSettings.marketing },
+          { eventType: 'LOW_STOCK',   channel: 'EMAIL', enabled: emailSettings.stock },
+          { eventType: 'NEW_ORDER',   channel: 'PUSH',  enabled: pushSettings.orders },
+          { eventType: 'LOW_STOCK',   channel: 'PUSH',  enabled: pushSettings.lowStock },
+          { eventType: 'NEW_REVIEW',  channel: 'PUSH',  enabled: pushSettings.reviews },
+          { eventType: 'CAMPAIGN',    channel: 'PUSH',  enabled: pushSettings.campaigns },
+        ],
+      });
+    } catch (err) {
+      console.error('[notifications] Error guardando preferencias:', err);
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
