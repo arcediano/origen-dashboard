@@ -23,6 +23,7 @@
 import {
   type Product,
   type ProductImage,
+  type Dimensions,
 } from '@/types/product';
 
 // ─── TIPOS DE RESPUESTA DEL BACKEND ──────────────────────────────────────────
@@ -198,7 +199,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
 
     weight:        api.weight,
     weightUnit:    api.weightUnit as 'kg' | 'g' | undefined,
-    dimensions:    api.dimensions,
+    dimensions:    api.dimensions as Dimensions | undefined,
 
     nutritionalInfo: undefined,   // No en respuesta básica del listado
     certifications:  [],
