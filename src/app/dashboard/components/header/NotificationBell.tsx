@@ -9,7 +9,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/atoms/button';
-import { Bell, Sparkles } from 'lucide-react';
+import { AlertCircle, Bell, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NotificationItem } from './NotificationItem';
 import { fetchUnreadNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '@/lib/api/notifications';
@@ -24,6 +24,8 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
   const [isLoading, setIsLoading] = useState(!initialNotifications.length);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
   
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -37,13 +39,17 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
 
   const loadNotifications = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const response = await fetchUnreadNotifications();
       if (response.data) {
         setNotifications(response.data);
+      } else if (response.error) {
+        setError(response.error);
       }
-    } catch (error) {
-      console.error('Error cargando notificaciones:', error);
+    } catch (err) {
+      console.error('Error cargando notificaciones:', err);
+      setError('Error al cargar notificaciones');
     } finally {
       setIsLoading(false);
       setHasLoaded(true);
@@ -77,23 +83,34 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleMarkAsRead = useCallback(async (id: string) => {
+    // Optimistic: remove from list immediately (all fetched notifications are unread)
+    setNotifications(prev => prev.filter(n => n.id !== id));
     try {
       await markNotificationAsRead(id);
-      setNotifications(prev => prev.filter(n => n.id !== id));
     } catch (error) {
       console.error('Error marcando notificación como leída:', error);
+      // On failure, reload to restore the correct state
+      void loadNotifications();
     }
-  }, []);
+  }, [loadNotifications]);
 
   const handleMarkAllAsRead = useCallback(async () => {
+    if (!unreadCount || isUpdating) return;
+    // Snapshot for rollback in case of failure
+    const snapshot = notifications.slice();
+    setIsUpdating(true);
+    setNotifications([]);
+    setIsOpen(false);
     try {
       await markAllNotificationsAsRead();
-      setNotifications([]);
-      setIsOpen(false);
     } catch (error) {
       console.error('Error marcando todas como leídas:', error);
+      // Rollback optimistic update
+      setNotifications(snapshot);
+    } finally {
+      setIsUpdating(false);
     }
-  }, []);
+  }, [notifications, unreadCount, isUpdating]);
 
   const toggleOpen = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -116,7 +133,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
           isOpen && 'bg-origen-pradera/10 text-origen-menta'
         )}
         onClick={toggleOpen}
-        aria-label="Notificaciones"
+        aria-label={unreadCount > 0 ? `Notificaciones (${unreadCount})` : 'Notificaciones'}
         aria-expanded={isOpen}
       >
         <Bell className="w-5 h-5" />
@@ -151,7 +168,8 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllAsRead}
-                    className="text-xs text-origen-menta hover:text-origen-pradera transition-colors font-medium"
+                    disabled={isUpdating}
+                    className="text-xs text-origen-menta hover:text-origen-pradera transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Marcar todas
                   </button>
@@ -165,6 +183,20 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                 <div className="px-4 py-8 text-center">
                   <div className="w-12 h-12 rounded-full bg-origen-crema mx-auto mb-3 animate-pulse" />
                   <p className="text-sm text-text-subtle">Cargando...</p>
+                </div>
+              ) : error ? (
+                <div className="px-4 py-8 text-center">
+                  <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3">
+                    <AlertCircle className="w-8 h-8 text-red-400" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">No se pudieron cargar</p>
+                  <p className="text-xs text-text-subtle mt-1">las notificaciones</p>
+                  <button
+                    onClick={() => void loadNotifications()}
+                    className="mt-3 text-xs text-origen-menta hover:text-origen-pradera transition-colors font-medium"
+                  >
+                    Reintentar
+                  </button>
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="px-4 py-8 text-center">

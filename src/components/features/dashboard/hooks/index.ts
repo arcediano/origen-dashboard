@@ -4,5 +4,6 @@
  */
 
 export * from './use-dashboard-stats';
+export * from './use-producer-profile';
 export * from './use-recent-orders';
 export * from './use-top-products';

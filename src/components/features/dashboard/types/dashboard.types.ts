@@ -29,6 +29,24 @@ export interface Producer {
   phone?: string;
 }
 
+export type AccountStatus = 'active' | 'pending' | 'suspended';
+
+/**
+ * Perfil del productor tal como lo devuelve GET /api/v1/producers/me (T16-BE4).
+ */
+export interface ProducerProfile {
+  id: string;
+  code?: string;
+  name: string;
+  avatarUrl?: string;
+  coverImageUrl?: string;
+  location: string;
+  shortBio?: string;
+  categories?: string[];
+  profileCompletenessScore: number;
+  accountStatus: AccountStatus;
+}
+
 // ============================================================================
 // ESTADÍSTICAS
 // ============================================================================

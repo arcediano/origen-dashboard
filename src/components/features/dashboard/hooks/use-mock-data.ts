@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import type { DashboardStats, Order, TopProduct } from '../types';
-import { MOCK_STATS, MOCK_ORDERS, MOCK_PRODUCTS } from '../data';
+import type { DashboardStats, TopProduct } from '../types';
+import { MOCK_STATS, MOCK_PRODUCTS } from '../data';
 
 interface UseMockDataResult {
   isMockMode: boolean;
   toggleMockMode: () => void;
   getMockStats: () => DashboardStats;
-  getMockOrders: (limit?: number) => Order[];
   getMockProducts: (limit?: number) => TopProduct[];
 }
 
@@ -31,11 +30,6 @@ export function useMockData(): UseMockDataResult {
     }
   });
 
-  const getMockOrders = (limit?: number): Order[] => 
-    isMockMode 
-      ? limit ? MOCK_ORDERS.slice(0, limit) : MOCK_ORDERS
-      : [];
-
   const getMockProducts = (limit?: number): TopProduct[] =>
     isMockMode
       ? limit ? MOCK_PRODUCTS.slice(0, limit) : MOCK_PRODUCTS
@@ -45,7 +39,6 @@ export function useMockData(): UseMockDataResult {
     isMockMode,
     toggleMockMode,
     getMockStats,
-    getMockOrders,
     getMockProducts
   };
 }

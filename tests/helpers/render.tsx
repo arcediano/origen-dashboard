@@ -11,9 +11,11 @@ import { render, RenderOptions } from '@testing-library/react';
 import { vi } from 'vitest';
 
 // Mock de next/link (sin next/navigation — cada test lo controla)
+// Se reenvían todos los props del elemento <a> (incluido onClick) para que
+// los event handlers de los componentes se disparen correctamente en tests.
 vi.mock('next/link', () => ({
-  default: ({ children, href }: { children: ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
+  default: ({ children, ...rest }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { children?: ReactNode }) => (
+    <a {...rest}>{children}</a>
   ),
 }));
 

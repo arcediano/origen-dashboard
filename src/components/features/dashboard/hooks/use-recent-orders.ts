@@ -1,11 +1,14 @@
 /**
  * @file use-recent-orders.ts
- * @description Hook para obtener pedidos recientes
+ * @description Hook para obtener los pedidos recientes del productor desde la API real.
+ * Sprint 16: reemplaza el mock en-memoria por fetchSellerOrders real.
  */
 
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import type { Order } from '../types';
-import { MOCK_ORDERS as MOCK_RECENT_ORDERS } from '../data';
+import { fetchSellerOrders } from '@/lib/api/orders';
 
 interface UseRecentOrdersResult {
   orders: Order[];
@@ -14,41 +17,68 @@ interface UseRecentOrdersResult {
   refetch: () => Promise<void>;
 }
 
+/**
+ * Mapea el status completo de la API al OrderStatus reducido del dashboard.
+ * 'refunded' no existe en el tipo dashboard → se trata como 'cancelled'.
+ */
+function mapStatus(status: string): Order['status'] {
+  const valid: Order['status'][] = [
+    'pending',
+    'processing',
+    'shipped',
+    'delivered',
+    'cancelled',
+  ];
+  return valid.includes(status as Order['status'])
+    ? (status as Order['status'])
+    : 'cancelled';
+}
+
 export function useRecentOrders(limit?: number): UseRecentOrdersResult {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchOrders = async () => {
+  const loadOrders = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // TODO: Reemplazar con llamada real a API
-      // const response = await fetch(`/api/dashboard/orders/recent?limit=${limit}`);
-      // const data = await response.json();
-      
-      // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      const data = limit ? MOCK_RECENT_ORDERS.slice(0, limit) : MOCK_RECENT_ORDERS;
-      setOrders(data);
+      const res = await fetchSellerOrders({ limit: limit ?? 5 });
+
+      if (res.error || !res.data) {
+        setError(res.error ?? 'Error al cargar pedidos');
+      } else {
+        setOrders(
+          res.data.orders.map((o) => ({
+            id: o.id,
+            orderNumber: o.orderNumber,
+            customer: o.customerName,
+            items: o.items.length,
+            total: o.total,
+            status: mapStatus(o.status),
+            date: format(o.createdAt, 'dd MMM', { locale: es }),
+          })),
+        );
+      }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar pedidos';
-      setError(errorMessage);
+      setError(
+        err instanceof Error ? err.message : 'Error al cargar pedidos',
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchOrders();
+    void loadOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [limit]);
 
   return {
     orders,
     isLoading,
     error,
-    refetch: fetchOrders,
+    refetch: loadOrders,
   };
 }

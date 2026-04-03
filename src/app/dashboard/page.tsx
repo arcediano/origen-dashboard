@@ -20,11 +20,13 @@ import {
 } from '@/components/features/dashboard';
 
 // Hooks
-import { useDashboardStats, useRecentOrders, useTopProducts } from '@/components/features/dashboard/hooks';
+import {
+  useDashboardStats,
+  useRecentOrders,
+  useTopProducts,
+  useProducerProfile,
+} from '@/components/features/dashboard/hooks';
 import { useAuth } from '@/contexts/AuthContext';
-
-// Datos mock
-import { MOCK_PRODUCER } from '@/components/features/dashboard/data';
 
 // ============================================================================
 // COMPONENTE PRINCIPAL
@@ -76,6 +78,7 @@ export default function ProducerDashboard() {
   const { stats: realStats, isLoading: statsLoading } = useDashboardStats();
   const { orders: realOrders, isLoading: ordersLoading } = useRecentOrders(3);
   const { products: realProducts, isLoading: productsLoading } = useTopProducts(3);
+  const { producer, isLoading: profileLoading, error: profileError } = useProducerProfile();
 
   useEffect(() => {
     setMounted(true);
@@ -101,12 +104,16 @@ export default function ProducerDashboard() {
       {/* Contenido principal */}
       <DashboardShell>
         {/* Perfil del productor */}
-        <ProducerCard producer={MOCK_PRODUCER} />
+        <ProducerCard
+          producer={producer}
+          isLoading={profileLoading}
+          error={profileError}
+        />
 
         {/* Estadísticas - Siempre visibles */}
-        <StatsGrid 
-          stats={realStats} 
-          isLoading={statsLoading} 
+        <StatsGrid
+          stats={realStats}
+          isLoading={statsLoading}
           collapsible={false}
         />
 

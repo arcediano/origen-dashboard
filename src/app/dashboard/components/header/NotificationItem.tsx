@@ -6,17 +6,27 @@
 'use client';
 
 import Link from 'next/link';
+import { Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { 
-  Package, 
-  ShoppingBag, 
-  Award, 
+import {
+  Package,
+  ShoppingBag,
+  Award,
   AlertCircle,
-  CheckCircle,
-  Clock,
-  XCircle
 } from 'lucide-react';
 import type { Notification } from '@/types/notification';
+
+/**
+ * Valida que la URL de acción sea segura (solo rutas internas).
+ * Bloquea URLs externas (http/https), protocolos peligrosos (javascript:)
+ * y rutas de red (//dominio.com).
+ */
+function getSafeActionUrl(url?: string): string | undefined {
+  if (!url) return undefined;
+  // Solo aceptar rutas relativas que comiencen con / pero no con //
+  if (url.startsWith('/') && !url.startsWith('//')) return url;
+  return undefined;
+}
 
 interface NotificationItemProps {
   notification: Notification;
@@ -105,15 +115,15 @@ export function NotificationItem({
   // RENDER
   // ==========================================================================
 
-  return (
-    <Link
-      href={notification.actionUrl || '#'}
-      className={cn(
-        'block px-4 py-3 hover:bg-surface transition-colors relative group',
-        !notification.read && 'bg-origen-crema/20'
-      )}
-      onClick={handleClick}
-    >
+  const safeUrl = getSafeActionUrl(notification.actionUrl);
+
+  const containerClass = cn(
+    'block px-4 py-3 hover:bg-surface transition-colors relative group',
+    !notification.read && 'bg-origen-crema/20'
+  );
+
+  const content = (
+    <>
       <div className="flex gap-3">
         {/* Icono de tipo con fondo */}
         <div className={cn(
@@ -122,7 +132,7 @@ export function NotificationItem({
         )}>
           {getIcon()}
         </div>
-        
+
         {/* Contenido */}
         <div className="flex-1 min-w-0">
           {/* Título y estado */}
@@ -133,18 +143,18 @@ export function NotificationItem({
             )}>
               {notification.title}
             </p>
-            
+
             {/* Indicador de no leído (visible solo en no leídas) */}
             {!notification.read && (
               <span className="w-2 h-2 rounded-full bg-origen-menta flex-shrink-0 mt-1.5" />
             )}
           </div>
-          
+
           {/* Descripción */}
           <p className="text-xs text-muted-foreground truncate mt-0.5">
             {notification.description}
           </p>
-          
+
           {/* Timestamp */}
           <p className="text-[10px] text-text-subtle mt-1">
             {timeAgo(notification.timestamp)}
@@ -165,9 +175,20 @@ export function NotificationItem({
           ))}
         </div>
       )}
-    </Link>
+    </>
+  );
+
+  if (safeUrl) {
+    return (
+      <Link href={safeUrl} className={containerClass} onClick={handleClick}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" className={cn(containerClass, 'w-full text-left')} onClick={handleClick}>
+      {content}
+    </button>
   );
 }
-
-// Importación necesaria para el icono por defecto
-import { Bell } from 'lucide-react';

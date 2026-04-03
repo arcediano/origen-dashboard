@@ -1,5 +1,4 @@
-import type { DashboardStats, Order, TopProduct } from './types';
-import { MOCK_PRODUCER } from './data/mock-producer';
+import type { DashboardStats, TopProduct } from './types';
 import { MOCK_ALERTS } from './data/mock-orders';
 
 export const MOCK_STATS: DashboardStats = {
@@ -8,18 +7,6 @@ export const MOCK_STATS: DashboardStats = {
   revenue: { today: 249, trend: { value: 20, isPositive: true } },
   rating: { average: 4.5, total: 24 }
 };
-
-export const MOCK_ORDERS: Order[] = [
-  {
-    id: 'ord_1',
-    orderNumber: 'ORD-2024-0001',
-    date: '12 Mar',
-    status: 'pending',
-    total: 49.99,
-    items: 3,
-    customer: 'Cliente Ejemplo'
-  },
-];
 
 export const MOCK_PRODUCTS: TopProduct[] = [
   {
@@ -33,4 +20,4 @@ export const MOCK_PRODUCTS: TopProduct[] = [
   },
 ];
 
-export { MOCK_PRODUCER, MOCK_ALERTS };
+export { MOCK_ALERTS };

@@ -90,7 +90,18 @@ const config: Config = {
         "border-strong":  "hsl(var(--border-strong))",
         "text-subtle":    "hsl(var(--text-subtle))",
         "text-disabled":  "hsl(var(--text-disabled))",
-        
+
+        // Tokens de feedback (estándar en todos los proyectos — BRAND-T2 Sprint 17)
+        feedback: {
+          "success":        "hsl(var(--hoja))",
+          "success-subtle": "hsl(var(--pastel))",
+          "success-text":   "hsl(var(--hoja))",
+          "danger":         "#ef4444",
+          "danger-subtle":  "#fef2f2",
+          "danger-text":    "#b91c1c",
+          "warning-subtle": "#fffbeb",
+        },
+
         // Variables del sistema (shadcn/ui)
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -177,24 +188,20 @@ const config: Config = {
       
       // === ANIMACIONES (ACTUALIZADO v1.4) ===
       keyframes: {
-        // Animaciones existentes
+        // Float & existentes
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-10px)' },
         },
-        
-        // NUEVAS ANIMACIONES PARA CARDS (desde la guía)
         'card-hover': {
           '0%': { transform: 'translateY(0px)' },
           '100%': { transform: 'translateY(-5px)' },
         },
-        
         'gradient-shift': {
           '0%': { opacity: '0', transform: 'scale(1)' },
           '100%': { opacity: '1', transform: 'scale(1.02)' },
         },
-        
-        // Animaciones para accordion
+        // Accordion
         'accordion-down': {
           from: { height: '0' },
           to: { height: 'var(--radix-accordion-content-height)' },
@@ -203,8 +210,7 @@ const config: Config = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
-        
-        // Animaciones para sheet/dialog
+        // Sheet / drawer
         'slide-in-from-bottom': {
           '0%': { transform: 'translateY(100%)' },
           '100%': { transform: 'translateY(0)' },
@@ -213,24 +219,61 @@ const config: Config = {
           '0%': { transform: 'translateY(0)' },
           '100%': { transform: 'translateY(100%)' },
         },
+        // Fade — BRAND-T3 Sprint 17
+        'fade-in':      { from: { opacity: '0' }, to: { opacity: '1' } },
+        'fade-out':     { from: { opacity: '1' }, to: { opacity: '0' } },
+        // Scale
+        'scale-in':  { from: { opacity: '0', transform: 'scale(0.95)' }, to: { opacity: '1', transform: 'scale(1)' } },
+        'scale-out': { from: { opacity: '1', transform: 'scale(1)' },   to: { opacity: '0', transform: 'scale(0.95)' } },
+        // Slide
+        'slide-up':   { from: { opacity: '0', transform: 'translateY(12px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+        'slide-down': { from: { opacity: '1', transform: 'translateY(0)' },    to: { opacity: '0', transform: 'translateY(12px)' } },
+        // Bounce
+        'bounce-gentle': { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-4px)' } },
+        // Pulse glow
+        'pulse-glow':    { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0.7' } },
+        'pulse-gentle':  { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0.7' } },
+        // Shimmer
+        shimmer: { from: { backgroundPosition: '200% 0' }, to: { backgroundPosition: '-200% 0' } },
+        // Marquee
+        marquee: { '0%': { transform: 'translateX(0%)' }, '100%': { transform: 'translateX(-50%)' } },
       },
-      
+
       animation: {
-        // Animaciones existentes
-        'float': 'float 3s ease-in-out infinite',
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        
-        // NUEVAS ANIMACIONES PARA CARDS
-        'card-hover': 'card-hover 0.3s ease-out forwards',
-        'gradient-shift': 'gradient-shift 0.3s ease-out',
-        
-        // Animaciones para accordion
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
-        
-        // Animaciones para sheet
+        float:              'float 3s ease-in-out infinite',
+        'pulse-slow':       'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'card-hover':       'card-hover 0.3s ease-out forwards',
+        'gradient-shift':   'gradient-shift 0.3s ease-out',
+        'accordion-down':   'accordion-down 0.2s ease-out',
+        'accordion-up':     'accordion-up 0.2s ease-out',
         'slide-in-from-bottom': 'slide-in-from-bottom 0.3s ease-out',
-        'slide-out-to-bottom': 'slide-out-to-bottom 0.3s ease-out',
+        'slide-out-to-bottom':  'slide-out-to-bottom 0.3s ease-out',
+        // BRAND-T3 Sprint 17
+        'fade-in':          'fade-in 0.3s ease-out forwards',
+        'fade-in-slow':     'fade-in 0.5s ease-out forwards',
+        'fade-in-sm':       'fade-in 0.2s ease-out forwards',
+        'fade-out':         'fade-out 0.2s ease-out forwards',
+        'scale-in':         'scale-in 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards',
+        'scale-out':        'scale-out 0.2s ease-in forwards',
+        'slide-up':         'slide-up 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        'slide-up-slow':    'slide-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        'slide-down':       'slide-down 0.25s ease-in forwards',
+        'bounce-gentle':    'bounce-gentle 0.5s ease-in-out 1',
+        'pulse-glow':       'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'pulse-gentle':     'pulse-gentle 2s ease-in-out infinite',
+        shimmer:            'shimmer 2s linear infinite',
+        marquee:            'marquee 24s linear infinite',
+      },
+
+      // Animation delays — BRAND-T3 Sprint 17
+      animationDelay: {
+        '100': '100ms',
+        '200': '200ms',
+        '300': '300ms',
+        '400': '400ms',
+        '500': '500ms',
+        '600': '600ms',
+        '700': '700ms',
       },
       
       // === GRADIENTES ===

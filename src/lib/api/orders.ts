@@ -1,343 +1,292 @@
 /**
  * @file orders.ts
- * @description Llamadas a la API para el sistema de pedidos
+ * @description Llamadas a la API real para el sistema de pedidos del productor.
+ * Sprint 16: reemplaza el mock en-memoria por fetch real al gateway.
+ *
+ * Endpoints reales (gateway → orders-service):
+ *   GET   /api/v1/orders/seller          — lista pedidos del productor (paginado)
+ *   GET   /api/v1/orders/seller/:id      — detalle de pedido
+ *   PATCH /api/v1/orders/seller/:id/status — actualizar estado de pedido
  */
 
-import { type Order, type OrderStats, type OrdersResponse, type OrderFilters } from '@/types/order';
-import { ApiResponse } from './products';
+import { gatewayClient, GatewayError } from './client';
+import type { Order, OrderStatus, OrderStats, OrdersResponse, OrderFilters } from '@/types/order';
+import type { ApiResponse } from './products';
 
-// ============================================================================
-// DATOS MOCK
-// ============================================================================
+// ─── Tipos internos (forma real del backend) ─────────────────────────────────
 
-const MOCK_ORDERS: Order[] = [
-  {
-    id: 'ord-001',
-    orderNumber: 'PED-2024-0001',
-    customerId: 'user-123',
-    customerName: 'María García',
-    customerEmail: 'maria@email.com',
-    customerPhone: '612345678',
-    
-    items: [
-      {
-        id: 'item-001',
-        productId: 'prod-001',
-        productName: 'Queso Manchego Curado 12 meses',
-        productImage: '/mock/queso.jpg',
-        quantity: 2,
-        unitPrice: 28.50,
-        totalPrice: 57.00
-      },
-      {
-        id: 'item-002',
-        productId: 'prod-002',
-        productName: 'Aceite de Oliva Virgen Extra',
-        productImage: '/mock/aceite.jpg',
-        quantity: 1,
-        unitPrice: 18.75,
-        totalPrice: 18.75
-      }
-    ],
-    
-    subtotal: 75.75,
-    shippingCost: 5.90,
-    tax: 15.92,
-    total: 97.57,
-    
-    status: 'delivered',
-    payment: {
-      method: 'card',
-      status: 'paid',
-      transactionId: 'txn-123456',
-      amount: 97.57,
-      paidAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10) // 10 días
-    },
-    
-    shipping: {
-      method: 'Correos Express',
-      carrier: 'Correos',
-      trackingNumber: 'CP123456789ES',
-      trackingUrl: 'https://www.correos.es/seguimiento',
-      status: 'delivered',
-      estimatedDays: 2,
-      shippedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9),
-      deliveredAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8),
-      cost: 5.90,
-      address: {
-        fullName: 'María García',
-        addressLine1: 'Calle Mayor 123',
-        city: 'Madrid',
-        postalCode: '28001',
-        country: 'España',
-        phone: '612345678'
-      }
-    },
-    
-    timeline: [
-      {
-        id: 'tl-001',
-        status: 'pending',
-        description: 'Pedido creado',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10)
-      },
-      {
-        id: 'tl-002',
-        status: 'processing',
-        description: 'Pago confirmado',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9.5)
-      },
-      {
-        id: 'tl-003',
-        status: 'shipped',
-        description: 'Pedido enviado',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9)
-      },
-      {
-        id: 'tl-004',
-        status: 'delivered',
-        description: 'Pedido entregado',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8)
-      }
-    ],
-    
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8)
-  },
-  
-  {
-    id: 'ord-002',
-    orderNumber: 'PED-2024-0002',
-    customerId: 'user-456',
-    customerName: 'Carlos Rodríguez',
-    customerEmail: 'carlos@email.com',
-    customerPhone: '623456789',
-    
-    items: [
-      {
-        id: 'item-003',
-        productId: 'prod-003',
-        productName: 'Miel de Romero',
-        productImage: '/mock/miel.jpg',
-        quantity: 3,
-        unitPrice: 12.50,
-        totalPrice: 37.50
-      }
-    ],
-    
-    subtotal: 37.50,
-    shippingCost: 4.90,
-    tax: 7.88,
-    total: 50.28,
-    
-    status: 'shipped',
-    payment: {
-      method: 'paypal',
-      status: 'paid',
-      transactionId: 'pp-789012',
-      amount: 50.28,
-      paidAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3)
-    },
-    
-    shipping: {
-      method: 'SEUR',
-      carrier: 'SEUR',
-      trackingNumber: 'SE123456789ES',
-      trackingUrl: 'https://www.seur.com/seguimiento',
-      status: 'shipped',
-      estimatedDays: 3,
-      shippedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
-      cost: 4.90,
-      address: {
-        fullName: 'Carlos Rodríguez',
-        addressLine1: 'Av. Catalunya 45',
-        addressLine2: '2º 2ª',
-        city: 'Barcelona',
-        postalCode: '08001',
-        country: 'España',
-        phone: '623456789'
-      }
-    },
-    
-    timeline: [
-      {
-        id: 'tl-005',
-        status: 'pending',
-        description: 'Pedido creado',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3)
-      },
-      {
-        id: 'tl-006',
-        status: 'processing',
-        description: 'Pago confirmado',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3)
-      },
-      {
-        id: 'tl-007',
-        status: 'shipped',
-        description: 'Pedido enviado',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2)
-      }
-    ],
-    
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2)
-  },
-  
-  {
-    id: 'ord-003',
-    orderNumber: 'PED-2024-0003',
-    customerId: 'user-789',
-    customerName: 'Ana Martínez',
-    customerEmail: 'ana@email.com',
-    customerPhone: '634567890',
-    
-    items: [
-      {
-        id: 'item-004',
-        productId: 'prod-004',
-        productName: 'Embutido Artesano',
-        productImage: '/mock/embutido.jpg',
-        quantity: 1,
-        unitPrice: 35.90,
-        totalPrice: 35.90
-      },
-      {
-        id: 'item-005',
-        productId: 'prod-005',
-        productName: 'Queso de Oveja',
-        productImage: '/mock/queso-oveja.jpg',
-        quantity: 1,
-        unitPrice: 22.30,
-        totalPrice: 22.30
-      },
-      {
-        id: 'item-006',
-        productId: 'prod-006',
-        productName: 'Vino Tinto Crianza',
-        productImage: '/mock/vino.jpg',
-        quantity: 2,
-        unitPrice: 15.50,
-        totalPrice: 31.00
-      }
-    ],
-    
-    subtotal: 89.20,
-    shippingCost: 5.90,
-    tax: 18.73,
-    total: 113.83,
-    
-    status: 'processing',
-    payment: {
-      method: 'transfer',
-      status: 'pending',
-      amount: 113.83
-    },
-    
-    shipping: {
-      method: 'Correos Express',
-      status: 'pending',
-      estimatedDays: 3,
-      cost: 5.90,
-      address: {
-        fullName: 'Ana Martínez',
-        addressLine1: 'Plaza del Pilar 7',
-        city: 'Zaragoza',
-        postalCode: '50001',
-        country: 'España',
-        phone: '634567890'
-      }
-    },
-    
-    timeline: [
-      {
-        id: 'tl-008',
-        status: 'pending',
-        description: 'Pedido creado',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5) // 5 horas
-      },
-      {
-        id: 'tl-009',
-        status: 'processing',
-        description: 'En espera de confirmación de pago',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5)
-      }
-    ],
-    
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 5)
+interface BackendProductImage {
+  id: string;
+  url: string;
+  alt: string;
+}
+
+interface BackendOrderItem {
+  id: string;
+  productId: string;
+  productSlug?: string;
+  productName: string;
+  productImage?: BackendProductImage | null;
+  sellerName: string;
+  unit: string;
+  unitPrice: number;
+  quantity: number;
+  subtotal: number;
+}
+
+interface BackendShippingAddress {
+  fullName?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  phone?: string;
+  email?: string;
+}
+
+interface BackendOrder {
+  id: string;
+  orderNumber: string;
+  status: string;
+  shippingAddress: BackendShippingAddress | null;
+  paymentMethod: string;
+  couponCode?: string;
+  subtotal: number;
+  shippingCost: number;
+  discountAmount: number;
+  total: number;
+  estimatedDelivery?: string;
+  createdAt: string;
+  updatedAt: string;
+  items: BackendOrderItem[];
+}
+
+interface BackendSellerListResponse {
+  items: BackendOrder[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// ─── Mappers ─────────────────────────────────────────────────────────────────
+
+function mapPaymentMethod(method: string): Order['payment']['method'] {
+  switch (method?.toLowerCase()) {
+    case 'card':
+    case 'tarjeta':
+      return 'card';
+    case 'transfer':
+    case 'transferencia':
+    case 'bank_transfer':
+      return 'transfer';
+    case 'paypal':
+      return 'paypal';
+    case 'cash':
+    case 'efectivo':
+      return 'cash';
+    default:
+      return 'other';
   }
-];
+}
 
-// ============================================================================
-// FUNCIONES AUXILIARES
-// ============================================================================
+function mapShippingStatus(orderStatus: string): Order['shipping']['status'] {
+  switch (orderStatus) {
+    case 'pending':
+    case 'processing':
+      return 'pending';
+    case 'shipped':
+      return 'shipped';
+    case 'delivered':
+      return 'delivered';
+    case 'cancelled':
+    case 'refunded':
+      return 'returned';
+    default:
+      return 'pending';
+  }
+}
 
-const delay = (ms: number = 400) => new Promise(resolve => setTimeout(resolve, ms));
+function mapOrderStatus(raw: string): OrderStatus {
+  const valid: OrderStatus[] = [
+    'pending',
+    'processing',
+    'shipped',
+    'delivered',
+    'cancelled',
+    'refunded',
+  ];
+  return valid.includes(raw as OrderStatus) ? (raw as OrderStatus) : 'pending';
+}
 
-const calculateStats = (orders: Order[]): OrderStats => {
-  const stats = {
-    total: orders.length,
-    pending: orders.filter(o => o.status === 'pending').length,
-    processing: orders.filter(o => o.status === 'processing').length,
-    shipped: orders.filter(o => o.status === 'shipped').length,
-    delivered: orders.filter(o => o.status === 'delivered').length,
-    cancelled: orders.filter(o => o.status === 'cancelled').length,
-    refunded: orders.filter(o => o.status === 'refunded').length,
-    totalRevenue: orders.reduce((acc, o) => acc + (o.status === 'delivered' ? o.total : 0), 0),
-    averageOrderValue: 0,
-    todayOrders: orders.filter(o => {
-      const today = new Date();
-      return o.createdAt.toDateString() === today.toDateString();
-    }).length,
-    todayRevenue: orders.filter(o => {
-      const today = new Date();
-      return o.createdAt.toDateString() === today.toDateString();
-    }).reduce((acc, o) => acc + (o.status === 'delivered' ? o.total : 0), 0)
+function mapBackendOrder(o: BackendOrder): Order {
+  const status = mapOrderStatus(o.status);
+  const addr = o.shippingAddress ?? {};
+
+  return {
+    id: o.id,
+    orderNumber: o.orderNumber,
+    customerId: '',
+    customerName: addr.fullName ?? 'Cliente',
+    customerEmail: addr.email ?? '',
+    customerPhone: addr.phone,
+
+    items: o.items.map((item) => ({
+      id: item.id,
+      productId: item.productId,
+      productName: item.productName,
+      productImage: item.productImage?.url ?? undefined,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      totalPrice: item.subtotal,
+    })),
+
+    subtotal: o.subtotal,
+    shippingCost: o.shippingCost,
+    discount: o.discountAmount > 0 ? o.discountAmount : undefined,
+    total: o.total,
+
+    status,
+
+    payment: {
+      method: mapPaymentMethod(o.paymentMethod),
+      status: status === 'pending' ? 'pending' : 'paid',
+      amount: o.total,
+    },
+
+    shipping: {
+      method: '',
+      status: mapShippingStatus(o.status),
+      cost: o.shippingCost,
+      estimatedDate: o.estimatedDelivery ? new Date(o.estimatedDelivery) : undefined,
+      address: {
+        fullName: addr.fullName ?? '',
+        addressLine1: addr.addressLine1 ?? '',
+        addressLine2: addr.addressLine2,
+        city: addr.city ?? '',
+        state: addr.state,
+        postalCode: addr.postalCode ?? '',
+        country: addr.country ?? 'España',
+        phone: addr.phone,
+        email: addr.email,
+      },
+    },
+
+    // El backend no expone timeline para el vendedor
+    timeline: [],
+
+    createdAt: new Date(o.createdAt),
+    updatedAt: new Date(o.updatedAt),
   };
+}
 
-  const deliveredOrders = orders.filter(o => o.status === 'delivered');
-  stats.averageOrderValue = deliveredOrders.length > 0 
-    ? stats.totalRevenue / deliveredOrders.length 
-    : 0;
+function computeStats(orders: Order[]): OrderStats {
+  const delivered = orders.filter((o) => o.status === 'delivered');
+  const totalRevenue = delivered.reduce((acc, o) => acc + o.total, 0);
+  const today = new Date().toDateString();
 
-  return stats;
-};
+  return {
+    total: orders.length,
+    pending: orders.filter((o) => o.status === 'pending').length,
+    processing: orders.filter((o) => o.status === 'processing').length,
+    shipped: orders.filter((o) => o.status === 'shipped').length,
+    delivered: delivered.length,
+    cancelled: orders.filter((o) => o.status === 'cancelled').length,
+    refunded: orders.filter((o) => o.status === 'refunded').length,
+    totalRevenue,
+    averageOrderValue: delivered.length > 0 ? totalRevenue / delivered.length : 0,
+    todayOrders: orders.filter(
+      (o) => new Date(o.createdAt).toDateString() === today,
+    ).length,
+    todayRevenue: orders
+      .filter(
+        (o) =>
+          o.status === 'delivered' &&
+          new Date(o.createdAt).toDateString() === today,
+      )
+      .reduce((acc, o) => acc + o.total, 0),
+  };
+}
 
-const filterOrders = (orders: Order[], filters?: OrderFilters): Order[] => {
-  if (!filters) return orders;
+// ─── Params públicos ──────────────────────────────────────────────────────────
 
-  return orders.filter(order => {
-    if (filters.status && order.status !== filters.status) return false;
-    if (filters.paymentStatus && order.payment.status !== filters.paymentStatus) return false;
-    if (filters.shippingStatus && order.shipping.status !== filters.shippingStatus) return false;
-    
-    if (filters.search) {
-      const search = filters.search.toLowerCase();
-      const matchesOrderNumber = order.orderNumber.toLowerCase().includes(search);
-      const matchesCustomerName = order.customerName.toLowerCase().includes(search);
-      const matchesCustomerEmail = order.customerEmail.toLowerCase().includes(search);
-      if (!matchesOrderNumber && !matchesCustomerName && !matchesCustomerEmail) return false;
-    }
+export interface SellerOrdersParams {
+  status?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
 
-    if (filters.dateFrom && order.createdAt < filters.dateFrom) return false;
-    if (filters.dateTo && order.createdAt > filters.dateTo) return false;
-
-    if (filters.minAmount !== undefined && order.total < filters.minAmount) return false;
-    if (filters.maxAmount !== undefined && order.total > filters.maxAmount) return false;
-
-    if (filters.customerId && order.customerId !== filters.customerId) return false;
-
-    return true;
-  });
-};
-
-// ============================================================================
-// FUNCIONES DE LA API
-// ============================================================================
+// ─── API ─────────────────────────────────────────────────────────────────────
 
 /**
- * Obtiene todos los pedidos con filtros
+ * Obtiene los pedidos del productor autenticado (paginado).
+ * GET /api/v1/orders/seller
+ */
+export async function fetchSellerOrders(
+  params?: SellerOrdersParams,
+): Promise<ApiResponse<{ orders: Order[]; total: number; page: number; limit: number }>> {
+  try {
+    const res = await gatewayClient.get<BackendSellerListResponse>('/orders/seller', {
+      params: {
+        ...(params?.page !== undefined ? { page: params.page } : {}),
+        ...(params?.limit !== undefined ? { limit: params.limit } : {}),
+        ...(params?.status ? { status: params.status } : {}),
+        ...(params?.search ? { search: params.search } : {}),
+      },
+    });
+
+    const orders = (res.items ?? []).map(mapBackendOrder);
+
+    return {
+      data: {
+        orders,
+        total: res.total,
+        page: res.page,
+        limit: res.limit,
+      },
+      status: 200,
+    };
+  } catch (err) {
+    console.error('[orders] fetchSellerOrders', err);
+    const message =
+      err instanceof GatewayError ? err.message : 'Error al cargar pedidos';
+    return {
+      error: message,
+      status: err instanceof GatewayError ? err.status : 500,
+    };
+  }
+}
+
+/**
+ * Obtiene el detalle de un pedido del productor por ID.
+ * GET /api/v1/orders/seller/:id
+ */
+export async function fetchSellerOrderById(
+  id: string,
+): Promise<ApiResponse<Order>> {
+  try {
+    const res = await gatewayClient.get<BackendOrder>(`/orders/seller/${id}`);
+    return { data: mapBackendOrder(res), status: 200 };
+  } catch (err) {
+    console.error('[orders] fetchSellerOrderById', err);
+    if (err instanceof GatewayError) {
+      if (err.status === 404) {
+        return { error: 'Pedido no encontrado', status: 404 };
+      }
+      if (err.status === 403) {
+        return { error: 'Acceso denegado al pedido', status: 403 };
+      }
+      return { error: err.message, status: err.status };
+    }
+    return { error: 'Error al cargar el pedido', status: 500 };
+  }
+}
+
+/**
+ * Obtiene todos los pedidos con filtros y paginación.
+ * Delega a fetchSellerOrders.
  */
 export async function fetchOrders(params?: {
   page?: number;
@@ -345,98 +294,91 @@ export async function fetchOrders(params?: {
   filters?: OrderFilters;
 }): Promise<ApiResponse<OrdersResponse>> {
   try {
-    await delay(600);
+    const result = await fetchSellerOrders({
+      page: params?.page,
+      limit: params?.limit,
+      status: params?.filters?.status,
+      search: params?.filters?.search,
+    });
 
-    let filtered = filterOrders([...MOCK_ORDERS], params?.filters);
-    
-    // Ordenar por fecha (más recientes primero)
-    filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    if (result.error || !result.data) {
+      return {
+        error: result.error ?? 'Error al cargar pedidos',
+        status: result.status,
+      };
+    }
 
-    const page = params?.page || 1;
-    const limit = params?.limit || 10;
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const paginated = filtered.slice(start, end);
+    const { orders, total, page, limit } = result.data;
+    const totalPages = limit > 0 ? Math.ceil(total / limit) : 1;
 
     return {
       data: {
-        orders: paginated,
-        stats: calculateStats(filtered),
-        total: filtered.length,
+        orders,
+        stats: computeStats(orders),
+        total,
         page,
         limit,
-        totalPages: Math.ceil(filtered.length / limit)
+        totalPages,
       },
-      status: 200
+      status: 200,
     };
-  } catch (error) {
-    console.error('Error en fetchOrders:', error);
+  } catch (err) {
+    console.error('[orders] fetchOrders', err);
     return { error: 'Error al cargar pedidos', status: 500 };
   }
 }
 
 /**
- * Obtiene un pedido por ID
+ * Obtiene un pedido por ID.
+ * Delega a fetchSellerOrderById.
  */
 export async function fetchOrderById(id: string): Promise<ApiResponse<Order>> {
-  try {
-    await delay(400);
-    const order = MOCK_ORDERS.find(o => o.id === id);
-    if (!order) {
-      return { error: 'Pedido no encontrado', status: 404 };
-    }
-    return { data: { ...order }, status: 200 };
-  } catch (error) {
-    console.error('Error en fetchOrderById:', error);
-    return { error: 'Error al cargar el pedido', status: 500 };
-  }
+  return fetchSellerOrderById(id);
 }
 
 /**
- * Actualiza el estado de un pedido
+ * Actualiza el estado de un pedido del productor.
+ * PATCH /api/v1/orders/seller/:id/status
  */
 export async function updateOrderStatus(
-  id: string, 
+  id: string,
   status: Order['status'],
-  comment?: string
+  comment?: string,
 ): Promise<ApiResponse<Order>> {
   try {
-    await delay(300);
-    const order = MOCK_ORDERS.find(o => o.id === id);
-    if (!order) {
-      return { error: 'Pedido no encontrado', status: 404 };
+    const res = await gatewayClient.patch<BackendOrder>(
+      `/orders/seller/${id}/status`,
+      { status, ...(comment ? { comment } : {}) },
+    );
+    return { data: mapBackendOrder(res), status: 200 };
+  } catch (err) {
+    console.error('[orders] updateOrderStatus', err);
+    if (err instanceof GatewayError) {
+      if (err.status === 404) {
+        return { error: 'Pedido no encontrado', status: 404 };
+      }
+      return { error: err.message, status: err.status };
     }
-
-    order.status = status;
-    order.updatedAt = new Date();
-    
-    // Añadir a la línea de tiempo
-    order.timeline.push({
-      id: `tl-${Date.now()}`,
-      status,
-      description: comment || `Estado actualizado a ${status}`,
-      createdAt: new Date()
-    });
-
-    return { data: { ...order }, status: 200 };
-  } catch (error) {
-    console.error('Error en updateOrderStatus:', error);
     return { error: 'Error al actualizar el pedido', status: 500 };
   }
 }
 
 /**
- * Obtiene estadísticas de pedidos
+ * Obtiene estadísticas de pedidos.
+ * Computa las estadísticas desde la primera página de la API (hasta 50 pedidos).
  */
 export async function fetchOrderStats(): Promise<ApiResponse<OrderStats>> {
   try {
-    await delay(300);
-    return {
-      data: calculateStats(MOCK_ORDERS),
-      status: 200
-    };
-  } catch (error) {
-    console.error('Error en fetchOrderStats:', error);
+    const result = await fetchSellerOrders({ limit: 50 });
+    if (result.error || !result.data) {
+      return {
+        error: result.error ?? 'Error al obtener estadísticas',
+        status: result.status,
+      };
+    }
+    return { data: computeStats(result.data.orders), status: 200 };
+  } catch (err) {
+    console.error('[orders] fetchOrderStats', err);
     return { error: 'Error al obtener estadísticas', status: 500 };
   }
 }
