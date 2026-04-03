@@ -56,22 +56,31 @@ export interface DeliveryOption {
   icon: React.ComponentType<{ className?: string }>;
 }
 
+/** Nivel logístico detectado por CP */
+export type LogisticsLevel = 'centralized' | 'transport' | 'own';
+
 export interface EnhancedCapacityData {
   // ¿Está en ruta de Origen?
   isInOriginRoute: boolean;
-  
+
+  /** Nivel logístico detectado: centralizado / transporte concertado / propio */
+  logisticsLevel?: LogisticsLevel;
+
+  /** Solo nivel 'transport': ¿usa el transporte concertado de Origen? */
+  useCentralizedTransport?: boolean;
+
   // Opciones de envío (personalizadas si no está en ruta)
   deliveryOptions: DeliveryOption[];
-  
+
   // Zonas de entrega (donde SÍ entrega)
   includedZones: ShippingZone[];
-  
+
   // Zonas de exclusión (donde NO entrega - opcional)
   excludedZones?: ShippingZone[];
-  
+
   // Pedido mínimo
   minOrderAmount: number;
-  
+
   // Packaging sostenible
   sustainablePackaging?: boolean;
   packagingDescription?: string;
@@ -410,6 +419,35 @@ export function EnhancedStep4Capacity({
   // ========================================================================
   
   const [editingOption, setEditingOption] = React.useState<string | null>(null);
+  const [detectingZone, setDetectingZone] = React.useState(false);
+
+  // Detectar zona logística cuando cambia el CP del productor
+  React.useEffect(() => {
+    const postalCode = producerLocation?.postalCode;
+    if (!postalCode || postalCode.length !== 5) return;
+
+    setDetectingZone(true);
+    fetch(`/api/v1/producers/logistics/zone-check?postalCode=${postalCode}`, { credentials: 'include' })
+      .then((r) => r.ok ? r.json() : Promise.reject())
+      .then((res: { data?: { centralizedLogistics: boolean; centralizedTransport: boolean } }) => {
+        const d = res.data;
+        if (!d) return;
+        const level: LogisticsLevel = d.centralizedLogistics
+          ? 'centralized'
+          : d.centralizedTransport
+            ? 'transport'
+            : 'own';
+        onChange({
+          ...data,
+          isInOriginRoute: d.centralizedLogistics,
+          logisticsLevel: level,
+        });
+      })
+      .catch(() => { /* sin cambios si falla */ })
+      .finally(() => setDetectingZone(false));
+  // Solo re-ejecutar cuando cambia el CP — no incluir data/onChange en deps para evitar loops
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [producerLocation?.postalCode]);
 
   // ========================================================================
   // VALIDACIÓN
@@ -417,7 +455,10 @@ export function EnhancedStep4Capacity({
   
   const hasDeliveryOptions = data.deliveryOptions?.length > 0;
   const hasIncludedZones = data.includedZones?.length > 0;
-  const hasMinOrder = data.minOrderAmount >= 10;
+  const hasMinOrder = data.minOrderAmount > 0;
+  const minOrderError = data.minOrderAmount !== undefined && data.minOrderAmount <= 0
+    ? 'El pedido mínimo debe ser mayor de 0 €'
+    : undefined;
   
   const totalSteps = 3;
   const completedSteps = [hasDeliveryOptions, hasIncludedZones, hasMinOrder].filter(Boolean).length;
@@ -532,10 +573,81 @@ export function EnhancedStep4Capacity({
       </div>
 
       {/* ====================================================================
+          BANNER LOGÍSTICO — nivel detectado por CP (mobile-first)
+      ==================================================================== */}
+      {detectingZone && (
+        <div className="flex items-center gap-3 p-4 bg-origen-crema/40 border border-border rounded-2xl animate-pulse">
+          <Compass className="w-5 h-5 text-origen-pradera flex-shrink-0" />
+          <p className="text-sm text-muted-foreground">Detectando disponibilidad logística para tu zona...</p>
+        </div>
+      )}
+
+      {!detectingZone && data.logisticsLevel === 'centralized' && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-2xl">
+          <div className="flex items-start gap-3 flex-1">
+            <Route className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-green-800">Logística centralizada disponible</p>
+              <p className="text-xs text-green-700 mt-0.5">
+                Origen recoge los pedidos en tu dirección de producción y gestiona la entrega al comprador. No necesitas configurar transportistas.
+              </p>
+            </div>
+          </div>
+          <span className="self-start sm:self-center text-xs font-medium bg-green-100 text-green-700 px-2.5 py-1 rounded-full border border-green-200 whitespace-nowrap">
+            Nivel 1 · Ruta Origen
+          </span>
+        </div>
+      )}
+
+      {!detectingZone && data.logisticsLevel === 'transport' && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
+          <div className="flex items-start gap-3 flex-1">
+            <Truck className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-blue-800">Transporte concertado disponible en tu zona</p>
+              <p className="text-xs text-blue-700 mt-0.5">
+                Tu zona no tiene logística centralizada, pero puedes usar nuestro transportista concertado. Tú preparas el pedido, nosotros lo enviamos.
+              </p>
+              {/* Toggle para usar transporte concertado */}
+              <label className="flex items-center gap-2 mt-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={data.useCentralizedTransport ?? true}
+                  onChange={(e) => onChange({ ...data, useCentralizedTransport: e.target.checked })}
+                  className="w-4 h-4 rounded border-border accent-blue-600"
+                />
+                <span className="text-xs font-medium text-blue-800">Usar el transportista concertado de Origen</span>
+              </label>
+            </div>
+          </div>
+          <span className="self-start sm:self-center text-xs font-medium bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200 whitespace-nowrap">
+            Nivel 2 · Transporte
+          </span>
+        </div>
+      )}
+
+      {!detectingZone && data.logisticsLevel === 'own' && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-origen-crema/50 border border-border rounded-2xl">
+          <div className="flex items-start gap-3 flex-1">
+            <Package className="w-5 h-5 text-origen-bosque flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-origen-bosque">Gestión propia de envíos</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Tu zona no tiene cobertura de logística o transporte de Origen. Configura tus propias opciones de envío a continuación.
+              </p>
+            </div>
+          </div>
+          <span className="self-start sm:self-center text-xs font-medium bg-surface text-muted-foreground px-2.5 py-1 rounded-full border border-border whitespace-nowrap">
+            Nivel 3 · Propio
+          </span>
+        </div>
+      )}
+
+      {/* ====================================================================
           CARD 1: ESTADO DE RUTA
       ==================================================================== */}
       <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        
+
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
             <Compass className="w-6 h-6 text-origen-pradera" />
@@ -543,7 +655,7 @@ export function EnhancedStep4Capacity({
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">Rutas de Origen</h2>
             <p className="text-sm text-muted-foreground">
-              {data.isInOriginRoute 
+              {data.isInOriginRoute
                 ? '¡Tu negocio está en nuestra ruta de reparto!'
                 : 'Actualmente no estás en nuestras rutas de reparto'}
             </p>
@@ -699,7 +811,7 @@ export function EnhancedStep4Capacity({
           </div>
 
           {!hasDeliveryOptions && (
-            <div className="mt-6 p-4 bg-red-50/50 rounded-xl border border-red-200">
+            <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-red-200">
               <p className="text-xs text-red-700 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
                 Añade al menos un método de envío para continuar
@@ -737,7 +849,7 @@ export function EnhancedStep4Capacity({
         />
 
         {!hasIncludedZones && (
-          <div className="mt-6 p-4 bg-red-50/50 rounded-xl border border-red-200">
+          <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-red-200">
             <p className="text-xs text-red-700 flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
               Añade al menos una zona de entrega para continuar
@@ -775,20 +887,29 @@ export function EnhancedStep4Capacity({
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">€</span>
             <Input
               type="number"
-              value={data.minOrderAmount || 20}
+              value={data.minOrderAmount || ''}
               onChange={(e) => handleInputChange('minOrderAmount', parseFloat(e.target.value) || 0)}
-              min={0}
+              min={1}
               step={5}
               inputSize="lg"
-              className="pl-8"
+              className={cn('pl-8', minOrderError && 'border-red-500 focus:ring-red-500')}
+              aria-invalid={!!minOrderError}
+              aria-describedby={minOrderError ? 'min-order-error' : 'min-order-hint'}
             />
           </div>
           <span className="text-sm text-muted-foreground">euros</span>
         </div>
-        
-        <p className="text-xs text-muted-foreground mt-3">
-          Recomendado: 20-30€ para venta al público general
-        </p>
+
+        {minOrderError ? (
+          <p id="min-order-error" className="text-xs text-red-600 flex items-center gap-1 mt-2">
+            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+            {minOrderError}
+          </p>
+        ) : (
+          <p id="min-order-hint" className="text-xs text-muted-foreground mt-3">
+            Recomendado: 20-30 € para venta al público general
+          </p>
+        )}
       </div>
 
       {/* ====================================================================

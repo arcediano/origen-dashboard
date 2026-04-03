@@ -147,6 +147,29 @@ export function EnhancedStep6Stripe({
     <div className="space-y-6">
 
       {/* ──────────────────────────────────────────────────────────────────────
+          BANNER DE IMPACTO — mobile-first, siempre visible si no conectado
+      ────────────────────────────────────────────────────────────────────── */}
+      {!data.stripeConnected && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+          <div className="flex items-start gap-3 flex-1">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-amber-800">
+                Necesitas conectar Stripe para cobrar tus pedidos
+              </p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                Sin cuenta de pagos, los pedidos que recibas quedarán en espera y no podrás procesarlos.
+                Puedes conectarlo ahora o después desde tu panel, pero hasta entonces no podrás operar.
+              </p>
+            </div>
+          </div>
+          <span className="self-start sm:self-center text-xs font-medium bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full whitespace-nowrap border border-amber-200">
+            Pendiente de configurar
+          </span>
+        </div>
+      )}
+
+      {/* ──────────────────────────────────────────────────────────────────────
           CARD 1: CÓMO FUNCIONAN LOS PAGOS
       ────────────────────────────────────────────────────────────────────── */}
       <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm">
@@ -268,11 +291,20 @@ export function EnhancedStep6Stripe({
               </p>
             </div>
 
-            {/* Error de conexión */}
+            {/* Error de conexión con reintento */}
             {connectError && (
-              <div className="w-full p-3 bg-red-50 rounded-xl border border-red-200 flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-red-700">{connectError}</p>
+              <div className="w-full p-3 bg-feedback-danger-subtle rounded-xl border border-red-200 flex flex-col sm:flex-row sm:items-center gap-2">
+                <div className="flex items-start gap-2 flex-1">
+                  <AlertCircle className="w-4 h-4 text-feedback-danger flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-red-700">{connectError}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setConnectError('')}
+                  className="text-xs font-medium text-red-700 underline underline-offset-2 whitespace-nowrap self-end sm:self-auto"
+                >
+                  Reintentar
+                </button>
               </div>
             )}
 
@@ -280,7 +312,7 @@ export function EnhancedStep6Stripe({
               type="button"
               onClick={handleConnect}
               disabled={isConnecting}
-              className="h-12 px-8 bg-origen-bosque hover:bg-origen-pino text-white text-base min-w-[220px]"
+              className="w-full sm:w-auto h-12 px-8 bg-origen-bosque hover:bg-origen-pino text-white text-base"
             >
               {isConnecting ? (
                 <span className="flex items-center gap-2">
@@ -300,8 +332,8 @@ export function EnhancedStep6Stripe({
               <span>Conexión segura · Cifrado SSL · Datos protegidos</span>
             </div>
 
-            <p className="text-xs text-text-subtle">
-              Este paso es opcional — podrás conectarlo más tarde desde tu panel
+            <p className="text-xs text-muted-foreground text-center">
+              También puedes conectarlo después desde tu panel, pero tus pedidos quedarán en espera hasta entonces.
             </p>
           </div>
         )}
@@ -310,35 +342,20 @@ export function EnhancedStep6Stripe({
       {/* ──────────────────────────────────────────────────────────────────────
           CARD 3: TÉRMINOS
       ────────────────────────────────────────────────────────────────────── */}
-      <div className={cn(
-        'bg-surface-alt rounded-2xl border p-6 md:p-8 shadow-sm transition-all',
-        !data.stripeConnected && 'opacity-60',
-        data.stripeConnected && 'border-border hover:border-origen-pradera/30',
-      )}>
-
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:border-origen-pradera/30 transition-all">
         <div className="flex items-start gap-4">
           <Checkbox
             id="accept-terms"
             checked={data.acceptTerms}
             onCheckedChange={handleTermsChange}
-            disabled={!data.stripeConnected}
-            className={cn(
-              'h-5 w-5 rounded-md border-2 mt-0.5 flex-shrink-0',
-              !data.stripeConnected && 'cursor-not-allowed',
-            )}
+            className="h-5 w-5 rounded-md border-2 mt-0.5 flex-shrink-0"
           />
           <div className="flex-1">
-            <label
-              htmlFor="accept-terms"
-              className={cn(
-                'text-sm font-medium text-origen-bosque',
-                data.stripeConnected ? 'cursor-pointer' : 'cursor-not-allowed',
-              )}
-            >
-              Acepto los términos y condiciones de Stripe y de Origen
+            <label htmlFor="accept-terms" className="text-sm font-medium text-origen-bosque cursor-pointer">
+              He leído y acepto los términos y condiciones de Stripe y de Origen
             </label>
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Al conectar, aceptas los{' '}
+              Al operar en Origen aceptas los{' '}
               <a
                 href="https://stripe.com/es/legal"
                 target="_blank"
@@ -354,13 +371,8 @@ export function EnhancedStep6Stripe({
               >
                 Política de privacidad de Origen
               </a>.
+              Puedes leerlos antes de conectar tu cuenta.
             </p>
-            {!data.stripeConnected && (
-              <p className="text-xs text-amber-600 flex items-center gap-1 mt-2">
-                <Info className="w-3.5 h-3.5" />
-                Conecta Stripe primero para aceptar los términos
-              </p>
-            )}
           </div>
         </div>
       </div>

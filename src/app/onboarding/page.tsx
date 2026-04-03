@@ -18,6 +18,7 @@ import { MobileStepperBar } from '@/components/features/onboarding/components/Mo
 import { MobileNavBar } from '@/components/features/onboarding/components/MobileNavBar';
 import { uploadFile } from '@/lib/api/media';
 import { GatewayError } from '@/lib/api/client';
+import { validateSpanishTaxId } from '@/lib/utils/tax-id';
 import {
   saveStep1,
   saveStep2,
@@ -197,7 +198,9 @@ export default function OnboardingPage() {
       locationImages: [],
       foundedYear: undefined,
       teamSize: undefined,
-      taxId: ''
+      taxId: '',
+      billingAddressSameAsProduction: true,
+      billingAddress: undefined,
     },
     step2: {
       businessName: '',
@@ -313,8 +316,7 @@ export default function OnboardingPage() {
           !!formData.step1.streetNumber.trim() &&
           /^\d{5}$/.test(formData.step1.postalCode) &&
           formData.step1.categories.length >= 1 &&
-          (formData.step1.taxId?.trim().length ?? 0) >= 9 &&
-          (formData.step1.taxId?.trim().length ?? 0) <= 20
+          validateSpanishTaxId(formData.step1.taxId ?? '').valid
         );
       case 1:
         return (

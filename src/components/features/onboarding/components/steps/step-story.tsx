@@ -173,6 +173,26 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
   const [charCount, setCharCount] = React.useState(data.description?.length || 0);
   const [philosophyCharCount, setPhilosophyCharCount] = React.useState(data.productionPhilosophy?.length || 0);
 
+  // Validaciones URL e Instagram — solo al perder el foco
+  const [websiteTouched, setWebsiteTouched] = React.useState(false);
+  const [instagramTouched, setInstagramTouched] = React.useState(false);
+
+  const websiteError = React.useMemo(() => {
+    if (!data.website?.trim()) return undefined; // campo opcional
+    if (!/^https?:\/\/[^\s]+\.[a-z]{2,}/i.test(data.website.trim())) {
+      return 'La URL debe empezar por http:// o https:// e incluir un dominio válido';
+    }
+    return undefined;
+  }, [data.website]);
+
+  const instagramError = React.useMemo(() => {
+    if (!data.instagramHandle?.trim()) return undefined; // campo opcional
+    if (!/^[a-zA-Z0-9._]{1,30}$/.test(data.instagramHandle.trim())) {
+      return 'Solo letras, números, puntos y guiones bajos. Máximo 30 caracteres';
+    }
+    return undefined;
+  }, [data.instagramHandle]);
+
   const hasBusinessName = Boolean(data.businessName?.trim());
   const hasDescription = data.description?.length >= 50;
   const hasValues = data.values?.length > 0;
@@ -306,10 +326,19 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                 <Input
                   value={data.website || ''}
                   onChange={(e) => handleInputChange('website', e.target.value)}
+                  onBlur={() => setWebsiteTouched(true)}
                   placeholder="https://www.tunegocio.com"
                   type="url"
                   inputSize="md"
+                  className={cn(websiteTouched && websiteError && 'border-red-500 focus:ring-red-500')}
+                  aria-invalid={websiteTouched && !!websiteError}
                 />
+                {websiteTouched && websiteError && (
+                  <p className="text-xs text-red-600 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    {websiteError}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
@@ -321,11 +350,20 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                   <Input
                     value={data.instagramHandle || ''}
                     onChange={(e) => handleInputChange('instagramHandle', e.target.value.replace(/^@/, ''))}
+                    onBlur={() => setInstagramTouched(true)}
                     placeholder="tunegocio"
                     inputSize="md"
-                    className="pl-7"
+                    className={cn('pl-7', instagramTouched && instagramError && 'border-red-500 focus:ring-red-500')}
+                    aria-invalid={instagramTouched && !!instagramError}
+                    maxLength={30}
                   />
                 </div>
+                {instagramTouched && instagramError && (
+                  <p className="text-xs text-red-600 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    {instagramError}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -506,8 +544,8 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
         </div>
 
         {!hasValues && (
-          <div className="mt-6 p-4 bg-red-50/50 rounded-xl border border-red-200 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-red-200 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-feedback-danger flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-red-700">
                 Selecciona al menos un valor

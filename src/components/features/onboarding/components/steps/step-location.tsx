@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 
 import { Input } from '@/components/ui/atoms/input';
 import { FileUpload, type UploadedFile, CategoryCard } from '@/components/shared';
+import { validateSpanishTaxId, type TaxIdType } from '@/lib/utils/tax-id';
 
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
@@ -29,6 +30,8 @@ import {
   Calendar,
   Users,
   ChevronDown,
+  Warehouse,
+  FileText,
 } from 'lucide-react';
 
 // ============================================================================
@@ -198,14 +201,28 @@ const SelectItem: React.FC<SelectItemProps> = ({
 // TIPOS
 // ============================================================================
 
-export interface EnhancedLocationData {
-  // Ubicación
+export interface AddressFields {
   street: string;
   streetNumber: string;
   streetComplement?: string;
   city: string;
   province: string;
   postalCode: string;
+}
+
+export interface EnhancedLocationData {
+  // Dirección de producción (punto de recogida de pedidos)
+  street: string;
+  streetNumber: string;
+  streetComplement?: string;
+  city: string;
+  province: string;
+  postalCode: string;
+
+  // Dirección de facturación
+  billingAddress?: AddressFields;
+  billingAddressSameAsProduction: boolean;
+
   categories: string[];
   locationImages: UploadedFile[];
 
@@ -253,6 +270,15 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
   const hasCategories = data.categories?.length > 0;
   const hasYear = Boolean(data.foundedYear && data.foundedYear >= 1900 && data.foundedYear <= new Date().getFullYear());
   const hasTeamSize = Boolean(data.teamSize);
+
+  // Validación NIF/CIF/NIE — solo tras perder el foco
+  const [taxIdTouched, setTaxIdTouched] = React.useState(false);
+  const taxIdValidation = React.useMemo(
+    () => (data.taxId ? validateSpanishTaxId(data.taxId) : { valid: false }),
+    [data.taxId],
+  );
+  const taxIdError = taxIdTouched && !taxIdValidation.valid ? taxIdValidation.error : undefined;
+  const taxIdBadge: Record<TaxIdType, string> = { NIF: 'NIF', NIE: 'NIE', CIF: 'CIF' };
 
   const totalSteps = 4;
   const completedSteps = [hasBasicInfo, hasCategories, hasYear, hasTeamSize].filter(Boolean).length;
@@ -337,8 +363,11 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             <Home className="w-6 h-6 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Ubicación y trayectoria</h2>
-            <p className="text-sm text-muted-foreground">Los clientes confían en negocios con historia</p>
+            <h2 className="text-xl font-bold text-origen-bosque flex items-center gap-2">
+              <Warehouse className="w-5 h-5 text-origen-pradera" />
+              Dirección de producción
+            </h2>
+            <p className="text-sm text-muted-foreground">Aquí se recogerán tus pedidos. Debe ser la dirección real de tu producción o almacén.</p>
           </div>
         </div>
 
@@ -445,19 +474,34 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           <div className="space-y-2">
             <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-origen-pradera" />
-              NIF / CIF <span className="text-red-500">*</span>
+              NIF / CIF / NIE <span className="text-red-500">*</span>
+              {taxIdValidation.valid && taxIdValidation.type && (
+                <span className="ml-auto text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                  {taxIdBadge[taxIdValidation.type]} ✓
+                </span>
+              )}
             </label>
             <Input
               value={data.taxId || ''}
-              onChange={(e) => handleInputChange('taxId', e.target.value.toUpperCase().trim())}
-              placeholder="Ej: 12345678A o B12345678"
+              onChange={(e) => handleInputChange('taxId', e.target.value.toUpperCase().replace(/[\s\-]/g, ''))}
+              onBlur={() => setTaxIdTouched(true)}
+              placeholder="Ej: 12345678A · X1234567L · B12345678"
               inputSize="lg"
-              className="font-mono uppercase"
-              maxLength={20}
+              className={cn('font-mono uppercase', taxIdError && 'border-red-500 focus:ring-red-500')}
+              maxLength={9}
+              aria-invalid={!!taxIdError}
+              aria-describedby={taxIdError ? 'taxid-error' : 'taxid-hint'}
             />
-            <p className="text-xs text-muted-foreground">
-              Número de identificación fiscal de tu negocio o empresa.
-            </p>
+            {taxIdError ? (
+              <p id="taxid-error" className="text-xs text-red-600 flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                {taxIdError}
+              </p>
+            ) : (
+              <p id="taxid-hint" className="text-xs text-muted-foreground">
+                NIF (personas físicas), NIE (extranjeros) o CIF (empresas y autónomos con personalidad jurídica).
+              </p>
+            )}
           </div>
 
           {/* Año de fundación */}
@@ -505,6 +549,118 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ====================================================================
+          CARD 1b: DIRECCIÓN DE FACTURACIÓN
+      ==================================================================== */}
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-bosque/10 to-origen-hoja/10 flex items-center justify-center">
+            <FileText className="w-6 h-6 text-origen-bosque" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-origen-bosque">Dirección de facturación</h2>
+            <p className="text-sm text-muted-foreground">Datos fiscales para emitir facturas a tus compradores</p>
+          </div>
+        </div>
+
+        {/* Checkbox "igual a la de producción" */}
+        <label className="flex items-center gap-3 p-3 bg-origen-crema/30 rounded-xl border border-border-subtle cursor-pointer hover:bg-origen-crema/50 transition-colors mb-5">
+          <input
+            type="checkbox"
+            checked={data.billingAddressSameAsProduction ?? true}
+            onChange={(e) => {
+              const same = e.target.checked;
+              handleInputChange('billingAddressSameAsProduction', same);
+              if (same) handleInputChange('billingAddress', undefined);
+            }}
+            className="w-4 h-4 rounded border-border accent-origen-pradera"
+          />
+          <span className="text-sm font-medium text-origen-bosque">
+            La dirección de facturación es la misma que la de producción
+          </span>
+        </label>
+
+        {/* Campos de facturación — solo si son distintas */}
+        {!data.billingAddressSameAsProduction && (
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-origen-bosque" />
+                Nombre de la vía <span className="text-red-500">*</span>
+              </label>
+              <Input
+                value={data.billingAddress?.street || ''}
+                onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, street: e.target.value })}
+                placeholder="Ej: Calle Mayor, Av. de la Constitución"
+                inputSize="lg"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-origen-bosque">Número <span className="text-red-500">*</span></label>
+                <Input
+                  value={data.billingAddress?.streetNumber || ''}
+                  onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, streetNumber: e.target.value })}
+                  placeholder="15"
+                  inputSize="lg"
+                  className="font-mono"
+                />
+              </div>
+              <div className="sm:col-span-2 space-y-2">
+                <label className="text-sm font-medium text-origen-bosque flex items-center gap-1">
+                  Piso / Puerta
+                  <span className="text-xs text-text-subtle font-normal">(opcional)</span>
+                </label>
+                <Input
+                  value={data.billingAddress?.streetComplement || ''}
+                  onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, streetComplement: e.target.value })}
+                  placeholder="3º A, Local 1"
+                  inputSize="lg"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-origen-bosque">Código Postal <span className="text-red-500">*</span></label>
+                <Input
+                  value={data.billingAddress?.postalCode || ''}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+                    const province = value.length === 5 ? (getProvinciaFromCP(value) ?? data.billingAddress?.province ?? '') : (data.billingAddress?.province ?? '');
+                    handleInputChange('billingAddress', { ...data.billingAddress, postalCode: value, province });
+                  }}
+                  placeholder="28001"
+                  maxLength={5}
+                  inputSize="lg"
+                  className="font-mono"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-origen-bosque">Provincia <span className="text-red-500">*</span></label>
+                <Input
+                  value={data.billingAddress?.province || ''}
+                  disabled
+                  placeholder="Autodetectada"
+                  inputSize="lg"
+                  className="bg-surface text-muted-foreground"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-origen-bosque">Ciudad <span className="text-red-500">*</span></label>
+                <Input
+                  value={data.billingAddress?.city || ''}
+                  onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, city: e.target.value })}
+                  placeholder="Ej: Madrid"
+                  inputSize="lg"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ====================================================================

@@ -30,15 +30,29 @@ export async function saveStep1(
   data: EnhancedLocationData,
   locationImageKeys: string[],
 ): Promise<StepSaveResponse> {
-  const address = [data.street, data.streetNumber, data.streetComplement]
-    .filter(Boolean)
-    .join(', ');
+  const billingAddress = data.billingAddressSameAsProduction
+    ? undefined
+    : data.billingAddress
+      ? {
+          street: data.billingAddress.street,
+          streetNumber: data.billingAddress.streetNumber,
+          streetComplement: data.billingAddress.streetComplement,
+          city: data.billingAddress.city,
+          province: data.billingAddress.province,
+          postalCode: data.billingAddress.postalCode,
+        }
+      : undefined;
 
   return gatewayClient.post('/producers/onboarding/step/1', {
-    address,
+    // Dirección de producción — campos separados (no concatenados)
+    street: data.street,
+    streetNumber: data.streetNumber,
+    streetComplement: data.streetComplement || undefined,
     city: data.city,
     province: data.province,
     postalCode: data.postalCode,
+    // Dirección de facturación (undefined si es igual a la de producción)
+    billingAddress,
     taxId: data.taxId,
     categories: data.categories,
     foundedYear: data.foundedYear ?? null,
@@ -90,6 +104,8 @@ export async function saveStep3(keys: {
 export async function saveStep4(data: EnhancedCapacityData): Promise<StepSaveResponse> {
   return gatewayClient.post('/producers/onboarding/step/4', {
     isInOriginRoute: data.isInOriginRoute,
+    logisticsLevel: data.logisticsLevel,
+    useCentralizedTransport: data.useCentralizedTransport,
     minOrderAmount: data.minOrderAmount,
     sustainablePackaging: data.sustainablePackaging ?? false,
     packagingDescription: data.packagingDescription || undefined,
