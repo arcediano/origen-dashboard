@@ -39,6 +39,7 @@ export async function saveStep1(
     city: data.city,
     province: data.province,
     postalCode: data.postalCode,
+    taxId: data.taxId,
     categories: data.categories,
     foundedYear: data.foundedYear ?? null,
     teamSize: data.teamSize ? TEAM_SIZE_MAP[data.teamSize] : null,

@@ -196,7 +196,8 @@ export default function OnboardingPage() {
       categories: [],
       locationImages: [],
       foundedYear: undefined,
-      teamSize: undefined
+      teamSize: undefined,
+      taxId: ''
     },
     step2: {
       businessName: '',
@@ -311,7 +312,9 @@ export default function OnboardingPage() {
           !!formData.step1.street.trim() &&
           !!formData.step1.streetNumber.trim() &&
           /^\d{5}$/.test(formData.step1.postalCode) &&
-          formData.step1.categories.length >= 1
+          formData.step1.categories.length >= 1 &&
+          (formData.step1.taxId?.trim().length ?? 0) >= 9 &&
+          (formData.step1.taxId?.trim().length ?? 0) <= 20
         );
       case 1:
         return (

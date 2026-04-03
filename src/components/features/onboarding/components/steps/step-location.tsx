@@ -441,6 +441,25 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             </div>
           </div>
 
+          {/* NIF / CIF */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-origen-pradera" />
+              NIF / CIF <span className="text-red-500">*</span>
+            </label>
+            <Input
+              value={data.taxId || ''}
+              onChange={(e) => handleInputChange('taxId', e.target.value.toUpperCase().trim())}
+              placeholder="Ej: 12345678A o B12345678"
+              inputSize="lg"
+              className="font-mono uppercase"
+              maxLength={20}
+            />
+            <p className="text-xs text-muted-foreground">
+              Número de identificación fiscal de tu negocio o empresa.
+            </p>
+          </div>
+
           {/* Año de fundación */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-border-subtle">
             <div className="space-y-2">
@@ -515,8 +534,8 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
         </div>
 
         {!hasCategories && (
-          <div className="mt-6 p-4 bg-red-50/50 rounded-xl border border-red-200 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-red-200 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-feedback-danger flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-red-700">
                 Selecciona al menos una categoría
