@@ -26,6 +26,7 @@ import {
   saveStep4,
   saveStep5,
   saveStep6,
+  saveStepProducts,
   completeOnboarding as apiCompleteOnboarding,
   loadOnboardingData,
 } from '@/lib/api/onboarding';
@@ -37,6 +38,7 @@ import { EnhancedStep3Visual, type EnhancedVisualData } from '@/components/featu
 import { EnhancedStep4Capacity, type EnhancedCapacityData } from '@/components/features/onboarding/components/steps/step-capacity';
 import { EnhancedStep5Documents, type EnhancedStep5DocumentsData } from '@/components/features/onboarding/components/steps/step-documents';
 import { EnhancedStep6Stripe, type EnhancedStep6StripeData } from '@/components/features/onboarding/components/steps/step-stripe';
+import { EnhancedStepProducts, type EnhancedProductsData } from '@/components/features/onboarding/components/steps/step-products';
 
 import {
   MapPin,
@@ -45,6 +47,7 @@ import {
   Package,
   FileText,
   CreditCard,
+  ShoppingBasket,
   ChevronLeft,
   ChevronRight,
   ArrowRight,
@@ -83,6 +86,16 @@ const STEPS = [
   },
   {
     id: 3,
+    title: 'Productos',
+    icon: ShoppingBasket,
+    color: 'text-origen-hoja',
+    bgColor: 'bg-origen-hoja/10',
+    time: '3 min',
+    description: 'Catálogo inicial y alérgenos',
+    longDescription: 'Define hasta 5 productos con nombre, precio y alérgenos obligatorios por ley.'
+  },
+  {
+    id: 4,
     title: 'Perfil visual',
     icon: Camera,
     color: 'text-origen-pino',
@@ -92,7 +105,7 @@ const STEPS = [
     longDescription: 'Configura la imagen de tu perfil y muestra tus productos.'
   },
   {
-    id: 4,
+    id: 5,
     title: 'Capacidad',
     icon: Package,
     color: 'text-origen-bosque',
@@ -102,7 +115,7 @@ const STEPS = [
     longDescription: 'Define tu capacidad de producción y las opciones de envío.'
   },
   {
-    id: 5,
+    id: 6,
     title: 'Documentación',
     icon: FileText,
     color: 'text-origen-oscuro',
@@ -112,7 +125,7 @@ const STEPS = [
     longDescription: 'Verifica tu identidad como productor y sube tus certificaciones.'
   },
   {
-    id: 6,
+    id: 7,
     title: 'Pagos',
     icon: CreditCard,
     color: 'text-origen-pradera',
@@ -166,6 +179,7 @@ function getUserFriendlyError(error: unknown, fallback = 'Error inesperado. Int�
 interface OnboardingFormData {
   step1: EnhancedLocationData;
   step2: EnhancedStoryData;
+  step_products: EnhancedProductsData;
   step3: EnhancedVisualData;
   step4: EnhancedCapacityData;
   step5: EnhancedStep5DocumentsData;
@@ -199,6 +213,9 @@ export default function OnboardingPage() {
       foundedYear: undefined,
       teamSize: undefined,
       taxId: '',
+      entityType: undefined,
+      legalRepresentativeName: '',
+      businessPhone: '',
       billingAddressSameAsProduction: true,
       billingAddress: undefined,
     },
@@ -212,6 +229,9 @@ export default function OnboardingPage() {
       instagramHandle: '',
       productionPhilosophy: '',
       certifications: []
+    },
+    step_products: {
+      products: [],
     },
     step3: {
       logo: null,
@@ -308,16 +328,31 @@ export default function OnboardingPage() {
 
   const isStepValid = useMemo(() => {
     switch (currentStep) {
-      case 0:
+      case 0: {
+        const { step1 } = formData;
+        const billingOk = step1.billingAddressSameAsProduction ||
+          (!!step1.billingAddress?.street.trim() &&
+           !!step1.billingAddress?.streetNumber.trim() &&
+           !!step1.billingAddress?.city.trim() &&
+           /^\d{5}$/.test(step1.billingAddress?.postalCode ?? ''));
+        const legalRepOk = step1.entityType === 'autonomo' || !step1.entityType
+          ? true
+          : !!step1.legalRepresentativeName?.trim();
+        const phoneOk = !!step1.businessPhone && /^[6789]\d{8}$/.test(step1.businessPhone);
         return (
-          !!formData.step1.province &&
-          !!formData.step1.city.trim() &&
-          !!formData.step1.street.trim() &&
-          !!formData.step1.streetNumber.trim() &&
-          /^\d{5}$/.test(formData.step1.postalCode) &&
-          formData.step1.categories.length >= 1 &&
-          validateSpanishTaxId(formData.step1.taxId ?? '').valid
+          !!step1.entityType &&
+          validateSpanishTaxId(step1.taxId ?? '').valid &&
+          legalRepOk &&
+          phoneOk &&
+          !!step1.province &&
+          !!step1.city.trim() &&
+          !!step1.street.trim() &&
+          !!step1.streetNumber.trim() &&
+          /^\d{5}$/.test(step1.postalCode) &&
+          step1.categories.length >= 1 &&
+          billingOk
         );
+      }
       case 1:
         return (
           !!formData.step2.businessName.trim() &&
@@ -325,19 +360,21 @@ export default function OnboardingPage() {
           formData.step2.values.length >= 1
         );
       case 2:
-        return formData.step3.logo !== null;
+        return formData.step_products.products.length >= 1;
       case 3:
+        return formData.step3.logo !== null;
+      case 4:
         return (
           formData.step4.deliveryOptions.length >= 1 &&
           formData.step4.includedZones.length >= 1
         );
-      case 4:
+      case 5:
         return (
           !!formData.step5.cif &&
           !!formData.step5.seguroRC &&
           !!formData.step5.manipuladorAlimentos
         );
-      case 5:
+      case 6:
         return true; // Stripe es opcional — se puede completar más tarde
       default:
         return true;
@@ -370,6 +407,18 @@ export default function OnboardingPage() {
         break;
       }
       case 2: {
+        const productImageKeys = await Promise.all(
+          formData.step_products.products
+            .filter((p) => p.photo?.file)
+            .map(async (p) => ({
+              productId: p.id,
+              imageKey: (await uploadFile(p.photo!.file!, `products/${p.id}`)).key,
+            })),
+        );
+        await saveStepProducts(formData.step_products.products, productImageKeys);
+        break;
+      }
+      case 3: {
         const logoKey = formData.step3.logo?.file
           ? (await uploadFile(formData.step3.logo.file, 'visual/logo')).key
           : undefined;
@@ -379,11 +428,11 @@ export default function OnboardingPage() {
         await saveStep3({ logoKey, bannerKey, introVideoUrl: formData.step3.introVideo });
         break;
       }
-      case 3: {
+      case 4: {
         await saveStep4(formData.step4);
         break;
       }
-      case 4: {
+      case 5: {
         const cifKey = formData.step5.cif?.file
           ? (await uploadFile(formData.step5.cif.file, 'documents/cif')).key
           : undefined;
@@ -404,7 +453,7 @@ export default function OnboardingPage() {
         await saveStep5(formData.step5, { cifKey, seguroRcKey, manipuladorAlimentosKey, certificationDocumentKeys });
         break;
       }
-      case 5: {
+      case 6: {
         await saveStep6(formData.step6);
         break;
       }
@@ -481,6 +530,10 @@ export default function OnboardingPage() {
     setFormData(prev => ({ ...prev, step2: data }));
   };
 
+  const handleStepProductsChange = (data: EnhancedProductsData) => {
+    setFormData(prev => ({ ...prev, step_products: data }));
+  };
+
   const handleStep3Change = (data: EnhancedVisualData) => {
     setFormData(prev => ({ ...prev, step3: data }));
   };
@@ -519,19 +572,27 @@ export default function OnboardingPage() {
         );
       case 2:
         return (
+          <EnhancedStepProducts
+            data={formData.step_products}
+            onChange={handleStepProductsChange}
+            producerCategories={formData.step1.categories}
+          />
+        );
+      case 3:
+        return (
           <EnhancedStep3Visual
             data={formData.step3}
             onChange={handleStep3Change}
           />
         );
-      case 3:
+      case 4:
         return (
           <EnhancedStep4Capacity
             data={formData.step4}
             onChange={handleStep4Change}
           />
         );
-      case 4:
+      case 5:
         return (
           <EnhancedStep5Documents
             data={formData.step5}
@@ -543,7 +604,7 @@ export default function OnboardingPage() {
             })) || []}
           />
         );
-      case 5:
+      case 6:
         return (
           <EnhancedStep6Stripe
             data={formData.step6}

@@ -32,6 +32,8 @@ import {
   ChevronDown,
   Warehouse,
   FileText,
+  Building2,
+  Phone,
 } from 'lucide-react';
 
 // ============================================================================
@@ -210,7 +212,31 @@ export interface AddressFields {
   postalCode: string;
 }
 
+export type EntityType =
+  | 'autonomo'
+  | 'sl'
+  | 'sa'
+  | 'cooperativa'
+  | 'comunidad_bienes'
+  | 'asociacion'
+  | 'otro';
+
+export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
+  autonomo: 'Autónomo / Empresario individual',
+  sl: 'Sociedad Limitada (SL)',
+  sa: 'Sociedad Anónima (SA)',
+  cooperativa: 'Cooperativa',
+  comunidad_bienes: 'Comunidad de Bienes',
+  asociacion: 'Asociación / Fundación',
+  otro: 'Otra forma jurídica',
+};
+
 export interface EnhancedLocationData {
+  // Identidad legal
+  entityType?: EntityType;
+  legalRepresentativeName?: string;
+  businessPhone?: string;
+
   // Dirección de producción (punto de recogida de pedidos)
   street: string;
   streetNumber: string;
@@ -270,6 +296,16 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
   const hasCategories = data.categories?.length > 0;
   const hasYear = Boolean(data.foundedYear && data.foundedYear >= 1900 && data.foundedYear <= new Date().getFullYear());
   const hasTeamSize = Boolean(data.teamSize);
+
+  // Validación teléfono — solo tras perder el foco
+  const [phoneTouched, setPhoneTouched] = React.useState(false);
+  const phoneError = React.useMemo(() => {
+    if (!data.businessPhone?.trim()) return undefined; // no mostrar hasta que se toque
+    if (!/^[6789]\d{8}$/.test(data.businessPhone.trim())) {
+      return 'Introduce un teléfono español válido (9 dígitos, comenzando por 6, 7, 8 o 9)';
+    }
+    return undefined;
+  }, [data.businessPhone]);
 
   // Validación NIF/CIF/NIE — solo tras perder el foco
   const [taxIdTouched, setTaxIdTouched] = React.useState(false);
@@ -351,6 +387,144 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           <Info className="w-3.5 h-3.5 text-origen-pradera" />
           Completa tu ubicación y cuéntanos tu trayectoria
         </p>
+      </div>
+
+      {/* ====================================================================
+          CARD 0: IDENTIDAD LEGAL
+      ==================================================================== */}
+      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
+            <Building2 className="w-6 h-6 text-origen-pradera" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-origen-bosque">Identidad legal</h2>
+            <p className="text-sm text-muted-foreground">Necesario para la verificación de tu cuenta y la emisión de facturas</p>
+          </div>
+        </div>
+
+        <div className="space-y-5">
+
+          {/* Tipo de entidad — pills scrollables en mobile */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-origen-pradera" />
+              Forma jurídica <span className="text-red-500">*</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {(Object.entries(ENTITY_TYPE_LABELS) as [EntityType, string][]).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => handleInputChange('entityType', key)}
+                  className={cn(
+                    'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                    data.entityType === key
+                      ? 'bg-origen-pradera text-white border-origen-pradera shadow-sm'
+                      : 'bg-surface text-muted-foreground border-border hover:border-origen-pradera/50 hover:text-origen-bosque',
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Nombre del representante legal — solo si no es autónomo */}
+          <div
+            className={cn(
+              'overflow-hidden transition-all duration-300',
+              data.entityType && data.entityType !== 'autonomo' ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0',
+            )}
+          >
+            <div className="space-y-2 pt-1">
+              <label className="text-sm font-medium text-origen-bosque">
+                Nombre del representante legal <span className="text-red-500">*</span>
+              </label>
+              <Input
+                value={data.legalRepresentativeName || ''}
+                onChange={(e) => handleInputChange('legalRepresentativeName', e.target.value)}
+                placeholder="Nombre y apellidos del representante"
+                inputSize="lg"
+              />
+              <p className="text-xs text-muted-foreground">
+                Persona física con poderes de representación de la entidad.
+              </p>
+            </div>
+          </div>
+
+          {/* NIF / CIF — movido aquí desde la card de ubicación */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-origen-pradera" />
+              NIF / CIF / NIE <span className="text-red-500">*</span>
+              {taxIdValidation.valid && taxIdValidation.type && (
+                <span className="ml-auto text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                  {taxIdBadge[taxIdValidation.type]} ✓
+                </span>
+              )}
+            </label>
+            <Input
+              value={data.taxId || ''}
+              onChange={(e) => handleInputChange('taxId', e.target.value.toUpperCase().replace(/[\s\-]/g, ''))}
+              onBlur={() => setTaxIdTouched(true)}
+              placeholder="Ej: 12345678A · X1234567L · B12345678"
+              inputSize="lg"
+              className={cn('font-mono uppercase', taxIdError && 'border-red-500 focus:ring-red-500')}
+              maxLength={9}
+              aria-invalid={!!taxIdError}
+              aria-describedby={taxIdError ? 'taxid-error' : 'taxid-hint'}
+            />
+            {taxIdError ? (
+              <p id="taxid-error" className="text-xs text-red-600 flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                {taxIdError}
+              </p>
+            ) : (
+              <p id="taxid-hint" className="text-xs text-muted-foreground">
+                NIF (personas físicas), NIE (extranjeros) o CIF (personas jurídicas).
+              </p>
+            )}
+          </div>
+
+          {/* Teléfono de negocio */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
+              <Phone className="w-4 h-4 text-origen-pradera" />
+              Teléfono de contacto del negocio <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none select-none">
+                +34
+              </span>
+              <Input
+                value={data.businessPhone || ''}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, '').slice(0, 9);
+                  handleInputChange('businessPhone', digits);
+                }}
+                onBlur={() => setPhoneTouched(true)}
+                placeholder="600 000 000"
+                inputMode="tel"
+                inputSize="lg"
+                className={cn('pl-12', phoneTouched && phoneError && 'border-red-500 focus:ring-red-500')}
+                aria-invalid={phoneTouched && !!phoneError}
+              />
+            </div>
+            {phoneTouched && phoneError ? (
+              <p className="text-xs text-red-600 flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                {phoneError}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Para coordinación de pedidos y entregas. No se mostrará públicamente.
+              </p>
+            )}
+          </div>
+
+        </div>
       </div>
 
       {/* ====================================================================
@@ -468,40 +642,6 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 inputSize="lg"
               />
             </div>
-          </div>
-
-          {/* NIF / CIF */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-origen-pradera" />
-              NIF / CIF / NIE <span className="text-red-500">*</span>
-              {taxIdValidation.valid && taxIdValidation.type && (
-                <span className="ml-auto text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
-                  {taxIdBadge[taxIdValidation.type]} ✓
-                </span>
-              )}
-            </label>
-            <Input
-              value={data.taxId || ''}
-              onChange={(e) => handleInputChange('taxId', e.target.value.toUpperCase().replace(/[\s\-]/g, ''))}
-              onBlur={() => setTaxIdTouched(true)}
-              placeholder="Ej: 12345678A · X1234567L · B12345678"
-              inputSize="lg"
-              className={cn('font-mono uppercase', taxIdError && 'border-red-500 focus:ring-red-500')}
-              maxLength={9}
-              aria-invalid={!!taxIdError}
-              aria-describedby={taxIdError ? 'taxid-error' : 'taxid-hint'}
-            />
-            {taxIdError ? (
-              <p id="taxid-error" className="text-xs text-red-600 flex items-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                {taxIdError}
-              </p>
-            ) : (
-              <p id="taxid-hint" className="text-xs text-muted-foreground">
-                NIF (personas físicas), NIE (extranjeros) o CIF (empresas y autónomos con personalidad jurídica).
-              </p>
-            )}
           </div>
 
           {/* Año de fundación */}

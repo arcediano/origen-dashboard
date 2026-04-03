@@ -9,6 +9,7 @@ import type { EnhancedStoryData } from '@/components/features/onboarding/compone
 import type { EnhancedCapacityData } from '@/components/features/onboarding/components/steps/step-capacity';
 import type { EnhancedStep5DocumentsData } from '@/components/features/onboarding/components/steps/step-documents';
 import type { EnhancedStep6StripeData } from '@/components/features/onboarding/components/steps/step-stripe';
+import type { OnboardingProduct } from '@/components/features/onboarding/components/steps/step-products';
 
 // Tipos de respuesta
 interface StepSaveResponse {
@@ -44,6 +45,11 @@ export async function saveStep1(
       : undefined;
 
   return gatewayClient.post('/producers/onboarding/step/1', {
+    // Identidad legal
+    entityType: data.entityType,
+    legalRepresentativeName: data.legalRepresentativeName || undefined,
+    businessPhone: data.businessPhone,
+    taxId: data.taxId,
     // Dirección de producción — campos separados (no concatenados)
     street: data.street,
     streetNumber: data.streetNumber,
@@ -53,7 +59,6 @@ export async function saveStep1(
     postalCode: data.postalCode,
     // Dirección de facturación (undefined si es igual a la de producción)
     billingAddress,
-    taxId: data.taxId,
     categories: data.categories,
     foundedYear: data.foundedYear ?? null,
     teamSize: data.teamSize ? TEAM_SIZE_MAP[data.teamSize] : null,
@@ -154,6 +159,30 @@ export async function saveStep6(data: EnhancedStep6StripeData): Promise<StepSave
     stripeConnected: data.stripeConnected,
     stripeAccountId: data.stripeAccountId,
     acceptTerms: data.acceptTerms,
+  });
+}
+
+// ─── Paso Productos ───────────────────────────────────────────────────────────
+
+export async function saveStepProducts(
+  products: OnboardingProduct[],
+  productImageKeys: Array<{ productId: string; imageKey: string }>,
+): Promise<StepSaveResponse> {
+  return gatewayClient.post('/producers/onboarding/step/products', {
+    products: products.map((p) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      referencePrice: p.referencePrice,
+      unit: p.unit,
+      allergens: p.allergens,
+      mayContain: p.mayContain,
+      noAllergens: p.noAllergens,
+      availabilityType: p.availabilityType,
+      activeMonths: p.activeMonths,
+      leadTimeDays: p.leadTimeDays,
+      imageKey: productImageKeys.find((k) => k.productId === p.id)?.imageKey,
+    })),
   });
 }
 
