@@ -269,6 +269,12 @@ export default function OnboardingPage() {
           ...prev,
           step1: {
             ...prev.step1,
+            // Identidad legal (Sprint 2)
+            entityType: d.fiscal?.entityType ?? prev.step1.entityType,
+            legalRepresentativeName: d.fiscal?.legalRepresentativeName ?? prev.step1.legalRepresentativeName,
+            businessPhone: d.fiscal?.businessPhone ?? prev.step1.businessPhone,
+            taxId: d.fiscal?.taxId ?? prev.step1.taxId,
+            // Dirección de producción
             street: d.location?.street ?? d.location?.address ?? prev.step1.street,
             streetNumber: d.location?.streetNumber ?? prev.step1.streetNumber,
             streetComplement: d.location?.streetComplement ?? prev.step1.streetComplement,
@@ -278,7 +284,9 @@ export default function OnboardingPage() {
             foundedYear: d.location?.foundedYear ?? prev.step1.foundedYear,
             teamSize: d.location?.teamSize ?? prev.step1.teamSize,
             categories: d.fiscal?.categories?.length ? d.fiscal.categories : prev.step1.categories,
-            taxId: d.fiscal?.taxId ?? prev.step1.taxId,
+            // Dirección de facturación (Sprint 2)
+            billingAddressSameAsProduction: d.fiscal?.billingAddress == null,
+            billingAddress: d.fiscal?.billingAddress ?? prev.step1.billingAddress,
           },
           step2: {
             ...prev.step2,
@@ -297,6 +305,8 @@ export default function OnboardingPage() {
           step4: d.logistics ? {
             ...prev.step4,
             isInOriginRoute: d.logistics.isInOriginRoute,
+            logisticsLevel: d.logistics.logisticsLevel ?? prev.step4.logisticsLevel,
+            useCentralizedTransport: d.logistics.useCentralizedTransport ?? prev.step4.useCentralizedTransport,
             minOrderAmount: Number(d.logistics.minOrderAmount),
             sustainablePackaging: d.logistics.sustainablePackaging,
             packagingDescription: d.logistics.packagingDescription ?? '',
@@ -309,6 +319,23 @@ export default function OnboardingPage() {
             excludedZones: d.logistics.shippingZones.filter((z: any) => z.isExcluded)
               .map((z: any) => ({ id: z.id, type: z.type.toLowerCase(), value: z.value, label: z.label })),
           } : prev.step4,
+          step_products: d.products?.length ? {
+            products: d.products.map((p: any) => ({
+              id: p.id,
+              name: p.name ?? '',
+              description: p.description ?? '',
+              categoryId: p.categoryId ?? '',
+              referencePrice: p.referencePrice != null ? Number(p.referencePrice) : undefined,
+              unit: p.unit ?? 'kg',
+              allergens: p.allergens ?? [],
+              mayContain: p.mayContain ?? [],
+              noAllergens: p.noAllergens ?? false,
+              availabilityType: p.availabilityType ?? 'year_round',
+              activeMonths: p.activeMonths ?? [],
+              leadTimeDays: p.leadTimeDays ?? undefined,
+              photo: p.imageUrl ? { preview: p.imageUrl, url: p.imageUrl } : undefined,
+            })),
+          } : prev.step_products,
           step6: d.payment ? {
             stripeConnected: d.payment.stripeConnected,
             acceptTerms: !!d.payment.acceptedTermsAt,
