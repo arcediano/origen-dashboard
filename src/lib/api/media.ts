@@ -38,8 +38,17 @@ export async function uploadFile(file: File, category: string): Promise<UploadRe
   });
 
   if (!response.ok) {
+    if (response.status === 413) {
+      throw new Error('El archivo supera el tamaño máximo permitido. Prueba con un archivo más pequeño.');
+    }
+    if (response.status === 415) {
+      throw new Error('Formato de archivo no permitido. Comprueba que el tipo de archivo sea correcto.');
+    }
+    if (response.status === 401) {
+      throw new Error('Tu sesión ha expirado. Recarga la página e inicia sesión de nuevo.');
+    }
     const data = await response.json().catch(() => ({}));
-    const message = (data as any)?.message ?? `Error ${response.status} al subir archivo`;
+    const message = (data as any)?.message ?? `Error al subir el archivo. Inténtalo de nuevo.`;
     throw new Error(message);
   }
 

@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/atoms/button';
 import { MobileStepperBar } from '@/components/features/onboarding/components/MobileStepperBar';
 import { MobileNavBar } from '@/components/features/onboarding/components/MobileNavBar';
 import { uploadFile } from '@/lib/api/media';
+import { GatewayError } from '@/lib/api/client';
 import {
   saveStep1,
   saveStep2,
@@ -120,6 +121,42 @@ const STEPS = [
     longDescription: 'Configura Stripe para recibir pagos de forma segura.'
   }
 ];
+
+// ============================================================================
+// HELPER: MENSAJES DE ERROR PARA EL USUARIO
+// ============================================================================
+
+function getUserFriendlyError(error: unknown, fallback = 'Error inesperado. Inténtalo de nuevo.'): string {
+  // Sin conexión / timeout
+  if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('network'))) {
+    return 'No se pudo conectar al servidor. Comprueba tu conexión a internet e inténtalo de nuevo.';
+  }
+  if (error instanceof GatewayError) {
+    switch (error.status) {
+      case 400:
+      case 422:
+        return error.message || 'Algunos campos no son válidos. Revísalos e inténtalo de nuevo.';
+      case 401:
+        return 'Tu sesión ha expirado. Recarga la página e inicia sesión de nuevo.';
+      case 403:
+        return 'No tienes permiso para realizar esta acción.';
+      case 413:
+        return 'El archivo supera el tamaño máximo permitido. Prueba con un archivo más pequeño.';
+      case 429:
+        return 'Demasiadas peticiones. Espera unos segundos e inténtalo de nuevo.';
+      case 500:
+      case 502:
+      case 503:
+        return 'Error temporal del servidor. Inténtalo de nuevo en unos momentos.';
+      default:
+        return error.message || fallback;
+    }
+  }
+  if (error instanceof Error) {
+    return error.message || fallback;
+  }
+  return fallback;
+}
 
 // ============================================================================
 // TIPOS ESPECÍFICOS PARA CADA PASO
@@ -309,9 +346,14 @@ export default function OnboardingPage() {
   const saveCurrentStep = useCallback(async (step: number) => {
     switch (step) {
       case 0: {
-        const locationImageKeys = await Promise.all(
-          formData.step1.locationImages.filter((f) => f.file).map((f) => uploadFile(f.file!, 'visual/location').then((r) => r.key)),
-        );
+        let locationImageKeys: string[] = [];
+        try {
+          locationImageKeys = await Promise.all(
+            formData.step1.locationImages.filter((f) => f.file).map((f) => uploadFile(f.file!, 'visual/location').then((r) => r.key)),
+          );
+        } catch (uploadErr) {
+          throw new Error(`No se pudieron subir las fotos del local: ${getUserFriendlyError(uploadErr)}`);
+        }
         await saveStep1(formData.step1, locationImageKeys);
         break;
       }
@@ -377,8 +419,9 @@ export default function OnboardingPage() {
       setDirection(1);
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error: any) {
-      setSaveError(error?.message ?? 'Error al guardar. Inténtalo de nuevo.');
+    } catch (error: unknown) {
+      console.error('[Onboarding] handleNext error:', error);
+      setSaveError(getUserFriendlyError(error, 'Error al guardar. Inténtalo de nuevo.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -409,8 +452,9 @@ export default function OnboardingPage() {
         setUser({ ...user, onboardingCompleted: true });
       }
       router.push('/dashboard');
-    } catch (error: any) {
-      setSaveError(error?.message ?? 'Error al completar el onboarding. Inténtalo de nuevo.');
+    } catch (error: unknown) {
+      console.error('[Onboarding] handleComplete error:', error);
+      setSaveError(getUserFriendlyError(error, 'Error al completar el onboarding. Inténtalo de nuevo.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -739,10 +783,10 @@ export default function OnboardingPage() {
                 ERROR DE GUARDADO
             ==================================================================== */}
             {saveError && (
-              <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-center gap-2">
+              <div className="mt-6 p-3 bg-feedback-danger-subtle border border-red-200 rounded-xl text-sm text-red-700 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{saveError}</span>
-                <button type="button" onClick={() => setSaveError(null)} className="ml-auto text-red-500 hover:text-red-700">×</button>
+                <button type="button" onClick={() => setSaveError(null)} className="ml-auto text-feedback-danger hover:text-red-700">×</button>
               </div>
             )}
 
