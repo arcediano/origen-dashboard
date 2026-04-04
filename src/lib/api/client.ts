@@ -26,11 +26,13 @@
  * ```
  */
 
-// Browser: usa la misma URL del frontend (mismo origen) → Next.js reescribe a API_GATEWAY_URL
-// Servidor (SSR/Server Components): llama directamente al gateway, sin restricciones CORS
+// Browser: usa siempre el origen actual del navegador para que dominios custom
+// como producers.origen.delivery sigan haciendo peticiones same-origin y
+// aprovechen el rewrite /api/v1/* de Next.js sin CORS.
+// Servidor (SSR/Server Components): llama directamente al gateway, sin restricciones CORS.
 const BASE_URL =
   typeof window !== 'undefined'
-    ? (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3001')
+    ? window.location.origin
     : (process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000');
 const API_VERSION = 'v1';
 
