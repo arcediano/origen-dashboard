@@ -158,7 +158,7 @@ export function StepBasic({
               onChange={(e) => handleChange('name', e.target.value)}
               className={cn(
                 "h-12 text-base w-full rounded-xl",
-                (allTouched?.name && (errors?.name || validationErrors?.name)) && "border-red-500"
+                (allTouched?.name && (errors?.name || validationErrors?.name)) && "border-feedback-danger"
               )}
               placeholder="Ej: Queso Manchego Curado 12 meses"
               maxLength={100}
@@ -191,7 +191,7 @@ export function StepBasic({
               >
                 <SelectTrigger className={cn(
                   "h-12 w-full rounded-xl",
-                  (allTouched?.categoryId && errors?.categoryId) && "border-red-500"
+                  (allTouched?.categoryId && errors?.categoryId) && "border-feedback-danger"
                 )}>
                   <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
@@ -260,7 +260,7 @@ export function StepBasic({
               onChange={(e) => handleChange('shortDescription', e.target.value)}
               className={cn(
                 "min-h-[100px] text-base w-full rounded-xl p-4",
-                (allTouched?.shortDescription && errors?.shortDescription) && "border-red-500"
+                (allTouched?.shortDescription && errors?.shortDescription) && "border-feedback-danger"
               )}
               placeholder="Describe tu producto en 2-3 líneas..."
               maxLength={160}

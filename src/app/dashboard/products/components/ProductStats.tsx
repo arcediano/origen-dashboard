@@ -63,7 +63,7 @@ export function ProductStats({
         icon={AlertCircle}
         bg="from-red-400/8 to-transparent"
         border="border-red-200/60"
-        iconColor="text-red-500"
+        iconColor="text-feedback-danger"
       />
     </div>
   );

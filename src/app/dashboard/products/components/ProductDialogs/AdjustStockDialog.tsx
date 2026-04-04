@@ -194,7 +194,7 @@ export function AdjustStockDialog({
 
         {/* Mensaje de error */}
         {error && (
-          <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+          <div className="p-3 bg-feedback-danger-subtle rounded-lg border border-red-200">
             <p className="text-xs text-red-600">{error}</p>
           </div>
         )}

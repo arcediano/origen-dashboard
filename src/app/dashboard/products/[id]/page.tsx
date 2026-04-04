@@ -177,7 +177,7 @@ function NutritionalContent({ info }: { info: NonNullable<Product['nutritionalIn
             {info.allergens.map(a => {
               const Icon = allergenIcon(a);
               return (
-                <span key={a} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-50 text-red-700 text-xs">
+                <span key={a} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-feedback-danger-subtle text-red-700 text-xs">
                   <Icon className="w-3 h-3" />{a}
                 </span>
               );
@@ -408,8 +408,8 @@ export default function ProductoDetallePage() {
   if (error || !product) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-        <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
-          <AlertCircle className="w-8 h-8 text-red-500" />
+        <div className="w-16 h-16 rounded-full bg-feedback-danger-subtle flex items-center justify-center mb-4">
+          <AlertCircle className="w-8 h-8 text-feedback-danger" />
         </div>
         <h2 className="text-lg font-bold text-origen-bosque mb-2">Error al cargar</h2>
         <p className="text-sm text-text-subtle mb-6 max-w-xs">{error || 'Producto no encontrado'}</p>
@@ -544,14 +544,14 @@ export default function ProductoDetallePage() {
               {/* Stock */}
               <motion.div custom={1} variants={cardVariants}
                 className={cn('rounded-2xl p-4 border',
-                  stockColor === 'error' ? 'bg-red-50/80 border-red-100' :
+                  stockColor === 'error' ? 'bg-feedback-danger-subtle/80 border-red-100' :
                   stockColor === 'warning' ? 'bg-amber-50/80 border-amber-100' :
                   'bg-origen-pastel/60 border-origen-hoja/20'
                 )}
               >
                 <div className="flex items-center gap-1.5 mb-2">
                   <Package className={cn('w-4 h-4',
-                    stockColor === 'error' ? 'text-red-500' :
+                    stockColor === 'error' ? 'text-feedback-danger' :
                     stockColor === 'warning' ? 'text-amber-500' : 'text-origen-hoja'
                   )} />
                   <span className="text-xs text-text-subtle">Stock</span>
@@ -629,8 +629,8 @@ export default function ProductoDetallePage() {
                 <p className="text-2xl font-bold text-origen-bosque">{formatCurrency(product.basePrice)}</p>
                 {hasDiscount && <div className="flex items-center gap-1 mt-2 text-xs"><span className="text-text-disabled line-through">{formatCurrency(product.comparePrice)}</span><span className="text-green-600 font-medium">(-{discountPercentage}%)</span></div>}
               </div>
-              <div className={cn('p-4 rounded-xl border', stockColor === 'error' ? 'bg-red-50/50 border-red-100' : stockColor === 'warning' ? 'bg-amber-50/50 border-amber-100' : 'bg-origen-hoja/5 border-origen-hoja/20')}>
-                <div className="flex items-center gap-2 mb-2"><Package className={cn('w-5 h-5', stockColor === 'error' ? 'text-red-500' : stockColor === 'warning' ? 'text-amber-500' : 'text-origen-hoja')} /><span className="text-xs font-medium text-text-subtle">Stock</span></div>
+              <div className={cn('p-4 rounded-xl border', stockColor === 'error' ? 'bg-feedback-danger-subtle/50 border-red-100' : stockColor === 'warning' ? 'bg-amber-50/50 border-amber-100' : 'bg-origen-hoja/5 border-origen-hoja/20')}>
+                <div className="flex items-center gap-2 mb-2"><Package className={cn('w-5 h-5', stockColor === 'error' ? 'text-feedback-danger' : stockColor === 'warning' ? 'text-amber-500' : 'text-origen-hoja')} /><span className="text-xs font-medium text-text-subtle">Stock</span></div>
                 <p className="text-2xl font-bold text-origen-bosque">{stockLevel} uds</p>
               </div>
               <div className="p-4 bg-amber-50/50 rounded-xl border border-amber-100">

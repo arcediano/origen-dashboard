@@ -10,11 +10,11 @@
 
 export const errorStates = {
   /** Fondo para errores */
-  bg: 'bg-red-50',
+  bg: 'bg-feedback-danger-subtle',
   /** Borde suave para errores */
   border: 'border-red-200',
   /** Borde fuerte para errores */
-  borderStrong: 'border-red-500',
+  borderStrong: 'border-feedback-danger',
   /** Borde en hover para errores */
   borderHover: 'hover:border-red-600',
   /** Texto principal de error */
@@ -26,7 +26,7 @@ export const errorStates = {
   /** Anillo de focus para error */
   ring: 'ring-red-200',
   /** Anillo de focus fuerte para error */
-  ringStrong: 'ring-red-500',
+  ringStrong: 'ring-feedback-danger',
 } as const;
 
 // ============================================================================

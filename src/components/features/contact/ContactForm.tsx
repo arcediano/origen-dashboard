@@ -78,7 +78,7 @@ export function ContactForm() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="mb-5 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-red-600"
+            className="mb-5 p-3 bg-feedback-danger-subtle border border-red-200 rounded-lg flex items-start gap-2 text-red-600"
           >
             <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <span className="text-xs">{errors.general}</span>
@@ -109,7 +109,7 @@ export function ContactForm() {
               )}
             />
             {errors.name && (
-              <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+              <p className="text-xs text-feedback-danger flex items-center gap-1 mt-1">
                 <AlertCircle className="w-3 h-3" />{errors.name}
               </p>
             )}
@@ -133,7 +133,7 @@ export function ContactForm() {
               )}
             />
             {errors.email && (
-              <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+              <p className="text-xs text-feedback-danger flex items-center gap-1 mt-1">
                 <AlertCircle className="w-3 h-3" />{errors.email}
               </p>
             )}
@@ -204,7 +204,7 @@ export function ContactForm() {
                 form.privacy
                   ? "bg-origen-bosque border-origen-bosque"
                   : errors.privacy
-                    ? "border-red-400 hover:border-red-500"
+                    ? "border-red-400 hover:border-feedback-danger"
                     : "border-border hover:border-origen-pradera"
               )}
             >
@@ -221,7 +221,7 @@ export function ContactForm() {
             </label>
           </div>
           {errors.privacy && (
-            <p className="text-xs text-red-500 flex items-center gap-1 ml-7">
+            <p className="text-xs text-feedback-danger flex items-center gap-1 ml-7">
               <AlertCircle className="w-3 h-3" />{errors.privacy}
             </p>
           )}

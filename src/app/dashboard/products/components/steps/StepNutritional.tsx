@@ -265,7 +265,7 @@ export function StepNutritional({
                       onChange={(e) => handleChange('servingSizeValue', parseFloat(e.target.value) || 100)}
                       className={cn(
                         "h-12 flex-1 rounded-xl",
-                        (touched.servingSizeValue && localErrors.servingSizeValue) && "border-red-500"
+                        (touched.servingSizeValue && localErrors.servingSizeValue) && "border-feedback-danger"
                       )}
                       min={1}
                       step={1}

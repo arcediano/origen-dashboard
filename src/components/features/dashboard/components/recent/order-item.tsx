@@ -59,8 +59,8 @@ export function OrderItem({
     },
     cancelled: { 
       label: 'Cancelado', 
-      color: 'bg-red-500',
-      bg: 'bg-red-50',
+      color: 'bg-feedback-danger',
+      bg: 'bg-feedback-danger-subtle',
       text: 'text-red-700',
       border: 'border-red-200'
     }

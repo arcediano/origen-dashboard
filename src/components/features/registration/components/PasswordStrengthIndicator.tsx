@@ -21,7 +21,7 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthProps> = ({ pas
     if (/[0-9]/.test(pwd)) score++;
     if (/[^A-Za-z0-9]/.test(pwd)) score++;
 
-    if (score <= 1) return { level: 1, label: 'Débil', color: 'bg-red-500' };
+    if (score <= 1) return { level: 1, label: 'Débil', color: 'bg-feedback-danger' };
     if (score <= 2) return { level: 2, label: 'Regular', color: 'bg-orange-500' };
     if (score <= 3) return { level: 3, label: 'Buena', color: 'bg-yellow-500' };
     if (score <= 4) return { level: 4, label: 'Fuerte', color: 'bg-origen-hoja' };
@@ -42,7 +42,7 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthProps> = ({ pas
         <span className="text-[10px] md:text-xs text-muted-foreground">Fortaleza:</span>
         <span className={cn(
           "text-[10px] md:text-xs font-semibold",
-          strength.level <= 2 ? "text-red-500" :
+          strength.level <= 2 ? "text-feedback-danger" :
           strength.level <= 3 ? "text-orange-500" :
           "text-origen-hoja"
         )}>

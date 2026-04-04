@@ -644,7 +644,7 @@ export function StepProduction({
                         setVideoError(null);
                       }}
                       placeholder="https://youtube.com/watch?v=..."
-                      className={cn("h-11 text-sm mb-2 rounded-lg", videoError && "border-red-500")}
+                      className={cn("h-11 text-sm mb-2 rounded-lg", videoError && "border-feedback-danger")}
                     />
                     {videoError && (
                       <p className="text-xs text-red-600 mb-2">{videoError}</p>

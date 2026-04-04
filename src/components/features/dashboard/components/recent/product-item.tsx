@@ -33,7 +33,7 @@ export function ProductItem({
   const stockConfig = {
     normal: { color: 'bg-green-500', label: 'Stock OK' },
     low: { color: 'bg-amber-500', label: 'Stock bajo' },
-    out: { color: 'bg-red-500', label: 'Sin stock' }
+    out: { color: 'bg-feedback-danger', label: 'Sin stock' }
   };
 
   return (
@@ -90,7 +90,7 @@ export function ProductItem({
                     "text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full",
                     trend > 0 
                       ? "bg-green-50 text-green-700 border border-green-200" 
-                      : "bg-red-50 text-red-700 border border-red-200"
+                      : "bg-feedback-danger-subtle text-red-700 border border-red-200"
                   )}>
                     {trend > 0 ? '+' : ''}{trend}%
                   </span>

@@ -236,7 +236,7 @@ export default function PersonalInfoPage() {
                         className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                         placeholder="Tu nombre completo"
                       />
-                      {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
+                      {errors.name && <p className="text-xs text-feedback-danger">{errors.name}</p>}
                     </div>
 
                     <div className="space-y-1">
@@ -252,7 +252,7 @@ export default function PersonalInfoPage() {
                         className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                         placeholder="tu@email.com"
                       />
-                      {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+                      {errors.email && <p className="text-xs text-feedback-danger">{errors.email}</p>}
                     </div>
 
                     <div className="space-y-1">
@@ -267,7 +267,7 @@ export default function PersonalInfoPage() {
                         className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
                         placeholder="+34 612 345 678"
                       />
-                      {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
+                      {errors.phone && <p className="text-xs text-feedback-danger">{errors.phone}</p>}
                     </div>
 
                     <div className="space-y-1">

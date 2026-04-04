@@ -56,7 +56,7 @@ const PAYMENT_CONFIG: Record<
 > = {
   paid:     { label: 'Pagado',      cls: 'text-origen-bosque bg-origen-pastel'         },
   pending:  { label: 'Pdte. pago',  cls: 'text-origen-mandarina bg-origen-mandarina/10'},
-  failed:   { label: 'Fallido',     cls: 'text-red-700 bg-red-50'                      },
+  failed:   { label: 'Fallido',     cls: 'text-red-700 bg-feedback-danger-subtle'         },
   refunded: { label: 'Reembolsado', cls: 'text-text-subtle bg-surface'                 },
 };
 

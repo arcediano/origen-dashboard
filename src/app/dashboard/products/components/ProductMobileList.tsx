@@ -51,7 +51,7 @@ const STATUS_CONFIG: Record<
   out_of_stock: {
     label: 'Agotado',
     icon: AlertCircle,
-    chip: 'bg-red-50 text-red-700 border-red-200',
+    chip: 'bg-feedback-danger-subtle text-red-700 border-red-200',
   },
 };
 
@@ -166,7 +166,7 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
             <span className="text-border-subtle" aria-hidden>·</span>
             {product.status === 'out_of_stock' ? (
               <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-feedback-danger flex-shrink-0" />
                 Sin stock
               </span>
             ) : isLowStock ? (

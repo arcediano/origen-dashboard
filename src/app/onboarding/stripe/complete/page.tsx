@@ -123,7 +123,7 @@ function StripeCompleteContent() {
 
       {state === 'error' && (
         <>
-          <XCircle className="w-14 h-14 text-red-500 mx-auto" />
+          <XCircle className="w-14 h-14 text-feedback-danger mx-auto" />
           <h1 className="text-xl font-bold text-origen-bosque">Error de conexión</h1>
           <p className="text-sm text-muted-foreground mb-4">{errorMessage}</p>
           <button

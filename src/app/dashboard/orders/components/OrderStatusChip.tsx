@@ -47,7 +47,7 @@ const STATUS_CONFIG: Record<
   cancelled: {
     label: 'Cancelado',
     icon: XCircle,
-    chip: 'bg-red-50 text-red-700 border-red-200',
+    chip: 'bg-feedback-danger-subtle text-red-700 border-red-200',
   },
   refunded: {
     label: 'Reembolsado',

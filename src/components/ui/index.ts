@@ -3,7 +3,7 @@
  * @description Export principal de UI components
  */
 
-export * from './atoms';
+export {};
 // export * from './molecules';
 // export * from './organisms';
 // export * from './templates';

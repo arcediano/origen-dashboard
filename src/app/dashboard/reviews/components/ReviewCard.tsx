@@ -38,8 +38,8 @@ const STATUS_CONFIG: Record<
 > = {
   pending:  { label: 'Pendiente',  icon: Clock,       cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   approved: { label: 'Aprobada',   icon: CheckCircle2,cls: 'bg-origen-pastel text-origen-bosque border-origen-pradera/30' },
-  rejected: { label: 'Rechazada',  icon: XCircle,     cls: 'bg-red-50 text-red-700 border-red-200' },
-  flagged:  { label: 'Reportada',  icon: AlertCircle, cls: 'bg-red-50 text-red-700 border-red-200' },
+  rejected: { label: 'Rechazada',  icon: XCircle,     cls: 'bg-feedback-danger-subtle text-red-700 border-red-200' },
+  flagged:  { label: 'Reportada',  icon: AlertCircle, cls: 'bg-feedback-danger-subtle text-red-700 border-red-200' },
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────

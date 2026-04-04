@@ -53,7 +53,7 @@ function SessionBanner() {
         'mb-5 p-3 border rounded-lg flex items-start gap-2 text-sm',
         isInactivity
           ? 'bg-amber-50 border-amber-200 text-amber-800'
-          : 'bg-red-50 border-red-200 text-red-700',
+          : 'bg-feedback-danger-subtle border-red-200 text-red-700',
       )}
     >
       <span className="flex-shrink-0 mt-0.5">{isInactivity ? '⏰' : '🔒'}</span>
@@ -181,7 +181,7 @@ export function SimpleLogin() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="mb-5 md:mb-6 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-red-600"
+              className="mb-5 md:mb-6 p-3 bg-feedback-danger-subtle border border-red-200 rounded-lg flex items-start gap-2 text-red-600"
             >
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span className="text-xs">{errors.general}</span>

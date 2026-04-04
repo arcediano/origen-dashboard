@@ -75,8 +75,8 @@ const statusConfig: Record<Order['status'], {
     label: 'Cancelado',
     icon: XCircle,
     color: 'text-red-700',
-    bandBg: 'bg-red-50',
-    heroBg: 'bg-gradient-to-br from-red-50 to-red-50/60',
+    bandBg: 'bg-feedback-danger-subtle',
+    heroBg: 'bg-gradient-to-br from-feedback-danger-subtle to-red-50/60',
     heroBorder: 'border-red-200',
   },
   refunded: {
@@ -84,8 +84,8 @@ const statusConfig: Record<Order['status'], {
     label: 'Reembolsado',
     icon: XCircle,
     color: 'text-red-700',
-    bandBg: 'bg-red-50',
-    heroBg: 'bg-gradient-to-br from-red-50 to-red-50/60',
+    bandBg: 'bg-feedback-danger-subtle',
+    heroBg: 'bg-gradient-to-br from-feedback-danger-subtle to-red-50/60',
     heroBorder: 'border-red-200',
   }
 };

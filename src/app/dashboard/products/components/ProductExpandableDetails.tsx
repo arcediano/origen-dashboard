@@ -286,7 +286,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
               <div className="flex items-center gap-2">
                 <div className={cn(
                   'w-2 h-2 rounded-full',
-                  product.stock === 0 ? 'bg-red-500' :
+                  product.stock === 0 ? 'bg-feedback-danger' :
                   product.lowStockThreshold && product.stock <= product.lowStockThreshold ? 'bg-amber-500' : 'bg-green-500'
                 )} />
                 <span className="text-base font-semibold text-origen-bosque">{product.stock} uds</span>

@@ -106,7 +106,7 @@ export function DeleteProductDialog({
         </p>
 
         {error && (
-          <div className="p-3 bg-red-50 rounded-lg border border-red-200 flex items-start gap-2">
+          <div className="p-3 bg-feedback-danger-subtle rounded-lg border border-red-200 flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
             <p className="text-xs text-red-600">{error}</p>
           </div>

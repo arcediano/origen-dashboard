@@ -51,7 +51,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
     suspended: {
       label: 'Cuenta suspendida',
       className:
-        'bg-red-50 text-red-700 border border-red-200',
+        'bg-feedback-danger-subtle text-red-700 border border-red-200',
       Icon: XCircle,
     },
   };

@@ -92,7 +92,7 @@ export function ProductTable({
       header: 'Stock',
       accessor: (item) => {
         const stockColor =
-          item.stock === 0 ? 'bg-red-500' :
+          item.stock === 0 ? 'bg-feedback-danger' :
           item.lowStockThreshold && item.stock <= item.lowStockThreshold ? 'bg-amber-500' :
           'bg-green-500';
         return (

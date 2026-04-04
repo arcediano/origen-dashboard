@@ -34,6 +34,15 @@ const nextConfig = {
       bodySizeLimit: "10mb",
     },
   },
+    webpack: (config) => {
+      // Resolución de fuente directa de origen-UXLibrary (sin build previo)
+      config.resolve.alias['@ux-lib'] = path.join(__dirname, '../origen-UXLibrary/src');
+      config.resolve.alias['@/components/ui/atoms'] = path.join(
+        __dirname,
+        '../origen-UXLibrary/src/compat/dashboard/atoms'
+      );
+      return config;
+    },
 };
 
 module.exports = nextConfig;

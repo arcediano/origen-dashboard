@@ -252,7 +252,7 @@ export function ReviewsList({
 
           {/* Diálogo de reporte */}
           {showFlagDialog === review.id && (
-            <div className="mt-4 p-4 bg-red-50/50 rounded-lg border border-red-200">
+            <div className="mt-4 p-4 bg-feedback-danger-subtle/50 rounded-lg border border-red-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-red-600">Reportar reseña</span>
                 <button

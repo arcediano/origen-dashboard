@@ -36,7 +36,7 @@ const valueColor: Record<StatStripVariant, string> = {
   default: 'text-origen-bosque',
   success: 'text-origen-hoja',
   warning: 'text-origen-mandarina',
-  danger:  'text-red-500',
+  danger:  'text-feedback-danger',
 };
 
 // ─── Componente ───────────────────────────────────────────────────────────────

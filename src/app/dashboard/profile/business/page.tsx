@@ -266,7 +266,7 @@ export default function BusinessInfoPage() {
                           disabled={!isEditing}
                           className={!isEditing ? 'bg-surface' : ''}
                         />
-                        {errors.businessName && <p className="text-xs text-red-500">{errors.businessName}</p>}
+                        {errors.businessName && <p className="text-xs text-feedback-danger">{errors.businessName}</p>}
                       </div>
 
                       <div className="space-y-2 md:col-span-2">
@@ -291,7 +291,7 @@ export default function BusinessInfoPage() {
                           disabled={!isEditing}
                           className={!isEditing ? 'bg-surface' : ''}
                         />
-                        {errors.taxId && <p className="text-xs text-red-500">{errors.taxId}</p>}
+                        {errors.taxId && <p className="text-xs text-feedback-danger">{errors.taxId}</p>}
                       </div>
 
                       <div className="space-y-2">
@@ -372,7 +372,7 @@ export default function BusinessInfoPage() {
                           disabled={!isEditing}
                           className={!isEditing ? 'bg-surface' : ''}
                         />
-                        {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
+                        {errors.phone && <p className="text-xs text-feedback-danger">{errors.phone}</p>}
                       </div>
                       
                       <div className="space-y-2">
@@ -387,7 +387,7 @@ export default function BusinessInfoPage() {
                           disabled={!isEditing}
                           className={!isEditing ? 'bg-surface' : ''}
                         />
-                        {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+                        {errors.email && <p className="text-xs text-feedback-danger">{errors.email}</p>}
                       </div>
                       
                       <div className="space-y-2">

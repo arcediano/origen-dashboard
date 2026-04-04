@@ -31,7 +31,9 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/lib/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+      // origen-UXLibrary: primera ola de integración — fuente directa sin build
+      "../origen-UXLibrary/src/**/*.{ts,tsx}",
+    ],
   
   theme: {
     container: {
@@ -165,6 +167,7 @@ const config: Config = {
         "h3": ["1.3rem", { lineHeight: "1.4", fontWeight: "600" }],   // 20.8px
         "body": ["1rem", { lineHeight: "1.6", fontWeight: "400" }],   // 16px
         "small": ["0.875rem", { lineHeight: "1.5", fontWeight: "400" }], // 14px
+          "micro": ["0.6875rem", { lineHeight: "1.4", fontWeight: "500" }], // 11px — UXLibrary compat
       },
       
       // === ESPACIADO ===

@@ -75,7 +75,7 @@ export function StatsCard({
                     "flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
                     trend.isPositive 
                       ? "bg-green-50 text-green-700 border border-green-200" 
-                      : "bg-red-50 text-red-700 border border-red-200"
+                      : "bg-feedback-danger-subtle text-red-700 border border-red-200"
                   )}>
                     {trend.isPositive ? (
                       <TrendingUp className="w-3 h-3" />

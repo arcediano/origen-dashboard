@@ -295,10 +295,10 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="relative w-full max-w-sm bg-surface-alt rounded-2xl shadow-2xl border border-border-subtle overflow-hidden"
             >
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-red-400" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-feedback-danger to-red-400" />
               <div className="p-6 flex flex-col items-center text-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center">
-                  <AlertCircle className="w-7 h-7 text-red-500" />
+                <div className="w-14 h-14 rounded-2xl bg-feedback-danger-subtle flex items-center justify-center">
+                  <AlertCircle className="w-7 h-7 text-feedback-danger" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-origen-bosque mb-2">

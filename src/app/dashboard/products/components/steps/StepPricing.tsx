@@ -315,7 +315,7 @@ export function StepPricing({
               inputSize="lg"
               className={cn(
                 "h-12 w-full rounded-xl",
-                (touched?.basePrice && errors?.basePrice) && "border-red-500"
+                (touched?.basePrice && errors?.basePrice) && "border-feedback-danger"
               )}
               placeholder="Ej: 24,50"
             />

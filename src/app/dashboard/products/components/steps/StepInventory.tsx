@@ -104,7 +104,7 @@ const StockLevelIndicator = ({ current, threshold, max }: { current: number; thr
         className={cn(
           "h-2 rounded-full",
           status === 'success' ? "bg-green-500" : 
-          status === 'warning' ? "bg-amber-500" : "bg-red-500"
+          status === 'warning' ? "bg-amber-500" : "bg-feedback-danger"
         )} 
       />
       {current <= threshold && current > 0 && (
@@ -245,7 +245,7 @@ export function StepInventory({
                 onChange={(e) => handleChange('sku', e.target.value.toUpperCase())}
                 className={cn(
                   "h-12 font-mono text-base w-full rounded-xl",
-                  (localTouched.sku && validationErrors.sku) && "border-red-500"
+                  (localTouched.sku && validationErrors.sku) && "border-feedback-danger"
                 )}
                 placeholder={skuSuggestion || "El backend generará el SKU"}
                 style={{ textTransform: 'uppercase' }}

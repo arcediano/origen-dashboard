@@ -29,8 +29,8 @@ export function ProductCard({
   onEdit,
   className,
 }: ProductCardProps) {
-  const stockColor = product.stock === 0 
-    ? 'bg-red-500' 
+  const stockColor = product.stock === 0
+    ? 'bg-feedback-danger'
     : product.lowStockThreshold && product.stock <= product.lowStockThreshold 
     ? 'bg-amber-500' 
     : 'bg-green-500';
