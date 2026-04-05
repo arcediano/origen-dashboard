@@ -19,9 +19,7 @@
       }
     ],
     "paths": {
-      "@/components/ui/atoms/*": ["../origen-UXLibrary/src/compat/dashboard/atoms/*"],
-      "@/*": ["./src/*"],
-      "@ux-lib/*": ["../origen-UXLibrary/src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
