@@ -5,7 +5,7 @@ import { Button } from '@origen/ux-library';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, CheckCircle, AlertCircle, User, Mail, MessageSquare } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/atoms/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@origen/ux-library';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 

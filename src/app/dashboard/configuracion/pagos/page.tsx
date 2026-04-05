@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@origen/ux-library';
-import { Card } from '@/components/ui/atoms/card';
+import { Card } from '@origen/ux-library';
 import { ArrowLeft, Save, CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function PagosPage() {

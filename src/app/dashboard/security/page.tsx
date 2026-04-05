@@ -4,7 +4,7 @@
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Bell, Shield, Globe, Moon, Sun, Save, Key } from 'lucide-react';
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Button, Input, Label, Separator } from '@origen/ux-library';
 import { Toggle } from '@/components/ui/atoms/toggle';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/tabs';

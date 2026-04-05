@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle, Package } from 'lucide-react';
-import { Modal } from '@/components/ui/atoms/dialog';
+import { Modal } from '@origen/ux-library';
 
 // ============================================================================
 // TIPOS

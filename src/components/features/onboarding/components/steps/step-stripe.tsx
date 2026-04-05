@@ -22,7 +22,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 import { Button } from '@origen/ux-library';
-import { Checkbox } from '@/components/ui/atoms/checkbox';
+import { Checkbox } from '@origen/ux-library';
 import { saveStep6 } from '@/lib/api/onboarding';
 import { Spinner } from '@/components/shared';
 

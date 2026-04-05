@@ -15,7 +15,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from '@/components/ui/atoms/select';
+} from '@origen/ux-library';
 import { LoadingSpinner } from '@/components/shared';
 
 import { PRODUCER_CATEGORIES } from '@/constants/categories';

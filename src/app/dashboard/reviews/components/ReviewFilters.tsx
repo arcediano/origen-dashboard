@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { FilterBottomSheet, type FilterSection, type ToggleOption } from '@/components/shared/mobile';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-} from '@/components/ui/atoms/select';
+} from '@origen/ux-library';
 import { Button } from '@origen/ux-library';
 import type { ReviewFilters as ReviewFiltersType, ReviewType, ReviewStatus } from '@/types/review';
 

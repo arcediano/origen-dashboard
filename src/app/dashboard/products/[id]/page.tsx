@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 // Componentes UI
 import { Button, Badge } from '@origen/ux-library';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/tabs';
-import { Modal } from '@/components/ui/atoms/dialog';
+import { Modal } from '@origen/ux-library';
 import { PageHeader } from '../../components/PageHeader';
 import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 import { ProductImage } from '@/components/ui/atoms/product-image';

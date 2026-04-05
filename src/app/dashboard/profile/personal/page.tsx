@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Button, Input, Label, Badge } from '@origen/ux-library';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/atoms/avatar';
 import { Alert, AlertDescription } from '@/components/ui/atoms/alert';

@@ -20,7 +20,7 @@ import { GatewayError } from '@/lib/api/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { Button, Input } from '@origen/ux-library';
-import { CheckboxWithLabel } from '@/components/ui/atoms/checkbox';
+import { CheckboxWithLabel } from '@origen/ux-library';
 
 import {
   LogIn,

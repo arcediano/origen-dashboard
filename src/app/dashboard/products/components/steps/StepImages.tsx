@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Card } from '@/components/ui/atoms/card';
+import { Card } from '@origen/ux-library';
 import { ImageUploader } from '../../components/ImageUploader';
 import { Badge } from '@origen/ux-library';
 import { Tooltip } from '@/components/ui/atoms/tooltip';

@@ -8,7 +8,7 @@
 import React from 'react';
 import { Package, Camera, DollarSign, FlaskConical, Leaf, ShoppingBag, Award, CheckCircle, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card } from '@/components/ui/atoms/card';
+import { Card } from '@origen/ux-library';
 import { Progress } from '@/components/ui/atoms/progress';
 import { Badge } from '@origen/ux-library';
 import { Tooltip } from '@/components/ui/atoms/tooltip';

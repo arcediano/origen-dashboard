@@ -18,7 +18,7 @@ import {
   Save,
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent } from '@/components/ui/atoms/card';
+import { Card, CardContent } from '@origen/ux-library';
 import { Button } from '@origen/ux-library';
 import { NotificationToggleRow } from './components/NotificationToggleRow';
 import { SegmentedControl, type SegmentItem } from './components/SegmentedControl';

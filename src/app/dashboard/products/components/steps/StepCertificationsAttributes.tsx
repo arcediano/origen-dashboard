@@ -6,7 +6,7 @@
 'use client';
 
 import { Button, Input, Badge } from '@origen/ux-library';
-import { Checkbox } from '@/components/ui/atoms/checkbox';
+import { Checkbox } from '@origen/ux-library';
 import { DocumentUploader } from '../../components/DocumentUploader';
 import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 

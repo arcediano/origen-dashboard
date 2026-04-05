@@ -5,10 +5,10 @@
 
 'use client';
 
-import { Card } from '@/components/ui/atoms/card';
+import { Card } from '@origen/ux-library';
 import { Input } from '@origen/ux-library';
 import { Textarea } from '@/components/ui/atoms/textarea';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/atoms/select';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@origen/ux-library';
 import { TagsInput } from '@/components/ui/atoms/tags-input';
 import { Badge } from '@origen/ux-library';
 import { Tooltip } from '@/components/ui/atoms/tooltip';

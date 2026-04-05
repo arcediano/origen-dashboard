@@ -6,7 +6,7 @@
 'use client';
 
 import { Sparkles, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Badge } from '@origen/ux-library';
 
 // ─── Props ────────────────────────────────────────────────────────────────────

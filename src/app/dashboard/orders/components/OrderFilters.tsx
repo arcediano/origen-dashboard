@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { FilterBottomSheet } from '@/components/shared/mobile';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-} from '@/components/ui/atoms/select';
+} from '@origen/ux-library';
 import { Input, Button } from '@origen/ux-library';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
 

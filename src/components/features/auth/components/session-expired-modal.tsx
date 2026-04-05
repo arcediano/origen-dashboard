@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Clock } from 'lucide-react';
-import { Modal } from '@/components/ui/atoms/dialog';
+import { Modal } from '@origen/ux-library';
 import { Button } from '@origen/ux-library';
 
 interface SessionExpiredModalProps {

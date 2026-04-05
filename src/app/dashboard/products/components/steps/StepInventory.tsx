@@ -5,10 +5,10 @@
 
 'use client';
 
-import { Card } from '@/components/ui/atoms/card';
+import { Card } from '@origen/ux-library';
 import { Input } from '@origen/ux-library';
 import { Badge } from '@origen/ux-library';
-import { Checkbox } from '@/components/ui/atoms/checkbox';
+import { Checkbox } from '@origen/ux-library';
 import { Progress } from '@/components/ui/atoms/progress';
 import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 

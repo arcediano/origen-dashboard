@@ -14,7 +14,7 @@ import { Package, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@origen/ux-library';
 import { PageLoader } from '@/components/shared/loading/page-loader';
 import { PageError } from '@/components/shared/error/page-error';
-import { Card } from '@/components/ui/atoms/card'
+import { Card } from '@origen/ux-library'
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Pagination } from '@/components/ui/atoms/pagination';
 import { ProductStats, ProductFilters, ProductTable, ProductCard, ProductMobileList } from './components';

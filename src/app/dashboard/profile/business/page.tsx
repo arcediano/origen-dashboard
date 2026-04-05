@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Button } from '@/components/ui/atoms/button';
 import { Input } from '@/components/ui/atoms/input';
 import { Textarea } from '@/components/ui/atoms/textarea';

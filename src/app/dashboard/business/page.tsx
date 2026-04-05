@@ -25,7 +25,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Button, Input, Label, Badge } from '@origen/ux-library';
 import { Textarea } from '@/components/ui/atoms/textarea';
 import { TagsInput } from '@/components/ui/atoms/tags-input';

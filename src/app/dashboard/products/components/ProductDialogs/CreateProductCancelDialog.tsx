@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
-import { Modal } from '@/components/ui/atoms/dialog';
+import { Modal } from '@origen/ux-library';
 
 // ============================================================================
 // TIPOS

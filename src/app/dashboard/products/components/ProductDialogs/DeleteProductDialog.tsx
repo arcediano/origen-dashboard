@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { Trash2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@origen/ux-library';
-import { Modal } from '@/components/ui/atoms/dialog';
+import { Modal } from '@origen/ux-library';
 import { type Product } from '@/types/product';
 import { deleteProduct } from '@/lib/api/products';
 
