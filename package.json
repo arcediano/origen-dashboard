@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev --port 3001",
     "dev:local": "NEXT_PUBLIC_API_GATEWAY_URL=http://localhost:3000 next dev --port 3001",
-    "build": "npm test && next build",
+    "build": "next build",
+    "build:ci": "npm test && next build",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
