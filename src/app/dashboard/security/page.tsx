@@ -6,7 +6,7 @@ import { ArrowLeft, Bell, Shield, Globe, Moon, Sun, Save, Key } from 'lucide-rea
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Button, Input, Label, Separator } from '@origen/ux-library';
-import { Toggle } from '@/components/ui/atoms/toggle';
+import { Toggle } from '@origen/ux-library';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@origen/ux-library';
 import { Alert, AlertDescription } from '@origen/ux-library';
 

@@ -11,6 +11,7 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom'],
     alias: {
+      '@origen/ux-library': resolve(projectRoot, 'node_modules/@origen/ux-library/dist/index.js'),
       react: resolve(projectRoot, 'node_modules/react'),
       'react-dom': resolve(projectRoot, 'node_modules/react-dom'),
       'lucide-react': resolve(projectRoot, 'node_modules/lucide-react'),

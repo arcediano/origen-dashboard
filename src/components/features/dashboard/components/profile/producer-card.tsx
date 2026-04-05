@@ -43,7 +43,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
       Icon: CheckCircle2,
     },
     pending: {
-      label: 'VerificaciÃ³n pendiente',
+      label: 'Verificación pendiente',
       className:
         'bg-amber-50 text-amber-700 border border-amber-200',
       Icon: Clock,

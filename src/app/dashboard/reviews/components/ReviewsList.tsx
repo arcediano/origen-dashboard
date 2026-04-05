@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { Card } from '@origen/ux-library';
 import { Badge, Button } from '@origen/ux-library';
 import { Avatar, AvatarFallback, AvatarImage } from '@origen/ux-library';
-import { Textarea } from '@/components/ui/atoms/textarea';
+import { Textarea } from '@origen/ux-library';
 import { 
   Star, 
   ThumbsUp, 

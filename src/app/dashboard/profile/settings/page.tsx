@@ -17,7 +17,7 @@ import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Button, Input, Label, Separator } from '@origen/ux-library';
-import { Toggle } from '@/components/ui/atoms/toggle';
+import { Toggle } from '@origen/ux-library';
 import { Alert, AlertDescription } from '@origen/ux-library';
 import { gatewayClient } from '@/lib/api/client';
 

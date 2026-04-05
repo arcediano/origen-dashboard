@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Toggle } from '@/components/ui/atoms/toggle';
+import { Toggle } from '@origen/ux-library';
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 

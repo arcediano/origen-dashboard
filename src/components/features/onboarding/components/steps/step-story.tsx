@@ -11,7 +11,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 import { Input } from '@origen/ux-library';
-import { Textarea } from '@/components/ui/atoms/textarea';
+import { Textarea } from '@origen/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 
 import {

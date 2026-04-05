@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 import { Button, Input } from '@origen/ux-library';
-import { Textarea } from '@/components/ui/atoms/textarea';
+import { Textarea } from '@origen/ux-library';
 import {
   Select,
   SelectTrigger,

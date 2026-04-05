@@ -27,8 +27,7 @@ import {
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Button, Input, Label, Badge } from '@origen/ux-library';
-import { Textarea } from '@/components/ui/atoms/textarea';
-import { TagsInput } from '@/components/ui/atoms/tags-input';
+import { Textarea, TagsInput } from '@origen/ux-library';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@origen/ux-library';
 import { cn } from '@/lib/utils';
 

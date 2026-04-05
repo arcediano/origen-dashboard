@@ -42,7 +42,7 @@ import {
   TabsList,
   TabsTrigger
 } from '@origen/ux-library';
-import { Textarea } from '@/components/ui/atoms/textarea';
+import { Textarea } from '@origen/ux-library';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
