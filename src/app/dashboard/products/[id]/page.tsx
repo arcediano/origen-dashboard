@@ -12,9 +12,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 // Componentes UI
-import { Button } from '@/components/ui/atoms/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
-import { Badge } from '@/components/ui/atoms/badge';
+import { Button, Badge } from '@origen/ux-library';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/tabs';
 import { Modal } from '@/components/ui/atoms/dialog';
 import { PageHeader } from '../../components/PageHeader';

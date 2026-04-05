@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@origen/ux-library';
 import { MobileStepperBar } from '@/components/features/onboarding/components/MobileStepperBar';
 import { MobileNavBar } from '@/components/features/onboarding/components/MobileNavBar';
 import { uploadFile } from '@/lib/api/media';

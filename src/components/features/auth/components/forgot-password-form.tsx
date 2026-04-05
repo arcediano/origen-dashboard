@@ -16,8 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { requestPasswordReset } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
 
-import { Button } from '@/components/ui/atoms/button';
-import { Input } from '@/components/ui/atoms/input';
+import { Button, Input } from '@origen/ux-library';
 
 import {
   Mail,

@@ -10,8 +10,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/atoms/card';
-import { Badge } from '@/components/ui/atoms/badge';
-import { Button } from '@/components/ui/atoms/button';
+import { Badge, Button } from '@origen/ux-library';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/atoms/avatar';
 import { Textarea } from '@/components/ui/atoms/textarea';
 import { 

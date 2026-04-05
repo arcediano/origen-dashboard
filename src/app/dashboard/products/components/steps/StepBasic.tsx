@@ -6,11 +6,11 @@
 'use client';
 
 import { Card } from '@/components/ui/atoms/card';
-import { Input } from '@/components/ui/atoms/input';
+import { Input } from '@origen/ux-library';
 import { Textarea } from '@/components/ui/atoms/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/atoms/select';
 import { TagsInput } from '@/components/ui/atoms/tags-input';
-import { Badge } from '@/components/ui/atoms/badge';
+import { Badge } from '@origen/ux-library';
 import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 
   Package, 

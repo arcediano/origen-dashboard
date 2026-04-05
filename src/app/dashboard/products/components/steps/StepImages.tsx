@@ -7,7 +7,7 @@
 
 import { Card } from '@/components/ui/atoms/card';
 import { ImageUploader } from '../../components/ImageUploader';
-import { Badge } from '@/components/ui/atoms/badge';
+import { Badge } from '@origen/ux-library';
 import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 
   Camera, 

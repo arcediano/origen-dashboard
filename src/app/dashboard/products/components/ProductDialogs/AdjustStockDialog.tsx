@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { Package, Plus, Minus, Save, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@origen/ux-library';
 import { Modal } from '@/components/ui/atoms/dialog';
 import { type Product } from '@/types/product';
 import { updateProductStock } from '@/lib/api/products';

@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input } from '@/components/ui/atoms/input';
+import { Input } from '@origen/ux-library';
 import { Textarea } from '@/components/ui/atoms/textarea';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 

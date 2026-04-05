@@ -18,11 +18,8 @@ import {
 import { motion, type Variants } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
-import { Button } from '@/components/ui/atoms/button';
-import { Input } from '@/components/ui/atoms/input';
-import { Label } from '@/components/ui/atoms/label';
+import { Button, Input, Label, Badge } from '@origen/ux-library';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/atoms/avatar';
-import { Badge } from '@/components/ui/atoms/badge';
 import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
 
 // Variants corregidos

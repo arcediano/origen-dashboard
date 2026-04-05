@@ -8,7 +8,7 @@
 
 'use client';
 
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@origen/ux-library';
 import { MessageSquare, Phone, Mail, HelpCircle, Shield, Clock, Users } from 'lucide-react';
 
 export function FinalCTASection() {

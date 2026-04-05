@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { logoutUser } from '@/lib/api/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/atoms/avatar';
-import { Badge } from '@/components/ui/atoms/badge';
+import { Badge } from '@origen/ux-library';
 import { 
   User, 
   Settings,

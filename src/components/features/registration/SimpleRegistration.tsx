@@ -7,8 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-import { Button } from '@/components/ui/atoms/button';
-import { Input } from '@/components/ui/atoms/input';
+import { Button, Input } from '@origen/ux-library';
 import { Textarea } from '@/components/ui/atoms/textarea';
 import {
   Select,

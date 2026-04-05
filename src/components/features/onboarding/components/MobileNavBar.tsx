@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@origen/ux-library';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface MobileNavBarProps {

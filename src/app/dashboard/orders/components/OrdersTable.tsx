@@ -11,8 +11,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Table, type Column } from '@/components/ui/atoms/table';
-import { Badge } from '@/components/ui/atoms/badge';
-import { Button } from '@/components/ui/atoms/button';
+import { Badge, Button } from '@origen/ux-library';
 import { 
   Eye, 
   Clock, 

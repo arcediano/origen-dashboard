@@ -8,7 +8,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Badge, type BadgeVariant } from "@/components/ui/atoms/badge";
+import { Badge, type BadgeVariant } from "@origen/ux-library";
 
 // ============================================================================
 // TIPOS

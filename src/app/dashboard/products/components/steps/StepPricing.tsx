@@ -5,12 +5,7 @@
 
 'use client';
 
-import { Button } from '@/components/ui/atoms/button';
-import { Card } from '@/components/ui/atoms/card';
-import { Input } from '@/components/ui/atoms/input';
-import { CurrencyInput } from '@/components/ui/atoms/currency-input';
-import { PercentageInput } from '@/components/ui/atoms/percentage-input';
-import { Badge } from '@/components/ui/atoms/badge';
+import { Button, Input, Badge } from '@origen/ux-library';
 import { Alert } from '@/components/ui/atoms/alert';
 import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 

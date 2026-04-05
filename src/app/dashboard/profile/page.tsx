@@ -12,8 +12,7 @@ import {
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
-import { Badge } from '@/components/ui/atoms/badge';
-import { Button } from '@/components/ui/atoms/button';
+import { Badge, Button } from '@origen/ux-library';
 import { Progress } from '@/components/ui/atoms/progress';
 
 const itemVariants = {

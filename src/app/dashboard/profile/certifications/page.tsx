@@ -20,8 +20,7 @@ import {
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
-import { Button } from '@/components/ui/atoms/button';
-import { Badge } from '@/components/ui/atoms/badge';
+import { Button, Badge } from '@origen/ux-library';
 import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
 import { Progress } from '@/components/ui/atoms/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/tabs';

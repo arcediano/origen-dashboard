@@ -15,8 +15,7 @@ import { FilterBottomSheet } from '@/components/shared/mobile';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/atoms/select';
-import { Input } from '@/components/ui/atoms/input';
-import { Button } from '@/components/ui/atoms/button';
+import { Input, Button } from '@origen/ux-library';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
 
 export interface OrderFiltersProps {

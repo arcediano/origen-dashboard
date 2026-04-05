@@ -5,13 +5,7 @@
 
 'use client';
 
-import { Button } from '@/components/ui/atoms/button';
-import { Card } from '@/components/ui/atoms/card';
-import { Input } from '@/components/ui/atoms/input';
-import { Textarea } from '@/components/ui/atoms/textarea';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/atoms/select';
-import { Checkbox } from '@/components/ui/atoms/checkbox';
-import { Badge } from '@/components/ui/atoms/badge';
+import { Button, Input, Badge } from '@origen/ux-library';
 import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 
   FlaskConical, 

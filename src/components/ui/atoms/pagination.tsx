@@ -8,7 +8,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@origen/ux-library';
 
 export interface PaginationProps {
   currentPage: number;

@@ -1,7 +1,7 @@
 // 📁 /src/app/dashboard/components/header/MobileMenu.tsx
 'use client';
 
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@origen/ux-library';
 import { Menu } from 'lucide-react';
 
 interface MobileMenuProps {

@@ -15,7 +15,7 @@ import { FilterBottomSheet, type FilterSection, type ToggleOption } from '@/comp
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/atoms/select';
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@origen/ux-library';
 import type { ReviewFilters as ReviewFiltersType, ReviewType, ReviewStatus } from '@/types/review';
 
 // ─── Opciones ─────────────────────────────────────────────────────────────────

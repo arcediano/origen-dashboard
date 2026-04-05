@@ -8,7 +8,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Table, type Column } from '@/components/ui/atoms/table';
-import { StatusBadge } from '@/components/ui/atoms/badge';
+import { StatusBadge } from '@origen/ux-library';
 import { ProductImage } from '@/components/ui/atoms/product-image';
 import { ProductTableActions } from './ProductTableActions';
 import { ProductExpandableDetails } from './ProductExpandableDetails';

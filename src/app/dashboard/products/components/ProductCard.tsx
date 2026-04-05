@@ -9,8 +9,8 @@ import React from 'react';
 import { Eye, Edit, PlusCircle, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/atoms/card';
-import { StatusBadge } from '@/components/ui/atoms/badge';
-import { Button } from '@/components/ui/atoms/button';
+import { StatusBadge } from '@origen/ux-library';
+import { Button } from '@origen/ux-library';
 import { ProductImage } from '@/components/ui/atoms/product-image';
 import { type Product } from '@/types/product';
 

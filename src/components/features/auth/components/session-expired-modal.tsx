@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Clock } from 'lucide-react';
 import { Modal } from '@/components/ui/atoms/dialog';
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@origen/ux-library';
 
 interface SessionExpiredModalProps {
   isOpen: boolean;

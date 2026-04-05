@@ -10,9 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input } from '@/components/ui/atoms/input';
-import { FileUpload, type UploadedFile } from '@/components/shared';
-import { Button } from '@/components/ui/atoms/button';
+import { Input, Button } from '@origen/ux-library';
 
 import {
   Truck,

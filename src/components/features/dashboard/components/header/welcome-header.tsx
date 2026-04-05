@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@origen/ux-library';
 import { Sparkles, Clock, Eye } from 'lucide-react';
 import { itemVariants } from '../layout/dashboard-shell';
 

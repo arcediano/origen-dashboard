@@ -19,8 +19,7 @@ import { loginUser } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-import { Button } from '@/components/ui/atoms/button';
-import { Input } from '@/components/ui/atoms/input';
+import { Button, Input } from '@origen/ux-library';
 import { CheckboxWithLabel } from '@/components/ui/atoms/checkbox';
 
 import {

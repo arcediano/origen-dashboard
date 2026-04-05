@@ -16,12 +16,9 @@ import {
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/atoms/card';
-import { Button } from '@/components/ui/atoms/button';
-import { Input } from '@/components/ui/atoms/input';
-import { Label } from '@/components/ui/atoms/label';
+import { Button, Input, Label, Separator } from '@origen/ux-library';
 import { Toggle } from '@/components/ui/atoms/toggle';
 import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
-import { Separator } from '@/components/ui/atoms/separator';
 import { gatewayClient } from '@/lib/api/client';
 
 const itemVariants = {

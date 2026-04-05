@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input } from '@/components/ui/atoms/input';
+import { Input } from '@origen/ux-library';
 import { FileUpload, type UploadedFile, CategoryCard } from '@/components/shared';
 import { validateSpanishTaxId, type TaxIdType } from '@/lib/utils/tax-id';
 

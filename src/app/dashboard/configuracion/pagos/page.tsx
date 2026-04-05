@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@origen/ux-library';
 import { Card } from '@/components/ui/atoms/card';
 import { ArrowLeft, Save, CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
 

@@ -11,7 +11,7 @@ import { motion, type Variants } from 'framer-motion';
 import { Package, Plus, RefreshCw } from 'lucide-react';
 
 // Componentes UI
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@origen/ux-library';
 import { PageLoader } from '@/components/shared/loading/page-loader';
 import { PageError } from '@/components/shared/error/page-error';
 import { Card } from '@/components/ui/atoms/card'

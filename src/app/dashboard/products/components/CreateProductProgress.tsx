@@ -10,7 +10,7 @@ import { Package, Camera, DollarSign, FlaskConical, Leaf, ShoppingBag, Award, Ch
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/atoms/card';
 import { Progress } from '@/components/ui/atoms/progress';
-import { Badge } from '@/components/ui/atoms/badge';
+import { Badge } from '@origen/ux-library';
 import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 

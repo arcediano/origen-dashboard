@@ -11,7 +11,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
-import { Badge } from '@/components/ui/atoms/badge';
+import { Badge } from '@origen/ux-library';
 import { SidebarSubmenu } from './SidebarSubmenu';
 import type { MenuItem, SubmenuItem } from '@/constants/sidebar';
 
