@@ -7,7 +7,7 @@
 
 import { useState, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Alert } from '@/components/ui/atoms/alert';
+import { Alert } from '@origen/ux-library';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { DashboardAlert } from '../../types';
 
@@ -59,3 +59,4 @@ export function AlertList({ alerts: initialAlerts, className }: AlertListProps) 
     </motion.div>
   );
 }
+

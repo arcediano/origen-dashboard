@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Table, type Column } from '@/components/ui/atoms/table';
+import { Table, type Column } from '@origen/ux-library';
 import { StatusBadge } from '@origen/ux-library';
 import { ProductImage } from '@/components/ui/atoms/product-image';
 import { ProductTableActions } from './ProductTableActions';
@@ -154,3 +154,4 @@ export function ProductTable({
     />
   );
 }
+

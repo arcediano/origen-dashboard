@@ -7,8 +7,8 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Button, Input, Label, Separator } from '@origen/ux-library';
 import { Toggle } from '@/components/ui/atoms/toggle';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/tabs';
-import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@origen/ux-library';
+import { Alert, AlertDescription } from '@origen/ux-library';
 
 export default function SettingsPage() {
   const router = useRouter();

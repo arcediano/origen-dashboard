@@ -21,9 +21,9 @@ import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Button, Badge } from '@origen/ux-library';
-import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
+import { Alert, AlertDescription } from '@origen/ux-library';
 import { Progress } from '@/components/ui/atoms/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/atoms/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@origen/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 
 interface Certification {

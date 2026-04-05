@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Alert } from '@/components/ui/atoms/alert';
+import { Alert } from '@origen/ux-library';
 import { Button } from '@origen/ux-library';
 import { RefreshCw } from 'lucide-react';
 
@@ -64,3 +64,4 @@ export function PageError({
     </div>
   );
 }
+

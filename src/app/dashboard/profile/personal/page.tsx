@@ -20,7 +20,7 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Button, Input, Label, Badge } from '@origen/ux-library';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/atoms/avatar';
-import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
+import { Alert, AlertDescription } from '@origen/ux-library';
 
 // Variants corregidos
 const itemVariants: Variants = {

@@ -19,7 +19,7 @@ import { OrderStats } from './components/OrderStats';
 import { OrderFilters } from './components/OrderFilters';
 import { OrdersTable } from './components/OrdersTable';
 import { OrderCard, OrderCardSkeleton } from './components/OrderCard';
-import { Pagination } from '@/components/ui/atoms/pagination';
+import { Pagination } from '@origen/ux-library';
 
 // Hooks y API
 import { fetchOrders } from '@/lib/api/orders';

@@ -18,7 +18,7 @@ import { ReviewStats } from './components/ReviewStats';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
 import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
-import { Pagination } from '@/components/ui/atoms/pagination';
+import { Pagination } from '@origen/ux-library';
 
 // Hooks y API
 import { fetchReviews } from '@/lib/api/reviews';
@@ -201,3 +201,4 @@ export default function ReviewsPage() {
     </MobilePullRefresh>
   );
 }
+

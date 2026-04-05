@@ -15,7 +15,7 @@ import * as React from 'react';
 import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@origen/ux-library';
-import { Alert } from '@/components/ui/atoms/alert';
+import { Alert } from '@origen/ux-library';
 
 import {
   Upload,
@@ -447,3 +447,4 @@ export function FileUpload({
 }
 
 FileUpload.displayName = 'FileUpload';
+

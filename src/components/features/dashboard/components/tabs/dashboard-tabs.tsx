@@ -6,7 +6,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/atoms/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@origen/ux-library';
 import { BarChart3 } from 'lucide-react';
 import { itemVariants } from '../layout/dashboard-shell';
 import { cn } from '@/lib/utils';
@@ -49,3 +49,4 @@ export function DashboardTabs({
     </motion.div>
   );
 }
+

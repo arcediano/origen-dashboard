@@ -18,7 +18,7 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
 import { Button, Input, Label, Separator } from '@origen/ux-library';
 import { Toggle } from '@/components/ui/atoms/toggle';
-import { Alert, AlertDescription } from '@/components/ui/atoms/alert';
+import { Alert, AlertDescription } from '@origen/ux-library';
 import { gatewayClient } from '@/lib/api/client';
 
 const itemVariants = {

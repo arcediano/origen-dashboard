@@ -6,7 +6,7 @@
 'use client';
 
 import { Button, Input, Badge } from '@origen/ux-library';
-import { Alert } from '@/components/ui/atoms/alert';
+import { Alert } from '@origen/ux-library';
 import { Tooltip } from '@/components/ui/atoms/tooltip';
 import { 
   DollarSign, 

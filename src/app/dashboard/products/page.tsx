@@ -16,7 +16,7 @@ import { PageLoader } from '@/components/shared/loading/page-loader';
 import { PageError } from '@/components/shared/error/page-error';
 import { Card } from '@origen/ux-library'
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Pagination } from '@/components/ui/atoms/pagination';
+import { Pagination } from '@origen/ux-library';
 import { ProductStats, ProductFilters, ProductTable, ProductCard, ProductMobileList } from './components';
 import { AdjustStockDialog } from './components/ProductDialogs/AdjustStockDialog';
 import { DeleteProductDialog } from './components/ProductDialogs/DeleteProductDialog';
