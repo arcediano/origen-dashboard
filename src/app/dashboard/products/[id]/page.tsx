@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @page ProductoDetallePage
  * @description Página de detalle de producto — experiencia app nativa
  */
@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@origen/ux-library';
 import { Modal } from '@origen/ux-library';
 import { PageHeader } from '../../components/PageHeader';
 import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
-import { ProductImage } from '@/components/ui/atoms/product-image';
+import { ProductImage } from '@origen/ux-library';
 
 // Iconos
 import {

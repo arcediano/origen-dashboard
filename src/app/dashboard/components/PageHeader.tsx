@@ -1,6 +1,6 @@
-/**
+﻿/**
  * @file PageHeader.tsx
- * @description Cabecera de página reutilizable - VERSIÓN REDISEÑADA
+ * @description Cabecera de pÃ¡gina reutilizable - VERSIÃ“N REDISEÃ‘ADA
  */
 
 'use client';
@@ -9,7 +9,7 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Tooltip } from '@/components/ui/atoms/tooltip';
+import { Tooltip } from '@origen/ux-library';
 
 export interface PageHeaderProps {
   title: string;
@@ -51,11 +51,11 @@ export function PageHeader({
   return (
     <div className={cn('relative', className)}>
 
-      {/* ── MÓVIL: header compacto estilo app (< lg) ── */}
-      {/* El botón volver NO se muestra aquí: MobileTopBar ya lo gestiona en todas las sub-rutas */}
+      {/* â”€â”€ MÃ“VIL: header compacto estilo app (< lg) â”€â”€ */}
+      {/* El botÃ³n volver NO se muestra aquÃ­: MobileTopBar ya lo gestiona en todas las sub-rutas */}
       <div className="lg:hidden px-4 pt-4 pb-3">
         <div className="flex items-center justify-between gap-3 min-h-[44px]">
-          {/* Izquierda: título */}
+          {/* Izquierda: tÃ­tulo */}
           <div className="min-w-0 flex-1">
             <h1 className="text-[18px] leading-snug font-bold text-origen-bosque truncate">{title}</h1>
             {description && (
@@ -69,7 +69,7 @@ export function PageHeader({
         </div>
       </div>
 
-      {/* ── DESKTOP: header decorativo completo (≥ lg) ── */}
+      {/* â”€â”€ DESKTOP: header decorativo completo (â‰¥ lg) â”€â”€ */}
       <div className="hidden lg:block">
         <div className="absolute inset-0 bg-gradient-to-b from-origen-pradera/[0.02] to-transparent pointer-events-none" />
         <div className={cn('relative container mx-auto px-6 py-8 sm:py-10', containerClassName)}>
@@ -94,7 +94,7 @@ export function PageHeader({
               <div className="flex items-center gap-2">{actions}</div>
             )}
           </div>
-          {/* Fila principal: título + botón volver */}
+          {/* Fila principal: tÃ­tulo + botÃ³n volver */}
           <div className="flex items-start gap-4">
             {showBackButton && (
               <button

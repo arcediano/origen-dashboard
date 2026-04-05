@@ -1,6 +1,6 @@
-/**
+﻿/**
  * @component StepProduction
- * @description Paso 5: Historia y producción - VERSIÓN CORREGIDA
+ * @description Paso 5: Historia y producciÃ³n - VERSIÃ“N CORREGIDA
  */
 
 'use client';
@@ -8,7 +8,7 @@
 import { Button, Input, Badge } from '@origen/ux-library';
 import { Checkbox } from '@origen/ux-library';
 import { ImageUploader } from '../../components/ImageUploader';
-import { Tooltip } from '@/components/ui/atoms/tooltip';
+import { Tooltip } from '@origen/ux-library';
 import { 
   Leaf, 
   MapPin, 
@@ -48,14 +48,14 @@ interface StepProductionProps {
 // ============================================================================
 
 const SUSTAINABLE_PRACTICES = [
-  { id: 'renewable_energy', label: 'Energía renovable', icon: <Sun className="w-4 h-4" />, description: 'Uso de energía solar, eólica o hidráulica' },
-  { id: 'water_conservation', label: 'Conservación de agua', icon: <Droplets className="w-4 h-4" />, description: 'Sistemas de riego eficiente, reutilización' },
+  { id: 'renewable_energy', label: 'EnergÃ­a renovable', icon: <Sun className="w-4 h-4" />, description: 'Uso de energÃ­a solar, eÃ³lica o hidrÃ¡ulica' },
+  { id: 'water_conservation', label: 'ConservaciÃ³n de agua', icon: <Droplets className="w-4 h-4" />, description: 'Sistemas de riego eficiente, reutilizaciÃ³n' },
   { id: 'zero_waste', label: 'Residuo cero', icon: <Sprout className="w-4 h-4" />, description: 'Aprovechamiento total de materiales' },
   { id: 'local_sourcing', label: 'Proveedores locales', icon: <MapPin className="w-4 h-4" />, description: 'Materias primas de proximidad' },
-  { id: 'biodiversity', label: 'Biodiversidad', icon: <TreePine className="w-4 h-4" />, description: 'Protección de flora y fauna local' },
-  { id: 'carbon_neutral', label: 'Carbono neutral', icon: <Wind className="w-4 h-4" />, description: 'Compensación de emisiones' },
+  { id: 'biodiversity', label: 'Biodiversidad', icon: <TreePine className="w-4 h-4" />, description: 'ProtecciÃ³n de flora y fauna local' },
+  { id: 'carbon_neutral', label: 'Carbono neutral', icon: <Wind className="w-4 h-4" />, description: 'CompensaciÃ³n de emisiones' },
   { id: 'recyclable_packaging', label: 'Embalaje reciclable', icon: <Package className="w-4 h-4" />, description: 'Envases sostenibles' },
-  { id: 'fair_trade', label: 'Comercio justo', icon: <Heart className="w-4 h-4" />, description: 'Condiciones laborales éticas' },
+  { id: 'fair_trade', label: 'Comercio justo', icon: <Heart className="w-4 h-4" />, description: 'Condiciones laborales Ã©ticas' },
 ];
 
 // ============================================================================
@@ -90,7 +90,7 @@ export function StepProduction({
   const [selectedPractice, setSelectedPractice] = useState<string | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  // Validar si el paso está completo
+  // Validar si el paso estÃ¡ completo
   const hasAnyContent = 
     productionInfo.story.trim() !== '' ||
     productionInfo.origin.trim() !== '' ||
@@ -106,7 +106,7 @@ export function StepProduction({
   };
 
   // ============================================================================
-  // GESTIÓN DE MEDIOS - CORREGIDO
+  // GESTIÃ“N DE MEDIOS - CORREGIDO
   // ============================================================================
 
   /**
@@ -114,13 +114,13 @@ export function StepProduction({
    */
   const productionMediaToProductImages = (media: ProductionMedia[]): ProductImage[] => {
     return media
-      .filter(m => m.type === 'image') // Solo imágenes, no vídeos
+      .filter(m => m.type === 'image') // Solo imÃ¡genes, no vÃ­deos
       .map(m => ({
         id: m.id,
         url: m.url,
         alt: m.alt,
         caption: m.caption,
-        isMain: false, // Las imágenes de producción nunca son principales
+        isMain: false, // Las imÃ¡genes de producciÃ³n nunca son principales
         sortOrder: m.sortOrder || 0,
         file: m.file || null,
         uploading: m.uploading,
@@ -129,12 +129,12 @@ export function StepProduction({
         width: m.width,
         height: m.height,
         size: m.size,
-        type: 'image/jpeg', // Aproximación, podrías mejorarlo
+        type: 'image/jpeg', // AproximaciÃ³n, podrÃ­as mejorarlo
       }));
   };
 
   /**
-   * Maneja el cambio de imágenes desde ImageUploader
+   * Maneja el cambio de imÃ¡genes desde ImageUploader
    */
   const handleMediaChange = (files: ProductImage[]) => {
     // Convertir ProductImage a ProductionMedia
@@ -155,7 +155,7 @@ export function StepProduction({
       alt: file.alt,
     }));
     
-    // Mantener los vídeos existentes
+    // Mantener los vÃ­deos existentes
     const existingVideos = mediaItems.filter(m => m.type === 'video');
     const updatedMedia = [...media, ...existingVideos];
     
@@ -164,7 +164,7 @@ export function StepProduction({
   };
 
   /**
-   * Añade un vídeo desde URL
+   * AÃ±ade un vÃ­deo desde URL
    */
   const handleVideoAdd = () => {
     setVideoError(null);
@@ -203,7 +203,7 @@ export function StepProduction({
   };
 
   /**
-   * Elimina un medio (imagen o vídeo)
+   * Elimina un medio (imagen o vÃ­deo)
    */
   const handleRemoveMedia = (id: string) => {
     const mediaToRemove = mediaItems.find(m => m.id === id);
@@ -217,7 +217,7 @@ export function StepProduction({
   };
 
   // ============================================================================
-  // GESTIÓN DE PRÁCTICAS SOSTENIBLES
+  // GESTIÃ“N DE PRÃCTICAS SOSTENIBLES
   // ============================================================================
 
   const handlePracticeToggle = (practiceId: string) => {
@@ -245,7 +245,7 @@ export function StepProduction({
               {isStepComplete ? <CheckCircle className="w-5 h-5" /> : <Leaf className="w-5 h-5" />}
             </div>
             <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-origen-bosque truncate">Historia y producción</h2>
+              <h2 className="text-lg font-semibold text-origen-bosque truncate">Historia y producciÃ³n</h2>
               <p className="text-sm text-muted-foreground truncate">Comparte el origen y proceso de tu producto</p>
             </div>
           </div>
@@ -269,14 +269,14 @@ export function StepProduction({
           </div>
         </div>
 
-        {/* Pestañas de navegación */}
+        {/* PestaÃ±as de navegaciÃ³n */}
         <div className="mb-6 border-b border-border overflow-x-auto">
           <div className="flex gap-6 min-w-max">
             {[
               { id: 'story', label: 'Historia', icon: <BookOpen className="w-4 h-4" /> },
               { id: 'origin', label: 'Origen', icon: <MapPin className="w-4 h-4" /> },
               { id: 'sustainability', label: 'Sostenibilidad', icon: <TreePine className="w-4 h-4" /> },
-              { id: 'media', label: 'Galería', icon: <Camera className="w-4 h-4" /> },
+              { id: 'media', label: 'GalerÃ­a', icon: <Camera className="w-4 h-4" /> },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -312,8 +312,8 @@ export function StepProduction({
                     Historia del productor
                   </span>
                   <Tooltip 
-                    content="Comparte la historia detrás de tu producto"
-                    detailed="Las historias auténticas conectan con los clientes. Incluye tradición familiar, métodos artesanales, pasión por la calidad."
+                    content="Comparte la historia detrÃ¡s de tu producto"
+                    detailed="Las historias autÃ©nticas conectan con los clientes. Incluye tradiciÃ³n familiar, mÃ©todos artesanales, pasiÃ³n por la calidad."
                     size="sm"
                   />
                 </div>
@@ -321,7 +321,7 @@ export function StepProduction({
                   value={productionInfo.story}
                   onChange={(e) => handleChange('story', e.target.value)}
                   className="min-h-[120px] text-base w-full rounded-xl p-4"
-                  placeholder="Comparte la historia detrás de este producto: tradición familiar, métodos artesanales, pasión por la calidad, el origen de los ingredientes..."
+                  placeholder="Comparte la historia detrÃ¡s de este producto: tradiciÃ³n familiar, mÃ©todos artesanales, pasiÃ³n por la calidad, el origen de los ingredientes..."
                 />
               </div>
 
@@ -333,7 +333,7 @@ export function StepProduction({
                   </span>
                   <Tooltip 
                     content="Describe el proceso artesanal"
-                    detailed="Describe las técnicas tradicionales, detalles del proceso, tiempos de maduración que hacen único tu producto."
+                    detailed="Describe las tÃ©cnicas tradicionales, detalles del proceso, tiempos de maduraciÃ³n que hacen Ãºnico tu producto."
                     size="sm"
                   />
                 </div>
@@ -341,7 +341,7 @@ export function StepProduction({
                   value={productionInfo.artisanProcess}
                   onChange={(e) => handleChange('artisanProcess', e.target.value)}
                   className="min-h-[100px] text-base w-full rounded-xl p-4"
-                  placeholder="Describe las técnicas tradicionales, detalles del proceso, tiempos de maduración..."
+                  placeholder="Describe las tÃ©cnicas tradicionales, detalles del proceso, tiempos de maduraciÃ³n..."
                 />
               </div>
 
@@ -352,8 +352,8 @@ export function StepProduction({
                     Bienestar animal
                   </span>
                   <Tooltip 
-                    content="Información sobre bienestar animal"
-                    detailed="Si tu producto es de origen animal, indica las condiciones de cría, alimentación y cuidados."
+                    content="InformaciÃ³n sobre bienestar animal"
+                    detailed="Si tu producto es de origen animal, indica las condiciones de crÃ­a, alimentaciÃ³n y cuidados."
                     size="sm"
                   />
                 </div>
@@ -361,7 +361,7 @@ export function StepProduction({
                   value={productionInfo.animalWelfare}
                   onChange={(e) => handleChange('animalWelfare', e.target.value)}
                   className="min-h-[100px] text-base w-full rounded-xl p-4"
-                  placeholder="Ej: Cría en libertad, alimentación natural, sin antibióticos, pastoreo tradicional..."
+                  placeholder="Ej: CrÃ­a en libertad, alimentaciÃ³n natural, sin antibiÃ³ticos, pastoreo tradicional..."
                 />
               </div>
             </motion.div>
@@ -381,17 +381,17 @@ export function StepProduction({
                   <div className="flex items-center gap-2">
                     <Globe className="h-5 w-5 text-origen-pradera" />
                     <span className="text-sm font-medium text-foreground">
-                      País
+                      PaÃ­s
                     </span>
                     <Tooltip 
-                      content="País de origen"
+                      content="PaÃ­s de origen"
                       size="sm"
                     />
                   </div>
                   <Input
                     value={productionInfo.origin}
                     onChange={(e) => handleChange('origin', e.target.value)}
-                    placeholder="Ej: España"
+                    placeholder="Ej: EspaÃ±a"
                     className="h-12 rounded-xl"
                   />
                 </div>
@@ -420,10 +420,10 @@ export function StepProduction({
                 <div className="flex items-center gap-2">
                   <Award className="h-5 w-5 text-origen-pradera" />
                   <span className="text-sm font-medium text-foreground">
-                    Método de producción
+                    MÃ©todo de producciÃ³n
                   </span>
                   <Tooltip 
-                    content="Método de elaboración"
+                    content="MÃ©todo de elaboraciÃ³n"
                     size="sm"
                   />
                 </div>
@@ -432,12 +432,12 @@ export function StepProduction({
                   onValueChange={(v) => handleChange('productionMethod', v)}
                 >
                   <SelectTrigger className="h-12 rounded-xl">
-                    <SelectValue placeholder="Seleccionar método" />
+                    <SelectValue placeholder="Seleccionar mÃ©todo" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="artesanal">Artesanal</SelectItem>
                     <SelectItem value="tradicional">Tradicional</SelectItem>
-                    <SelectItem value="ecologico">Ecológico</SelectItem>
+                    <SelectItem value="ecologico">EcolÃ³gico</SelectItem>
                     <SelectItem value="industrial">Industrial</SelectItem>
                   </SelectContent>
                 </Select>
@@ -459,7 +459,7 @@ export function StepProduction({
                 <div>
                   <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                     <Calendar className="w-3 h-3 text-origen-pradera" />
-                    Fecha producción
+                    Fecha producciÃ³n
                   </p>
                   <Input
                     type="date"
@@ -486,7 +486,7 @@ export function StepProduction({
                 <div className="flex items-center gap-2">
                   <Package className="h-5 w-5 text-origen-pradera" />
                   <span className="text-sm font-medium text-foreground">
-                    Número de lote
+                    NÃºmero de lote
                   </span>
                   <Tooltip 
                     content="Para trazabilidad"
@@ -516,11 +516,11 @@ export function StepProduction({
                 <div className="flex items-center gap-2">
                   <TreePine className="h-5 w-5 text-origen-pradera" />
                   <span className="text-sm font-medium text-foreground">
-                    Prácticas sostenibles
+                    PrÃ¡cticas sostenibles
                   </span>
                   <Tooltip 
-                    content="Selecciona las prácticas que aplicas"
-                    detailed="Las prácticas sostenibles aumentan la confianza de los consumidores y mejoran el posicionamiento."
+                    content="Selecciona las prÃ¡cticas que aplicas"
+                    detailed="Las prÃ¡cticas sostenibles aumentan la confianza de los consumidores y mejoran el posicionamiento."
                     size="sm"
                   />
                 </div>
@@ -565,7 +565,7 @@ export function StepProduction({
                 <div className="flex items-center gap-2">
                   <Sprout className="h-5 w-5 text-origen-pradera" />
                   <span className="text-sm font-medium text-foreground">
-                    Información de sostenibilidad
+                    InformaciÃ³n de sostenibilidad
                   </span>
                   <Tooltip 
                     content="Detalles adicionales"
@@ -576,13 +576,13 @@ export function StepProduction({
                   value={productionInfo.sustainabilityInfo}
                   onChange={(e) => handleChange('sustainabilityInfo', e.target.value)}
                   className="min-h-[100px] text-base w-full rounded-xl p-4"
-                  placeholder="Ej: Energía renovable, gestión de residuos, huella de carbono, certificaciones ambientales..."
+                  placeholder="Ej: EnergÃ­a renovable, gestiÃ³n de residuos, huella de carbono, certificaciones ambientales..."
                 />
               </div>
             </motion.div>
           )}
 
-          {/* TAB GALERÍA - CORREGIDO */}
+          {/* TAB GALERÃA - CORREGIDO */}
           {activeTab === 'media' && (
             <motion.div
               key="media"
@@ -595,31 +595,31 @@ export function StepProduction({
                 <div className="flex items-center gap-2">
                   <Camera className="h-5 w-5 text-origen-pradera" />
                   <span className="text-sm font-medium text-foreground">
-                    Galería del proceso
+                    GalerÃ­a del proceso
                   </span>
                   <Tooltip 
-                    content="Imágenes del proceso de producción"
-                    detailed="Sube imágenes del proceso de elaboración, el taller o los productores en acción. Todas las imágenes tienen la misma importancia."
+                    content="ImÃ¡genes del proceso de producciÃ³n"
+                    detailed="Sube imÃ¡genes del proceso de elaboraciÃ³n, el taller o los productores en acciÃ³n. Todas las imÃ¡genes tienen la misma importancia."
                     size="sm"
                   />
                 </div>
                 
-                {/* ImageUploader con transformación de tipos */}
+                {/* ImageUploader con transformaciÃ³n de tipos */}
                 <ImageUploader
                   value={productionMediaToProductImages(mediaItems)}
                   onChange={handleMediaChange}
                   maxFiles={10}
                   maxSize={10}
                   showMainBadge={false}
-                  uploadButtonText="Arrastra o haz clic para subir imágenes del proceso"
+                  uploadButtonText="Arrastra o haz clic para subir imÃ¡genes del proceso"
                 />
               </div>
 
-              {/* Sección de vídeos */}
+              {/* SecciÃ³n de vÃ­deos */}
               <div className="mt-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Film className="h-5 w-5 text-origen-pradera" />
-                  <h3 className="text-sm font-medium text-origen-bosque">Vídeos del proceso</h3>
+                  <h3 className="text-sm font-medium text-origen-bosque">VÃ­deos del proceso</h3>
                 </div>
 
                 {!showVideoInput ? (
@@ -628,7 +628,7 @@ export function StepProduction({
                     className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-origen-pradera/30 hover:border-origen-pradera hover:bg-origen-pradera/5 transition-all text-sm font-medium text-origen-bosque bg-surface-alt"
                   >
                     <Film className="w-4 h-4" />
-                    Añadir vídeo (YouTube/Vimeo)
+                    AÃ±adir vÃ­deo (YouTube/Vimeo)
                   </button>
                 ) : (
                   <div className="p-4 bg-origen-crema/30 rounded-xl border-2 border-origen-pradera/20">
@@ -663,13 +663,13 @@ export function StepProduction({
                         onClick={handleVideoAdd}
                         disabled={!videoUrl}
                       >
-                        Añadir vídeo
+                        AÃ±adir vÃ­deo
                       </Button>
                     </div>
                   </div>
                 )}
 
-                {/* Grid de vídeos existentes */}
+                {/* Grid de vÃ­deos existentes */}
                 {mediaItems.filter(m => m.type === 'video').length > 0 && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
                     <AnimatePresence>
@@ -684,7 +684,7 @@ export function StepProduction({
                           {video.thumbnail ? (
                             <img
                               src={video.thumbnail}
-                              alt="Vídeo thumbnail"
+                              alt="VÃ­deo thumbnail"
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -706,7 +706,7 @@ export function StepProduction({
                           <div className="absolute top-2 left-2">
                             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium bg-origen-pradera/90 text-white">
                               <Film className="w-3 h-3" />
-                              Vídeo
+                              VÃ­deo
                             </span>
                           </div>
                         </motion.div>

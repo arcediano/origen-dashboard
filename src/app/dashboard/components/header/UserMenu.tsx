@@ -1,4 +1,4 @@
-// 📁 /src/app/dashboard/components/header/UserMenu.tsx
+﻿// ðŸ“ /src/app/dashboard/components/header/UserMenu.tsx
 'use client';
 
 import * as React from 'react';
@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { logoutUser } from '@/lib/api/auth';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/atoms/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@origen/ux-library';
 import { Badge } from '@origen/ux-library';
 import { 
   User, 
@@ -126,7 +126,7 @@ export function UserMenu({
               </div>
             </div>
 
-            {/* Opción: Mi Perfil */}
+            {/* OpciÃ³n: Mi Perfil */}
             <div className="py-2">
               <Link href="/dashboard/profile" onClick={() => setIsOpen(false)}>
                 <div className="flex items-center gap-3 px-4 py-3 hover:bg-origen-crema/50 transition-colors group">
@@ -142,10 +142,10 @@ export function UserMenu({
               </Link>
             </div>
 
-            {/* Sección: Configuración (con 2 subopciones) */}
+            {/* SecciÃ³n: ConfiguraciÃ³n (con 2 subopciones) */}
             <div className="pt-1 pb-2 border-t border-border-subtle">
               <div className="px-4 py-2">
-                <p className="text-xs font-medium text-text-disabled uppercase tracking-wider">Configuración</p>
+                <p className="text-xs font-medium text-text-disabled uppercase tracking-wider">ConfiguraciÃ³n</p>
               </div>
               
               <Link href="/dashboard/profile/settings?tab=security" onClick={() => setIsOpen(false)}>
@@ -155,7 +155,7 @@ export function UserMenu({
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-origen-bosque">Seguridad</p>
-                    <p className="text-xs text-muted-foreground">Contraseña y 2FA</p>
+                    <p className="text-xs text-muted-foreground">ContraseÃ±a y 2FA</p>
                   </div>
                 </div>
               </Link>
@@ -173,7 +173,7 @@ export function UserMenu({
               </Link>
             </div>
 
-            {/* Sección de ayuda */}
+            {/* SecciÃ³n de ayuda */}
             <div className="px-5 py-3 bg-surface border-y border-border-subtle">
               <Link href="/ayuda" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-origen-pradera">
                 <HelpCircle className="w-4 h-4" />
@@ -181,7 +181,7 @@ export function UserMenu({
               </Link>
             </div>
 
-            {/* Cerrar sesión */}
+            {/* Cerrar sesiÃ³n */}
             <div className="py-2">
               <button 
                 onClick={handleLogout}
@@ -192,7 +192,7 @@ export function UserMenu({
                     <LogOut className="w-5 h-5 text-red-500" />
                   </div>
                   <div className="flex-1 text-left">
-                    <p className="text-sm font-medium text-red-600">Cerrar sesión</p>
+                    <p className="text-sm font-medium text-red-600">Cerrar sesiÃ³n</p>
                     <p className="text-xs text-muted-foreground">Salir de tu cuenta</p>
                   </div>
                 </div>

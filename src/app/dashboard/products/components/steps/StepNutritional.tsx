@@ -1,12 +1,12 @@
-/**
+﻿/**
  * @component StepNutritional
- * @description Paso 4: Información nutricional
+ * @description Paso 4: InformaciÃ³n nutricional
  */
 
 'use client';
 
 import { Button, Input, Badge } from '@origen/ux-library';
-import { Tooltip } from '@/components/ui/atoms/tooltip';
+import { Tooltip } from '@origen/ux-library';
 import { 
   FlaskConical, 
   CheckCircle, 
@@ -50,11 +50,11 @@ interface StepNutritionalProps {
 }
 
 // ============================================================================
-// ESQUEMAS DE VALIDACIÓN
+// ESQUEMAS DE VALIDACIÃ“N
 // ============================================================================
 
 const NutritionalSchema = z.object({
-  servingSizeValue: z.number().min(1, 'El tamaño de ración debe ser mayor que 0'),
+  servingSizeValue: z.number().min(1, 'El tamaÃ±o de raciÃ³n debe ser mayor que 0'),
   ingredients: z.array(z.string()).min(1, 'Debe incluir al menos un ingrediente'),
 });
 
@@ -65,16 +65,16 @@ const NutritionalSchema = z.object({
 const getAllergenIcon = (allergen: string) => {
   const icons: Record<string, any> = {
     'Gluten': Wheat,
-    'Crustáceos': Shell,
+    'CrustÃ¡ceos': Shell,
     'Huevos': Egg,
     'Pescado': Fish,
     'Cacahuetes': Nut,
     'Soja': Bean,
-    'Lácteos': Milk,
-    'Frutos de cáscara': Nut,
+    'LÃ¡cteos': Milk,
+    'Frutos de cÃ¡scara': Nut,
     'Apio': Leaf,
     'Mostaza': Leaf,
-    'Sésamo': Sprout,
+    'SÃ©samo': Sprout,
     'Sulfitos': Droplet,
     'Altramuces': Bean,
     'Moluscos': Shell,
@@ -114,7 +114,7 @@ export function StepNutritional({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState('basicos');
 
-  // Validar si el paso está completo
+  // Validar si el paso estÃ¡ completo
   const hasRequiredFields = 
     nutritionalInfo.servingSizeValue > 0 && 
     nutritionalInfo.ingredients.length > 0;
@@ -176,7 +176,7 @@ export function StepNutritional({
               {isStepComplete ? <CheckCircle className="w-5 h-5" /> : <FlaskConical className="w-5 h-5" />}
             </div>
             <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-origen-bosque truncate">Información nutricional</h2>
+              <h2 className="text-lg font-semibold text-origen-bosque truncate">InformaciÃ³n nutricional</h2>
               <p className="text-sm text-muted-foreground truncate">Obligatorio para productos alimenticios</p>
             </div>
           </div>
@@ -200,13 +200,13 @@ export function StepNutritional({
           </div>
         </div>
 
-        {/* Pestañas de navegación */}
+        {/* PestaÃ±as de navegaciÃ³n */}
         <div className="mb-6 border-b border-border overflow-x-auto">
           <div className="flex gap-6 min-w-max">
             {[
-              { id: 'basicos', label: 'Básicos', icon: <Scale className="w-4 h-4" /> },
+              { id: 'basicos', label: 'BÃ¡sicos', icon: <Scale className="w-4 h-4" /> },
               { id: 'nutrientes', label: 'Nutrientes', icon: <Beef className="w-4 h-4" /> },
-              { id: 'alergenos', label: 'Alérgenos', icon: <AlertCircle className="w-4 h-4" /> },
+              { id: 'alergenos', label: 'AlÃ©rgenos', icon: <AlertCircle className="w-4 h-4" /> },
               { id: 'ausencias', label: 'Ausencias', icon: <Ban className="w-4 h-4" /> },
               { id: 'ingredientes', label: 'Ingredientes', icon: <FileText className="w-4 h-4" /> },
             ].map((tab) => (
@@ -228,7 +228,7 @@ export function StepNutritional({
         </div>
 
         <AnimatePresence mode="wait">
-          {/* TAB 1: BÁSICOS */}
+          {/* TAB 1: BÃSICOS */}
           {activeTab === 'basicos' && (
             <motion.div
               key="basicos"
@@ -237,18 +237,18 @@ export function StepNutritional({
               exit={{ opacity: 0, x: 20 }}
               className="space-y-6"
             >
-              {/* Tamaño de ración */}
+              {/* TamaÃ±o de raciÃ³n */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Scale className="h-5 w-5 text-origen-pradera" />
                     <span className="text-sm font-medium text-foreground">
-                      Tamaño de ración
+                      TamaÃ±o de raciÃ³n
                       <span className="text-red-500 ml-1">*</span>
                     </span>
                     <Tooltip 
                       content="Cantidad de referencia"
-                      detailed="Indica la cantidad por ración. Normalmente 100g para sólidos y 100ml para líquidos."
+                      detailed="Indica la cantidad por raciÃ³n. Normalmente 100g para sÃ³lidos y 100ml para lÃ­quidos."
                       size="sm"
                     />
                   </div>
@@ -283,10 +283,10 @@ export function StepNutritional({
                   <div className="flex items-center gap-2">
                     <Flame className="h-5 w-5 text-origen-pradera" />
                     <span className="text-sm font-medium text-foreground">
-                      Calorías (kcal)
+                      CalorÃ­as (kcal)
                     </span>
                     <Tooltip 
-                      content="Energía por ración"
+                      content="EnergÃ­a por raciÃ³n"
                       size="sm"
                     />
                   </div>
@@ -317,7 +317,7 @@ export function StepNutritional({
                 <h3 className="text-sm font-medium text-origen-bosque mb-3">Macronutrientes (g)</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Proteínas</p>
+                    <p className="text-xs text-muted-foreground mb-1">ProteÃ­nas</p>
                     <Input
                       type="number"
                       value={nutritionalInfo.protein || ''}
@@ -408,7 +408,7 @@ export function StepNutritional({
                     />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Azúcares (g)</p>
+                    <p className="text-xs text-muted-foreground mb-1">AzÃºcares (g)</p>
                     <Input
                       type="number"
                       value={nutritionalInfo.sugars || ''}
@@ -434,7 +434,7 @@ export function StepNutritional({
             </motion.div>
           )}
 
-          {/* TAB 3: ALÉRGENOS */}
+          {/* TAB 3: ALÃ‰RGENOS */}
           {activeTab === 'alergenos' && (
             <motion.div
               key="alergenos"
@@ -451,7 +451,7 @@ export function StepNutritional({
                       Contiene
                     </span>
                     <Tooltip 
-                      content="Alérgenos presentes"
+                      content="AlÃ©rgenos presentes"
                       size="sm"
                     />
                   </div>
@@ -531,8 +531,8 @@ export function StepNutritional({
                     Declaraciones de ausencia
                   </span>
                   <Tooltip 
-                    content="Indica qué alérgenos NO contiene"
-                    detailed="Marca las casillas para indicar que el producto NO contiene estos alérgenos o es apto para estas dietas."
+                    content="Indica quÃ© alÃ©rgenos NO contiene"
+                    detailed="Marca las casillas para indicar que el producto NO contiene estos alÃ©rgenos o es apto para estas dietas."
                     size="sm"
                   />
                 </div>
@@ -560,7 +560,7 @@ export function StepNutritional({
               <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 flex items-start gap-2">
                 <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <p className="text-xs text-blue-700">
-                  Estas declaraciones aparecerán como badges en la ficha del producto, ayudando a clientes con necesidades específicas.
+                  Estas declaraciones aparecerÃ¡n como badges en la ficha del producto, ayudando a clientes con necesidades especÃ­ficas.
                 </p>
               </div>
             </motion.div>
@@ -602,7 +602,7 @@ export function StepNutritional({
                       disabled={!ingredientInput.trim()}
                       className="shrink-0"
                     >
-                      Añadir
+                      AÃ±adir
                     </Button>
                   </div>
 
@@ -638,10 +638,10 @@ export function StepNutritional({
                   <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-origen-pradera" />
                     <span className="text-sm font-medium text-foreground">
-                      Preparación
+                      PreparaciÃ³n
                     </span>
                     <Tooltip 
-                      content="Cómo preparar el producto"
+                      content="CÃ³mo preparar el producto"
                       size="sm"
                     />
                   </div>
@@ -657,10 +657,10 @@ export function StepNutritional({
                   <div className="flex items-center gap-2">
                     <Package className="h-5 w-5 text-origen-pradera" />
                     <span className="text-sm font-medium text-foreground">
-                      Conservación
+                      ConservaciÃ³n
                     </span>
                     <Tooltip 
-                      content="Cómo conservar el producto"
+                      content="CÃ³mo conservar el producto"
                       size="sm"
                     />
                   </div>
@@ -676,11 +676,11 @@ export function StepNutritional({
           )}
         </AnimatePresence>
 
-        {/* Badge de información */}
+        {/* Badge de informaciÃ³n */}
         <div className="mt-6 flex items-center justify-center gap-2 p-3 bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5 rounded-lg border border-origen-pradera/20">
           <Heart className="h-4 w-4 text-origen-pradera" />
           <span className="text-xs text-muted-foreground">
-            La información nutricional completa genera confianza en tus clientes
+            La informaciÃ³n nutricional completa genera confianza en tus clientes
           </span>
         </div>
       </Card>

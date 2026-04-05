@@ -1,6 +1,6 @@
-/**
+﻿/**
  * @file ProductTable.tsx
- * @description Tabla de productos con ordenación y filas expandibles
+ * @description Tabla de productos con ordenaciÃ³n y filas expandibles
  */
 
 'use client';
@@ -9,7 +9,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Table, type Column } from '@origen/ux-library';
 import { StatusBadge } from '@origen/ux-library';
-import { ProductImage } from '@/components/ui/atoms/product-image';
+import { ProductImage } from '@origen/ux-library';
 import { ProductTableActions } from './ProductTableActions';
 import { ProductExpandableDetails } from './ProductExpandableDetails';
 import { type Product } from '@/types/product';
@@ -75,11 +75,11 @@ export function ProductTable({
       accessor: (item) => (
         <div className="whitespace-nowrap">
           <span className="text-sm font-semibold text-origen-pradera">
-            {item.basePrice.toFixed(2)}€
+            {item.basePrice.toFixed(2)}â‚¬
           </span>
           {item.comparePrice && item.comparePrice > item.basePrice && (
             <span className="text-xs text-text-subtle line-through ml-1">
-              {item.comparePrice.toFixed(2)}€
+              {item.comparePrice.toFixed(2)}â‚¬
             </span>
           )}
         </div>
@@ -154,4 +154,5 @@ export function ProductTable({
     />
   );
 }
+
 

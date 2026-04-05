@@ -1,6 +1,6 @@
-/**
+﻿/**
  * @file ProductCard.tsx
- * @description Tarjeta de producto para vista en cuadrícula - VERSIÓN RESPONSIVE
+ * @description Tarjeta de producto para vista en cuadrÃ­cula - VERSIÃ“N RESPONSIVE
  */
 
 'use client';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { Card } from '@origen/ux-library';
 import { StatusBadge } from '@origen/ux-library';
 import { Button } from '@origen/ux-library';
-import { ProductImage } from '@/components/ui/atoms/product-image';
+import { ProductImage } from '@origen/ux-library';
 import { type Product } from '@/types/product';
 
 export interface ProductCardProps {
@@ -57,18 +57,18 @@ export function ProductCard({
         <StatusBadge status={product.status} size="xs" />
       </div>
 
-      {/* SKU - visible solo en móvil? mejor siempre visible pero pequeño */}
+      {/* SKU - visible solo en mÃ³vil? mejor siempre visible pero pequeÃ±o */}
       <p className="text-[10px] sm:text-xs text-muted-foreground mb-2 truncate">{product.sku}</p>
 
       {/* Precio y stock */}
       <div className="flex justify-between items-center mb-2 sm:mb-3">
         <div>
           <span className="text-base sm:text-lg font-bold text-origen-pradera">
-            {product.basePrice.toFixed(2)}€
+            {product.basePrice.toFixed(2)}â‚¬
           </span>
           {product.comparePrice && (
             <span className="text-[10px] sm:text-xs text-text-subtle line-through ml-1 sm:ml-2">
-              {product.comparePrice.toFixed(2)}€
+              {product.comparePrice.toFixed(2)}â‚¬
             </span>
           )}
         </div>
@@ -78,7 +78,7 @@ export function ProductCard({
         </div>
       </div>
 
-      {/* Valoración (si existe) */}
+      {/* ValoraciÃ³n (si existe) */}
       {product.rating ? (
         <div className="flex items-center gap-1 mb-2 sm:mb-3">
           <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-400 text-amber-400" />

@@ -1,6 +1,6 @@
-/**
+﻿/**
  * @file CreateProductProgress.tsx
- * @description Barra de progreso y navegación de pasos para creación de productos
+ * @description Barra de progreso y navegaciÃ³n de pasos para creaciÃ³n de productos
  */
 
 'use client';
@@ -9,9 +9,9 @@ import React from 'react';
 import { Package, Camera, DollarSign, FlaskConical, Leaf, ShoppingBag, Award, CheckCircle, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@origen/ux-library';
-import { Progress } from '@/components/ui/atoms/progress';
+import { Progress } from '@origen/ux-library';
 import { Badge } from '@origen/ux-library';
-import { Tooltip } from '@/components/ui/atoms/tooltip';
+import { Tooltip } from '@origen/ux-library';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 
 // ============================================================================
@@ -37,7 +37,7 @@ export interface CreateProductProgressProps {
   currentTab: FormStepId;
   /** Pasos completados */
   completedTabs: Record<string, boolean>;
-  /** Función para cambiar de paso */
+  /** FunciÃ³n para cambiar de paso */
   onTabChange: (tab: FormStepId) => void;
   /** Clase CSS adicional */
   className?: string;
@@ -48,7 +48,7 @@ export interface CreateProductProgressProps {
 // ============================================================================
 
 /**
- * Barra de progreso y navegación de pasos para creación de productos
+ * Barra de progreso y navegaciÃ³n de pasos para creaciÃ³n de productos
  */
 export function CreateProductProgress({
   currentTab,
@@ -83,7 +83,7 @@ export function CreateProductProgress({
         {/* Barra de progreso */}
         <Progress value={progress} variant="leaf" size="sm" showLabel={false} className="mb-4 sm:mb-5" />
         
-        {/* Navegación de pasos */}
+        {/* NavegaciÃ³n de pasos */}
         <div className="flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto pb-1 scrollbar-origen">
           {FORM_STEPS.map((step, index) => {
             const isActive = step.id === currentTab;
