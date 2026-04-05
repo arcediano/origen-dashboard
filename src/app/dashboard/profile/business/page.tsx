@@ -25,15 +25,24 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
-import { Button } from '@/components/ui/atoms/button';
-import { Input } from '@/components/ui/atoms/input';
+import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  Separator,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@origen/ux-library';
 import { Textarea } from '@/components/ui/atoms/textarea';
-import { Label } from '@/components/ui/atoms/label';
-import { Badge } from '@/components/ui/atoms/badge';
-import { Alert, AlertDescription } from '@origen/ux-library';
-import { Separator } from '@/components/ui/atoms/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@origen/ux-library';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
