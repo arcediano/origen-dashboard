@@ -666,7 +666,7 @@ export default function ProductoDetallePage() {
 
               {/* Imagen principal */}
               <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
-                <Card variant="elevated" hoverEffect="organic">
+                <Card variant="elevated">
                   <CardContent className="p-4">
                     <div className="aspect-[4/3] lg:aspect-square rounded-xl bg-gradient-to-br from-origen-crema to-gray-100 flex items-center justify-center overflow-hidden">
                       {product.mainImage ? (
@@ -692,7 +692,7 @@ export default function ProductoDetallePage() {
 
               {/* Datos básicos */}
               <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
-                <Card variant="elevated" hoverEffect="organic">
+                <Card variant="elevated">
                   <CardHeader spacing="sm">
                     <CardTitle size="sm" className="flex items-center gap-2">
                       <Info className="w-4 h-4 text-origen-pradera" />Datos del producto
@@ -714,7 +714,7 @@ export default function ProductoDetallePage() {
               {/* Certificaciones */}
               {product.certifications && product.certifications.length > 0 && (
                 <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
-                  <Card variant="elevated" hoverEffect="organic">
+                  <Card variant="elevated">
                     <CardHeader spacing="sm">
                       <CardTitle size="sm" className="flex items-center gap-2">
                         <Award className="w-4 h-4 text-origen-pradera" />Certificaciones
@@ -759,7 +759,7 @@ export default function ProductoDetallePage() {
             <div className="lg:col-span-8">
               <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
                 {/* Descripción */}
-                <Card variant="elevated" hoverEffect="organic" className="p-4 lg:p-6 mb-4">
+                <Card variant="elevated" className="p-4 lg:p-6 mb-4">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
                       <FileText className="w-4 h-4 text-origen-pradera" />
@@ -797,7 +797,7 @@ export default function ProductoDetallePage() {
 
                 {/* ── Pestañas (desktop) ── */}
                 <div className="hidden lg:block">
-                  <Card variant="elevated" hoverEffect="organic" className="p-4 lg:p-6">
+                  <Card variant="elevated" className="p-4 lg:p-6">
                     <Tabs defaultValue="nutritional" className="w-full">
                       <TabsList className="grid w-full grid-cols-5 p-1 bg-origen-crema/50 rounded-xl mb-6">
                         {sections.map(s => (
@@ -843,15 +843,27 @@ export default function ProductoDetallePage() {
         </div>
 
         {/* ===== DIÁLOGO DE ELIMINACIÓN ===== */}
-        <Modal
-          isOpen={showDeleteDialog}
-          onClose={() => setShowDeleteDialog(false)}
-          title="¿Eliminar producto?"
-          description="Esta acción no se puede deshacer."
-          icon={<Trash2 className="w-5 h-5 text-red-600" />}
-          size="md"
-          footer={
-            <>
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <div className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                <DialogTitle>¿Eliminar producto?</DialogTitle>
+              </div>
+              <DialogDescription>Esta acción no se puede deshacer.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Se eliminará permanentemente <span className="font-semibold text-origen-bosque">{product.name}</span> del catálogo, incluyendo todas sus variantes, imágenes y estadísticas.
+              </p>
+              {product.sales && product.sales > 0 && (
+                <p className="text-amber-600 text-sm flex items-center gap-1 mt-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  Este producto tiene {product.sales} ventas registradas.
+                </p>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
               <Button
                 variant="secondary"
                 onClick={() => setShowDeleteDialog(false)}
@@ -862,26 +874,13 @@ export default function ProductoDetallePage() {
               <Button
                 variant="destructive"
                 onClick={handleDelete}
-                loading={isDeleting}
-                loadingText="Eliminando..."
+                disabled={isDeleting}
               >
-                Eliminar permanentemente
+                {isDeleting ? 'Eliminando...' : 'Eliminar permanentemente'}
               </Button>
-            </>
-          }
-        >
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Se eliminará permanentemente <span className="font-semibold text-origen-bosque">{product.name}</span> del catálogo, incluyendo todas sus variantes, imágenes y estadísticas.
-            </p>
-            {product.sales && product.sales > 0 && (
-              <p className="text-amber-600 text-sm flex items-center gap-1 mt-2">
-                <AlertTriangle className="w-4 h-4" />
-                Este producto tiene {product.sales} ventas registradas.
-              </p>
-            )}
-          </div>
-        </Modal>
+            </div>
+          </DialogContent>
+        </Dialog>
       </motion.div>
     </MobilePullRefresh>
   );

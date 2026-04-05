@@ -102,7 +102,7 @@ export function StepBasic({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <Card variant="elevated" hoverEffect="organic" className="p-4 sm:p-6">
+      <Card variant="elevated" className="p-4 sm:p-6">
         {/* Cabecera */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">

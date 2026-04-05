@@ -1,75 +1,53 @@
 /**
  * @file index.ts
- * @description Export de componentes UI atoms - Origen Marketplace v3.0
- * @version 3.1.0
- *
- * Componentes atómicos según Manual de Marca "Bosque Profundo"
+ * @description Export de componentes UI atoms - Origen Dashboard v3.0
+ * Re-exports from @origen/ux-library + local dashboard-specific components
+ * @version 3.2.0
  */
 
-// Inputs
-export { Input, InputGroup } from './input';
-export { Textarea } from './textarea';
-export { Label, labelVariants } from './label';
-export { CurrencyInput } from './currency-input';
-export { PercentageInput } from './percentage-input';
-export { TagsInput } from './tags-input';
-
-// Selection
-export { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup } from './select';
-export { Checkbox, CheckboxWithLabel, CheckboxGroup } from './checkbox';
-export { RadioGroup, RadioGroupItem } from './radio-group';
-export { Toggle, ToggleGroup } from './toggle';
-export { Switch } from './switch';
-export { Slider } from './slider';
-
-// Display
-export { ProductImage } from './product-image';
-export { Badge, StatusBadge } from './badge';
-export { Avatar, AvatarFallback, AvatarImage, AvatarGroup } from './avatar';
-export { Progress, CircularProgress, SteppedProgress } from './progress';
-export { Stepper, StepperContent, StepperFooter, StepperHeader } from './stepper';
-export { Separator } from './separator';
-
-// Feedback
-export { Alert, AlertTitle, AlertDescription, AlertWithIcon, AlertStack } from './alert';
+// ─── @origen/ux-library ───────────────────────────────────────────────────────
 export {
-  Toast,
-  ToastProvider,
-  ToastViewport,
-  ToastTitle,
-  ToastDescription,
-  ToastClose,
-  ToastAction,
-  Toaster,
-  toast,
-  toastUtils,
-  useToast,
-} from './toast';
-export { Tooltip, InfoTooltip, TooltipInline } from './tooltip';
-
-// Containers
-export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, FeatureCard, StatCard, ProductCard } from './card';
-export { Modal } from './dialog';
-export { Sheet, SheetPortal, SheetOverlay, SheetClose, SheetTrigger, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription } from './sheet';
-
-// Navigation
-export { Button, buttonVariants } from './button';
-export { Tabs, TabsList, TabsTrigger, TabsContent, TabsWithIcon } from './tabs';
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent, FilterAccordion, AccordionGroup } from './accordion';
-export { Pagination } from './pagination';
-
-// Data
-export { Table } from './table';
-
-// Other
-export {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from './alert-dialog';
+  // Inputs
+  Input, InputGroup,
+  Textarea,
+  Label, labelVariants,
+  CurrencyInput,
+  PercentageInput,
+  TagsInput,
+  // Selection
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup,
+  Checkbox, CheckboxWithLabel, CheckboxGroup,
+  RadioGroup, RadioGroupItem,
+  Toggle,
+  ToggleGroup, ToggleGroupItem,
+  Switch,
+  Slider,
+  // Display
+  ProductImage,
+  Badge, StatusBadge,
+  Avatar, AvatarFallback, AvatarImage, AvatarGroup,
+  Progress,
+  Stepper, StepperContent, StepperFooter,
+  Separator,
+  // Feedback
+  Alert, AlertTitle, AlertDescription,
+  Toast, ToastProvider, ToastViewport, ToastTitle, ToastDescription,
+  ToastClose, ToastAction, Toaster, toast, useToast,
+  Tooltip,
+  // Containers
+  Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, cardVariants,
+  Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle,
+  DialogDescription, DialogFooter, DialogClose,
+  Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle,
+  SheetDescription, SheetFooter, SheetClose,
+  // Navigation
+  Button, buttonVariants,
+  Tabs, TabsList, TabsTrigger, TabsContent,
+  Pagination,
+  // Data
+  Table,
+  // Other
+  AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
+  AlertDialogFooter, AlertDialogTitle, AlertDialogDescription,
+  AlertDialogAction, AlertDialogCancel,
+} from '@origen/ux-library';

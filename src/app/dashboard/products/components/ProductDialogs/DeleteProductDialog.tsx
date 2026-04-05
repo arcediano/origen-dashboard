@@ -64,15 +64,30 @@ export function DeleteProductDialog({
   };
 
   return (
-    <Modal
-      isOpen={open}
-      onClose={() => onOpenChange(false)}
-      title="¿Eliminar producto?"
-      description="Esta acción no se puede deshacer."
-      icon={<Trash2 className="w-5 h-5 text-red-600" />}
-      size="md"
-      footer={
-        <>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <Trash2 className="w-5 h-5 text-red-600" />
+            <DialogTitle>¿Eliminar producto?</DialogTitle>
+          </div>
+          <DialogDescription>Esta acción no se puede deshacer.</DialogDescription>
+        </DialogHeader>
+      <div className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Se eliminará permanentemente el producto{' '}
+          <span className="font-semibold text-origen-bosque">{product.name}</span> del catálogo,
+          incluyendo todas sus variantes, imágenes y estadísticas asociadas.
+        </p>
+
+        {error && (
+          <div className="p-3 bg-feedback-danger-subtle rounded-lg border border-red-200 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <p className="text-xs text-red-600">{error}</p>
+          </div>
+        )}
+      </div>
+        <div className="flex justify-end gap-2 pt-4">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
@@ -95,23 +110,8 @@ export function DeleteProductDialog({
               'Eliminar permanentemente'
             )}
           </Button>
-        </>
-      }
-    >
-      <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Se eliminará permanentemente el producto{' '}
-          <span className="font-semibold text-origen-bosque">{product.name}</span> del catálogo,
-          incluyendo todas sus variantes, imágenes y estadísticas asociadas.
-        </p>
-
-        {error && (
-          <div className="p-3 bg-feedback-danger-subtle rounded-lg border border-red-200 flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-            <p className="text-xs text-red-600">{error}</p>
-          </div>
-        )}
-      </div>
-    </Modal>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

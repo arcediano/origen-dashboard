@@ -15,7 +15,7 @@ import * as React from 'react';
 import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@origen/ux-library';
-import { Alert } from '@origen/ux-library';
+import { Alert, AlertTitle, AlertDescription } from '@origen/ux-library';
 
 import {
   Upload,
@@ -369,10 +369,11 @@ export function FileUpload({
       {error && (
         <Alert
           variant="error"
-          title="Error de validación"
-          description={error}
           className="mt-3"
-        />
+        >
+          <AlertTitle>Error de validación</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Lista de archivos */}

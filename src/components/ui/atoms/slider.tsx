@@ -8,7 +8,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Minus, Plus } from "lucide-react";
-import { Button } from "./button";
+import { Button } from "@origen/ux-library";
 
 // ============================================================================
 // TIPOS

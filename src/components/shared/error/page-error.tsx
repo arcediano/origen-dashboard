@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Alert } from '@origen/ux-library';
+import { Alert, AlertTitle, AlertDescription } from '@origen/ux-library';
 import { Button } from '@origen/ux-library';
 import { RefreshCw } from 'lucide-react';
 
@@ -41,11 +41,10 @@ export function PageError({
       <div className="max-w-md w-full">
         <Alert
           variant="error"
-          title={title}
-          description={message}
-          alertSize="lg"
           className="shadow-lg"
         >
+          <AlertTitle>{title}</AlertTitle>
+          <AlertDescription>{message}</AlertDescription>
           {onRetry && (
             <div className="mt-4 flex justify-center">
               <Button

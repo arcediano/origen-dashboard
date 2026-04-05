@@ -6,6 +6,10 @@
 'use client';
 
 import { Button, Input, Badge } from '@origen/ux-library';
+import {
+  Card, CardContent,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from '@origen/ux-library';
 import { Checkbox } from '@origen/ux-library';
 import { DocumentUploader } from '../../components/DocumentUploader';
 import { Tooltip } from '@origen/ux-library';
@@ -495,7 +499,7 @@ export function StepCertificationsAttributes({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <Card variant="elevated" hoverEffect="organic" className="p-4 sm:p-6">
+      <Card variant="elevated" className="p-4 sm:p-6">
         {/* Cabecera */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
@@ -864,7 +868,7 @@ export function StepCertificationsAttributes({
                     AÃ±ade certificaciones para aumentar la confianza de tus clientes y diferenciar tu producto
                   </p>
                   <Button
-                    size="xs"
+                    size="sm"
                     className="mt-4"
                     onClick={() => setShowCertForm(true)}
                     leftIcon={<Plus className="w-3 h-3" />}
@@ -1108,11 +1112,11 @@ export function StepCertificationsAttributes({
                           <div>
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-medium text-origen-bosque">{attr.name}</p>
-                              <Badge variant="seed" size="xs" className="bg-origen-pradera/10">
+                              <Badge variant="leaf" size="xs" className="bg-origen-pradera/10">
                                 {attr.type}
                               </Badge>
                               {!attr.visible && (
-                                <Badge variant="seed" size="xs" className="bg-surface flex items-center gap-1">
+                                <Badge variant="leaf" size="xs" className="bg-surface flex items-center gap-1">
                                   <EyeOff className="w-3 h-3" />
                                   Oculto
                                 </Badge>

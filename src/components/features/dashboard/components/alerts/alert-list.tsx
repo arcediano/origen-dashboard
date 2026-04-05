@@ -7,7 +7,7 @@
 
 import { useState, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Alert } from '@origen/ux-library';
+import { Alert, AlertTitle, AlertDescription } from '@origen/ux-library';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { DashboardAlert } from '../../types';
 
@@ -23,14 +23,24 @@ const AlertItem = memo(function AlertItem({
   alert: DashboardAlert;
   onDismiss: (id: string) => void;
 }) {
+  const alertVariant = alert.type === 'accent' ? 'info' : alert.type;
+
   return (
-    <Alert
-      variant={alert.type}
-      dismissible={alert.dismissible}
-      title={alert.title}
-      description={alert.description}
-      onDismiss={() => onDismiss(alert.id)}
-    />
+    <div className="relative">
+      <Alert variant={alertVariant}>
+        <AlertTitle>{alert.title}</AlertTitle>
+        <AlertDescription>{alert.description}</AlertDescription>
+      </Alert>
+      {alert.dismissible && (
+        <button
+          onClick={() => onDismiss(alert.id)}
+          className="absolute top-2 right-2 rounded p-1 text-muted-foreground hover:text-foreground hover:bg-black/5 transition-colors"
+          aria-label="Cerrar alerta"
+        >
+          ×
+        </button>
+      )}
+    </div>
   );
 });
 

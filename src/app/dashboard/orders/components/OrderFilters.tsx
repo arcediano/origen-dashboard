@@ -200,7 +200,7 @@ export function OrderFilters({
         {hasAnyFilter && (
           <>
             <div className="w-px h-4 bg-border-subtle mx-1" />
-            <Button variant="ghost" size="xs" onClick={onClearFilters} leftIcon={<X className="w-3 h-3" />}>
+            <Button variant="ghost" size="sm" onClick={onClearFilters} leftIcon={<X className="w-3 h-3" />}>
               Limpiar
             </Button>
           </>

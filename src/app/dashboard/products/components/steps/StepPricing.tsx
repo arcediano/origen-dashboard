@@ -8,6 +8,11 @@
 import { Button, Input, Badge } from '@origen/ux-library';
 import { Alert } from '@origen/ux-library';
 import { Tooltip } from '@origen/ux-library';
+import {
+  Card,
+  CurrencyInput,
+  PercentageInput,
+} from '@origen/ux-library';
 import { 
   DollarSign, 
   Tag, 
@@ -252,7 +257,7 @@ export function StepPricing({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <Card variant="elevated" hoverEffect="organic" className="p-4 sm:p-6">
+      <Card variant="elevated" className="p-4 sm:p-6">
         {/* Cabecera */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
@@ -736,7 +741,7 @@ export function StepPricing({
               </p>
               {hasBasePrice ? (
                 <Button
-                  size="xs"
+                  size="sm"
                   className="mt-4"
                   onClick={() => setShowTierForm(true)}
                   leftIcon={<Plus className="w-3 h-3" />}

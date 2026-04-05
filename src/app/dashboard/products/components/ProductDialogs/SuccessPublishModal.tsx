@@ -50,16 +50,15 @@ export function SuccessPublishModal({
   }, [open, onOpenChange, router]);
 
   return (
-    <Modal
-      isOpen={open}
-      onClose={() => onOpenChange(false)}
-      title="¡Producto publicado con éxito!"
-      description={`${productName} ya está disponible en el catálogo`}
-      icon={<CheckCircle className="w-6 h-6 text-green-600" />}
-      size="md"
-      showCloseButton={false}
-      closeOnOutsideClick={false}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-6 h-6 text-green-600" />
+            <DialogTitle>¡Producto publicado con éxito!</DialogTitle>
+          </div>
+          <DialogDescription>{`${productName} ya está disponible en el catálogo`}</DialogDescription>
+        </DialogHeader>
       <div className="py-6">
         <div className="flex flex-col items-center text-center">
           {/* Icono de éxito animado */}
@@ -93,6 +92,7 @@ export function SuccessPublishModal({
           </div>
         </div>
       </div>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 }

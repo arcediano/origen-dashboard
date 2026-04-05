@@ -220,7 +220,7 @@ export function ProductFilters({
         </Select>
 
         {hasAnyFilter && (
-          <Button variant="ghost" size="xs" onClick={onClearFilters} leftIcon={<X className="w-3 h-3" />}>
+          <Button variant="ghost" size="sm" onClick={onClearFilters} leftIcon={<X className="w-3 h-3" />}>
             Limpiar
           </Button>
         )}

@@ -40,7 +40,6 @@ export function ProductCard({
   return (
     <Card
       variant="elevated"
-      hoverEffect="organic"
       className={cn('p-3 sm:p-4 cursor-pointer', className)}
       onClick={() => onView(product.id)}
     >

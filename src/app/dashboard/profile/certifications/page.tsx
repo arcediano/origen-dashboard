@@ -216,20 +216,20 @@ export default function CertificationsPage() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full max-w-md grid-cols-2">
               <TabsTrigger 
-                value="certifications" 
-                icon={<Award className="w-4 h-4" />}
-                badge={stats.pendingCerts > 0 ? stats.pendingCerts : undefined}
-                badgeVariant="warning"
+                value="certifications"
               >
-                Certificaciones
+                <span className="flex items-center gap-2">
+                  <Award className="w-4 h-4" />
+                  Certificaciones
+                </span>
               </TabsTrigger>
               <TabsTrigger 
-                value="documents" 
-                icon={<FileBadge className="w-4 h-4" />}
-                badge={stats.pendingDocs > 0 ? stats.pendingDocs : undefined}
-                badgeVariant="warning"
+                value="documents"
               >
-                Documentos legales
+                <span className="flex items-center gap-2">
+                  <FileBadge className="w-4 h-4" />
+                  Documentos legales
+                </span>
               </TabsTrigger>
             </TabsList>
 

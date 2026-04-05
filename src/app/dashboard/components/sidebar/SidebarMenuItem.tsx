@@ -94,7 +94,7 @@ export function SidebarMenuItem({
 
           <div className="flex items-center gap-2 flex-shrink-0">
             {badge && (
-              <Badge variant="notification" size="xs" className="min-w-[1.2rem] h-5">
+              <Badge variant="neutral" className="min-w-[1.2rem] h-5 text-xs px-1.5 py-0">
                 {badge > 99 ? '99+' : badge}
               </Badge>
             )}
@@ -170,7 +170,7 @@ export function SidebarMenuItem({
       </div>
 
       {badge && (
-        <Badge variant="notification" size="xs" className="min-w-[1.2rem] h-5">
+        <Badge variant="neutral" className="min-w-[1.2rem] h-5 text-xs px-1.5 py-0">
           {badge > 99 ? '99+' : badge}
         </Badge>
       )}

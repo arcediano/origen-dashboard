@@ -71,7 +71,7 @@ export function SidebarSubmenu({
                   </div>
 
                   {item.badge && (
-                    <Badge variant="notification" size="xs" className="min-w-[1.2rem] h-5">
+                    <Badge variant="neutral" className="min-w-[1.2rem] h-5 text-xs px-1.5 py-0">
                       {item.badge > 99 ? '99+' : item.badge}
                     </Badge>
                   )}

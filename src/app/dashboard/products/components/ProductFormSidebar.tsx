@@ -24,7 +24,6 @@ export function ProductFormSidebar({ tips, keyFact }: ProductFormSidebarProps) {
       <div className="sticky top-[260px]">
         <Card
           variant="elevated"
-          hoverEffect="organic"
           className="overflow-hidden border border-border shadow-sm"
         >
           <CardHeader spacing="md">

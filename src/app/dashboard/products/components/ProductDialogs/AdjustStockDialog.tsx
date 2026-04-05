@@ -82,42 +82,15 @@ export function AdjustStockDialog({
   };
 
   return (
-    <Modal
-      isOpen={open}
-      onClose={() => onOpenChange(false)}
-      title="Ajustar stock"
-      description={`Modifica el stock de ${product.name}`}
-      icon={<Package className="w-5 h-5 text-origen-pradera" />}
-      size="md"
-      footer={
-        <>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="rounded-xl border-2 hover:border-origen-pradera"
-            disabled={isLoading}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                Procesando...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Save className="w-4 h-4" />
-                Confirmar
-              </span>
-            )}
-          </Button>
-        </>
-      }
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <Package className="w-5 h-5 text-origen-pradera" />
+            <DialogTitle>Ajustar stock</DialogTitle>
+          </div>
+          <DialogDescription>{`Modifica el stock de ${product.name}`}</DialogDescription>
+        </DialogHeader>
       <div className="space-y-4">
         {/* Información del producto */}
         <div className="p-4 bg-origen-crema/30 rounded-lg border border-origen-pradera/20">
@@ -199,6 +172,33 @@ export function AdjustStockDialog({
           </div>
         )}
       </div>
-    </Modal>
+        <div className="flex justify-end gap-2 pt-4">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="rounded-xl border-2 hover:border-origen-pradera"
+            disabled={isLoading}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Procesando...
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Confirmar
+              </span>
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
