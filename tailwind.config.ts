@@ -31,8 +31,7 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/lib/**/*.{js,ts,jsx,tsx,mdx}",
-      // origen-UXLibrary: primera ola de integración — fuente directa sin build
-      "../origen-UXLibrary/src/**/*.{ts,tsx}",
+      "./node_modules/@arcediano/ux-library/dist/**/*.{js,mjs}",
     ],
   
   theme: {
