@@ -1,11 +1,11 @@
 /**
  * @file index.ts
  * @description Export de componentes UI atoms - Origen Dashboard v3.0
- * Re-exports from @origen/ux-library + local dashboard-specific components
+ * Re-exports from @arcediano/ux-library + local dashboard-specific components
  * @version 3.2.0
  */
 
-// ─── @origen/ux-library ───────────────────────────────────────────────────────
+// ─── @arcediano/ux-library ───────────────────────────────────────────────────────
 export {
   // Inputs
   Input, InputGroup,
@@ -50,4 +50,4 @@ export {
   AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
   AlertDialogFooter, AlertDialogTitle, AlertDialogDescription,
   AlertDialogAction, AlertDialogCancel,
-} from '@origen/ux-library';
+} from '@arcediano/ux-library';

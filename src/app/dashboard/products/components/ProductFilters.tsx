@@ -14,8 +14,8 @@ import { cn } from '@/lib/utils';
 import { FilterBottomSheet } from '@/components/shared/mobile';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-} from '@origen/ux-library';
-import { Button } from '@origen/ux-library';
+} from '@arcediano/ux-library';
+import { Button } from '@arcediano/ux-library';
 
 export interface ProductFiltersProps {
   searchQuery: string;

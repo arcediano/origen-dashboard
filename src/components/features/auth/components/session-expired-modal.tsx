@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { Clock } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@origen/ux-library';
-import { Button } from '@origen/ux-library';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@arcediano/ux-library';
+import { Button } from '@arcediano/ux-library';
 
 interface SessionExpiredModalProps {
   isOpen: boolean;

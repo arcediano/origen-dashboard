@@ -5,14 +5,14 @@
 
 'use client';
 
-import { Button, Input, Badge } from '@origen/ux-library';
+import { Button, Input, Badge } from '@arcediano/ux-library';
 import {
   Card, CardHeader, CardTitle, CardContent,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
   Checkbox,
   Textarea,
-} from '@origen/ux-library';
-import { Tooltip } from '@origen/ux-library';
+} from '@arcediano/ux-library';
+import { Tooltip } from '@arcediano/ux-library';
 import { 
   FlaskConical, 
   CheckCircle, 

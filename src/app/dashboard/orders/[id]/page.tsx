@@ -14,7 +14,7 @@ import { motion } from 'framer-motion';
 import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink } from 'lucide-react';
 
 // Componentes UI
-import { Button, Badge } from '@origen/ux-library';
+import { Button, Badge } from '@arcediano/ux-library';
 import { PageLoader } from '@/components/shared';
 import { PageError } from '@/components/shared';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';

@@ -7,8 +7,8 @@
 
 import React, { useState } from 'react';
 import { Trash2, AlertCircle, RefreshCw } from 'lucide-react';
-import { Button } from '@origen/ux-library';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@origen/ux-library';
+import { Button } from '@arcediano/ux-library';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@arcediano/ux-library';
 import { type Product } from '@/types/product';
 import { deleteProduct } from '@/lib/api/products';
 

@@ -10,7 +10,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Card } from '@origen/ux-library';
+import { Card } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { 
   User, 

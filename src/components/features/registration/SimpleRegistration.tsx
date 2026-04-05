@@ -7,15 +7,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-import { Button, Input } from '@origen/ux-library';
-import { Textarea } from '@origen/ux-library';
+import { Button, Input } from '@arcediano/ux-library';
+import { Textarea } from '@arcediano/ux-library';
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from '@origen/ux-library';
+} from '@arcediano/ux-library';
 import { LoadingSpinner } from '@/components/shared';
 
 import { PRODUCER_CATEGORIES } from '@/constants/categories';

@@ -25,10 +25,10 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
-import { Button, Input, Label, Badge } from '@origen/ux-library';
-import { Textarea, TagsInput } from '@origen/ux-library';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@origen/ux-library';
+import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
+import { Button, Input, Label, Badge } from '@arcediano/ux-library';
+import { Textarea, TagsInput } from '@arcediano/ux-library';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 
 export default function BusinessPage() {

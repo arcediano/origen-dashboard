@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Alert, AlertTitle, AlertDescription } from '@origen/ux-library';
-import { Button } from '@origen/ux-library';
+import { Alert, AlertTitle, AlertDescription } from '@arcediano/ux-library';
+import { Button } from '@arcediano/ux-library';
 import { RefreshCw } from 'lucide-react';
 
 export interface PageErrorProps {

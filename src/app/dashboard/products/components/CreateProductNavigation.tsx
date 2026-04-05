@@ -8,7 +8,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Save, Send, RefreshCw, Shield, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@origen/ux-library';
+import { Button } from '@arcediano/ux-library';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 
 // ============================================================================

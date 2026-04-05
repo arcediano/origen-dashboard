@@ -25,7 +25,7 @@ import {
   Flag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@origen/ux-library';
+import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
 import type { Review } from '@/types/review';
 import { ReviewResponseSheet } from './ReviewResponseSheet';
 import { SwipeableRow } from '@/components/shared/mobile';

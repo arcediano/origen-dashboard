@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@origen/ux-library';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@arcediano/ux-library';
 
 // ============================================================================
 // TIPOS

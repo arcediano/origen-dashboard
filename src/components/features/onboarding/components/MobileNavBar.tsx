@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Button } from '@origen/ux-library';
+import { Button } from '@arcediano/ux-library';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface MobileNavBarProps {

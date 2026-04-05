@@ -7,8 +7,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@origen/ux-library';
-import { Card } from '@origen/ux-library';
+import { Button } from '@arcediano/ux-library';
+import { Card } from '@arcediano/ux-library';
 import { ArrowLeft, Save, CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function PagosPage() {

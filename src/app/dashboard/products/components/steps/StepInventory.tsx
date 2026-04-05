@@ -5,15 +5,15 @@
 
 'use client';
 
-import { Card } from '@origen/ux-library';
-import { Input } from '@origen/ux-library';
-import { Badge } from '@origen/ux-library';
-import { Checkbox } from '@origen/ux-library';
-import { Progress } from '@origen/ux-library';
-import { Tooltip } from '@origen/ux-library';
+import { Card } from '@arcediano/ux-library';
+import { Input } from '@arcediano/ux-library';
+import { Badge } from '@arcediano/ux-library';
+import { Checkbox } from '@arcediano/ux-library';
+import { Progress } from '@arcediano/ux-library';
+import { Tooltip } from '@arcediano/ux-library';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-} from '@origen/ux-library';
+} from '@arcediano/ux-library';
 import { 
   Package, 
   CheckCircle, 

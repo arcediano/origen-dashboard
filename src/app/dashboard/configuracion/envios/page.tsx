@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button, Input, Badge, Card } from '@origen/ux-library';
+import { Button, Input, Badge, Card } from '@arcediano/ux-library';
 import { ArrowLeft, Save, Plus, Truck, Zap, Store } from 'lucide-react';
 
 export default function EnviosPage() {

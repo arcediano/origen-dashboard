@@ -19,8 +19,8 @@ import { loginUser } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-import { Button, Input } from '@origen/ux-library';
-import { CheckboxWithLabel } from '@origen/ux-library';
+import { Button, Input } from '@arcediano/ux-library';
+import { CheckboxWithLabel } from '@arcediano/ux-library';
 
 import {
   LogIn,

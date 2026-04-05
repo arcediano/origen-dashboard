@@ -6,7 +6,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@origen/ux-library';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@arcediano/ux-library';
 import { BarChart3 } from 'lucide-react';
 import { itemVariants } from '../layout/dashboard-shell';
 import { cn } from '@/lib/utils';

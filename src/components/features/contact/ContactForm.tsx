@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@origen/ux-library';
+import { Button } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, CheckCircle, AlertCircle, User, Mail, MessageSquare } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@origen/ux-library';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@arcediano/ux-library';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 

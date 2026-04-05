@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Table, type Column } from '@origen/ux-library';
-import { StatusBadge } from '@origen/ux-library';
-import { ProductImage } from '@origen/ux-library';
+import { Table, type Column } from '@arcediano/ux-library';
+import { StatusBadge } from '@arcediano/ux-library';
+import { ProductImage } from '@arcediano/ux-library';
 import { ProductTableActions } from './ProductTableActions';
 import { ProductExpandableDetails } from './ProductExpandableDetails';
 import { type Product } from '@/types/product';

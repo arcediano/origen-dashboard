@@ -23,7 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
 import { SwipeableRow } from '@/components/shared/mobile';
-import { ProductImage } from '@origen/ux-library';
+import { ProductImage } from '@arcediano/ux-library';
 
 // â”€â”€â”€ STATUS CONFIG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 

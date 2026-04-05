@@ -9,7 +9,7 @@ import { useParams } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
 import { Package } from 'lucide-react';
 
-import { Badge } from '@origen/ux-library';
+import { Badge } from '@arcediano/ux-library';
 import { PageHeader } from '../../../components/PageHeader';
 import { PageLoader } from '@/components/shared/loading/page-loader';
 import { PageError } from '@/components/shared/error/page-error';

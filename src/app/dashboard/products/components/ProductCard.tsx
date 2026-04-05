@@ -8,10 +8,10 @@
 import React from 'react';
 import { Eye, Edit, PlusCircle, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card } from '@origen/ux-library';
-import { StatusBadge } from '@origen/ux-library';
-import { Button } from '@origen/ux-library';
-import { ProductImage } from '@origen/ux-library';
+import { Card } from '@arcediano/ux-library';
+import { StatusBadge } from '@arcediano/ux-library';
+import { Button } from '@arcediano/ux-library';
+import { ProductImage } from '@arcediano/ux-library';
 import { type Product } from '@/types/product';
 
 export interface ProductCardProps {

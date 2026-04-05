@@ -29,7 +29,7 @@ import {
   Package,
   ArrowUpRight
 } from 'lucide-react';
-import { Badge } from '@origen/ux-library';
+import { Badge } from '@arcediano/ux-library';
 
 interface DashboardFooterProps {
   className?: string;

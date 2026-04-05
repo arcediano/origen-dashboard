@@ -13,7 +13,7 @@
 
 'use client';
 
-import { Button } from '@origen/ux-library';
+import { Button } from '@arcediano/ux-library';
 import { ArrowRight, Sparkles, TrendingUp, Clock, ShieldCheck, Globe, Leaf, CheckCircle, User, MapPin, Package, Store } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';

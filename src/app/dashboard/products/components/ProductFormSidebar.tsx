@@ -6,8 +6,8 @@
 'use client';
 
 import { Sparkles, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
-import { Badge } from '@origen/ux-library';
+import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
+import { Badge } from '@arcediano/ux-library';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 

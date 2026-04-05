@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { requestPasswordReset } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
 
-import { Button, Input } from '@origen/ux-library';
+import { Button, Input } from '@arcediano/ux-library';
 
 import {
   Mail,

@@ -5,10 +5,10 @@
 
 'use client';
 
-import { Card } from '@origen/ux-library';
+import { Card } from '@arcediano/ux-library';
 import { ImageUploader } from '../../components/ImageUploader';
-import { Badge } from '@origen/ux-library';
-import { Tooltip } from '@origen/ux-library';
+import { Badge } from '@arcediano/ux-library';
+import { Tooltip } from '@arcediano/ux-library';
 import { 
   Camera, 
   CheckCircle, 

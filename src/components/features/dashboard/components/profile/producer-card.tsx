@@ -8,7 +8,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Avatar, AvatarFallback, AvatarImage } from '@origen/ux-library';
+import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
 import { MapPin, CheckCircle2, Clock, XCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { itemVariants } from '../layout/dashboard-shell';

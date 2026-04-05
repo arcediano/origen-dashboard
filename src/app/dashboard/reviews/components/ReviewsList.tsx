@@ -9,10 +9,10 @@ import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Card } from '@origen/ux-library';
-import { Badge, Button } from '@origen/ux-library';
-import { Avatar, AvatarFallback, AvatarImage } from '@origen/ux-library';
-import { Textarea } from '@origen/ux-library';
+import { Card } from '@arcediano/ux-library';
+import { Badge, Button } from '@arcediano/ux-library';
+import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
+import { Textarea } from '@arcediano/ux-library';
 import { 
   Star, 
   ThumbsUp, 

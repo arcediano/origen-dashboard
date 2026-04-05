@@ -1,7 +1,7 @@
 // 📁 /src/app/dashboard/components/header/MobileMenu.tsx
 'use client';
 
-import { Button } from '@origen/ux-library';
+import { Button } from '@arcediano/ux-library';
 import { Menu } from 'lucide-react';
 
 interface MobileMenuProps {

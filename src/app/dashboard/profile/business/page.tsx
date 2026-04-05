@@ -41,8 +41,8 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger
-} from '@origen/ux-library';
-import { Textarea } from '@origen/ux-library';
+} from '@arcediano/ux-library';
+import { Textarea } from '@arcediano/ux-library';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },

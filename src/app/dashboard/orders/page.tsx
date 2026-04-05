@@ -13,13 +13,13 @@ import { ShoppingBag } from 'lucide-react';
 // Componentes UI
 import { PageLoader } from '@/components/shared';
 import { PageError } from '@/components/shared';
-import { Card } from '@origen/ux-library';
+import { Card } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { OrderStats } from './components/OrderStats';
 import { OrderFilters } from './components/OrderFilters';
 import { OrdersTable } from './components/OrdersTable';
 import { OrderCard, OrderCardSkeleton } from './components/OrderCard';
-import { Pagination } from '@origen/ux-library';
+import { Pagination } from '@arcediano/ux-library';
 
 // Hooks y API
 import { fetchOrders } from '@/lib/api/orders';

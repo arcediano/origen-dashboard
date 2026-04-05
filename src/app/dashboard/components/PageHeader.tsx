@@ -9,7 +9,7 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Tooltip } from '@origen/ux-library';
+import { Tooltip } from '@arcediano/ux-library';
 
 export interface PageHeaderProps {
   title: string;

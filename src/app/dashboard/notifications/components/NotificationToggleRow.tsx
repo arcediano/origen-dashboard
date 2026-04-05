@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Toggle } from '@origen/ux-library';
+import { Toggle } from '@arcediano/ux-library';
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 

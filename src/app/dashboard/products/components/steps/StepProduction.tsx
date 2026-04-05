@@ -5,15 +5,15 @@
 
 'use client';
 
-import { Button, Input, Badge } from '@origen/ux-library';
-import { Checkbox } from '@origen/ux-library';
+import { Button, Input, Badge } from '@arcediano/ux-library';
+import { Checkbox } from '@arcediano/ux-library';
 import { ImageUploader } from '../../components/ImageUploader';
-import { Tooltip } from '@origen/ux-library';
+import { Tooltip } from '@arcediano/ux-library';
 import {
   Card, CardHeader, CardTitle, CardContent,
   Textarea,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-} from '@origen/ux-library';
+} from '@arcediano/ux-library';
 import { 
   Leaf, 
   MapPin, 

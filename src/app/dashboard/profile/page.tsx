@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
-import { Badge, Button } from '@origen/ux-library';
-import { Progress } from '@origen/ux-library';
+import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
+import { Badge, Button } from '@arcediano/ux-library';
+import { Progress } from '@arcediano/ux-library';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },

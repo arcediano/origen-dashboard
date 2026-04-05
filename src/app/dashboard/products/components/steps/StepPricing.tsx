@@ -5,14 +5,14 @@
 
 'use client';
 
-import { Button, Input, Badge } from '@origen/ux-library';
-import { Alert } from '@origen/ux-library';
-import { Tooltip } from '@origen/ux-library';
+import { Button, Input, Badge } from '@arcediano/ux-library';
+import { Alert } from '@arcediano/ux-library';
+import { Tooltip } from '@arcediano/ux-library';
 import {
   Card,
   CurrencyInput,
   PercentageInput,
-} from '@origen/ux-library';
+} from '@arcediano/ux-library';
 import { 
   DollarSign, 
   Tag, 

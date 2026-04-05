@@ -14,8 +14,8 @@
 import * as React from 'react';
 import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
-import { Button } from '@origen/ux-library';
-import { Alert, AlertTitle, AlertDescription } from '@origen/ux-library';
+import { Button } from '@arcediano/ux-library';
+import { Alert, AlertTitle, AlertDescription } from '@arcediano/ux-library';
 
 import {
   Upload,

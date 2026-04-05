@@ -17,10 +17,10 @@ import {
 } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
-import { Button, Input, Label, Badge } from '@origen/ux-library';
-import { Avatar, AvatarFallback, AvatarImage } from '@origen/ux-library';
-import { Alert, AlertDescription } from '@origen/ux-library';
+import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
+import { Button, Input, Label, Badge } from '@arcediano/ux-library';
+import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
+import { Alert, AlertDescription } from '@arcediano/ux-library';
 
 // Variants corregidos
 const itemVariants: Variants = {

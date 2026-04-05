@@ -1,7 +1,7 @@
 // components/register/ProcessSection.tsx
 'use client';
 
-import { Button } from '@origen/ux-library';
+import { Button } from '@arcediano/ux-library';
 import { ArrowRight, CheckCircle, FileText, Users, Settings, Package } from 'lucide-react';
 import { MobileCardSlider } from '../mobile-card-slider';
 

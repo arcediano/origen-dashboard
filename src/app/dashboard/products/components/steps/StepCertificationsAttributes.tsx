@@ -5,14 +5,14 @@
 
 'use client';
 
-import { Button, Input, Badge } from '@origen/ux-library';
+import { Button, Input, Badge } from '@arcediano/ux-library';
 import {
   Card, CardContent,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-} from '@origen/ux-library';
-import { Checkbox } from '@origen/ux-library';
+} from '@arcediano/ux-library';
+import { Checkbox } from '@arcediano/ux-library';
 import { DocumentUploader } from '../../components/DocumentUploader';
-import { Tooltip } from '@origen/ux-library';
+import { Tooltip } from '@arcediano/ux-library';
 import { 
   Award,
   CheckCircle,

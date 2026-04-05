@@ -7,7 +7,7 @@
 
 import { useState, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Alert, AlertTitle, AlertDescription } from '@origen/ux-library';
+import { Alert, AlertTitle, AlertDescription } from '@arcediano/ux-library';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { DashboardAlert } from '../../types';
 

@@ -8,10 +8,10 @@
 import React from 'react';
 import { Package, Camera, DollarSign, FlaskConical, Leaf, ShoppingBag, Award, CheckCircle, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card } from '@origen/ux-library';
-import { Progress } from '@origen/ux-library';
-import { Badge } from '@origen/ux-library';
-import { Tooltip } from '@origen/ux-library';
+import { Card } from '@arcediano/ux-library';
+import { Progress } from '@arcediano/ux-library';
+import { Badge } from '@arcediano/ux-library';
+import { Tooltip } from '@arcediano/ux-library';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 
 // ============================================================================

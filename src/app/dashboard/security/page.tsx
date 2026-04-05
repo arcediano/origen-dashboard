@@ -4,11 +4,11 @@
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Bell, Shield, Globe, Moon, Sun, Save, Key } from 'lucide-react';
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
-import { Button, Input, Label, Separator } from '@origen/ux-library';
-import { Toggle } from '@origen/ux-library';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@origen/ux-library';
-import { Alert, AlertDescription } from '@origen/ux-library';
+import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
+import { Button, Input, Label, Separator } from '@arcediano/ux-library';
+import { Toggle } from '@arcediano/ux-library';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@arcediano/ux-library';
+import { Alert, AlertDescription } from '@arcediano/ux-library';
 
 export default function SettingsPage() {
   const router = useRouter();

@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input, Button } from '@origen/ux-library';
+import { Input, Button } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 
 import {

@@ -8,8 +8,8 @@
 import React, { useEffect, useState } from 'react';
 import { Package, Plus, Minus, Save, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@origen/ux-library';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@origen/ux-library';
+import { Button } from '@arcediano/ux-library';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@arcediano/ux-library';
 import { type Product } from '@/types/product';
 import { updateProductStock } from '@/lib/api/products';
 

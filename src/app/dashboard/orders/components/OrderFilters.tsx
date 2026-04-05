@@ -14,8 +14,8 @@ import { cn } from '@/lib/utils';
 import { FilterBottomSheet } from '@/components/shared/mobile';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-} from '@origen/ux-library';
-import { Input, Button } from '@origen/ux-library';
+} from '@arcediano/ux-library';
+import { Input, Button } from '@arcediano/ux-library';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
 
 export interface OrderFiltersProps {

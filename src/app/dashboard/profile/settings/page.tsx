@@ -15,10 +15,10 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@origen/ux-library';
-import { Button, Input, Label, Separator } from '@origen/ux-library';
-import { Toggle } from '@origen/ux-library';
-import { Alert, AlertDescription } from '@origen/ux-library';
+import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
+import { Button, Input, Label, Separator } from '@arcediano/ux-library';
+import { Toggle } from '@arcediano/ux-library';
+import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { gatewayClient } from '@/lib/api/client';
 
 const itemVariants = {

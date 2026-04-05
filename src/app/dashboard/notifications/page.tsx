@@ -18,8 +18,8 @@ import {
   Save,
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent } from '@origen/ux-library';
-import { Button } from '@origen/ux-library';
+import { Card, CardContent } from '@arcediano/ux-library';
+import { Button } from '@arcediano/ux-library';
 import { NotificationToggleRow } from './components/NotificationToggleRow';
 import { SegmentedControl, type SegmentItem } from './components/SegmentedControl';
 import { gatewayClient } from '@/lib/api/client';

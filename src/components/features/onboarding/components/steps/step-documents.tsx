@@ -11,7 +11,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 import { FileUpload, type UploadedFile } from '@/components/shared';
-import { Button } from '@origen/ux-library';
+import { Button } from '@arcediano/ux-library';
 
 import {
   FileText,

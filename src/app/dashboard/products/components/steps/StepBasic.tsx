@@ -5,12 +5,12 @@
 
 'use client';
 
-import { Card } from '@origen/ux-library';
-import { Input } from '@origen/ux-library';
-import { Textarea, TagsInput } from '@origen/ux-library';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@origen/ux-library';
-import { Badge } from '@origen/ux-library';
-import { Tooltip } from '@origen/ux-library';
+import { Card } from '@arcediano/ux-library';
+import { Input } from '@arcediano/ux-library';
+import { Textarea, TagsInput } from '@arcediano/ux-library';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@arcediano/ux-library';
+import { Badge } from '@arcediano/ux-library';
+import { Tooltip } from '@arcediano/ux-library';
 import { 
   Package, 
   CheckCircle, 

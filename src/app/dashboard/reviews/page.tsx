@@ -18,7 +18,7 @@ import { ReviewStats } from './components/ReviewStats';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
 import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
-import { Pagination } from '@origen/ux-library';
+import { Pagination } from '@arcediano/ux-library';
 
 // Hooks y API
 import { fetchReviews } from '@/lib/api/reviews';
