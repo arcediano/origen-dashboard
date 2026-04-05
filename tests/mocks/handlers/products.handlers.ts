@@ -1,7 +1,8 @@
 import { http, HttpResponse } from 'msw';
 import { buildProduct, buildProductList } from '../../factories/product.factory';
+import { TEST_API_BASE } from '../api-base';
 
-const BASE = 'http://localhost:3001/api/v1';
+const BASE = TEST_API_BASE;
 
 // ─── Fixture ApiProduct para my-products ─────────────────────────────────────
 

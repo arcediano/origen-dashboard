@@ -1,7 +1,8 @@
 import { http, HttpResponse } from 'msw';
+import { TEST_API_BASE } from '../api-base';
 
-// En tests, el cliente browser usa NEXT_PUBLIC_APP_URL como base + /api/v1 prefix
-const BASE = 'http://localhost:3001/api/v1';
+// En tests, el cliente browser usa el origin actual + /api/v1.
+const BASE = TEST_API_BASE;
 
 export const authHandlers = [
   // Login exitoso

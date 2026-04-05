@@ -8,6 +8,7 @@ import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { render } from '../../helpers/render';
 import { server } from '../../mocks/server';
+import { TEST_API_BASE } from '../../mocks/api-base';
 import { SimpleForgotPassword } from '@/components/features/auth/components/forgot-password-form';
 
 vi.mock('next/navigation', () => ({
@@ -137,7 +138,7 @@ describe('SimpleForgotPassword — Formulario de recuperación de contraseña', 
 
   it('muestra error de servidor cuando el backend devuelve 500', async () => {
     server.use(
-      http.post('http://localhost:3001/api/v1/auth/forgot-password', () =>
+      http.post(`${TEST_API_BASE}/auth/forgot-password`, () =>
         HttpResponse.json(
           { success: false, message: 'Internal Server Error' },
           { status: 500 }
@@ -158,7 +159,7 @@ describe('SimpleForgotPassword — Formulario de recuperación de contraseña', 
 
   it('no muestra el estado de éxito cuando hay un error de servidor', async () => {
     server.use(
-      http.post('http://localhost:3001/api/v1/auth/forgot-password', () =>
+      http.post(`${TEST_API_BASE}/auth/forgot-password`, () =>
         HttpResponse.json({ success: false }, { status: 500 })
       )
     );
@@ -178,7 +179,7 @@ describe('SimpleForgotPassword — Formulario de recuperación de contraseña', 
 
   it('muestra éxito (no error) con 404 — evita revelar si el email existe', async () => {
     server.use(
-      http.post('http://localhost:3001/api/v1/auth/forgot-password', () =>
+      http.post(`${TEST_API_BASE}/auth/forgot-password`, () =>
         HttpResponse.json({ success: false, message: 'Not Found' }, { status: 404 })
       )
     );
@@ -196,7 +197,7 @@ describe('SimpleForgotPassword — Formulario de recuperación de contraseña', 
 
   it('muestra éxito con 400 — no revela que el email es inválido en el servidor', async () => {
     server.use(
-      http.post('http://localhost:3001/api/v1/auth/forgot-password', () =>
+      http.post(`${TEST_API_BASE}/auth/forgot-password`, () =>
         HttpResponse.json({ success: false, message: 'Bad Request' }, { status: 400 })
       )
     );

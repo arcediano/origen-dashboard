@@ -11,6 +11,7 @@ import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { render } from '../../helpers/render';
 import { server } from '../../mocks/server';
 import { authErrorHandlers } from '../../mocks/handlers/auth.handlers';
+import { TEST_API_BASE } from '../../mocks/api-base';
 import { SimpleRegistration } from '@/components/features/registration/SimpleRegistration';
 
 vi.mock('next/navigation', () => ({
@@ -161,7 +162,7 @@ describe('SimpleRegistration — Formulario de registro', () => {
   it('el handler MSW devuelve 409 para email ya registrado', async () => {
     server.use(authErrorHandlers.registerConflict);
 
-    const response = await fetch('http://localhost:3001/api/v1/auth/register', {
+    const response = await fetch(`${TEST_API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: 'test@test.es' }),
@@ -173,7 +174,7 @@ describe('SimpleRegistration — Formulario de registro', () => {
   });
 
   it('el handler MSW del registro exitoso devuelve 200 con trackingCode', async () => {
-    const response = await fetch('http://localhost:3001/api/v1/auth/register', {
+    const response = await fetch(`${TEST_API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: 'nuevo@test.es', password: 'Password1' }),

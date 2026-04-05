@@ -13,8 +13,9 @@ import {
   producerErrorHandler,
   producerUnauthorizedHandler,
 } from '../../mocks/handlers/producers.handlers';
+import { TEST_API_BASE } from '../../mocks/api-base';
 
-const BASE = 'http://localhost:3001/api/v1';
+const BASE = TEST_API_BASE;
 
 describe('fetchMyProfile', () => {
   it('devuelve status 200 y los datos del perfil', async () => {

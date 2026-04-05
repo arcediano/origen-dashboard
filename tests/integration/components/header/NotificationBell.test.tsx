@@ -22,6 +22,7 @@ import {
   notificationsErrorHandler,
   mockBackendNotifications,
 } from '../../../mocks/handlers/notifications.handlers';
+import { TEST_API_BASE } from '../../../mocks/api-base';
 import { NotificationBell } from '@/app/dashboard/components/header/NotificationBell';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
 import type { Notification } from '@/types/notification';
@@ -80,7 +81,7 @@ describe('NotificationBell', () => {
     // Track the PATCH /notifications/:id/read call via MSW
     let capturedId: string | undefined;
     server.use(
-      http.patch('http://localhost:3001/api/v1/notifications/:id/read', ({ params }) => {
+      http.patch(`${TEST_API_BASE}/notifications/:id/read`, ({ params }) => {
         capturedId = params.id as string;
         return HttpResponse.json({
           success: true,
