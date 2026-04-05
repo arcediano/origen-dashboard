@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Clock } from 'lucide-react';
-import { Modal } from '@origen/ux-library';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@origen/ux-library';
 import { Button } from '@origen/ux-library';
 
 interface SessionExpiredModalProps {

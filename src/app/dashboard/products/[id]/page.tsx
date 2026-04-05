@@ -12,9 +12,8 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 // Componentes UI
-import { Button, Badge } from '@origen/ux-library';
+import { Button, Badge, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@origen/ux-library';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@origen/ux-library';
-import { Modal } from '@origen/ux-library';
 import { PageHeader } from '../../components/PageHeader';
 import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 import { ProductImage } from '@origen/ux-library';
