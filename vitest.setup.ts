@@ -20,6 +20,15 @@ vi.mock('@arcediano/ux-library', () => {
 			error ? React.createElement('div', { role: 'alert' }, error) : null
 		)
 	);
+	const InputAffixField = React.forwardRef<any, any>(({ label, error, id, affixLeft: _affixLeft, affixRight: _affixRight, ...props }, ref) =>
+		React.createElement(
+			'div',
+			null,
+			label ? React.createElement('label', { htmlFor: id }, label) : null,
+			React.createElement('input', { ref, id, 'aria-invalid': error ? 'true' : undefined, ...props }),
+			error ? React.createElement('div', { role: 'alert' }, error) : null
+		)
+	);
 	const Textarea = passthrough('textarea');
 	const Label = passthrough('label');
 	const Badge = passthrough('span');
@@ -95,6 +104,7 @@ vi.mock('@arcediano/ux-library', () => {
 	return {
 		Button,
 		Input,
+		InputAffixField,
 		Textarea,
 		Label,
 		Badge,

@@ -265,6 +265,7 @@ export interface EnhancedStep1LocationProps {
 // ============================================================================
 
 export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationProps) {
+  const billingAddressSameAsProduction = data.billingAddressSameAsProduction ?? true;
   
   // ========================================================================
   // VALIDACIÓN
@@ -320,7 +321,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
   // ========================================================================
   
   const handleInputChange = (field: keyof EnhancedLocationData, value: any) => {
-    onChange({ ...data, [field]: value });
+    onChange({ ...data, billingAddressSameAsProduction, [field]: value });
   };
 
   const capitalizeWords = (str: string) =>
@@ -646,9 +647,10 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
         <div className="p-3 bg-origen-crema/30 rounded-xl border border-border-subtle hover:bg-origen-crema/50 transition-colors mb-5">
           <CheckboxWithLabel
             id="billing-address-same-as-production"
-            checked={data.billingAddressSameAsProduction ?? true}
+            checked={billingAddressSameAsProduction}
             onCheckedChange={(checked) => {
-              const same = checked === true;
+              if (checked === 'indeterminate') return;
+              const same = checked;
               onChange({
                 ...data,
                 billingAddressSameAsProduction: same,
@@ -662,7 +664,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
         </div>
 
         {/* Campos de facturación — solo si son distintas */}
-        {!data.billingAddressSameAsProduction && (
+        {!billingAddressSameAsProduction && (
           <div className="space-y-5">
             <Input
               label="Nombre de la vía"

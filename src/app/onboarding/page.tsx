@@ -444,6 +444,45 @@ export default function OnboardingPage() {
 
   const isStepValid = stepValidationMessages.length === 0;
 
+  const focusFirstIncompleteField = useCallback(() => {
+    if (typeof window === 'undefined') return;
+
+    const formRoot = document.querySelector('[data-onboarding-step-content]');
+    if (!formRoot) return;
+
+    const candidates = Array.from(
+      formRoot.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLButtonElement>(
+        'input, textarea, select, button[role="combobox"]',
+      ),
+    );
+
+    const firstInvalid = candidates.find((el) => {
+      if (el.hasAttribute('disabled')) return false;
+      if (el.getAttribute('aria-invalid') === 'true') return true;
+
+      const isRequired = el.hasAttribute('required');
+      if (!isRequired) return false;
+
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) {
+        return !String(el.value ?? '').trim();
+      }
+
+      return false;
+    });
+
+    if (firstInvalid) {
+      firstInvalid.focus();
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const firstFocusable = formRoot.querySelector<HTMLElement>('input, textarea, select, button[role="combobox"]');
+    if (firstFocusable) {
+      firstFocusable.focus();
+      firstFocusable.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
+
   // ========================================================================
   // GUARDAR PASO ACTUAL EN EL BACKEND
   // ========================================================================
@@ -904,6 +943,13 @@ export default function OnboardingPage() {
                       </li>
                     ))}
                   </ul>
+                  <button
+                    type="button"
+                    onClick={focusFirstIncompleteField}
+                    className="mt-3 text-xs font-medium text-amber-800 underline underline-offset-2 hover:text-amber-900"
+                  >
+                    Ir al primer campo pendiente
+                  </button>
                 </div>
               )}
             </div>
@@ -912,6 +958,7 @@ export default function OnboardingPage() {
             <AnimatePresence mode="wait" custom={direction}>
               <motion.div
                 key={currentStep}
+                data-onboarding-step-content
                 custom={direction}
                 initial={{ opacity: 0, x: direction > 0 ? 20 : -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -921,6 +968,12 @@ export default function OnboardingPage() {
                 {renderStep()}
               </motion.div>
             </AnimatePresence>
+
+            {currentStep === 6 && formData.step6.acceptTerms && !formData.step6.stripeConnected && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-800">
+                Puedes finalizar el onboarding sin Stripe ahora, pero no podrás publicar productos hasta conectarlo desde tu dashboard.
+              </div>
+            )}
 
             {/* ====================================================================
                 ERROR DE GUARDADO
