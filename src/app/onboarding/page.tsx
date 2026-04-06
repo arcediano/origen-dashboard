@@ -353,11 +353,14 @@ export default function OnboardingPage() {
   const totalSteps = STEPS.length;
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
-  const isStepValid = useMemo(() => {
+  const stepValidationMessages = useMemo<string[]>(() => {
+    const messages: string[] = [];
+
     switch (currentStep) {
       case 0: {
         const { step1 } = formData;
-        const billingOk = step1.billingAddressSameAsProduction ||
+        const billingRequired = !step1.billingAddressSameAsProduction;
+        const billingOk = !billingRequired ||
           (!!step1.billingAddress?.street.trim() &&
            !!step1.billingAddress?.streetNumber.trim() &&
            !!step1.billingAddress?.city.trim() &&
@@ -366,47 +369,80 @@ export default function OnboardingPage() {
           ? true
           : !!step1.legalRepresentativeName?.trim();
         const phoneOk = !!step1.businessPhone && /^[6789]\d{8}$/.test(step1.businessPhone);
-        return (
-          !!step1.entityType &&
-          validateSpanishTaxId(step1.taxId ?? '').valid &&
-          legalRepOk &&
-          phoneOk &&
-          !!step1.province &&
-          !!step1.city.trim() &&
-          !!step1.street.trim() &&
-          !!step1.streetNumber.trim() &&
-          /^\d{5}$/.test(step1.postalCode) &&
-          step1.categories.length >= 1 &&
-          billingOk
-        );
+
+        if (!step1.entityType) messages.push('Selecciona el tipo de entidad.');
+        if (!validateSpanishTaxId(step1.taxId ?? '').valid) messages.push('Introduce un CIF/NIF válido.');
+        if (!legalRepOk) messages.push('Añade el representante legal para entidades jurídicas.');
+        if (!phoneOk) messages.push('Introduce un teléfono válido (9 dígitos, empieza por 6, 7, 8 o 9).');
+        if (!step1.street.trim()) messages.push('Completa la calle de producción.');
+        if (!step1.streetNumber.trim()) messages.push('Completa el número de la dirección de producción.');
+        if (!step1.city.trim()) messages.push('Completa la ciudad de producción.');
+        if (!step1.province) messages.push('Selecciona la provincia de producción.');
+        if (!/^\d{5}$/.test(step1.postalCode)) messages.push('El código postal de producción debe tener 5 dígitos.');
+        if (step1.categories.length < 1) messages.push('Selecciona al menos una categoría de productos.');
+        if (!billingOk) messages.push('Completa la dirección de facturación o marca que es igual a la de producción.');
+        break;
       }
-      case 1:
-        return (
-          !!formData.step2.businessName.trim() &&
-          formData.step2.description.trim().length >= 50 &&
-          formData.step2.values.length >= 1
-        );
-      case 2:
-        return formData.step_products.products.length >= 1;
-      case 3:
-        return formData.step3.logo !== null;
-      case 4:
-        return (
-          formData.step4.deliveryOptions.length >= 1 &&
-          formData.step4.includedZones.length >= 1
-        );
-      case 5:
-        return (
-          !!formData.step5.cif &&
-          !!formData.step5.seguroRC &&
-          !!formData.step5.manipuladorAlimentos
-        );
-      case 6:
-        return true; // Stripe es opcional — se puede completar más tarde
+      case 1: {
+        if (!formData.step2.businessName.trim()) messages.push('Escribe el nombre del negocio.');
+        if (formData.step2.description.trim().length < 50) messages.push('Amplía la historia del negocio (mínimo 50 caracteres).');
+        if (formData.step2.values.length < 1) messages.push('Selecciona al menos un valor que represente tu marca.');
+        break;
+      }
+      case 2: {
+        const products = formData.step_products.products;
+        if (products.length < 1) {
+          messages.push('Añade al menos un producto para continuar.');
+          break;
+        }
+
+        const invalidProduct = products.find((product) => {
+          const hasAllergenDeclaration = product.noAllergens || product.allergens.length > 0 || product.mayContain.length > 0;
+          const hasSeasonMonths = product.availabilityType !== 'seasonal' || (product.activeMonths?.length ?? 0) > 0;
+          return (
+            product.name.trim().length < 3 ||
+            product.description.trim().length < 20 ||
+            !product.referencePrice || product.referencePrice <= 0 ||
+            !hasAllergenDeclaration ||
+            !hasSeasonMonths
+          );
+        });
+
+        if (invalidProduct) {
+          messages.push('Revisa tus productos: nombre y descripción suficientes, precio válido, alérgenos declarados y meses activos si es de temporada.');
+        }
+        break;
+      }
+      case 3: {
+        if (formData.step3.logo === null) messages.push('Sube el logo del negocio para continuar.');
+        break;
+      }
+      case 4: {
+        if (formData.step4.deliveryOptions.length < 1) messages.push('Añade al menos un método de envío.');
+        if (formData.step4.includedZones.length < 1) messages.push('Añade al menos una zona de entrega incluida.');
+        if (!formData.step4.minOrderAmount || formData.step4.minOrderAmount <= 0) messages.push('El pedido mínimo debe ser mayor que 0 €.');
+        break;
+      }
+      case 5: {
+        if (!formData.step5.cif) messages.push('Sube el documento CIF/NIF.');
+        if (!formData.step5.seguroRC) messages.push('Sube el documento de seguro RC.');
+        if (!formData.step5.manipuladorAlimentos) messages.push('Sube el documento de manipulador de alimentos.');
+        break;
+      }
+      case 6: {
+        if (!formData.step6.acceptTerms) {
+          messages.push('Debes aceptar los términos para finalizar el onboarding. Stripe sigue siendo opcional en este paso.');
+        }
+        break;
+      }
       default:
-        return true;
+        break;
     }
+
+    return messages;
   }, [currentStep, formData]);
+
+  const isStepValid = stepValidationMessages.length === 0;
 
   // ========================================================================
   // GUARDAR PASO ACTUAL EN EL BACKEND
@@ -856,6 +892,20 @@ export default function OnboardingPage() {
               <h1 className="text-2xl lg:text-3xl font-bold text-origen-bosque">
                 {STEPS[currentStep].title}
               </h1>
+
+              {!isStepValid && stepValidationMessages.length > 0 && (
+                <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                  <p className="text-sm font-semibold text-amber-800 mb-2">Para continuar en este paso:</p>
+                  <ul className="space-y-1 text-xs text-amber-700">
+                    {stepValidationMessages.map((message) => (
+                      <li key={message} className="flex items-start gap-2">
+                        <span className="mt-1 w-1.5 h-1.5 rounded-full bg-amber-600 flex-shrink-0" />
+                        <span>{message}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* Contenido del paso - ANIMADO */}

@@ -174,7 +174,7 @@ export function SimpleForgotPassword() {
                   className="w-full"
                   leftIcon={<Send className="w-4 h-4" />}
                 >
-                  Enviar enlace de recuperación
+                  Enviar enlace
                 </Button>
 
                 {/* Volver al login */}

@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input, InputAffixField, Checkbox } from '@arcediano/ux-library';
+import { Input, InputAffixField, CheckboxWithLabel } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile, CategoryCard } from '@/components/shared';
 import { validateSpanishTaxId, type TaxIdType } from '@/lib/utils/tax-id';
 
@@ -634,7 +634,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-bosque/10 to-origen-hoja/10 flex items-center justify-center">
-            <FileText className="w-6 h-6 text-origen-bosque" />
+            <FileText className="w-6 h-6 text-origen-pradera" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-origen-bosque">Dirección de facturación</h2>
@@ -643,8 +643,8 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
         </div>
 
         {/* Checkbox "igual a la de producción" */}
-        <div className="flex items-center gap-3 p-3 bg-origen-crema/30 rounded-xl border border-border-subtle hover:bg-origen-crema/50 transition-colors mb-5">
-          <Checkbox
+        <div className="p-3 bg-origen-crema/30 rounded-xl border border-border-subtle hover:bg-origen-crema/50 transition-colors mb-5">
+          <CheckboxWithLabel
             id="billing-address-same-as-production"
             checked={data.billingAddressSameAsProduction ?? true}
             onCheckedChange={(checked) => {
@@ -655,12 +655,10 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 billingAddress: same ? undefined : data.billingAddress,
               });
             }}
+            label="La dirección de facturación es la misma que la de producción"
             variant="seed"
             size="md"
           />
-          <label htmlFor="billing-address-same-as-production" className="text-sm font-medium text-origen-bosque cursor-pointer">
-            La dirección de facturación es la misma que la de producción
-          </label>
         </div>
 
         {/* Campos de facturación — solo si son distintas */}

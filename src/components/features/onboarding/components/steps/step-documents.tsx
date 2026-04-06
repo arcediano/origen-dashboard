@@ -106,12 +106,11 @@ export function EnhancedStep5Documents({
   const verifiedCertifications = data.certifications?.filter(cert => cert.status === 'verified') || [];
   const pendingCertifications = data.certifications?.filter(cert => cert.status === 'pending') || [];
   
-  const totalRequired = 3 + selectedCertifications.length;
-  const completedRequired = [hasCif, hasSeguro, hasManipulador, ...verifiedCertifications].filter(Boolean).length;
+  const totalRequired = 3;
+  const completedRequired = [hasCif, hasSeguro, hasManipulador].filter(Boolean).length;
   const progress = (completedRequired / totalRequired) * 100;
   
-  const isComplete = hasCif && hasSeguro && hasManipulador && 
-    selectedCertifications.length === verifiedCertifications.length;
+  const isComplete = hasCif && hasSeguro && hasManipulador;
 
   // ========================================================================
   // MANEJADORES
@@ -332,7 +331,7 @@ export function EnhancedStep5Documents({
             <div>
               <h2 className="text-xl font-bold text-origen-bosque">Certificaciones seleccionadas</h2>
               <p className="text-sm text-muted-foreground">
-                Sube los documentos para verificar tus certificaciones
+                Sube los documentos para verificar tus certificaciones (opcional)
               </p>
             </div>
           </div>
@@ -428,7 +427,7 @@ export function EnhancedStep5Documents({
               {selectedCertifications.length > 0 && (
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-2 h-2 rounded-full bg-origen-pradera" />
-                  <span className="text-muted-foreground">Certificaciones:</span>
+                  <span className="text-muted-foreground">Certificaciones (recomendadas):</span>
                   <span className="font-medium text-origen-bosque">
                     {verifiedCertifications.length}/{selectedCertifications.length}
                   </span>
