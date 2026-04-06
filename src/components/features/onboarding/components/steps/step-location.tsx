@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input } from '@arcediano/ux-library';
+import { Input, Checkbox } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile, CategoryCard } from '@/components/shared';
 import { validateSpanishTaxId, type TaxIdType } from '@/lib/utils/tax-id';
 
@@ -27,7 +27,6 @@ import {
   Store,
   Info,
   ChevronDown,
-  Warehouse,
   FileText,
   Building2,
 } from 'lucide-react';
@@ -508,10 +507,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             <Home className="w-6 h-6 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque flex items-center gap-2">
-              <Warehouse className="w-5 h-5 text-origen-pradera" />
-              Dirección de producción
-            </h2>
+            <h2 className="text-xl font-bold text-origen-bosque">Dirección de producción</h2>
             <p className="text-sm text-muted-foreground">Aquí se recogerán tus pedidos. Debe ser la dirección real de tu producción o almacén.</p>
           </div>
         </div>
@@ -652,21 +648,25 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
         </div>
 
         {/* Checkbox "igual a la de producción" */}
-        <label className="flex items-center gap-3 p-3 bg-origen-crema/30 rounded-xl border border-border-subtle cursor-pointer hover:bg-origen-crema/50 transition-colors mb-5">
-          <input
-            type="checkbox"
+        <div className="flex items-center gap-3 p-3 bg-origen-crema/30 rounded-xl border border-border-subtle hover:bg-origen-crema/50 transition-colors mb-5">
+          <Checkbox
+            id="billing-address-same-as-production"
             checked={data.billingAddressSameAsProduction ?? true}
-            onChange={(e) => {
-              const same = e.target.checked;
-              handleInputChange('billingAddressSameAsProduction', same);
-              if (same) handleInputChange('billingAddress', undefined);
+            onCheckedChange={(checked) => {
+              const same = checked === true;
+              onChange({
+                ...data,
+                billingAddressSameAsProduction: same,
+                billingAddress: same ? undefined : data.billingAddress,
+              });
             }}
-            className="w-4 h-4 rounded border-border accent-origen-pradera"
+            variant="seed"
+            size="md"
           />
-          <span className="text-sm font-medium text-origen-bosque">
+          <label htmlFor="billing-address-same-as-production" className="text-sm font-medium text-origen-bosque cursor-pointer">
             La dirección de facturación es la misma que la de producción
-          </span>
-        </label>
+          </label>
+        </div>
 
         {/* Campos de facturación — solo si son distintas */}
         {!data.billingAddressSameAsProduction && (

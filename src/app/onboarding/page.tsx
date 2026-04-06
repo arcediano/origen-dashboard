@@ -876,8 +876,8 @@ export default function OnboardingPage() {
                 ERROR DE GUARDADO
             ==================================================================== */}
             {saveError && (
-              <div className="mt-6 p-3 bg-feedback-danger-subtle border border-red-200 rounded-xl text-sm text-red-700 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <div className="mt-6 p-3 bg-feedback-danger-subtle border border-red-200 rounded-xl text-sm text-red-700 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span>{saveError}</span>
                 <button type="button" onClick={() => setSaveError(null)} className="ml-auto text-feedback-danger hover:text-red-700">×</button>
               </div>

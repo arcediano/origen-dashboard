@@ -85,8 +85,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
     watch,
     setValue,
     getValues,
-    trigger,
-    formState: { errors, isValid }
+    formState: { errors, isValid, touchedFields, isSubmitted }
   } = useForm<InitialRegistrationFormData>({
     resolver: zodResolver(initialRegistrationSchema),
     mode: 'onChange',
@@ -118,10 +117,15 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
   const isFormValid = isValid && textareaValid;
 
   const confirmPasswordError =
-    errors.confirmPassword?.message ||
-    (formValues.confirmPassword && formValues.password !== formValues.confirmPassword
-      ? 'Las contraseñas no coinciden'
-      : undefined);
+    isSubmitted || touchedFields.confirmPassword
+      ? errors.confirmPassword?.message ||
+        (formValues.confirmPassword && formValues.password !== formValues.confirmPassword
+          ? 'Las contraseñas no coinciden'
+          : undefined)
+      : undefined;
+
+  const shouldShowFieldError = (fieldName: keyof InitialRegistrationFormData): boolean =>
+    isSubmitted || Boolean(touchedFields[fieldName]);
 
   const isProvinceAutoFilled = useMemo(() => {
     const cp = formValues.postalCode || '';
@@ -164,7 +168,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
           setValue(key as any, value as any, { shouldValidate: false });
         }
       });
-      trigger();
     }
   }, []);
 
@@ -321,11 +324,17 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     )}
                   </p>
                 </div>
+                <a
+                  href="/contacto"
+                  className="inline-flex w-full items-center justify-center py-2.5 rounded-xl border border-origen-hoja/30 bg-origen-hoja/10 text-sm font-semibold text-origen-hoja hover:bg-origen-hoja/20 hover:border-origen-hoja/50 active:scale-[.98] transition-all"
+                >
+                  Contactar soporte
+                </a>
                 <button
                   onClick={() => setSubmitStatus('idle')}
                   className="w-full py-2.5 rounded-xl border border-border text-sm font-semibold text-muted-foreground hover:text-origen-bosque hover:border-red-200 hover:bg-red-50/30 active:scale-[.98] transition-all"
                 >
-                  Cerrar e intentarlo de nuevo
+                  Reintentar
                 </button>
               </div>
             </motion.div>
@@ -348,14 +357,14 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   label="Nombre"
                   required
                   inputSize="lg"
-                  error={errors.contactName?.message}
+                  error={shouldShowFieldError('contactName') ? errors.contactName?.message : undefined}
                   {...register('contactName')}
                 />
                 <Input
                   label="Apellidos"
                   required
                   inputSize="lg"
-                  error={errors.contactSurname?.message}
+                  error={shouldShowFieldError('contactSurname') ? errors.contactSurname?.message : undefined}
                   {...register('contactSurname')}
                 />
               </div>
@@ -368,7 +377,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   type="email"
                   placeholder="nombre@ejemplo.es"
                   inputSize="lg"
-                  error={errors.email?.message}
+                  error={shouldShowFieldError('email') ? errors.email?.message : undefined}
                   {...register('email')}
                 />
                 <Input
@@ -378,7 +387,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   type="tel"
                   placeholder="600 000 000"
                   inputSize="lg"
-                  error={errors.phone?.message}
+                  error={shouldShowFieldError('phone') ? errors.phone?.message : undefined}
                   {...register('phone')}
                 />
               </div>
@@ -390,7 +399,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     required
                     type="password"
                     helperText="Mínimo 8 caracteres"
-                    error={errors.password?.message}
+                    error={shouldShowFieldError('password') ? errors.password?.message : undefined}
                     inputSize="lg"
                     {...register('password')}
                   />
@@ -401,7 +410,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   required
                   type="password"
                   error={confirmPasswordError}
-                  success={!confirmPasswordError && !!formValues.confirmPassword && formValues.password === formValues.confirmPassword}
+                  success={!confirmPasswordError && !!formValues.confirmPassword && formValues.password === formValues.confirmPassword && (isSubmitted || !!touchedFields.confirmPassword)}
                   inputSize="lg"
                   {...register('confirmPassword')}
                 />
@@ -419,14 +428,14 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 leftIcon={<Store />}
                 required
                 inputSize="lg"
-                error={errors.businessName?.message}
+                error={shouldShowFieldError('businessName') ? errors.businessName?.message : undefined}
                 {...register('businessName')}
               />
 
               <BusinessTypeSelector
                 value={formValues.businessType}
                 onChange={(value) => setValue('businessType', value, { shouldValidate: true })}
-                error={errors.businessType?.message}
+                error={shouldShowFieldError('businessType') ? errors.businessType?.message : undefined}
               />
 
               {/* Nombre de la vía */}
@@ -436,7 +445,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 required
                 placeholder="Calle Mayor, Av. de la Constitución..."
                 inputSize="lg"
-                error={errors.street?.message}
+                error={shouldShowFieldError('street') ? errors.street?.message : undefined}
                 {...register('street')}
                 onBlur={() => {
                   const v = formValues.street;
@@ -451,7 +460,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   required
                   inputSize="lg"
                   className="font-mono"
-                  error={errors.streetNumber?.message}
+                  error={shouldShowFieldError('streetNumber') ? errors.streetNumber?.message : undefined}
                   {...register('streetNumber')}
                 />
                 <div className="md:col-span-2">
@@ -459,7 +468,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     label="Piso / Puerta"
                     inputSize="lg"
                     helperText="Opcional"
-                    error={errors.streetComplement?.message}
+                    error={shouldShowFieldError('streetComplement') ? errors.streetComplement?.message : undefined}
                     {...register('streetComplement')}
                   />
                 </div>
@@ -473,7 +482,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   inputSize="lg"
                   maxLength={5}
                   className="font-mono"
-                  error={errors.postalCode?.message || cpError}
+                  error={shouldShowFieldError('postalCode') ? (errors.postalCode?.message || cpError) : undefined}
                   {...register('postalCode')}
                 />
                 <div>
@@ -482,7 +491,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     value={formValues.province}
                     onValueChange={(value) => setValue('province', value, { shouldValidate: true })}
                     placeholder="Selecciona provincia"
-                    error={errors.province?.message}
+                    error={shouldShowFieldError('province') ? errors.province?.message : undefined}
                     disabled={isProvinceAutoFilled}
                     required
                   >
@@ -500,7 +509,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   label="Ciudad / Municipio"
                   required
                   inputSize="lg"
-                  error={errors.municipio?.message}
+                  error={shouldShowFieldError('municipio') ? errors.municipio?.message : undefined}
                   {...register('municipio')}
                 />
               </div>
@@ -522,7 +531,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   />
                 ))}
               </div>
-              {errors.producerCategory && (
+              {(isSubmitted || !!touchedFields.producerCategory) && errors.producerCategory && (
                 <div className="mt-2 p-3 md:p-4 bg-destructive/10 rounded-lg border border-destructive/30">
                   <p className="text-sm text-destructive flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" />
@@ -544,7 +553,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   required
                   placeholder="¿Quién eres, qué produces y desde cuándo? ¿Cuáles son tus valores? ¿Por qué quieres unirte a Origen?"
                   helperText="Mínimo 50 caracteres"
-                  error={errors.whyOrigin?.message}
+                  error={shouldShowFieldError('whyOrigin') ? errors.whyOrigin?.message : undefined}
                   maxLength={300}
                   showCharCount
                   {...register('whyOrigin')}
@@ -571,7 +580,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   description="He leído y acepto las condiciones de uso de la plataforma Origen"
                   checked={formValues.acceptsTerms}
                   onChange={(checked) => setValue('acceptsTerms', checked, { shouldValidate: true })}
-                  error={errors.acceptsTerms?.message}
+                  error={shouldShowFieldError('acceptsTerms') ? errors.acceptsTerms?.message : undefined}
                   required
                 />
                 <CustomCheckbox
@@ -579,7 +588,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   description="Autorizo el tratamiento de mis datos personales según el RGPD"
                   checked={formValues.acceptsPrivacy}
                   onChange={(checked) => setValue('acceptsPrivacy', checked, { shouldValidate: true })}
-                  error={errors.acceptsPrivacy?.message}
+                  error={shouldShowFieldError('acceptsPrivacy') ? errors.acceptsPrivacy?.message : undefined}
                   required
                 />
               </div>
@@ -590,8 +599,9 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               <Button
                 type="submit"
                 size="lg"
+                variant="primary"
                 disabled={!isFormValid}
-                className="w-full md:w-auto md:min-w-[280px]"
+                className="w-full md:w-auto md:min-w-[280px] text-white disabled:text-white/90"
               >
                 {isFormValid ? (
                   <motion.span

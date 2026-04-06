@@ -567,9 +567,9 @@ export function EnhancedStepProducts({ data, onChange, producerCategories }: Enh
           type="button"
           onClick={handleAdd}
           variant="outline"
+          leftIcon={<Plus className="w-4 h-4" />}
           className="w-full h-12 border-dashed border-origen-pradera/40 text-origen-bosque hover:bg-origen-crema/30 hover:border-origen-pradera"
         >
-          <Plus className="w-4 h-4 mr-2" />
           Añadir producto {data.products.length > 0 ? `(${data.products.length}/${MAX_PRODUCTS})` : ''}
         </Button>
       ) : (
