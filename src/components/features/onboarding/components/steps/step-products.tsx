@@ -228,11 +228,10 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
 
           {/* Foto del producto */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              <Camera className="w-4 h-4 text-origen-pradera" />
+            <p className="text-sm font-medium text-origen-bosque">
               Foto del producto
-              <span className="text-xs text-muted-foreground font-normal">(recomendada)</span>
-            </label>
+              <span className="text-xs text-muted-foreground font-normal ml-2">(recomendada)</span>
+            </p>
             <FileUpload
               value={product.photo ? [product.photo] : []}
               onChange={(files) => onChange({ ...product, photo: files[0] ?? undefined })}
@@ -244,26 +243,24 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
           </div>
 
           {/* Nombre */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque">
-              Nombre del producto <span className="text-red-500">*</span>
-            </label>
+          <div>
             <Input
+              label="Nombre del producto"
+              required
               value={product.name}
               onChange={(e) => onChange({ ...product, name: e.target.value })}
-              placeholder="Ej: Queso manchego curado, Aceite de oliva virgen extra..."
+              placeholder="Queso manchego curado, Aceite de oliva virgen extra..."
               inputSize="lg"
               maxLength={60}
             />
-            <p className="text-xs text-muted-foreground text-right">{product.name.length} / 60</p>
+            <p className="text-xs text-muted-foreground text-right mt-1">{product.name.length} / 60</p>
           </div>
 
           {/* Descripción */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque">
-              Descripción corta <span className="text-red-500">*</span>
-            </label>
+          <div>
             <Textarea
+              label="Descripción corta"
+              required
               value={product.description}
               onChange={(e) => onChange({ ...product, description: e.target.value })}
               placeholder="Describe brevemente el producto: qué es, cómo se produce, qué lo hace especial..."
@@ -275,7 +272,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
               )}
               maxLength={200}
             />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>{product.description.length < 20 ? `Mínimo ${20 - product.description.length} caracteres más` : '✓ Suficiente'}</span>
               <span>{product.description.length} / 200</span>
             </div>
@@ -283,13 +280,12 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
 
           {/* Precio + Unidad */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-origen-bosque">
-                Precio de referencia <span className="text-red-500">*</span>
-              </label>
+            <div>
               <div className="relative">
-                <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <Euro className="absolute left-3 top-[2.35rem] w-4 h-4 text-muted-foreground pointer-events-none z-10" />
                 <Input
+                  label="Precio de referencia"
+                  required
                   type="number"
                   value={product.referencePrice ?? ''}
                   onChange={(e) => onChange({ ...product, referencePrice: parseFloat(e.target.value) || undefined })}
@@ -326,10 +322,10 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
 
           {/* Alérgenos EU 1169/2011 */}
           <div className="space-y-3">
-            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
+            <p className="text-sm font-medium text-origen-bosque flex items-center gap-2">
               Alérgenos <span className="text-red-500">*</span>
               <span className="text-xs text-muted-foreground font-normal">(Reglamento UE 1169/2011)</span>
-            </label>
+            </p>
 
             {/* No contiene alérgenos */}
             <label className="flex items-center gap-2 cursor-pointer">

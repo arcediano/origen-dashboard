@@ -19,7 +19,6 @@ import { PRODUCER_CATEGORIES } from '@/constants/categories';
 import { getProvinciaFromCP } from '@/constants/cp-provincias';
 
 import {
-  MapPin,
   Camera,
   CheckCircle2,
   AlertCircle,
@@ -27,13 +26,10 @@ import {
   Home,
   Store,
   Info,
-  Calendar,
-  Users,
   ChevronDown,
   Warehouse,
   FileText,
   Building2,
-  Phone,
 } from 'lucide-react';
 
 // ============================================================================
@@ -409,7 +405,6 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           {/* Tipo de entidad — pills scrollables en mobile */}
           <div className="space-y-3">
             <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-origen-pradera" />
               Forma jurídica <span className="text-red-500">*</span>
             </label>
             <div className="flex flex-wrap gap-2">
@@ -438,67 +433,52 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
               data.entityType && data.entityType !== 'autonomo' ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0',
             )}
           >
-            <div className="space-y-2 pt-1">
-              <label className="text-sm font-medium text-origen-bosque">
-                Nombre del representante legal <span className="text-red-500">*</span>
-              </label>
+            <div className="pt-1">
               <Input
+                label="Nombre del representante legal"
+                required
                 value={data.legalRepresentativeName || ''}
                 onChange={(e) => handleInputChange('legalRepresentativeName', e.target.value)}
                 placeholder="Nombre y apellidos del representante"
                 inputSize="lg"
+                helperText="Persona física con poderes de representación de la entidad."
               />
-              <p className="text-xs text-muted-foreground">
-                Persona física con poderes de representación de la entidad.
-              </p>
             </div>
           </div>
 
           {/* NIF / CIF — movido aquí desde la card de ubicación */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-origen-pradera" />
-              NIF / CIF / NIE <span className="text-red-500">*</span>
-              {taxIdValidation.valid && taxIdValidation.type && (
-                <span className="ml-auto text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+          <div>
+            {taxIdValidation.valid && taxIdValidation.type && (
+              <div className="flex justify-end mb-1">
+                <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
                   {taxIdBadge[taxIdValidation.type]} ✓
                 </span>
-              )}
-            </label>
+              </div>
+            )}
             <Input
+              label="NIF / CIF / NIE"
+              required
               value={data.taxId || ''}
               onChange={(e) => handleInputChange('taxId', e.target.value.toUpperCase().replace(/[\s\-]/g, ''))}
               onBlur={() => setTaxIdTouched(true)}
-              placeholder="Ej: 12345678A · X1234567L · B12345678"
+              placeholder="12345678A · X1234567L · B12345678"
               inputSize="lg"
-              className={cn('font-mono uppercase', taxIdError && 'border-red-500 focus:ring-red-500')}
+              className="font-mono uppercase"
               maxLength={9}
-              aria-invalid={!!taxIdError}
-              aria-describedby={taxIdError ? 'taxid-error' : 'taxid-hint'}
+              error={taxIdError}
+              helperText={!taxIdError ? 'NIF (personas físicas), NIE (extranjeros) o CIF (personas jurídicas).' : undefined}
             />
-            {taxIdError ? (
-              <p id="taxid-error" className="text-xs text-red-600 flex items-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                {taxIdError}
-              </p>
-            ) : (
-              <p id="taxid-hint" className="text-xs text-muted-foreground">
-                NIF (personas físicas), NIE (extranjeros) o CIF (personas jurídicas).
-              </p>
-            )}
           </div>
 
           {/* Teléfono de negocio */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              <Phone className="w-4 h-4 text-origen-pradera" />
-              Teléfono de contacto del negocio <span className="text-red-500">*</span>
-            </label>
+          <div>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none select-none">
+              <span className="absolute left-3 top-[2.35rem] text-sm text-muted-foreground pointer-events-none select-none z-10">
                 +34
               </span>
               <Input
+                label="Teléfono de contacto del negocio"
+                required
                 value={data.businessPhone || ''}
                 onChange={(e) => {
                   const digits = e.target.value.replace(/\D/g, '').slice(0, 9);
@@ -508,20 +488,11 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 placeholder="600 000 000"
                 inputMode="tel"
                 inputSize="lg"
-                className={cn('pl-12', phoneTouched && phoneError && 'border-red-500 focus:ring-red-500')}
-                aria-invalid={phoneTouched && !!phoneError}
+                className="pl-12"
+                error={phoneTouched ? phoneError : undefined}
+                helperText={!phoneTouched || !phoneError ? 'Para coordinación de pedidos y entregas. No se mostrará públicamente.' : undefined}
               />
             </div>
-            {phoneTouched && phoneError ? (
-              <p className="text-xs text-red-600 flex items-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                {phoneError}
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Para coordinación de pedidos y entregas. No se mostrará públicamente.
-              </p>
-            )}
           </div>
 
         </div>
@@ -555,43 +526,32 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
 
         <div className="space-y-5">
           {/* Nombre de la vía */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-origen-pradera" />
-              Nombre de la vía <span className="text-red-500">*</span>
-            </label>
-            <Input
-              value={data.street || ''}
-              onChange={(e) => handleInputChange('street', e.target.value)}
-              onBlur={handleStreetBlur}
-              placeholder="Ej: Calle Mayor, Av. de la Constitución"
-              inputSize="lg"
-            />
-          </div>
+          <Input
+            label="Nombre de la vía"
+            required
+            value={data.street || ''}
+            onChange={(e) => handleInputChange('street', e.target.value)}
+            onBlur={handleStreetBlur}
+            placeholder="Calle Mayor, Av. de la Constitución"
+            inputSize="lg"
+          />
 
           {/* Número + Piso/Puerta */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-origen-bosque">
-                Número <span className="text-red-500">*</span>
-              </label>
+            <Input
+              label="Número"
+              required
+              value={data.streetNumber || ''}
+              onChange={(e) => handleInputChange('streetNumber', e.target.value)}
+              inputSize="lg"
+              className="font-mono"
+            />
+            <div className="sm:col-span-2">
               <Input
-                value={data.streetNumber || ''}
-                onChange={(e) => handleInputChange('streetNumber', e.target.value)}
-                placeholder="Ej: 15"
-                inputSize="lg"
-                className="font-mono"
-              />
-            </div>
-            <div className="sm:col-span-2 space-y-2">
-              <label className="text-sm font-medium text-origen-bosque flex items-center gap-1">
-                Piso / Puerta
-                <span className="text-xs text-text-subtle font-normal">(opcional)</span>
-              </label>
-              <Input
+                label="Piso / Puerta"
                 value={data.streetComplement || ''}
                 onChange={(e) => handleInputChange('streetComplement', e.target.value)}
-                placeholder="Ej: 3º A, Local 1, Bajo"
+                placeholder="3º A, Local 1, Bajo"
                 inputSize="lg"
               />
             </div>
@@ -599,20 +559,16 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
 
           {/* CP + Provincia + Ciudad/Municipio */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-origen-bosque">
-                Código Postal <span className="text-red-500">*</span>
-              </label>
-              <Input
-                value={data.postalCode || ''}
-                onChange={handlePostalCodeChange}
-                placeholder="28001"
-                maxLength={5}
-                inputSize="lg"
-                className="font-mono"
-                error={cpError}
-              />
-            </div>
+            <Input
+              label="Código Postal"
+              required
+              value={data.postalCode || ''}
+              onChange={handlePostalCodeChange}
+              maxLength={5}
+              inputSize="lg"
+              className="font-mono"
+              error={cpError}
+            />
             <div className="space-y-2">
               <label className="text-sm font-medium text-origen-bosque">
                 Provincia <span className="text-red-500">*</span>
@@ -620,7 +576,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
               <Select
                 value={data.province || ''}
                 onValueChange={(value) => handleInputChange('province', value)}
-                placeholder="Ej: Madrid"
+                placeholder="Autodetectada"
                 disabled
               >
                 {PROVINCIAS_ESPANA.map((province) => (
@@ -630,39 +586,30 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 ))}
               </Select>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-origen-bosque">
-                Ciudad / Municipio <span className="text-red-500">*</span>
-              </label>
-              <Input
-                value={data.city || ''}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                onBlur={handleCityBlur}
-                placeholder="Ej: Madrid"
-                inputSize="lg"
-              />
-            </div>
+            <Input
+              label="Ciudad / Municipio"
+              required
+              value={data.city || ''}
+              onChange={(e) => handleInputChange('city', e.target.value)}
+              onBlur={handleCityBlur}
+              inputSize="lg"
+            />
           </div>
 
           {/* Año de fundación */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-border-subtle">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-origen-pradera" />
-                Año de fundación
-                <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
-              </label>
+            <div>
               <Input
+                label="Año de fundación"
                 type="number"
                 value={data.foundedYear || ''}
                 onChange={(e) => handleInputChange('foundedYear', parseInt(e.target.value) || undefined)}
-                placeholder="Ej: 1985"
                 min={1900}
                 max={new Date().getFullYear()}
                 inputSize="lg"
               />
               {data.foundedYear && (
-                <p className="text-xs text-origen-pradera">
+                <p className="text-xs text-origen-pradera mt-1">
                   {new Date().getFullYear() - data.foundedYear} años de experiencia
                 </p>
               )}
@@ -671,7 +618,6 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             {/* Tamaño del equipo */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-                <Users className="w-4 h-4 text-origen-pradera" />
                 Tamaño del equipo
                 <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
               </label>
@@ -725,36 +671,27 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
         {/* Campos de facturación — solo si son distintas */}
         {!data.billingAddressSameAsProduction && (
           <div className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-origen-bosque" />
-                Nombre de la vía <span className="text-red-500">*</span>
-              </label>
-              <Input
-                value={data.billingAddress?.street || ''}
-                onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, street: e.target.value })}
-                placeholder="Ej: Calle Mayor, Av. de la Constitución"
-                inputSize="lg"
-              />
-            </div>
+            <Input
+              label="Nombre de la vía"
+              required
+              value={data.billingAddress?.street || ''}
+              onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, street: e.target.value })}
+              placeholder="Calle Mayor, Av. de la Constitución"
+              inputSize="lg"
+            />
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-origen-bosque">Número <span className="text-red-500">*</span></label>
+              <Input
+                label="Número"
+                required
+                value={data.billingAddress?.streetNumber || ''}
+                onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, streetNumber: e.target.value })}
+                inputSize="lg"
+                className="font-mono"
+              />
+              <div className="sm:col-span-2">
                 <Input
-                  value={data.billingAddress?.streetNumber || ''}
-                  onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, streetNumber: e.target.value })}
-                  placeholder="15"
-                  inputSize="lg"
-                  className="font-mono"
-                />
-              </div>
-              <div className="sm:col-span-2 space-y-2">
-                <label className="text-sm font-medium text-origen-bosque flex items-center gap-1">
-                  Piso / Puerta
-                  <span className="text-xs text-text-subtle font-normal">(opcional)</span>
-                </label>
-                <Input
+                  label="Piso / Puerta"
                   value={data.billingAddress?.streetComplement || ''}
                   onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, streetComplement: e.target.value })}
                   placeholder="3º A, Local 1"
@@ -764,40 +701,35 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-origen-bosque">Código Postal <span className="text-red-500">*</span></label>
-                <Input
-                  value={data.billingAddress?.postalCode || ''}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, '').slice(0, 5);
-                    const province = value.length === 5 ? (getProvinciaFromCP(value) ?? data.billingAddress?.province ?? '') : (data.billingAddress?.province ?? '');
-                    handleInputChange('billingAddress', { ...data.billingAddress, postalCode: value, province });
-                  }}
-                  placeholder="28001"
-                  maxLength={5}
-                  inputSize="lg"
-                  className="font-mono"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-origen-bosque">Provincia <span className="text-red-500">*</span></label>
-                <Input
-                  value={data.billingAddress?.province || ''}
-                  disabled
-                  placeholder="Autodetectada"
-                  inputSize="lg"
-                  className="bg-surface text-muted-foreground"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-origen-bosque">Ciudad <span className="text-red-500">*</span></label>
-                <Input
-                  value={data.billingAddress?.city || ''}
-                  onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, city: e.target.value })}
-                  placeholder="Ej: Madrid"
-                  inputSize="lg"
-                />
-              </div>
+              <Input
+                label="Código Postal"
+                required
+                value={data.billingAddress?.postalCode || ''}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+                  const province = value.length === 5 ? (getProvinciaFromCP(value) ?? data.billingAddress?.province ?? '') : (data.billingAddress?.province ?? '');
+                  handleInputChange('billingAddress', { ...data.billingAddress, postalCode: value, province });
+                }}
+                maxLength={5}
+                inputSize="lg"
+                className="font-mono"
+              />
+              <Input
+                label="Provincia"
+                required
+                value={data.billingAddress?.province || ''}
+                disabled
+                placeholder="Autodetectada"
+                inputSize="lg"
+                className="bg-surface text-muted-foreground"
+              />
+              <Input
+                label="Ciudad"
+                required
+                value={data.billingAddress?.city || ''}
+                onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, city: e.target.value })}
+                inputSize="lg"
+              />
             </div>
           </div>
         )}

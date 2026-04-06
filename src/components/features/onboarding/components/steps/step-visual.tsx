@@ -21,8 +21,6 @@ import {
   X,
   Video,
   Sparkles,
-  AlertCircle,
-  ExternalLink
 } from 'lucide-react';
 
 // ============================================================================
@@ -288,38 +286,16 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
         </div>
 
         <div className="space-y-4">
-          <div className="relative">
-            <Input
-              value={data.introVideo || ''}
-              onChange={(e) => handleInputChange('introVideo', e.target.value)}
-              placeholder="https://youtube.com/watch?v=... o https://vimeo.com/..."
-              className={cn(
-                "h-12 text-base focus:ring-2",
-                data.introVideo && isValidVideoUrl(data.introVideo)
-                  ? "border-green-400 focus:border-green-500 focus:ring-green-200"
-                  : data.introVideo && !isValidVideoUrl(data.introVideo)
-                  ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                  : "border-border focus:border-origen-pradera focus:ring-origen-pradera/20"
-              )}
-            />
-            {data.introVideo && isValidVideoUrl(data.introVideo) && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-green-600">
-                <CheckCircle2 className="w-4 h-4" />
-              </div>
+          <Input
+            value={data.introVideo || ''}
+            onChange={(e) => handleInputChange('introVideo', e.target.value)}
+            placeholder="https://youtube.com/watch?v=... o https://vimeo.com/..."
+            inputSize="lg"
+            error={data.introVideo && !isValidVideoUrl(data.introVideo) ? 'Introduce una URL válida de YouTube o Vimeo' : undefined}
+            className={cn(
+              data.introVideo && isValidVideoUrl(data.introVideo) && "border-green-400 focus:border-green-500"
             )}
-            {data.introVideo && !isValidVideoUrl(data.introVideo) && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <AlertCircle className="w-4 h-4 text-red-400" />
-              </div>
-            )}
-          </div>
-
-          {data.introVideo && !isValidVideoUrl(data.introVideo) && (
-            <p className="text-xs text-red-600 flex items-center gap-1">
-              <AlertCircle className="w-3.5 h-3.5" />
-              Introduce una URL válida de YouTube o Vimeo
-            </p>
-          )}
+          />
 
           {/* Embed preview */}
           {data.introVideo && isValidVideoUrl(data.introVideo) && getVideoEmbedUrl(data.introVideo) && (

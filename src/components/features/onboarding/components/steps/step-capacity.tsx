@@ -30,7 +30,6 @@ import {
   Plus,
   X,
   Recycle,
-  TrendingUp,
   Users
 } from 'lucide-react';
 
@@ -742,34 +741,32 @@ export function EnhancedStep4Capacity({
                           <Input
                             value={option.name}
                             onChange={(e) => handleDeliveryOptionChange(option.id, 'name', e.target.value)}
-                            className="h-10 text-base font-medium"
+                            inputSize="md"
+                            className="text-base font-medium"
                           />
                           <Input
                             value={option.description}
                             onChange={(e) => handleDeliveryOptionChange(option.id, 'description', e.target.value)}
-                            className="h-10 text-sm"
+                            inputSize="md"
+                            className="text-sm"
                           />
                           <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-xs text-muted-foreground mb-1 block">Precio (€)</label>
-                              <Input
-                                type="number"
-                                value={option.price}
-                                onChange={(e) => handleDeliveryOptionChange(option.id, 'price', parseFloat(e.target.value) || 0)}
-                                min={0}
-                                step={0.5}
-                                className="h-10 text-base"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs text-muted-foreground mb-1 block">Tiempo estimado</label>
-                              <Input
-                                value={option.estimatedDays}
-                                onChange={(e) => handleDeliveryOptionChange(option.id, 'estimatedDays', e.target.value)}
-                                placeholder="Ej: 2-3 días"
-                                className="h-10 text-base"
-                              />
-                            </div>
+                            <Input
+                              label="Precio (€)"
+                              type="number"
+                              value={option.price}
+                              onChange={(e) => handleDeliveryOptionChange(option.id, 'price', parseFloat(e.target.value) || 0)}
+                              min={0}
+                              step={0.5}
+                              inputSize="md"
+                            />
+                            <Input
+                              label="Tiempo estimado"
+                              value={option.estimatedDays}
+                              onChange={(e) => handleDeliveryOptionChange(option.id, 'estimatedDays', e.target.value)}
+                              placeholder="2-3 días"
+                              inputSize="md"
+                            />
                           </div>
                         </div>
                       ) : (
@@ -882,7 +879,7 @@ export function EnhancedStep4Capacity({
 
         <div className="flex items-center gap-4">
           <div className="relative flex-1 max-w-xs">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">€</span>
+            <span className="absolute left-3 top-[2.35rem] text-muted-foreground z-10">€</span>
             <Input
               type="number"
               value={data.minOrderAmount || ''}
@@ -890,21 +887,15 @@ export function EnhancedStep4Capacity({
               min={1}
               step={5}
               inputSize="lg"
-              className={cn('pl-8', minOrderError && 'border-red-500 focus:ring-red-500')}
-              aria-invalid={!!minOrderError}
-              aria-describedby={minOrderError ? 'min-order-error' : 'min-order-hint'}
+              className="pl-8"
+              error={minOrderError}
             />
           </div>
           <span className="text-sm text-muted-foreground">euros</span>
         </div>
 
-        {minOrderError ? (
-          <p id="min-order-error" className="text-xs text-red-600 flex items-center gap-1 mt-2">
-            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-            {minOrderError}
-          </p>
-        ) : (
-          <p id="min-order-hint" className="text-xs text-muted-foreground mt-3">
+        {!minOrderError && (
+          <p className="text-xs text-muted-foreground mt-3">
             Recomendado: 20-30 € para venta al público general
           </p>
         )}
@@ -963,14 +954,11 @@ export function EnhancedStep4Capacity({
 
           {data.sustainablePackaging && (
             <div className="pl-4 animate-in slide-in-from-top-2 duration-300">
-              <label className="text-sm font-medium text-origen-bosque block mb-2">
-                Describe tu packaging
-                <span className="text-xs text-muted-foreground ml-2">(opcional)</span>
-              </label>
               <Input
+                label="Describe tu packaging"
                 value={data.packagingDescription || ''}
                 onChange={(e) => handleInputChange('packagingDescription', e.target.value)}
-                placeholder="Ej: Cajas de cartón 100% reciclado, papel kraft, etiquetas compostables..."
+                placeholder="Cajas de cartón 100% reciclado, papel kraft, etiquetas compostables..."
                 inputSize="md"
               />
               <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">

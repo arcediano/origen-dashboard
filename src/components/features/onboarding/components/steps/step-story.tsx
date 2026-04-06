@@ -20,7 +20,6 @@ import {
   Camera,
   CheckCircle2,
   AlertCircle,
-  Quote,
   Info,
   Sprout,
   Shield,
@@ -32,16 +31,8 @@ import {
   Sparkles,
   FileBadge,
   BookOpen,
-  Droplet,
   Recycle,
-  Sun,
-  Wind,
-  TreePine,
   MapPin,
-  Store,
-  Package,
-  Instagram,
-  Link,
 } from 'lucide-react';
 
 // ============================================================================
@@ -281,34 +272,22 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
         </div>
 
         <div className="space-y-5">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              Nombre del negocio <span className="text-red-500">*</span>
-            </label>
-            <Input
-              value={data.businessName || ''}
-              onChange={(e) => handleInputChange('businessName', e.target.value)}
-              placeholder="Ej: Huerta Orgánica del Valle"
-              inputSize="lg"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              <Quote className="w-4 h-4 text-origen-pradera" />
-              Eslogan o frase descriptiva
-              <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
-            </label>
-            <Input
-              value={data.tagline || ''}
-              onChange={(e) => handleInputChange('tagline', e.target.value)}
-              placeholder="Una frase que capture la esencia de tu marca"
-              inputSize="lg"
-            />
-            <p className="text-xs text-muted-foreground">
-              Ej: &ldquo;El sabor de la tradición&rdquo;, &ldquo;De nuestra huerta a tu mesa&rdquo;, &ldquo;Artesanía con corazón&rdquo;
-            </p>
-          </div>
+          <Input
+            label="Nombre del negocio"
+            required
+            value={data.businessName || ''}
+            onChange={(e) => handleInputChange('businessName', e.target.value)}
+            inputSize="lg"
+          />
+
+          <Input
+            label="Eslogan o frase descriptiva"
+            value={data.tagline || ''}
+            onChange={(e) => handleInputChange('tagline', e.target.value)}
+            placeholder="Una frase que capture la esencia de tu marca"
+            inputSize="lg"
+            helperText={'Ej: "El sabor de la tradición", "De nuestra huerta a tu mesa", "Artesanía con corazón"'}
+          />
 
           {/* Presencia digital */}
           <div className="pt-4 border-t border-border-subtle space-y-4">
@@ -318,52 +297,31 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
               <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                  <Link className="w-3.5 h-3.5" />
-                  Sitio web
-                </label>
-                <Input
-                  value={data.website || ''}
-                  onChange={(e) => handleInputChange('website', e.target.value)}
-                  onBlur={() => setWebsiteTouched(true)}
-                  placeholder="https://www.tunegocio.com"
-                  type="url"
-                  inputSize="md"
-                  className={cn(websiteTouched && websiteError && 'border-red-500 focus:ring-red-500')}
-                  aria-invalid={websiteTouched && !!websiteError}
-                />
-                {websiteTouched && websiteError && (
-                  <p className="text-xs text-red-600 flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                    {websiteError}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                  <Instagram className="w-3.5 h-3.5" />
-                  Instagram
-                </label>
+              <Input
+                label="Sitio web"
+                value={data.website || ''}
+                onChange={(e) => handleInputChange('website', e.target.value)}
+                onBlur={() => setWebsiteTouched(true)}
+                placeholder="https://www.tunegocio.com"
+                type="url"
+                inputSize="md"
+                error={websiteTouched ? websiteError : undefined}
+              />
+              <div>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-subtle pointer-events-none">@</span>
+                  <span className="absolute left-3 top-[2.35rem] text-sm text-text-subtle pointer-events-none z-10">@</span>
                   <Input
+                    label="Instagram"
                     value={data.instagramHandle || ''}
                     onChange={(e) => handleInputChange('instagramHandle', e.target.value.replace(/^@/, ''))}
                     onBlur={() => setInstagramTouched(true)}
                     placeholder="tunegocio"
                     inputSize="md"
-                    className={cn('pl-7', instagramTouched && instagramError && 'border-red-500 focus:ring-red-500')}
-                    aria-invalid={instagramTouched && !!instagramError}
+                    className="pl-7"
+                    error={instagramTouched ? instagramError : undefined}
                     maxLength={30}
                   />
                 </div>
-                {instagramTouched && instagramError && (
-                  <p className="text-xs text-red-600 flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                    {instagramError}
-                  </p>
-                )}
               </div>
             </div>
           </div>
