@@ -29,6 +29,8 @@ import {
   MapPin,
   Film,
   Trash2,
+  BookOpen,
+  Camera,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -361,7 +363,6 @@ export function StepProduction({
               </div>
 
               <Select
-                label="Método de producción"
                 value={productionInfo.productionMethod}
                 onValueChange={(v) => handleChange('productionMethod', v)}
               >

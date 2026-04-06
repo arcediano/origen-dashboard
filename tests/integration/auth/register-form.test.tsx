@@ -14,6 +14,12 @@ import { authErrorHandlers } from '../../mocks/handlers/auth.handlers';
 import { TEST_API_BASE } from '../../mocks/api-base';
 import { SimpleRegistration } from '@/components/features/registration/SimpleRegistration';
 
+function getInputByName(name: string): HTMLInputElement {
+  const el = document.querySelector(`input[name="${name}"]`);
+  expect(el).not.toBeNull();
+  return el as HTMLInputElement;
+}
+
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn(), back: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
@@ -55,12 +61,12 @@ describe('SimpleRegistration — Formulario de registro', () => {
 
   it('renderiza los campos principales del formulario', () => {
     render(<SimpleRegistration />);
-    expect(screen.getByPlaceholderText(/Ej: María/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/tu@email\.com/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Mín\. 8 caracteres/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Repite la contraseña/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Huerta Ecológica/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/600 000 000/i)).toBeInTheDocument();
+    expect(getInputByName('contactName')).toBeInTheDocument();
+    expect(getInputByName('email')).toBeInTheDocument();
+    expect(getInputByName('password')).toBeInTheDocument();
+    expect(getInputByName('confirmPassword')).toBeInTheDocument();
+    expect(getInputByName('businessName')).toBeInTheDocument();
+    expect(getInputByName('phone')).toBeInTheDocument();
   });
 
   it('el botón muestra "Completar registro" cuando el formulario no es válido', () => {
@@ -101,7 +107,7 @@ describe('SimpleRegistration — Formulario de registro', () => {
     const user = userEvent.setup();
     render(<SimpleRegistration />);
 
-    const emailInput = screen.getByPlaceholderText(/tu@email\.com/i);
+    const emailInput = getInputByName('email');
     await user.type(emailInput, 'test@test.es');
     expect(emailInput).toHaveValue('test@test.es');
   });
@@ -110,14 +116,14 @@ describe('SimpleRegistration — Formulario de registro', () => {
     const user = userEvent.setup();
     render(<SimpleRegistration />);
 
-    const cpInput = screen.getByPlaceholderText(/Ej: 28001/i);
+    const cpInput = getInputByName('postalCode');
     await user.type(cpInput, '28001');
     expect(cpInput).toHaveValue('28001');
   });
 
   it('el campo de contraseña oculta el texto por defecto (type=password)', () => {
     render(<SimpleRegistration />);
-    const pwInput = screen.getByPlaceholderText(/Mín\. 8 caracteres/i);
+    const pwInput = getInputByName('password');
     expect(pwInput).toHaveAttribute('type', 'password');
   });
 
@@ -127,7 +133,7 @@ describe('SimpleRegistration — Formulario de registro', () => {
     const user = userEvent.setup();
     render(<SimpleRegistration />);
 
-    const emailInput = screen.getByPlaceholderText(/tu@email\.com/i);
+    const emailInput = getInputByName('email');
     await user.type(emailInput, 'notvalid');
     // Disparar blur para asegurar que la validación corre
     fireEvent.blur(emailInput);
@@ -153,7 +159,7 @@ describe('SimpleRegistration — Formulario de registro', () => {
 
   it('el campo confirmPassword tiene type=password', () => {
     render(<SimpleRegistration />);
-    const confirmInput = screen.getByPlaceholderText(/Repite la contraseña/i);
+    const confirmInput = getInputByName('confirmPassword');
     expect(confirmInput).toHaveAttribute('type', 'password');
   });
 

@@ -481,7 +481,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   <Select
                     value={formValues.province}
                     onValueChange={(value) => setValue('province', value, { shouldValidate: true })}
-                    label="Provincia"
                     placeholder="Selecciona provincia"
                     error={errors.province?.message}
                     disabled={isProvinceAutoFilled}

@@ -21,6 +21,8 @@ import {
   AlertCircle,
   AlertTriangle,
   Truck,
+  TrendingDown,
+  TrendingUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -354,8 +356,6 @@ export function StepInventory({
             </div>
 
             <Select
-              label="Clase de envío"
-              tooltip="La clase de envío determina la tarifa aplicable según el tipo de producto (estándar, frágil, perecedero, etc.)"
               value={formData?.shippingClass || ''}
               onValueChange={(v) => handleChange('shippingClass', v)}
             >

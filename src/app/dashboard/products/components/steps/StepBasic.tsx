@@ -150,9 +150,7 @@ export function StepBasic({
           {/* Categoría y Subcategoría */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Select
-              label="Categoría"
               required
-              tooltip="Selecciona la categoría más específica donde los clientes buscarán tu producto. Ejemplo: 'Quesos' en lugar de 'Alimentación'"
               value={formData?.categoryId || ''}
               onValueChange={(value) => handleChange('categoryId', value)}
               error={allTouched?.categoryId ? errors?.categoryId : undefined}
@@ -170,8 +168,6 @@ export function StepBasic({
             </Select>
 
             <Select
-              label="Subcategoría"
-              tooltip="Ayuda a los clientes a encontrar tu producto más fácilmente. Ejemplos: 'Artesano', 'Ecológico', 'Premium'"
               value={formData?.subcategoryId || ''}
               onValueChange={(value) => handleChange('subcategoryId', value)}
             >
