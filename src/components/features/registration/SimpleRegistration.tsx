@@ -486,6 +486,10 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   {...register('postalCode')}
                 />
                 <div>
+                  <label className="text-sm font-medium text-origen-bosque mb-2 inline-flex items-center gap-1">
+                    Provincia
+                    <span className="text-red-500">*</span>
+                  </label>
                   <input type="hidden" {...register('province')} />
                   <Select
                     value={formValues.province}

@@ -118,7 +118,8 @@ const dateInputCls = [
   'bg-surface border border-border-subtle rounded-xl',
   'focus:outline-none focus:ring-2 focus:ring-origen-pradera/25 focus:border-origen-pradera',
   'transition-colors',
-  '[&::-webkit-calendar-picker-indicator]:opacity-40',
+  '[&::-webkit-calendar-picker-indicator]:opacity-75',
+  'hover:[&::-webkit-calendar-picker-indicator]:opacity-100',
 ].join(' ');
 
 function DateRangeSection({
@@ -136,16 +137,16 @@ function DateRangeSection({
 }) {
   return (
     <div>
-      <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wide mb-2">
+      <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
         {section.title}
       </p>
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1 block uppercase tracking-wide">Desde</label>
+          <label className="text-xs font-medium text-text-secondary mb-1 block uppercase tracking-wide">Desde</label>
           <input type="date" value={from} onChange={(e) => onFrom(e.target.value)} className={dateInputCls} />
         </div>
         <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1 block uppercase tracking-wide">Hasta</label>
+          <label className="text-xs font-medium text-text-secondary mb-1 block uppercase tracking-wide">Hasta</label>
           <input type="date" value={to} onChange={(e) => onTo(e.target.value)} className={dateInputCls} />
         </div>
       </div>
@@ -171,20 +172,20 @@ function NumberRangeSection({
   const inputCls = cn(
     'w-full h-10 text-sm font-medium text-origen-bosque border border-border-subtle bg-surface rounded-xl',
     'focus:outline-none focus:ring-2 focus:ring-origen-pradera/25 focus:border-origen-pradera transition-colors',
-    section.prefix ? 'pl-6 pr-3' : 'px-3',
+    section.prefix ? 'pl-8 pr-3' : 'px-3',
   );
 
   return (
     <div>
-      <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wide mb-2">
+      <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
         {section.title}
       </p>
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1 block uppercase tracking-wide">Mínimo</label>
+          <label className="text-xs font-medium text-text-secondary mb-1 block uppercase tracking-wide">Mínimo</label>
           <div className="relative">
             {section.prefix && (
-              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-medium text-text-subtle pointer-events-none">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-secondary pointer-events-none">
                 {section.prefix}
               </span>
             )}
@@ -192,10 +193,10 @@ function NumberRangeSection({
           </div>
         </div>
         <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1 block uppercase tracking-wide">Máximo</label>
+          <label className="text-xs font-medium text-text-secondary mb-1 block uppercase tracking-wide">Máximo</label>
           <div className="relative">
             {section.prefix && (
-              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-medium text-text-subtle pointer-events-none">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-secondary pointer-events-none">
                 {section.prefix}
               </span>
             )}

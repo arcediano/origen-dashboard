@@ -624,7 +624,7 @@ export default function ProductoDetallePage() {
             </div>
           </motion.div>
 
-          {/* -- M�tricas desktop: fila horizontal -- */}
+          {/* -- Metricas desktop: fila horizontal -- */}
           <div className="hidden lg:block overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 mb-8">
             <div className="grid grid-cols-7 gap-4 w-auto">
               <div className="p-4 bg-gradient-to-br from-origen-pradera/5 to-transparent rounded-xl border border-origen-pradera/10">
@@ -637,9 +637,9 @@ export default function ProductoDetallePage() {
                 <p className="text-2xl font-bold text-origen-bosque">{stockLevel} uds</p>
               </div>
               <div className="p-4 bg-amber-50/50 rounded-xl border border-amber-100">
-                <div className="flex items-center gap-2 mb-2"><Star className="w-5 h-5 text-amber-500" /><span className="text-xs font-medium text-text-subtle">Valoraci�n</span></div>
+                <div className="flex items-center gap-2 mb-2"><Star className="w-5 h-5 text-amber-500" /><span className="text-xs font-medium text-text-subtle">Valoración</span></div>
                 <div className="flex items-baseline gap-1"><p className="text-2xl font-bold text-origen-bosque">{product.rating?.toFixed(1) || '0.0'}</p><span className="text-xs text-text-disabled">/5</span></div>
-                <p className="text-xs text-text-subtle mt-2">{product.reviewCount || 0} rese�as</p>
+                <p className="text-xs text-text-subtle mt-2">{product.reviewCount || 0} reseñas</p>
               </div>
               <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
                 <div className="flex items-center gap-2 mb-2"><TrendingUp className="w-5 h-5 text-blue-500" /><span className="text-xs font-medium text-text-subtle">Ventas</span></div>
@@ -652,7 +652,7 @@ export default function ProductoDetallePage() {
                 {product.conversion && <div className="flex items-center gap-1 mt-2 text-xs text-purple-600"><TrendingUp className="w-3 h-3" /><span>{product.conversion.toFixed(1)}% conv.</span></div>}
               </div>
               <div className="p-4 bg-green-50/50 rounded-xl border border-green-100">
-                <div className="flex items-center gap-2 mb-2"><TrendingUp className="w-5 h-5 text-green-500" /><span className="text-xs font-medium text-text-subtle">Conversi�n</span></div>
+                <div className="flex items-center gap-2 mb-2"><TrendingUp className="w-5 h-5 text-green-500" /><span className="text-xs font-medium text-text-subtle">Conversión</span></div>
                 <p className="text-2xl font-bold text-origen-bosque">{product.conversion?.toFixed(1) || '0.0'}%</p>
               </div>
               <div className="p-4 bg-origen-crema/50 rounded-xl border border-origen-pradera/10">
