@@ -9,7 +9,10 @@
  * pública para imágenes o null para documentos.
  */
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
+const BASE_URL =
+  typeof window !== 'undefined'
+    ? window.location.origin
+    : (process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000');
 const API_PATH = '/api/v1/media/upload';
 
 export interface UploadResult {
@@ -31,11 +34,16 @@ export async function uploadFile(file: File, category: string): Promise<UploadRe
   form.append('file', file);
   form.append('category', category);
 
-  const response = await fetch(`${BASE_URL}${API_PATH}`, {
-    method: 'POST',
-    body: form,
-    credentials: 'include',
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${BASE_URL}${API_PATH}`, {
+      method: 'POST',
+      body: form,
+      credentials: 'include',
+    });
+  } catch {
+    throw new Error('No se pudo conectar al servidor de archivos. Comprueba tu conexión e inténtalo de nuevo.');
+  }
 
   if (!response.ok) {
     if (response.status === 413) {
