@@ -149,9 +149,11 @@ describe('useDashboardStats', () => {
 
     await result.current.refetch();
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.totalOrders).toBe(countBefore);
-    expect(result.current.error).toBeNull();
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
+      expect(result.current.totalOrders).toBe(countBefore);
+    });
   });
 
   it('se recupera de un error al hacer refetch con la API disponible', async () => {
@@ -165,9 +167,11 @@ describe('useDashboardStats', () => {
 
     await result.current.refetch();
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.error).toBeNull();
-    expect(result.current.totalOrders).toBe(3);
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
+      expect(result.current.totalOrders).toBe(3);
+    });
   });
 
   it('expone la función refetch', () => {
