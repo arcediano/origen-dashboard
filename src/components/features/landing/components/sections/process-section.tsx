@@ -125,7 +125,7 @@ export function ProcessSection() {
 
           <Button
             size="lg"
-            className="w-full md:w-auto"
+            className="w-full md:w-auto text-white !text-white disabled:text-white/90"
             onClick={() => document.getElementById('registration-form')?.scrollIntoView({ behavior: 'smooth' })}
           >
             <span className="flex items-center justify-center gap-2 md:gap-3">
