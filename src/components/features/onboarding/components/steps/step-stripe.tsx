@@ -312,7 +312,7 @@ export function EnhancedStep6Stripe({
               type="button"
               onClick={handleConnect}
               disabled={isConnecting}
-              className="w-full sm:w-auto h-12 px-8 bg-origen-bosque hover:bg-origen-pino text-white text-base"
+              size="lg"
             >
               {isConnecting ? (
                 <span className="flex items-center gap-2">

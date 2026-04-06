@@ -928,7 +928,7 @@ export default function OnboardingPage() {
                   <Button
                     onClick={handleNext}
                     disabled={!isStepValid || isSubmitting}
-                    className="h-10 px-5 bg-origen-bosque hover:bg-origen-pino text-white shadow-sm hover:shadow transition-all"
+                    size="sm"
                   >
                     Continuar
                   </Button>
@@ -936,7 +936,7 @@ export default function OnboardingPage() {
                   <Button
                     onClick={handleComplete}
                     disabled={!isStepValid || isSubmitting}
-                    className="h-10 px-5 bg-origen-bosque hover:bg-origen-pino text-white shadow-sm hover:shadow transition-all"
+                    size="sm"
                   >
                     {isSubmitting ? (
                       <>

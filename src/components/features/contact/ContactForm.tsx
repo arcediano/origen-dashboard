@@ -233,14 +233,7 @@ export function ContactForm() {
             <Button
               type="submit"
               disabled={status === 'loading' || status === 'success'}
-              className={cn(
-                "w-full max-w-xs h-11 md:h-12",
-                "bg-origen-bosque hover:bg-origen-pino",
-                "text-white text-sm font-semibold",
-                "rounded-xl shadow-md hover:shadow-lg",
-                "transition-all transform hover:-translate-y-0.5",
-                "disabled:opacity-50 disabled:hover:translate-y-0"
-              )}
+              className="w-full max-w-xs"
             >
               {status === 'loading' ? (
                 <div className="flex items-center gap-2">

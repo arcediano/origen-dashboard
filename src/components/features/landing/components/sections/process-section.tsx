@@ -125,7 +125,7 @@ export function ProcessSection() {
 
           <Button
             size="lg"
-            className="bg-origen-bosque hover:bg-origen-pino text-white px-8 md:px-12 py-3 md:py-6 text-sm md:text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 font-semibold w-full md:w-auto"
+            className="w-full md:w-auto"
             onClick={() => document.getElementById('registration-form')?.scrollIntoView({ behavior: 'smooth' })}
           >
             <span className="flex items-center justify-center gap-2 md:gap-3">
