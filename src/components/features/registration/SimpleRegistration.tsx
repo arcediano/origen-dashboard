@@ -30,19 +30,14 @@ import { GatewayError } from '@/lib/api/client';
 
 import {
   ArrowRight,
-  User,
   Store,
   MapPin,
   Leaf,
   Mail,
   Phone,
-  Heart,
   ShieldCheck,
   Clock,
-  Lock,
-  CheckCircle2,
   AlertCircle,
-  Check,
 } from 'lucide-react';
 
 // ============================================================================
@@ -56,7 +51,7 @@ import { BusinessTypeSelector } from './components/BusinessTypeSelector';
 import { CategoryCard } from './components/CategoryCard';
 import { FormSection } from './components/FormSection';
 import { PasswordStrengthIndicator } from './components/PasswordStrengthIndicator';
-import { ProgressBar } from './components/ProgressBar';
+import { CheckCircle2 } from 'lucide-react';
 
 // Hooks
 import { useAutosave } from './hooks/useAutosave';
@@ -351,18 +346,14 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Input
                   label="Nombre"
-                  leftIcon={<User />}
                   required
-                  placeholder="Ej: María"
                   inputSize="lg"
                   error={errors.contactName?.message}
                   {...register('contactName')}
                 />
                 <Input
                   label="Apellidos"
-                  leftIcon={<User />}
                   required
-                  placeholder="Ej: García López"
                   inputSize="lg"
                   error={errors.contactSurname?.message}
                   {...register('contactSurname')}
@@ -375,7 +366,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   leftIcon={<Mail />}
                   required
                   type="email"
-                  placeholder="tu@email.com"
+                  placeholder="nombre@ejemplo.es"
                   inputSize="lg"
                   error={errors.email?.message}
                   {...register('email')}
@@ -396,38 +387,24 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 <div>
                   <Input
                     label="Contraseña"
-                    leftIcon={<Lock />}
                     required
                     type="password"
-                    placeholder="Mín. 8 caracteres"
+                    helperText="Mínimo 8 caracteres"
                     error={errors.password?.message}
                     inputSize="lg"
                     {...register('password')}
                   />
                   <PasswordStrengthIndicator password={formValues.password || ''} />
                 </div>
-                <div>
-                  <Input
-                    label="Confirmar contraseña"
-                    leftIcon={<Lock />}
-                    required
-                    type="password"
-                    placeholder="Repite la contraseña"
-                    error={confirmPasswordError}
-                    inputSize="lg"
-                    {...register('confirmPassword')}
-                  />
-                  {formValues.confirmPassword && formValues.password === formValues.confirmPassword && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center gap-1.5 text-origen-hoja mt-1"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      <span className="text-xs font-medium">Las contraseñas coinciden</span>
-                    </motion.div>
-                  )}
-                </div>
+                <Input
+                  label="Confirmar contraseña"
+                  required
+                  type="password"
+                  error={confirmPasswordError}
+                  success={!confirmPasswordError && !!formValues.confirmPassword && formValues.password === formValues.confirmPassword}
+                  inputSize="lg"
+                  {...register('confirmPassword')}
+                />
               </div>
             </FormSection>
 
@@ -441,7 +418,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 label="Nombre del negocio"
                 leftIcon={<Store />}
                 required
-                placeholder="Ej: Huerta Ecológica del Valle"
                 inputSize="lg"
                 error={errors.businessName?.message}
                 {...register('businessName')}
@@ -458,7 +434,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 label="Nombre de la vía"
                 leftIcon={<MapPin />}
                 required
-                placeholder="Ej: Calle Mayor, Av. de la Constitución"
+                placeholder="Calle Mayor, Av. de la Constitución..."
                 inputSize="lg"
                 error={errors.street?.message}
                 {...register('street')}
@@ -473,7 +449,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 <Input
                   label="Número"
                   required
-                  placeholder="Ej: 15"
                   inputSize="lg"
                   className="font-mono"
                   error={errors.streetNumber?.message}
@@ -482,9 +457,8 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 <div className="md:col-span-2">
                   <Input
                     label="Piso / Puerta"
-                    placeholder="Ej: 3º A, Local 1, Bajo"
                     inputSize="lg"
-                    helperText="opcional"
+                    helperText="Opcional"
                     error={errors.streetComplement?.message}
                     {...register('streetComplement')}
                   />
@@ -496,24 +470,22 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 <Input
                   label="Código postal"
                   required
-                  placeholder="Ej: 28001"
                   inputSize="lg"
                   maxLength={5}
                   className="font-mono"
                   error={errors.postalCode?.message || cpError}
                   {...register('postalCode')}
                 />
-                <div className="space-y-1.5">
-                  <label className="text-sm md:text-base font-medium text-origen-bosque">
-                    Provincia <span className="text-destructive">*</span>
-                  </label>
+                <div>
                   <input type="hidden" {...register('province')} />
                   <Select
                     value={formValues.province}
                     onValueChange={(value) => setValue('province', value, { shouldValidate: true })}
-                    placeholder="Ej: Madrid"
+                    label="Provincia"
+                    placeholder="Selecciona provincia"
                     error={errors.province?.message}
                     disabled={isProvinceAutoFilled}
+                    required
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -527,9 +499,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 </div>
                 <Input
                   label="Ciudad / Municipio"
-                  leftIcon={<MapPin />}
                   required
-                  placeholder="Ej: Madrid"
                   inputSize="lg"
                   error={errors.municipio?.message}
                   {...register('municipio')}
@@ -570,22 +540,17 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               badge="Paso 4 de 5"
             >
               <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <label className="text-sm md:text-base font-medium text-origen-bosque flex items-center gap-2">
-                    <Heart className="w-4 h-4 md:w-5 md:h-5 text-origen-hoja" />
-                    Cuéntanos tu historia como productor <span className="text-destructive">*</span>
-                  </label>
-                  <Textarea
-                    placeholder="¿Quién eres, qué produces y desde cuándo? ¿Cuáles son tus valores y prácticas? ¿Por qué quieres formar parte de la comunidad Origen? (mínimo 50 caracteres)"
-                    error={errors.whyOrigin?.message}
-                    maxLength={300}
-                    {...register('whyOrigin')}
-                    className="min-h-[120px] md:min-h-[140px] resize-y"
-                  />
-                </div>
-                {whyOriginValue.length > 0 && (
-                  <ProgressBar value={whyOriginValue.length} max={50} />
-                )}
+                <Textarea
+                  label="Cuéntanos tu historia como productor"
+                  required
+                  placeholder="¿Quién eres, qué produces y desde cuándo? ¿Cuáles son tus valores? ¿Por qué quieres unirte a Origen?"
+                  helperText="Mínimo 50 caracteres"
+                  error={errors.whyOrigin?.message}
+                  maxLength={300}
+                  showCharCount
+                  {...register('whyOrigin')}
+                  className="min-h-[120px] md:min-h-[140px] resize-y"
+                />
                 {textareaValid && (
                   <div className="flex items-center gap-2 text-sm text-origen-hoja bg-origen-crema/50 p-3 rounded-lg border border-origen-hoja/30">
                     <CheckCircle2 className="w-4 h-4" />
@@ -627,7 +592,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 type="submit"
                 size="lg"
                 disabled={!isFormValid}
-                className="w-full md:w-auto md:min-w-[280px] relative overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-1 disabled:hover:translate-y-0 h-12 md:h-14 px-6 md:px-8 text-base md:text-lg"
+                className="w-full md:w-auto md:min-w-[280px]"
               >
                 {isFormValid ? (
                   <motion.span
