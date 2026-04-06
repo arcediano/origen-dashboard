@@ -1,6 +1,6 @@
-﻿/**
+/**
  * @component StepBasic
- * @description Paso 1: InformaciÃ³n bÃ¡sica del producto
+ * @description Paso 1: Información básica del producto
  */
 
 'use client';
@@ -42,18 +42,18 @@ interface StepBasicProps {
 }
 
 // ============================================================================
-// ESQUEMAS DE VALIDACIÃ“N
+// ESQUEMAS DE VALIDACIÓN
 // ============================================================================
 
 const BasicProductSchema = z.object({
   name: z.string()
-    .min(5, 'MÃ­nimo 5 caracteres')
-    .max(100, 'MÃ¡ximo 100 caracteres')
-    .regex(/^[a-zA-Z0-9Ã¡Ã©Ã­Ã³ÃºÃÃ‰ÃÃ“ÃšÃ±Ã‘\s\-_,.]+$/, 'Caracteres no vÃ¡lidos'),
+    .min(5, 'Mínimo 5 caracteres')
+    .max(100, 'Máximo 100 caracteres')
+    .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s\-_,.]+$/, 'Caracteres no válidos'),
   shortDescription: z.string()
-    .min(20, 'MÃ­nimo 20 caracteres')
-    .max(160, 'MÃ¡ximo 160 caracteres'),
-  categoryId: z.string().min(1, 'Selecciona una categorÃ­a'),
+    .min(20, 'Mínimo 20 caracteres')
+    .max(160, 'Máximo 160 caracteres'),
+  categoryId: z.string().min(1, 'Selecciona una categoría'),
 });
 
 // ============================================================================
@@ -112,7 +112,7 @@ export function StepBasic({
               {completed ? <CheckCircle className="w-5 h-5" /> : <Package className="w-5 h-5" />}
             </div>
             <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-origen-bosque truncate">InformaciÃ³n bÃ¡sica</h2>
+              <h2 className="text-lg font-semibold text-origen-bosque truncate">Información básica</h2>
               <p className="text-sm text-muted-foreground truncate">Los datos esenciales de tu producto</p>
             </div>
           </div>
@@ -148,7 +148,7 @@ export function StepBasic({
               </span>
               <Tooltip 
                 content="Nombre claro y descriptivo"
-                detailed="Incluye palabra clave principal, variedad y caracterÃ­sticas Ãºnicas. Ejemplo: 'Queso Manchego Curado 12 meses' (no solo 'Queso')"
+                detailed="Incluye palabra clave principal, variedad y características únicas. Ejemplo: 'Queso Manchego Curado 12 meses' (no solo 'Queso')"
                 size="sm"
               />
             </div>
@@ -168,19 +168,19 @@ export function StepBasic({
             )}
           </div>
 
-          {/* CategorÃ­a y SubcategorÃ­a */}
+          {/* Categoría y Subcategoría */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* CategorÃ­a */}
+            {/* Categoría */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <FolderTree className="h-5 w-5 text-origen-pradera" />
                 <span className="text-sm font-medium text-foreground">
-                  CategorÃ­a
+                  Categoría
                   <span className="text-red-500 ml-1">*</span>
                 </span>
                 <Tooltip 
-                  content="CategorÃ­a principal del producto"
-                  detailed="Selecciona la categorÃ­a mÃ¡s especÃ­fica donde los clientes buscarÃ¡n tu producto. Ejemplo: 'Quesos' en lugar de 'AlimentaciÃ³n'"
+                  content="Categoría principal del producto"
+                  detailed="Selecciona la categoría más específica donde los clientes buscarán tu producto. Ejemplo: 'Quesos' en lugar de 'Alimentación'"
                   size="sm"
                 />
               </div>
@@ -192,7 +192,7 @@ export function StepBasic({
                   "h-12 w-full rounded-xl",
                   (allTouched?.categoryId && errors?.categoryId) && "border-feedback-danger"
                 )}>
-                  <SelectValue placeholder="Seleccionar categorÃ­a" />
+                  <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
                 <SelectContent>
                   {PRODUCT_CATEGORIES.map(cat => (
@@ -210,16 +210,16 @@ export function StepBasic({
               )}
             </div>
 
-            {/* SubcategorÃ­a */}
+            {/* Subcategoría */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <FolderTree className="h-5 w-5 text-origen-pradera" />
                 <span className="text-sm font-medium text-foreground">
-                  SubcategorÃ­a
+                  Subcategoría
                 </span>
                 <Tooltip 
-                  content="SubcategorÃ­a para mayor precisiÃ³n"
-                  detailed="Ayuda a los clientes a encontrar tu producto mÃ¡s fÃ¡cilmente. Ejemplos: 'Artesano', 'EcolÃ³gico', 'Premium'"
+                  content="Subcategoría para mayor precisión"
+                  detailed="Ayuda a los clientes a encontrar tu producto más fácilmente. Ejemplos: 'Artesano', 'Ecológico', 'Premium'"
                   size="sm"
                 />
               </div>
@@ -228,11 +228,11 @@ export function StepBasic({
                 onValueChange={(value) => handleChange('subcategoryId', value)}
               >
                 <SelectTrigger className="h-12 w-full rounded-xl">
-                  <SelectValue placeholder="Seleccionar subcategorÃ­a (opcional)" />
+                  <SelectValue placeholder="Seleccionar subcategoría (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="artesano">Artesano</SelectItem>
-                  <SelectItem value="ecologico">EcolÃ³gico</SelectItem>
+                  <SelectItem value="ecologico">Ecológico</SelectItem>
                   <SelectItem value="premium">Premium</SelectItem>
                   <SelectItem value="tradicional">Tradicional</SelectItem>
                 </SelectContent>
@@ -240,17 +240,17 @@ export function StepBasic({
             </div>
           </div>
 
-          {/* DescripciÃ³n corta */}
+          {/* Descripción corta */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <AlignLeft className="h-5 w-5 text-origen-pradera" />
               <span className="text-sm font-medium text-foreground">
-                DescripciÃ³n corta
+                Descripción corta
                 <span className="text-red-500 ml-1">*</span>
               </span>
               <Tooltip 
-                content="DescripciÃ³n breve para listados"
-                detailed="Aparece en bÃºsquedas y vista previa. MÃ¡ximo 160 caracteres. Incluye los beneficios principales y una llamada a la acciÃ³n."
+                content="Descripción breve para listados"
+                detailed="Aparece en búsquedas y vista previa. Máximo 160 caracteres. Incluye los beneficios principales y una llamada a la acción."
                 size="sm"
               />
             </div>
@@ -261,7 +261,7 @@ export function StepBasic({
                 "min-h-[100px] text-base w-full rounded-xl p-4",
                 (allTouched?.shortDescription && errors?.shortDescription) && "border-feedback-danger"
               )}
-              placeholder="Describe tu producto en 2-3 lÃ­neas..."
+              placeholder="Describe tu producto en 2-3 líneas..."
               maxLength={160}
               showCharCount
             />
@@ -270,16 +270,16 @@ export function StepBasic({
             )}
           </div>
 
-          {/* DescripciÃ³n larga */}
+          {/* Descripción larga */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-origen-pradera" />
               <span className="text-sm font-medium text-foreground">
-                DescripciÃ³n detallada
+                Descripción detallada
               </span>
               <Tooltip 
-                content="DescripciÃ³n completa del producto"
-                detailed="Mejora el SEO y la conversiÃ³n. Incluye caracterÃ­sticas, proceso de elaboraciÃ³n, historia del productor, maridajes y usos recomendados. MÃ­nimo recomendado: 300 caracteres."
+                content="Descripción completa del producto"
+                detailed="Mejora el SEO y la conversión. Incluye características, proceso de elaboración, historia del productor, maridajes y usos recomendados. Mínimo recomendado: 300 caracteres."
                 size="sm"
               />
             </div>
@@ -288,7 +288,7 @@ export function StepBasic({
                 value={formData?.fullDescription || ''}
                 onChange={(e) => handleChange('fullDescription', e.target.value)}
                 className="min-h-[180px] text-base w-full rounded-xl p-4"
-                placeholder="Describe tu producto con detalle: caracterÃ­sticas, proceso de elaboraciÃ³n, maridajes, historia del productor..."
+                placeholder="Describe tu producto con detalle: características, proceso de elaboración, maridajes, historia del productor..."
               />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-2">
                 <p className="text-sm text-text-subtle">{fullDescLength} caracteres</p>
@@ -310,8 +310,8 @@ export function StepBasic({
                 Etiquetas
               </span>
               <Tooltip 
-                content="Etiquetas para mejorar la bÃºsqueda"
-                detailed="Pulsa Enter para aÃ±adir cada etiqueta. Incluye sinÃ³nimos, variedades, tipos y palabras clave relacionadas. MÃ¡ximo 10 etiquetas. Ejemplo: 'curado', 'oveja', 'artesano', 'manchego'"
+                content="Etiquetas para mejorar la búsqueda"
+                detailed="Pulsa Enter para añadir cada etiqueta. Incluye sinónimos, variedades, tipos y palabras clave relacionadas. Máximo 10 etiquetas. Ejemplo: 'curado', 'oveja', 'artesano', 'manchego'"
                 size="sm"
               />
             </div>
@@ -321,8 +321,8 @@ export function StepBasic({
               placeholder="Escribe y pulsa Enter..."
               maxTags={10}
               suggestions={[
-                "artesano", "ecolÃ³gico", "premiado", "tradicional", "gourmet",
-                "kilÃ³metro cero", "ediciÃ³n limitada", "familiar", "slow food"
+                "artesano", "ecológico", "premiado", "tradicional", "gourmet",
+                "kilómetro cero", "edición limitada", "familiar", "slow food"
               ]}
               className="w-full"
             />
@@ -332,3 +332,4 @@ export function StepBasic({
     </motion.div>
   );
 }
+

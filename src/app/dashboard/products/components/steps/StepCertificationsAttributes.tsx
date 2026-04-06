@@ -1,6 +1,6 @@
-﻿/**
+/**
  * @component StepCertificationsAttributes
- * @description Paso 7: Certificaciones y atributos - VERSIÃ“N CORREGIDA
+ * @description Paso 7: Certificaciones y atributos - VERSIÓN CORREGIDA
  */
 
 'use client';
@@ -75,27 +75,27 @@ interface StepCertificationsAttributesProps {
 const PREDEFINED_CERTIFICATIONS = [
   { 
     id: 'eu-organic', 
-    name: 'Agricultura EcolÃ³gica UE', 
-    body: 'ComitÃ© de Agricultura EcolÃ³gica',
+    name: 'Agricultura Ecológica UE', 
+    body: 'Comité de Agricultura Ecológica',
     icon: <Leaf className="w-3 h-3" />,
     category: 'organic' as CertificationCategory,
-    description: 'CertificaciÃ³n oficial de la UniÃ³n Europea para productos ecolÃ³gicos'
+    description: 'Certificación oficial de la Unión Europea para productos ecológicos'
   },
   { 
     id: 'dop', 
-    name: 'DenominaciÃ³n de Origen Protegida', 
+    name: 'Denominación de Origen Protegida', 
     body: 'Oficina Europea de Propiedad Intelectual',
     icon: <Globe className="w-3 h-3" />,
     category: 'origin' as CertificationCategory,
-    description: 'Reconoce productos con caracterÃ­sticas Ãºnicas debidas al terreno'
+    description: 'Reconoce productos con características únicas debidas al terreno'
   },
   { 
     id: 'igp', 
-    name: 'IndicaciÃ³n GeogrÃ¡fica Protegida', 
+    name: 'Indicación Geográfica Protegida', 
     body: 'Oficina Europea de Propiedad Intelectual',
     icon: <Globe className="w-3 h-3" />,
     category: 'origin' as CertificationCategory,
-    description: 'Vincula el producto a una zona geogrÃ¡fica especÃ­fica'
+    description: 'Vincula el producto a una zona geográfica específica'
   },
   { 
     id: 'iso-9001', 
@@ -103,7 +103,7 @@ const PREDEFINED_CERTIFICATIONS = [
     body: 'AENOR',
     icon: <Award className="w-3 h-3" />,
     category: 'quality' as CertificationCategory,
-    description: 'Sistema de gestiÃ³n de calidad certificado'
+    description: 'Sistema de gestión de calidad certificado'
   },
   { 
     id: 'fairtrade', 
@@ -111,7 +111,7 @@ const PREDEFINED_CERTIFICATIONS = [
     body: 'Fairtrade International',
     icon: <Award className="w-3 h-3" />,
     category: 'sustainability' as CertificationCategory,
-    description: 'Garantiza condiciones laborales justas y comercio Ã©tico'
+    description: 'Garantiza condiciones laborales justas y comercio ético'
   },
   { 
     id: 'bio-suisse', 
@@ -119,12 +119,12 @@ const PREDEFINED_CERTIFICATIONS = [
     body: 'Bio Suisse',
     icon: <Leaf className="w-3 h-3" />,
     category: 'organic' as CertificationCategory,
-    description: 'EstÃ¡ndar suizo para productos ecolÃ³gicos'
+    description: 'Estándar suizo para productos ecológicos'
   },
 ];
 
 // ============================================================================
-// EJEMPLOS DE ATRIBUTOS POR CATEGORÃA
+// EJEMPLOS DE ATRIBUTOS POR CATEGORÍA
 // ============================================================================
 
 const ATTRIBUTE_EXAMPLES: Record<string, Array<{ 
@@ -144,18 +144,18 @@ const ATTRIBUTE_EXAMPLES: Record<string, Array<{
       icon: <Milk className="w-4 h-4" />
     },
     { 
-      name: 'Tiempo de curaciÃ³n', 
+      name: 'Tiempo de curación', 
       type: 'number', 
       example: '12', 
       unit: 'meses',
-      description: 'PerÃ­odo de maduraciÃ³n del queso',
+      description: 'Período de maduración del queso',
       icon: <Clock className="w-4 h-4" />
     },
     { 
-      name: 'MaduraciÃ³n', 
+      name: 'Maduración', 
       type: 'text', 
-      example: 'En cueva, CÃ¡mara, Bodega',
-      description: 'MÃ©todo y lugar de maduraciÃ³n',
+      example: 'En cueva, Cámara, Bodega',
+      description: 'Método y lugar de maduración',
       icon: <Beef className="w-4 h-4" />
     },
     { 
@@ -177,16 +177,16 @@ const ATTRIBUTE_EXAMPLES: Record<string, Array<{
     { 
       name: 'Variedad de uva', 
       type: 'text', 
-      example: 'Tempranillo, Garnacha, AlbariÃ±o',
+      example: 'Tempranillo, Garnacha, Albariño',
       description: 'Tipo de uva utilizado',
       icon: <Droplet className="w-4 h-4" />
     },
     { 
-      name: 'AÃ±ada', 
+      name: 'Añada', 
       type: 'number', 
       example: '2020', 
-      unit: 'aÃ±o',
-      description: 'AÃ±o de la cosecha',
+      unit: 'año',
+      description: 'Año de la cosecha',
       icon: <Calendar className="w-4 h-4" />
     },
     { 
@@ -199,12 +199,12 @@ const ATTRIBUTE_EXAMPLES: Record<string, Array<{
     { 
       name: 'Barrica', 
       type: 'text', 
-      example: '6 meses en roble francÃ©s',
+      example: '6 meses en roble francés',
       description: 'Tipo de madera y tiempo en barrica',
       icon: <Award className="w-4 h-4" />
     },
     { 
-      name: 'GraduaciÃ³n', 
+      name: 'Graduación', 
       type: 'number', 
       example: '13.5', 
       unit: '% vol',
@@ -225,27 +225,27 @@ const ATTRIBUTE_EXAMPLES: Record<string, Array<{
       type: 'number', 
       example: '0.2', 
       unit: '%',
-      description: 'Grado de acidez (mÃ¡ximo 0.8Â° para AOVE)',
+      description: 'Grado de acidez (máximo 0.8° para AOVE)',
       icon: <Beef className="w-4 h-4" />
     },
     { 
-      name: 'ExtracciÃ³n', 
+      name: 'Extracción', 
       type: 'text', 
-      example: 'Primera prensada en frÃ­o',
-      description: 'MÃ©todo de extracciÃ³n del aceite',
+      example: 'Primera prensada en frío',
+      description: 'Método de extracción del aceite',
       icon: <Award className="w-4 h-4" />
     },
     { 
       name: 'Cosecha', 
       type: 'text', 
       example: 'Temprana, Tradicional',
-      description: 'Momento de la recolecciÃ³n',
+      description: 'Momento de la recolección',
       icon: <Calendar className="w-4 h-4" />
     },
   ],
   mieles: [
     { 
-      name: 'FloraciÃ³n', 
+      name: 'Floración', 
       type: 'text', 
       example: 'Azahar, Romero, Tomillo, Milflores',
       description: 'Tipo de flor de origen',
@@ -254,14 +254,14 @@ const ATTRIBUTE_EXAMPLES: Record<string, Array<{
     { 
       name: 'Textura', 
       type: 'text', 
-      example: 'LÃ­quida, Cremosa, Cristalizada',
+      example: 'Líquida, Cremosa, Cristalizada',
       description: 'Consistencia de la miel',
       icon: <Droplet className="w-4 h-4" />
     },
     { 
-      name: 'Origen botÃ¡nico', 
+      name: 'Origen botánico', 
       type: 'text', 
-      example: 'Bosque, MontaÃ±a, Dehesa',
+      example: 'Bosque, Montaña, Dehesa',
       description: 'Entorno de las colmenas',
       icon: <TreePine className="w-4 h-4" />
     },
@@ -270,29 +270,29 @@ const ATTRIBUTE_EXAMPLES: Record<string, Array<{
     { 
       name: 'Tipo de carne', 
       type: 'text', 
-      example: 'Cerdo ibÃ©rico, Cerdo blanco',
+      example: 'Cerdo ibérico, Cerdo blanco',
       description: 'Raza y tipo de cerdo',
       icon: <Beef className="w-4 h-4" />
     },
     { 
-      name: 'CuraciÃ³n', 
+      name: 'Curación', 
       type: 'number', 
       example: '24', 
       unit: 'meses',
-      description: 'Tiempo de curaciÃ³n',
+      description: 'Tiempo de curación',
       icon: <Clock className="w-4 h-4" />
     },
     { 
-      name: 'AlimentaciÃ³n', 
+      name: 'Alimentación', 
       type: 'text', 
       example: 'Bellota, Cebo de campo, Cebo',
-      description: 'Tipo de alimentaciÃ³n del animal',
+      description: 'Tipo de alimentación del animal',
       icon: <Wheat className="w-4 h-4" />
     },
     { 
       name: 'Pieza', 
       type: 'text', 
-      example: 'Paleta, JamÃ³n, Lomo, Chorizo',
+      example: 'Paleta, Jamón, Lomo, Chorizo',
       description: 'Tipo de pieza',
       icon: <Beef className="w-4 h-4" />
     },
@@ -511,7 +511,7 @@ export function StepCertificationsAttributes({
             </div>
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-origen-bosque truncate">Certificaciones y atributos</h2>
-              <p className="text-sm text-muted-foreground truncate">AÃ±ade sellos de calidad y caracterÃ­sticas</p>
+              <p className="text-sm text-muted-foreground truncate">Añade sellos de calidad y características</p>
             </div>
           </div>
           
@@ -540,7 +540,7 @@ export function StepCertificationsAttributes({
           </div>
         </div>
 
-        {/* PestaÃ±as */}
+        {/* Pestañas */}
         <div className="mb-6 border-b border-border overflow-x-auto">
           <div className="flex gap-6 min-w-max">
             {[
@@ -581,12 +581,12 @@ export function StepCertificationsAttributes({
                   <p className="text-sm font-medium text-blue-800">Certificaciones verificadas</p>
                   <p className="text-xs text-blue-600 mt-1">
                     Sube los documentos acreditativos para que podamos verificar tus certificaciones. 
-                    Una vez verificadas, aparecerÃ¡ un sello de confianza en tu producto.
+                    Una vez verificadas, aparecerá un sello de confianza en tu producto.
                   </p>
                 </div>
               </div>
 
-              {/* BotÃ³n aÃ±adir certificaciÃ³n */}
+              {/* Botón añadir certificación */}
               <div className="flex justify-end">
                 <Button
                   size="sm"
@@ -596,11 +596,11 @@ export function StepCertificationsAttributes({
                   }}
                   leftIcon={<Plus className="w-4 h-4" />}
                 >
-                  {showCertForm ? 'Cancelar' : 'Nueva certificaciÃ³n'}
+                  {showCertForm ? 'Cancelar' : 'Nueva certificación'}
                 </Button>
               </div>
 
-              {/* Formulario de certificaciÃ³n */}
+              {/* Formulario de certificación */}
               <AnimatePresence>
                 {showCertForm && (
                   <motion.div
@@ -611,12 +611,12 @@ export function StepCertificationsAttributes({
                   >
                     <div className="p-5 bg-origen-crema/30 rounded-xl border-2 border-origen-pradera/20 mb-4">
                       <h4 className="text-sm font-medium text-origen-bosque mb-4">
-                        {editingCert ? 'Editar certificaciÃ³n' : 'Nueva certificaciÃ³n'}
+                        {editingCert ? 'Editar certificación' : 'Nueva certificación'}
                       </h4>
 
                       {/* Certificaciones predefinidas */}
                       <div className="mb-4">
-                        <p className="text-xs text-muted-foreground mb-2">Selecciona una certificaciÃ³n comÃºn:</p>
+                        <p className="text-xs text-muted-foreground mb-2">Selecciona una certificación común:</p>
                         <div className="flex flex-wrap gap-2">
                           {PREDEFINED_CERTIFICATIONS.map((cert) => (
                             <button
@@ -642,7 +642,7 @@ export function StepCertificationsAttributes({
                           <Input
                             value={newCert.name}
                             onChange={(e) => setNewCert({ ...newCert, name: e.target.value })}
-                            placeholder="Nombre de la certificaciÃ³n"
+                            placeholder="Nombre de la certificación"
                             className="h-11 rounded-xl"
                           />
                           <Input
@@ -657,7 +657,7 @@ export function StepCertificationsAttributes({
                           <Input
                             value={newCert.certificateNumber || ''}
                             onChange={(e) => setNewCert({ ...newCert, certificateNumber: e.target.value })}
-                            placeholder="NÃºmero de certificado"
+                            placeholder="Número de certificado"
                             className="h-11 rounded-xl"
                           />
                           <Select
@@ -677,7 +677,7 @@ export function StepCertificationsAttributes({
 
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <p className="text-xs text-muted-foreground mb-1">Fecha emisiÃ³n</p>
+                            <p className="text-xs text-muted-foreground mb-1">Fecha emisión</p>
                             <Input
                               type="date"
                               value={formatDateForInput(newCert.issueDate)}
@@ -827,7 +827,7 @@ export function StepCertificationsAttributes({
                             {cert.certificateNumber && (
                               <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
                                 <FileText className="w-3 h-3" />
-                                NÂº {cert.certificateNumber}
+                                Nº {cert.certificateNumber}
                               </p>
                             )}
 
@@ -865,7 +865,7 @@ export function StepCertificationsAttributes({
                   <Award className="w-12 h-12 text-origen-pradera/40 mx-auto mb-3" />
                   <p className="text-sm font-medium text-foreground">No hay certificaciones</p>
                   <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">
-                    AÃ±ade certificaciones para aumentar la confianza de tus clientes y diferenciar tu producto
+                    Añade certificaciones para aumentar la confianza de tus clientes y diferenciar tu producto
                   </p>
                   <Button
                     size="sm"
@@ -873,7 +873,7 @@ export function StepCertificationsAttributes({
                     onClick={() => setShowCertForm(true)}
                     leftIcon={<Plus className="w-3 h-3" />}
                   >
-                    AÃ±adir certificaciÃ³n
+                    Añadir certificación
                   </Button>
                 </div>
               )}
@@ -889,21 +889,21 @@ export function StepCertificationsAttributes({
               exit={{ opacity: 0, x: 20 }}
               className="space-y-6"
             >
-              {/* ExplicaciÃ³n de atributos */}
+              {/* Explicación de atributos */}
               <div className="p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
                 <div className="flex items-start gap-3">
                   <Lightbulb className="w-5 h-5 text-origen-pradera shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-origen-bosque">Â¿QuÃ© son los atributos?</p>
+                    <p className="text-sm font-medium text-origen-bosque">¿Qué son los atributos?</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Los atributos son caracterÃ­sticas especÃ­ficas de tu producto que no aparecen en otros campos.
+                      Los atributos son características específicas de tu producto que no aparecen en otros campos.
                       Ayudan a los clientes a encontrar tu producto y a tomar decisiones de compra.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Ejemplos por categorÃ­a */}
+              {/* Ejemplos por categoría */}
               <div>
                 <p className="text-sm font-medium text-origen-bosque mb-3 flex items-center gap-2">
                   <Star className="w-4 h-4 text-origen-pradera" />
@@ -951,7 +951,7 @@ export function StepCertificationsAttributes({
                 </div>
               </div>
 
-              {/* BotÃ³n aÃ±adir atributo */}
+              {/* Botón añadir atributo */}
               <div className="flex justify-end">
                 <Button
                   size="sm"
@@ -1000,8 +1000,8 @@ export function StepCertificationsAttributes({
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="text">Texto</SelectItem>
-                              <SelectItem value="number">NÃºmero</SelectItem>
-                              <SelectItem value="boolean">SÃ­/No</SelectItem>
+                              <SelectItem value="number">Número</SelectItem>
+                              <SelectItem value="boolean">Sí/No</SelectItem>
                               <SelectItem value="date">Fecha</SelectItem>
                             </SelectContent>
                           </Select>
@@ -1035,7 +1035,7 @@ export function StepCertificationsAttributes({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="true">SÃ­</SelectItem>
+                                <SelectItem value="true">Sí</SelectItem>
                                 <SelectItem value="false">No</SelectItem>
                               </SelectContent>
                             </Select>
@@ -1163,7 +1163,7 @@ export function StepCertificationsAttributes({
                   <Tag className="w-12 h-12 text-origen-pradera/40 mx-auto mb-3" />
                   <p className="text-sm font-medium text-foreground">No hay atributos</p>
                   <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">
-                    Los atributos ayudan a los clientes a encontrar tu producto y a conocer sus caracterÃ­sticas especÃ­ficas
+                    Los atributos ayudan a los clientes a encontrar tu producto y a conocer sus características específicas
                   </p>
                 </div>
               )}
@@ -1171,14 +1171,14 @@ export function StepCertificationsAttributes({
           )}
         </AnimatePresence>
 
-        {/* EstadÃ­sticas */}
+        {/* Estadísticas */}
         <div className="mt-6 p-4 bg-gradient-to-br from-origen-crema/30 to-white rounded-xl border border-origen-pradera/20">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-origen-pradera" />
             <span className="text-xs font-medium text-origen-bosque">Impacto en ventas</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            Los productos con certificaciones verificadas tienen un <span className="font-bold text-origen-pradera">35% mÃ¡s</span> de clics.
+            Los productos con certificaciones verificadas tienen un <span className="font-bold text-origen-pradera">35% más</span> de clics.
             Los atributos detallados aumentan la confianza del cliente en un <span className="font-bold text-origen-pradera">28%</span>.
           </p>
         </div>
@@ -1186,3 +1186,4 @@ export function StepCertificationsAttributes({
     </motion.div>
   );
 }
+

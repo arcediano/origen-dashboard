@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file producer-card.tsx
  * @description Tarjeta de perfil del productor conectada a la API real.
  * Props: ProducerProfile (GET /api/v1/producers/me) + isLoading + error.
@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { ProducerProfile, AccountStatus } from '../../types';
 
-// â”€â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── helpers ─────────────────────────────────────────────────────────────────
 
 function getInitials(name: string): string {
   return name
@@ -25,7 +25,7 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-// â”€â”€â”€ sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── sub-components ───────────────────────────────────────────────────────────
 
 interface StatusBadgeProps {
   status: AccountStatus;
@@ -112,7 +112,7 @@ function CompletenessBar({ score }: CompletenessBarProps) {
   );
 }
 
-// â”€â”€â”€ skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── skeleton ────────────────────────────────────────────────────────────────
 
 function ProducerCardSkeleton({ className }: { className?: string }) {
   return (
@@ -134,7 +134,7 @@ function ProducerCardSkeleton({ className }: { className?: string }) {
   );
 }
 
-// â”€â”€â”€ main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── main component ───────────────────────────────────────────────────────────
 
 interface ProducerCardProps {
   producer: ProducerProfile | null;
@@ -201,13 +201,13 @@ export function ProducerCard({
           </div>
         </div>
 
-        {/* Status badge â€” desktop: inline, mobile: below */}
+        {/* Status badge — desktop: inline, mobile: below */}
         <div className="hidden sm:flex flex-wrap gap-2 lg:ml-auto">
           <StatusBadge status={producer.accountStatus} />
         </div>
       </div>
 
-      {/* Status badge â€” mobile */}
+      {/* Status badge — mobile */}
       <div className="sm:hidden">
         <StatusBadge status={producer.accountStatus} />
       </div>
@@ -217,7 +217,7 @@ export function ProducerCard({
         <CompletenessBar score={producer.profileCompletenessScore} />
       </div>
 
-      {/* Row 3: CTA â€” only when profile is incomplete */}
+      {/* Row 3: CTA — only when profile is incomplete */}
       {isIncomplete && (
         <div>
           <Link
@@ -232,4 +232,5 @@ export function ProducerCard({
     </motion.div>
   );
 }
+
 

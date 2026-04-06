@@ -703,3 +703,4 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
 EnhancedStep2Story.displayName = 'EnhancedStep2Story';
 
 export default EnhancedStep2Story;
+

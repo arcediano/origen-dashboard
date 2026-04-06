@@ -44,3 +44,4 @@ export function SessionExpiredModal({ isOpen }: SessionExpiredModalProps) {
     </Dialog>
   );
 }
+

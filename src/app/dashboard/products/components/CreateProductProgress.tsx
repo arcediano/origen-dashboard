@@ -1,6 +1,6 @@
-﻿/**
+/**
  * @file CreateProductProgress.tsx
- * @description Barra de progreso y navegaciÃ³n de pasos para creaciÃ³n de productos
+ * @description Barra de progreso y navegación de pasos para creación de productos
  */
 
 'use client';
@@ -37,7 +37,7 @@ export interface CreateProductProgressProps {
   currentTab: FormStepId;
   /** Pasos completados */
   completedTabs: Record<string, boolean>;
-  /** FunciÃ³n para cambiar de paso */
+  /** Función para cambiar de paso */
   onTabChange: (tab: FormStepId) => void;
   /** Clase CSS adicional */
   className?: string;
@@ -48,7 +48,7 @@ export interface CreateProductProgressProps {
 // ============================================================================
 
 /**
- * Barra de progreso y navegaciÃ³n de pasos para creaciÃ³n de productos
+ * Barra de progreso y navegación de pasos para creación de productos
  */
 export function CreateProductProgress({
   currentTab,
@@ -83,7 +83,7 @@ export function CreateProductProgress({
         {/* Barra de progreso */}
         <Progress value={progress} variant="leaf" size="sm" showLabel={false} className="mb-4 sm:mb-5" />
         
-        {/* NavegaciÃ³n de pasos */}
+        {/* Navegación de pasos */}
         <div className="flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto pb-1 scrollbar-origen">
           {FORM_STEPS.map((step, index) => {
             const isActive = step.id === currentTab;
@@ -130,3 +130,4 @@ export function CreateProductProgress({
     </div>
   );
 }
+

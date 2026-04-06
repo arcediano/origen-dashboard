@@ -1,6 +1,6 @@
-﻿/**
+/**
  * @component StepInventory
- * @description Paso 6: Inventario y gestiÃ³n de stock - VERSIÃ“N ACTUALIZADA (SIN GENERAR SKU)
+ * @description Paso 6: Inventario y gestión de stock - VERSIÓN ACTUALIZADA (SIN GENERAR SKU)
  */
 
 'use client';
@@ -63,15 +63,15 @@ interface StepInventoryProps {
   onInputChange: (field: string, value: any) => void;
   onNestedChange: (section: string, field: string, value: any) => void;
   completed?: boolean;
-  skuSuggestion?: string; // â† NUEVO: para mostrar sugerencia
+  skuSuggestion?: string; // ← NUEVO: para mostrar sugerencia
 }
 
 // ============================================================================
-// ESQUEMAS DE VALIDACIÃ“N
+// ESQUEMAS DE VALIDACIÓN
 // ============================================================================
 
 const InventorySchema = z.object({
-  sku: z.string().min(3, 'MÃ­nimo 3 caracteres').max(30, 'MÃ¡ximo 30 caracteres'),
+  sku: z.string().min(3, 'Mínimo 3 caracteres').max(30, 'Máximo 30 caracteres'),
   stock: z.number().min(0, 'El stock no puede ser negativo'),
   lowStockThreshold: z.number().min(0, 'El umbral debe ser positivo'),
 });
@@ -143,13 +143,13 @@ export function StepInventory({
   onInputChange,
   onNestedChange,
   completed,
-  skuSuggestion = '', // â† NUEVO: valor por defecto
+  skuSuggestion = '', // ← NUEVO: valor por defecto
 }: StepInventoryProps) {
   
   const [localTouched, setLocalTouched] = useState<Record<string, boolean>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  // Validar si el paso estÃ¡ completo
+  // Validar si el paso está completo
   const isStepComplete = formData?.sku && formData.sku.trim() !== '';
 
   const validateField = useCallback((field: string, value: any) => {
@@ -202,7 +202,7 @@ export function StepInventory({
             </div>
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-origen-bosque truncate">Inventario</h2>
-              <p className="text-sm text-muted-foreground truncate">Controla el stock y la logÃ­stica</p>
+              <p className="text-sm text-muted-foreground truncate">Controla el stock y la logística</p>
             </div>
           </div>
           
@@ -225,7 +225,7 @@ export function StepInventory({
           </div>
         </div>
 
-        {/* SKU y CÃ³digo de barras */}
+        {/* SKU y Código de barras */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* SKU */}
           <div className="space-y-2">
@@ -236,8 +236,8 @@ export function StepInventory({
                 <span className="text-red-500 ml-1">*</span>
               </span>
               <Tooltip 
-                content="CÃ³digo Ãºnico para identificar el producto"
-                detailed="El SKU (Stock Keeping Unit) es un cÃ³digo Ãºnico para tu inventario interno. El backend lo generarÃ¡ automÃ¡ticamente."
+                content="Código único para identificar el producto"
+                detailed="El SKU (Stock Keeping Unit) es un código único para tu inventario interno. El backend lo generará automáticamente."
                 size="sm"
               />
             </div>
@@ -249,9 +249,9 @@ export function StepInventory({
                   "h-12 font-mono text-base w-full rounded-xl",
                   (localTouched.sku && validationErrors.sku) && "border-feedback-danger"
                 )}
-                placeholder={skuSuggestion || "El backend generarÃ¡ el SKU"}
+                placeholder={skuSuggestion || "El backend generará el SKU"}
                 style={{ textTransform: 'uppercase' }}
-                disabled // â† OPCIONAL: deshabilitar si quieres que sea solo lectura
+                disabled // ← OPCIONAL: deshabilitar si quieres que sea solo lectura
               />
               {skuSuggestion && !formData?.sku && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-subtle">
@@ -269,16 +269,16 @@ export function StepInventory({
             )}
           </div>
 
-          {/* CÃ³digo de barras */}
+          {/* Código de barras */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Barcode className="h-5 w-5 text-origen-pradera" />
               <span className="text-sm font-medium text-foreground">
-                CÃ³digo de barras
+                Código de barras
               </span>
               <Tooltip 
                 content="EAN-13 o UPC (opcional)"
-                detailed="CÃ³digo de barras estÃ¡ndar para productos. Formato EAN-13 (13 dÃ­gitos) o UPC (12 dÃ­gitos)."
+                detailed="Código de barras estándar para productos. Formato EAN-13 (13 dígitos) o UPC (12 dígitos)."
                 size="sm"
               />
             </div>
@@ -303,7 +303,7 @@ export function StepInventory({
               </span>
               <Tooltip 
                 content="Cantidad disponible"
-                detailed="NÃºmero de unidades disponibles para la venta. Se actualizarÃ¡ automÃ¡ticamente con los pedidos."
+                detailed="Número de unidades disponibles para la venta. Se actualizará automáticamente con los pedidos."
                 size="sm"
               />
             </div>
@@ -324,8 +324,8 @@ export function StepInventory({
                 Umbral de stock bajo
               </span>
               <Tooltip 
-                content="Alerta cuando el stock estÃ© por debajo"
-                detailed="RecibirÃ¡s una notificaciÃ³n cuando el stock estÃ© por debajo de este nÃºmero. Recomendado: 5-10 unidades."
+                content="Alerta cuando el stock esté por debajo"
+                detailed="Recibirás una notificación cuando el stock esté por debajo de este número. Recomendado: 5-10 unidades."
                 size="sm"
               />
             </div>
@@ -359,9 +359,9 @@ export function StepInventory({
             />
             <div>
               <label htmlFor="trackInventory" className="text-sm font-medium text-origen-bosque cursor-pointer">
-                Controlar inventario automÃ¡ticamente
+                Controlar inventario automáticamente
               </label>
-              <p className="text-xs text-muted-foreground mt-1">Descuenta stock automÃ¡ticamente cuando se realizan ventas</p>
+              <p className="text-xs text-muted-foreground mt-1">Descuenta stock automáticamente cuando se realizan ventas</p>
             </div>
           </div>
 
@@ -381,11 +381,11 @@ export function StepInventory({
           </div>
         </div>
 
-        {/* Datos de envÃ­o */}
+        {/* Datos de envío */}
         <div className="pt-4 border-t border-border">
           <h3 className="text-sm font-semibold text-origen-bosque mb-4 flex items-center gap-2">
             <Truck className="w-4 h-4 text-origen-pradera" />
-            Datos de envÃ­o
+            Datos de envío
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -397,8 +397,8 @@ export function StepInventory({
                   Peso
                 </span>
                 <Tooltip 
-                  content="Peso del producto para envÃ­o"
-                  detailed="El peso es necesario para calcular los costes de envÃ­o. Incluye el peso del producto mÃ¡s el embalaje."
+                  content="Peso del producto para envío"
+                  detailed="El peso es necesario para calcular los costes de envío. Incluye el peso del producto más el embalaje."
                   size="sm"
                 />
               </div>
@@ -427,16 +427,16 @@ export function StepInventory({
               </div>
             </div>
 
-            {/* Clase de envÃ­o */}
+            {/* Clase de envío */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Truck className="h-5 w-5 text-origen-pradera" />
                 <span className="text-sm font-medium text-foreground">
-                  Clase de envÃ­o
+                  Clase de envío
                 </span>
                 <Tooltip 
-                  content="CategorÃ­a para tarifas"
-                  detailed="La clase de envÃ­o determina la tarifa aplicable segÃºn el tipo de producto (estÃ¡ndar, frÃ¡gil, perecedero, etc.)"
+                  content="Categoría para tarifas"
+                  detailed="La clase de envío determina la tarifa aplicable según el tipo de producto (estándar, frágil, perecedero, etc.)"
                   size="sm"
                 />
               </div>
@@ -448,9 +448,9 @@ export function StepInventory({
                   <SelectValue placeholder="Seleccionar clase" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="standard">EstÃ¡ndar</SelectItem>
+                  <SelectItem value="standard">Estándar</SelectItem>
                   <SelectItem value="express">Express</SelectItem>
-                  <SelectItem value="fragile">FrÃ¡gil</SelectItem>
+                  <SelectItem value="fragile">Frágil</SelectItem>
                   <SelectItem value="perishable">Perecedero</SelectItem>
                   <SelectItem value="bulky">Voluminoso</SelectItem>
                 </SelectContent>
@@ -467,7 +467,7 @@ export function StepInventory({
               </span>
               <Tooltip 
                 content="Largo, ancho y alto del paquete"
-                detailed="Dimensiones del paquete para calcular el volumen y costes de envÃ­o. Medir el producto embalado."
+                detailed="Dimensiones del paquete para calcular el volumen y costes de envío. Medir el producto embalado."
                 size="sm"
               />
             </div>
@@ -512,7 +512,7 @@ export function StepInventory({
           )}
         </div>
 
-        {/* Punto de reorden y stock mÃ¡ximo (opcional) */}
+        {/* Punto de reorden y stock máximo (opcional) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-border">
           <div>
             <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
@@ -527,13 +527,13 @@ export function StepInventory({
               className="h-11 rounded-xl"
               placeholder="Opcional"
             />
-            <p className="text-xs text-text-subtle mt-1">Cantidad para sugerir reposiciÃ³n</p>
+            <p className="text-xs text-text-subtle mt-1">Cantidad para sugerir reposición</p>
           </div>
 
           <div>
             <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
               <TrendingUp className="w-3 h-3 text-origen-pradera" />
-              Stock mÃ¡ximo
+              Stock máximo
             </p>
             <Input
               type="number"
@@ -543,10 +543,11 @@ export function StepInventory({
               className="h-11 rounded-xl"
               placeholder="Opcional"
             />
-            <p className="text-xs text-text-subtle mt-1">LÃ­mite superior de inventario</p>
+            <p className="text-xs text-text-subtle mt-1">Límite superior de inventario</p>
           </div>
         </div>
       </Card>
     </motion.div>
   );
 }
+

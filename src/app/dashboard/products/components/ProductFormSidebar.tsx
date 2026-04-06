@@ -67,3 +67,4 @@ export function ProductFormSidebar({ tips, keyFact }: ProductFormSidebarProps) {
     </div>
   );
 }
+

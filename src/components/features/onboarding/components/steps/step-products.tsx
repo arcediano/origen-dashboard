@@ -597,3 +597,4 @@ export function EnhancedStepProducts({ data, onChange, producerCategories }: Enh
     </div>
   );
 }
+

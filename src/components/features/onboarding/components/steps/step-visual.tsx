@@ -363,3 +363,4 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
 EnhancedStep3Visual.displayName = 'EnhancedStep3Visual';
 
 export default EnhancedStep3Visual;
+

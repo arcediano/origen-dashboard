@@ -1,4 +1,4 @@
-﻿// ðŸ“ /src/app/dashboard/profile/page.tsx
+// 📁 /src/app/dashboard/profile/page.tsx
 'use client';
 
 import * as React from 'react';
@@ -35,20 +35,20 @@ export default function ProfilePage() {
 
   return (
     <div>
-      {/* Cabecera de pÃ¡gina */}
+      {/* Cabecera de página */}
       <PageHeader
         title="Mi perfil"
-        description="InformaciÃ³n personal, negocio y certificaciones"
+        description="Información personal, negocio y certificaciones"
         badgeIcon={User}
         badgeText="Perfil"
         tooltip="Perfil"
-        tooltipDetailed="Administra tu informaciÃ³n personal, los datos de tu negocio y tus certificaciones."
+        tooltipDetailed="Administra tu información personal, los datos de tu negocio y tus certificaciones."
       />
 
-      {/* â”€â”€ Barra de completitud â”€â”€ */}
+      {/* ── Barra de completitud ── */}
       <div className="px-4 sm:px-6 lg:px-8 mt-4 mb-5 sm:mt-6 sm:mb-8">
 
-        {/* MÃ³vil: fila compacta */}
+        {/* Móvil: fila compacta */}
         <div className="lg:hidden flex items-center gap-3 p-4 rounded-2xl bg-surface-alt border border-border-subtle">
           <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
             <User className="w-5 h-5 text-origen-pradera" />
@@ -85,7 +85,7 @@ export default function ProfilePage() {
         </Card>
       </div>
 
-      {/* â”€â”€ MÃ³vil: lista de navegaciÃ³n nativa â”€â”€ */}
+      {/* ── Móvil: lista de navegación nativa ── */}
       <div className="lg:hidden mx-4 rounded-2xl border border-border-subtle overflow-hidden bg-surface divide-y divide-border-subtle">
 
         <Link href="/dashboard/profile/personal" className="flex items-center gap-3 px-4 py-4 active:bg-surface-alt transition-colors">
@@ -93,8 +93,8 @@ export default function ProfilePage() {
             <User className="w-5 h-5 text-origen-pradera" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[15px] font-semibold text-origen-bosque leading-tight">InformaciÃ³n personal</p>
-            <p className="text-xs text-text-subtle mt-0.5">Datos personales, contacto y direcciÃ³n</p>
+            <p className="text-[15px] font-semibold text-origen-bosque leading-tight">Información personal</p>
+            <p className="text-xs text-text-subtle mt-0.5">Datos personales, contacto y dirección</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Badge variant="success" size="xs">Verificado</Badge>
@@ -108,7 +108,7 @@ export default function ProfilePage() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[15px] font-semibold text-origen-bosque leading-tight">Mi negocio</p>
-            <p className="text-xs text-text-subtle mt-0.5">Empresa, ubicaciÃ³n y datos comerciales</p>
+            <p className="text-xs text-text-subtle mt-0.5">Empresa, ubicación y datos comerciales</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Badge variant="success" size="xs">Verificado</Badge>
@@ -132,24 +132,24 @@ export default function ProfilePage() {
 
       </div>
 
-      {/* â”€â”€ Desktop: grid de cards â”€â”€ */}
+      {/* ── Desktop: grid de cards ── */}
       <div className="hidden lg:grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 px-8">
 
-        {/* CARD 1: InformaciÃ³n personal */}
+        {/* CARD 1: Información personal */}
         <motion.div variants={itemVariants} initial="hidden" animate="visible" className="flex">
           <Card className="hover:shadow-lg transition-all group flex flex-col w-full">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <User className="w-5 h-5 text-origen-pradera" />
-                  InformaciÃ³n personal
+                  Información personal
                 </CardTitle>
                 <Badge variant="success" size="xs">Verificado</Badge>
               </div>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Gestiona tus datos personales, informaciÃ³n de contacto y direcciÃ³n.
+                Gestiona tus datos personales, información de contacto y dirección.
               </p>
               <div className="flex-1" />
               <div className="flex justify-end mt-4">
@@ -180,7 +180,7 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Administra la informaciÃ³n de tu empresa, ubicaciÃ³n, categorÃ­as y datos comerciales.
+                Administra la información de tu empresa, ubicación, categorías y datos comerciales.
               </p>
               <div className="flex-1" />
               <div className="flex justify-end mt-4">
@@ -211,7 +211,7 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Gestiona tus certificaciones de calidad, sellos ecolÃ³gicos y documentos legales.
+                Gestiona tus certificaciones de calidad, sellos ecológicos y documentos legales.
               </p>
               <div className="flex-1" />
               <div className="flex justify-end mt-4">
@@ -232,3 +232,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

@@ -1,6 +1,6 @@
-﻿/**
+/**
  * @component ReviewsList
- * @description Lista de reseÃ±as con diseÃ±o de tarjetas
+ * @description Lista de reseñas con diseño de tarjetas
  */
 
 'use client';
@@ -98,10 +98,10 @@ export function ReviewsList({
         <div className="flex flex-col items-center">
           <MessageSquare className="w-8 h-8 sm:w-12 sm:h-12 text-text-disabled mb-3 sm:mb-4" />
           <h3 className="text-lg font-semibold text-origen-bosque mb-2">
-            No hay reseÃ±as
+            No hay reseñas
           </h3>
           <p className="text-sm text-text-subtle">
-            No se encontraron reseÃ±as con los filtros seleccionados.
+            No se encontraron reseñas con los filtros seleccionados.
           </p>
         </div>
       </Card>
@@ -137,8 +137,8 @@ export function ReviewsList({
                   )}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-text-subtle mt-1">
-                  <span>ReseÃ±a de {review.type === 'product' ? 'producto' : 'productor'}</span>
-                  <span>Â·</span>
+                  <span>Reseña de {review.type === 'product' ? 'producto' : 'productor'}</span>
+                  <span>·</span>
                   <span>{formatDistanceToNow(review.createdAt, { locale: es, addSuffix: true })}</span>
                 </div>
               </div>
@@ -157,7 +157,7 @@ export function ReviewsList({
             </Badge>
           </div>
 
-          {/* Rating y tÃ­tulo */}
+          {/* Rating y título */}
           <div className="flex items-center gap-3 mb-2">
             {renderStars(review.rating)}
             <span className="font-semibold text-origen-bosque">{review.title}</span>
@@ -171,17 +171,17 @@ export function ReviewsList({
             {review.content}
           </p>
 
-          {/* BotÃ³n ver mÃ¡s */}
+          {/* Botón ver más */}
           {review.content.length > 200 && (
             <button
               onClick={() => setExpandedId(expandedId === review.id ? null : review.id)}
               className="text-xs text-origen-pradera hover:text-origen-hoja mb-3"
             >
-              {expandedId === review.id ? 'Ver menos' : 'Ver mÃ¡s'}
+              {expandedId === review.id ? 'Ver menos' : 'Ver más'}
             </button>
           )}
 
-          {/* ImÃ¡genes */}
+          {/* Imágenes */}
           {review.images && review.images.length > 0 && (
             <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
               {review.images.map((img, idx) => (
@@ -215,7 +215,7 @@ export function ReviewsList({
           {respondingTo === review.id && (
             <div className="mt-4 p-4 bg-origen-crema/30 rounded-lg border border-origen-pradera/20">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-origen-bosque">Responder a esta reseÃ±a</span>
+                <span className="text-sm font-medium text-origen-bosque">Responder a esta reseña</span>
                 <button
                   onClick={() => {
                     setRespondingTo(null);
@@ -249,11 +249,11 @@ export function ReviewsList({
             </div>
           )}
 
-          {/* DiÃ¡logo de reporte */}
+          {/* Diálogo de reporte */}
           {showFlagDialog === review.id && (
             <div className="mt-4 p-4 bg-feedback-danger-subtle/50 rounded-lg border border-red-200">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-red-600">Reportar reseÃ±a</span>
+                <span className="text-sm font-medium text-red-600">Reportar reseña</span>
                 <button
                   onClick={() => {
                     setShowFlagDialog(null);
@@ -265,7 +265,7 @@ export function ReviewsList({
                 </button>
               </div>
               <p className="text-xs text-muted-foreground mb-3">
-                Â¿Por quÃ© quieres reportar esta reseÃ±a?
+                ¿Por qué quieres reportar esta reseña?
               </p>
               <select
                 value={flagReason}
@@ -275,7 +275,7 @@ export function ReviewsList({
                 <option value="">Selecciona un motivo</option>
                 <option value="inappropriate">Contenido inapropiado</option>
                 <option value="spam">Spam</option>
-                <option value="fake">ReseÃ±a falsa</option>
+                <option value="fake">Reseña falsa</option>
                 <option value="offensive">Lenguaje ofensivo</option>
                 <option value="other">Otro</option>
               </select>
@@ -377,3 +377,4 @@ export function ReviewsList({
     </div>
   );
 }
+

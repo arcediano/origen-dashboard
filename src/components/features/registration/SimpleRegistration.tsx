@@ -665,3 +665,4 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
     </>
   );
 }
+

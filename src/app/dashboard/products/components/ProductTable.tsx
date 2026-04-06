@@ -1,6 +1,6 @@
-﻿/**
+/**
  * @file ProductTable.tsx
- * @description Tabla de productos con ordenaciÃ³n y filas expandibles
+ * @description Tabla de productos con ordenación y filas expandibles
  */
 
 'use client';
@@ -75,11 +75,11 @@ export function ProductTable({
       accessor: (item) => (
         <div className="whitespace-nowrap">
           <span className="text-sm font-semibold text-origen-pradera">
-            {item.basePrice.toFixed(2)}â‚¬
+            {item.basePrice.toFixed(2)}€
           </span>
           {item.comparePrice && item.comparePrice > item.basePrice && (
             <span className="text-xs text-text-subtle line-through ml-1">
-              {item.comparePrice.toFixed(2)}â‚¬
+              {item.comparePrice.toFixed(2)}€
             </span>
           )}
         </div>
@@ -154,5 +154,6 @@ export function ProductTable({
     />
   );
 }
+
 
 

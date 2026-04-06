@@ -9,10 +9,13 @@ const projectRoot = fileURLToPath(new URL('.', import.meta.url));
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   resolve: {
+    preserveSymlinks: true,
     dedupe: ['react', 'react-dom'],
     alias: {
-      '@origen/ux-library': resolve(projectRoot, 'node_modules/@origen/ux-library/dist/index.js'),
+      '@arcediano/ux-library': resolve(projectRoot, 'node_modules/@arcediano/ux-library/dist/index.js'),
       react: resolve(projectRoot, 'node_modules/react'),
+      'react/jsx-runtime': resolve(projectRoot, 'node_modules/react/jsx-runtime.js'),
+      'react/jsx-dev-runtime': resolve(projectRoot, 'node_modules/react/jsx-dev-runtime.js'),
       'react-dom': resolve(projectRoot, 'node_modules/react-dom'),
       'lucide-react': resolve(projectRoot, 'node_modules/lucide-react'),
     },

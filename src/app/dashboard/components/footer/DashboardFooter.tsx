@@ -254,3 +254,4 @@ export function DashboardFooter({
     </motion.footer>
   );
 }
+

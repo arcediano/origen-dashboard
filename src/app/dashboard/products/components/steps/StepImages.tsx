@@ -1,6 +1,6 @@
-﻿/**
+/**
  * @component StepImages
- * @description Paso 2: ImÃ¡genes del producto
+ * @description Paso 2: Imágenes del producto
  */
 
 'use client';
@@ -49,8 +49,8 @@ export function StepImages({
               {completed ? <CheckCircle className="w-5 h-5" /> : <Layers className="w-5 h-5" />}
             </div>
             <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-origen-bosque truncate">ImÃ¡genes</h2>
-              <p className="text-sm text-muted-foreground truncate">AÃ±ade fotos de tu producto</p>
+              <h2 className="text-lg font-semibold text-origen-bosque truncate">Imágenes</h2>
+              <p className="text-sm text-muted-foreground truncate">Añade fotos de tu producto</p>
             </div>
           </div>
           
@@ -78,12 +78,12 @@ export function StepImages({
           <div className="flex items-center gap-2">
             <Camera className="h-5 w-5 text-origen-pradera" />
             <span className="text-sm font-medium text-foreground">
-              GalerÃ­a de imÃ¡genes
+              Galería de imágenes
               <span className="text-red-500 ml-1">*</span>
             </span>
             <Tooltip 
-              content="ImÃ¡genes del producto"
-              detailed="Sube imÃ¡genes de alta calidad. La primera serÃ¡ la principal. Formatos: JPG, PNG, WebP. MÃ¡ximo 5 imÃ¡genes, 10MB cada una."
+              content="Imágenes del producto"
+              detailed="Sube imágenes de alta calidad. La primera será la principal. Formatos: JPG, PNG, WebP. Máximo 5 imágenes, 10MB cada una."
               size="sm"
             />
           </div>
@@ -93,10 +93,11 @@ export function StepImages({
             maxFiles={5}
             maxSize={10}
             showMainBadge={true}
-            uploadButtonText="Arrastra o haz clic para subir imÃ¡genes"
+            uploadButtonText="Arrastra o haz clic para subir imágenes"
           />
         </div>
       </Card>
     </motion.div>
   );
 }
+

@@ -1,4 +1,4 @@
-﻿// ðŸ“ /src/app/dashboard/profile/personal/page.tsx
+// 📁 /src/app/dashboard/profile/personal/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -55,7 +55,7 @@ export default function PersonalInfoPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState({
-    name: 'MarÃ­a MartÃ­nez',
+    name: 'María Martínez',
     email: 'maria@origen.es',
     phone: '+34 612 345 678',
     birthDate: '1985-06-15',
@@ -63,8 +63,8 @@ export default function PersonalInfoPage() {
     city: 'Madrid',
     postalCode: '28001',
     province: 'Madrid',
-    country: 'EspaÃ±a',
-    bio: 'Productora artesanal de quesos con mÃ¡s de 15 aÃ±os de experiencia. Apasionada de la tradiciÃ³n y la calidad.',
+    country: 'España',
+    bio: 'Productora artesanal de quesos con más de 15 años de experiencia. Apasionada de la tradición y la calidad.',
     avatar: null
   });
 
@@ -75,8 +75,8 @@ export default function PersonalInfoPage() {
     
     if (!form.name.trim()) newErrors.name = 'El nombre es obligatorio';
     if (!form.email.trim()) newErrors.email = 'El email es obligatorio';
-    else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = 'Email no vÃ¡lido';
-    if (!form.phone.trim()) newErrors.phone = 'El telÃ©fono es obligatorio';
+    else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = 'Email no válido';
+    if (!form.phone.trim()) newErrors.phone = 'El teléfono es obligatorio';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -103,9 +103,9 @@ export default function PersonalInfoPage() {
       <div className="fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       <div className="container mx-auto px-4 sm:px-6 py-8 max-w-7xl">
-        {/* PageHeader con sus mÃ¡rgenes internos */}
+        {/* PageHeader con sus márgenes internos */}
         <PageHeader
-          title="InformaciÃ³n personal"
+          title="Información personal"
           description="Gestiona tus datos personales y de contacto"
           badgeIcon={User}
           badgeText="Datos personales"
@@ -138,7 +138,7 @@ export default function PersonalInfoPage() {
                         )}
                       </div>
                       
-                      {/* Overlay elegante para hover - solo visible en ediciÃ³n */}
+                      {/* Overlay elegante para hover - solo visible en edición */}
                       {isEditing && (
                         <>
                           <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
@@ -151,7 +151,7 @@ export default function PersonalInfoPage() {
                       )}
                     </div>
 
-                    {/* InformaciÃ³n del usuario */}
+                    {/* Información del usuario */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-4">
                         <div>
@@ -166,7 +166,7 @@ export default function PersonalInfoPage() {
                           </div>
                         </div>
 
-                        {/* Botones de acciÃ³n */}
+                        {/* Botones de acción */}
                         <div className="flex gap-2 flex-shrink-0">
                           {!isEditing ? (
                             <Button onClick={() => setIsEditing(true)} size="sm" variant="outline" className="border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10">
@@ -254,7 +254,7 @@ export default function PersonalInfoPage() {
 
                     <div className="space-y-1">
                       <Label htmlFor="phone" className="text-sm font-medium">
-                        TelÃ©fono <span className="text-red-500">*</span>
+                        Teléfono <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="phone"
@@ -284,19 +284,19 @@ export default function PersonalInfoPage() {
                 </Card>
               </motion.div>
 
-              {/* COLUMNA DERECHA - DirecciÃ³n */}
+              {/* COLUMNA DERECHA - Dirección */}
               <motion.div variants={itemVariants}>
                 <Card className="border border-border shadow-sm h-full">
                   <CardHeader className="pb-3 border-b border-border-subtle">
                     <CardTitle className="flex items-center gap-2 text-base">
                       <MapPin className="w-4 h-4 text-origen-pradera" />
-                      DirecciÃ³n
+                      Dirección
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4 space-y-4">
                     <div className="space-y-1">
                       <Label htmlFor="address" className="text-sm font-medium">
-                        DirecciÃ³n
+                        Dirección
                       </Label>
                       <Input
                         id="address"
@@ -304,7 +304,7 @@ export default function PersonalInfoPage() {
                         onChange={(e) => setForm({ ...form, address: e.target.value })}
                         disabled={!isEditing}
                         className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
-                        placeholder="Calle, nÃºmero, piso..."
+                        placeholder="Calle, número, piso..."
                       />
                     </div>
 
@@ -320,7 +320,7 @@ export default function PersonalInfoPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="postalCode" className="text-sm">CÃ³digo postal</Label>
+                        <Label htmlFor="postalCode" className="text-sm">Código postal</Label>
                         <Input
                           id="postalCode"
                           value={form.postalCode}
@@ -343,7 +343,7 @@ export default function PersonalInfoPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="country" className="text-sm">PaÃ­s</Label>
+                        <Label htmlFor="country" className="text-sm">País</Label>
                         <Input
                           id="country"
                           value={form.country}
@@ -357,13 +357,13 @@ export default function PersonalInfoPage() {
               </motion.div>
             </div>
 
-            {/* BIOGRAFÃA */}
+            {/* BIOGRAFÍA */}
             <motion.div variants={itemVariants}>
               <Card className="border border-border shadow-sm">
                 <CardHeader className="pb-3 border-b border-border-subtle">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <User className="w-4 h-4 text-origen-pradera" />
-                    BiografÃ­a
+                    Biografía
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -375,17 +375,17 @@ export default function PersonalInfoPage() {
                       disabled={!isEditing}
                       rows={4}
                       className="w-full p-3 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-origen-menta/50 focus:border-origen-pradera disabled:bg-surface"
-                      placeholder="CuÃ©ntanos algo sobre ti..."
+                      placeholder="Cuéntanos algo sobre ti..."
                     />
                     <p className="text-xs text-muted-foreground">
-                      Esta informaciÃ³n aparecerÃ¡ en tu perfil pÃºblico
+                      Esta información aparecerá en tu perfil público
                     </p>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* ALERTA DE VERIFICACIÃ“N */}
+            {/* ALERTA DE VERIFICACIÓN */}
             <motion.div variants={itemVariants}>
               <Alert className="bg-origen-crema/20 border-origen-pradera/30 py-3">
                 <CheckCircle className="w-4 h-4 text-origen-pradera" />
@@ -400,4 +400,5 @@ export default function PersonalInfoPage() {
     </div>
   );
 }
+
 

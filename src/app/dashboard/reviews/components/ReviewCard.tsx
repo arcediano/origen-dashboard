@@ -1,8 +1,8 @@
-﻿/**
+/**
  * @component ReviewCard
- * @description Tarjeta compacta de reseÃ±a para lista mÃ³vil.
- *              Avatar pequeÃ±o, rating inline con nombre, respuesta colapsada.
- *              Usa ReviewResponseSheet para responder en mÃ³vil.
+ * @description Tarjeta compacta de reseña para lista móvil.
+ *              Avatar pequeño, rating inline con nombre, respuesta colapsada.
+ *              Usa ReviewResponseSheet para responder en móvil.
  *
  * Tokens Origen v3.0.
  */
@@ -30,7 +30,7 @@ import type { Review } from '@/types/review';
 import { ReviewResponseSheet } from './ReviewResponseSheet';
 import { SwipeableRow } from '@/components/shared/mobile';
 
-// â”€â”€â”€ STATUS CONFIG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<
   Review['status'],
@@ -42,7 +42,7 @@ const STATUS_CONFIG: Record<
   flagged:  { label: 'Reportada',  icon: AlertCircle, cls: 'bg-feedback-danger-subtle text-red-700 border-red-200' },
 };
 
-// â”€â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
 
 function StarRow({ rating }: { rating: number }) {
   return (
@@ -76,7 +76,7 @@ function StatusChip({ status }: { status: Review['status'] }) {
   );
 }
 
-// â”€â”€â”€ SKELETON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── SKELETON ─────────────────────────────────────────────────────────────────
 
 export function ReviewCardSkeleton() {
   return (
@@ -101,7 +101,7 @@ export function ReviewCardSkeleton() {
   );
 }
 
-// â”€â”€â”€ COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── COMPONENT ────────────────────────────────────────────────────────────────
 
 export interface ReviewCardProps {
   review:    Review;
@@ -170,7 +170,7 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
           </div>
         </div>
 
-        {/* TÃ­tulo + target */}
+        {/* Título + target */}
         <p className="text-xs font-medium text-origen-bosque mb-1">{review.title}</p>
         <p className="text-[10px] text-text-subtle mb-2 truncate">
           {review.type === 'product' ? 'Producto: ' : 'Productor: '}
@@ -190,7 +190,7 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
             {expanded ? (
               <><ChevronUp className="w-3 h-3" /> Ver menos</>
             ) : (
-              <><ChevronDown className="w-3 h-3" /> Ver mÃ¡s</>
+              <><ChevronDown className="w-3 h-3" /> Ver más</>
             )}
           </button>
         )}
@@ -207,9 +207,9 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
           </div>
         )}
 
-        {/* Hint swipe + acciones rÃ¡pidas */}
+        {/* Hint swipe + acciones rápidas */}
         <div className="flex items-center justify-between mt-3">
-          <span className="text-[9px] text-text-disabled select-none">â† desliza para acciones</span>
+          <span className="text-[9px] text-text-disabled select-none">← desliza para acciones</span>
           {!review.response && (
             <button
               onClick={() => setSheetOpen(true)}
@@ -223,7 +223,7 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
       </motion.div>
       </SwipeableRow>
 
-      {/* Bottom sheet â€” solo mÃ³vil */}
+      {/* Bottom sheet — solo móvil */}
       <ReviewResponseSheet
         isOpen={sheetOpen}
         onClose={() => setSheetOpen(false)}
@@ -233,4 +233,5 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
     </>
   );
 }
+
 

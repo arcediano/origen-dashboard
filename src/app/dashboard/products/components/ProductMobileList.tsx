@@ -1,10 +1,10 @@
-﻿/**
+/**
  * @component ProductMobileList
- * @description Lista de productos optimizada para mÃ³vil.
+ * @description Lista de productos optimizada para móvil.
  *              Reemplaza ProductTable en pantallas < lg.
- *              Layout: thumbnail 72Ã—72 a la izquierda, info a la derecha, badge top-right.
+ *              Layout: thumbnail 72×72 a la izquierda, info a la derecha, badge top-right.
  *
- * Tokens Origen v3.0. DiseÃ±o nativo mobile-first.
+ * Tokens Origen v3.0. Diseño nativo mobile-first.
  */
 
 'use client';
@@ -25,7 +25,7 @@ import { type Product } from '@/types/product';
 import { SwipeableRow } from '@/components/shared/mobile';
 import { ProductImage } from '@arcediano/ux-library';
 
-// â”€â”€â”€ STATUS CONFIG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
 type ProductStatus = Product['status'];
 
@@ -55,7 +55,7 @@ const STATUS_CONFIG: Record<
   },
 };
 
-// â”€â”€â”€ SKELETON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── SKELETON ─────────────────────────────────────────────────────────────────
 
 function ProductRowSkeleton() {
   return (
@@ -77,7 +77,7 @@ function ProductRowSkeleton() {
   );
 }
 
-// â”€â”€â”€ BADGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── BADGE ────────────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: ProductStatus }) {
   const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.draft;
@@ -96,7 +96,7 @@ function StatusBadge({ status }: { status: ProductStatus }) {
   );
 }
 
-// â”€â”€â”€ ROW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── ROW ──────────────────────────────────────────────────────────────────────
 
 interface ProductRowProps {
   product:        Product;
@@ -145,14 +145,14 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
           <ProductImage src={mainImg} alt={product.name} />
         </div>
 
-        {/* Info â€” 3 lÃ­neas con jerarquÃ­a clara */}
+        {/* Info — 3 líneas con jerarquía clara */}
         <div className="flex-1 min-w-0 space-y-0.5">
-          {/* L1: nombre â€” lÃ­nea completa sin competencia */}
+          {/* L1: nombre — línea completa sin competencia */}
           <p className="text-sm font-semibold text-origen-bosque truncate leading-snug">
             {product.name}
           </p>
 
-          {/* L2: categorÃ­a (izq) + estado (der) */}
+          {/* L2: categoría (izq) + estado (der) */}
           <div className="flex items-center justify-between gap-2">
             <p className="text-[11px] text-text-subtle truncate flex-1">{product.categoryName}</p>
             <StatusBadge status={product.status} />
@@ -161,9 +161,9 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
           {/* L3: precio + indicador de stock */}
           <div className="flex items-center gap-2 pt-0.5">
             <span className="text-sm font-bold text-origen-bosque tabular-nums">
-              {product.basePrice.toFixed(2)} â‚¬
+              {product.basePrice.toFixed(2)} €
             </span>
-            <span className="text-border-subtle" aria-hidden>Â·</span>
+            <span className="text-border-subtle" aria-hidden>·</span>
             {product.status === 'out_of_stock' ? (
               <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-feedback-danger flex-shrink-0" />
@@ -190,7 +190,7 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
   );
 }
 
-// â”€â”€â”€ MAIN COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 
 export interface ProductMobileListProps {
   products:       Product[];
@@ -202,9 +202,9 @@ export interface ProductMobileListProps {
 }
 
 /**
- * Lista compacta de productos para pantallas mÃ³vil (< lg).
- * Cada fila tiene swipe-to-reveal: Ver Â· Editar Â· Stock
- * Se muestra con `block lg:hidden` en la pÃ¡gina padre.
+ * Lista compacta de productos para pantallas móvil (< lg).
+ * Cada fila tiene swipe-to-reveal: Ver · Editar · Stock
+ * Se muestra con `block lg:hidden` en la página padre.
  */
 export function ProductMobileList({
   products,
@@ -238,4 +238,5 @@ export function ProductMobileList({
     </div>
   );
 }
+
 

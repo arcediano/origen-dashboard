@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @component StepPricing
  * @description Paso 3: Precios y ofertas
  */
@@ -48,11 +48,11 @@ interface StepPricingProps {
 }
 
 // ============================================================================
-// ESQUEMAS DE VALIDACIÃ“N
+// ESQUEMAS DE VALIDACIÓN
 // ============================================================================
 
 const TierSchema = z.object({
-  minQuantity: z.number().min(1, 'MÃ­nimo 1 unidad'),
+  minQuantity: z.number().min(1, 'Mínimo 1 unidad'),
   maxQuantity: z.number().optional(),
   type: z.enum(['percentage', 'fixed', 'bundle']),
   value: z.number().optional(),
@@ -63,7 +63,7 @@ const TierSchema = z.object({
   if (data.type === 'fixed') return data.value && data.value > 0;
   if (data.type === 'bundle') return data.buyQuantity && data.payQuantity && data.buyQuantity > data.payQuantity;
   return true;
-}, 'Valores de oferta no vÃ¡lidos');
+}, 'Valores de oferta no válidos');
 
 // ============================================================================
 // COMPONENTE PRINCIPAL
@@ -96,7 +96,7 @@ export function StepPricing({
   const basePrice = formData.basePrice || 0;
   const hasBasePrice = basePrice > 0;
 
-  // Validar si el paso estÃ¡ completo
+  // Validar si el paso está completo
   const isStepComplete = hasBasePrice && basePrice > 0;
 
   // Actualizar tiers en formData cuando cambien
@@ -108,7 +108,7 @@ export function StepPricing({
   }, [tiers, onInputChange, onPriceTiersChange]);
 
   // ============================================================================
-  // FUNCIONES DE CÃLCULO
+  // FUNCIONES DE CÁLCULO
   // ============================================================================
 
   const calculateOfferPrice = (tier: PriceTier): number => {
@@ -146,7 +146,7 @@ export function StepPricing({
       case 'percentage':
         return `${tier.value}% dto`;
       case 'fixed':
-        return `${tier.value}â‚¬`;
+        return `${tier.value}€`;
       case 'bundle':
         return `${tier.buyQuantity}x${tier.payQuantity}`;
       default:
@@ -182,7 +182,7 @@ export function StepPricing({
       setShowTierForm(false);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setValidationError(error.errors[0]?.message || 'Error de validaciÃ³n');
+        setValidationError(error.errors[0]?.message || 'Error de validación');
       }
     }
   };
@@ -210,7 +210,7 @@ export function StepPricing({
       setEditingTierId(null);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setValidationError(error.errors[0]?.message || 'Error de validaciÃ³n');
+        setValidationError(error.errors[0]?.message || 'Error de validación');
       }
     }
   };
@@ -303,7 +303,7 @@ export function StepPricing({
                 <span className="text-red-500 ml-1">*</span>
               </span>
               <Tooltip 
-                content="Precio de venta al pÃºblico"
+                content="Precio de venta al público"
                 detailed="Todos los descuentos se calculan sobre este valor. Debe ser mayor que 0."
                 size="sm"
               />
@@ -357,7 +357,7 @@ export function StepPricing({
           </div>
         )}
 
-        {/* SecciÃ³n de ofertas */}
+        {/* Sección de ofertas */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -437,12 +437,12 @@ export function StepPricing({
                     ))}
                   </div>
 
-                  {/* Campos segÃºn tipo */}
+                  {/* Campos según tipo */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                     <div>
                       <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                         <Hash className="w-3 h-3 text-origen-pradera" />
-                        MÃ­nimo
+                        Mínimo
                       </p>
                       <Input
                         type="number"
@@ -456,7 +456,7 @@ export function StepPricing({
                     <div>
                       <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                         <Hash className="w-3 h-3 text-origen-pradera" />
-                        MÃ¡ximo
+                        Máximo
                       </p>
                       <Input
                         type="number"
@@ -464,7 +464,7 @@ export function StepPricing({
                         onChange={(e) => setNewTier({ ...newTier, maxQuantity: parseInt(e.target.value) || undefined })}
                         min={1}
                         className="h-10"
-                        placeholder="Sin lÃ­mite"
+                        placeholder="Sin límite"
                       />
                     </div>
 
@@ -553,14 +553,14 @@ export function StepPricing({
                           >
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-muted-foreground">Precio base:</span>
-                              <span className="font-medium">{basePrice.toFixed(2)} â‚¬</span>
+                              <span className="font-medium">{basePrice.toFixed(2)} €</span>
                             </div>
                             
                             {newTier.type === 'percentage' && newTier.value && (
                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-muted-foreground">Precio oferta:</span>
                                 <span className="font-bold text-green-600">
-                                  {(basePrice * (1 - newTier.value / 100)).toFixed(2)} â‚¬
+                                  {(basePrice * (1 - newTier.value / 100)).toFixed(2)} €
                                 </span>
                               </div>
                             )}
@@ -569,7 +569,7 @@ export function StepPricing({
                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-muted-foreground">Precio oferta:</span>
                                 <span className="font-bold text-green-600">
-                                  {newTier.value.toFixed(2)} â‚¬
+                                  {newTier.value.toFixed(2)} €
                                 </span>
                               </div>
                             )}
@@ -579,7 +579,7 @@ export function StepPricing({
                                 <div className="flex items-center justify-between text-sm">
                                   <span className="text-muted-foreground">Precio por unidad:</span>
                                   <span className="font-bold text-green-600">
-                                    {((basePrice * newTier.payQuantity) / newTier.buyQuantity).toFixed(2)} â‚¬
+                                    {((basePrice * newTier.payQuantity) / newTier.buyQuantity).toFixed(2)} €
                                   </span>
                                 </div>
                                 <div className="p-2 bg-amber-50 rounded-lg text-xs text-amber-700">
@@ -676,7 +676,7 @@ export function StepPricing({
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-1">
                                   Desde {tier.minQuantity} {tier.minQuantity === 1 ? 'unidad' : 'unidades'}
-                                  {tier.maxQuantity && ` Â· hasta ${tier.maxQuantity}`}
+                                  {tier.maxQuantity && ` · hasta ${tier.maxQuantity}`}
                                 </p>
                               </div>
                               
@@ -699,15 +699,15 @@ export function StepPricing({
                             <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
                               <div className="p-2 bg-surface rounded-lg">
                                 <p className="text-[10px] text-muted-foreground">Precio normal</p>
-                                <p className="text-sm font-medium">{basePrice.toFixed(2)} â‚¬</p>
+                                <p className="text-sm font-medium">{basePrice.toFixed(2)} €</p>
                               </div>
                               <div className="p-2 bg-green-50 rounded-lg border border-green-200">
                                 <p className="text-[10px] text-muted-foreground">Oferta</p>
-                                <p className="text-sm font-bold text-green-700">{offerPrice.toFixed(2)} â‚¬</p>
+                                <p className="text-sm font-bold text-green-700">{offerPrice.toFixed(2)} €</p>
                               </div>
                               <div className="p-2 bg-amber-50 rounded-lg col-span-2 sm:col-span-1">
                                 <p className="text-[10px] text-muted-foreground">Ahorro</p>
-                                <p className="text-sm font-bold text-amber-700">{savings.toFixed(2)} â‚¬</p>
+                                <p className="text-sm font-bold text-amber-700">{savings.toFixed(2)} €</p>
                               </div>
                             </div>
 
@@ -731,7 +731,7 @@ export function StepPricing({
             </Reorder.Group>
           )}
 
-          {/* Estado vacÃ­o */}
+          {/* Estado vacío */}
           {tiers.length === 0 && !showTierForm && (
             <div className="text-center py-8 bg-origen-crema/20 rounded-xl border-2 border-dashed border-origen-pradera/30">
               <Gift className="w-12 h-12 text-origen-pradera/40 mx-auto mb-3" />
@@ -760,4 +760,5 @@ export function StepPricing({
     </motion.div>
   );
 }
+
 

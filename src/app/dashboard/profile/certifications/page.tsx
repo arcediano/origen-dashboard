@@ -1,4 +1,4 @@
-﻿// ðŸ“ /src/app/dashboard/profile/certifications/page.tsx
+// 📁 /src/app/dashboard/profile/certifications/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -69,18 +69,18 @@ export default function CertificationsPage() {
   const [certifications] = useState<Certification[]>([
     {
       id: '1',
-      name: 'Agricultura EcolÃ³gica',
+      name: 'Agricultura Ecológica',
       issuingBody: 'CCAE / CAAE',
-      description: 'Certificado oficial de producciÃ³n ecolÃ³gica',
+      description: 'Certificado oficial de producción ecológica',
       icon: Leaf,
       status: 'verified',
       verifiedDate: '15/01/2024'
     },
     {
       id: '2',
-      name: 'DenominaciÃ³n de Origen',
+      name: 'Denominación de Origen',
       issuingBody: 'DOP Queso Payoyo',
-      description: 'Producto con denominaciÃ³n de origen protegida',
+      description: 'Producto con denominación de origen protegida',
       icon: Award,
       status: 'pending'
     },
@@ -88,7 +88,7 @@ export default function CertificationsPage() {
       id: '3',
       name: 'Bienestar Animal',
       issuingBody: 'Welfair',
-      description: 'CertificaciÃ³n en bienestar animal',
+      description: 'Certificación en bienestar animal',
       icon: Shield,
       status: 'verified',
       verifiedDate: '03/02/2024'
@@ -97,15 +97,15 @@ export default function CertificationsPage() {
       id: '4',
       name: 'Comercio Justo',
       issuingBody: 'WFTO',
-      description: 'PrÃ¡cticas de comercio Ã©tico y justo',
+      description: 'Prácticas de comercio ético y justo',
       icon: Globe,
       status: 'not_submitted'
     },
     {
       id: '5',
       name: 'Producto Artesano',
-      issuingBody: 'Junta de AndalucÃ­a',
-      description: 'Certificado de elaboraciÃ³n artesanal',
+      issuingBody: 'Junta de Andalucía',
+      description: 'Certificado de elaboración artesanal',
       icon: Heart,
       status: 'not_submitted'
     }
@@ -115,7 +115,7 @@ export default function CertificationsPage() {
     {
       id: 'doc1',
       name: 'CIF / NIF',
-      description: 'Documento de identificaciÃ³n fiscal',
+      description: 'Documento de identificación fiscal',
       required: true,
       status: 'verified',
       document: { id: 'f1', name: 'cif_elgazpacho.pdf', size: 245760, type: 'application/pdf', url: '#' }
@@ -123,7 +123,7 @@ export default function CertificationsPage() {
     {
       id: 'doc2',
       name: 'Seguro de Responsabilidad Civil',
-      description: 'MÃ­nimo 150.000â‚¬ de cobertura',
+      description: 'Mínimo 150.000€ de cobertura',
       required: true,
       status: 'verified',
       document: { id: 'f2', name: 'seguro_rc_2024.pdf', size: 524288, type: 'application/pdf', url: '#' }
@@ -131,7 +131,7 @@ export default function CertificationsPage() {
     {
       id: 'doc3',
       name: 'Manipulador de Alimentos',
-      description: 'Certificado de formaciÃ³n',
+      description: 'Certificado de formación',
       required: true,
       status: 'pending',
       document: { id: 'f3', name: 'manipulador_maria.pdf', size: 102400, type: 'application/pdf', url: '#' }
@@ -179,9 +179,9 @@ export default function CertificationsPage() {
     <div className="container mx-auto px-4 sm:px-6 py-8 max-w-7xl">
       <PageHeader
         title="Certificaciones y Documentos"
-        description="Gestiona tus certificaciones de calidad y documentaciÃ³n legal"
+        description="Gestiona tus certificaciones de calidad y documentación legal"
         badgeIcon={FileBadge}
-        badgeText="VerificaciÃ³n"
+        badgeText="Verificación"
         showBackButton={true}
         onBack={() => router.back()}
       />
@@ -197,7 +197,7 @@ export default function CertificationsPage() {
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h3 className="font-semibold text-origen-bosque">Estado de verificaciÃ³n</h3>
+                  <h3 className="font-semibold text-origen-bosque">Estado de verificación</h3>
                   <p className="text-sm text-muted-foreground">
                     {stats.verifiedCerts + stats.verifiedDocs} de {stats.totalCerts + stats.totalDocs} elementos verificados
                   </p>
@@ -275,7 +275,7 @@ export default function CertificationsPage() {
                                 <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
                                   <p className="text-xs text-amber-700 flex items-center gap-2">
                                     <Clock className="w-3.5 h-3.5" />
-                                    Tu certificado estÃ¡ siendo revisado. Te notificaremos cuando estÃ© verificado.
+                                    Tu certificado está siendo revisado. Te notificaremos cuando esté verificado.
                                   </p>
                                 </div>
                               )}
@@ -286,7 +286,7 @@ export default function CertificationsPage() {
                                     <FileUpload
                                       value={[]}
                                       onChange={(files) => handleFileUpload(cert.id, files)}
-                                      helperText="Sube el certificado en PDF, JPG o PNG (mÃ¡x 5MB)"
+                                      helperText="Sube el certificado en PDF, JPG o PNG (máx 5MB)"
                                       accept=".pdf,.jpg,.jpeg,.png"
                                       multiple={false}
                                       maxSize={5}
@@ -361,7 +361,7 @@ export default function CertificationsPage() {
                                   <FileUpload
                                     value={[]}
                                     onChange={(files) => handleFileUpload(doc.id, files)}
-                                    helperText="Sube el documento en PDF, JPG o PNG (mÃ¡x 5MB)"
+                                    helperText="Sube el documento en PDF, JPG o PNG (máx 5MB)"
                                     accept=".pdf,.jpg,.jpeg,.png"
                                     multiple={false}
                                     maxSize={5}
@@ -415,7 +415,7 @@ export default function CertificationsPage() {
                                   <FileUpload
                                     value={[]}
                                     onChange={(files) => handleFileUpload(doc.id, files)}
-                                    helperText="Sube el documento en PDF, JPG o PNG (mÃ¡x 5MB)"
+                                    helperText="Sube el documento en PDF, JPG o PNG (máx 5MB)"
                                     accept=".pdf,.jpg,.jpeg,.png"
                                     multiple={false}
                                     maxSize={5}
@@ -447,7 +447,7 @@ export default function CertificationsPage() {
           <Alert className="mt-6">
             <Shield className="w-4 h-4" />
             <AlertDescription>
-              Los documentos verificados aparecen con un sello de confianza en tu perfil pÃºblico, 
+              Los documentos verificados aparecen con un sello de confianza en tu perfil público, 
               lo que aumenta la credibilidad con los compradores.
             </AlertDescription>
           </Alert>
@@ -456,4 +456,5 @@ export default function CertificationsPage() {
     </div>
   );
 }
+
 

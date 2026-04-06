@@ -1,6 +1,6 @@
-﻿/**
+/**
  * @page ProductoDetallePage
- * @description Página de detalle de producto — experiencia app nativa
+ * @description P�gina de detalle de producto � experiencia app nativa
  */
 
 'use client';
@@ -44,7 +44,7 @@ const StatusBadge = ({ status }: { status: Product['status'] }) => {
   return <Badge variant={variant} icon={<Icon className="w-3 h-3" />}>{label}</Badge>;
 };
 
-// ── Acordeón de sección (solo móvil) ──────────────────────────────────────────
+// -- Acorde�n de secci�n (solo m�vil) ------------------------------------------
 function SectionAccordion({
   title, icon: Icon, defaultOpen = false, children,
 }: { title: string; icon: React.ElementType; defaultOpen?: boolean; children: React.ReactNode }) {
@@ -70,7 +70,7 @@ function SectionAccordion({
   );
 }
 
-// ── Skeleton de carga estructurado ────────────────────────────────────────────
+// -- Skeleton de carga estructurado --------------------------------------------
 const LoadingSkeleton = () => (
   <div className="animate-pulse">
     {/* Header skeleton */}
@@ -104,7 +104,7 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-// ── Fila de dato (para tablas de info) ───────────────────────────────────────
+// -- Fila de dato (para tablas de info) ---------------------------------------
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   if (!value && value !== 0) return null;
   return (
@@ -115,12 +115,18 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-// ── Contenido nutricional ─────────────────────────────────────────────────────
+// -- Contenido nutricional -----------------------------------------------------
 function NutritionalContent({ info }: { info: NonNullable<Product['nutritionalInfo']> }) {
   const allergenIcon = (a: string) => {
     const icons: Record<string, React.ElementType> = {
-      Gluten: Wheat, Crustáceos: Shell, Huevos: Egg, Pescado: Fish,
-      Cacahuetes: Nut, Soja: Bean, Lácteos: Milk, Sésamo: Sprout,
+      Gluten: Wheat,
+      "Crustaceos": Shell,
+      Huevos: Egg,
+      Pescado: Fish,
+      Cacahuetes: Nut,
+      Soja: Bean,
+      "Lacteos": Milk,
+      "Sesamo": Sprout,
       Sulfitos: Droplet,
     };
     return icons[a] || AlertCircle;
@@ -144,18 +150,18 @@ function NutritionalContent({ info }: { info: NonNullable<Product['nutritionalIn
           Por {info.servingSize}
         </p>
         <div className="grid grid-cols-2 gap-x-4">
-          {info.calories != null && <InfoRow label="Calorías" value={`${info.calories} kcal`} />}
-          {info.protein != null && <InfoRow label="Proteínas" value={`${info.protein} g`} />}
+          {info.calories != null && <InfoRow label="Calorias" value={`${info.calories} kcal`} />}
+          {info.protein != null && <InfoRow label="Proteinas" value={`${info.protein} g`} />}
           {info.totalFat != null && <InfoRow label="Grasas totales" value={`${info.totalFat} g`} />}
-          {info.saturatedFat != null && <InfoRow label="  · Saturadas" value={`${info.saturatedFat} g`} />}
+          {info.saturatedFat != null && <InfoRow label="  - Saturadas" value={`${info.saturatedFat} g`} />}
           {info.carbohydrates != null && <InfoRow label="Hidratos" value={`${info.carbohydrates} g`} />}
-          {info.sugars != null && <InfoRow label="  · Azúcares" value={`${info.sugars} g`} />}
+          {info.sugars != null && <InfoRow label="  � Az�cares" value={`${info.sugars} g`} />}
           {info.dietaryFiber != null && <InfoRow label="Fibra" value={`${info.dietaryFiber} g`} />}
           {info.sodium != null && <InfoRow label="Sodio" value={`${info.sodium} mg`} />}
         </div>
       </div>
 
-      {/* Etiquetas dietéticas */}
+      {/* Etiquetas diet�ticas */}
       {activeDietary.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {activeDietary.map(f => (
@@ -166,10 +172,10 @@ function NutritionalContent({ info }: { info: NonNullable<Product['nutritionalIn
         </div>
       )}
 
-      {/* Alérgenos */}
+      {/* Al�rgenos */}
       {info.allergens.length > 0 && (
         <div>
-          <p className="text-[10px] font-bold text-text-subtle uppercase tracking-wider mb-2">Alérgenos</p>
+          <p className="text-[10px] font-bold text-text-subtle uppercase tracking-wider mb-2">Al�rgenos</p>
           <div className="flex flex-wrap gap-1.5">
             {info.allergens.map(a => {
               const Icon = allergenIcon(a);
@@ -196,7 +202,7 @@ function NutritionalContent({ info }: { info: NonNullable<Product['nutritionalIn
         <div className="flex items-start gap-2 rounded-xl bg-origen-pastel/40 p-3">
           <Thermometer className="w-4 h-4 text-origen-pino mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-[10px] font-bold text-text-subtle uppercase tracking-wider mb-0.5">Conservación</p>
+            <p className="text-[10px] font-bold text-text-subtle uppercase tracking-wider mb-0.5">Conservaci�n</p>
             <p className="text-xs text-origen-bosque">{info.storageInstructions}</p>
           </div>
         </div>
@@ -205,7 +211,7 @@ function NutritionalContent({ info }: { info: NonNullable<Product['nutritionalIn
   );
 }
 
-// ── Contenido de producción ───────────────────────────────────────────────────
+// -- Contenido de producci�n ---------------------------------------------------
 function ProductionContent({ info, formatDate }: {
   info: NonNullable<Product['productionInfo']>;
   formatDate: (d?: Date | string | null) => string;
@@ -220,14 +226,14 @@ function ProductionContent({ info, formatDate }: {
       <div>
         <InfoRow label="Productor" value={info.farmName} />
         <InfoRow label="Origen" value={info.origin} />
-        <InfoRow label="Método" value={info.productionMethod} />
+        <InfoRow label="M�todo" value={info.productionMethod} />
         <InfoRow label="Lote" value={info.batchNumber} />
         <InfoRow label="Cosecha" value={info.harvestDate ? formatDate(info.harvestDate) : undefined} />
         <InfoRow label="Caducidad" value={info.expiryDate ? formatDate(info.expiryDate) : undefined} />
       </div>
       {info.practices && info.practices.length > 0 && (
         <div>
-          <p className="text-[10px] font-bold text-text-subtle uppercase tracking-wider mb-2">Prácticas</p>
+          <p className="text-[10px] font-bold text-text-subtle uppercase tracking-wider mb-2">Pr�cticas</p>
           <div className="flex flex-wrap gap-1.5">
             {info.practices.map(p => (
               <Badge key={p} variant="leaf" size="sm">
@@ -244,7 +250,7 @@ function ProductionContent({ info, formatDate }: {
   );
 }
 
-// ── Contenido de precios ──────────────────────────────────────────────────────
+// -- Contenido de precios ------------------------------------------------------
 function PricingContent({
   product, formatCurrency, hasDiscount, discountPercentage,
 }: {
@@ -257,8 +263,8 @@ function PricingContent({
     <div className="space-y-4">
       <div className="rounded-xl bg-origen-crema/40 p-3">
         <InfoRow label="Precio base" value={<span className="font-bold text-origen-bosque text-sm">{formatCurrency(product.basePrice)}</span>} />
-        {product.comparePrice && <InfoRow label="Precio comparación" value={formatCurrency(product.comparePrice)} />}
-        {hasDiscount && <InfoRow label="Descuento" value={<span className="text-green-600 font-medium">−{discountPercentage}%</span>} />}
+        {product.comparePrice && <InfoRow label="Precio comparaci�n" value={formatCurrency(product.comparePrice)} />}
+        {hasDiscount && <InfoRow label="Descuento" value={<span className="text-green-600 font-medium">-{discountPercentage}%</span>} />}
       </div>
       {product.priceTiers && product.priceTiers.length > 0 && (
         <div>
@@ -267,10 +273,10 @@ function PricingContent({
             {product.priceTiers.map(tier => (
               <div key={tier.id} className="flex items-center justify-between rounded-xl border border-border-subtle p-3 text-xs">
                 <span className="text-text-subtle">
-                  {tier.minQuantity}{tier.maxQuantity ? `–${tier.maxQuantity}` : '+'} uds.
+                  {tier.minQuantity}{tier.maxQuantity ? `�${tier.maxQuantity}` : '+'} uds.
                 </span>
                 <span className="font-semibold text-origen-bosque">
-                  {tier.type === 'percentage' ? `−${tier.value}%` : formatCurrency(tier.value)}
+                  {tier.type === 'percentage' ? `-${tier.value}%` : formatCurrency(tier.value)}
                 </span>
               </div>
             ))}
@@ -281,7 +287,7 @@ function PricingContent({
   );
 }
 
-// ── Contenido de inventario ───────────────────────────────────────────────────
+// -- Contenido de inventario ---------------------------------------------------
 function InventoryContent({ product }: { product: Product }) {
   const stockLevel = product.stock ?? 0;
   const lowStockThreshold = product.lowStockThreshold ?? 5;
@@ -291,10 +297,10 @@ function InventoryContent({ product }: { product: Product }) {
     <div className="space-y-4">
       <div className="rounded-xl bg-origen-crema/40 p-3">
         <InfoRow label="SKU" value={<span className="font-mono">{product.sku}</span>} />
-        {product.barcode && <InfoRow label="Código de barras" value={<span className="font-mono">{product.barcode}</span>} />}
+        {product.barcode && <InfoRow label="C�digo de barras" value={<span className="font-mono">{product.barcode}</span>} />}
         <InfoRow label="Stock actual" value={<span className={cn('font-bold', stockColor)}>{stockLevel} uds.</span>} />
         <InfoRow label="Alerta stock bajo" value={`${lowStockThreshold} uds.`} />
-        <InfoRow label="Control de inventario" value={product.trackInventory ? 'Sí' : 'No'} />
+        <InfoRow label="Control de inventario" value={product.trackInventory ? 'S�' : 'No'} />
         <InfoRow label="Pedidos sin stock" value={product.allowBackorders ? 'Permitidos' : 'No permitidos'} />
       </div>
       {(product.weight || product.dimensions) && (
@@ -303,9 +309,9 @@ function InventoryContent({ product }: { product: Product }) {
           <div className="rounded-xl bg-origen-crema/40 p-3">
             {product.weight && <InfoRow label="Peso" value={`${product.weight} ${product.weightUnit || 'kg'}`} />}
             {product.dimensions && (
-              <InfoRow label="Medidas" value={`${product.dimensions.length || 0}×${product.dimensions.width || 0}×${product.dimensions.height || 0} cm`} />
+              <InfoRow label="Medidas" value={`${product.dimensions.length || 0}�${product.dimensions.width || 0}�${product.dimensions.height || 0} cm`} />
             )}
-            {product.shippingClass && <InfoRow label="Clase de envío" value={product.shippingClass} />}
+            {product.shippingClass && <InfoRow label="Clase de env�o" value={product.shippingClass} />}
           </div>
         </div>
       )}
@@ -313,7 +319,7 @@ function InventoryContent({ product }: { product: Product }) {
   );
 }
 
-// ── Contenido de atributos ────────────────────────────────────────────────────
+// -- Contenido de atributos ----------------------------------------------------
 function AttributesContent({ product }: { product: Product }) {
   const visible = product.attributes.filter(a => a.visible);
   if (!visible.length) return <p className="text-xs text-text-subtle text-center py-4">Sin atributos definidos</p>;
@@ -323,7 +329,7 @@ function AttributesContent({ product }: { product: Product }) {
         <div key={attr.id} className="p-3 rounded-xl border border-border-subtle bg-origen-crema/20">
           <p className="text-[10px] text-text-subtle uppercase tracking-wider mb-0.5">{attr.name}</p>
           <p className="text-sm font-semibold text-origen-bosque truncate">
-            {attr.type === 'boolean' ? (attr.value ? 'Sí' : 'No') : attr.value}
+            {attr.type === 'boolean' ? (attr.value ? 'S�' : 'No') : attr.value}
             {attr.unit && attr.type !== 'boolean' ? ` ${attr.unit}` : ''}
           </p>
         </div>
@@ -392,12 +398,12 @@ export default function ProductoDetallePage() {
     if (!date) return 'No disponible';
     try {
       return new Date(date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
-    } catch { return 'Fecha inválida'; }
+    } catch { return 'Fecha inv�lida'; }
   };
 
   const formatCurrency = (value?: number | null) => {
-    if (value === undefined || value === null) return '0,00 €';
-    return value.toFixed(2).replace('.', ',') + ' €';
+    if (value === undefined || value === null) return '0,00 �';
+    return value.toFixed(2).replace('.', ',') + ' �';
   };
 
   if (isLoading) return <LoadingSkeleton />;
@@ -431,19 +437,19 @@ export default function ProductoDetallePage() {
   const lowStockThreshold = product.lowStockThreshold ?? 5;
   const stockColor = stockLevel === 0 ? 'error' : stockLevel <= lowStockThreshold ? 'warning' : 'success';
 
-  // Secciones del acordeón / tabs
+  // Secciones del acorde�n / tabs
   const sections = [
     {
       id: 'nutritional', title: 'Nutricional', icon: FlaskConical, show: !!product.nutritionalInfo,
       content: product.nutritionalInfo
         ? <NutritionalContent info={product.nutritionalInfo} />
-        : <p className="text-xs text-text-subtle text-center py-4">Sin información nutricional</p>,
+        : <p className="text-xs text-text-subtle text-center py-4">Sin informaci�n nutricional</p>,
     },
     {
-      id: 'production', title: 'Producción', icon: Leaf, show: !!product.productionInfo,
+      id: 'production', title: 'Producci�n', icon: Leaf, show: !!product.productionInfo,
       content: product.productionInfo
         ? <ProductionContent info={product.productionInfo} formatDate={formatDate} />
-        : <p className="text-xs text-text-subtle text-center py-4">Sin información de producción</p>,
+        : <p className="text-xs text-text-subtle text-center py-4">Sin informaci�n de producci�n</p>,
     },
     {
       id: 'pricing', title: 'Precios', icon: DollarSign, show: true,
@@ -477,18 +483,18 @@ export default function ProductoDetallePage() {
         animate={{ opacity: 1 }}
         className="lg:min-h-screen lg:bg-gradient-to-b lg:from-white lg:to-origen-crema pb-[calc(152px+env(safe-area-inset-bottom))] lg:pb-8"
       >
-        {/* Decorativos sutiles — en móvil también */}
+        {/* Decorativos sutiles � en m�vil tambi�n */}
         <div className="fixed top-0 right-0 w-80 h-80 bg-origen-pradera/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-30 lg:opacity-100" />
         <div className="fixed bottom-0 left-0 w-80 h-80 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none opacity-30 lg:opacity-100" />
 
         {/* ===== CABECERA ===== */}
         <PageHeader
           title={product.name}
-          description={`${product.categoryName || product.categoryId} · ${product.sku || 'Sin SKU'}`}
+          description={`${product.categoryName || product.categoryId} � ${product.sku || 'Sin SKU'}`}
           badgeIcon={Package}
           badgeText={product.status === 'active' ? 'Activo' : product.status === 'inactive' ? 'Inactivo' : product.status === 'out_of_stock' ? 'Sin stock' : 'Borrador'}
           tooltip="Detalle del producto"
-          tooltipDetailed="Información completa del producto, incluyendo datos nutricionales, producción y métricas."
+          tooltipDetailed="Informaci�n completa del producto, incluyendo datos nutricionales, producci�n y m�tricas."
           showBackButton
           onBack={() => router.back()}
           actions={
@@ -518,7 +524,7 @@ export default function ProductoDetallePage() {
         {/* ===== CONTENIDO PRINCIPAL ===== */}
         <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-2">
 
-          {/* ── Métricas móvil: precio destacado + grid 2×3 ── */}
+          {/* -- M�tricas m�vil: precio destacado + grid 2�3 -- */}
           <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible" className="lg:hidden mb-5">
             {/* Precio destacado */}
             <div className="rounded-2xl p-5 bg-gradient-to-br from-origen-bosque to-origen-pino text-white mb-3 relative overflow-hidden">
@@ -528,7 +534,7 @@ export default function ProductoDetallePage() {
               {hasDiscount && (
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-white/50 line-through text-sm">{formatCurrency(product.comparePrice)}</span>
-                  <span className="bg-white/20 rounded-full px-2 py-0.5 text-xs font-bold">−{discountPercentage}%</span>
+                  <span className="bg-white/20 rounded-full px-2 py-0.5 text-xs font-bold">-{discountPercentage}%</span>
                 </div>
               )}
               <div className="mt-3">
@@ -536,7 +542,7 @@ export default function ProductoDetallePage() {
               </div>
             </div>
 
-            {/* Grid 2×3 de métricas */}
+            {/* Grid 2�3 de m�tricas */}
             <div className="grid grid-cols-2 gap-3">
               {/* Stock */}
               <motion.div custom={1} variants={cardVariants}
@@ -557,17 +563,17 @@ export default function ProductoDetallePage() {
                 <p className="text-xs text-text-subtle">unidades</p>
               </motion.div>
 
-              {/* Valoración */}
+              {/* Valoraci�n */}
               <motion.div custom={2} variants={cardVariants} className="rounded-2xl p-4 border bg-amber-50/80 border-amber-100">
                 <div className="flex items-center gap-1.5 mb-2">
                   <Star className="w-4 h-4 text-amber-500" />
-                  <span className="text-xs text-text-subtle">Valoración</span>
+                  <span className="text-xs text-text-subtle">Valoraci�n</span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <p className="text-2xl font-bold text-origen-bosque">{product.rating?.toFixed(1) || '—'}</p>
+                  <p className="text-2xl font-bold text-origen-bosque">{product.rating?.toFixed(1) || '�'}</p>
                   <span className="text-xs text-text-disabled">/5</span>
                 </div>
-                <p className="text-xs text-text-subtle">{product.reviewCount || 0} reseñas</p>
+                <p className="text-xs text-text-subtle">{product.reviewCount || 0} rese�as</p>
               </motion.div>
 
               {/* Ventas */}
@@ -592,11 +598,11 @@ export default function ProductoDetallePage() {
                 )}
               </motion.div>
 
-              {/* Conversión */}
+              {/* Conversi�n */}
               <motion.div custom={5} variants={cardVariants} className="rounded-2xl p-4 border bg-green-50/80 border-green-100">
                 <div className="flex items-center gap-1.5 mb-2">
                   <ShoppingBag className="w-4 h-4 text-green-500" />
-                  <span className="text-xs text-text-subtle">Conversión</span>
+                  <span className="text-xs text-text-subtle">Conversi�n</span>
                 </div>
                 <p className="text-2xl font-bold text-origen-bosque">{product.conversion?.toFixed(1) || '0.0'}%</p>
                 <p className="text-xs text-text-subtle">de vistas</p>
@@ -618,7 +624,7 @@ export default function ProductoDetallePage() {
             </div>
           </motion.div>
 
-          {/* ── Métricas desktop: fila horizontal ── */}
+          {/* -- M�tricas desktop: fila horizontal -- */}
           <div className="hidden lg:block overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 mb-8">
             <div className="grid grid-cols-7 gap-4 w-auto">
               <div className="p-4 bg-gradient-to-br from-origen-pradera/5 to-transparent rounded-xl border border-origen-pradera/10">
@@ -631,9 +637,9 @@ export default function ProductoDetallePage() {
                 <p className="text-2xl font-bold text-origen-bosque">{stockLevel} uds</p>
               </div>
               <div className="p-4 bg-amber-50/50 rounded-xl border border-amber-100">
-                <div className="flex items-center gap-2 mb-2"><Star className="w-5 h-5 text-amber-500" /><span className="text-xs font-medium text-text-subtle">Valoración</span></div>
+                <div className="flex items-center gap-2 mb-2"><Star className="w-5 h-5 text-amber-500" /><span className="text-xs font-medium text-text-subtle">Valoraci�n</span></div>
                 <div className="flex items-baseline gap-1"><p className="text-2xl font-bold text-origen-bosque">{product.rating?.toFixed(1) || '0.0'}</p><span className="text-xs text-text-disabled">/5</span></div>
-                <p className="text-xs text-text-subtle mt-2">{product.reviewCount || 0} reseñas</p>
+                <p className="text-xs text-text-subtle mt-2">{product.reviewCount || 0} rese�as</p>
               </div>
               <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
                 <div className="flex items-center gap-2 mb-2"><TrendingUp className="w-5 h-5 text-blue-500" /><span className="text-xs font-medium text-text-subtle">Ventas</span></div>
@@ -646,7 +652,7 @@ export default function ProductoDetallePage() {
                 {product.conversion && <div className="flex items-center gap-1 mt-2 text-xs text-purple-600"><TrendingUp className="w-3 h-3" /><span>{product.conversion.toFixed(1)}% conv.</span></div>}
               </div>
               <div className="p-4 bg-green-50/50 rounded-xl border border-green-100">
-                <div className="flex items-center gap-2 mb-2"><TrendingUp className="w-5 h-5 text-green-500" /><span className="text-xs font-medium text-text-subtle">Conversión</span></div>
+                <div className="flex items-center gap-2 mb-2"><TrendingUp className="w-5 h-5 text-green-500" /><span className="text-xs font-medium text-text-subtle">Conversi�n</span></div>
                 <p className="text-2xl font-bold text-origen-bosque">{product.conversion?.toFixed(1) || '0.0'}%</p>
               </div>
               <div className="p-4 bg-origen-crema/50 rounded-xl border border-origen-pradera/10">
@@ -690,7 +696,7 @@ export default function ProductoDetallePage() {
                 </Card>
               </motion.div>
 
-              {/* Datos básicos */}
+              {/* Datos b�sicos */}
               <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
                 <Card variant="elevated">
                   <CardHeader spacing="sm">
@@ -700,11 +706,11 @@ export default function ProductoDetallePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-0">
-                      <InfoRow label="Categoría" value={`${product.categoryName || product.categoryId}${product.subcategoryId ? ` / ${product.subcategoryId}` : ''}`} />
+                      <InfoRow label="Categor�a" value={`${product.categoryName || product.categoryId}${product.subcategoryId ? ` / ${product.subcategoryId}` : ''}`} />
                       <InfoRow label="Origen" value={product.productionInfo?.origin} />
                       <InfoRow label="Productor" value={product.productionInfo?.farmName} />
                       {product.weight && <InfoRow label="Peso" value={`${product.weight} ${product.weightUnit || 'kg'}`} />}
-                      <InfoRow label="Clase de envío" value={product.shippingClass} />
+                      <InfoRow label="Clase de env�o" value={product.shippingClass} />
                       <InfoRow label="Lote" value={product.productionInfo?.batchNumber} />
                     </div>
                   </CardContent>
@@ -724,7 +730,7 @@ export default function ProductoDetallePage() {
                       <div className="space-y-2">
                         {product.certifications.map(cert => (
                           <div key={cert.id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-origen-pastel/30 border border-origen-pradera/20">
-                            {/* Icono verificación */}
+                            {/* Icono verificaci�n */}
                             <div className={cn(
                               'w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0',
                               cert.verified ? 'bg-green-100' : 'bg-origen-crema',
@@ -740,7 +746,7 @@ export default function ProductoDetallePage() {
                                 <p className="text-[10px] text-text-subtle truncate leading-tight">{cert.issuingBody}</p>
                               )}
                             </div>
-                            {/* Caducidad — compacta, siempre en una línea */}
+                            {/* Caducidad � compacta, siempre en una l�nea */}
                             {cert.expiryDate && (
                               <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
                                 {new Date(cert.expiryDate).toLocaleDateString('es-ES', { month: 'short', year: '2-digit' })}
@@ -758,14 +764,14 @@ export default function ProductoDetallePage() {
             {/* COLUMNA DERECHA (8/12) */}
             <div className="lg:col-span-8">
               <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible">
-                {/* Descripción */}
+                {/* Descripci�n */}
                 <Card variant="elevated" className="p-4 lg:p-6 mb-4">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
                       <FileText className="w-4 h-4 text-origen-pradera" />
                     </div>
                     <div className="flex-1">
-                      <h2 className="text-base font-semibold text-origen-bosque mb-2">Descripción</h2>
+                      <h2 className="text-base font-semibold text-origen-bosque mb-2">Descripci�n</h2>
                       <p className="text-sm text-foreground leading-relaxed mb-3">{product.shortDescription}</p>
                       {product.fullDescription && (
                         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{product.fullDescription}</p>
@@ -781,7 +787,7 @@ export default function ProductoDetallePage() {
                   )}
                 </Card>
 
-                {/* ── Acordeón (móvil) ── */}
+                {/* -- Acorde�n (m�vil) -- */}
                 <div className="lg:hidden space-y-2">
                   {sections.filter(s => s.show).map((section, i) => (
                     <SectionAccordion
@@ -795,7 +801,7 @@ export default function ProductoDetallePage() {
                   ))}
                 </div>
 
-                {/* ── Pestañas (desktop) ── */}
+                {/* -- Pesta�as (desktop) -- */}
                 <div className="hidden lg:block">
                   <Card variant="elevated" className="p-4 lg:p-6">
                     <Tabs defaultValue="nutritional" className="w-full">
@@ -820,16 +826,16 @@ export default function ProductoDetallePage() {
           </div>
         </div>
 
-        {/* ===== ACCIONES STICKY — SOLO MÓVIL ===== */}
+        {/* ===== ACCIONES STICKY � SOLO M�VIL ===== */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 px-4 pb-[calc(env(safe-area-inset-bottom)+80px)] pt-3 bg-gradient-to-t from-surface via-surface/95 to-transparent pointer-events-none">
           <div className="pointer-events-auto flex items-center gap-3">
-            {/* Editar — CTA principal */}
+            {/* Editar � CTA principal */}
             <Link href={`/dashboard/products/${product.id}/edit`} className="flex-1">
               <Button variant="primary" size="lg" leftIcon={<Edit className="w-4 h-4" />}>
                 Editar producto
               </Button>
             </Link>
-            {/* Eliminar — icono solo, acción destructiva controlada */}
+            {/* Eliminar � icono solo, acci�n destructiva controlada */}
             <Button
               variant="destructive"
               size="icon"
@@ -842,19 +848,19 @@ export default function ProductoDetallePage() {
           </div>
         </div>
 
-        {/* ===== DIÁLOGO DE ELIMINACIÓN ===== */}
+        {/* ===== DI�LOGO DE ELIMINACI�N ===== */}
         <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <DialogContent>
             <DialogHeader>
               <div className="flex items-center gap-2">
                 <Trash2 className="w-5 h-5 text-red-600" />
-                <DialogTitle>¿Eliminar producto?</DialogTitle>
+                <DialogTitle>�Eliminar producto?</DialogTitle>
               </div>
-              <DialogDescription>Esta acción no se puede deshacer.</DialogDescription>
+              <DialogDescription>Esta acci�n no se puede deshacer.</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
-                Se eliminará permanentemente <span className="font-semibold text-origen-bosque">{product.name}</span> del catálogo, incluyendo todas sus variantes, imágenes y estadísticas.
+                Se eliminar� permanentemente <span className="font-semibold text-origen-bosque">{product.name}</span> del cat�logo, incluyendo todas sus variantes, im�genes y estad�sticas.
               </p>
               {product.sales && product.sales > 0 && (
                 <p className="text-amber-600 text-sm flex items-center gap-1 mt-2">
@@ -885,3 +891,4 @@ export default function ProductoDetallePage() {
     </MobilePullRefresh>
   );
 }
+
