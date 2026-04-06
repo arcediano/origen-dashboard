@@ -9,6 +9,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
 
 import { Input, InputAffixField, CheckboxWithLabel } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile, CategoryCard } from '@/components/shared';
@@ -793,11 +794,13 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           accept="image/*"
           multiple={true}
           maxSize={5}
+          qualityRequirement={IMAGE_QUALITY_PRESETS.profileGallery}
+          dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.profileGallery)}
         />
         
         <div className="mt-4 text-xs text-muted-foreground flex items-center gap-2 bg-origen-crema/50 p-3 rounded-lg">
           <Leaf className="w-4 h-4 text-origen-pradera flex-shrink-0" />
-          <span>Formatos: JPG, PNG, WEBP. Tamaño recomendado: 1200x800px</span>
+          <span>Formatos: JPG, PNG, WEBP. Usa fotos amplias y bien iluminadas para que tu perfil publico no se vea pixelado.</span>
         </div>
       </div>
     </div>

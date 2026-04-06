@@ -42,5 +42,40 @@ describe('uploadFile', () => {
       'https://dashboard.origen.es/api/v1/media/upload',
       expect.objectContaining({ method: 'POST', credentials: 'include' }),
     );
+
+    const requestInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    const formData = requestInit.body as FormData;
+
+    expect(formData.get('entityType')).toBe('producers');
+  });
+
+  it('reintenta con la ruta legacy cuando la versionada no existe', async () => {
+    Object.defineProperty(globalThis, 'window', {
+      value: { location: { origin: 'https://dashboard.origen.es' } },
+      configurable: true,
+    });
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 404, json: async () => ({}) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ data: { key: 'products/123/test.png', url: 'https://cdn.origen.es/test.png' } }) });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { uploadFile } = await import('@/lib/api/media');
+    const file = new File(['image'], 'product.png', { type: 'image/png' });
+
+    await uploadFile(file, 'products/123');
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      'https://dashboard.origen.es/api/v1/media/upload',
+      expect.objectContaining({ method: 'POST', credentials: 'include' }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      'https://dashboard.origen.es/api/media/upload',
+      expect.objectContaining({ method: 'POST', credentials: 'include' }),
+    );
   });
 });

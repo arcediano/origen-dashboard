@@ -14,6 +14,13 @@
 import * as React from 'react';
 import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
+import {
+  buildImageResolutionError,
+  getImageDimensions,
+  getImageQualityHint,
+  type ImageQualityRequirement,
+  isImageFile,
+} from '@/lib/validations/image-quality';
 import { Button } from '@arcediano/ux-library';
 import { Alert, AlertTitle, AlertDescription } from '@arcediano/ux-library';
 
@@ -69,6 +76,8 @@ export interface FileUploadProps {
   minDimensions?: { width: number; height: number };
   /** Etiqueta de dimensiones recomendadas a mostrar en la zona de drop (ej: "200×200 px mín.") */
   dimensionsHint?: string;
+  /** Requisito de calidad para imagenes visibles en el escaparate publico */
+  qualityRequirement?: ImageQualityRequirement;
 }
 
 // ============================================================================
@@ -83,10 +92,6 @@ const formatFileSize = (bytes: number): string => {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 };
 
-const isImage = (type: string): boolean => {
-  return type.startsWith('image/');
-};
-
 const createPreview = (file: File): Promise<string> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -94,22 +99,6 @@ const createPreview = (file: File): Promise<string> => {
       resolve(e.target?.result as string);
     };
     reader.readAsDataURL(file);
-  });
-};
-
-const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      resolve({ width: img.naturalWidth, height: img.naturalHeight });
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('No se pudo leer la imagen'));
-    };
-    img.src = url;
   });
 };
 
@@ -139,12 +128,15 @@ export function FileUpload({
   showPreview = true,
   minDimensions,
   dimensionsHint,
+  qualityRequirement,
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const acceptHint = accept !== '*/*' ? formatAcceptHint(accept) : '';
+  const resolvedMinDimensions = qualityRequirement?.minDimensions ?? minDimensions;
+  const resolvedDimensionsHint = dimensionsHint ?? (qualityRequirement ? getImageQualityHint(qualityRequirement) : undefined);
 
   // Validar tipo de archivo con mensaje específico
   const validateFileType = useCallback(
@@ -195,13 +187,17 @@ export function FileUpload({
         }
 
         // Validar dimensiones mínimas (solo imágenes)
-        if (minDimensions && isImage(file.type)) {
+        if (resolvedMinDimensions && isImageFile(file.type)) {
           try {
             const { width, height } = await getImageDimensions(file);
-            if (width < minDimensions.width || height < minDimensions.height) {
-              errors.push(
-                `La imagen "${file.name}" mide ${width}×${height} px. El mínimo requerido es ${minDimensions.width}×${minDimensions.height} px para que se vea nítida en el perfil.`
-              );
+            if (width < resolvedMinDimensions.width || height < resolvedMinDimensions.height) {
+              if (qualityRequirement) {
+                errors.push(buildImageResolutionError(file.name, { width, height }, qualityRequirement));
+              } else {
+                errors.push(
+                  `La imagen "${file.name}" mide ${width}x${height} px. El minimo requerido es ${resolvedMinDimensions.width}x${resolvedMinDimensions.height} px para que se vea nitida.`
+                );
+              }
               continue;
             }
           } catch {
@@ -219,7 +215,7 @@ export function FileUpload({
         };
 
         // Preview para imágenes
-        if (isImage(file.type) && showPreview) {
+        if (isImageFile(file.type) && showPreview) {
           uploadedFile.preview = await createPreview(file);
         }
 
@@ -229,7 +225,7 @@ export function FileUpload({
       if (errors.length > 0) setError(errors[0]);
       onChange([...value, ...newFiles]);
     },
-    [value, onChange, validateFileType, multiple, maxFiles, maxSize, minDimensions, showPreview]
+    [value, onChange, validateFileType, multiple, maxFiles, maxSize, resolvedMinDimensions, qualityRequirement, showPreview]
   );
 
   // Manejar drag & drop
@@ -348,7 +344,7 @@ export function FileUpload({
           <p className="text-[10px] text-muted-foreground mb-4">
             {acceptHint && <><span className="font-medium">{acceptHint}</span> · </>}
             Máx. {maxSize} MB
-            {dimensionsHint && <> · {dimensionsHint}</>}
+            {resolvedDimensionsHint && <> · {resolvedDimensionsHint}</>}
           </p>
 
           {/* Botón de subida */}
@@ -400,7 +396,7 @@ export function FileUpload({
                 </div>
               ) : (
                 <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center flex-shrink-0">
-                  {isImage(file.type) ? (
+                  {isImageFile(file.type) ? (
                     <ImageIcon className="w-8 h-8 text-origen-bosque" />
                   ) : (
                     <FileText className="w-8 h-8 text-origen-bosque" />

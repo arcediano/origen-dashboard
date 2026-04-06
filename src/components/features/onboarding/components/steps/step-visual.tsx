@@ -9,6 +9,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
 
 import { Input, Button } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
@@ -189,8 +190,8 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             accept="image/jpeg,image/png,image/webp,image/gif"
             multiple={false}
             maxSize={2}
-            minDimensions={{ width: 200, height: 200 }}
-            dimensionsHint="200×200 px mín."
+            qualityRequirement={IMAGE_QUALITY_PRESETS.businessLogo}
+            dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.businessLogo)}
           />
         )}
       </div>
@@ -210,7 +211,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
                 <h2 className="text-xl font-bold text-origen-bosque">Imagen de cabecera</h2>
                 <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-1 rounded-full">Opcional</span>
               </div>
-              <p className="text-sm text-muted-foreground">Recomendado: 1200x400px • JPG o PNG</p>
+              <p className="text-sm text-muted-foreground">Sube una imagen amplia y nitida para que la cabecera no se vea borrosa.</p>
             </div>
           </div>
           {hasBanner && (
@@ -259,8 +260,8 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             accept="image/jpeg,image/png,image/webp"
             multiple={false}
             maxSize={5}
-            minDimensions={{ width: 1200, height: 400 }}
-            dimensionsHint="1200×400 px recomendado"
+            qualityRequirement={IMAGE_QUALITY_PRESETS.profileBanner}
+            dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.profileBanner)}
           />
         )}
       </div>

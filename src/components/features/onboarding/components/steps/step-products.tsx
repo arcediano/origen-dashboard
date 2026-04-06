@@ -12,6 +12,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
 import { Input, InputAffixField, Button, Textarea } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 
@@ -238,6 +239,8 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
               accept="image/jpeg,image/png,image/webp"
               maxSize={8}
               helperText="Arrastra una foto o toca para seleccionar"
+              qualityRequirement={IMAGE_QUALITY_PRESETS.productImage}
+              dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.productImage)}
             />
           </div>
 

@@ -33,6 +33,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { IMAGE_QUALITY_PRESETS } from '@/lib/validations/image-quality';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import type { ProductionInfo, ProductionMedia } from '@/types/product';
@@ -507,6 +508,7 @@ export function StepProduction({
                   maxSize={10}
                   showMainBadge={false}
                   uploadButtonText="Arrastra o haz clic para subir imágenes del proceso"
+                  qualityRequirement={IMAGE_QUALITY_PRESETS.productionGallery}
                 />
               </div>
 

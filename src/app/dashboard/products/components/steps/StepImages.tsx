@@ -17,6 +17,7 @@ import {
   Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
 import { motion } from 'framer-motion';
 import type { ProductImage } from '@/types/product';
 
@@ -83,7 +84,7 @@ export function StepImages({
             </span>
             <Tooltip 
               content="Imágenes del producto"
-              detailed="Sube imágenes de alta calidad. La primera será la principal. Formatos: JPG, PNG, WebP. Máximo 5 imágenes, 10MB cada una."
+              detailed={`Sube imagenes de alta calidad. La primera sera la principal. ${getImageQualityHint(IMAGE_QUALITY_PRESETS.productImage)}. Formatos: JPG, PNG, WebP. Maximo 5 imagenes, 10MB cada una.`}
               size="sm"
             />
           </div>
@@ -94,6 +95,7 @@ export function StepImages({
             maxSize={10}
             showMainBadge={true}
             uploadButtonText="Arrastra o haz clic para subir imágenes"
+            qualityRequirement={IMAGE_QUALITY_PRESETS.productImage}
           />
         </div>
       </Card>

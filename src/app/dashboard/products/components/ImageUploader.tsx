@@ -5,9 +5,16 @@
 
 'use client';
 
-import React, { useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import React, { useCallback, useState } from 'react';
+import { type FileRejection, useDropzone } from 'react-dropzone';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@arcediano/ux-library';
+import {
+  buildImageResolutionError,
+  getImageDimensions,
+  getImageQualityHint,
+  type ImageQualityRequirement,
+} from '@/lib/validations/image-quality';
 import { Upload, X, Image as ImageIcon, Star } from 'lucide-react';
 import { type ProductImage } from '@/types/product';
 
@@ -32,6 +39,8 @@ export interface ImageUploaderProps {
   className?: string;
   /** Aceptar solo imágenes */
   accept?: Record<string, string[]>;
+  /** Regla de calidad de imagen para superficies publicas */
+  qualityRequirement?: ImageQualityRequirement;
 }
 
 // ============================================================================
@@ -46,29 +55,90 @@ export function ImageUploader({
   showMainBadge = true,
   uploadButtonText = "Arrastra o haz clic para subir imágenes",
   className,
+  qualityRequirement,
   accept = {
     'image/*': ['.jpeg', '.jpg', '.png', '.webp', '.gif']
   }
 }: ImageUploaderProps) {
+  const [error, setError] = useState<string | null>(null);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newImages: ProductImage[] = acceptedFiles.map((file, index) => ({
-      id: `temp-${Date.now()}-${index}-${Math.random().toString(36).substring(2, 7)}`,
-      url: URL.createObjectURL(file),
-      file,
-      isMain: value.length === 0 && index === 0,
-      sortOrder: value.length + index,
-      uploading: false,
-      progress: 0,
-      size: file.size,
-      type: file.type,
-    }));
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    setError(null);
 
-    onChange([...value, ...newImages]);
-  }, [value, onChange]);
+    const newImages: ProductImage[] = [];
+    const errors: string[] = [];
+
+    for (const [index, file] of acceptedFiles.entries()) {
+      let dimensions;
+
+      if (qualityRequirement) {
+        try {
+          dimensions = await getImageDimensions(file);
+
+          if (
+            dimensions.width < qualityRequirement.minDimensions.width ||
+            dimensions.height < qualityRequirement.minDimensions.height
+          ) {
+            errors.push(buildImageResolutionError(file.name, dimensions, qualityRequirement));
+            continue;
+          }
+        } catch {
+          errors.push(`No hemos podido comprobar la resolucion de "${file.name}". Intentalo con otra imagen.`);
+          continue;
+        }
+      }
+
+      newImages.push({
+        id: `temp-${Date.now()}-${index}-${Math.random().toString(36).substring(2, 7)}`,
+        url: URL.createObjectURL(file),
+        file,
+        isMain: value.length === 0 && index === 0,
+        sortOrder: value.length + index,
+        uploading: false,
+        progress: 0,
+        size: file.size,
+        type: file.type,
+        width: dimensions?.width,
+        height: dimensions?.height,
+      });
+    }
+
+    if (errors.length > 0) {
+      setError(errors[0]);
+    }
+
+    if (newImages.length > 0) {
+      onChange([...value, ...newImages]);
+    }
+  }, [qualityRequirement, value, onChange]);
+
+  const handleDropRejected = useCallback((rejections: FileRejection[]) => {
+    const firstRejection = rejections[0];
+    const firstError = firstRejection?.errors[0];
+
+    if (!firstError) {
+      setError('No hemos podido subir esa imagen. Intentalo de nuevo.');
+      return;
+    }
+
+    switch (firstError.code) {
+      case 'file-too-large':
+        setError(`La imagen "${firstRejection.file.name}" supera el limite de ${maxSize} MB.`);
+        break;
+      case 'too-many-files':
+        setError(`Solo puedes subir hasta ${maxFiles} imagenes en este bloque.`);
+        break;
+      case 'file-invalid-type':
+        setError(`El archivo "${firstRejection.file.name}" no tiene un formato valido. Usa JPG, PNG, WebP o GIF.`);
+        break;
+      default:
+        setError(`No hemos podido subir "${firstRejection.file.name}". Revisa el archivo e intentalo de nuevo.`);
+    }
+  }, [maxFiles, maxSize]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    onDropRejected: handleDropRejected,
     accept,
     maxFiles: maxFiles - value.length,
     maxSize: maxSize * 1024 * 1024,
@@ -118,11 +188,23 @@ export function ImageUploader({
           <p className="text-xs text-muted-foreground mt-1">
             PNG, JPG, WebP hasta {maxSize}MB
           </p>
+          {qualityRequirement && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {getImageQualityHint(qualityRequirement)}
+            </p>
+          )}
           <p className="text-xs text-text-subtle mt-2">
             {value.length} de {maxFiles} imágenes
           </p>
         </div>
       </div>
+
+      {error && (
+        <Alert variant="error">
+          <AlertTitle>Imagen rechazada</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Grid de imágenes */}
       {value.length > 0 && (

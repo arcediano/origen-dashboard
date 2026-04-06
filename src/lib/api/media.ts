@@ -13,7 +13,23 @@ const BASE_URL =
   typeof window !== 'undefined'
     ? window.location.origin
     : (process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000');
-const API_PATH = '/api/v1/media/upload';
+const API_PATHS = ['/api/v1/media/upload', '/api/media/upload', '/media/upload'] as const;
+
+function resolveEntityType(category: string): 'products' | 'producers' | 'certifications' {
+  if (category.startsWith('products/')) {
+    return 'products';
+  }
+
+  if (category.startsWith('documents/certifications/')) {
+    return 'certifications';
+  }
+
+  return 'producers';
+}
+
+function shouldRetryWithNextPath(response: Response): boolean {
+  return response.status === 404 || response.status === 405;
+}
 
 export interface UploadResult {
   key: string;
@@ -32,17 +48,34 @@ export interface UploadResult {
 export async function uploadFile(file: File, category: string): Promise<UploadResult> {
   const form = new FormData();
   form.append('file', file);
-  form.append('category', category);
+  form.append('entityType', resolveEntityType(category));
 
-  let response: Response;
-  try {
-    response = await fetch(`${BASE_URL}${API_PATH}`, {
-      method: 'POST',
-      body: form,
-      credentials: 'include',
-    });
-  } catch {
-    throw new Error('No se pudo conectar al servidor de archivos. Comprueba tu conexión e inténtalo de nuevo.');
+  let response: Response | null = null;
+  let networkError = false;
+
+  for (const apiPath of API_PATHS) {
+    try {
+      response = await fetch(`${BASE_URL}${apiPath}`, {
+        method: 'POST',
+        body: form,
+        credentials: 'include',
+      });
+    } catch {
+      networkError = true;
+      continue;
+    }
+
+    if (response.ok || !shouldRetryWithNextPath(response)) {
+      break;
+    }
+  }
+
+  if (!response) {
+    if (networkError) {
+      throw new Error('No se pudo conectar al servidor de archivos. Comprueba tu conexión e inténtalo de nuevo.');
+    }
+
+    throw new Error('No se encontro una ruta valida de subida de archivos.');
   }
 
   if (!response.ok) {
