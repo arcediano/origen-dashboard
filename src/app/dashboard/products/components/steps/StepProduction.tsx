@@ -14,27 +14,21 @@ import {
   Textarea,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
-import { 
-  Leaf, 
-  MapPin, 
-  Camera, 
+import {
+  Leaf,
   CheckCircle,
   Sparkles,
   Heart,
   Sprout,
   AlertCircle,
-  Clock,
   TreePine,
   Droplets,
   Sun,
   Wind,
   Package,
-  Award,
-  Globe,
-  BookOpen,
-  Calendar,
+  MapPin,
   Film,
-  Trash2
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -310,65 +304,33 @@ export function StepProduction({
               exit={{ opacity: 0, x: 20 }}
               className="space-y-6"
             >
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-foreground">
-                    Historia del productor
-                  </span>
-                  <Tooltip 
-                    content="Comparte la historia detrás de tu producto"
-                    detailed="Las historias auténticas conectan con los clientes. Incluye tradición familiar, métodos artesanales, pasión por la calidad."
-                    size="sm"
-                  />
-                </div>
-                <Textarea
-                  value={productionInfo.story}
-                  onChange={(e) => handleChange('story', e.target.value)}
-                  className="min-h-[120px] text-base w-full rounded-xl p-4"
-                  placeholder="Comparte la historia detrás de este producto: tradición familiar, métodos artesanales, pasión por la calidad, el origen de los ingredientes..."
-                />
-              </div>
+              <Textarea
+                label="Historia del productor"
+                tooltip="Las historias auténticas conectan con los clientes. Incluye tradición familiar, métodos artesanales, pasión por la calidad."
+                value={productionInfo.story}
+                onChange={(e) => handleChange('story', e.target.value)}
+                className="min-h-[120px]"
+                placeholder="Tradición familiar, métodos artesanales, pasión por la calidad, el origen de los ingredientes..."
+              />
 
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Sprout className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-foreground">
-                    Proceso artesanal
-                  </span>
-                  <Tooltip 
-                    content="Describe el proceso artesanal"
-                    detailed="Describe las técnicas tradicionales, detalles del proceso, tiempos de maduración que hacen único tu producto."
-                    size="sm"
-                  />
-                </div>
-                <Textarea
-                  value={productionInfo.artisanProcess}
-                  onChange={(e) => handleChange('artisanProcess', e.target.value)}
-                  className="min-h-[100px] text-base w-full rounded-xl p-4"
-                  placeholder="Describe las técnicas tradicionales, detalles del proceso, tiempos de maduración..."
-                />
-              </div>
+              <Textarea
+                label="Proceso artesanal"
+                tooltip="Describe las técnicas tradicionales, detalles del proceso, tiempos de maduración que hacen único tu producto."
+                value={productionInfo.artisanProcess}
+                onChange={(e) => handleChange('artisanProcess', e.target.value)}
+                className="min-h-[100px]"
+                placeholder="Técnicas tradicionales, detalles del proceso, tiempos de maduración..."
+              />
 
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-foreground">
-                    Bienestar animal
-                  </span>
-                  <Tooltip 
-                    content="Información sobre bienestar animal"
-                    detailed="Si tu producto es de origen animal, indica las condiciones de cría, alimentación y cuidados."
-                    size="sm"
-                  />
-                </div>
-                <Textarea
-                  value={productionInfo.animalWelfare}
-                  onChange={(e) => handleChange('animalWelfare', e.target.value)}
-                  className="min-h-[100px] text-base w-full rounded-xl p-4"
-                  placeholder="Ej: Cría en libertad, alimentación natural, sin antibióticos, pastoreo tradicional..."
-                />
-              </div>
+              <Textarea
+                label="Bienestar animal"
+                tooltip="Si tu producto es de origen animal, indica las condiciones de cría, alimentación y cuidados."
+                helperText="Opcional — solo si aplica"
+                value={productionInfo.animalWelfare}
+                onChange={(e) => handleChange('animalWelfare', e.target.value)}
+                className="min-h-[100px]"
+                placeholder="Cría en libertad, alimentación natural, sin antibióticos, pastoreo tradicional..."
+              />
             </motion.div>
           )}
 
@@ -382,109 +344,57 @@ export function StepProduction({
               className="space-y-6"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-foreground">
-                      País
-                    </span>
-                    <Tooltip 
-                      content="País de origen"
-                      size="sm"
-                    />
-                  </div>
-                  <Input
-                    value={productionInfo.origin}
-                    onChange={(e) => handleChange('origin', e.target.value)}
-                    placeholder="Ej: España"
-                    className="h-12 rounded-xl"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-foreground">
-                      Finca / Taller
-                    </span>
-                    <Tooltip 
-                      content="Nombre de la finca o taller"
-                      size="sm"
-                    />
-                  </div>
-                  <Input
-                    value={productionInfo.farmName}
-                    onChange={(e) => handleChange('farmName', e.target.value)}
-                    placeholder="Ej: Finca El Valle"
-                    className="h-12 rounded-xl"
-                  />
-                </div>
+                <Input
+                  label="País de origen"
+                  value={productionInfo.origin}
+                  onChange={(e) => handleChange('origin', e.target.value)}
+                  inputSize="lg"
+                  placeholder="España"
+                />
+                <Input
+                  label="Finca / Taller"
+                  value={productionInfo.farmName}
+                  onChange={(e) => handleChange('farmName', e.target.value)}
+                  inputSize="lg"
+                  placeholder="Finca El Valle"
+                />
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-foreground">
-                    Método de producción
-                  </span>
-                  <Tooltip 
-                    content="Método de elaboración"
-                    size="sm"
-                  />
-                </div>
-                <Select
-                  value={productionInfo.productionMethod}
-                  onValueChange={(v) => handleChange('productionMethod', v)}
-                >
-                  <SelectTrigger className="h-12 rounded-xl">
-                    <SelectValue placeholder="Seleccionar método" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="artesanal">Artesanal</SelectItem>
-                    <SelectItem value="tradicional">Tradicional</SelectItem>
-                    <SelectItem value="ecologico">Ecológico</SelectItem>
-                    <SelectItem value="industrial">Industrial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select
+                label="Método de producción"
+                value={productionInfo.productionMethod}
+                onValueChange={(v) => handleChange('productionMethod', v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar método" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="artesanal">Artesanal</SelectItem>
+                  <SelectItem value="tradicional">Tradicional</SelectItem>
+                  <SelectItem value="ecologico">Ecológico</SelectItem>
+                  <SelectItem value="industrial">Industrial</SelectItem>
+                </SelectContent>
+              </Select>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-origen-pradera" />
-                    Fecha cosecha
-                  </p>
-                  <Input
-                    type="date"
-                    value={productionInfo.harvestDate ? new Date(productionInfo.harvestDate).toISOString().split('T')[0] : ''}
-                    onChange={(e) => handleChange('harvestDate', e.target.value ? new Date(e.target.value) : undefined)}
-                    className="h-11 rounded-xl"
-                  />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-origen-pradera" />
-                    Fecha producción
-                  </p>
-                  <Input
-                    type="date"
-                    value={productionInfo.productionDate ? new Date(productionInfo.productionDate).toISOString().split('T')[0] : ''}
-                    onChange={(e) => handleChange('productionDate', e.target.value ? new Date(e.target.value) : undefined)}
-                    className="h-11 rounded-xl"
-                  />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-origen-pradera" />
-                    Fecha caducidad
-                  </p>
-                  <Input
-                    type="date"
-                    value={productionInfo.expiryDate ? new Date(productionInfo.expiryDate).toISOString().split('T')[0] : ''}
-                    onChange={(e) => handleChange('expiryDate', e.target.value ? new Date(e.target.value) : undefined)}
-                    className="h-11 rounded-xl"
-                  />
-                </div>
+                <Input
+                  label="Fecha de cosecha"
+                  type="date"
+                  value={productionInfo.harvestDate ? new Date(productionInfo.harvestDate).toISOString().split('T')[0] : ''}
+                  onChange={(e) => handleChange('harvestDate', e.target.value ? new Date(e.target.value) : undefined)}
+                />
+                <Input
+                  label="Fecha de producción"
+                  type="date"
+                  value={productionInfo.productionDate ? new Date(productionInfo.productionDate).toISOString().split('T')[0] : ''}
+                  onChange={(e) => handleChange('productionDate', e.target.value ? new Date(e.target.value) : undefined)}
+                />
+                <Input
+                  label="Fecha de caducidad"
+                  type="date"
+                  value={productionInfo.expiryDate ? new Date(productionInfo.expiryDate).toISOString().split('T')[0] : ''}
+                  onChange={(e) => handleChange('expiryDate', e.target.value ? new Date(e.target.value) : undefined)}
+                />
               </div>
 
               <div className="space-y-2">
@@ -566,24 +476,13 @@ export function StepProduction({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Sprout className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-foreground">
-                    Información de sostenibilidad
-                  </span>
-                  <Tooltip 
-                    content="Detalles adicionales"
-                    size="sm"
-                  />
-                </div>
-                <Textarea
-                  value={productionInfo.sustainabilityInfo}
-                  onChange={(e) => handleChange('sustainabilityInfo', e.target.value)}
-                  className="min-h-[100px] text-base w-full rounded-xl p-4"
-                  placeholder="Ej: Energía renovable, gestión de residuos, huella de carbono, certificaciones ambientales..."
-                />
-              </div>
+              <Textarea
+                label="Información de sostenibilidad"
+                value={productionInfo.sustainabilityInfo}
+                onChange={(e) => handleChange('sustainabilityInfo', e.target.value)}
+                className="min-h-[100px]"
+                placeholder="Energía renovable, gestión de residuos, huella de carbono, certificaciones ambientales..."
+              />
             </motion.div>
           )}
 
@@ -597,19 +496,9 @@ export function StepProduction({
               className="space-y-6"
             >
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Camera className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-foreground">
-                    Galería del proceso
-                  </span>
-                  <Tooltip 
-                    content="Imágenes del proceso de producción"
-                    detailed="Sube imágenes del proceso de elaboración, el taller o los productores en acción. Todas las imágenes tienen la misma importancia."
-                    size="sm"
-                  />
-                </div>
-                
-                {/* ImageUploader con transformación de tipos */}
+                <p className="text-sm font-semibold text-origen-bosque">Galería del proceso</p>
+                <p className="text-xs text-text-subtle">Imágenes del proceso de elaboración, el taller o los productores en acción.</p>
+
                 <ImageUploader
                   value={productionMediaToProductImages(mediaItems)}
                   onChange={handleMediaChange}

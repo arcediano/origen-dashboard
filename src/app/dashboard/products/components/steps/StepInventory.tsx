@@ -14,19 +14,13 @@ import { Tooltip } from '@arcediano/ux-library';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
-import { 
-  Package, 
-  CheckCircle, 
+import {
+  Package,
+  CheckCircle,
   Sparkles,
   AlertCircle,
-  Barcode,
-  Ruler,
-  Weight,
-  Truck,
-  TrendingUp,
-  TrendingDown,
   AlertTriangle,
-  Info
+  Truck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -227,116 +221,55 @@ export function StepInventory({
 
         {/* SKU y Código de barras */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* SKU */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Barcode className="h-5 w-5 text-origen-pradera" />
-              <span className="text-sm font-medium text-foreground">
-                SKU
-                <span className="text-red-500 ml-1">*</span>
-              </span>
-              <Tooltip 
-                content="Código único para identificar el producto"
-                detailed="El SKU (Stock Keeping Unit) es un código único para tu inventario interno. El backend lo generará automáticamente."
-                size="sm"
-              />
-            </div>
-            <div className="relative">
-              <Input
-                value={formData?.sku || ''}
-                onChange={(e) => handleChange('sku', e.target.value.toUpperCase())}
-                className={cn(
-                  "h-12 font-mono text-base w-full rounded-xl",
-                  (localTouched.sku && validationErrors.sku) && "border-feedback-danger"
-                )}
-                placeholder={skuSuggestion || "El backend generará el SKU"}
-                style={{ textTransform: 'uppercase' }}
-                disabled // ← OPCIONAL: deshabilitar si quieres que sea solo lectura
-              />
-              {skuSuggestion && !formData?.sku && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-subtle">
-                  Sugerencia: {skuSuggestion}
-                </div>
-              )}
-              {formData?.sku && !validationErrors.sku && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600">
-                  <CheckCircle className="w-5 h-5" />
-                </div>
-              )}
-            </div>
-            {localTouched.sku && validationErrors.sku && (
-              <p className="text-xs text-red-600 mt-1">{validationErrors.sku}</p>
-            )}
-          </div>
+          <Input
+            label="SKU"
+            required
+            tooltip="El SKU (Stock Keeping Unit) es un código único para tu inventario interno. El backend lo generará automáticamente."
+            value={formData?.sku || ''}
+            onChange={(e) => handleChange('sku', e.target.value.toUpperCase())}
+            inputSize="lg"
+            className="font-mono"
+            placeholder={skuSuggestion || "El backend generará el SKU"}
+            helperText={skuSuggestion && !formData?.sku ? `Sugerencia: ${skuSuggestion}` : undefined}
+            error={localTouched.sku ? validationErrors.sku : undefined}
+            success={!!formData?.sku && !validationErrors.sku}
+            disabled
+          />
 
-          {/* Código de barras */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Barcode className="h-5 w-5 text-origen-pradera" />
-              <span className="text-sm font-medium text-foreground">
-                Código de barras
-              </span>
-              <Tooltip 
-                content="EAN-13 o UPC (opcional)"
-                detailed="Código de barras estándar para productos. Formato EAN-13 (13 dígitos) o UPC (12 dígitos)."
-                size="sm"
-              />
-            </div>
-            <Input
-              value={formData?.barcode || ''}
-              onChange={(e) => handleChange('barcode', e.target.value)}
-              className="h-12 font-mono text-base rounded-xl"
-              placeholder="841234567890"
-            />
-          </div>
+          <Input
+            label="Código de barras"
+            tooltip="Código de barras estándar para productos. Formato EAN-13 (13 dígitos) o UPC (12 dígitos)."
+            helperText="Opcional — EAN-13 o UPC"
+            value={formData?.barcode || ''}
+            onChange={(e) => handleChange('barcode', e.target.value)}
+            inputSize="lg"
+            className="font-mono"
+            placeholder="841234567890"
+          />
         </div>
 
         {/* Stock */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Stock actual */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-origen-pradera" />
-              <span className="text-sm font-medium text-foreground">
-                Stock actual
-                <span className="text-red-500 ml-1">*</span>
-              </span>
-              <Tooltip 
-                content="Cantidad disponible"
-                detailed="Número de unidades disponibles para la venta. Se actualizará automáticamente con los pedidos."
-                size="sm"
-              />
-            </div>
-            <Input
-              type="number"
-              value={formData?.stock || 0}
-              onChange={(e) => handleChange('stock', parseInt(e.target.value) || 0)}
-              min={0}
-              className="h-12 rounded-xl"
-            />
-          </div>
+          <Input
+            label="Stock actual"
+            required
+            tooltip="Número de unidades disponibles para la venta. Se actualizará automáticamente con los pedidos."
+            type="number"
+            value={formData?.stock || 0}
+            onChange={(e) => handleChange('stock', parseInt(e.target.value) || 0)}
+            min={0}
+            inputSize="lg"
+          />
 
-          {/* Umbral de stock bajo */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-origen-pradera" />
-              <span className="text-sm font-medium text-foreground">
-                Umbral de stock bajo
-              </span>
-              <Tooltip 
-                content="Alerta cuando el stock esté por debajo"
-                detailed="Recibirás una notificación cuando el stock esté por debajo de este número. Recomendado: 5-10 unidades."
-                size="sm"
-              />
-            </div>
-            <Input
-              type="number"
-              value={formData?.lowStockThreshold || 5}
-              onChange={(e) => handleChange('lowStockThreshold', parseInt(e.target.value) || 5)}
-              min={0}
-              className="h-12 rounded-xl"
-            />
-          </div>
+          <Input
+            label="Umbral de stock bajo"
+            tooltip="Recibirás una notificación cuando el stock esté por debajo de este número. Recomendado: 5-10 unidades."
+            type="number"
+            value={formData?.lowStockThreshold || 5}
+            onChange={(e) => handleChange('lowStockThreshold', parseInt(e.target.value) || 5)}
+            min={0}
+            inputSize="lg"
+          />
         </div>
 
         {/* Indicador de nivel de stock */}
@@ -390,33 +323,26 @@ export function StepInventory({
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Peso */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Weight className="h-5 w-5 text-origen-pradera" />
-                <span className="text-sm font-medium text-foreground">
-                  Peso
-                </span>
-                <Tooltip 
-                  content="Peso del producto para envío"
-                  detailed="El peso es necesario para calcular los costes de envío. Incluye el peso del producto más el embalaje."
-                  size="sm"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                  value={formData?.weight || ''}
-                  onChange={(e) => handleChange('weight', parseFloat(e.target.value) || undefined)}
-                  step="0.1"
-                  min={0}
-                  className="h-12 flex-1 rounded-xl"
-                  placeholder="0.5"
-                />
+            <div>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <Input
+                    label="Peso"
+                    tooltip="El peso es necesario para calcular los costes de envío. Incluye el peso del producto más el embalaje."
+                    type="number"
+                    value={formData?.weight || ''}
+                    onChange={(e) => handleChange('weight', parseFloat(e.target.value) || undefined)}
+                    step="0.1"
+                    min={0}
+                    inputSize="lg"
+                    placeholder="0.5"
+                  />
+                </div>
                 <Select
                   value={formData?.weightUnit || 'kg'}
                   onValueChange={(v) => handleChange('weightUnit', v)}
                 >
-                  <SelectTrigger className="h-12 w-20 rounded-xl">
+                  <SelectTrigger className="h-12 w-20 rounded-xl mb-0">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -427,75 +353,50 @@ export function StepInventory({
               </div>
             </div>
 
-            {/* Clase de envío */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Truck className="h-5 w-5 text-origen-pradera" />
-                <span className="text-sm font-medium text-foreground">
-                  Clase de envío
-                </span>
-                <Tooltip 
-                  content="Categoría para tarifas"
-                  detailed="La clase de envío determina la tarifa aplicable según el tipo de producto (estándar, frágil, perecedero, etc.)"
-                  size="sm"
-                />
-              </div>
-              <Select
-                value={formData?.shippingClass || ''}
-                onValueChange={(v) => handleChange('shippingClass', v)}
-              >
-                <SelectTrigger className="h-12 rounded-xl">
-                  <SelectValue placeholder="Seleccionar clase" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="standard">Estándar</SelectItem>
-                  <SelectItem value="express">Express</SelectItem>
-                  <SelectItem value="fragile">Frágil</SelectItem>
-                  <SelectItem value="perishable">Perecedero</SelectItem>
-                  <SelectItem value="bulky">Voluminoso</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select
+              label="Clase de envío"
+              tooltip="La clase de envío determina la tarifa aplicable según el tipo de producto (estándar, frágil, perecedero, etc.)"
+              value={formData?.shippingClass || ''}
+              onValueChange={(v) => handleChange('shippingClass', v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar clase" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="standard">Estándar</SelectItem>
+                <SelectItem value="express">Express</SelectItem>
+                <SelectItem value="fragile">Frágil</SelectItem>
+                <SelectItem value="perishable">Perecedero</SelectItem>
+                <SelectItem value="bulky">Voluminoso</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Dimensiones */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Ruler className="h-5 w-5 text-origen-pradera" />
-              <span className="text-sm font-medium text-foreground">
-                Dimensiones (cm)
-              </span>
-              <Tooltip 
-                content="Largo, ancho y alto del paquete"
-                detailed="Dimensiones del paquete para calcular el volumen y costes de envío. Medir el producto embalado."
-                size="sm"
-              />
-            </div>
+          <div className="space-y-1.5">
+            <p className="text-sm font-semibold text-origen-bosque">Dimensiones del paquete <span className="text-text-subtle font-normal">(cm)</span></p>
             <div className="grid grid-cols-3 gap-2">
               <Input
+                label="Largo"
                 type="number"
                 value={formData?.dimensions?.length || ''}
                 onChange={(e) => handleNestedChange('dimensions', 'length', parseFloat(e.target.value) || undefined)}
-                className="h-12 rounded-xl"
-                placeholder="Largo"
                 step="0.1"
                 min={0}
               />
               <Input
+                label="Ancho"
                 type="number"
                 value={formData?.dimensions?.width || ''}
                 onChange={(e) => handleNestedChange('dimensions', 'width', parseFloat(e.target.value) || undefined)}
-                className="h-12 rounded-xl"
-                placeholder="Ancho"
                 step="0.1"
                 min={0}
               />
               <Input
+                label="Alto"
                 type="number"
                 value={formData?.dimensions?.height || ''}
                 onChange={(e) => handleNestedChange('dimensions', 'height', parseFloat(e.target.value) || undefined)}
-                className="h-12 rounded-xl"
-                placeholder="Alto"
                 step="0.1"
                 min={0}
               />
