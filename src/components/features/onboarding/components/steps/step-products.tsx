@@ -12,7 +12,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { Input, Button, Textarea } from '@arcediano/ux-library';
+import { Input, InputAffixField, Button, Textarea } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 
 import {
@@ -280,7 +280,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
           {/* Precio + Unidad */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Input
+              <InputAffixField
                 label="Precio de referencia"
                 required
                 type="number"
@@ -288,7 +288,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
                 onChange={(e) => onChange({ ...product, referencePrice: parseFloat(e.target.value) || undefined })}
                 placeholder="0.00"
                 inputSize="lg"
-                leftIcon="€"
+                affixLeft="€"
                 min={0}
                 step={0.01}
                 inputMode="decimal"

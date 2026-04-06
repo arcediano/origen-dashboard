@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input, Checkbox } from '@arcediano/ux-library';
+import { Input, InputAffixField, Checkbox } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile, CategoryCard } from '@/components/shared';
 import { validateSpanishTaxId, type TaxIdType } from '@/lib/utils/tax-id';
 
@@ -471,7 +471,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
 
           {/* Teléfono de negocio */}
           <div>
-            <Input
+            <InputAffixField
               label="Teléfono de contacto del negocio"
               required
               value={data.businessPhone || ''}
@@ -483,7 +483,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
               placeholder="600 000 000"
               inputMode="tel"
               inputSize="lg"
-              leftIcon="+34"
+              affixLeft="+34"
               error={phoneTouched ? phoneError : undefined}
               helperText={!phoneTouched || !phoneError ? 'Para coordinación de pedidos y entregas. No se mostrará públicamente.' : undefined}
             />

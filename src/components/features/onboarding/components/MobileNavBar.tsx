@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Button } from '@arcediano/ux-library';
+import { ActionBar } from '@arcediano/ux-library';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface MobileNavBarProps {
@@ -17,7 +17,7 @@ interface MobileNavBarProps {
 
 export function MobileNavBar({
   currentStep,
-  totalSteps,
+  totalSteps: _totalSteps,
   onBack,
   onNext,
   onSkip,
@@ -25,56 +25,48 @@ export function MobileNavBar({
   isSubmitting,
   isLastStep,
 }: MobileNavBarProps) {
-  const showSecondaryRow = currentStep > 0 || (currentStep >= 1 && !isLastStep);
+  const secondaryActions = [];
+
+  if (currentStep > 0) {
+    secondaryActions.push({
+      id: 'back',
+      label: 'Anterior',
+      onClick: onBack,
+      disabled: isSubmitting,
+      variant: 'outline' as const,
+      leftIcon: <ChevronLeft className="w-4 h-4" />,
+      className: 'border-border text-origen-bosque',
+    });
+  }
+
+  if (currentStep >= 1 && !isLastStep) {
+    secondaryActions.push({
+      id: 'skip',
+      label: 'Más tarde',
+      onClick: onSkip,
+      disabled: isSubmitting,
+      variant: 'ghost' as const,
+      className: 'text-sm text-muted-foreground hover:text-foreground',
+    });
+  }
 
   return (
-    <div className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-surface-alt border-t border-border px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] space-y-2">
-      <Button
-        type="button"
-        variant="primary"
-        onClick={onNext}
-        disabled={!canContinue || isSubmitting}
-        loading={isSubmitting}
-        loadingText="Guardando..."
-        className="w-full h-12 text-white !text-white disabled:text-white/90"
-        rightIcon={!isSubmitting && !isLastStep ? <ChevronRight className="w-4 h-4" /> : undefined}
-        aria-label={isLastStep ? 'Finalizar onboarding' : 'Continuar al siguiente paso'}
-      >
-        {isLastStep ? 'Finalizar' : 'Continuar'}
-      </Button>
-
-      {showSecondaryRow && (
-        <div className="flex items-center gap-2">
-          {currentStep > 0 ? (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onBack}
-              disabled={isSubmitting}
-              className="h-11 flex-1 border-border text-origen-bosque"
-              leftIcon={<ChevronLeft className="w-4 h-4" />}
-              aria-label="Volver al paso anterior"
-            >
-              Anterior
-            </Button>
-          ) : (
-            <div className="flex-1" />
-          )}
-
-          {currentStep >= 1 && !isLastStep && (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onSkip}
-              disabled={isSubmitting}
-              className="h-11 flex-1 text-sm text-muted-foreground hover:text-foreground"
-            >
-              Más tarde
-            </Button>
-          )}
-        </div>
-      )}
-    </div>
+    <ActionBar
+      primaryAction={{
+        id: 'next',
+        label: isLastStep ? 'Finalizar' : 'Continuar',
+        onClick: onNext,
+        disabled: !canContinue || isSubmitting,
+        loading: isSubmitting,
+        loadingText: 'Guardando...',
+        variant: 'primary',
+        rightIcon: !isSubmitting && !isLastStep ? <ChevronRight className="w-4 h-4" /> : undefined,
+        className: 'text-white !text-white disabled:text-white/90',
+      }}
+      secondaryActions={secondaryActions}
+      fixed
+      showOnDesktop={false}
+    />
   );
 }
 

@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input } from '@arcediano/ux-library';
+import { Input, InputAffixField } from '@arcediano/ux-library';
 import { Textarea } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 
@@ -308,14 +308,14 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                 error={websiteTouched ? websiteError : undefined}
               />
               <div>
-                <Input
+                <InputAffixField
                   label="Instagram"
                   value={data.instagramHandle || ''}
                   onChange={(e) => handleInputChange('instagramHandle', e.target.value.replace(/^@/, ''))}
                   onBlur={() => setInstagramTouched(true)}
                   placeholder="tunegocio"
                   inputSize="md"
-                  leftIcon="@"
+                  affixLeft="@"
                   error={instagramTouched ? instagramError : undefined}
                   maxLength={30}
                 />

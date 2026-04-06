@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input, Button } from '@arcediano/ux-library';
+import { Input, InputAffixField, Button } from '@arcediano/ux-library';
 
 import {
   Truck,
@@ -879,14 +879,14 @@ export function EnhancedStep4Capacity({
 
         <div className="flex items-center gap-4">
           <div className="flex-1 max-w-xs">
-            <Input
+            <InputAffixField
               type="number"
               value={data.minOrderAmount || ''}
               onChange={(e) => handleInputChange('minOrderAmount', parseFloat(e.target.value) || 0)}
               min={1}
               step={5}
               inputSize="lg"
-              leftIcon="€"
+              affixLeft="€"
               error={minOrderError}
             />
           </div>
