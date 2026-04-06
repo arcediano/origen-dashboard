@@ -25,37 +25,10 @@ export function MobileNavBar({
   isSubmitting,
   isLastStep,
 }: MobileNavBarProps) {
+  const showSecondaryRow = currentStep > 0 || (currentStep >= 1 && !isLastStep);
+
   return (
-    <div className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-surface-alt border-t border-border px-4 py-3 flex items-center gap-2">
-      {/* Back button */}
-      {currentStep > 0 ? (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onBack}
-          disabled={isSubmitting}
-          className="h-12 w-12 p-0 border-border text-origen-bosque flex-shrink-0"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-      ) : (
-        <div className="w-12 flex-shrink-0" />
-      )}
-
-      {/* Skip button */}
-      {currentStep >= 1 && !isLastStep && (
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onSkip}
-          disabled={isSubmitting}
-          className="flex-shrink-0 h-12 text-xs text-muted-foreground hover:text-foreground"
-        >
-          Más tarde
-        </Button>
-      )}
-
-      {/* Continue / Finish button */}
+    <div className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-surface-alt border-t border-border px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] space-y-2">
       <Button
         type="button"
         variant="primary"
@@ -63,11 +36,44 @@ export function MobileNavBar({
         disabled={!canContinue || isSubmitting}
         loading={isSubmitting}
         loadingText="Guardando..."
-        className="flex-1 h-12"
+        className="w-full h-12 text-white !text-white disabled:text-white/90"
         rightIcon={!isSubmitting && !isLastStep ? <ChevronRight className="w-4 h-4" /> : undefined}
+        aria-label={isLastStep ? 'Finalizar onboarding' : 'Continuar al siguiente paso'}
       >
         {isLastStep ? 'Finalizar' : 'Continuar'}
       </Button>
+
+      {showSecondaryRow && (
+        <div className="flex items-center gap-2">
+          {currentStep > 0 ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onBack}
+              disabled={isSubmitting}
+              className="h-11 flex-1 border-border text-origen-bosque"
+              leftIcon={<ChevronLeft className="w-4 h-4" />}
+              aria-label="Volver al paso anterior"
+            >
+              Anterior
+            </Button>
+          ) : (
+            <div className="flex-1" />
+          )}
+
+          {currentStep >= 1 && !isLastStep && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onSkip}
+              disabled={isSubmitting}
+              className="h-11 flex-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              Más tarde
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

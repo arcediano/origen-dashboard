@@ -21,7 +21,6 @@ import {
   ChevronDown,
   ChevronUp,
   Package,
-  Euro,
   AlertCircle,
   CheckCircle2,
   Info,
@@ -281,22 +280,19 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
           {/* Precio + Unidad */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <div className="relative">
-                <Euro className="absolute left-3 top-[2.35rem] w-4 h-4 text-muted-foreground pointer-events-none z-10" />
-                <Input
-                  label="Precio de referencia"
-                  required
-                  type="number"
-                  value={product.referencePrice ?? ''}
-                  onChange={(e) => onChange({ ...product, referencePrice: parseFloat(e.target.value) || undefined })}
-                  placeholder="0.00"
-                  inputSize="lg"
-                  className="pl-8"
-                  min={0}
-                  step={0.01}
-                  inputMode="decimal"
-                />
-              </div>
+              <Input
+                label="Precio de referencia"
+                required
+                type="number"
+                value={product.referencePrice ?? ''}
+                onChange={(e) => onChange({ ...product, referencePrice: parseFloat(e.target.value) || undefined })}
+                placeholder="0.00"
+                inputSize="lg"
+                leftIcon="€"
+                min={0}
+                step={0.01}
+                inputMode="decimal"
+              />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-origen-bosque">Unidad</label>
@@ -342,7 +338,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
               <>
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Contiene</p>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                  <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2">
                     {ALLERGENS.map((a) => (
                       <button
                         key={a.id}
@@ -356,7 +352,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
                         )}
                       >
                         <span className="text-base leading-none">{a.emoji}</span>
-                        <span className="text-[10px] font-medium leading-tight">{a.label}</span>
+                        <span className="text-xs font-medium leading-tight">{a.label}</span>
                       </button>
                     ))}
                   </div>
@@ -364,7 +360,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
 
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Puede contener (trazas)</p>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                  <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2">
                     {ALLERGENS.map((a) => (
                       <button
                         key={a.id}
@@ -379,7 +375,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
                         )}
                       >
                         <span className="text-base leading-none">{a.emoji}</span>
-                        <span className="text-[10px] font-medium leading-tight">{a.label}</span>
+                        <span className="text-xs font-medium leading-tight">{a.label}</span>
                       </button>
                     ))}
                   </div>

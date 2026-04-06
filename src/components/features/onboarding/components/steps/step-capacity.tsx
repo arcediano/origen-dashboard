@@ -878,8 +878,7 @@ export function EnhancedStep4Capacity({
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-xs">
-            <span className="absolute left-3 top-[2.35rem] text-muted-foreground z-10">€</span>
+          <div className="flex-1 max-w-xs">
             <Input
               type="number"
               value={data.minOrderAmount || ''}
@@ -887,7 +886,7 @@ export function EnhancedStep4Capacity({
               min={1}
               step={5}
               inputSize="lg"
-              className="pl-8"
+              leftIcon="€"
               error={minOrderError}
             />
           </div>

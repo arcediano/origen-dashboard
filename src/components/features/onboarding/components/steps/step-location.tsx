@@ -471,27 +471,22 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
 
           {/* Teléfono de negocio */}
           <div>
-            <div className="relative">
-              <span className="absolute left-3 top-[2.35rem] text-sm text-muted-foreground pointer-events-none select-none z-10">
-                +34
-              </span>
-              <Input
-                label="Teléfono de contacto del negocio"
-                required
-                value={data.businessPhone || ''}
-                onChange={(e) => {
-                  const digits = e.target.value.replace(/\D/g, '').slice(0, 9);
-                  handleInputChange('businessPhone', digits);
-                }}
-                onBlur={() => setPhoneTouched(true)}
-                placeholder="600 000 000"
-                inputMode="tel"
-                inputSize="lg"
-                className="pl-12"
-                error={phoneTouched ? phoneError : undefined}
-                helperText={!phoneTouched || !phoneError ? 'Para coordinación de pedidos y entregas. No se mostrará públicamente.' : undefined}
-              />
-            </div>
+            <Input
+              label="Teléfono de contacto del negocio"
+              required
+              value={data.businessPhone || ''}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, '').slice(0, 9);
+                handleInputChange('businessPhone', digits);
+              }}
+              onBlur={() => setPhoneTouched(true)}
+              placeholder="600 000 000"
+              inputMode="tel"
+              inputSize="lg"
+              leftIcon="+34"
+              error={phoneTouched ? phoneError : undefined}
+              helperText={!phoneTouched || !phoneError ? 'Para coordinación de pedidos y entregas. No se mostrará públicamente.' : undefined}
+            />
           </div>
 
         </div>

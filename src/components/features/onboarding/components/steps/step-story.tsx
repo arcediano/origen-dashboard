@@ -308,20 +308,17 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                 error={websiteTouched ? websiteError : undefined}
               />
               <div>
-                <div className="relative">
-                  <span className="absolute left-3 top-[2.35rem] text-sm text-text-subtle pointer-events-none z-10">@</span>
-                  <Input
-                    label="Instagram"
-                    value={data.instagramHandle || ''}
-                    onChange={(e) => handleInputChange('instagramHandle', e.target.value.replace(/^@/, ''))}
-                    onBlur={() => setInstagramTouched(true)}
-                    placeholder="tunegocio"
-                    inputSize="md"
-                    className="pl-7"
-                    error={instagramTouched ? instagramError : undefined}
-                    maxLength={30}
-                  />
-                </div>
+                <Input
+                  label="Instagram"
+                  value={data.instagramHandle || ''}
+                  onChange={(e) => handleInputChange('instagramHandle', e.target.value.replace(/^@/, ''))}
+                  onBlur={() => setInstagramTouched(true)}
+                  placeholder="tunegocio"
+                  inputSize="md"
+                  leftIcon="@"
+                  error={instagramTouched ? instagramError : undefined}
+                  maxLength={30}
+                />
               </div>
             </div>
           </div>

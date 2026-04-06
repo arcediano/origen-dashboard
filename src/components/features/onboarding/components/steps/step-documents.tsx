@@ -231,7 +231,7 @@ export function EnhancedStep5Documents({
                     <p className="text-xs text-muted-foreground">{(data.cif.size / 1024).toFixed(1)} KB · Pendiente de verificación</p>
                   </div>
                 </div>
-                <Button type="button" variant="ghost" size="icon-sm" onClick={() => handleDeleteRequired('cif')} className="text-text-subtle hover:text-foreground flex-shrink-0">
+                <Button type="button" variant="ghost" size="icon" onClick={() => handleDeleteRequired('cif')} className="h-11 w-11 text-text-subtle hover:text-foreground flex-shrink-0" aria-label="Eliminar documento CIF/NIF">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
@@ -269,7 +269,7 @@ export function EnhancedStep5Documents({
                     <p className="text-xs text-muted-foreground">{(data.seguroRC.size / 1024).toFixed(1)} KB · Pendiente de verificación</p>
                   </div>
                 </div>
-                <Button type="button" variant="ghost" size="icon-sm" onClick={() => handleDeleteRequired('seguroRC')} className="text-text-subtle hover:text-foreground flex-shrink-0">
+                <Button type="button" variant="ghost" size="icon" onClick={() => handleDeleteRequired('seguroRC')} className="h-11 w-11 text-text-subtle hover:text-foreground flex-shrink-0" aria-label="Eliminar documento de seguro RC">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
@@ -307,7 +307,7 @@ export function EnhancedStep5Documents({
                     <p className="text-xs text-muted-foreground">{(data.manipuladorAlimentos.size / 1024).toFixed(1)} KB · Pendiente de verificación</p>
                   </div>
                 </div>
-                <Button type="button" variant="ghost" size="icon-sm" onClick={() => handleDeleteRequired('manipuladorAlimentos')} className="text-text-subtle hover:text-foreground flex-shrink-0">
+                <Button type="button" variant="ghost" size="icon" onClick={() => handleDeleteRequired('manipuladorAlimentos')} className="h-11 w-11 text-text-subtle hover:text-foreground flex-shrink-0" aria-label="Eliminar documento de manipulador de alimentos">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
@@ -382,9 +382,10 @@ export function EnhancedStep5Documents({
                       <Button
                         type="button"
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon"
                         onClick={() => handleDeleteDocument(cert.id)}
-                        className="text-text-subtle hover:text-foreground"
+                        className="h-11 w-11 text-text-subtle hover:text-foreground"
+                        aria-label={`Eliminar documento de ${cert.name}`}
                       >
                         <X className="w-4 h-4" />
                       </Button>
