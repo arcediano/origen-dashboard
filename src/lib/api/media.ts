@@ -48,7 +48,7 @@ export interface UploadResult {
 export async function uploadFile(file: File, category: string): Promise<UploadResult> {
   const form = new FormData();
   form.append('file', file);
-  form.append('entityType', resolveEntityType(category));
+  form.append('category', category);
 
   let response: Response | null = null;
   let networkError = false;
