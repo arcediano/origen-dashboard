@@ -305,7 +305,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
           </div>
 
           {/* Categoría de producto */}
-          <div className="space-y-3">
+          <div className="space-y-3" data-testid="product-category-selector">
             <p className="text-sm font-medium text-origen-bosque">
               Categoría <span className="text-red-500">*</span>
             </p>
@@ -329,6 +329,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
                           <button
                             key={opt.id}
                             type="button"
+                            data-testid="product-category-option"
                             onClick={() => onChange({ ...product, categoryId: opt.id })}
                             className={cn(
                               'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
