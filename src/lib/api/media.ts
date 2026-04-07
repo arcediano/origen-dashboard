@@ -9,11 +9,11 @@
  * pública para imágenes o null para documentos.
  */
 
-const BASE_URL =
-  typeof window !== 'undefined'
-    ? window.location.origin
-    : (process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000');
-const API_PATHS = ['/api/v1/media/upload', '/api/media/upload', '/media/upload'] as const;
+// Siempre usamos el Route Handler /api/upload del propio Next.js.
+// Este handler lee el accessToken HttpOnly server-side y lo reenvía al gateway
+// con Authorization: Bearer, evitando el problema de cookies no reenviadas
+// en los rewrites de Next.js a orígenes externos.
+const UPLOAD_PATH = '/api/upload';
 
 function resolveEntityType(category: string): 'products' | 'producers' | 'certifications' {
   if (category.startsWith('products/')) {
@@ -27,9 +27,6 @@ function resolveEntityType(category: string): 'products' | 'producers' | 'certif
   return 'producers';
 }
 
-function shouldRetryWithNextPath(response: Response): boolean {
-  return response.status === 404 || response.status === 405;
-}
 
 export interface UploadResult {
   key: string;
@@ -51,32 +48,18 @@ export async function uploadFile(file: File, category: string): Promise<UploadRe
   form.append('category', category);
   form.append('entityType', resolveEntityType(category));
 
-  let response: Response | null = null;
-  let networkError = false;
+  const url = typeof window !== 'undefined'
+    ? `${window.location.origin}${UPLOAD_PATH}`
+    : `${process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000'}${UPLOAD_PATH}`;
 
-  for (const apiPath of API_PATHS) {
-    try {
-      response = await fetch(`${BASE_URL}${apiPath}`, {
-        method: 'POST',
-        body: form,
-        credentials: 'include',
-      });
-    } catch {
-      networkError = true;
-      continue;
-    }
-
-    if (response.ok || !shouldRetryWithNextPath(response)) {
-      break;
-    }
-  }
-
-  if (!response) {
-    if (networkError) {
-      throw new Error('No se pudo conectar al servidor de archivos. Comprueba tu conexión e inténtalo de nuevo.');
-    }
-
-    throw new Error('No se encontro una ruta valida de subida de archivos.');
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      body: form,
+    });
+  } catch {
+    throw new Error('No se pudo conectar al servidor de archivos. Comprueba tu conexión.');
   }
 
   if (!response.ok) {
@@ -90,7 +73,7 @@ export async function uploadFile(file: File, category: string): Promise<UploadRe
       throw new Error('Tu sesión ha expirado. Recarga la página e inicia sesión de nuevo.');
     }
     const data = await response.json().catch(() => ({}));
-    const message = (data as any)?.message ?? `Error al subir el archivo. Inténtalo de nuevo.`;
+    const message = (data as any)?.message ?? 'Error al subir el archivo. Inténtalo de nuevo.';
     throw new Error(message);
   }
 
