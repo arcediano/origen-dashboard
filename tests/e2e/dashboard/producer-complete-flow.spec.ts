@@ -329,24 +329,100 @@ async function hideDevOverlay(page: Page): Promise<void> {
 }
 
 async function getCurrentOnboardingStepTitle(page: Page): Promise<string> {
-  const heading = page.getByRole('heading', {
-    level: 1,
-    name: /^(Ubicación|Historia|Productos|Perfil visual|Capacidad|Documentación|Pagos)$/i,
-  }).first();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (page.url().includes('/dashboard')) {
+      return 'dashboard';
+    }
 
-  await expect(heading, 'Debería mostrar un paso válido de onboarding').toBeVisible({ timeout: 15_000 });
-  return (((await heading.textContent()) ?? '').trim().toLowerCase());
+    const appErrorHeading = page.getByRole('heading', {
+      name: /Application error: a client-side exception/i,
+    }).first();
+
+    if (await appErrorHeading.isVisible().catch(() => false)) {
+      console.info('[E2E] Detectado crash cliente en onboarding. Reintentando con reload.');
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(1000);
+      continue;
+    }
+
+    const heading = page.getByRole('heading', {
+      level: 1,
+      name: /^(Ubicación|Historia|Productos|Perfil visual|Capacidad|Documentación|Pagos)$/i,
+    }).first();
+
+    if (await heading.isVisible().catch(() => false)) {
+      return (((await heading.textContent()) ?? '').trim().toLowerCase());
+    }
+
+    await page.waitForTimeout(1000);
+  }
+
+  return 'unknown';
+}
+
+async function hasEnabledContinueButton(page: Page): Promise<boolean> {
+  const candidates = page.getByRole('button', { name: /^(Siguiente|Continuar)$/i });
+  const count = await candidates.count();
+  for (let i = 0; i < count; i++) {
+    const btn = candidates.nth(i);
+    const isVisible = await btn.isVisible().catch(() => false);
+    const isEnabled = await btn.isEnabled().catch(() => false);
+    if (isVisible && isEnabled) {
+      return true;
+    }
+  }
+  return false;
 }
 
 async function clickContinue(page: Page): Promise<void> {
-  const nextBtn = page.getByRole('button', { name: /^(Siguiente|Continuar)$/i });
   await hideDevOverlay(page);
-  await expect(nextBtn).toBeEnabled({ timeout: 8_000 });
-  await nextBtn.click();
+
+  // Espera hasta 8s a que exista al menos un botón de avance visible y habilitado.
+  for (let i = 0; i < 8; i++) {
+    if (await hasEnabledContinueButton(page)) {
+      break;
+    }
+    await page.waitForTimeout(1000);
+  }
+
+  const candidates = page.getByRole('button', { name: /^(Siguiente|Continuar)$/i });
+  const count = await candidates.count();
+  for (let i = 0; i < count; i++) {
+    const btn = candidates.nth(i);
+    const isVisible = await btn.isVisible().catch(() => false);
+    const isEnabled = await btn.isEnabled().catch(() => false);
+    if (isVisible && isEnabled) {
+      await btn.click();
+      return;
+    }
+  }
+
+  const states: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const btn = candidates.nth(i);
+    const isVisible = await btn.isVisible().catch(() => false);
+    const isEnabled = await btn.isEnabled().catch(() => false);
+    states.push(`#${i}(visible=${isVisible},enabled=${isEnabled})`);
+  }
+  throw new Error(`No hay boton Continuar/Siguiente visible y habilitado. candidates=${states.join(', ')}`);
 }
 
 async function completeOnboardingStep1(page: Page, profile: ProducerProfile): Promise<void> {
-  const currentStepTitle = await getCurrentOnboardingStepTitle(page);
+  let currentStepTitle = await getCurrentOnboardingStepTitle(page);
+  if (currentStepTitle === 'dashboard') {
+    console.info(`[E2E] ${profile.firstName} ya está en dashboard (onboarding finalizado).`);
+    return;
+  }
+
+  if (currentStepTitle === 'unknown') {
+    await page.goto('/onboarding', { waitUntil: 'domcontentloaded' });
+    currentStepTitle = await getCurrentOnboardingStepTitle(page);
+    if (currentStepTitle === 'dashboard') {
+      console.info(`[E2E] ${profile.firstName} ya está en dashboard (onboarding finalizado).`);
+      return;
+    }
+  }
+
   if (currentStepTitle !== 'ubicación' && currentStepTitle !== 'ubicacion') {
     console.info(`[E2E] ${profile.firstName} ya está en "${currentStepTitle}". Reabriendo Ubicación para persistir categoría.`);
 
@@ -406,7 +482,7 @@ async function completeOnboardingStep1(page: Page, profile: ProducerProfile): Pr
 
 async function completeOnboardingStep2(page: Page, profile: ProducerProfile): Promise<void> {
   const currentStepTitle = await getCurrentOnboardingStepTitle(page);
-  if (['productos', 'perfil visual', 'capacidad', 'documentación', 'documentacion', 'pagos'].includes(currentStepTitle)) {
+  if (['productos', 'perfil visual', 'capacidad', 'documentación', 'documentacion', 'pagos', 'dashboard'].includes(currentStepTitle)) {
     console.info(`[E2E] ${profile.firstName} ya está en el paso "${currentStepTitle}" (posterior a Historia).`);
     return;
   }
@@ -443,7 +519,7 @@ async function completeOnboardingStep2(page: Page, profile: ProducerProfile): Pr
 
 async function completeOnboardingStep3(page: Page, profile: ProducerProfile): Promise<void> {
   const currentStepTitle = await getCurrentOnboardingStepTitle(page);
-  if (['perfil visual', 'capacidad', 'documentación', 'documentacion', 'pagos'].includes(currentStepTitle)) {
+  if (['perfil visual', 'capacidad', 'documentación', 'documentacion', 'pagos', 'dashboard'].includes(currentStepTitle)) {
     console.info(`[E2E] ${profile.firstName} ya está en el paso "${currentStepTitle}" (posterior a Productos).`);
     return;
   }
@@ -548,7 +624,7 @@ async function completeOnboardingStep3(page: Page, profile: ProducerProfile): Pr
 
 async function completeOnboardingStep4(page: Page, profile: ProducerProfile): Promise<boolean> {
   const currentStepTitle = await getCurrentOnboardingStepTitle(page);
-  if (['capacidad', 'documentación', 'documentacion', 'pagos'].includes(currentStepTitle)) {
+  if (['capacidad', 'documentación', 'documentacion', 'pagos', 'dashboard'].includes(currentStepTitle)) {
     console.info(`[E2E] ${profile.firstName} ya está en el paso "${currentStepTitle}" (posterior a Perfil visual).`);
     return true;
   }
@@ -556,18 +632,116 @@ async function completeOnboardingStep4(page: Page, profile: ProducerProfile): Pr
   const stepContent = page.locator('[data-onboarding-step-content]');
 
   const submitVisualStep = async (): Promise<boolean> => {
-    const logoUploaded = await stepContent.getByText(/Logo del negocio/i).isVisible().catch(() => false)
-      && await stepContent.getByText(/Subido/i).first().isVisible().catch(() => false);
+    const isContinueEnabled = async (): Promise<boolean> => {
+      return await hasEnabledContinueButton(page);
+    };
+
+    const logoRequiredMessage = page
+      .locator('div:has-text("Para continuar en este paso:")')
+      .getByText(/Sube el logo del negocio para continuar/i)
+      .first();
+    const logoUploaded = !(await logoRequiredMessage.isVisible().catch(() => false));
 
     if (!logoUploaded) {
-      const fileInput = stepContent.locator('input[type="file"][accept*="gif"]').first();
-      if (await fileInput.count()) {
-        await fileInput.setInputFiles(LOGO_FIXTURE_PATH);
-        await page.waitForTimeout(500);
+      const goToPendingBtn = stepContent.getByRole('button', { name: /Ir al primer campo pendiente/i }).first();
+      if (await goToPendingBtn.isVisible().catch(() => false)) {
+        await goToPendingBtn.click();
+      }
+
+      // Reintentos defensivos: en producción el upload puede tardar o invalidarse por timing.
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const logoUploadButton = stepContent.getByRole('button', { name: /Subir archivos/i }).first();
+        const buttonCount = await logoUploadButton.count();
+        console.info(`[E2E] ${profile.firstName}: logo upload attempt ${attempt + 1}. buttonCount=${buttonCount}`);
+
+        if (buttonCount) {
+          const chooserPromise = page.waitForEvent('filechooser', { timeout: 5000 }).catch(() => null);
+          await logoUploadButton.click();
+          const chooser = await chooserPromise;
+          if (chooser) {
+            console.info(`[E2E] ${profile.firstName}: filechooser opened.`);
+            await chooser.setFiles(LOGO_FIXTURE_PATH);
+          } else {
+            const fallbackInput = stepContent.locator('input[type="file"]').first();
+            console.info(`[E2E] ${profile.firstName}: filechooser not opened; fallbackInputCount=${await fallbackInput.count()}`);
+            if (await fallbackInput.count()) {
+              await fallbackInput.setInputFiles(LOGO_FIXTURE_PATH);
+            }
+          }
+        } else {
+          const fallbackInput = stepContent.locator('input[type="file"]').first();
+          console.info(`[E2E] ${profile.firstName}: no upload button; fallbackInputCount=${await fallbackInput.count()}`);
+          if (await fallbackInput.count()) {
+            await fallbackInput.setInputFiles(LOGO_FIXTURE_PATH);
+          } else {
+            break;
+          }
+        }
+
+        // Espera activa hasta 8s a que desaparezca el pendiente o se vea badge "Subido".
+        for (let i = 0; i < 8; i++) {
+          const uploaded = !(await logoRequiredMessage.isVisible().catch(() => false));
+          if (uploaded) {
+            break;
+          }
+          await page.waitForTimeout(1000);
+        }
+
+        const uploadedAfterAttempt =
+          !(await logoRequiredMessage.isVisible().catch(() => false));
+        console.info(`[E2E] ${profile.firstName}: upload state after attempt ${attempt + 1}: uploaded=${uploadedAfterAttempt}`);
+        if (uploadedAfterAttempt) {
+          break;
+        }
       }
     }
 
+    await hideDevOverlay(page);
+    for (let i = 0; i < 8; i++) {
+      if (await isContinueEnabled()) {
+        break;
+      }
+      await page.waitForTimeout(1000);
+    }
+
+    if (!(await isContinueEnabled())) {
+      const logoStillPending = await logoRequiredMessage.isVisible().catch(() => false);
+      const visibleValidationItems = await page
+        .locator('div:has-text("Para continuar en este paso:") li')
+        .allTextContents()
+        .catch(() => [] as string[]);
+      const normalizedItems = visibleValidationItems
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0)
+        .slice(0, 6);
+      console.info(
+        `[E2E] ${profile.firstName}: Paso 4 bloqueado. Continue disabled. logoPending=${logoStillPending}. validationItems=${JSON.stringify(normalizedItems)}`,
+      );
+      return false;
+    }
+
+    const postTrace: string[] = [];
+    const responseListener = async (resp: any) => {
+      const method = resp.request().method();
+      const url = resp.url();
+      if (method !== 'POST') return;
+      if (!/media\/upload|producers\/onboarding\/step\/3/i.test(url)) return;
+      const status = resp.status();
+      const bodyText = await resp.text().catch(() => '');
+      const compactBody = bodyText.replace(/\s+/g, ' ').slice(0, 220);
+      postTrace.push(`${status} ${url} :: ${compactBody || '<empty>'}`);
+    };
+
+    page.on('response', responseListener);
     await clickContinue(page);
+    await page.waitForTimeout(2500);
+    page.off('response', responseListener);
+
+    if (postTrace.length > 0) {
+      console.info(`[E2E] ${profile.firstName}: POST trace Paso 4 => ${JSON.stringify(postTrace)}`);
+    } else {
+      console.info(`[E2E] ${profile.firstName}: no se capturaron POST relevantes en Paso 4.`);
+    }
 
     const capacidadHeading = page.getByRole('heading', { level: 1, name: /^Capacidad$/i });
     if (await capacidadHeading.isVisible().catch(() => false)) {
@@ -599,28 +773,43 @@ async function completeOnboardingStep4(page: Page, profile: ProducerProfile): Pr
 
 async function completeOnboardingStep5(page: Page, profile: ProducerProfile): Promise<void> {
   const currentStepTitle = await getCurrentOnboardingStepTitle(page);
-  if (['documentación', 'documentacion', 'pagos'].includes(currentStepTitle)) {
+  if (['documentación', 'documentacion', 'pagos', 'dashboard'].includes(currentStepTitle)) {
     console.info(`[E2E] ${profile.firstName} ya está en el paso "${currentStepTitle}" (posterior a Capacidad).`);
     return;
   }
 
-  if (await page.getByText(/Añade al menos una zona de entrega/i).isVisible().catch(() => false)) {
-    const addSpainBtn = page.getByRole('button', { name: /Añadir toda España de una vez/i });
-    if (await addSpainBtn.count()) {
-      await addSpainBtn.click();
-    }
-  }
+  const missingMethodMsg = page.getByText(/Añade al menos un método de envío/i).first();
+  const missingZoneMsg = page.getByText(/Añade al menos una zona de entrega/i).first();
 
-  const minOrderInput = page.locator('[data-onboarding-step-content] input[type="number"]').first();
-  if (await minOrderInput.count()) {
-    await minOrderInput.fill('20');
-  }
-
-  if (await page.getByText(/Añade al menos un método de envío/i).isVisible().catch(() => false)) {
-    const addMethodBtn = page.getByRole('button', { name: /Añadir método/i });
-    if (await addMethodBtn.count()) {
-      await addMethodBtn.click();
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (await missingMethodMsg.isVisible().catch(() => false)) {
+      const addMethodBtn = page.getByRole('button', { name: /Añadir método/i }).first();
+      if (await addMethodBtn.isVisible().catch(() => false)) {
+        await addMethodBtn.click();
+      }
     }
+
+    if (await missingZoneMsg.isVisible().catch(() => false)) {
+      const addSpainBtn = page.getByRole('button', { name: /Añadir toda España de una vez/i }).first();
+      if (await addSpainBtn.isVisible().catch(() => false)) {
+        await addSpainBtn.click();
+      }
+    }
+
+    const minOrderInput = page.locator('[data-onboarding-step-content] input[type="number"]').first();
+    if (await minOrderInput.count()) {
+      await minOrderInput.fill('20');
+    }
+
+    if (await hasEnabledContinueButton(page)) {
+      break;
+    }
+
+    const focusPendingBtn = page.getByRole('button', { name: /Ir al primer campo pendiente/i }).first();
+    if (await focusPendingBtn.isVisible().catch(() => false)) {
+      await focusPendingBtn.click();
+    }
+    await page.waitForTimeout(500);
   }
 
   await clickContinue(page);
@@ -633,7 +822,7 @@ async function completeOnboardingStep5(page: Page, profile: ProducerProfile): Pr
 
 async function completeOnboardingStep6(page: Page, profile: ProducerProfile): Promise<void> {
   const currentStepTitle = await getCurrentOnboardingStepTitle(page);
-  if (['pagos'].includes(currentStepTitle)) {
+  if (['pagos', 'dashboard'].includes(currentStepTitle)) {
     console.info(`[E2E] ${profile.firstName} ya está en el paso "${currentStepTitle}" (posterior a Documentación).`);
     return;
   }

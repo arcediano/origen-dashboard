@@ -309,19 +309,21 @@ export default function OnboardingPage() {
             isInOriginRoute: d.logistics.isInOriginRoute,
             logisticsLevel: d.logistics.logisticsLevel ?? prev.step4.logisticsLevel,
             useCentralizedTransport: d.logistics.useCentralizedTransport ?? prev.step4.useCentralizedTransport,
-            minOrderAmount: Number(d.logistics.minOrderAmount),
+            minOrderAmount: Number.isFinite(Number(d.logistics.minOrderAmount))
+              ? Number(d.logistics.minOrderAmount)
+              : prev.step4.minOrderAmount,
             sustainablePackaging: d.logistics.sustainablePackaging,
             packagingDescription: d.logistics.packagingDescription ?? '',
-            deliveryOptions: d.logistics.deliveryOptions.map((o: any) => ({
+            deliveryOptions: (Array.isArray(d.logistics.deliveryOptions) ? d.logistics.deliveryOptions : []).map((o: any) => ({
               id: o.id, name: o.name, description: o.description ?? '',
               price: Number(o.price), estimatedDays: o.estimatedDays,
             })),
-            includedZones: d.logistics.shippingZones.filter((z: any) => !z.isExcluded)
+            includedZones: (Array.isArray(d.logistics.shippingZones) ? d.logistics.shippingZones : []).filter((z: any) => !z.isExcluded)
               .map((z: any) => ({ id: z.id, type: z.type.toLowerCase(), value: z.value, label: z.label })),
-            excludedZones: d.logistics.shippingZones.filter((z: any) => z.isExcluded)
+            excludedZones: (Array.isArray(d.logistics.shippingZones) ? d.logistics.shippingZones : []).filter((z: any) => z.isExcluded)
               .map((z: any) => ({ id: z.id, type: z.type.toLowerCase(), value: z.value, label: z.label })),
           } : prev.step4,
-          step_products: d.products?.length ? {
+          step_products: Array.isArray(d.products) && d.products.length ? {
             products: d.products.map((p: any) => ({
               id: p.id,
               name: p.name ?? '',
