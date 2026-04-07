@@ -49,6 +49,7 @@ export async function uploadFile(file: File, category: string): Promise<UploadRe
   const form = new FormData();
   form.append('file', file);
   form.append('category', category);
+  form.append('entityType', resolveEntityType(category));
 
   let response: Response | null = null;
   let networkError = false;
