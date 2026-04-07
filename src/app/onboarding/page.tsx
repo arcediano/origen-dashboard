@@ -317,6 +317,7 @@ export default function OnboardingPage() {
             deliveryOptions: (Array.isArray(d.logistics.deliveryOptions) ? d.logistics.deliveryOptions : []).map((o: any) => ({
               id: o.id, name: o.name, description: o.description ?? '',
               price: Number(o.price), estimatedDays: o.estimatedDays,
+              icon: Package,
             })),
             includedZones: (Array.isArray(d.logistics.shippingZones) ? d.logistics.shippingZones : []).filter((z: any) => !z.isExcluded)
               .map((z: any) => ({ id: z.id, type: z.type.toLowerCase(), value: z.value, label: z.label })),
