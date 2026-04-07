@@ -38,7 +38,7 @@ import { EnhancedStep3Visual, type EnhancedVisualData } from '@/components/featu
 import { EnhancedStep4Capacity, type EnhancedCapacityData } from '@/components/features/onboarding/components/steps/step-capacity';
 import { EnhancedStep5Documents, type EnhancedStep5DocumentsData } from '@/components/features/onboarding/components/steps/step-documents';
 import { EnhancedStep6Stripe, type EnhancedStep6StripeData } from '@/components/features/onboarding/components/steps/step-stripe';
-import { EnhancedStepProducts, type EnhancedProductsData } from '@/components/features/onboarding/components/steps/step-products';
+import { EnhancedStepProducts, type EnhancedProductsData, getProductErrors } from '@/components/features/onboarding/components/steps/step-products';
 
 import {
   MapPin,
@@ -396,22 +396,16 @@ export default function OnboardingPage() {
           break;
         }
 
-        const invalidProduct = products.find((product) => {
-          const hasAllergenDeclaration = product.noAllergens || product.allergens.length > 0 || product.mayContain.length > 0;
-          const hasSeasonMonths = product.availabilityType !== 'seasonal' || (product.activeMonths?.length ?? 0) > 0;
-          return (
-            product.name.trim().length < 3 ||
-            product.description.trim().length < 20 ||
-            !product.referencePrice || product.referencePrice <= 0 ||
-            !hasAllergenDeclaration ||
-            !hasSeasonMonths ||
-            !product.categoryId
-          );
+        products.forEach((product, index) => {
+          const errors = getProductErrors(product);
+          if (errors.length > 0) {
+            const productLabel =
+              product.name.trim().length >= 3
+                ? `"${product.name.trim()}"`
+                : `Producto ${index + 1}`;
+            messages.push(`${productLabel}: falta ${errors.join(', ')}.`);
+          }
         });
-
-        if (invalidProduct) {
-          messages.push('Revisa tus productos: nombre, descripción, precio, categoría y alérgenos son obligatorios.');
-        }
         break;
       }
       case 3: {
@@ -678,7 +672,6 @@ export default function OnboardingPage() {
           <EnhancedStepProducts
             data={formData.step_products}
             onChange={handleStepProductsChange}
-            producerCategories={formData.step1.categories}
           />
         );
       case 3:

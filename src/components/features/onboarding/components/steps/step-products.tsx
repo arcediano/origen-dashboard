@@ -31,7 +31,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-import { PRODUCER_CATEGORIES } from '@/constants/categories';
+import { fetchCategoriesTree, type CategoryTree } from '@/lib/api/categories';
 
 // ============================================================================
 // TIPOS
@@ -69,8 +69,6 @@ export interface EnhancedProductsData {
 export interface EnhancedStepProductsProps {
   data: EnhancedProductsData;
   onChange: (data: EnhancedProductsData) => void;
-  /** Categorías seleccionadas en paso 1 para filtrar las opciones del producto */
-  producerCategories?: string[];
 }
 
 // ============================================================================
@@ -130,6 +128,34 @@ function createEmptyProduct(): OnboardingProduct {
 }
 
 // ============================================================================
+// VALIDACIÓN UNIFICADA (usada por card-level Y por stepValidationMessages)
+// ============================================================================
+
+/**
+ * Devuelve la lista de campos inválidos para un producto.
+ * Esta es la fuente de verdad única — se usa en ProductCard y en page.tsx.
+ */
+export function getProductErrors(product: OnboardingProduct): string[] {
+  const errors: string[] = [];
+  if (product.name.trim().length < 3) errors.push('nombre (mínimo 3 caracteres)');
+  if (product.description.trim().length < 20) errors.push('descripción (mínimo 20 caracteres)');
+  if (!product.referencePrice || product.referencePrice <= 0) errors.push('precio de referencia');
+  const hasAllergenDeclaration =
+    product.noAllergens || product.allergens.length > 0 || product.mayContain.length > 0;
+  if (!hasAllergenDeclaration) errors.push('declaración de alérgenos');
+  const hasSeasonMonths =
+    product.availabilityType !== 'seasonal' || (product.activeMonths?.length ?? 0) > 0;
+  if (!hasSeasonMonths) errors.push('meses de disponibilidad estacional');
+  if (!product.categoryId) errors.push('categoría');
+  return errors;
+}
+
+/** Retorna `true` si el producto cumple todos los criterios para poder continuar. */
+export function isProductValid(product: OnboardingProduct): boolean {
+  return getProductErrors(product).length === 0;
+}
+
+// ============================================================================
 // SUBCOMPONENTE: CARD DE PRODUCTO
 // ============================================================================
 
@@ -140,17 +166,12 @@ interface ProductCardProps {
   onToggle: () => void;
   onChange: (updated: OnboardingProduct) => void;
   onRemove: () => void;
-  producerCategories?: string[];
+  productCategories: CategoryTree[];
 }
 
-function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove, producerCategories }: ProductCardProps) {
-  const isComplete = !!(
-    product.name.trim() &&
-    product.description.trim().length >= 20 &&
-    product.referencePrice !== undefined &&
-    (product.noAllergens || product.allergens.length > 0) &&
-    product.categoryId
-  );
+function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove, productCategories }: ProductCardProps) {
+  const productErrors = getProductErrors(product);
+  const isComplete = productErrors.length === 0;
 
   const toggleAllergen = (id: AllergenId, field: 'allergens' | 'mayContain') => {
     const current = product[field];
@@ -283,42 +304,55 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
             </div>
           </div>
 
-          {/* Categoría */}
-          {producerCategories && producerCategories.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-origen-bosque">
-                Categoría <span className="text-red-500">*</span>
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {producerCategories.map((catId) => {
-                  const catInfo = PRODUCER_CATEGORIES.find((c) => c.id === catId);
-                  if (!catInfo) return null;
+          {/* Categoría de producto */}
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-origen-bosque">
+              Categoría <span className="text-red-500">*</span>
+            </p>
+            {productCategories.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Cargando categorías…</p>
+            ) : (
+              <div className="space-y-3">
+                {productCategories.map((parent) => {
+                  const options = parent.children && parent.children.length > 0
+                    ? parent.children
+                    : [{ id: parent.id, name: parent.name, slug: parent.slug }];
                   return (
-                    <button
-                      key={catId}
-                      type="button"
-                      onClick={() => onChange({ ...product, categoryId: catId })}
-                      className={cn(
-                        'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
-                        product.categoryId === catId
-                          ? 'bg-origen-bosque text-white border-origen-bosque'
-                          : 'bg-surface text-muted-foreground border-border hover:border-origen-bosque/50',
+                    <div key={parent.id}>
+                      {parent.children && parent.children.length > 0 && (
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                          {parent.name}
+                        </p>
                       )}
-                    >
-                      <span>{catInfo.icon}</span>
-                      {catInfo.name}
-                    </button>
+                      <div className="flex flex-wrap gap-2">
+                        {options.map((opt) => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => onChange({ ...product, categoryId: opt.id })}
+                            className={cn(
+                              'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                              product.categoryId === opt.id
+                                ? 'bg-origen-bosque text-white border-origen-bosque'
+                                : 'bg-surface text-muted-foreground border-border hover:border-origen-bosque/50',
+                            )}
+                          >
+                            {opt.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
-              {!product.categoryId && (
-                <p className="text-xs text-amber-700 flex items-center gap-1">
-                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                  Asigna una categoría al producto para continuar
-                </p>
-              )}
-            </div>
-          )}
+            )}
+            {!product.categoryId && productCategories.length > 0 && (
+              <p className="text-xs text-amber-700 flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                Asigna una categoría al producto para continuar
+              </p>
+            )}
+          </div>
 
           {/* Precio + Unidad */}
           <div className="grid grid-cols-2 gap-3">
@@ -529,10 +563,15 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
-export function EnhancedStepProducts({ data, onChange, producerCategories }: EnhancedStepProductsProps) {
+export function EnhancedStepProducts({ data, onChange }: EnhancedStepProductsProps) {
   const [expandedId, setExpandedId] = React.useState<string | null>(
     data.products.length === 0 ? null : data.products[0].id,
   );
+  const [productCategories, setProductCategories] = React.useState<CategoryTree[]>([]);
+
+  React.useEffect(() => {
+    fetchCategoriesTree().then(setProductCategories).catch(() => {});
+  }, []);
 
   const canAddMore = data.products.length < MAX_PRODUCTS;
   const hasMinimum = data.products.length >= 1;
@@ -600,7 +639,7 @@ export function EnhancedStepProducts({ data, onChange, producerCategories }: Enh
             onToggle={() => setExpandedId(expandedId === product.id ? null : product.id)}
             onChange={(updated) => handleUpdate(product.id, updated)}
             onRemove={() => handleRemove(product.id)}
-            producerCategories={producerCategories}
+            productCategories={productCategories}
           />
         ))}
       </div>
