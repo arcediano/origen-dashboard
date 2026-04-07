@@ -173,6 +173,7 @@ export async function saveStepProducts(
       id: p.id,
       name: p.name,
       description: p.description,
+      categoryId: p.categoryId || undefined,
       referencePrice: p.referencePrice,
       unit: p.unit,
       allergens: p.allergens,

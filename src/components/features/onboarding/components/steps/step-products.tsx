@@ -31,6 +31,8 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
+import { PRODUCER_CATEGORIES } from '@/constants/categories';
+
 // ============================================================================
 // TIPOS
 // ============================================================================
@@ -146,7 +148,8 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
     product.name.trim() &&
     product.description.trim().length >= 20 &&
     product.referencePrice !== undefined &&
-    (product.noAllergens || product.allergens.length > 0)
+    (product.noAllergens || product.allergens.length > 0) &&
+    product.categoryId
   );
 
   const toggleAllergen = (id: AllergenId, field: 'allergens' | 'mayContain') => {
@@ -279,6 +282,43 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
               <span>{product.description.length} / 200</span>
             </div>
           </div>
+
+          {/* Categoría */}
+          {producerCategories && producerCategories.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-origen-bosque">
+                Categoría <span className="text-red-500">*</span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {producerCategories.map((catId) => {
+                  const catInfo = PRODUCER_CATEGORIES.find((c) => c.id === catId);
+                  if (!catInfo) return null;
+                  return (
+                    <button
+                      key={catId}
+                      type="button"
+                      onClick={() => onChange({ ...product, categoryId: catId })}
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                        product.categoryId === catId
+                          ? 'bg-origen-bosque text-white border-origen-bosque'
+                          : 'bg-surface text-muted-foreground border-border hover:border-origen-bosque/50',
+                      )}
+                    >
+                      <span>{catInfo.icon}</span>
+                      {catInfo.name}
+                    </button>
+                  );
+                })}
+              </div>
+              {!product.categoryId && (
+                <p className="text-xs text-amber-700 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  Asigna una categoría al producto para continuar
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Precio + Unidad */}
           <div className="grid grid-cols-2 gap-3">

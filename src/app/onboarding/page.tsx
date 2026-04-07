@@ -404,12 +404,13 @@ export default function OnboardingPage() {
             product.description.trim().length < 20 ||
             !product.referencePrice || product.referencePrice <= 0 ||
             !hasAllergenDeclaration ||
-            !hasSeasonMonths
+            !hasSeasonMonths ||
+            !product.categoryId
           );
         });
 
         if (invalidProduct) {
-          messages.push('Revisa tus productos: nombre y descripción suficientes, precio válido, alérgenos declarados y meses activos si es de temporada.');
+          messages.push('Revisa tus productos: nombre, descripción, precio, categoría y alérgenos son obligatorios.');
         }
         break;
       }
