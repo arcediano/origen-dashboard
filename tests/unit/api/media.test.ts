@@ -39,8 +39,8 @@ describe('uploadFile', () => {
     await uploadFile(file, 'visual/logo');
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://dashboard.origen.es/api/v1/media/upload',
-      expect.objectContaining({ method: 'POST', credentials: 'include' }),
+      'https://dashboard.origen.es/api/upload',
+      expect.objectContaining({ method: 'POST' }),
     );
 
     const requestInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
@@ -49,7 +49,7 @@ describe('uploadFile', () => {
     expect(formData.get('entityType')).toBe('producers');
   });
 
-  it('reintenta con la ruta legacy cuando la versionada no existe', async () => {
+  it('devuelve un error de usuario cuando falla el route handler de upload', async () => {
     Object.defineProperty(globalThis, 'window', {
       value: { location: { origin: 'https://dashboard.origen.es' } },
       configurable: true,
@@ -57,25 +57,21 @@ describe('uploadFile', () => {
 
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: false, status: 404, json: async () => ({}) })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ data: { key: 'products/123/test.png', url: 'https://cdn.origen.es/test.png' } }) });
+      .mockResolvedValueOnce({ ok: false, status: 404, json: async () => ({}) });
 
     vi.stubGlobal('fetch', fetchMock);
 
     const { uploadFile } = await import('@/lib/api/media');
     const file = new File(['image'], 'product.png', { type: 'image/png' });
 
-    await uploadFile(file, 'products/123');
-
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      1,
-      'https://dashboard.origen.es/api/v1/media/upload',
-      expect.objectContaining({ method: 'POST', credentials: 'include' }),
+    await expect(uploadFile(file, 'products/123')).rejects.toThrow(
+      'Error al subir el archivo',
     );
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      2,
-      'https://dashboard.origen.es/api/media/upload',
-      expect.objectContaining({ method: 'POST', credentials: 'include' }),
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://dashboard.origen.es/api/upload',
+      expect.objectContaining({ method: 'POST' }),
     );
   });
 });

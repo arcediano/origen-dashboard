@@ -96,11 +96,13 @@ export async function saveStep3(keys: {
   bannerKey?: string;
   introVideoUrl?: string;
 }): Promise<StepSaveResponse> {
+  const introVideoUrl = keys.introVideoUrl?.trim() || undefined;
+
   return gatewayClient.post('/producers/onboarding/step/3', {
     logoKey: keys.logoKey,
     bannerKey: keys.bannerKey,
     productImageKeys: [],
-    introVideoUrl: keys.introVideoUrl,
+    introVideoUrl,
   });
 }
 
