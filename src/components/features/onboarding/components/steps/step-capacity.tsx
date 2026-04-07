@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input, InputAffixField, Button } from '@arcediano/ux-library';
+import { Input, InputAffixField, Button, Checkbox } from '@arcediano/ux-library';
 
 import {
   Truck,
@@ -606,15 +606,18 @@ export function EnhancedStep4Capacity({
                 Tu zona no tiene logística centralizada, pero puedes usar nuestro transportista concertado. Tú preparas el pedido, nosotros lo enviamos.
               </p>
               {/* Toggle para usar transporte concertado */}
-              <label className="flex items-center gap-2 mt-3 cursor-pointer">
-                <input
-                  type="checkbox"
+              <div className="flex items-center gap-2 mt-3">
+                <Checkbox
+                  id="use-centralized-transport"
+                  size="sm"
+                  variant="forest"
                   checked={data.useCentralizedTransport ?? true}
-                  onChange={(e) => onChange({ ...data, useCentralizedTransport: e.target.checked })}
-                  className="w-4 h-4 rounded border-border accent-blue-600"
+                  onCheckedChange={(checked) => onChange({ ...data, useCentralizedTransport: checked === true })}
                 />
-                <span className="text-xs font-medium text-blue-800">Usar el transportista concertado de Origen</span>
-              </label>
+                <label htmlFor="use-centralized-transport" className="text-xs font-medium text-blue-800 cursor-pointer">
+                  Usar el transportista concertado de Origen
+                </label>
+              </div>
             </div>
           </div>
           <span className="self-start sm:self-center text-xs font-medium bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200 whitespace-nowrap">

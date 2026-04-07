@@ -13,7 +13,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
-import { Input, InputAffixField, Button, Textarea } from '@arcediano/ux-library';
+import { Input, InputAffixField, Button, Textarea, Checkbox } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 
 import {
@@ -327,15 +327,20 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
             </p>
 
             {/* No contiene alérgenos */}
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id={`no-allergens-${product.id ?? 'new'}`}
+                size="sm"
+                variant="seed"
                 checked={product.noAllergens}
-                onChange={(e) => onChange({ ...product, noAllergens: e.target.checked, allergens: [], mayContain: [] })}
-                className="w-4 h-4 rounded border-border accent-origen-pradera"
+                onCheckedChange={(checked) =>
+                  onChange({ ...product, noAllergens: checked === true, allergens: [], mayContain: [] })
+                }
               />
-              <span className="text-sm text-origen-bosque">Sin alérgenos</span>
-            </label>
+              <label htmlFor={`no-allergens-${product.id ?? 'new'}`} className="text-sm text-origen-bosque cursor-pointer">
+                Sin alérgenos
+              </label>
+            </div>
 
             {!product.noAllergens && (
               <>
