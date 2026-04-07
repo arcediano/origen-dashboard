@@ -198,6 +198,8 @@ export default function OnboardingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [saveError, setSaveError] = useState<string | null>(null);
+  // UX-3: counter para disparar auto-expansión del primer producto incompleto en step 2
+  const [focusProductsCounter, setFocusProductsCounter] = useState(0);
 
   // Estado con tipos específicos por paso
   const [formData, setFormData] = useState<OnboardingFormData>({
@@ -442,6 +444,12 @@ export default function OnboardingPage() {
   const focusFirstIncompleteField = useCallback(() => {
     if (typeof window === 'undefined') return;
 
+    // UX-3: en el paso de productos, delegar al componente vía counter
+    if (currentStep === 2) {
+      setFocusProductsCounter((c) => c + 1);
+      return;
+    }
+
     const formRoot = document.querySelector('[data-onboarding-step-content]');
     if (!formRoot) return;
 
@@ -476,7 +484,7 @@ export default function OnboardingPage() {
       firstFocusable.focus();
       firstFocusable.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }, []);
+  }, [currentStep]);
 
   // ========================================================================
   // GUARDAR PASO ACTUAL EN EL BACKEND
@@ -672,6 +680,7 @@ export default function OnboardingPage() {
           <EnhancedStepProducts
             data={formData.step_products}
             onChange={handleStepProductsChange}
+            autoExpandFirstIncomplete={focusProductsCounter}
           />
         );
       case 3:

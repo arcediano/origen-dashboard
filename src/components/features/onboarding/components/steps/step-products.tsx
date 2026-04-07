@@ -69,6 +69,8 @@ export interface EnhancedProductsData {
 export interface EnhancedStepProductsProps {
   data: EnhancedProductsData;
   onChange: (data: EnhancedProductsData) => void;
+  /** Incrementar este valor para disparar auto-expansión del primer producto incompleto (UX-3/UX-4) */
+  autoExpandFirstIncomplete?: number;
 }
 
 // ============================================================================
@@ -198,10 +200,13 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
   };
 
   return (
-    <div className={cn(
-      'rounded-2xl border transition-all duration-200',
-      isComplete ? 'border-green-200 bg-green-50/30' : 'border-border bg-surface-alt',
-    )}>
+    <div
+      data-product-id={product.id}
+      className={cn(
+        'rounded-2xl border transition-all duration-200',
+        isComplete ? 'border-green-200 bg-green-50/30' : 'border-border bg-surface-alt',
+      )}
+    >
       {/* ── Header compacto (siempre visible) ── */}
       <button
         type="button"
@@ -564,15 +569,32 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
-export function EnhancedStepProducts({ data, onChange }: EnhancedStepProductsProps) {
+export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete }: EnhancedStepProductsProps) {
+  // UX-4: al montar, expandir el primer producto incompleto si lo hay; si todos son válidos, el primero
+  const firstIncompleteOnMount = data.products.find((p) => getProductErrors(p).length > 0);
   const [expandedId, setExpandedId] = React.useState<string | null>(
-    data.products.length === 0 ? null : data.products[0].id,
+    data.products.length === 0
+      ? null
+      : (firstIncompleteOnMount?.id ?? data.products[0].id),
   );
   const [productCategories, setProductCategories] = React.useState<CategoryTree[]>([]);
 
   React.useEffect(() => {
     fetchCategoriesTree().then(setProductCategories).catch(() => {});
   }, []);
+
+  // UX-3: cuando se incrementa el counter desde page.tsx, expandir y hacer scroll al primer incompleto
+  React.useEffect(() => {
+    if (!autoExpandFirstIncomplete) return;
+    const target = data.products.find((p) => getProductErrors(p).length > 0);
+    if (!target) return;
+    setExpandedId(target.id);
+    setTimeout(() => {
+      const el = document.querySelector<HTMLElement>(`[data-product-id="${target.id}"]`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoExpandFirstIncomplete]);
 
   const canAddMore = data.products.length < MAX_PRODUCTS;
   const hasMinimum = data.products.length >= 1;
