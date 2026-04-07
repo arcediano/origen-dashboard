@@ -11,7 +11,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
 
-import { Input, InputAffixField, CheckboxWithLabel } from '@arcediano/ux-library';
+import { Input, InputAffixField } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile, CategoryCard } from '@/components/shared';
 import { validateSpanishTaxId, type TaxIdType } from '@/lib/utils/tax-id';
 
@@ -646,22 +646,29 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
 
         {/* Checkbox "igual a la de producción" */}
         <div className="p-3 bg-origen-crema/30 rounded-xl border border-border-subtle hover:bg-origen-crema/50 transition-colors mb-5">
-          <CheckboxWithLabel
-            id="billing-address-same-as-production"
-            checked={billingAddressSameAsProduction}
-            onCheckedChange={(checked) => {
-              if (checked === 'indeterminate') return;
-              const same = checked;
-              onChange({
-                ...data,
-                billingAddressSameAsProduction: same,
-                billingAddress: same ? undefined : data.billingAddress,
-              });
-            }}
-            label="La dirección de facturación es la misma que la de producción"
-            variant="seed"
-            size="md"
-          />
+          <label
+            htmlFor="billing-address-same-as-production"
+            className="flex cursor-pointer items-start gap-3"
+          >
+            <input
+              id="billing-address-same-as-production"
+              type="checkbox"
+              checked={billingAddressSameAsProduction}
+              onChange={(event) => {
+                const same = event.target.checked;
+                onChange({
+                  ...data,
+                  billingAddressSameAsProduction: same,
+                  billingAddress: same ? undefined : data.billingAddress,
+                });
+              }}
+              className="mt-0.5 h-5 w-5 shrink-0 rounded-md border-2 border-origen-pradera/50 text-origen-pradera focus:ring-2 focus:ring-origen-pradera/50"
+            />
+
+            <span className="text-sm font-medium text-origen-bosque">
+              La dirección de facturación es la misma que la de producción
+            </span>
+          </label>
         </div>
 
         {/* Campos de facturación — solo si son distintas */}
