@@ -43,7 +43,7 @@ export default function SecurityPage() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
 
       {/* Cabecera canónica */}
       <PageHeader
@@ -55,10 +55,22 @@ export default function SecurityPage() {
         tooltipDetailed="Gestiona tu contraseña, verificación en dos pasos y preferencias generales de tu cuenta."
       />
 
-      <div className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 max-w-5xl">
+
+      <div className="mb-5 rounded-[28px] border border-origen-pradera/25 bg-gradient-to-br from-origen-crema via-surface-alt to-surface p-4 shadow-sm sm:p-5">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex-shrink-0">
+            <Shield className="h-5 w-5 text-origen-pradera" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-origen-bosque leading-tight">Protege tu cuenta</p>
+            <p className="mt-1 text-xs text-text-subtle sm:text-sm">Actualiza tu contraseña y activa capas extra de seguridad para reducir riesgos de acceso.</p>
+          </div>
+        </div>
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-2 rounded-xl border border-border-subtle bg-surface p-1">
           <TabsTrigger value="security" className="flex items-center gap-1.5 px-2 sm:px-4">
             <Shield className="w-4 h-4 flex-shrink-0" />
             <span className="text-xs sm:text-sm">Seguridad</span>
@@ -76,7 +88,7 @@ export default function SecurityPage() {
 
         {/* TAB: SEGURIDAD — único contenido de /dashboard/security */}
         <TabsContent value="security">
-          <Card>
+          <Card className="rounded-2xl border border-border-subtle shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-origen-pradera" />
@@ -152,7 +164,7 @@ export default function SecurityPage() {
 
         {/* TAB: PREFERENCIAS */}
         <TabsContent value="preferences">
-          <Card>
+          <Card className="rounded-2xl border border-border-subtle shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="w-5 h-5 text-origen-pradera" />
@@ -164,7 +176,7 @@ export default function SecurityPage() {
                 <div className="space-y-2">
                   <Label>Idioma</Label>
                   <select 
-                    className="w-full h-10 px-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-origen-menta/50 focus:border-origen-pradera"
+                    className="w-full h-10 px-3 border border-border-subtle bg-surface rounded-lg focus:outline-none focus:ring-2 focus:ring-origen-menta/50 focus:border-origen-pradera"
                     value={preferences.language}
                     onChange={(e) => setPreferences({...preferences, language: e.target.value})}
                   >
