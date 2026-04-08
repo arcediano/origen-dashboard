@@ -166,7 +166,7 @@ export default function NotificationsPage() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8"
+        className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema"
       >
         <PageHeader
           title="Notificaciones"
@@ -179,35 +179,43 @@ export default function NotificationsPage() {
             activeView === 'preferences' ? (
               <div className="hidden lg:block">
                 <Button onClick={handleSave}>
-                  <Save className="w-4 h-4 mr-2" />
-                  Guardar preferencias
+                  <span className="inline-flex items-center gap-2">
+                    <Save className="w-4 h-4" />
+                    <span>Guardar preferencias</span>
+                  </span>
                 </Button>
               </div>
             ) : (
               <div className="hidden lg:flex items-center gap-2">
                 <Button variant="outline" onClick={() => void loadInbox()}>
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Actualizar
+                  <span className="inline-flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4" />
+                    <span>Actualizar</span>
+                  </span>
                 </Button>
                 <Button onClick={handleMarkAll} disabled={!unreadCount || isInboxUpdating}>
-                  <CheckCheck className="w-4 h-4 mr-2" />
-                  Marcar todas
+                  <span className="inline-flex items-center gap-2">
+                    <CheckCheck className="w-4 h-4" />
+                    <span>Marcar todas</span>
+                  </span>
                 </Button>
               </div>
             )
           }
         />
 
+        <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8">
+
         {/* Vista principal */}
         <SegmentedControl
           items={SEGMENTS}
           active={activeView}
           onChange={(v) => handleViewChange(v as 'inbox' | 'preferences')}
-          className="max-w-md"
+          className="max-w-lg"
         />
 
         {activeView === 'inbox' && (
-          <Card variant="elevated">
+          <Card variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
             <CardContent className="p-0">
               <div className="border-b border-border-subtle px-4 py-3 text-sm text-muted-foreground sm:px-6">
                 Tienes <span className="font-semibold text-origen-bosque">{unreadCount}</span> notificación(es) sin leer.
@@ -237,10 +245,10 @@ export default function NotificationsPage() {
               items={PREFERENCE_SEGMENTS}
               active={activeTab}
               onChange={(v) => setActiveTab(v as 'email' | 'push')}
-              className="max-w-md"
+              className="max-w-lg"
             />
 
-            <Card variant="elevated">
+            <Card variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
               <CardContent className="p-0">
                 {activeTab === 'email' && (
                   <div className="px-4 sm:px-6 divide-y divide-border-subtle">
@@ -322,6 +330,7 @@ export default function NotificationsPage() {
 
         {/* Espacio extra en móvil para el botón sticky */}
         <div className="h-4 lg:hidden" />
+        </div>
       </motion.div>
 
       {/* ── Botón guardar sticky en móvil ── */}

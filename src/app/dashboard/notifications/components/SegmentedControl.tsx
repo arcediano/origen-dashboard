@@ -47,8 +47,8 @@ export function SegmentedControl({
     <div
       role="tablist"
       className={cn(
-        'inline-flex items-center w-full rounded-xl p-1',
-        'bg-origen-bosque/10',
+        'inline-flex items-center w-full rounded-2xl p-1.5',
+        'border border-border-subtle bg-surface',
         'min-h-[44px]',
         className,
       )}
@@ -65,16 +65,16 @@ export function SegmentedControl({
             onClick={() => onChange(item.value)}
             className={cn(
               'relative flex-1 flex items-center justify-center gap-1.5',
-              'rounded-lg text-sm font-medium transition-colors',
-              'min-h-[36px] px-3',
-              isActive ? 'text-white' : 'text-origen-bosque/70 hover:text-origen-bosque',
+              'rounded-xl text-sm font-semibold transition-colors',
+              'min-h-[40px] px-3',
+              isActive ? 'text-white' : 'text-text-subtle hover:text-origen-bosque',
             )}
           >
             {/* Pill activo */}
             {isActive && (
               <motion.div
                 layoutId={layoutId}
-                className="absolute inset-0 bg-origen-bosque rounded-lg shadow-sm"
+                className="absolute inset-0 bg-gradient-to-r from-origen-bosque to-origen-pino rounded-xl shadow-sm"
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}

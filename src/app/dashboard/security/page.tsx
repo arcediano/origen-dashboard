@@ -70,14 +70,14 @@ export default function SecurityPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 rounded-xl border border-border-subtle bg-surface p-1">
-          <TabsTrigger value="security" className="flex items-center gap-1.5 px-2 sm:px-4">
+        <TabsList className="grid w-full grid-cols-2 rounded-2xl border border-border-subtle bg-surface p-1.5 min-h-[44px]">
+          <TabsTrigger value="security" className="flex items-center gap-1.5 px-3 sm:px-4 min-h-[40px] rounded-xl text-sm font-semibold">
             <Shield className="w-4 h-4 flex-shrink-0" />
-            <span className="text-xs sm:text-sm">Seguridad</span>
+            <span className="text-sm">Seguridad</span>
           </TabsTrigger>
-          <TabsTrigger value="preferences" className="flex items-center gap-1.5 px-2 sm:px-4">
+          <TabsTrigger value="preferences" className="flex items-center gap-1.5 px-3 sm:px-4 min-h-[40px] rounded-xl text-sm font-semibold">
             <Globe className="w-4 h-4 flex-shrink-0" />
-            <span className="text-xs sm:text-sm">Ajustes</span>
+            <span className="text-sm">Ajustes</span>
           </TabsTrigger>
         </TabsList>
 
@@ -224,8 +224,10 @@ export default function SecurityPage() {
               
               <div className="flex justify-end pt-4">
                 <Button>
-                  <Save className="w-4 h-4 mr-2" />
-                  Guardar preferencias
+                  <span className="inline-flex items-center gap-2">
+                    <Save className="w-4 h-4" />
+                    <span>Guardar preferencias</span>
+                  </span>
                 </Button>
               </div>
             </CardContent>

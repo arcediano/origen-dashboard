@@ -57,9 +57,9 @@ export function PageHeader({
         <div className="flex items-center justify-between gap-3 min-h-[44px]">
           {/* Izquierda: título */}
           <div className="min-w-0 flex-1">
-            <h1 className="text-[18px] leading-snug font-bold text-origen-bosque truncate">{title}</h1>
+            <h1 className="text-[22px] leading-tight font-bold text-origen-bosque line-clamp-2">{title}</h1>
             {description && (
-              <p className="text-xs text-muted-foreground mt-0.5 truncate">{description}</p>
+              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{description}</p>
             )}
           </div>
           {/* Derecha: acciones */}
