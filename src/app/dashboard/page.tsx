@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Leaf, X } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronUp, Leaf, X } from 'lucide-react';
 import { DashboardFooter } from '@/app/dashboard/components/footer/DashboardFooter';
 import {
   AlertList,
@@ -123,6 +123,7 @@ function BusinessSnapshotCard({
 
 export default function ProducerDashboard() {
   const [mounted, setMounted] = useState(false);
+  const [showAccountHealthMobile, setShowAccountHealthMobile] = useState(false);
   const { user } = useAuth();
 
   // Hooks para datos
@@ -197,7 +198,7 @@ export default function ProducerDashboard() {
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
       {/* Header integrado en el gradiente */}
       <div className="bg-transparent">
-        <div className="container mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:py-8">
+        <div className="container mx-auto px-4 py-3 sm:px-6 sm:py-4 lg:py-6">
           <WelcomeHeader userName={userName} showViewStoreButton={false} />
         </div>
       </div>
@@ -208,19 +209,6 @@ export default function ProducerDashboard() {
       {/* Contenido principal */}
       <DashboardShell>
         {alerts.length > 0 && <AlertList alerts={alerts} />}
-
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
-          <ProducerCard
-            producer={producer}
-            isLoading={profileLoading}
-            error={profileError}
-          />
-          <BusinessSnapshotCard
-            profileCompleteness={profileCompleteness}
-            pendingOrders={pendingOrders}
-            totalRevenue={totalRevenue}
-          />
-        </div>
 
         <StatsGrid
           stats={realStats}
@@ -236,6 +224,56 @@ export default function ProducerDashboard() {
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-start">
           <OrdersSummary orders={realOrders} isLoading={ordersLoading} className="lg:col-span-2" />
           <TopProducts products={realProducts} isLoading={productsLoading} />
+        </div>
+
+        <div className="sm:hidden">
+          <button
+            type="button"
+            onClick={() => setShowAccountHealthMobile((prev) => !prev)}
+            className="w-full rounded-2xl border border-border-subtle bg-surface px-4 py-3 text-left"
+            aria-expanded={showAccountHealthMobile}
+            aria-controls="account-health-mobile"
+          >
+            <span className="flex items-center justify-between gap-3">
+              <span>
+                <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Estado de cuenta</span>
+                <span className="mt-1 block text-sm font-semibold text-origen-bosque">Perfil {profileCompleteness}% completado</span>
+              </span>
+              {showAccountHealthMobile ? (
+                <ChevronUp className="h-4 w-4 text-text-subtle" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-text-subtle" />
+              )}
+            </span>
+          </button>
+
+          {showAccountHealthMobile && (
+            <div id="account-health-mobile" className="mt-3 grid grid-cols-1 gap-4">
+              <ProducerCard
+                producer={producer}
+                isLoading={profileLoading}
+                error={profileError}
+              />
+              <BusinessSnapshotCard
+                profileCompleteness={profileCompleteness}
+                pendingOrders={pendingOrders}
+                totalRevenue={totalRevenue}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="hidden grid-cols-1 gap-5 sm:grid xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
+          <ProducerCard
+            producer={producer}
+            isLoading={profileLoading}
+            error={profileError}
+          />
+          <BusinessSnapshotCard
+            profileCompleteness={profileCompleteness}
+            pendingOrders={pendingOrders}
+            totalRevenue={totalRevenue}
+          />
         </div>
 
         <DashboardTabs />

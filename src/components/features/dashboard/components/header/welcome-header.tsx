@@ -8,7 +8,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@arcediano/ux-library';
-import { Sparkles, Clock, Eye } from 'lucide-react';
+import { Clock, Eye } from 'lucide-react';
 import { itemVariants } from '../layout/dashboard-shell';
 
 interface WelcomeHeaderProps {
@@ -52,18 +52,12 @@ export function WelcomeHeader({
   return (
     <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
-        {/* Badge Panel de control — solo desktop */}
-        <div className="hidden sm:inline-flex items-center gap-2 bg-origen-pradera/10 text-origen-bosque rounded-full px-4 py-2 mb-3 border border-origen-pradera/30">
-          <Sparkles className="w-4 h-4 text-origen-pradera" />
-          <span className="text-sm font-medium">Panel de control</span>
-        </div>
-
-        <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-origen-bosque mb-1 sm:mb-2">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-origen-bosque mb-1">
           {greeting}, {userName}
         </h1>
         {/* Fecha — solo sm+ para no ocupar espacio en 375px */}
-        <p className="hidden sm:flex items-center gap-2 text-sm text-text-subtle">
-          <Clock className="w-4 h-4" />
+        <p className="hidden sm:flex items-center gap-2 text-xs text-text-subtle">
+          <Clock className="w-3.5 h-3.5" />
           {currentTime}
         </p>
       </div>
