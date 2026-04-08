@@ -29,8 +29,8 @@ describe('UserMenu', () => {
     fireEvent.click(trigger);
 
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByText('Preferencias de notificación')).toBeDefined();
-    expect(screen.getByText('Pagos')).toBeDefined();
+    expect(screen.getByText('Mi cuenta')).toBeDefined();
+    expect(screen.getByText('Centro de ayuda')).toBeDefined();
   });
 
   it('usa redirecciones canónicas en links clave', () => {
@@ -44,13 +44,11 @@ describe('UserMenu', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Abrir menú de usuario' }));
 
-    const preferenciasLink = screen
-      .getByText('Preferencias de notificación')
-      .closest('a');
-    const pagosLink = screen.getByText('Pagos').closest('a');
+    const accountLink = screen.getByText('Mi cuenta').closest('a');
+    const helpLink = screen.getByText('Centro de ayuda').closest('a');
 
-    expect(preferenciasLink?.getAttribute('href')).toBe('/dashboard/notifications?view=preferences');
-    expect(pagosLink?.getAttribute('href')).toBe('/dashboard/configuracion/pagos');
+    expect(accountLink?.getAttribute('href')).toBe('/dashboard/account');
+    expect(helpLink?.getAttribute('href')).toBe('/ayuda');
   });
 
   it('cierra el menú con Escape', () => {

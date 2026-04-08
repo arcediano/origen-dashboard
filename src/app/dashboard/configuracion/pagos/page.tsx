@@ -19,12 +19,12 @@ export default function PagosPage() {
 
       {/* Cabecera canónica */}
       <PageHeader
-        title="Pagos"
-        description="Gestiona tu conexión con Stripe y métodos de cobro"
+        title="Cobros"
+        description="Gestiona Stripe, el estado de tu cuenta y cómo cobras tus ventas"
         badgeIcon={CreditCard}
-        badgeText="Pagos"
-        tooltip="Pagos"
-        tooltipDetailed="Conecta y gestiona tu cuenta de Stripe para recibir pagos de tus clientes."
+        badgeText="Cobros"
+        tooltip="Cobros"
+        tooltipDetailed="Conecta y gestiona tu cuenta de Stripe para recibir pagos, revisar verificaciones y evitar bloqueos."
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 max-w-5xl">

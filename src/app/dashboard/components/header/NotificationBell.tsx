@@ -257,13 +257,6 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
               >
                 Ver todas las notificaciones
               </Link>
-                <Link
-                  href="/dashboard/notifications?view=preferences"
-                  className="block w-full text-center text-xs text-text-subtle hover:text-origen-bosque py-1 transition-colors"
-                  onClick={close}
-                >
-                  Configurar preferencias
-                </Link>
             </div>
           </motion.div>
         )}

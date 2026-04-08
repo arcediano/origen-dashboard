@@ -11,15 +11,16 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Bell, ChevronLeft, Leaf } from 'lucide-react';
+import { Bell, ChevronLeft, Leaf, Menu } from 'lucide-react';
 import { getDashboardPageTitle, isRootMobileTab } from '@/constants/sidebar';
 import { getUnreadCount } from '@/lib/api/notifications';
 
 interface MobileTopBarProps {
   notificationCount?: number;
+  onMenuOpen?: () => void;
 }
 
-export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
+export function MobileTopBar({ notificationCount = 0, onMenuOpen }: MobileTopBarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -126,19 +127,30 @@ export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
           )}
         </AnimatePresence>
 
-        {/* Zona derecha — acceso persistente a notificaciones */}
-        <motion.div whileTap={{ scale: 0.82 }} className="flex-shrink-0">
-          <Link
-            href="/dashboard/notifications?view=inbox"
-            className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-origen-pradera/10 transition-colors"
-            aria-label={liveNotificationCount > 0 ? `Notificaciones (${liveNotificationCount})` : 'Notificaciones'}
+        {/* Zona derecha — accesos persistentes */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <motion.div whileTap={{ scale: 0.82 }}>
+            <Link
+              href="/dashboard/notifications?view=inbox"
+              className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-origen-pradera/10 transition-colors"
+              aria-label={liveNotificationCount > 0 ? `Notificaciones (${liveNotificationCount})` : 'Notificaciones'}
+            >
+              <Bell className="w-[18px] h-[18px] text-foreground stroke-[1.8]" />
+              {liveNotificationCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 border-2 border-surface-alt" />
+              )}
+            </Link>
+          </motion.div>
+          <motion.button
+            whileTap={{ scale: 0.82 }}
+            onClick={onMenuOpen}
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-origen-pradera/10 transition-colors text-foreground border border-transparent"
+            type="button"
+            aria-label="Abrir menú"
           >
-            <Bell className="w-[18px] h-[18px] text-foreground stroke-[1.8]" />
-            {liveNotificationCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 border-2 border-surface-alt" />
-            )}
-          </Link>
-        </motion.div>
+            <Menu className="w-[18px] h-[18px]" />
+          </motion.button>
+        </div>
 
       </div>
     </header>

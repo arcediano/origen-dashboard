@@ -6,7 +6,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Package, ShoppingBag, Store, BarChart3 } from 'lucide-react';
+import { Package, ShoppingBag, Store, CreditCard } from 'lucide-react';
 import { QuickActionCard } from './quick-action-card';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { QuickAction } from '../../types';
@@ -36,19 +36,19 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     gradient: 'from-origen-pradera to-origen-hoja',
   },
   {
-    id: 'my-profile',
-    title: 'Mi perfil',
-    description: 'Actualiza la información de tu negocio',
+    id: 'business-profile',
+    title: 'Mi negocio',
+    description: 'Actualiza la información comercial',
     icon: Store,
-    href: '/dashboard/profile',
+    href: '/dashboard/profile/business',
     gradient: 'from-origen-hoja to-origen-pino',
   },
   {
-    id: 'statistics',
-    title: 'Notificaciones',
-    description: 'Revisa actividad y preferencias',
-    icon: BarChart3,
-    href: '/dashboard/notifications',
+    id: 'payments',
+    title: 'Cobros',
+    description: 'Revisa Stripe, pagos y bloqueos',
+    icon: CreditCard,
+    href: '/dashboard/configuracion/pagos',
     gradient: 'from-origen-pino to-origen-bosque',
   },
 ];

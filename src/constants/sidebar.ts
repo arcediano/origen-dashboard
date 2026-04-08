@@ -4,16 +4,12 @@
  */
 
 import {
-  Bell,
   CreditCard,
-  FileBadge,
   LayoutDashboard,
   Package,
   Settings,
-  Shield,
   ShoppingBag,
   Star,
-  Store,
   Truck,
   User,
 } from 'lucide-react';
@@ -68,16 +64,17 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/products': 'Productos',
   '/dashboard/products/create': 'Nuevo producto',
   '/dashboard/reviews': 'Reseñas',
-  '/dashboard/profile': 'Mi perfil',
+  '/dashboard/profile': 'Perfil comercial',
   '/dashboard/profile/personal': 'Información personal',
   '/dashboard/profile/business': 'Mi negocio',
   '/dashboard/profile/certifications': 'Certificaciones',
   '/dashboard/profile/settings': 'Ajustes de perfil',
+  '/dashboard/account': 'Cuenta',
   '/dashboard/notifications': 'Notificaciones',
   '/dashboard/security': 'Seguridad',
-  '/dashboard/configuracion': 'Ajustes',
+  '/dashboard/configuracion': 'Cuenta',
   '/dashboard/configuracion/envios': 'Envíos',
-  '/dashboard/configuracion/pagos': 'Pagos',
+  '/dashboard/configuracion/pagos': 'Cobros',
   '/dashboard/configuracion/perfil': 'Ajustes de perfil',
   '/dashboard/business': 'Mi negocio',
 };
@@ -88,16 +85,17 @@ const SEGMENT_LABELS: Record<string, string> = {
   products: 'Productos',
   create: 'Nuevo producto',
   reviews: 'Reseñas',
-  profile: 'Mi perfil',
+  profile: 'Perfil comercial',
   personal: 'Información personal',
   business: 'Mi negocio',
   certifications: 'Certificaciones',
+  account: 'Cuenta',
   settings: 'Ajustes de perfil',
   notifications: 'Notificaciones',
   security: 'Seguridad',
-  configuracion: 'Ajustes',
+  configuracion: 'Cuenta',
   envios: 'Envíos',
-  pagos: 'Pagos',
+  pagos: 'Cobros',
 };
 
 const GENERAL_ITEMS: MenuItem[] = [
@@ -136,63 +134,35 @@ const OPERATIONS_ITEMS: MenuItem[] = [
 
 const BUSINESS_ITEMS: MenuItem[] = [
   {
-    id: 'perfil',
-    label: 'Perfil',
+    id: 'perfil-comercial',
+    label: 'Perfil comercial',
     icon: User,
     href: '/dashboard/profile',
-    matchPaths: ['/dashboard/profile', '/dashboard/profile/personal*'],
+    matchPaths: ['/dashboard/profile', '/dashboard/profile/personal*', '/dashboard/profile/business*', '/dashboard/profile/certifications*', '/dashboard/business*'],
   },
-  {
-    id: 'negocio',
-    label: 'Negocio',
-    icon: Store,
-    href: '/dashboard/profile/business',
-    matchPaths: ['/dashboard/profile/business*', '/dashboard/business*'],
-  },
-  {
-    id: 'certificaciones',
-    label: 'Certificaciones',
-    icon: FileBadge,
-    href: '/dashboard/profile/certifications',
-    matchPaths: ['/dashboard/profile/certifications*'],
-  },
-];
-
-const SETTINGS_ITEMS: MenuItem[] = [
   {
     id: 'envios',
-    label: 'Envíos',
+    label: 'Logística',
     icon: Truck,
     href: '/dashboard/configuracion/envios',
     matchPaths: ['/dashboard/configuracion/envios*'],
   },
   {
-    id: 'pagos',
-    label: 'Pagos',
+    id: 'cobros',
+    label: 'Cobros',
     icon: CreditCard,
     href: '/dashboard/configuracion/pagos',
     matchPaths: ['/dashboard/configuracion/pagos*'],
   },
+];
+
+const SETTINGS_ITEMS: MenuItem[] = [
   {
-    id: 'notificaciones',
-    label: 'Notificaciones',
-    icon: Bell,
-    href: '/dashboard/notifications',
-    matchPaths: ['/dashboard/notifications*'],
-  },
-  {
-    id: 'seguridad',
-    label: 'Seguridad',
-    icon: Shield,
-    href: '/dashboard/security',
-    matchPaths: ['/dashboard/security*'],
-  },
-  {
-    id: 'ajustes',
-    label: 'Ajustes',
+    id: 'cuenta',
+    label: 'Cuenta',
     icon: Settings,
-    href: '/dashboard/configuracion',
-    matchPaths: ['/dashboard/configuracion', '/dashboard/configuracion/*', '/dashboard/profile/settings*'],
+    href: '/dashboard/account',
+    matchPaths: ['/dashboard/account*', '/dashboard/security*', '/dashboard/notifications*', '/dashboard/configuracion', '/dashboard/profile/settings*'],
   },
 ];
 
@@ -229,23 +199,23 @@ export const MOBILE_ROOT_TABS: RootTabItem[] = [
     isCentral: true,
   },
   {
-    id: 'resenas',
-    label: 'Reseñas',
-    icon: Star,
-    href: '/dashboard/reviews',
-    matchPaths: ['/dashboard/reviews*'],
+    id: 'cobros',
+    label: 'Cobros',
+    icon: CreditCard,
+    href: '/dashboard/configuracion/pagos',
+    matchPaths: ['/dashboard/configuracion/pagos*'],
   },
   {
     id: 'cuenta',
     label: 'Cuenta',
     icon: User,
-    href: '/dashboard/profile',
+    href: '/dashboard/account',
     matchPaths: [
-      '/dashboard/profile*',
+      '/dashboard/account*',
       '/dashboard/configuracion*',
       '/dashboard/security*',
       '/dashboard/notifications*',
-      '/dashboard/business*',
+      '/dashboard/profile/settings*',
     ],
   },
 ];

@@ -45,12 +45,12 @@ export default function ProfilePage() {
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
       {/* Cabecera de página */}
       <PageHeader
-        title="Mi perfil"
-        description="Información personal, negocio y certificaciones"
+        title="Perfil comercial"
+        description="Gestiona la identidad de tu negocio, datos personales y certificaciones"
         badgeIcon={User}
-        badgeText="Perfil"
-        tooltip="Perfil"
-        tooltipDetailed="Administra tu información personal, los datos de tu negocio y tus certificaciones."
+        badgeText="Negocio"
+        tooltip="Perfil comercial"
+        tooltipDetailed="Administra la identidad comercial de tu tienda, los datos personales del productor y las certificaciones necesarias."
       />
 
       <div className="container mx-auto px-4 pb-6 sm:px-6 sm:pb-8 lg:px-8 lg:pb-10">

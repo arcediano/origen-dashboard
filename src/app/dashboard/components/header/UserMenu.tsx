@@ -10,13 +10,10 @@ import { logoutUser } from '@/lib/api/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
 import { Badge } from '@arcediano/ux-library';
 import { 
-  User, 
-  CreditCard,
+  User,
   LogOut,
   ChevronRight,
   HelpCircle,
-  BellOff,
-  Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -167,61 +164,18 @@ export function UserMenu({
               </div>
             </div>
 
-            {/* Opción: Mi Perfil */}
+            {/* Opción: Cuenta */}
             <div className="py-2">
-              <Link href="/dashboard/profile" onClick={closeMenu}>
+              <Link href="/dashboard/account" onClick={closeMenu}>
                 <div className="flex items-center gap-3 px-4 py-3 hover:bg-origen-crema/50 transition-colors group">
                   <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
                     <User className="w-5 h-5 text-text-subtle group-hover:text-origen-pradera" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-origen-bosque">Mi Perfil</p>
-                    <p className="text-xs text-muted-foreground">Datos personales y negocio</p>
+                    <p className="text-sm font-medium text-origen-bosque">Mi cuenta</p>
+                    <p className="text-xs text-muted-foreground">Notificaciones, seguridad y preferencias</p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-border group-hover:text-origen-pradera" />
-                </div>
-              </Link>
-            </div>
-
-            {/* Sección: Configuración (con 2 subopciones) */}
-            <div className="pt-1 pb-2 border-t border-border-subtle">
-              <div className="px-4 py-2">
-                <p className="text-xs font-medium text-text-disabled uppercase tracking-wider">Configuración</p>
-              </div>
-              
-              <Link href="/dashboard/security" onClick={closeMenu}>
-                <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
-                  <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
-                    <Shield className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-origen-bosque">Seguridad</p>
-                    <p className="text-xs text-muted-foreground">Contraseña y 2FA</p>
-                  </div>
-                </div>
-              </Link>
-              
-              <Link href="/dashboard/notifications?view=preferences" onClick={closeMenu}>
-                <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
-                  <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
-                    <BellOff className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-origen-bosque">Preferencias de notificación</p>
-                    <p className="text-xs text-muted-foreground">Canales y tipos de aviso</p>
-                  </div>
-                </div>
-              </Link>
-
-              <Link href="/dashboard/configuracion/pagos" onClick={closeMenu}>
-                <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
-                  <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
-                    <CreditCard className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-origen-bosque">Pagos</p>
-                    <p className="text-xs text-muted-foreground">Cobros y métodos de pago</p>
-                  </div>
                 </div>
               </Link>
             </div>
