@@ -49,13 +49,13 @@ export function NotificationItem({
   const getIcon = () => {
     switch (notification.type) {
       case 'product':
-        return <Package className="w-4 h-4 text-origen-pradera" />;
+        return <Package className="w-4 h-4 text-origen-hoja" />;
       case 'order':
-        return <ShoppingBag className="w-4 h-4 text-blue-500" />;
+        return <ShoppingBag className="w-4 h-4 text-origen-bosque" />;
       case 'certification':
-        return <Award className="w-4 h-4 text-amber-500" />;
+        return <Award className="w-4 h-4 text-origen-menta" />;
       case 'system':
-        return <AlertCircle className="w-4 h-4 text-purple-500" />;
+        return <AlertCircle className="w-4 h-4 text-origen-pino" />;
       default:
         return <Bell className="w-4 h-4 text-muted-foreground" />;
     }
@@ -67,13 +67,13 @@ export function NotificationItem({
   const getBgColor = () => {
     switch (notification.type) {
       case 'product':
-        return 'bg-origen-pradera/10';
+        return 'bg-origen-hoja/10';
       case 'order':
-        return 'bg-blue-50';
+        return 'bg-origen-pradera/10';
       case 'certification':
-        return 'bg-amber-50';
+        return 'bg-origen-menta/15';
       case 'system':
-        return 'bg-purple-50';
+        return 'bg-origen-pino/10';
       default:
         return 'bg-surface';
     }

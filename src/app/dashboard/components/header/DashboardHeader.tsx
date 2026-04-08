@@ -2,6 +2,7 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { NotificationBell } from './NotificationBell';
@@ -9,6 +10,7 @@ import { UserMenu } from './UserMenu';
 import { DashboardBreadcrumb } from './DashboardBreadcrumb';
 import { getDashboardPageTitle, getDashboardSectionLabel } from '@/constants/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
+import { Plus, ShoppingBag } from 'lucide-react';
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -63,10 +65,10 @@ export function DashboardHeader({
     <header className={cn(
       'sticky top-0 z-30 transition-all duration-300',
       isScrolled 
-        ? 'bg-surface-alt/90 backdrop-blur-xl border-b border-border shadow-md' 
-        : 'bg-surface-alt/75 backdrop-blur-md border-b border-border-subtle'
-    )}>
-      <div className="flex items-center justify-between gap-6 px-6 lg:px-8 min-h-[76px]">
+        ? 'bg-surface-alt/95 backdrop-blur-xl border-b border-border shadow-sm' 
+        : 'bg-surface-alt/85 backdrop-blur-md border-b border-border-subtle'
+    )} role="banner" aria-label="Cabecera del dashboard">
+      <div className="mx-auto flex min-h-[76px] max-w-[1600px] items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-4">
           <div className="min-w-0 flex-1 py-4">
             <div className="mb-1 hidden md:block">
@@ -85,7 +87,24 @@ export function DashboardHeader({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-shrink-0 py-4">
+        <nav className="hidden items-center gap-2 xl:flex" aria-label="Accesos rápidos del dashboard">
+          <Link
+            href="/dashboard/orders"
+            className="inline-flex items-center gap-2 rounded-xl border border-border-subtle bg-surface px-3 py-2 text-xs font-medium text-origen-bosque transition-colors hover:bg-origen-crema/50"
+          >
+            <ShoppingBag className="h-3.5 w-3.5" />
+            Pedidos
+          </Link>
+          <Link
+            href="/dashboard/products/create"
+            className="inline-flex items-center gap-2 rounded-xl bg-origen-bosque px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-origen-pino"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Nuevo producto
+          </Link>
+        </nav>
+
+        <div className="flex items-center gap-2.5 py-4">
           <NotificationBell />
           <UserMenu
             userName={resolvedName}

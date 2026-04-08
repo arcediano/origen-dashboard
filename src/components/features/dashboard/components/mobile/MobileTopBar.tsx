@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Bell, ChevronLeft, Leaf } from 'lucide-react';
 import { getDashboardPageTitle, isRootMobileTab } from '@/constants/sidebar';
+import { getUnreadCount } from '@/lib/api/notifications';
 
 interface MobileTopBarProps {
   notificationCount?: number;
@@ -23,12 +24,30 @@ export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [liveNotificationCount, setLiveNotificationCount] = useState(notificationCount);
 
   useEffect(() => {
     setMounted(true);
     const onScroll = () => setScrolled(window.scrollY > 6);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadUnreadCount = async () => {
+      const response = await getUnreadCount();
+      if (active && response.data) {
+        setLiveNotificationCount(response.data.count);
+      }
+    };
+
+    void loadUnreadCount();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   if (!mounted) return null;
@@ -108,11 +127,12 @@ export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
         {/* Zona derecha — acceso persistente a notificaciones */}
         <motion.div whileTap={{ scale: 0.82 }} className="flex-shrink-0">
           <Link
-            href="/dashboard/notifications"
+            href="/dashboard/notifications?view=inbox"
             className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-origen-pradera/10 transition-colors"
+            aria-label={liveNotificationCount > 0 ? `Notificaciones (${liveNotificationCount})` : 'Notificaciones'}
           >
             <Bell className="w-[18px] h-[18px] text-foreground stroke-[1.8]" />
-            {notificationCount > 0 && (
+            {liveNotificationCount > 0 && (
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 border-2 border-surface-alt" />
             )}
           </Link>

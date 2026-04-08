@@ -81,6 +81,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
   }, [isOpen]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
+  const previewNotifications = notifications.slice(0, 6);
 
   const handleMarkAsRead = useCallback(async (id: string) => {
     // Optimistic: remove from list immediately (all fetched notifications are unread)
@@ -122,6 +123,22 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
     setIsOpen(false);
   }, []);
 
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
   return (
     <div className="relative notifications-menu">
       <Button
@@ -130,11 +147,13 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
         size="icon"
         className={cn(
           'relative text-foreground hover:text-origen-bosque hover:bg-origen-pradera/10 transition-all',
-          isOpen && 'bg-origen-pradera/10 text-origen-menta'
+          isOpen && 'bg-origen-pradera/10 text-origen-bosque'
         )}
         onClick={toggleOpen}
         aria-label={unreadCount > 0 ? `Notificaciones (${unreadCount})` : 'Notificaciones'}
         aria-expanded={isOpen}
+        aria-haspopup="dialog"
+        aria-controls="notification-bell-panel"
       >
         <Bell className="w-5 h-5" />
         
@@ -155,6 +174,9 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
             transition={{ duration: 0.2 }}
             className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-alt rounded-xl shadow-xl border border-border-subtle overflow-hidden z-50"
             onClick={(e) => e.stopPropagation()}
+            id="notification-bell-panel"
+            role="dialog"
+            aria-label="Notificaciones recientes"
           >
             {/* Cabecera */}
               <div className="bg-gradient-to-r from-origen-crema to-surface-alt px-4 py-3 border-b border-border-subtle">
@@ -208,7 +230,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                 </div>
               ) : (
                 <div className="divide-y divide-border-subtle">
-                  {notifications.map(notification => (
+                  {previewNotifications.map(notification => (
                     <NotificationItem
                       key={notification.id}
                       notification={notification}
@@ -220,15 +242,28 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
               )}
             </div>
 
+              {!isLoading && !error && notifications.length > previewNotifications.length && (
+                <div className="px-4 py-2 text-[11px] text-text-subtle border-t border-border-subtle">
+                  Mostrando {previewNotifications.length} de {notifications.length} notificaciones no leídas.
+                </div>
+              )}
+
             {/* Footer */}
             <div className="border-t border-border-subtle p-2 bg-surface">
               <Link
-                href="/dashboard/notificaciones"
+                  href="/dashboard/notifications?view=inbox"
                 className="block w-full text-center text-xs text-muted-foreground hover:text-origen-bosque py-2 transition-colors font-medium"
                 onClick={close}
               >
                 Ver todas las notificaciones
               </Link>
+                <Link
+                  href="/dashboard/notifications?view=preferences"
+                  className="block w-full text-center text-xs text-text-subtle hover:text-origen-bosque py-1 transition-colors"
+                  onClick={close}
+                >
+                  Configurar preferencias
+                </Link>
             </div>
           </motion.div>
         )}

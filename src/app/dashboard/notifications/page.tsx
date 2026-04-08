@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Bell,
@@ -16,17 +16,33 @@ import {
   Package,
   Megaphone,
   Save,
+  Inbox,
+  CheckCheck,
+  RefreshCw,
 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent } from '@arcediano/ux-library';
 import { Button } from '@arcediano/ux-library';
 import { NotificationToggleRow } from './components/NotificationToggleRow';
 import { SegmentedControl, type SegmentItem } from './components/SegmentedControl';
 import { gatewayClient } from '@/lib/api/client';
+import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
+import {
+  fetchNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+} from '@/lib/api/notifications';
+import type { Notification } from '@/types/notification';
 
 // ─── TABS CONFIG ──────────────────────────────────────────────────────────────
 
 const SEGMENTS: SegmentItem[] = [
+  { value: 'inbox', label: 'Bandeja', icon: Inbox },
+  { value: 'preferences', label: 'Preferencias', icon: Bell },
+];
+
+const PREFERENCE_SEGMENTS: SegmentItem[] = [
   { value: 'email', label: 'Email',       icon: Mail       },
   { value: 'push',  label: 'Push',        icon: Smartphone },
 ];
@@ -34,7 +50,16 @@ const SEGMENTS: SegmentItem[] = [
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 
 export default function NotificationsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const initialView = searchParams.get('view') === 'preferences' ? 'preferences' : 'inbox';
+
+  const [activeView, setActiveView] = useState<'inbox' | 'preferences'>(initialView);
   const [activeTab, setActiveTab] = useState<'email' | 'push'>('email');
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isInboxLoading, setIsInboxLoading] = useState(true);
+  const [isInboxUpdating, setIsInboxUpdating] = useState(false);
 
   const [emailSettings, setEmailSettings] = useState({
     orders:    true,
@@ -51,6 +76,49 @@ export default function NotificationsPage() {
   });
 
   const [saved, setSaved] = useState(false);
+
+  const unreadCount = useMemo(
+    () => notifications.filter((notification) => !notification.read).length,
+    [notifications],
+  );
+
+  const loadInbox = async () => {
+    setIsInboxLoading(true);
+    try {
+      const response = await fetchNotifications({ page: 1, limit: 30 });
+      if (response.data) {
+        setNotifications(response.data.notifications);
+      }
+    } finally {
+      setIsInboxLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadInbox();
+  }, []);
+
+  const handleMarkAsRead = async (id: string) => {
+    setNotifications((current) =>
+      current.map((notification) =>
+        notification.id === id ? { ...notification, read: true } : notification,
+      ),
+    );
+    await markNotificationAsRead(id);
+  };
+
+  const handleMarkAll = async () => {
+    if (!unreadCount || isInboxUpdating) return;
+    setIsInboxUpdating(true);
+    setNotifications((current) => current.map((notification) => ({ ...notification, read: true })));
+    await markAllNotificationsAsRead();
+    setIsInboxUpdating(false);
+  };
+
+  const handleViewChange = (view: 'inbox' | 'preferences') => {
+    setActiveView(view);
+    router.replace(`/dashboard/notifications?view=${view}`, { scroll: false });
+  };
 
   const handleSave = async () => {
     try {
@@ -82,138 +150,187 @@ export default function NotificationsPage() {
       >
         <PageHeader
           title="Notificaciones"
-          description="Configura cómo y cuándo quieres recibir notificaciones"
+          description="Gestiona tu bandeja y cómo quieres recibir avisos"
           badgeIcon={Bell}
-          badgeText="Preferencias"
+          badgeText={activeView === 'inbox' ? 'Bandeja' : 'Preferencias'}
           tooltip="Notificaciones"
-          tooltipDetailed="Elige qué notificaciones recibir por email y push."
+          tooltipDetailed="Define qué avisos llegan a la campana y cómo quieres recibirlos."
           actions={
-            /* Botón guardar — solo visible en desktop (lg+) */
-            <div className="hidden lg:block">
-              <Button onClick={handleSave}>
-                <Save className="w-4 h-4 mr-2" />
-                Guardar preferencias
-              </Button>
-            </div>
+            activeView === 'preferences' ? (
+              <div className="hidden lg:block">
+                <Button onClick={handleSave}>
+                  <Save className="w-4 h-4 mr-2" />
+                  Guardar preferencias
+                </Button>
+              </div>
+            ) : (
+              <div className="hidden lg:flex items-center gap-2">
+                <Button variant="outline" onClick={() => void loadInbox()}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Actualizar
+                </Button>
+                <Button onClick={handleMarkAll} disabled={!unreadCount || isInboxUpdating}>
+                  <CheckCheck className="w-4 h-4 mr-2" />
+                  Marcar todas
+                </Button>
+              </div>
+            )
           }
         />
 
-        {/* Control segmentado (reemplaza TabsList) */}
+        {/* Vista principal */}
         <SegmentedControl
           items={SEGMENTS}
-          active={activeTab}
-          onChange={(v) => setActiveTab(v as 'email' | 'push')}
+          active={activeView}
+          onChange={(v) => handleViewChange(v as 'inbox' | 'preferences')}
           className="max-w-md"
         />
 
-        {/* Contenido del tab activo */}
-        <Card variant="elevated">
-          <CardContent className="p-0">
-            {activeTab === 'email' && (
-              <div className="px-4 sm:px-6 divide-y divide-border-subtle">
-                <NotificationToggleRow
-                  icon={ShoppingBag}
-                  title="Nuevos pedidos"
-                  description="Recibe un email cuando llegue un nuevo pedido"
-                  checked={emailSettings.orders}
-                  onChange={(v) => setEmailSettings((s) => ({ ...s, orders: v }))}
-                  divider={false}
-                />
-                <NotificationToggleRow
-                  icon={Star}
-                  title="Nuevas reseñas"
-                  description="Cuando un cliente deje una reseña"
-                  checked={emailSettings.reviews}
-                  onChange={(v) => setEmailSettings((s) => ({ ...s, reviews: v }))}
-                  divider={false}
-                />
-                <NotificationToggleRow
-                  icon={Package}
-                  title="Stock bajo"
-                  description="Alertas cuando un producto esté por agotarse"
-                  checked={emailSettings.stock}
-                  onChange={(v) => setEmailSettings((s) => ({ ...s, stock: v }))}
-                  divider={false}
-                />
-                <NotificationToggleRow
-                  icon={Megaphone}
-                  title="Marketing y promociones"
-                  description="Ofertas, novedades y recomendaciones"
-                  checked={emailSettings.marketing}
-                  onChange={(v) => setEmailSettings((s) => ({ ...s, marketing: v }))}
-                  divider={false}
-                />
+        {activeView === 'inbox' && (
+          <Card variant="elevated">
+            <CardContent className="p-0">
+              <div className="border-b border-border-subtle px-4 py-3 text-sm text-muted-foreground sm:px-6">
+                Tienes <span className="font-semibold text-origen-bosque">{unreadCount}</span> notificación(es) sin leer.
               </div>
-            )}
+              {isInboxLoading ? (
+                <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">Cargando notificaciones...</div>
+              ) : notifications.length === 0 ? (
+                <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">No hay notificaciones por ahora.</div>
+              ) : (
+                <div className="divide-y divide-border-subtle">
+                  {notifications.map((notification) => (
+                    <NotificationItem
+                      key={notification.id}
+                      notification={notification}
+                      onMarkAsRead={handleMarkAsRead}
+                    />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-            {activeTab === 'push' && (
-              <div className="px-4 sm:px-6 divide-y divide-border-subtle">
-                <NotificationToggleRow
-                  icon={ShoppingBag}
-                  title="Nuevos pedidos"
-                  description="Notificación push para nuevos pedidos"
-                  checked={pushSettings.orders}
-                  onChange={(v) => setPushSettings((s) => ({ ...s, orders: v }))}
-                  divider={false}
-                />
-                <NotificationToggleRow
-                  icon={Package}
-                  title="Stock bajo"
-                  description="Alertas de inventario en tiempo real"
-                  checked={pushSettings.lowStock}
-                  onChange={(v) => setPushSettings((s) => ({ ...s, lowStock: v }))}
-                  divider={false}
-                />
-                <NotificationToggleRow
-                  icon={Star}
-                  title="Nuevas reseñas"
-                  description="Notificaciones cuando recibas una reseña"
-                  checked={pushSettings.reviews}
-                  onChange={(v) => setPushSettings((s) => ({ ...s, reviews: v }))}
-                  divider={false}
-                />
-                <NotificationToggleRow
-                  icon={Megaphone}
-                  title="Campañas"
-                  description="Resultados y actualizaciones de campañas"
-                  checked={pushSettings.campaigns}
-                  onChange={(v) => setPushSettings((s) => ({ ...s, campaigns: v }))}
-                  divider={false}
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {activeView === 'preferences' && (
+          <>
+            <SegmentedControl
+              items={PREFERENCE_SEGMENTS}
+              active={activeTab}
+              onChange={(v) => setActiveTab(v as 'email' | 'push')}
+              className="max-w-md"
+            />
+
+            <Card variant="elevated">
+              <CardContent className="p-0">
+                {activeTab === 'email' && (
+                  <div className="px-4 sm:px-6 divide-y divide-border-subtle">
+                    <NotificationToggleRow
+                      icon={ShoppingBag}
+                      title="Nuevos pedidos"
+                      description="Recibe un email cuando llegue un nuevo pedido"
+                      checked={emailSettings.orders}
+                      onChange={(v) => setEmailSettings((s) => ({ ...s, orders: v }))}
+                      divider={false}
+                    />
+                    <NotificationToggleRow
+                      icon={Star}
+                      title="Nuevas reseñas"
+                      description="Cuando un cliente deje una reseña"
+                      checked={emailSettings.reviews}
+                      onChange={(v) => setEmailSettings((s) => ({ ...s, reviews: v }))}
+                      divider={false}
+                    />
+                    <NotificationToggleRow
+                      icon={Package}
+                      title="Stock bajo"
+                      description="Alertas cuando un producto esté por agotarse"
+                      checked={emailSettings.stock}
+                      onChange={(v) => setEmailSettings((s) => ({ ...s, stock: v }))}
+                      divider={false}
+                    />
+                    <NotificationToggleRow
+                      icon={Megaphone}
+                      title="Marketing y promociones"
+                      description="Ofertas, novedades y recomendaciones"
+                      checked={emailSettings.marketing}
+                      onChange={(v) => setEmailSettings((s) => ({ ...s, marketing: v }))}
+                      divider={false}
+                    />
+                  </div>
+                )}
+
+                {activeTab === 'push' && (
+                  <div className="px-4 sm:px-6 divide-y divide-border-subtle">
+                    <NotificationToggleRow
+                      icon={ShoppingBag}
+                      title="Nuevos pedidos"
+                      description="Notificación push para nuevos pedidos"
+                      checked={pushSettings.orders}
+                      onChange={(v) => setPushSettings((s) => ({ ...s, orders: v }))}
+                      divider={false}
+                    />
+                    <NotificationToggleRow
+                      icon={Package}
+                      title="Stock bajo"
+                      description="Alertas de inventario en tiempo real"
+                      checked={pushSettings.lowStock}
+                      onChange={(v) => setPushSettings((s) => ({ ...s, lowStock: v }))}
+                      divider={false}
+                    />
+                    <NotificationToggleRow
+                      icon={Star}
+                      title="Nuevas reseñas"
+                      description="Notificaciones cuando recibas una reseña"
+                      checked={pushSettings.reviews}
+                      onChange={(v) => setPushSettings((s) => ({ ...s, reviews: v }))}
+                      divider={false}
+                    />
+                    <NotificationToggleRow
+                      icon={Megaphone}
+                      title="Campañas"
+                      description="Resultados y actualizaciones de campañas"
+                      checked={pushSettings.campaigns}
+                      onChange={(v) => setPushSettings((s) => ({ ...s, campaigns: v }))}
+                      divider={false}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </>
+        )}
 
         {/* Espacio extra en móvil para el botón sticky */}
         <div className="h-4 lg:hidden" />
       </motion.div>
 
       {/* ── Botón guardar sticky en móvil ── */}
-      <div
-        className={`
-          fixed bottom-[calc(88px+env(safe-area-inset-bottom))]
-          left-4 right-4
-          lg:hidden z-30
-        `}
-      >
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={handleSave}
+      {activeView === 'preferences' && (
+        <div
           className={`
-            w-full flex items-center justify-center gap-2
-            rounded-2xl py-3.5
-            text-sm font-semibold shadow-lg
-            transition-colors
-            ${saved
-              ? 'bg-origen-pradera text-white'
-              : 'bg-origen-bosque text-white active:bg-origen-pino'}
+            fixed bottom-[calc(88px+env(safe-area-inset-bottom))]
+            left-4 right-4
+            lg:hidden z-30
           `}
         >
-          <Save className="w-4 h-4" />
-          {saved ? '¡Guardado!' : 'Guardar preferencias'}
-        </motion.button>
-      </div>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={handleSave}
+            className={`
+              w-full flex items-center justify-center gap-2
+              rounded-2xl py-3.5
+              text-sm font-semibold shadow-lg
+              transition-colors
+              ${saved
+                ? 'bg-origen-pradera text-white'
+                : 'bg-origen-bosque text-white active:bg-origen-pino'}
+            `}
+          >
+            <Save className="w-4 h-4" />
+            {saved ? '¡Guardado!' : 'Guardar preferencias'}
+          </motion.button>
+        </div>
+      )}
     </>
   );
 }
