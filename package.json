@@ -16,6 +16,9 @@
     "test:coverage": "vitest run --coverage",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
+    "test:smoke:dashboard:integration": "vitest run tests/integration/dashboard/home-sections.smoke.test.tsx",
+    "test:smoke:dashboard:e2e": "playwright test tests/e2e/dashboard/home-sections-smoke.spec.ts --project=chromium",
+    "test:smoke:dashboard": "npm run test:smoke:dashboard:integration && npm run test:smoke:dashboard:e2e",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed"

@@ -139,8 +139,6 @@ export default function ProducerDashboard() {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
-
   // BUG FIX: usar el nombre real del usuario autenticado en lugar del hardcodeado 'María'
   const userName = user?.firstName ?? 'Productor';
 
@@ -225,6 +223,8 @@ export default function ProducerDashboard() {
 
     return dashboardAlerts;
   }, [pendingOrders, producer, user?.onboardingCompleted]);
+
+  if (!mounted) return null;
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
