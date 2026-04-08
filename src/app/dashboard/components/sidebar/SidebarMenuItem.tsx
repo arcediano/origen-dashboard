@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
 import { Badge } from '@arcediano/ux-library';
 import { SidebarSubmenu } from './SidebarSubmenu';
-import type { MenuItem, SubmenuItem } from '@/constants/sidebar';
+import { matchesNavigationItem, type MenuItem, type SubmenuItem } from '@/constants/sidebar';
 
 interface SidebarMenuItemProps extends MenuItem {
   onItemClick?: () => void;
@@ -26,6 +26,7 @@ export function SidebarMenuItem({
   label,
   icon: Icon,
   href,
+  matchPaths,
   badge,
   submenu,
   onItemClick,
@@ -36,15 +37,16 @@ export function SidebarMenuItem({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   // Determinar si el item o algún subitem está activo
-  const isActive = href ? pathname === href : false;
+  const isActive = matchesNavigationItem(pathname, { href, matchPaths });
   
   const hasActiveChild = submenu?.some(item => {
     if ('submenu' in item) {
-      return (item as any).submenu?.some((sub: SubmenuItem) => 
-        pathname === sub.href || pathname === sub.href.split('?')[0]
+      return (
+        matchesNavigationItem(pathname, item) ||
+        (item as any).submenu?.some((sub: SubmenuItem) => matchesNavigationItem(pathname, sub))
       );
     }
-    return pathname === item.href || pathname === item.href.split('?')[0];
+    return matchesNavigationItem(pathname, item);
   }) || false;
 
   // Abrir automáticamente si tiene un hijo activo

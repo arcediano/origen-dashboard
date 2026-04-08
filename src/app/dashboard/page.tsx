@@ -7,20 +7,21 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Bell, CreditCard, Leaf, Package, Settings2, ShoppingBag, Store, X } from 'lucide-react';
+import { ArrowRight, Leaf, X } from 'lucide-react';
 import { DashboardFooter } from '@/app/dashboard/components/footer/DashboardFooter';
 import {
   AlertList,
   DashboardShell,
-  QuickActionsGrid,
   ProducerCard,
   StatsGrid,
   OrdersSummary,
   TopProducts,
   DashboardTabs,
   WelcomeHeader,
+  SalesChart,
+  VisitsChart,
 } from '@/components/features/dashboard';
-import type { DashboardAlert, QuickAction } from '@/components/features/dashboard';
+import type { DashboardAlert } from '@/components/features/dashboard';
 
 // Hooks
 import {
@@ -142,41 +143,11 @@ export default function ProducerDashboard() {
   // BUG FIX: usar el nombre real del usuario autenticado en lugar del hardcodeado 'María'
   const userName = user?.firstName ?? 'Productor';
 
-  const quickActions = useMemo<QuickAction[]>(() => [
-    {
-      id: 'new-product',
-      title: 'Nuevo producto',
-      description: 'Añade referencias al catálogo',
-      icon: Package,
-      href: '/dashboard/products/create',
-      gradient: 'from-origen-bosque to-origen-pradera',
-    },
-    {
-      id: 'orders',
-      title: 'Pedidos',
-      description: 'Revisa actividad y estados',
-      icon: ShoppingBag,
-      href: '/dashboard/orders',
-      badge: pendingOrders,
-      gradient: 'from-origen-pradera to-origen-hoja',
-    },
-    {
-      id: 'business',
-      title: 'Mi negocio',
-      description: 'Edita datos comerciales',
-      icon: Store,
-      href: '/dashboard/profile/business',
-      gradient: 'from-origen-hoja to-origen-pino',
-    },
-    {
-      id: 'payments',
-      title: 'Pagos y ajustes',
-      description: 'Stripe, envíos y alertas',
-      icon: CreditCard,
-      href: '/dashboard/configuracion/pagos',
-      gradient: 'from-origen-pino to-origen-bosque',
-    },
-  ], [pendingOrders]);
+  const profileCompleteness = useMemo(() => {
+    const rawScore = producer?.profileCompletenessScore ?? 0;
+    const normalized = rawScore <= 1 ? rawScore * 100 : rawScore;
+    return Math.round(Math.min(100, Math.max(0, normalized)));
+  }, [producer?.profileCompletenessScore]);
 
   const alerts = useMemo<DashboardAlert[]>(() => {
     const dashboardAlerts: DashboardAlert[] = [];
@@ -201,12 +172,12 @@ export default function ProducerDashboard() {
       });
     }
 
-    if (producer && producer.profileCompletenessScore < 100) {
+    if (producer && profileCompleteness < 100) {
       dashboardAlerts.push({
         id: 'profile-incomplete',
         type: 'accent',
         title: 'Aún puedes mejorar tu perfil',
-        description: `Te faltan detalles para completar tu escaparate. Estado actual: ${producer.profileCompletenessScore}%.`,
+        description: `Te faltan detalles para completar tu escaparate. Estado actual: ${profileCompleteness}%.`,
         dismissible: true,
       });
     }
@@ -222,7 +193,7 @@ export default function ProducerDashboard() {
     }
 
     return dashboardAlerts;
-  }, [pendingOrders, producer, user?.onboardingCompleted]);
+  }, [pendingOrders, producer, profileCompleteness, user?.onboardingCompleted]);
 
   if (!mounted) return null;
 
@@ -249,19 +220,22 @@ export default function ProducerDashboard() {
             error={profileError}
           />
           <BusinessSnapshotCard
-            profileCompleteness={producer?.profileCompletenessScore ?? 0}
+            profileCompleteness={profileCompleteness}
             pendingOrders={pendingOrders}
             totalRevenue={totalRevenue}
           />
         </div>
-
-        <QuickActionsGrid actions={quickActions} pendingOrders={pendingOrders} />
 
         <StatsGrid
           stats={realStats}
           isLoading={statsLoading}
           collapsible={false}
         />
+
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+          <SalesChart />
+          <VisitsChart />
+        </div>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-start">
           <OrdersSummary orders={realOrders} isLoading={ordersLoading} className="lg:col-span-2" />

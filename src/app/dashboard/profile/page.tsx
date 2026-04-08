@@ -14,6 +14,7 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
 import { Badge, Button } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
+import { useProducerProfile } from '@/components/features/dashboard/hooks';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -29,12 +30,21 @@ const itemVariants = {
 };
 
 export default function ProfilePage() {
-  // Pendientes (simulado)
-  const pendingItems = 2;
-  const completion = 85;
+  const { producer } = useProducerProfile();
+
+  const rawScore = producer?.profileCompletenessScore ?? 0;
+  const completion = Math.round(Math.min(100, Math.max(0, rawScore <= 1 ? rawScore * 100 : rawScore)));
+
+  const totalSections = 3;
+  const completedSections = Math.round((completion / 100) * totalSections);
+  const pendingItems = Math.max(0, totalSections - completedSections);
+
+  const personalVerified = Boolean(producer?.name && producer?.location);
+  const businessVerified = Boolean(producer?.categories && producer.categories.length > 0);
+  const certificationsPending = pendingItems > 0 ? pendingItems : 0;
 
   return (
-    <div>
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
       {/* Cabecera de página */}
       <PageHeader
         title="Mi perfil"
@@ -45,8 +55,10 @@ export default function ProfilePage() {
         tooltipDetailed="Administra tu información personal, los datos de tu negocio y tus certificaciones."
       />
 
+      <div className="container mx-auto px-4 pb-6 sm:px-6 sm:pb-8 lg:px-8 lg:pb-10">
+
       {/* ── Barra de completitud ── */}
-      <div className="px-4 sm:px-6 lg:px-8 mt-4 mb-5 sm:mt-6 sm:mb-8">
+      <div className="mt-4 mb-5 sm:mt-6 sm:mb-8">
 
         {/* Móvil: fila compacta */}
         <div className="lg:hidden flex items-center gap-3 p-4 rounded-2xl bg-surface-alt border border-border-subtle">
@@ -86,7 +98,7 @@ export default function ProfilePage() {
       </div>
 
       {/* ── Móvil: lista de navegación nativa ── */}
-      <div className="lg:hidden mx-4 rounded-2xl border border-border-subtle overflow-hidden bg-surface divide-y divide-border-subtle">
+      <div className="lg:hidden rounded-2xl border border-border-subtle overflow-hidden bg-surface divide-y divide-border-subtle">
 
         <Link href="/dashboard/profile/personal" className="flex items-center gap-3 px-4 py-4 active:bg-surface-alt transition-colors">
           <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
@@ -97,7 +109,7 @@ export default function ProfilePage() {
             <p className="text-xs text-text-subtle mt-0.5">Datos personales, contacto y dirección</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Badge variant="success" size="xs">Verificado</Badge>
+            <Badge variant={personalVerified ? 'success' : 'warning'} size="xs">{personalVerified ? 'Verificado' : 'Pendiente'}</Badge>
             <ChevronRight className="w-4 h-4 text-text-subtle" />
           </div>
         </Link>
@@ -111,7 +123,7 @@ export default function ProfilePage() {
             <p className="text-xs text-text-subtle mt-0.5">Empresa, ubicación y datos comerciales</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Badge variant="success" size="xs">Verificado</Badge>
+            <Badge variant={businessVerified ? 'success' : 'warning'} size="xs">{businessVerified ? 'Verificado' : 'Pendiente'}</Badge>
             <ChevronRight className="w-4 h-4 text-text-subtle" />
           </div>
         </Link>
@@ -125,7 +137,9 @@ export default function ProfilePage() {
             <p className="text-xs text-text-subtle mt-0.5">Certificaciones de calidad y documentos legales</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Badge variant="warning" size="xs">2 pendientes</Badge>
+            <Badge variant={certificationsPending > 0 ? 'warning' : 'success'} size="xs">
+              {certificationsPending > 0 ? `${certificationsPending} pendientes` : 'Al día'}
+            </Badge>
             <ChevronRight className="w-4 h-4 text-text-subtle" />
           </div>
         </Link>
@@ -133,7 +147,7 @@ export default function ProfilePage() {
       </div>
 
       {/* ── Desktop: grid de cards ── */}
-      <div className="hidden lg:grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 px-8">
+      <div className="hidden lg:grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
 
         {/* CARD 1: Información personal */}
         <motion.div variants={itemVariants} initial="hidden" animate="visible" className="flex">
@@ -144,7 +158,7 @@ export default function ProfilePage() {
                   <User className="w-5 h-5 text-origen-pradera" />
                   Información personal
                 </CardTitle>
-                <Badge variant="success" size="xs">Verificado</Badge>
+                <Badge variant={personalVerified ? 'success' : 'warning'} size="xs">{personalVerified ? 'Verificado' : 'Pendiente'}</Badge>
               </div>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
@@ -175,7 +189,7 @@ export default function ProfilePage() {
                   <Store className="w-5 h-5 text-origen-pradera" />
                   Mi negocio
                 </CardTitle>
-                <Badge variant="success" size="xs">Verificado</Badge>
+                <Badge variant={businessVerified ? 'success' : 'warning'} size="xs">{businessVerified ? 'Verificado' : 'Pendiente'}</Badge>
               </div>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
@@ -206,7 +220,9 @@ export default function ProfilePage() {
                   <FileBadge className="w-5 h-5 text-origen-pradera" />
                   Certificaciones
                 </CardTitle>
-                <Badge variant="warning" size="xs">2 pendientes</Badge>
+                <Badge variant={certificationsPending > 0 ? 'warning' : 'success'} size="xs">
+                  {certificationsPending > 0 ? `${certificationsPending} pendientes` : 'Al día'}
+                </Badge>
               </div>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
@@ -228,6 +244,7 @@ export default function ProfilePage() {
           </Card>
         </motion.div>
 
+      </div>
       </div>
     </div>
   );

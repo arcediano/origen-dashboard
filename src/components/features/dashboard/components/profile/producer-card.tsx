@@ -25,6 +25,11 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
+function normalizeProfileScore(score: number): number {
+  const normalized = score <= 1 ? score * 100 : score;
+  return Math.round(Math.min(100, Math.max(0, normalized)));
+}
+
 // ─── sub-components ───────────────────────────────────────────────────────────
 
 interface StatusBadgeProps {
@@ -76,7 +81,7 @@ interface CompletenessBarProps {
 }
 
 function CompletenessBar({ score }: CompletenessBarProps) {
-  const clamped = Math.min(100, Math.max(0, score));
+  const clamped = normalizeProfileScore(score);
 
   const barColor =
     clamped < 40
@@ -168,7 +173,7 @@ export function ProducerCard({
   if (!producer) return null;
 
   const initials = getInitials(producer.name);
-  const isIncomplete = producer.profileCompletenessScore < 100;
+  const isIncomplete = normalizeProfileScore(producer.profileCompletenessScore) < 100;
 
   return (
     <motion.div

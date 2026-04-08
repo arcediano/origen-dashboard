@@ -10,7 +10,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Badge } from '@arcediano/ux-library';
-import type { SubmenuItem } from '@/constants/sidebar';
+import { matchesNavigationItem, type SubmenuItem } from '@/constants/sidebar';
 
 interface SidebarSubmenuProps {
   items: SubmenuItem[];
@@ -43,8 +43,7 @@ export function SidebarSubmenu({
         >
           <div className={cn('py-1 space-y-0.5', paddingLeft)}>
             {items.map((item) => {
-              const isActive = pathname === item.href || 
-                (item.href.includes('?') && pathname === item.href.split('?')[0]);
+              const isActive = matchesNavigationItem(pathname, item);
 
               return (
                 <Link
