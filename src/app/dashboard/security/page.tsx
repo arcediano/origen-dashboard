@@ -1,29 +1,18 @@
-// 📁 /src/app/dashboard/profile/settings/page.tsx
+// 📁 /src/app/dashboard/security/page.tsx
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Bell, Shield, Globe, Moon, Sun, Save, Key } from 'lucide-react';
+import { Shield, Globe, Moon, Sun, Save, Key } from 'lucide-react';
 import { useState } from 'react';
+import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
 import { Button, Input, Label, Separator } from '@arcediano/ux-library';
 import { Toggle } from '@arcediano/ux-library';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 
-export default function SettingsPage() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState('notifications');
+export default function SecurityPage() {
+  const [activeTab, setActiveTab] = useState('security');
   const [isSaving, setIsSaving] = useState(false);
-
-  // Estado para notificaciones
-  const [notifications, setNotifications] = useState({
-    emailOrders: true,
-    emailMarketing: false,
-    pushNewOrder: true,
-    pushLowStock: true,
-    pushReviews: true,
-    weeklyReport: true
-  });
 
   // Estado para seguridad
   const [password, setPassword] = useState({
@@ -38,19 +27,6 @@ export default function SettingsPage() {
     theme: 'light',
     compactMode: false
   });
-
-  const toggleNotification = (key: keyof typeof notifications) => {
-    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const handleSaveNotifications = async () => {
-    setIsSaving(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleChangePassword = async () => {
     if (password.new !== password.confirm) {
@@ -67,32 +43,22 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="px-4 py-5 sm:px-6 sm:py-6 lg:py-8 lg:max-w-4xl lg:mx-auto">
-      {/* Botón volver — solo desktop (MobileTopBar lo gestiona en móvil) */}
-      <button 
-        onClick={() => router.back()}
-        className="hidden lg:flex items-center gap-2 text-sm text-muted-foreground hover:text-origen-pradera mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Volver al perfil
-      </button>
+    <div className="w-full">
 
-      {/* Cabecera — solo desktop (MobileTopBar muestra "Seguridad" en móvil) */}
-      <div className="hidden lg:block mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-origen-bosque">
-          Configuración
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Gestiona tus preferencias, notificaciones y seguridad
-        </p>
-      </div>
+      {/* Cabecera canónica */}
+      <PageHeader
+        title="Seguridad"
+        description="Contraseña, verificación en dos pasos y preferencias de cuenta"
+        badgeIcon={Shield}
+        badgeText="Seguridad"
+        tooltip="Seguridad"
+        tooltipDetailed="Gestiona tu contraseña, verificación en dos pasos y preferencias generales de tu cuenta."
+      />
+
+      <div className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 max-w-4xl">
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="notifications" className="flex items-center gap-1.5 px-2 sm:px-4">
-            <Bell className="w-4 h-4 flex-shrink-0" />
-            <span className="text-xs sm:text-sm">Avisos</span>
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="security" className="flex items-center gap-1.5 px-2 sm:px-4">
             <Shield className="w-4 h-4 flex-shrink-0" />
             <span className="text-xs sm:text-sm">Seguridad</span>
@@ -103,102 +69,12 @@ export default function SettingsPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* TAB: NOTIFICACIONES */}
-        <TabsContent value="notifications">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="w-5 h-5 text-origen-pradera" />
-                Notificaciones
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
-                <div className="space-y-0.5">
-                  <p className="font-medium text-origen-bosque">Notificaciones por email</p>
-                  <p className="text-sm text-muted-foreground">Nuevos pedidos, confirmaciones</p>
-                </div>
-                <Toggle
-                  checked={notifications.emailOrders}
-                  onCheckedChange={() => toggleNotification('emailOrders')}
-                  variant="leaf"
-                />
-              </div>
+        {/* ── PLACEHOLDER: TAB NOTIFICACIONES ELIMINADO ─────────────────────────
+            Las preferencias de notificación se gestionan en /dashboard/notifications
+            Ruta canónica según ADR-001 (Sprint 22)
+        ──────────────────────────────────────────────────────────────────────── */}
 
-              <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
-                <div className="space-y-0.5">
-                  <p className="font-medium text-origen-bosque">Marketing y promociones</p>
-                  <p className="text-sm text-muted-foreground">Ofertas y novedades</p>
-                </div>
-                <Toggle
-                  checked={notifications.emailMarketing}
-                  onCheckedChange={() => toggleNotification('emailMarketing')}
-                  variant="leaf"
-                />
-              </div>
-
-              <Separator className="my-2" />
-
-              <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
-                <div className="space-y-0.5">
-                  <p className="font-medium text-origen-bosque">Nuevos pedidos</p>
-                  <p className="text-sm text-muted-foreground">Notificaciones push en tiempo real</p>
-                </div>
-                <Toggle
-                  checked={notifications.pushNewOrder}
-                  onCheckedChange={() => toggleNotification('pushNewOrder')}
-                  variant="leaf"
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
-                <div className="space-y-0.5">
-                  <p className="font-medium text-origen-bosque">Stock bajo</p>
-                  <p className="text-sm text-muted-foreground">Alertas cuando queden pocas unidades</p>
-                </div>
-                <Toggle
-                  checked={notifications.pushLowStock}
-                  onCheckedChange={() => toggleNotification('pushLowStock')}
-                  variant="leaf"
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
-                <div className="space-y-0.5">
-                  <p className="font-medium text-origen-bosque">Nuevas reseñas</p>
-                  <p className="text-sm text-muted-foreground">Cuando los clientes te valoren</p>
-                </div>
-                <Toggle
-                  checked={notifications.pushReviews}
-                  onCheckedChange={() => toggleNotification('pushReviews')}
-                  variant="leaf"
-                />
-              </div>
-
-              <Separator className="my-2" />
-
-              <div className="flex items-center justify-between p-4 bg-origen-crema/30 rounded-lg">
-                <div className="space-y-0.5">
-                  <p className="font-medium text-origen-bosque">Informe semanal</p>
-                  <p className="text-sm text-muted-foreground">Resumen de actividad cada lunes</p>
-                </div>
-                <Toggle
-                  checked={notifications.weeklyReport}
-                  onCheckedChange={() => toggleNotification('weeklyReport')}
-                  variant="leaf"
-                />
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <Button onClick={handleSaveNotifications} disabled={isSaving}>
-                  {isSaving ? 'Guardando...' : 'Guardar preferencias'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* TAB: SEGURIDAD */}
+        {/* TAB: SEGURIDAD — único contenido de /dashboard/security */}
         <TabsContent value="security">
           <Card>
             <CardHeader>
@@ -344,6 +220,8 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      </div>
     </div>
   );
 }
