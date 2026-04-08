@@ -11,11 +11,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
 import { Badge } from '@arcediano/ux-library';
 import { 
   User, 
-  Settings,
+  CreditCard,
   LogOut,
   ChevronRight,
   HelpCircle,
-  Bell,
+  BellOff,
   Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,7 +27,6 @@ interface UserMenuProps {
   userAvatar?: string;
   userType?: 'producer' | 'customer';
   onLogout?: () => void;
-  notificationCount?: number;
 }
 
 export function UserMenu({ 
@@ -36,7 +35,6 @@ export function UserMenu({
   userInitials, 
   userAvatar,
   userType = 'producer',
-  notificationCount = 3,
   onLogout 
 }: UserMenuProps) {
   const router = useRouter();
@@ -89,11 +87,7 @@ export function UserMenu({
             </AvatarFallback>
           )}
         </Avatar>
-        {notificationCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-origen-menta text-white text-xs rounded-full flex items-center justify-center animate-pulse">
-            {notificationCount > 9 ? '9+' : notificationCount}
-          </span>
-        )}
+
       </button>
 
       <AnimatePresence>
@@ -160,14 +154,14 @@ export function UserMenu({
                 </div>
               </Link>
               
-              <Link href="/dashboard/notifications" onClick={() => setIsOpen(false)}>
+              <Link href="/dashboard/notifications?view=preferences" onClick={() => setIsOpen(false)}>
                 <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
-                    <Bell className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
+                    <BellOff className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-origen-bosque">Notificaciones</p>
-                    <p className="text-xs text-muted-foreground">Preferencias de avisos</p>
+                    <p className="text-sm font-medium text-origen-bosque">Preferencias de notificación</p>
+                    <p className="text-xs text-muted-foreground">Canales y tipos de aviso</p>
                   </div>
                 </div>
               </Link>
@@ -175,11 +169,11 @@ export function UserMenu({
               <Link href="/dashboard/configuracion/pagos" onClick={() => setIsOpen(false)}>
                 <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
-                    <Settings className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
+                    <CreditCard className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-origen-bosque">Pagos y ajustes</p>
-                    <p className="text-xs text-muted-foreground">Cobros, envíos y preferencias</p>
+                    <p className="text-sm font-medium text-origen-bosque">Pagos</p>
+                    <p className="text-xs text-muted-foreground">Cobros y métodos de pago</p>
                   </div>
                 </div>
               </Link>

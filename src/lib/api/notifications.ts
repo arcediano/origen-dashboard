@@ -8,7 +8,15 @@
  */
 
 import { gatewayClient } from './client';
-import type { Notification, NotificationStats, NotificationsResponse } from '@/types/notification';
+import type {
+  Notification,
+  NotificationCategory,
+  NotificationPriority,
+  NotificationAction,
+  NotificationActionType,
+  NotificationStats,
+  NotificationsResponse,
+} from '@/types/notification';
 import type { ApiResponse } from './products';
 
 // â”€â”€â”€ Tipos internos (forma real del backend) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -17,10 +25,17 @@ interface BackendNotification {
   id: string;
   eventType: string;
   category?: string;
+  priority?: string;
   title: string;
   body: string;
   actionUrl?: string;
+  actionType?: string;
+  actionLabel?: string;
+  actionResourceId?: string;
   isRead: boolean;
+  readAt?: string;
+  archived?: boolean;
+  archivedAt?: string;
   createdAt: string;
   metadata?: Record<string, unknown>;
 }
@@ -38,36 +53,59 @@ interface BackendListResponse {
 
 // â”€â”€â”€ Mappers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+function mapPriority(raw?: string): NotificationPriority | undefined {
+  const p = raw?.toUpperCase();
+  if (p === 'LOW' || p === 'MEDIUM' || p === 'HIGH' || p === 'URGENT') return p;
+  return undefined;
+}
+
 function mapCategory(eventType: string, category?: string): Notification['type'] {
   const cat = category?.toUpperCase() ?? '';
   if (cat === 'ORDER' || eventType.startsWith('ORDER') || eventType === 'NEW_ORDER') return 'order';
-  if (
-    cat === 'REVIEW' ||
-    eventType.startsWith('REVIEW') ||
-    eventType === 'NEW_REVIEW'
-  ) {
-    return 'product';
-  }
+  if (cat === 'REVIEW' || eventType.startsWith('REVIEW') || eventType === 'NEW_REVIEW') return 'product';
   if (cat === 'PRODUCT' || eventType.startsWith('PRODUCT')) return 'product';
-  if (
-    cat === 'MARKETING' ||
-    eventType === 'PROMOTION_CREATED' ||
-    eventType === 'CAMPAIGN'
-  ) {
-    return 'product';
-  }
+  if (cat === 'MARKETING' || eventType === 'PROMOTION_CREATED' || eventType === 'CAMPAIGN') return 'product';
   return 'system';
+}
+
+function mapCanonicalCategory(eventType: string, category?: string): NotificationCategory {
+  const cat = category?.toUpperCase() ?? '';
+  if (cat === 'ORDER' || eventType.startsWith('ORDER') || eventType === 'NEW_ORDER') return 'ORDER';
+  if (cat === 'REVIEW' || eventType.startsWith('REVIEW') || eventType === 'NEW_REVIEW') return 'REVIEW';
+  if (cat === 'PRODUCT' || eventType.startsWith('PRODUCT')) return 'PRODUCT';
+  if (cat === 'MARKETING' || eventType === 'PROMOTION_CREATED' || eventType === 'CAMPAIGN') return 'MARKETING';
+  if (cat === 'ACCOUNT' || eventType.startsWith('ACCOUNT') || eventType.startsWith('CERTIFICATION')) return 'ACCOUNT';
+  return 'SYSTEM';
+}
+
+function mapAction(n: BackendNotification): NotificationAction | undefined {
+  if (!n.actionUrl && !n.actionType) return undefined;
+  const type: NotificationActionType =
+    (n.actionType as NotificationActionType | undefined) ?? 'OPEN_URL';
+  return {
+    type,
+    label: n.actionLabel,
+    url: n.actionUrl,
+    resourceId: n.actionResourceId,
+  };
 }
 
 function mapBackendNotification(n: BackendNotification): Notification {
   return {
     id: n.id,
     type: mapCategory(n.eventType, n.category),
+    category: mapCanonicalCategory(n.eventType, n.category),
+    priority: mapPriority(n.priority),
+    eventType: n.eventType,
     title: n.title,
     description: n.body,
     timestamp: new Date(n.createdAt),
     read: n.isRead,
+    readAt: n.readAt ? new Date(n.readAt) : undefined,
+    archived: n.archived ?? false,
+    archivedAt: n.archivedAt ? new Date(n.archivedAt) : undefined,
     actionUrl: n.actionUrl,
+    action: mapAction(n),
     metadata: n.metadata,
   };
 }
