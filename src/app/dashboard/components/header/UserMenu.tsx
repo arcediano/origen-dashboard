@@ -41,12 +41,34 @@ export function UserMenu({
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuId = React.useId();
+
+  const closeMenu = () => {
+    setIsOpen(false);
+    buttonRef.current?.focus();
+  };
+
+  const toggleMenu = () => {
+    setIsOpen((prev) => !prev);
+  };
+
+  const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggleMenu();
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeMenu();
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       if (buttonRef.current?.contains(target) || dropdownRef.current?.contains(target)) return;
-      setIsOpen(false);
+      closeMenu();
     };
 
     if (isOpen) {
@@ -66,12 +88,34 @@ export function UserMenu({
     router.replace('/auth/login');
   };
 
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeMenu();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
   return (
     <div className="relative">
       <button
         ref={buttonRef}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleMenu}
+        onKeyDown={handleTriggerKeyDown}
         className="relative focus:outline-none group"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-controls={menuId}
+        aria-label="Abrir menú de usuario"
+        type="button"
       >
         <Avatar className={cn(
           'w-10 h-10 ring-2 transition-all cursor-pointer',
@@ -99,6 +143,9 @@ export function UserMenu({
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className="absolute right-0 mt-3 w-72 bg-surface-alt rounded-2xl shadow-xl border border-border-subtle overflow-hidden z-50"
+            id={menuId}
+            role="menu"
+            aria-label="Opciones de cuenta"
           >
             {/* Cabecera con datos del usuario */}
             <div className="px-5 py-5 bg-gradient-to-r from-origen-crema/40 to-transparent border-b border-border-subtle">
@@ -122,7 +169,7 @@ export function UserMenu({
 
             {/* Opción: Mi Perfil */}
             <div className="py-2">
-              <Link href="/dashboard/profile" onClick={() => setIsOpen(false)}>
+              <Link href="/dashboard/profile" onClick={closeMenu}>
                 <div className="flex items-center gap-3 px-4 py-3 hover:bg-origen-crema/50 transition-colors group">
                   <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
                     <User className="w-5 h-5 text-text-subtle group-hover:text-origen-pradera" />
@@ -142,7 +189,7 @@ export function UserMenu({
                 <p className="text-xs font-medium text-text-disabled uppercase tracking-wider">Configuración</p>
               </div>
               
-              <Link href="/dashboard/security" onClick={() => setIsOpen(false)}>
+              <Link href="/dashboard/security" onClick={closeMenu}>
                 <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
                     <Shield className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
@@ -154,7 +201,7 @@ export function UserMenu({
                 </div>
               </Link>
               
-              <Link href="/dashboard/notifications?view=preferences" onClick={() => setIsOpen(false)}>
+              <Link href="/dashboard/notifications?view=preferences" onClick={closeMenu}>
                 <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
                     <BellOff className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
@@ -166,7 +213,7 @@ export function UserMenu({
                 </div>
               </Link>
 
-              <Link href="/dashboard/configuracion/pagos" onClick={() => setIsOpen(false)}>
+              <Link href="/dashboard/configuracion/pagos" onClick={closeMenu}>
                 <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
                     <CreditCard className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />

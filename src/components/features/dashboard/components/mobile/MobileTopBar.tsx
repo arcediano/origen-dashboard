@@ -106,6 +106,8 @@ export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
                 whileTap={{ scale: 0.82 }}
                 onClick={() => router.back()}
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-surface-alt/80 hover:bg-origen-pradera/10 transition-colors text-origen-bosque border border-border-subtle flex-shrink-0"
+                type="button"
+                aria-label="Volver"
               >
                 <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
               </motion.button>

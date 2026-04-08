@@ -13,12 +13,8 @@ import Link from 'next/link';
 import { Card } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { 
-  User, 
   Truck, 
   CreditCard, 
-  Bell, 
-  Shield, 
-  Globe,
   Settings,
   ChevronRight 
 } from 'lucide-react';
@@ -36,30 +32,6 @@ export default function ConfiguracionPage() {
       title: 'Pagos', 
       description: 'Stripe y facturación', 
       href: '/dashboard/configuracion/pagos' 
-    },
-    { 
-      icon: Bell, 
-      title: 'Notificaciones', 
-      description: 'Alertas y comunicaciones', 
-      href: '/dashboard/notifications' 
-    },
-    { 
-      icon: Shield, 
-      title: 'Seguridad', 
-      description: 'Contraseña, sesiones y acceso', 
-      href: '/dashboard/security' 
-    },
-    { 
-      icon: User,
-      title: 'Mi perfil',
-      description: 'Datos personales y de negocio',
-      href: '/dashboard/profile'
-    },
-    {
-      icon: Globe,
-      title: 'Mi negocio',
-      description: 'Información comercial y certificaciones',
-      href: '/dashboard/profile/business'
     }
   ];
 

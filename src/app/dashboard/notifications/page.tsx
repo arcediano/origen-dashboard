@@ -53,7 +53,8 @@ export default function NotificationsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const initialView = searchParams.get('view') === 'preferences' ? 'preferences' : 'inbox';
+  const viewParam = searchParams.get('view');
+  const initialView = viewParam === 'preferences' ? 'preferences' : 'inbox';
 
   const [activeView, setActiveView] = useState<'inbox' | 'preferences'>(initialView);
   const [activeTab, setActiveTab] = useState<'email' | 'push'>('email');
@@ -98,21 +99,40 @@ export default function NotificationsPage() {
     void loadInbox();
   }, []);
 
+  useEffect(() => {
+    const normalizedView = viewParam === 'preferences' ? 'preferences' : 'inbox';
+    if (viewParam !== normalizedView) {
+      router.replace(`/dashboard/notifications?view=${normalizedView}`, { scroll: false });
+    }
+    setActiveView(normalizedView);
+  }, [viewParam, router]);
+
   const handleMarkAsRead = async (id: string) => {
     setNotifications((current) =>
       current.map((notification) =>
         notification.id === id ? { ...notification, read: true } : notification,
       ),
     );
-    await markNotificationAsRead(id);
+    try {
+      await markNotificationAsRead(id);
+    } catch (error) {
+      console.error('[notifications] Error marcando notificación como leída:', error);
+      void loadInbox();
+    }
   };
 
   const handleMarkAll = async () => {
     if (!unreadCount || isInboxUpdating) return;
     setIsInboxUpdating(true);
     setNotifications((current) => current.map((notification) => ({ ...notification, read: true })));
-    await markAllNotificationsAsRead();
-    setIsInboxUpdating(false);
+    try {
+      await markAllNotificationsAsRead();
+    } catch (error) {
+      console.error('[notifications] Error marcando todas como leídas:', error);
+      void loadInbox();
+    } finally {
+      setIsInboxUpdating(false);
+    }
   };
 
   const handleViewChange = (view: 'inbox' | 'preferences') => {
