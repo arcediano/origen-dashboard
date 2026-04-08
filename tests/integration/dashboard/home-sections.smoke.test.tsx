@@ -63,13 +63,11 @@ describe('Dashboard home smoke', () => {
     });
 
     expect(screen.getByTestId('alerts-section')).toBeDefined();
-    expect(screen.getByTestId('producer-card')).toBeDefined();
     expect(screen.getByTestId('stats-grid')).toBeDefined();
     expect(screen.getByTestId('sales-chart')).toBeDefined();
     expect(screen.getByTestId('visits-chart')).toBeDefined();
     expect(screen.getByTestId('orders-summary')).toBeDefined();
     expect(screen.getByTestId('top-products')).toBeDefined();
-    expect(screen.getByTestId('dashboard-tabs')).toBeDefined();
     expect(screen.getByText('Continuar')).toBeDefined();
   });
 

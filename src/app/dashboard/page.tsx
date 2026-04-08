@@ -7,16 +7,14 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ChevronDown, ChevronUp, Leaf, X } from 'lucide-react';
+import { ArrowRight, Leaf, X } from 'lucide-react';
 import { DashboardFooter } from '@/app/dashboard/components/footer/DashboardFooter';
 import {
   AlertList,
   DashboardShell,
-  ProducerCard,
   StatsGrid,
   OrdersSummary,
   TopProducts,
-  DashboardTabs,
   WelcomeHeader,
   SalesChart,
   VisitsChart,
@@ -80,50 +78,8 @@ function OnboardingProgressBanner() {
   );
 }
 
-function BusinessSnapshotCard({
-  profileCompleteness,
-  pendingOrders,
-  totalRevenue,
-}: {
-  profileCompleteness: number;
-  pendingOrders: number;
-  totalRevenue: number;
-}) {
-  const completionLabel = profileCompleteness >= 100 ? 'Operativa' : 'Pendiente de completar';
-
-  return (
-    <div className="rounded-[28px] border border-border-subtle bg-surface-alt p-4 shadow-sm sm:p-5">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Estado del negocio</p>
-          <h2 className="mt-1 text-lg font-semibold text-origen-bosque">Resumen operativo</h2>
-        </div>
-        <div className="rounded-full bg-origen-pradera/10 px-3 py-1 text-xs font-medium text-origen-bosque">
-          {completionLabel}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        <div className="rounded-2xl bg-surface p-3">
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Perfil</p>
-          <p className="mt-1 text-lg font-semibold text-origen-bosque">{profileCompleteness}%</p>
-        </div>
-        <div className="rounded-2xl bg-surface p-3">
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Pendientes</p>
-          <p className="mt-1 text-lg font-semibold text-origen-bosque">{pendingOrders}</p>
-        </div>
-        <div className="rounded-2xl bg-surface p-3">
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Ingresos</p>
-          <p className="mt-1 text-lg font-semibold text-origen-bosque">{totalRevenue.toFixed(0)}€</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function ProducerDashboard() {
   const [mounted, setMounted] = useState(false);
-  const [showAccountHealthMobile, setShowAccountHealthMobile] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<'7d' | '30d' | '90d'>('30d');
   const { user } = useAuth();
 
@@ -132,11 +88,10 @@ export default function ProducerDashboard() {
     stats: realStats,
     isLoading: statsLoading,
     pendingOrders,
-    totalRevenue,
   } = useDashboardStats();
   const { orders: realOrders, isLoading: ordersLoading } = useRecentOrders(3);
   const { products: realProducts, isLoading: productsLoading } = useTopProducts(3);
-  const { producer, isLoading: profileLoading, error: profileError } = useProducerProfile();
+  const { producer } = useProducerProfile();
 
   useEffect(() => {
     setMounted(true);
@@ -175,8 +130,12 @@ export default function ProducerDashboard() {
         id: 'profile-incomplete',
         type: 'accent',
         title: 'Aún puedes mejorar tu perfil',
-        description: `Te faltan detalles para completar tu escaparate. Estado actual: ${profileCompleteness}%.`,
+        description: `Completa tu perfil de negocio para mejorar confianza y conversión. Estado actual: ${profileCompleteness}%.`,
         dismissible: true,
+        action: {
+          label: 'Completar perfil',
+          href: '/dashboard/profile/business',
+        },
       });
     }
 
@@ -253,58 +212,6 @@ export default function ProducerDashboard() {
           <OrdersSummary orders={realOrders} isLoading={ordersLoading} className="lg:col-span-2" />
           <TopProducts products={realProducts} isLoading={productsLoading} />
         </div>
-
-        <div className="sm:hidden">
-          <button
-            type="button"
-            onClick={() => setShowAccountHealthMobile((prev) => !prev)}
-            className="w-full rounded-2xl border border-border-subtle bg-surface px-4 py-3 text-left"
-            aria-expanded={showAccountHealthMobile}
-            aria-controls="account-health-mobile"
-          >
-            <span className="flex items-center justify-between gap-3">
-              <span>
-                <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Estado de cuenta</span>
-                <span className="mt-1 block text-sm font-semibold text-origen-bosque">Perfil {profileCompleteness}% completado</span>
-              </span>
-              {showAccountHealthMobile ? (
-                <ChevronUp className="h-4 w-4 text-text-subtle" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-text-subtle" />
-              )}
-            </span>
-          </button>
-
-          {showAccountHealthMobile && (
-            <div id="account-health-mobile" className="mt-3 grid grid-cols-1 gap-4">
-              <ProducerCard
-                producer={producer}
-                isLoading={profileLoading}
-                error={profileError}
-              />
-              <BusinessSnapshotCard
-                profileCompleteness={profileCompleteness}
-                pendingOrders={pendingOrders}
-                totalRevenue={totalRevenue}
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="hidden grid-cols-1 gap-5 sm:grid xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
-          <ProducerCard
-            producer={producer}
-            isLoading={profileLoading}
-            error={profileError}
-          />
-          <BusinessSnapshotCard
-            profileCompleteness={profileCompleteness}
-            pendingOrders={pendingOrders}
-            totalRevenue={totalRevenue}
-          />
-        </div>
-
-        <DashboardTabs />
       </DashboardShell>
 
       <DashboardFooter className="hidden lg:block" />

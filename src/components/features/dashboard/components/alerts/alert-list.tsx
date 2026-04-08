@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useCallback, memo } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Alert, AlertTitle, AlertDescription } from '@arcediano/ux-library';
 import { itemVariants } from '../layout/dashboard-shell';
@@ -30,6 +31,16 @@ const AlertItem = memo(function AlertItem({
       <Alert variant={alertVariant}>
         <AlertTitle>{alert.title}</AlertTitle>
         <AlertDescription>{alert.description}</AlertDescription>
+        {alert.action && (
+          <div className="mt-2">
+            <Link
+              href={alert.action.href}
+              className="inline-flex items-center rounded-lg bg-origen-bosque px-3 py-1.5 text-xs font-medium text-white hover:bg-origen-pino"
+            >
+              {alert.action.label}
+            </Link>
+          </div>
+        )}
       </Alert>
       {alert.dismissible && (
         <button
