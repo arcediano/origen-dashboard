@@ -31,7 +31,7 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     title: 'Ver pedidos',
     description: 'Gestiona tus pedidos pendientes',
     icon: ShoppingBag,
-    href: '/dashboard/pedidos',
+    href: '/dashboard/orders',
     badge: 3,
     gradient: 'from-origen-pradera to-origen-hoja',
   },
@@ -45,10 +45,10 @@ const DEFAULT_ACTIONS: QuickAction[] = [
   },
   {
     id: 'statistics',
-    title: 'Estadísticas',
-    description: 'Analiza el rendimiento de tu tienda',
+    title: 'Notificaciones',
+    description: 'Revisa actividad y preferencias',
     icon: BarChart3,
-    href: '/dashboard/estadisticas',
+    href: '/dashboard/notifications',
     gradient: 'from-origen-pino to-origen-bosque',
   },
 ];
@@ -71,7 +71,7 @@ export function QuickActionsGrid({
       <h3 className="text-sm font-medium text-text-subtle uppercase tracking-wider mb-4">
         Acciones rápidas
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
         {finalActions.map((action) => (
           <QuickActionCard
             key={action.id}

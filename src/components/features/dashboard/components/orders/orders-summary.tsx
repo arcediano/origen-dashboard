@@ -30,7 +30,7 @@ export function OrdersSummary({ orders, isLoading = false, className }: OrdersSu
           Pedidos recientes
         </h3>
         <Link
-          href="/dashboard/pedidos"
+          href="/dashboard/orders"
           className="text-sm text-origen-pradera hover:text-origen-hoja flex items-center gap-1"
         >
           Ver todos <ChevronRight className="w-4 h-4" />

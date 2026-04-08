@@ -30,7 +30,6 @@ export function QuickActionCard({
 }: QuickActionCardProps) {
   return (
     <Link href={href} className="block group relative">
-      {/* EFECTO EXACTO DE BENEFITSSECTION */}
       <div className={cn(
         "absolute inset-0 rounded-2xl transition-transform duration-300",
         "bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5",
@@ -38,23 +37,22 @@ export function QuickActionCard({
       )}></div>
       
       <div className={cn(
-        "relative bg-surface-alt rounded-2xl p-6 border border-border",
+        "relative bg-surface-alt rounded-2xl border border-border p-4 sm:p-5 lg:p-6",
         "shadow-origen group-hover:shadow-origen-lg group-hover:border-origen-pradera",
         "transition-all duration-300",
         className
       )}>
-        <div className="flex items-center gap-4">
-          {/* Icono circular */}
+        <div className="flex items-center gap-3 sm:gap-4">
           <div className={cn(
-            "w-14 h-14 rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0 shadow-subtle",
+            "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-subtle sm:h-14 sm:w-14 sm:rounded-xl",
             gradient
           )}>
-            <Icon className="w-7 h-7 text-white" />
+            <Icon className="h-5 w-5 text-white sm:h-7 sm:w-7" />
           </div>
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-lg text-origen-bosque">{title}</h3>
+              <h3 className="text-sm font-semibold text-origen-bosque sm:text-base lg:text-lg">{title}</h3>
               {badge && (
                 <span className="px-2 py-0.5 text-xs font-medium bg-origen-pradera text-white rounded-full">
                   {badge}
@@ -62,11 +60,11 @@ export function QuickActionCard({
               )}
             </div>
             {description && (
-              <p className="text-sm text-muted-foreground mt-1">{description}</p>
+              <p className="mt-1 line-clamp-2 text-xs text-muted-foreground sm:text-sm">{description}</p>
             )}
           </div>
           
-          <ChevronRight className="w-5 h-5 text-text-subtle group-hover:text-origen-pradera group-hover:translate-x-1 transition-all" />
+          <ChevronRight className="h-4 w-4 text-text-subtle transition-all group-hover:translate-x-1 group-hover:text-origen-pradera sm:h-5 sm:w-5" />
         </div>
       </div>
     </Link>
