@@ -42,16 +42,16 @@ describe('EnhancedStep1Location — Dirección de facturación', () => {
     const checkbox = screen.getByLabelText(/la dirección de facturación es la misma que la de producción/i);
 
     expect(checkbox).toBeChecked();
-    expect(screen.queryByPlaceholderText(/^3º A, Local 1$/i)).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/^3º A$/i)).not.toBeInTheDocument();
 
     await user.click(checkbox);
 
     expect(checkbox).not.toBeChecked();
-    expect(screen.getByPlaceholderText(/^3º A, Local 1$/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/^3º A$/i)).toBeInTheDocument();
 
     await user.click(checkbox);
 
     expect(checkbox).toBeChecked();
-    expect(screen.queryByPlaceholderText(/^3º A, Local 1$/i)).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/^3º A$/i)).not.toBeInTheDocument();
   });
 });
