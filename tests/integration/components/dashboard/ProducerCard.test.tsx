@@ -23,7 +23,10 @@ const baseProducer: ProducerProfile = {
   id: 'producer-001',
   name: 'Quesería Artesana Valle del Tajo',
   location: 'Talavera de la Reina, Toledo',
-  profileCompletenessScore: 72,
+  profileCompletenessScore: 0.72,
+  profileCompletenessRatio: 0.72,
+  profileCompletenessPercent: 72,
+  profileCompletenessMeta: { completedSteps: 4, totalSteps: 6, version: 'v1' },
   accountStatus: 'active',
   avatarUrl: '',
 };
@@ -81,7 +84,7 @@ describe('ProducerCard', () => {
   it('muestra CTA "Completar perfil" cuando score < 100', () => {
     render(
       <ProducerCard
-        producer={{ ...baseProducer, profileCompletenessScore: 72 }}
+        producer={{ ...baseProducer, profileCompletenessScore: 0.72, profileCompletenessRatio: 0.72, profileCompletenessPercent: 72 }}
       />,
     );
     expect(screen.getByText('Completar perfil')).toBeDefined();
@@ -90,7 +93,7 @@ describe('ProducerCard', () => {
   it('NO muestra CTA "Completar perfil" cuando score === 100', () => {
     render(
       <ProducerCard
-        producer={{ ...baseProducer, profileCompletenessScore: 100 }}
+        producer={{ ...baseProducer, profileCompletenessScore: 1, profileCompletenessRatio: 1, profileCompletenessPercent: 100 }}
       />,
     );
     expect(screen.queryByText('Completar perfil')).toBeNull();
@@ -139,7 +142,7 @@ describe('ProducerCard', () => {
   it('renderiza score 0 sin errores', () => {
     render(
       <ProducerCard
-        producer={{ ...baseProducer, profileCompletenessScore: 0 }}
+        producer={{ ...baseProducer, profileCompletenessScore: 0, profileCompletenessRatio: 0, profileCompletenessPercent: 0 }}
       />,
     );
     expect(screen.getByText('0%')).toBeDefined();
@@ -148,7 +151,7 @@ describe('ProducerCard', () => {
   it('renderiza score 100 sin CTA', () => {
     render(
       <ProducerCard
-        producer={{ ...baseProducer, profileCompletenessScore: 100 }}
+        producer={{ ...baseProducer, profileCompletenessScore: 1, profileCompletenessRatio: 1, profileCompletenessPercent: 100 }}
       />,
     );
     expect(screen.getByText('100%')).toBeDefined();

@@ -32,12 +32,10 @@ const itemVariants = {
 export default function ProfilePage() {
   const { producer } = useProducerProfile();
 
-  const rawScore = producer?.profileCompletenessScore ?? 0;
-  const completion = Math.round(Math.min(100, Math.max(0, rawScore <= 1 ? rawScore * 100 : rawScore)));
-
-  const totalSections = 3;
-  const completedSections = Math.round((completion / 100) * totalSections);
-  const pendingItems = Math.max(0, totalSections - completedSections);
+  const completion = producer?.profileCompletenessPercent ?? 0;
+  const totalTrackedItems = producer?.profileCompletenessMeta.totalSteps ?? 0;
+  const completedTrackedItems = producer?.profileCompletenessMeta.completedSteps ?? 0;
+  const pendingItems = Math.max(0, totalTrackedItems - completedTrackedItems);
 
   const personalVerified = Boolean(producer?.name && producer?.location);
   const businessVerified = Boolean(producer?.categories && producer.categories.length > 0);

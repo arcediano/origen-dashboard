@@ -31,6 +31,12 @@ export interface Producer {
 
 export type AccountStatus = 'active' | 'pending' | 'suspended';
 
+export interface ProducerProfileCompletenessMeta {
+  completedSteps: number;
+  totalSteps: number;
+  version: string;
+}
+
 /**
  * Perfil del productor tal como lo devuelve GET /api/v1/producers/me (T16-BE4).
  */
@@ -43,7 +49,10 @@ export interface ProducerProfile {
   location: string;
   shortBio?: string;
   categories?: string[];
-  profileCompletenessScore: number;
+  profileCompletenessScore?: number;
+  profileCompletenessRatio: number;
+  profileCompletenessPercent: number;
+  profileCompletenessMeta: ProducerProfileCompletenessMeta;
   accountStatus: AccountStatus;
 }
 

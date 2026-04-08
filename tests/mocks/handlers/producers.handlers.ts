@@ -21,15 +21,22 @@ export const mockProducerProfile: ProducerProfile = {
   location: 'Talavera de la Reina, Toledo',
   shortBio: 'El auténtico sabor de la tradición manchega desde 1985',
   categories: ['lácteos', 'quesos'],
-  profileCompletenessScore: 72,
+  profileCompletenessScore: 0.72,
+  profileCompletenessRatio: 0.72,
+  profileCompletenessPercent: 72,
+  profileCompletenessMeta: { completedSteps: 4, totalSteps: 6, version: 'v1' },
   accountStatus: 'active',
+};
+
+const mockProducerProfileApi = {
+  ...mockProducerProfile,
 };
 
 // ─── Handlers normales ────────────────────────────────────────────────────────
 
 export const producersHandlers = [
   http.get(`${BASE}/producers/me`, () =>
-    HttpResponse.json(mockProducerProfile),
+    HttpResponse.json(mockProducerProfileApi),
   ),
 ];
 
@@ -50,16 +57,22 @@ export const producerUnauthorizedHandler = http.get(
 
 export const producerCompleteHandler = http.get(`${BASE}/producers/me`, () =>
   HttpResponse.json({
-    ...mockProducerProfile,
-    profileCompletenessScore: 100,
+    ...mockProducerProfileApi,
+    profileCompletenessScore: 1,
+    profileCompletenessRatio: 1,
+    profileCompletenessPercent: 100,
+    profileCompletenessMeta: { completedSteps: 6, totalSteps: 6, version: 'v1' },
     accountStatus: 'active',
-  } satisfies ProducerProfile),
+  }),
 );
 
 export const producerIncompleteHandler = http.get(`${BASE}/producers/me`, () =>
   HttpResponse.json({
-    ...mockProducerProfile,
-    profileCompletenessScore: 45,
+    ...mockProducerProfileApi,
+    profileCompletenessScore: 0.45,
+    profileCompletenessRatio: 0.45,
+    profileCompletenessPercent: 45,
+    profileCompletenessMeta: { completedSteps: 3, totalSteps: 6, version: 'v1' },
     accountStatus: 'pending',
-  } satisfies ProducerProfile),
+  }),
 );

@@ -72,11 +72,13 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/profile/personal': 'Información personal',
   '/dashboard/profile/business': 'Mi negocio',
   '/dashboard/profile/certifications': 'Certificaciones',
+  '/dashboard/profile/settings': 'Ajustes de perfil',
   '/dashboard/notifications': 'Notificaciones',
   '/dashboard/security': 'Seguridad',
   '/dashboard/configuracion': 'Ajustes',
   '/dashboard/configuracion/envios': 'Envíos',
   '/dashboard/configuracion/pagos': 'Pagos',
+  '/dashboard/configuracion/perfil': 'Ajustes de perfil',
   '/dashboard/business': 'Mi negocio',
 };
 
@@ -90,6 +92,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   personal: 'Información personal',
   business: 'Mi negocio',
   certifications: 'Certificaciones',
+  settings: 'Ajustes de perfil',
   notifications: 'Notificaciones',
   security: 'Seguridad',
   configuracion: 'Ajustes',
@@ -189,7 +192,7 @@ const SETTINGS_ITEMS: MenuItem[] = [
     label: 'Ajustes',
     icon: Settings,
     href: '/dashboard/configuracion',
-    matchPaths: ['/dashboard/configuracion'],
+    matchPaths: ['/dashboard/configuracion', '/dashboard/configuracion/*', '/dashboard/profile/settings*'],
   },
 ];
 

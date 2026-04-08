@@ -25,11 +25,6 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-function normalizeProfileScore(score: number): number {
-  const normalized = score <= 1 ? score * 100 : score;
-  return Math.round(Math.min(100, Math.max(0, normalized)));
-}
-
 // ─── sub-components ───────────────────────────────────────────────────────────
 
 interface StatusBadgeProps {
@@ -77,11 +72,11 @@ function StatusBadge({ status }: StatusBadgeProps) {
 }
 
 interface CompletenessBarProps {
-  score: number;
+  percent: number;
 }
 
-function CompletenessBar({ score }: CompletenessBarProps) {
-  const clamped = normalizeProfileScore(score);
+function CompletenessBar({ percent }: CompletenessBarProps) {
+  const clamped = Math.round(Math.min(100, Math.max(0, percent)));
 
   const barColor =
     clamped < 40
@@ -173,7 +168,7 @@ export function ProducerCard({
   if (!producer) return null;
 
   const initials = getInitials(producer.name);
-  const isIncomplete = normalizeProfileScore(producer.profileCompletenessScore) < 100;
+  const isIncomplete = producer.profileCompletenessPercent < 100;
 
   return (
     <motion.div
@@ -219,7 +214,7 @@ export function ProducerCard({
 
       {/* Row 2: profile completeness */}
       <div className="max-w-xs sm:max-w-sm">
-        <CompletenessBar score={producer.profileCompletenessScore} />
+        <CompletenessBar percent={producer.profileCompletenessPercent} />
       </div>
 
       {/* Row 3: CTA — only when profile is incomplete */}

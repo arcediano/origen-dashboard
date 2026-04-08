@@ -51,16 +51,17 @@ describe('useProducerProfile', () => {
     expect(p.id).toBe(mockProducerProfile.id);
     expect(p.name).toBe(mockProducerProfile.name);
     expect(p.location).toBe(mockProducerProfile.location);
-    expect(p.profileCompletenessScore).toBe(mockProducerProfile.profileCompletenessScore);
+    expect(p.profileCompletenessRatio).toBe(mockProducerProfile.profileCompletenessRatio);
+    expect(p.profileCompletenessPercent).toBe(mockProducerProfile.profileCompletenessPercent);
     expect(p.accountStatus).toBe(mockProducerProfile.accountStatus);
   });
 
-  it('profileCompletenessScore es un número 0-100', async () => {
+  it('profileCompletenessPercent es un número 0-100', async () => {
     const { result } = renderHook(() => useProducerProfile());
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    const score = result.current.producer!.profileCompletenessScore;
+    const score = result.current.producer!.profileCompletenessPercent;
     expect(typeof score).toBe('number');
     expect(score).toBeGreaterThanOrEqual(0);
     expect(score).toBeLessThanOrEqual(100);
@@ -121,7 +122,7 @@ describe('useProducerProfile', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.producer!.profileCompletenessScore).toBe(100);
+    expect(result.current.producer!.profileCompletenessPercent).toBe(100);
   });
 
   it('carga perfil incompleto con status pending', async () => {
@@ -130,7 +131,7 @@ describe('useProducerProfile', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.producer!.profileCompletenessScore).toBe(45);
+    expect(result.current.producer!.profileCompletenessPercent).toBe(45);
     expect(result.current.producer!.accountStatus).toBe('pending');
   });
 

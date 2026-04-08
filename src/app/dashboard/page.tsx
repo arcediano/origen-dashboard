@@ -143,11 +143,7 @@ export default function ProducerDashboard() {
   // BUG FIX: usar el nombre real del usuario autenticado en lugar del hardcodeado 'María'
   const userName = user?.firstName ?? 'Productor';
 
-  const profileCompleteness = useMemo(() => {
-    const rawScore = producer?.profileCompletenessScore ?? 0;
-    const normalized = rawScore <= 1 ? rawScore * 100 : rawScore;
-    return Math.round(Math.min(100, Math.max(0, normalized)));
-  }, [producer?.profileCompletenessScore]);
+  const profileCompleteness = producer?.profileCompletenessPercent ?? 0;
 
   const alerts = useMemo<DashboardAlert[]>(() => {
     const dashboardAlerts: DashboardAlert[] = [];

@@ -36,9 +36,11 @@ describe('fetchMyProfile', () => {
     expect(result.data!.location).toBe(mockProducerProfile.location);
   });
 
-  it('profileCompletenessScore es un número', async () => {
+  it('devuelve percent y ratio canónicos de completitud', async () => {
     const result = await fetchMyProfile();
-    expect(typeof result.data!.profileCompletenessScore).toBe('number');
+    expect(typeof result.data!.profileCompletenessRatio).toBe('number');
+    expect(typeof result.data!.profileCompletenessPercent).toBe('number');
+    expect(result.data!.profileCompletenessPercent).toBe(72);
   });
 
   it('accountStatus es un valor válido', async () => {
