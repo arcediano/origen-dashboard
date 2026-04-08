@@ -44,6 +44,13 @@ const LOGO_FIXTURE_PATH = 'tests/e2e/fixtures/logo-test.png';
 const DOC_CIF_FIXTURE_PATH = 'tests/e2e/fixtures/doc-test.pdf';
 const DOC_SEGURO_FIXTURE_PATH = 'tests/e2e/fixtures/seguro-test.pdf';
 const DOC_MANIPULADOR_FIXTURE_PATH = 'tests/e2e/fixtures/manipulador-test.pdf';
+const MOBILE_VIEWPORT = { width: 375, height: 812 };
+
+const QA_MANDATORY_TASKS = [
+  'Flujo principal en desktop',
+  'Revisión mobile UX (375x812)',
+  'Validación de sesión expirada con redirect a login',
+] as const;
 
 // ─── TIMESTAMP único para que los emails no choquen entre ejecuciones ─────────
 const TS = Date.now();
@@ -93,6 +100,7 @@ interface ProducerProfile {
       availabilityLabel: 'Todo el año' | 'De temporada' | 'Bajo pedido';
     };
   };
+  qaTasks: readonly string[];
 }
 
 const PROFILES: ProducerProfile[] = [
@@ -135,6 +143,7 @@ const PROFILES: ProducerProfile[] = [
         availabilityLabel: 'Todo el año',
       },
     },
+    qaTasks: QA_MANDATORY_TASKS,
   },
   {
     firstName: 'Miguel',
@@ -174,6 +183,7 @@ const PROFILES: ProducerProfile[] = [
         availabilityLabel: 'Todo el año',
       },
     },
+    qaTasks: QA_MANDATORY_TASKS,
   },
   {
     firstName: 'Carmen',
@@ -213,6 +223,7 @@ const PROFILES: ProducerProfile[] = [
         availabilityLabel: 'Todo el año',
       },
     },
+    qaTasks: QA_MANDATORY_TASKS,
   },
 ];
 
@@ -918,6 +929,48 @@ async function completeOnboardingStep7(page: Page, profile: ProducerProfile): Pr
   await expect(page).toHaveURL(/dashboard/, { timeout: 20_000 });
 }
 
+async function runMandatoryMobileUxAndSessionCheck(page: Page, profile: ProducerProfile): Promise<void> {
+  await page.setViewportSize(MOBILE_VIEWPORT);
+  await hideDevOverlay(page);
+
+  console.info(`[E2E][Mobile QA] ${profile.firstName} tareas: ${profile.qaTasks.join(' | ')}`);
+
+  await page.goto('/onboarding', { waitUntil: 'domcontentloaded' });
+
+  // Verifica que el CTA principal de navegación mobile existe cuando estamos en onboarding.
+  if (page.url().includes('/onboarding')) {
+    const mobilePrimaryCta = page.getByRole('button', { name: /^(Continuar|Siguiente|Finalizar)$/i }).first();
+    await expect(
+      mobilePrimaryCta,
+      `${profile.firstName}: CTA móvil principal no visible en onboarding`,
+    ).toBeVisible({ timeout: 10_000 });
+  }
+
+  // Simular token inválido para validar comportamiento esperado de sesión expirada.
+  const origin = new URL(page.url()).origin;
+  const url = new URL(origin);
+  await page.context().clearCookies();
+  await page.context().addCookies([
+    {
+      name: 'accessToken',
+      value: 'invalid.token.signature',
+      domain: url.hostname,
+      path: '/',
+      httpOnly: true,
+      secure: url.protocol === 'https:',
+      sameSite: 'Lax',
+    },
+  ]);
+
+  await page.goto('/onboarding', { waitUntil: 'domcontentloaded' });
+  await expect(page, `${profile.firstName}: sin redirect a login tras token inválido`).toHaveURL(/\/auth\/login/, { timeout: 15_000 });
+  await expect(page, `${profile.firstName}: falta reason=expired en redirect`).toHaveURL(/reason=expired/, { timeout: 15_000 });
+  await expect(
+    page.getByText(/Tu sesión ha expirado/i),
+    `${profile.firstName}: mensaje de sesión expirada no visible en login`,
+  ).toBeVisible({ timeout: 15_000 });
+}
+
 // ═════════════════════════════════════════════════════════════════════════════
 // SUITE PRINCIPAL
 // ═════════════════════════════════════════════════════════════════════════════
@@ -1348,6 +1401,36 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
         await completeOnboardingStep7(page, profile);
 
         console.info(`[E2E] Onboarding finalizado: ${account!.email} → dashboard`);
+      });
+    }
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // FASE 10: QA obligatorio mobile + sesión expirada
+  // ───────────────────────────────────────────────────────────────────────────
+
+  test.describe('Fase 10 · QA móvil obligatorio y sesión expirada', () => {
+    test.setTimeout(90_000);
+
+    for (let i = 0; i < PROFILES.length; i++) {
+      const profile = PROFILES[i];
+
+      test(`${profile.firstName} completa tareas QA mobile + sesión`, async ({ page }) => {
+        test.skip(!SHOULD_RUN_E2E, 'Requiere E2E_ENABLE_REGISTRATION=true o E2E_USE_APPROVED_ACCOUNTS=true.');
+
+        const account = registrationResults[i];
+        test.skip(!account, `No hay credenciales para ${profile.firstName}.`);
+
+        const destinationUrl = await loginAndWait(page, account!.email, account!.password);
+        if (destinationUrl.includes('/auth/login')) {
+          if (await isPendingApprovalState(page)) {
+            test.skip(true, `${profile.firstName} sigue en revisión manual; no se puede ejecutar QA móvil.`);
+            return;
+          }
+          throw new Error(`Login rechazado para ${profile.firstName}. URL: ${destinationUrl}`);
+        }
+
+        await runMandatoryMobileUxAndSessionCheck(page, profile);
       });
     }
   });

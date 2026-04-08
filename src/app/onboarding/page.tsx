@@ -193,6 +193,11 @@ interface OnboardingFormData {
 export default function OnboardingPage() {
   const router = useRouter();
   const { user, setUser } = useAuth();
+
+  const redirectToLoginOnExpiredSession = useCallback(() => {
+    const message = encodeURIComponent('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
+    router.replace(`/auth/login?reason=expired&message=${message}`);
+  }, [router]);
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -351,9 +356,15 @@ export default function OnboardingPage() {
           setCurrentStep(Math.max(0, savedStep));
         }
       })
-      .catch(() => { /* primer acceso — sin datos guardados */ })
+      .catch((error: unknown) => {
+        if (error instanceof GatewayError && error.status === 401) {
+          redirectToLoginOnExpiredSession();
+          return;
+        }
+        /* primer acceso — sin datos guardados */
+      })
       .finally(() => setIsLoading(false));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [redirectToLoginOnExpiredSession]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const totalSteps = STEPS.length;
   const progress = ((currentStep + 1) / totalSteps) * 100;
@@ -583,6 +594,10 @@ export default function OnboardingPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error: unknown) {
       console.error('[Onboarding] handleNext error:', error);
+      if (error instanceof GatewayError && error.status === 401) {
+        redirectToLoginOnExpiredSession();
+        return;
+      }
       setSaveError(getUserFriendlyError(error, 'Error al guardar. Inténtalo de nuevo.'));
     } finally {
       setIsSubmitting(false);
@@ -616,6 +631,10 @@ export default function OnboardingPage() {
       router.push('/dashboard');
     } catch (error: unknown) {
       console.error('[Onboarding] handleComplete error:', error);
+      if (error instanceof GatewayError && error.status === 401) {
+        redirectToLoginOnExpiredSession();
+        return;
+      }
       setSaveError(getUserFriendlyError(error, 'Error al completar el onboarding. Inténtalo de nuevo.'));
     } finally {
       setIsSubmitting(false);

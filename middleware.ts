@@ -34,7 +34,7 @@ import { jwtVerify, importSPKI, type CryptoKey, type KeyObject } from 'jose';
 
 // ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
 
-const PROTECTED_PREFIXES = ['/dashboard'];
+const PROTECTED_PREFIXES = ['/dashboard', '/onboarding'];
 const AUTH_PREFIXES      = ['/auth/login', '/auth/register'];
 
 // ─── CACHÉ DE CLAVE PÚBLICA ───────────────────────────────────────────────────
