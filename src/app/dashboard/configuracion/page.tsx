@@ -26,12 +26,6 @@ import {
 export default function ConfiguracionPage() {
   const sections = [
     { 
-      icon: User, 
-      title: 'Perfil público', 
-      description: 'Información de tu negocio', 
-      href: '/dashboard/configuracion/profile' 
-    },
-    { 
       icon: Truck, 
       title: 'Envíos', 
       description: 'Métodos y zonas de entrega', 
@@ -47,19 +41,25 @@ export default function ConfiguracionPage() {
       icon: Bell, 
       title: 'Notificaciones', 
       description: 'Alertas y comunicaciones', 
-      href: '/dashboard/configuracion/notificaciones' 
+      href: '/dashboard/notifications' 
     },
     { 
       icon: Shield, 
-      title: 'Privacidad', 
-      description: 'Datos y seguridad', 
-      href: '/dashboard/configuracion/privacidad' 
+      title: 'Seguridad', 
+      description: 'Contraseña, sesiones y acceso', 
+      href: '/dashboard/security' 
     },
     { 
-      icon: Globe, 
-      title: 'Idioma y región', 
-      description: 'Preferencias regionales', 
-      href: '/dashboard/configuracion/idioma' 
+      icon: User,
+      title: 'Mi perfil',
+      description: 'Datos personales y de negocio',
+      href: '/dashboard/profile'
+    },
+    {
+      icon: Globe,
+      title: 'Mi negocio',
+      description: 'Información comercial y certificaciones',
+      href: '/dashboard/profile/business'
     }
   ];
 

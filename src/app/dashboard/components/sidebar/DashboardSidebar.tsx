@@ -1,31 +1,18 @@
 /**
  * @component DashboardSidebar
- * @description Menú lateral principal del dashboard
- * 
- * FUNCIONALIDADES:
- * - Navegación principal con submenús anidados
- * - Badges de notificaciones
- * - Indicador de sección activa animado
- * - Versión responsive con overlay en móvil
- * - Cierre automático al navegar en móvil
+ * @description Navegación principal del dashboard, unificada para desktop y móvil.
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@arcediano/ux-library';
-import { 
-  Leaf, 
-  X, 
-  HelpCircle, 
-  LogOut 
-} from 'lucide-react';
+import { ChevronRight, CirclePlus, HelpCircle, Leaf, LogOut, X } from 'lucide-react';
 import { SidebarMenuItem } from './SidebarMenuItem';
-import { MENU_ITEMS } from '@/constants/sidebar';
+import { DASHBOARD_NAV_SECTIONS } from '@/constants/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { logoutUser } from '@/lib/api/auth';
 
@@ -35,9 +22,8 @@ interface DashboardSidebarProps {
 }
 
 export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: DashboardSidebarProps) {
-  const pathname = usePathname();
   const router = useRouter();
-  const { clearUser } = useAuth();
+  const { clearUser, user } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -46,19 +32,16 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
   }, []);
 
   const handleItemClick = () => {
-    if (onMobileClose) onMobileClose();
+    onMobileClose?.();
   };
 
-  // BUG FIX: Los botones de cerrar sesión no tenían onClick.
-  // Ahora llaman al endpoint de logout del gateway, limpian el contexto
-  // y redirigen al login.
   const handleLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
     try {
       await logoutUser();
     } catch {
-      // Si el gateway falla, continuamos con el logout local igualmente
+      // El logout local debe continuar aunque falle la llamada al gateway.
     } finally {
       clearUser();
       router.replace('/auth/login');
@@ -67,7 +50,62 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
 
   if (!mounted) return null;
 
-  // Versión móvil (overlay)
+  const userName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Tu cuenta';
+  const userEmail = user?.email ?? 'productor@origen.es';
+  const userInitials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase() || 'OR';
+
+  const navSections = (
+    <>
+      {DASHBOARD_NAV_SECTIONS.map((section) => (
+        <section key={section.id} className="space-y-2">
+          <p className="px-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            {section.label}
+          </p>
+          <div className="space-y-1">
+            {section.items.map((item) => (
+              <SidebarMenuItem key={item.id} {...item} onItemClick={handleItemClick} />
+            ))}
+          </div>
+        </section>
+      ))}
+    </>
+  );
+
+  const quickAction = (
+    <Link
+      href="/dashboard/products/create"
+      onClick={handleItemClick}
+      className="flex items-center justify-between rounded-2xl bg-origen-bosque px-4 py-3 text-sm font-semibold text-white shadow-sm transition-transform hover:translate-y-[-1px] active:scale-[0.98]"
+    >
+      <span className="flex items-center gap-2">
+        <CirclePlus className="h-4 w-4" />
+        Nuevo producto
+      </span>
+      <ChevronRight className="h-4 w-4" />
+    </Link>
+  );
+
+  const footer = (
+    <div className="border-t border-border-subtle p-3">
+      <Link
+        href="/ayuda"
+        onClick={handleItemClick}
+        className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-muted-foreground transition-all hover:bg-surface"
+      >
+        <HelpCircle className="h-5 w-5 text-text-subtle" />
+        <span>Ayuda</span>
+      </Link>
+      <button
+        onClick={handleLogout}
+        disabled={isLoggingOut}
+        className="mt-1 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm text-red-600 transition-all hover:bg-red-50 disabled:opacity-50"
+      >
+        <LogOut className="h-5 w-5" />
+        <span>{isLoggingOut ? 'Cerrando...' : 'Cerrar sesión'}</span>
+      </button>
+    </div>
+  );
+
   if (isMobileOpen) {
     return (
       <>
@@ -78,99 +116,68 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
           className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm lg:hidden"
           onClick={onMobileClose}
         />
-        
+
         <motion.aside
-          initial={{ x: -320 }}
+          initial={{ x: -360 }}
           animate={{ x: 0 }}
-          exit={{ x: -320 }}
+          exit={{ x: -360 }}
           transition={{ type: 'spring', damping: 30, stiffness: 200 }}
-          className="fixed top-0 left-0 z-50 h-full w-80 bg-surface-alt shadow-2xl lg:hidden flex flex-col"
+          className="fixed left-0 top-0 z-50 flex h-full w-[calc(100vw-1rem)] max-w-[22rem] flex-col bg-surface-alt shadow-2xl lg:hidden"
         >
-          {/* Cabecera móvil */}
-          <div className="flex items-center justify-between p-6 border-b border-border-subtle">
-            <Link href="/dashboard" className="flex items-center gap-3" onClick={handleItemClick}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md"
-                   style={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #74C69D 100%)' }}>
-                <Leaf className="w-5 h-5 text-white" />
+          <div className="border-b border-border-subtle px-5 pb-5 pt-[max(env(safe-area-inset-top),1.25rem)]">
+            <div className="mb-5 flex items-center justify-between">
+              <Link href="/dashboard" className="flex items-center gap-3" onClick={handleItemClick}>
+                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-bosque via-origen-pino to-origen-hoja shadow-md">
+                  <Leaf className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <span className="block text-base font-semibold text-origen-bosque">origen.</span>
+                  <span className="block text-[11px] font-medium text-muted-foreground">Panel del productor</span>
+                </div>
+              </Link>
+              <Button variant="ghost" size="icon-sm" onClick={onMobileClose}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="rounded-3xl border border-border-subtle bg-surface p-4 shadow-sm">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-pradera to-origen-hoja text-sm font-semibold text-white shadow-sm">
+                  {userInitials}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-origen-bosque">{userName}</p>
+                  <p className="truncate text-xs text-muted-foreground">{userEmail}</p>
+                </div>
               </div>
-              <span className="text-base font-semibold" style={{ color: '#1B4332' }}>origen.</span>
-            </Link>
-            <Button variant="ghost" size="icon-sm" onClick={onMobileClose}>
-              <X className="w-5 h-5" />
-            </Button>
+              {quickAction}
+            </div>
           </div>
 
-          {/* Navegación móvil */}
-          <nav className="flex-1 overflow-y-auto py-4 px-3">
-            {MENU_ITEMS.map((item) => (
-              <SidebarMenuItem
-                key={item.id}
-                {...item}
-                onItemClick={handleItemClick}
-              />
-            ))}
-          </nav>
-
-          {/* Footer móvil */}
-          <div className="p-3 border-t border-border-subtle">
-            <Link href="/ayuda" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-muted-foreground hover:bg-surface transition-all">
-              <HelpCircle className="w-5 h-5 text-text-subtle" />
-              <span>Ayuda</span>
-            </Link>
-            <button
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-all mt-1 disabled:opacity-50"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>{isLoggingOut ? 'Cerrando...' : 'Cerrar sesión'}</span>
-            </button>
-          </div>
+          <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">{navSections}</nav>
+          {footer}
         </motion.aside>
       </>
     );
   }
 
-  // Versión desktop
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-surface-alt/90 backdrop-blur-xl border-r border-border-subtle z-40 hidden lg:flex flex-col shadow-xl">
-      {/* Logo */}
-      <div className="flex items-center gap-2 px-5 py-7">
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-md"
-             style={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #74C69D 100%)' }}>
-          <Leaf className="w-5 h-5 text-white" />
-        </div>
-        <span className="text-lg font-semibold" style={{ color: '#1B4332' }}>origen.</span>
-        <span className="ml-auto text-[10px] font-medium px-2 py-1 bg-surface rounded-full text-muted-foreground">
-          v2.0
-        </span>
-      </div>
-
-      {/* Navegación desktop */}
-      <nav className="flex-1 overflow-y-auto px-3 py-2">
-        {MENU_ITEMS.map((item) => (
-          <SidebarMenuItem
-            key={item.id}
-            {...item}
-          />
-        ))}
-      </nav>
-
-      {/* Footer desktop */}
-      <div className="p-3 border-t border-border-subtle">
-        <Link href="/ayuda" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-muted-foreground hover:bg-surface transition-all">
-          <HelpCircle className="w-5 h-5 text-text-subtle" />
-          <span>Ayuda</span>
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-border-subtle bg-surface-alt/95 backdrop-blur-xl shadow-xl lg:flex">
+      <div className="border-b border-border-subtle px-5 py-6">
+        <Link href="/dashboard" className="mb-5 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-bosque via-origen-pino to-origen-hoja shadow-md">
+            <Leaf className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <span className="block text-lg font-semibold text-origen-bosque">origen.</span>
+            <span className="block text-xs font-medium text-muted-foreground">Panel del productor</span>
+          </div>
         </Link>
-        <button
-          onClick={handleLogout}
-          disabled={isLoggingOut}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-all mt-1 disabled:opacity-50"
-        >
-          <LogOut className="w-5 h-5" />
-          <span>{isLoggingOut ? 'Cerrando...' : 'Salir'}</span>
-        </button>
+        {quickAction}
       </div>
+
+      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">{navSections}</nav>
+      {footer}
     </aside>
   );
 }

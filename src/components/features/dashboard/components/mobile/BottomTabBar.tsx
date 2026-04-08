@@ -11,66 +11,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import {
-  LayoutDashboard,
-  Package,
-  ShoppingBag,
-  Star,
-  User,
-} from 'lucide-react';
-
-interface Tab {
-  id: string;
-  label: string;
-  icon: React.ElementType;
-  href: string;
-  badge?: number;
-  matchPaths?: string[];
-  isCentral?: boolean;
-}
-
-const TABS: Tab[] = [
-  {
-    // Pedidos ocupa el slot izquierdo (era el de inicio)
-    id: 'pedidos',
-    label: 'Pedidos',
-    icon: ShoppingBag,
-    href: '/dashboard/orders',
-    badge: 3,
-    matchPaths: ['/dashboard/orders'],
-  },
-  {
-    id: 'productos',
-    label: 'Productos',
-    icon: Package,
-    href: '/dashboard/products',
-    matchPaths: ['/dashboard/products', '/dashboard/inventario'],
-  },
-  {
-    // Inicio ocupa el centro como FAB elevado — sin literal inferior
-    id: 'inicio',
-    label: '',
-    icon: LayoutDashboard,
-    href: '/dashboard',
-    matchPaths: ['/dashboard'],
-    isCentral: true,
-  },
-  {
-    id: 'resenas',
-    label: 'Reseñas',
-    icon: Star,
-    href: '/dashboard/reviews',
-    badge: 4,
-    matchPaths: ['/dashboard/reviews'],
-  },
-  {
-    id: 'perfil',
-    label: 'Perfil',
-    icon: User,
-    href: '/dashboard/profile',
-    matchPaths: ['/dashboard/profile', '/dashboard/configuracion', '/dashboard/security'],
-  },
-];
+import { MOBILE_ROOT_TABS, matchesNavigationItem } from '@/constants/sidebar';
 
 export function BottomTabBar() {
   const pathname = usePathname();
@@ -90,14 +31,7 @@ export function BottomTabBar() {
 
   if (!mounted) return null;
 
-  const isActive = (tab: Tab) => {
-    if (tab.matchPaths) {
-      return tab.matchPaths.some(p =>
-        p === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(p)
-      );
-    }
-    return pathname === tab.href;
-  };
+  const isActive = (tab: (typeof MOBILE_ROOT_TABS)[number]) => matchesNavigationItem(pathname, { matchPaths: tab.matchPaths });
 
   return (
     <AnimatePresence>
@@ -122,7 +56,7 @@ export function BottomTabBar() {
         'h-[62px]',
       )}>
 
-        {TABS.map((tab) => {
+        {MOBILE_ROOT_TABS.map((tab) => {
           const active = isActive(tab);
           const Icon = tab.icon;
 

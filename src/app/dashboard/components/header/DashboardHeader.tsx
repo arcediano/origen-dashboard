@@ -1,15 +1,14 @@
 // 📁 /src/app/dashboard/components/header/DashboardHeader.tsx
 'use client';
 
-import * as React from 'react'; // AÑADIR
-import { useState, useEffect } from 'react'; // AÑADIR
+import { useMemo, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { MobileMenu } from './MobileMenu';
-import { HeaderLogo } from './HeaderLogo';
 import { NotificationBell } from './NotificationBell';
 import { UserMenu } from './UserMenu';
 import { DashboardBreadcrumb } from './DashboardBreadcrumb';
+import { getDashboardPageTitle, getDashboardSectionLabel } from '@/constants/sidebar';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -20,7 +19,7 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ 
-  onMenuClick, 
+  onMenuClick: _onMenuClick,
   userName = 'María Martínez',
   userEmail = 'maria@origen.es',
   userInitials = 'MM',
@@ -28,6 +27,7 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,16 +37,23 @@ export function DashboardHeader({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Función para obtener el título de la página basado en la ruta
-  const getPageTitle = (path: string): string => {
-    if (path.includes('/profile/business')) return 'Mi Negocio';
-    if (path.includes('/profile/settings')) return 'Configuración';
-    if (path.includes('/profile/certifications')) return 'Certificaciones';
-    if (path.includes('/profile')) return 'Mi Perfil';
-    if (path.includes('/products')) return 'Mis Productos';
-    if (path.includes('/orders')) return 'Pedidos';
-    return 'Dashboard';
-  };
+  const resolvedName = useMemo(() => {
+    if (user?.firstName || user?.lastName) {
+      return `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
+    }
+    return userName;
+  }, [user?.firstName, user?.lastName, userName]);
+
+  const resolvedEmail = user?.email ?? userEmail;
+  const resolvedInitials = useMemo(() => {
+    if (user?.firstName || user?.lastName) {
+      return `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase() || userInitials;
+    }
+    return userInitials;
+  }, [user?.firstName, user?.lastName, userInitials]);
+
+  const pageTitle = getDashboardPageTitle(pathname);
+  const sectionLabel = getDashboardSectionLabel(pathname);
 
   const handleLogout = () => {
     // La lógica de logout (API call + redirect) está en UserMenu
@@ -56,35 +63,34 @@ export function DashboardHeader({
     <header className={cn(
       'sticky top-0 z-30 transition-all duration-300',
       isScrolled 
-        ? 'bg-surface-alt/90 backdrop-blur-md border-b border-border shadow-md' 
-        : 'bg-surface-alt/50 backdrop-blur-sm border-b border-border-subtle'
+        ? 'bg-surface-alt/90 backdrop-blur-xl border-b border-border shadow-md' 
+        : 'bg-surface-alt/75 backdrop-blur-md border-b border-border-subtle'
     )}>
-      <div className="flex items-center justify-between px-6 lg:px-8 h-16">
-        {/* Zona Izquierda: Menú móvil + Breadcrumb + Título */}
-        <div className="flex items-center gap-4 flex-1 min-w-0">
-          <MobileMenu onClick={onMenuClick!} />
-          <div className="hidden lg:block">
-            <HeaderLogo />
-          </div>
-          <div className="flex flex-col min-w-0">
-            {/* Breadcrumb para desktop */}
-            <div className="hidden md:block">
+      <div className="flex items-center justify-between gap-6 px-6 lg:px-8 min-h-[76px]">
+        <div className="flex min-w-0 flex-1 items-center gap-4">
+          <div className="min-w-0 flex-1 py-4">
+            <div className="mb-1 hidden md:block">
               <DashboardBreadcrumb />
             </div>
-            {/* Título de página para móvil (cuando no hay breadcrumb) */}
-            <h1 className="md:hidden text-lg font-semibold text-origen-bosque truncate">
-              {getPageTitle(pathname)}
-            </h1>
+            <div className="min-w-0">
+              {sectionLabel && (
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  {sectionLabel}
+                </p>
+              )}
+              <h1 className="truncate text-lg font-semibold text-origen-bosque">
+                {pageTitle}
+              </h1>
+            </div>
           </div>
         </div>
 
-        {/* Zona Derecha: Notificaciones y Usuario */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-3 flex-shrink-0 py-4">
           <NotificationBell />
           <UserMenu
-            userName={userName}
-            userEmail={userEmail}
-            userInitials={userInitials}
+            userName={resolvedName}
+            userEmail={resolvedEmail}
+            userInitials={resolvedInitials}
             userAvatar={userAvatar}
             onLogout={handleLogout}
           />

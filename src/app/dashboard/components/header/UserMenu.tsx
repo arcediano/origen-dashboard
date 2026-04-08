@@ -148,7 +148,7 @@ export function UserMenu({
                 <p className="text-xs font-medium text-text-disabled uppercase tracking-wider">Configuración</p>
               </div>
               
-              <Link href="/dashboard/profile/settings?tab=security" onClick={() => setIsOpen(false)}>
+              <Link href="/dashboard/security" onClick={() => setIsOpen(false)}>
                 <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
                     <Shield className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
@@ -160,7 +160,7 @@ export function UserMenu({
                 </div>
               </Link>
               
-              <Link href="/dashboard/profile/settings?tab=notifications" onClick={() => setIsOpen(false)}>
+              <Link href="/dashboard/notifications" onClick={() => setIsOpen(false)}>
                 <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
                     <Bell className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
@@ -168,6 +168,18 @@ export function UserMenu({
                   <div className="flex-1">
                     <p className="text-sm font-medium text-origen-bosque">Notificaciones</p>
                     <p className="text-xs text-muted-foreground">Preferencias de avisos</p>
+                  </div>
+                </div>
+              </Link>
+
+              <Link href="/dashboard/configuracion/pagos" onClick={() => setIsOpen(false)}>
+                <div className="flex items-center gap-3 px-4 py-2 hover:bg-origen-crema/50 transition-colors group">
+                  <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
+                    <Settings className="w-4 h-4 text-text-subtle group-hover:text-origen-pradera" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-origen-bosque">Pagos y ajustes</p>
+                    <p className="text-xs text-muted-foreground">Cobros, envíos y preferencias</p>
                   </div>
                 </div>
               </Link>

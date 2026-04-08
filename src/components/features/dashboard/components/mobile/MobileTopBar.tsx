@@ -12,50 +12,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Bell, ChevronLeft, Leaf } from 'lucide-react';
-
-const ROOT_TABS = [
-  '/dashboard',
-  '/dashboard/products',
-  '/dashboard/orders',
-  '/dashboard/reviews',
-  '/dashboard/profile',
-];
-
-function isRootTab(pathname: string): boolean {
-  return ROOT_TABS.some(t => pathname === t);
-}
-
-// Títulos solo para sub-páginas (no para tabs raíz — esas tienen PageHeader en el contenido)
-const SUB_PAGE_TITLES: Record<string, string> = {
-  '/dashboard/products/create': 'Nuevo producto',
-  '/dashboard/profile/personal': 'Datos personales',
-  '/dashboard/profile/business': 'Mi negocio',
-  '/dashboard/profile/settings': 'Ajustes',
-  '/dashboard/profile/certifications': 'Certificaciones',
-  '/dashboard/notifications': 'Notificaciones',
-  '/dashboard/configuracion': 'Configuración',
-  '/dashboard/configuracion/perfil': 'Perfil público',
-  '/dashboard/configuracion/envios': 'Envíos',
-  '/dashboard/configuracion/pagos': 'Pagos',
-  '/dashboard/configuracion/notificaciones': 'Notificaciones',
-  '/dashboard/configuracion/privacidad': 'Privacidad',
-  '/dashboard/configuracion/idioma': 'Idioma y región',
-  '/dashboard/security': 'Seguridad',
-  '/dashboard/business': 'Mi negocio',
-};
-
-function getSubPageTitle(pathname: string): string {
-  if (SUB_PAGE_TITLES[pathname]) return SUB_PAGE_TITLES[pathname];
-  if (pathname.startsWith('/dashboard/products/') && pathname.endsWith('/edit')) return 'Editar producto';
-  if (pathname.startsWith('/dashboard/orders/')) return 'Detalle del pedido';
-  // Detalle de producto: /dashboard/products/[id] (no es create ni edit)
-  if (
-    pathname.startsWith('/dashboard/products/') &&
-    !pathname.endsWith('/edit') &&
-    pathname !== '/dashboard/products/create'
-  ) return 'Detalle del producto';
-  return '';
-}
+import { getDashboardPageTitle, isRootMobileTab } from '@/constants/sidebar';
 
 interface MobileTopBarProps {
   notificationCount?: number;
@@ -76,8 +33,8 @@ export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
 
   if (!mounted) return null;
 
-  const isRoot = isRootTab(pathname);
-  const subTitle = getSubPageTitle(pathname);
+  const isRoot = isRootMobileTab(pathname);
+  const subTitle = getDashboardPageTitle(pathname);
 
   return (
     <header
@@ -95,7 +52,7 @@ export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
         {/* Zona izquierda — logo O botón atrás */}
         <AnimatePresence mode="wait" initial={false}>
           {isRoot ? (
-            /* ── TABS RAÍZ: solo wordmark de marca ── */
+            /* ── TABS RAÍZ: marca compacta estilo app ── */
             <motion.div
               key="logo"
               initial={{ opacity: 0, x: -10 }}
@@ -107,9 +64,14 @@ export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
               <div className="w-7 h-7 rounded-[10px] flex items-center justify-center bg-gradient-to-br from-origen-bosque to-origen-pino shadow-sm flex-shrink-0">
                 <Leaf className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="text-[17px] font-bold text-origen-bosque tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
-                origen.
-              </span>
+              <div className="min-w-0">
+                <span className="block text-[17px] font-bold text-origen-bosque tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
+                  origen.
+                </span>
+                <span className="block text-[11px] font-medium text-muted-foreground truncate">
+                  Panel del productor
+                </span>
+              </div>
             </motion.div>
           ) : (
             /* ── SUB-PÁGINAS: back + título de la sub-página ── */
@@ -143,7 +105,7 @@ export function MobileTopBar({ notificationCount = 0 }: MobileTopBarProps) {
           )}
         </AnimatePresence>
 
-        {/* Zona derecha — campana de notificaciones (el perfil está en la BottomTabBar) */}
+        {/* Zona derecha — acceso persistente a notificaciones */}
         <motion.div whileTap={{ scale: 0.82 }} className="flex-shrink-0">
           <Link
             href="/dashboard/notifications"
