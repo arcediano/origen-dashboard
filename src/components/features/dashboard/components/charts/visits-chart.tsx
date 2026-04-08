@@ -12,7 +12,7 @@ import {
   YAxis,
 } from 'recharts';
 
-type ChartPeriod = '7d' | '30d' | '90d';
+type ChartPeriod = '7d' | '6m' | '1y';
 
 interface VisitsChartProps {
   period?: ChartPeriod;
@@ -28,26 +28,37 @@ const VISITS_DATA: Record<ChartPeriod, Array<{ day: string; currentPeriod: numbe
     { day: 'Sáb', currentPeriod: 280, previousPeriod: 240 },
     { day: 'Dom', currentPeriod: 220, previousPeriod: 210 },
   ],
-  '30d': [
-    { day: 'Sem 1', currentPeriod: 760, previousPeriod: 690 },
-    { day: 'Sem 2', currentPeriod: 910, previousPeriod: 830 },
-    { day: 'Sem 3', currentPeriod: 860, previousPeriod: 845 },
-    { day: 'Sem 4', currentPeriod: 980, previousPeriod: 900 },
+  '6m': [
+    { day: 'Nov', currentPeriod: 5760, previousPeriod: 5290 },
+    { day: 'Dic', currentPeriod: 5910, previousPeriod: 5480 },
+    { day: 'Ene', currentPeriod: 5620, previousPeriod: 5210 },
+    { day: 'Feb', currentPeriod: 6040, previousPeriod: 5570 },
+    { day: 'Mar', currentPeriod: 6290, previousPeriod: 5820 },
+    { day: 'Abr', currentPeriod: 6150, previousPeriod: 5690 },
   ],
-  '90d': [
-    { day: 'Mes 1', currentPeriod: 3220, previousPeriod: 2980 },
-    { day: 'Mes 2', currentPeriod: 3460, previousPeriod: 3150 },
-    { day: 'Mes 3', currentPeriod: 3710, previousPeriod: 3340 },
+  '1y': [
+    { day: 'May', currentPeriod: 4820, previousPeriod: 4390 },
+    { day: 'Jun', currentPeriod: 4950, previousPeriod: 4520 },
+    { day: 'Jul', currentPeriod: 5070, previousPeriod: 4680 },
+    { day: 'Ago', currentPeriod: 4930, previousPeriod: 4510 },
+    { day: 'Sep', currentPeriod: 5210, previousPeriod: 4760 },
+    { day: 'Oct', currentPeriod: 5380, previousPeriod: 4890 },
+    { day: 'Nov', currentPeriod: 5760, previousPeriod: 5290 },
+    { day: 'Dic', currentPeriod: 5910, previousPeriod: 5480 },
+    { day: 'Ene', currentPeriod: 5620, previousPeriod: 5210 },
+    { day: 'Feb', currentPeriod: 6040, previousPeriod: 5570 },
+    { day: 'Mar', currentPeriod: 6290, previousPeriod: 5820 },
+    { day: 'Abr', currentPeriod: 6150, previousPeriod: 5690 },
   ],
 };
 
-export function VisitsChart({ period = '30d' }: VisitsChartProps) {
+export function VisitsChart({ period = '6m' }: VisitsChartProps) {
   const title =
     period === '7d'
       ? 'Visitas: últimos 7 días vs 7 anteriores'
-      : period === '30d'
-        ? 'Visitas: últimos 30 días vs 30 anteriores'
-        : 'Visitas: últimos 90 días vs 90 anteriores';
+      : period === '6m'
+        ? 'Visitas: últimos 6 meses vs 6 anteriores'
+        : 'Visitas: último año vs año anterior';
 
   return (
     <section className="rounded-[24px] border border-border-subtle bg-surface-alt p-4 shadow-sm sm:p-5" data-testid="visits-chart">
@@ -57,17 +68,17 @@ export function VisitsChart({ period = '30d' }: VisitsChartProps) {
       <div className="h-52 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={VISITS_DATA[period]} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e6ece3" />
-            <XAxis dataKey="day" tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} width={36} />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border-subtle))" />
+            <XAxis dataKey="day" tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} width={36} />
             <Tooltip formatter={(value: number, name: string) => [`${value}`, name]} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="currentPeriod" name="Periodo actual" fill="#3f8f3b" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="currentPeriod" name="Periodo actual" fill="hsl(var(--hoja))" radius={[6, 6, 0, 0]} />
             <Line
               type="monotone"
               dataKey="previousPeriod"
               name="Periodo anterior"
-              stroke="#3d6b8d"
+              stroke="hsl(var(--pino))"
               strokeWidth={2}
               dot={{ r: 2 }}
               activeDot={{ r: 4 }}

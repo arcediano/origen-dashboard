@@ -14,7 +14,7 @@ import {
 } from 'recharts';
 import { fetchSellerOrders } from '@/lib/api/orders';
 
-type ChartPeriod = '7d' | '30d' | '90d';
+type ChartPeriod = '7d' | '6m' | '1y';
 
 interface SalesChartProps {
   period?: ChartPeriod;
@@ -36,24 +36,31 @@ const FALLBACK_DATA: Record<ChartPeriod, SalesPoint[]> = {
     { day: 'Sáb', currentPeriod: 410, previousPeriod: 350 },
     { day: 'Dom', currentPeriod: 290, previousPeriod: 265 },
   ],
-  '30d': [
-    { day: 'Sem 1', currentPeriod: 980, previousPeriod: 860 },
-    { day: 'Sem 2', currentPeriod: 1120, previousPeriod: 995 },
-    { day: 'Sem 3', currentPeriod: 1080, previousPeriod: 1015 },
-    { day: 'Sem 4', currentPeriod: 1260, previousPeriod: 1140 },
+  '6m': [
+    { day: 'Nov', currentPeriod: 3980, previousPeriod: 3520 },
+    { day: 'Dic', currentPeriod: 4210, previousPeriod: 3890 },
+    { day: 'Ene', currentPeriod: 4090, previousPeriod: 3780 },
+    { day: 'Feb', currentPeriod: 4350, previousPeriod: 4010 },
+    { day: 'Mar', currentPeriod: 4680, previousPeriod: 4290 },
+    { day: 'Abr', currentPeriod: 4520, previousPeriod: 4170 },
   ],
-  '90d': [
-    { day: 'Mes 1', currentPeriod: 4020, previousPeriod: 3650 },
-    { day: 'Mes 2', currentPeriod: 4310, previousPeriod: 3980 },
-    { day: 'Mes 3', currentPeriod: 4680, previousPeriod: 4210 },
+  '1y': [
+    { day: 'May', currentPeriod: 3210, previousPeriod: 2960 },
+    { day: 'Jun', currentPeriod: 3380, previousPeriod: 3070 },
+    { day: 'Jul', currentPeriod: 3470, previousPeriod: 3190 },
+    { day: 'Ago', currentPeriod: 3340, previousPeriod: 3050 },
+    { day: 'Sep', currentPeriod: 3520, previousPeriod: 3210 },
+    { day: 'Oct', currentPeriod: 3690, previousPeriod: 3380 },
+    { day: 'Nov', currentPeriod: 3980, previousPeriod: 3520 },
+    { day: 'Dic', currentPeriod: 4210, previousPeriod: 3890 },
+    { day: 'Ene', currentPeriod: 4090, previousPeriod: 3780 },
+    { day: 'Feb', currentPeriod: 4350, previousPeriod: 4010 },
+    { day: 'Mar', currentPeriod: 4680, previousPeriod: 4290 },
+    { day: 'Abr', currentPeriod: 4520, previousPeriod: 4170 },
   ],
 };
 
-const PERIOD_DAYS: Record<ChartPeriod, number> = {
-  '7d': 7,
-  '30d': 30,
-  '90d': 90,
-};
+const PERIOD_SIZE: Record<ChartPeriod, number> = { '7d': 7, '6m': 6, '1y': 12 };
 
 function toDateKey(date: Date): string {
   const year = date.getFullYear();
@@ -62,57 +69,110 @@ function toDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+function toMonthKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+function startOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function addMonths(date: Date, months: number): Date {
+  return new Date(date.getFullYear(), date.getMonth() + months, 1);
+}
+
 function formatLabel(date: Date, period: ChartPeriod): string {
   if (period === '7d') {
     return date.toLocaleDateString('es-ES', { weekday: 'short' });
   }
-  return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+  return date.toLocaleDateString('es-ES', { month: 'short' });
 }
 
 function buildSeriesFromOrders(period: ChartPeriod, orders: Array<{ createdAt: Date; total: number; status: string }>): SalesPoint[] {
-  const days = PERIOD_DAYS[period];
+  const buckets = PERIOD_SIZE[period];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  const currentStart = new Date(today);
-  currentStart.setDate(today.getDate() - (days - 1));
-
-  const previousEnd = new Date(currentStart);
-  previousEnd.setDate(currentStart.getDate() - 1);
-
-  const previousStart = new Date(previousEnd);
-  previousStart.setDate(previousEnd.getDate() - (days - 1));
 
   const currentMap = new Map<string, number>();
   const previousMap = new Map<string, number>();
 
+  if (period === '7d') {
+    const currentStart = new Date(today);
+    currentStart.setDate(today.getDate() - (buckets - 1));
+
+    const previousEnd = new Date(currentStart);
+    previousEnd.setDate(currentStart.getDate() - 1);
+
+    const previousStart = new Date(previousEnd);
+    previousStart.setDate(previousEnd.getDate() - (buckets - 1));
+
+    for (const order of orders) {
+      if (order.status !== 'delivered') continue;
+
+      const orderDate = new Date(order.createdAt);
+      orderDate.setHours(0, 0, 0, 0);
+
+      if (orderDate >= currentStart && orderDate <= today) {
+        const key = toDateKey(orderDate);
+        currentMap.set(key, (currentMap.get(key) ?? 0) + order.total);
+      }
+
+      if (orderDate >= previousStart && orderDate <= previousEnd) {
+        const key = toDateKey(orderDate);
+        previousMap.set(key, (previousMap.get(key) ?? 0) + order.total);
+      }
+    }
+
+    const series: SalesPoint[] = [];
+    for (let i = 0; i < buckets; i++) {
+      const currentDate = new Date(currentStart);
+      currentDate.setDate(currentStart.getDate() + i);
+
+      const previousDate = new Date(previousStart);
+      previousDate.setDate(previousStart.getDate() + i);
+
+      series.push({
+        day: formatLabel(currentDate, period),
+        currentPeriod: Math.round(currentMap.get(toDateKey(currentDate)) ?? 0),
+        previousPeriod: Math.round(previousMap.get(toDateKey(previousDate)) ?? 0),
+      });
+    }
+
+    return series;
+  }
+
+  const currentMonthStart = startOfMonth(today);
+  const currentStart = addMonths(currentMonthStart, -(buckets - 1));
+  const previousStart = addMonths(currentStart, -buckets);
+  const previousEnd = addMonths(currentStart, -1);
+
   for (const order of orders) {
     if (order.status !== 'delivered') continue;
 
-    const orderDate = new Date(order.createdAt);
-    orderDate.setHours(0, 0, 0, 0);
+    const orderDate = startOfMonth(new Date(order.createdAt));
 
-    if (orderDate >= currentStart && orderDate <= today) {
-      const key = toDateKey(orderDate);
+    if (orderDate >= currentStart && orderDate <= currentMonthStart) {
+      const key = toMonthKey(orderDate);
       currentMap.set(key, (currentMap.get(key) ?? 0) + order.total);
     }
 
     if (orderDate >= previousStart && orderDate <= previousEnd) {
-      const key = toDateKey(orderDate);
+      const key = toMonthKey(orderDate);
       previousMap.set(key, (previousMap.get(key) ?? 0) + order.total);
     }
   }
 
   const series: SalesPoint[] = [];
-  for (let i = 0; i < days; i++) {
+  for (let i = 0; i < buckets; i++) {
     const currentDate = new Date(currentStart);
-    currentDate.setDate(currentStart.getDate() + i);
+    currentDate.setMonth(currentStart.getMonth() + i);
 
-    const previousDate = new Date(previousStart);
-    previousDate.setDate(previousStart.getDate() + i);
+    const previousDate = addMonths(currentDate, -buckets);
 
-    const currentKey = toDateKey(currentDate);
-    const previousKey = toDateKey(previousDate);
+    const currentKey = toMonthKey(currentDate);
+    const previousKey = toMonthKey(previousDate);
 
     series.push({
       day: formatLabel(currentDate, period),
@@ -124,7 +184,7 @@ function buildSeriesFromOrders(period: ChartPeriod, orders: Array<{ createdAt: D
   return series;
 }
 
-export function SalesChart({ period = '30d' }: SalesChartProps) {
+export function SalesChart({ period = '6m' }: SalesChartProps) {
   const [series, setSeries] = useState<SalesPoint[]>(FALLBACK_DATA[period]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -164,8 +224,8 @@ export function SalesChart({ period = '30d' }: SalesChartProps) {
 
   const title = useMemo(() => {
     if (period === '7d') return 'Ventas: últimos 7 días vs 7 anteriores';
-    if (period === '30d') return 'Ventas: últimos 30 días vs 30 anteriores';
-    return 'Ventas: últimos 90 días vs 90 anteriores';
+    if (period === '6m') return 'Ventas: últimos 6 meses vs 6 anteriores';
+    return 'Ventas: último año vs año anterior';
   }, [period]);
 
   return (
@@ -177,17 +237,17 @@ export function SalesChart({ period = '30d' }: SalesChartProps) {
       <div className="h-52 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={series} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e6ece3" />
-            <XAxis dataKey="day" tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} width={36} />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border-subtle))" />
+            <XAxis dataKey="day" tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} width={36} />
             <Tooltip formatter={(value: number, name: string) => [`${value}€`, name]} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="currentPeriod" name="Periodo actual" fill="#3f8f3b" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="currentPeriod" name="Periodo actual" fill="hsl(var(--pradera))" radius={[6, 6, 0, 0]} />
             <Line
               type="monotone"
               dataKey="previousPeriod"
               name="Periodo anterior"
-              stroke="#8b5e3c"
+              stroke="hsl(var(--bosque))"
               strokeWidth={2}
               dot={{ r: 2 }}
               activeDot={{ r: 4 }}

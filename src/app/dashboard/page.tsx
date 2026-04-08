@@ -80,7 +80,7 @@ function OnboardingProgressBanner() {
 
 export default function ProducerDashboard() {
   const [mounted, setMounted] = useState(false);
-  const [chartPeriod, setChartPeriod] = useState<'7d' | '30d' | '90d'>('30d');
+  const [chartPeriod, setChartPeriod] = useState<'7d' | '6m' | '1y'>('6m');
   const { user } = useAuth();
 
   // Hooks para datos
@@ -182,8 +182,8 @@ export default function ProducerDashboard() {
             <div className="inline-flex rounded-xl border border-border-subtle bg-surface p-1">
               {([
                 { value: '7d', label: '7D' },
-                { value: '30d', label: '30D' },
-                { value: '90d', label: '90D' },
+                { value: '6m', label: '6M' },
+                { value: '1y', label: '1A' },
               ] as const).map((option) => (
                 <button
                   key={option.value}
