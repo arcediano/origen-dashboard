@@ -124,6 +124,7 @@ function BusinessSnapshotCard({
 export default function ProducerDashboard() {
   const [mounted, setMounted] = useState(false);
   const [showAccountHealthMobile, setShowAccountHealthMobile] = useState(false);
+  const [chartPeriod, setChartPeriod] = useState<'7d' | '30d' | '90d'>('30d');
   const { user } = useAuth();
 
   // Hooks para datos
@@ -216,9 +217,36 @@ export default function ProducerDashboard() {
           collapsible={false}
         />
 
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-          <SalesChart />
-          <VisitsChart />
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Rendimiento comercial</h3>
+            <div className="inline-flex rounded-xl border border-border-subtle bg-surface p-1">
+              {([
+                { value: '7d', label: '7D' },
+                { value: '30d', label: '30D' },
+                { value: '90d', label: '90D' },
+              ] as const).map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setChartPeriod(option.value)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+                    chartPeriod === option.value
+                      ? 'bg-origen-bosque text-white'
+                      : 'text-text-subtle hover:text-origen-bosque'
+                  }`}
+                  aria-pressed={chartPeriod === option.value}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+            <SalesChart period={chartPeriod} />
+            <VisitsChart period={chartPeriod} />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-start">
