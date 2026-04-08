@@ -158,7 +158,7 @@ export function EnhancedStep5Documents({
   // ========================================================================
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       
       {/* ====================================================================
           PROGRESS BAR
@@ -188,19 +188,19 @@ export function EnhancedStep5Documents({
       {/* ====================================================================
           CARD 1: DOCUMENTOS OBLIGATORIOS
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <FileText className="w-6 h-6 text-origen-pradera" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <FileText className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Documentos obligatorios</h2>
+            <h2 className="text-base font-semibold text-origen-bosque">Documentos obligatorios</h2>
             <p className="text-sm text-muted-foreground">Necesarios para verificar tu negocio</p>
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
 
           {/* CIF / NIF */}
           <div className="space-y-3">
@@ -322,21 +322,21 @@ export function EnhancedStep5Documents({
           CARD 2: CERTIFICACIONES SELECCIONADAS
       ==================================================================== */}
       {selectedCertifications.length > 0 && (
-        <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+          <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
           
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-              <Award className="w-6 h-6 text-origen-pradera" />
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+              <Award className="w-5 h-5 text-origen-pradera" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-origen-bosque">Certificaciones seleccionadas</h2>
+              <h2 className="text-base font-semibold text-origen-bosque">Certificaciones seleccionadas</h2>
               <p className="text-sm text-muted-foreground">
                 Sube los documentos para verificar tus certificaciones (opcional)
               </p>
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {selectedCertifications.map((cert) => {
               const IconComponent = getCertificationIcon(cert.id);
               const uploadedDoc = data.certifications?.find(doc => doc.certificationId === cert.id);

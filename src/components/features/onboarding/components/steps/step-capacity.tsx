@@ -548,12 +548,12 @@ export function EnhancedStep4Capacity({
   // ========================================================================
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       
       {/* ====================================================================
           PROGRESS BAR
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-3 md:p-4 shadow-sm hover:shadow-md transition-all">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
@@ -646,14 +646,14 @@ export function EnhancedStep4Capacity({
       {/* ====================================================================
           CARD 1: ESTADO DE RUTA
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
 
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Compass className="w-6 h-6 text-origen-pradera" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <Compass className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Rutas de Origen</h2>
+            <h2 className="text-base font-semibold text-origen-bosque">Rutas de Origen</h2>
             <p className="text-sm text-muted-foreground">
               {data.isInOriginRoute
                 ? '¡Tu negocio está en nuestra ruta de reparto!'
@@ -700,15 +700,15 @@ export function EnhancedStep4Capacity({
           CARD 2: OPCIONES DE ENVÍO (SOLO SI NO ESTÁ EN RUTA)
       ==================================================================== */}
       {!data.isInOriginRoute && (
-        <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+        <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
           
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-                <Truck className="w-6 h-6 text-origen-pradera" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+                <Truck className="w-5 h-5 text-origen-pradera" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-origen-bosque">Tus métodos de envío</h2>
+                <h2 className="text-base font-semibold text-origen-bosque">Tus métodos de envío</h2>
                 <p className="text-sm text-muted-foreground">Configura precios y tiempos</p>
               </div>
             </div>
@@ -734,8 +734,8 @@ export function EnhancedStep4Capacity({
                   className="p-5 bg-surface-alt rounded-xl border-2 border-border hover:border-origen-pradera/50 transition-all"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
-                      <Icon className="w-6 h-6 text-origen-pradera" />
+                    <div className="w-9 h-9 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-5 h-5 text-origen-pradera" />
                     </div>
                     
                     <div className="flex-1">
@@ -822,14 +822,14 @@ export function EnhancedStep4Capacity({
       {/* ====================================================================
           CARD 3: ZONAS DE ENTREGA (SIEMPRE VISIBLE)
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <MapPin className="w-6 h-6 text-origen-pradera" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <MapPin className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Zonas de entrega</h2>
+            <h2 className="text-base font-semibold text-origen-bosque">Zonas de entrega</h2>
             <p className="text-sm text-muted-foreground">
               {data.isInOriginRoute
                 ? 'Tu ruta está definida por Origen, pero puedes excluir zonas'
@@ -868,14 +868,14 @@ export function EnhancedStep4Capacity({
       {/* ====================================================================
           CARD 4: PEDIDO MÍNIMO
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Euro className="w-6 h-6 text-origen-pradera" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <Euro className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Pedido mínimo</h2>
+            <h2 className="text-base font-semibold text-origen-bosque">Pedido mínimo</h2>
             <p className="text-sm text-muted-foreground">Importe mínimo por pedido</p>
           </div>
         </div>
@@ -888,7 +888,7 @@ export function EnhancedStep4Capacity({
               onChange={(e) => handleInputChange('minOrderAmount', parseFloat(e.target.value) || 0)}
               min={1}
               step={5}
-              inputSize="lg"
+              inputSize="md"
               affixLeft="€"
               error={minOrderError}
             />
@@ -906,16 +906,16 @@ export function EnhancedStep4Capacity({
       {/* ====================================================================
           CARD 5: PACKAGING SOSTENIBLE (OPCIONAL)
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Recycle className="w-6 h-6 text-origen-pradera" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <Recycle className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-origen-bosque">Packaging sostenible</h2>
-              <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-1 rounded-full">Recomendado</span>
+              <h2 className="text-base font-semibold text-origen-bosque">Packaging sostenible</h2>
+              <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-0.5 rounded-full">Recomendado</span>
             </div>
             <p className="text-sm text-muted-foreground">
               El 73% de los consumidores prefiere marcas con embalaje ecológico

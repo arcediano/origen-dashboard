@@ -22,6 +22,7 @@ import {
   X,
   Video,
   Sparkles,
+  ChevronDown,
 } from 'lucide-react';
 
 // ============================================================================
@@ -101,17 +102,19 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
     onChange({ ...data, banner: null });
   };
 
+  const [videoExpanded, setVideoExpanded] = React.useState(Boolean(data.introVideo));
+
   // ========================================================================
   // RENDER
   // ========================================================================
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       
       {/* ====================================================================
           PROGRESS BAR
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-3 md:p-4 shadow-sm hover:shadow-md transition-all">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
@@ -134,16 +137,16 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
       {/* ====================================================================
           CARD 1: LOGO DEL NEGOCIO (OBLIGATORIO)
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-origen-pradera" />
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+              <ImageIcon className="w-5 h-5 text-origen-pradera" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-origen-bosque">Logo del negocio</h2>
-              <p className="text-sm text-muted-foreground">PNG, JPG, WebP o GIF • Fondo transparente ideal</p>
+              <h2 className="text-base font-semibold text-origen-bosque">Logo del negocio</h2>
+              <p className="text-xs text-muted-foreground">PNG, JPG, WebP o GIF • Fondo transparente ideal</p>
             </div>
           </div>
           {hasLogo && (
@@ -199,19 +202,19 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
       {/* ====================================================================
           CARD 2: IMAGEN DE CABECERA (OPCIONAL)
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-              <Camera className="w-6 h-6 text-origen-pradera" />
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+              <Camera className="w-5 h-5 text-origen-pradera" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-origen-bosque">Imagen de cabecera</h2>
-                <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-1 rounded-full">Opcional</span>
+                <h2 className="text-base font-semibold text-origen-bosque">Imagen de cabecera</h2>
+                <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-0.5 rounded-full">Opcional</span>
               </div>
-              <p className="text-sm text-muted-foreground">Sube una imagen amplia y nitida para que la cabecera no se vea borrosa.</p>
+              <p className="text-xs text-muted-foreground">Imagen amplia y nítida para la cabecera</p>
             </div>
           </div>
           {hasBanner && (
@@ -267,31 +270,37 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
       </div>
 
       {/* ====================================================================
-          CARD 3: VIDEO DE PRESENTACIÓN (OPCIONAL)
+          CARD 3: VIDEO DE PRESENTACIÓN (colapsable)
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Video className="w-6 h-6 text-origen-pradera" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-origen-bosque">Video de presentación</h2>
-              <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-1 rounded-full">Recomendado</span>
+      <div className="bg-surface-alt rounded-2xl border border-border shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setVideoExpanded(e => !e)}
+          className="w-full flex items-center justify-between p-4 md:p-5 text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+              <Video className="w-5 h-5 text-origen-pradera" />
             </div>
-            <p className="text-sm text-muted-foreground">
-              Los perfiles con video reciben +80% más visitas. Cuéntanos tu historia en 1 minuto.
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-semibold text-origen-bosque">Video de presentación</h2>
+                <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-0.5 rounded-full">Recomendado</span>
+                {data.introVideo && isValidVideoUrl(data.introVideo) && <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />}
+              </div>
+              <p className="text-xs text-muted-foreground">+80% de visitas con video</p>
+            </div>
           </div>
-        </div>
-
-        <div className="space-y-4">
+          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform flex-shrink-0", videoExpanded && "rotate-180")} />
+        </button>
+        {videoExpanded && (
+          <div className="px-4 pb-4 md:px-5 md:pb-5 border-t border-border-subtle">
+            <div className="pt-4 space-y-3">
           <Input
             value={data.introVideo || ''}
             onChange={(e) => handleInputChange('introVideo', e.target.value)}
             placeholder="https://youtube.com/watch?v=... o https://vimeo.com/..."
-            inputSize="lg"
+            inputSize="md"
             error={data.introVideo && !isValidVideoUrl(data.introVideo) ? 'Introduce una URL válida de YouTube o Vimeo' : undefined}
             className={cn(
               data.introVideo && isValidVideoUrl(data.introVideo) && "border-green-400 focus:border-green-500"
@@ -313,12 +322,12 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
           <div className="flex items-start gap-2 p-3 bg-origen-crema/30 rounded-lg">
             <Sparkles className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
-              <span className="font-medium">Consejo:</span> Un video auténtico, sin producción profesional,
-              genera más confianza que uno muy editado. Muestra tu taller, tus manos trabajando,
-              tu huerta... ¡Sé tú mismo!
+              <span className="font-medium">Consejo:</span> Un video auténtico genera más confianza que uno muy editado.
             </p>
           </div>
-        </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ====================================================================

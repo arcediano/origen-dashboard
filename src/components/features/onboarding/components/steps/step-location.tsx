@@ -295,6 +295,8 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
   const hasTeamSize = Boolean(data.teamSize);
 
   // Validación teléfono — solo tras perder el foco
+  const [photosExpanded, setPhotosExpanded] = React.useState(false);
+
   const [phoneTouched, setPhoneTouched] = React.useState(false);
   const phoneError = React.useMemo(() => {
     if (!data.businessPhone?.trim()) return undefined; // no mostrar hasta que se toque
@@ -361,12 +363,12 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
   // ========================================================================
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       
       {/* ====================================================================
           PROGRESS BAR
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-3 md:p-4 shadow-sm hover:shadow-md transition-all">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
@@ -389,19 +391,19 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       {/* ====================================================================
           CARD 0: IDENTIDAD LEGAL
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
 
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Building2 className="w-6 h-6 text-origen-pradera" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <Building2 className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Identidad legal</h2>
-            <p className="text-sm text-muted-foreground">Necesario para la verificación de tu cuenta y la emisión de facturas</p>
+            <h2 className="text-lg font-semibold text-origen-bosque">Identidad legal</h2>
+            <p className="text-xs text-muted-foreground">Necesario para la verificación de tu cuenta y la emisión de facturas</p>
           </div>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
 
           {/* Tipo de entidad — pills scrollables en mobile */}
           <div className="space-y-3">
@@ -441,54 +443,54 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 value={data.legalRepresentativeName || ''}
                 onChange={(e) => handleInputChange('legalRepresentativeName', e.target.value)}
                 placeholder="Nombre y apellidos del representante"
-                inputSize="lg"
+                inputSize="md"
                 helperText="Persona física con poderes de representación de la entidad."
               />
             </div>
           </div>
 
-          {/* NIF / CIF — movido aquí desde la card de ubicación */}
-          <div>
-            {taxIdValidation.valid && taxIdValidation.type && (
-              <div className="flex justify-end mb-1">
-                <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
-                  {taxIdBadge[taxIdValidation.type]} ✓
-                </span>
-              </div>
-            )}
-            <Input
-              label="NIF / CIF / NIE"
-              required
-              value={data.taxId || ''}
-              onChange={(e) => handleInputChange('taxId', e.target.value.toUpperCase().replace(/[\s\-]/g, ''))}
-              onBlur={() => setTaxIdTouched(true)}
-              placeholder="12345678A · X1234567L · B12345678"
-              inputSize="lg"
-              className="font-mono uppercase"
-              maxLength={9}
-              error={taxIdError}
-              helperText={!taxIdError ? 'NIF (personas físicas), NIE (extranjeros) o CIF (personas jurídicas).' : undefined}
-            />
-          </div>
-
-          {/* Teléfono de negocio */}
-          <div>
-            <InputAffixField
-              label="Teléfono de contacto del negocio"
-              required
-              value={data.businessPhone || ''}
-              onChange={(e) => {
-                const digits = e.target.value.replace(/\D/g, '').slice(0, 9);
-                handleInputChange('businessPhone', digits);
-              }}
-              onBlur={() => setPhoneTouched(true)}
-              placeholder="600 000 000"
-              inputMode="tel"
-              inputSize="lg"
-              affixLeft="+34"
-              error={phoneTouched ? phoneError : undefined}
-              helperText={!phoneTouched || !phoneError ? 'Para coordinación de pedidos y entregas. No se mostrará públicamente.' : undefined}
-            />
+          {/* NIF/CIF + Teléfono en 2 columnas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              {taxIdValidation.valid && taxIdValidation.type && (
+                <div className="flex justify-end mb-1">
+                  <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                    {taxIdBadge[taxIdValidation.type]} ✓
+                  </span>
+                </div>
+              )}
+              <Input
+                label="NIF / CIF / NIE"
+                required
+                value={data.taxId || ''}
+                onChange={(e) => handleInputChange('taxId', e.target.value.toUpperCase().replace(/[\s\-]/g, ''))}
+                onBlur={() => setTaxIdTouched(true)}
+                placeholder="12345678A"
+                inputSize="md"
+                className="font-mono uppercase"
+                maxLength={9}
+                error={taxIdError}
+                helperText={!taxIdError ? 'NIF, NIE o CIF' : undefined}
+              />
+            </div>
+            <div>
+              <InputAffixField
+                label="Teléfono del negocio"
+                required
+                value={data.businessPhone || ''}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, '').slice(0, 9);
+                  handleInputChange('businessPhone', digits);
+                }}
+                onBlur={() => setPhoneTouched(true)}
+                placeholder="600 000 000"
+                inputMode="tel"
+                inputSize="md"
+                affixLeft="+34"
+                error={phoneTouched ? phoneError : undefined}
+                helperText={!phoneTouched || !phoneError ? 'No público' : undefined}
+              />
+            </div>
           </div>
 
         </div>
@@ -497,27 +499,27 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       {/* ====================================================================
           CARD 1: UBICACIÓN + AÑO FUNDACIÓN + EQUIPO
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Home className="w-6 h-6 text-origen-pradera" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <Home className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Dirección de producción</h2>
-            <p className="text-sm text-muted-foreground">Aquí se recogerán tus pedidos. Debe ser la dirección real de tu producción o almacén.</p>
+            <h2 className="text-lg font-semibold text-origen-bosque">Dirección de producción</h2>
+            <p className="text-xs text-muted-foreground">Aquí se recogerán tus pedidos.</p>
           </div>
         </div>
 
         {/* Helper contextual */}
-        <div className="flex items-start gap-2 p-3 bg-origen-crema/40 rounded-xl border border-origen-pradera/20 mb-6">
+        <div className="flex items-start gap-2 p-2.5 bg-origen-crema/40 rounded-lg border border-origen-pradera/20 mb-4">
           <Info className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
           <p className="text-xs text-muted-foreground">
             Esta información nos ayuda a conectarte con compradores de tu zona y a verificar tu identidad como productor.
           </p>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* Nombre de la vía */}
           <Input
             label="Nombre de la vía"
@@ -526,17 +528,17 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             onChange={(e) => handleInputChange('street', e.target.value)}
             onBlur={handleStreetBlur}
             placeholder="Calle Mayor, Av. de la Constitución"
-            inputSize="lg"
+            inputSize="md"
           />
 
           {/* Número + Piso/Puerta */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <Input
               label="Número"
               required
               value={data.streetNumber || ''}
               onChange={(e) => handleInputChange('streetNumber', e.target.value)}
-              inputSize="lg"
+              inputSize="md"
               className="font-mono"
             />
             <div className="sm:col-span-2">
@@ -544,21 +546,21 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 label="Piso / Puerta"
                 value={data.streetComplement || ''}
                 onChange={(e) => handleInputChange('streetComplement', e.target.value)}
-                placeholder="3º A, Local 1, Bajo"
-                inputSize="lg"
+                placeholder="3º A, Bajo"
+                inputSize="md"
               />
             </div>
           </div>
 
           {/* CP + Provincia + Ciudad/Municipio */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Input
               label="Código Postal"
               required
               value={data.postalCode || ''}
               onChange={handlePostalCodeChange}
               maxLength={5}
-              inputSize="lg"
+              inputSize="md"
               className="font-mono"
               error={cpError}
             />
@@ -585,12 +587,12 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
               value={data.city || ''}
               onChange={(e) => handleInputChange('city', e.target.value)}
               onBlur={handleCityBlur}
-              inputSize="lg"
+              inputSize="md"
             />
           </div>
 
           {/* Año de fundación */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-border-subtle">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-border-subtle">
             <div>
               <Input
                 label="Año de fundación"
@@ -599,7 +601,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 onChange={(e) => handleInputChange('foundedYear', parseInt(e.target.value) || undefined)}
                 min={1900}
                 max={new Date().getFullYear()}
-                inputSize="lg"
+                inputSize="md"
               />
               {data.foundedYear && (
                 <p className="text-xs text-origen-pradera mt-1">
@@ -633,19 +635,19 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       {/* ====================================================================
           CARD 1b: DIRECCIÓN DE FACTURACIÓN
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-bosque/10 to-origen-hoja/10 flex items-center justify-center">
-            <FileText className="w-6 h-6 text-origen-pradera" />
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-bosque/10 to-origen-hoja/10 flex items-center justify-center flex-shrink-0">
+            <FileText className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Dirección de facturación</h2>
-            <p className="text-sm text-muted-foreground">Datos fiscales para emitir facturas a tus compradores</p>
+            <h2 className="text-lg font-semibold text-origen-bosque">Dirección de facturación</h2>
+            <p className="text-xs text-muted-foreground">Datos fiscales para emitir facturas</p>
           </div>
         </div>
 
         {/* Checkbox "igual a la de producción" */}
-        <div className="p-3 bg-origen-crema/30 rounded-xl border border-border-subtle hover:bg-origen-crema/50 transition-colors mb-5">
+        <div className="p-2.5 bg-origen-crema/30 rounded-xl border border-border-subtle hover:bg-origen-crema/50 transition-colors mb-4">
           <CheckboxWithLabel
             id="billing-address-same-as-production"
             label="La dirección de facturación es la misma que la de producción"
@@ -664,23 +666,23 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
 
         {/* Campos de facturación — solo si son distintas */}
         {!billingAddressSameAsProduction && (
-          <div className="space-y-5">
+          <div className="space-y-3">
             <Input
               label="Nombre de la vía"
               required
               value={data.billingAddress?.street || ''}
               onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, street: e.target.value })}
-              placeholder="Calle Mayor, Av. de la Constitución"
-              inputSize="lg"
+              placeholder="Calle Mayor"
+              inputSize="md"
             />
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <Input
                 label="Número"
                 required
                 value={data.billingAddress?.streetNumber || ''}
                 onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, streetNumber: e.target.value })}
-                inputSize="lg"
+                inputSize="md"
                 className="font-mono"
               />
               <div className="sm:col-span-2">
@@ -688,13 +690,13 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                   label="Piso / Puerta"
                   value={data.billingAddress?.streetComplement || ''}
                   onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, streetComplement: e.target.value })}
-                  placeholder="3º A, Local 1"
-                  inputSize="lg"
+                  placeholder="3º A"
+                  inputSize="md"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Input
                 label="Código Postal"
                 required
@@ -705,7 +707,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                   handleInputChange('billingAddress', { ...data.billingAddress, postalCode: value, province });
                 }}
                 maxLength={5}
-                inputSize="lg"
+                inputSize="md"
                 className="font-mono"
               />
               <Input
@@ -714,7 +716,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 value={data.billingAddress?.province || ''}
                 disabled
                 placeholder="Autodetectada"
-                inputSize="lg"
+                inputSize="md"
                 className="bg-surface text-muted-foreground"
               />
               <Input
@@ -722,7 +724,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
                 required
                 value={data.billingAddress?.city || ''}
                 onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, city: e.target.value })}
-                inputSize="lg"
+                inputSize="md"
               />
             </div>
           </div>
@@ -732,19 +734,19 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       {/* ====================================================================
           CARD 2: CATEGORÍAS
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Store className="w-6 h-6 text-origen-pradera" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <Store className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">¿Qué productos vendes?</h2>
-            <p className="text-sm text-muted-foreground">Selecciona tu categoría principal</p>
+            <h2 className="text-lg font-semibold text-origen-bosque">¿Qué productos vendes?</h2>
+            <p className="text-xs text-muted-foreground">Selecciona tu categoría principal</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
           {PRODUCER_CATEGORIES.map((category) => (
             <CategoryCard
               key={category.id}
@@ -771,35 +773,44 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       </div>
 
       {/* ====================================================================
-          CARD 3: FOTOS DEL ENTORNO (OPCIONAL)
+          CARD 3: FOTOS DEL ENTORNO (OPCIONAL — colapsable)
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Camera className="w-6 h-6 text-origen-pradera" />
+      <div className="bg-surface-alt rounded-2xl border border-border shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setPhotosExpanded(e => !e)}
+          className="w-full flex items-center justify-between p-4 md:p-5 text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+              <Camera className="w-5 h-5 text-origen-pradera" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-origen-bosque">
+                Fotos del entorno
+                <span className="ml-2 text-xs font-normal text-muted-foreground">(opcional)</span>
+              </h2>
+              <p className="text-xs text-muted-foreground">Muestra tu huerta, taller o establecimiento</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Fotos del entorno</h2>
-            <p className="text-sm text-muted-foreground">Muestra tu huerta, taller o establecimiento</p>
+          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", photosExpanded && "rotate-180")} />
+        </button>
+        {photosExpanded && (
+          <div className="px-4 pb-4 md:px-5 md:pb-5 border-t border-border-subtle">
+            <div className="pt-4">
+              <FileUpload
+                value={data.locationImages || []}
+                onChange={(files) => handleInputChange('locationImages', files)}
+                helperText="Arrastra imágenes o haz clic para subir"
+                accept="image/*"
+                multiple={true}
+                maxSize={5}
+                qualityRequirement={IMAGE_QUALITY_PRESETS.profileGallery}
+                dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.profileGallery)}
+              />
+            </div>
           </div>
-        </div>
-
-        <FileUpload
-          value={data.locationImages || []}
-          onChange={(files) => handleInputChange('locationImages', files)}
-          helperText="Arrastra imágenes o haz clic para subir"
-          accept="image/*"
-          multiple={true}
-          maxSize={5}
-          qualityRequirement={IMAGE_QUALITY_PRESETS.profileGallery}
-          dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.profileGallery)}
-        />
-        
-        <div className="mt-4 text-xs text-muted-foreground flex items-center gap-2 bg-origen-crema/50 p-3 rounded-lg">
-          <Leaf className="w-4 h-4 text-origen-pradera flex-shrink-0" />
-          <span>Formatos: JPG, PNG, WEBP. Usa fotos amplias y bien iluminadas para que tu perfil publico no se vea pixelado.</span>
-        </div>
+        )}
       </div>
     </div>
   );

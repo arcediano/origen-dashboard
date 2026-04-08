@@ -19,6 +19,7 @@ import {
   Building,
   Heart,
   Camera,
+  ChevronDown,
   CheckCircle2,
   AlertCircle,
   Info,
@@ -164,6 +165,9 @@ export interface EnhancedStep2StoryProps {
 export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) {
   const [charCount, setCharCount] = React.useState(data.description?.length || 0);
   const [philosophyCharCount, setPhilosophyCharCount] = React.useState(data.productionPhilosophy?.length || 0);
+  const [filosofiaExpanded, setFilosofiaExpanded] = React.useState(false);
+  const [certificacionesExpanded, setCertificacionesExpanded] = React.useState(false);
+  const [fotosExpanded, setFotosExpanded] = React.useState(false);
 
   // Validaciones URL e Instagram — solo al perder el foco
   const [websiteTouched, setWebsiteTouched] = React.useState(false);
@@ -236,12 +240,12 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
   // ========================================================================
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       
       {/* ====================================================================
           PROGRESS BAR
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-3 md:p-4 shadow-sm hover:shadow-md transition-all">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
@@ -260,25 +264,25 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       {/* ====================================================================
           CARD 1: NOMBRE Y ESLOGAN
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Building className="w-6 h-6 text-origen-pradera" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <Building className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Nombre y eslogan</h2>
-            <p className="text-sm text-muted-foreground">Cómo quieres que te conozcan</p>
+            <h2 className="text-lg font-semibold text-origen-bosque">Nombre y eslogan</h2>
+            <p className="text-xs text-muted-foreground">Cómo quieres que te conozcan</p>
           </div>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           <Input
             label="Nombre del negocio"
             required
             value={data.businessName || ''}
             onChange={(e) => handleInputChange('businessName', e.target.value)}
-            inputSize="lg"
+            inputSize="md"
           />
 
           <Input
@@ -286,18 +290,18 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
             value={data.tagline || ''}
             onChange={(e) => handleInputChange('tagline', e.target.value)}
             placeholder="Una frase que capture la esencia de tu marca"
-            inputSize="lg"
-            helperText={'Ej: "El sabor de la tradición", "De nuestra huerta a tu mesa", "Artesanía con corazón"'}
+            inputSize="md"
+            helperText={'Ej: "El sabor de la tradición"'}
           />
 
           {/* Presencia digital */}
-          <div className="pt-4 border-t border-border-subtle space-y-4">
+          <div className="pt-3 border-t border-border-subtle space-y-3">
             <p className="text-sm font-medium text-origen-bosque flex items-center gap-2">
               <Globe className="w-4 h-4 text-origen-pradera" />
               Presencia digital
               <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
                 label="Sitio web"
                 value={data.website || ''}
@@ -329,15 +333,15 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       {/* ====================================================================
           CARD 2: DESCRIPCIÓN / HISTORIA
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <BookOpen className="w-6 h-6 text-origen-pradera" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Cuéntanos tu historia</h2>
-            <p className="text-sm text-muted-foreground">Los compradores conectan con personas, no solo con productos</p>
+            <h2 className="text-lg font-semibold text-origen-bosque">Cuéntanos tu historia</h2>
+            <p className="text-xs text-muted-foreground">Los compradores conectan con personas, no solo con productos</p>
           </div>
         </div>
 
@@ -388,69 +392,82 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       </div>
 
       {/* ====================================================================
-          CARD 3: FILOSOFÍA DE PRODUCCIÓN
+          CARD 3: FILOSOFÍA DE PRODUCCIÓN (colapsable)
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Sprout className="w-6 h-6 text-origen-pradera" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-origen-bosque">Filosofía de producción</h2>
-              <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-1 rounded-full">Recomendado</span>
+      <div className="bg-surface-alt rounded-2xl border border-border shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setFilosofiaExpanded((e) => !e)}
+          className="w-full flex items-center justify-between p-4 md:p-5 text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+              <Sprout className="w-5 h-5 text-origen-pradera" />
             </div>
-            <p className="text-sm text-muted-foreground">Cuenta tus métodos, valores y compromiso con la calidad</p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-semibold text-origen-bosque">Filosofía de producción</h2>
+                <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-0.5 rounded-full">Recomendado</span>
+                {data.productionPhilosophy && <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />}
+              </div>
+              <p className="text-xs text-muted-foreground">Métodos, valores y compromiso con la calidad</p>
+            </div>
           </div>
-        </div>
-
-        <div className="space-y-4">
-          <Textarea
-            value={data.productionPhilosophy || ''}
-            onChange={(e) => handleInputChange('productionPhilosophy', e.target.value)}
-            placeholder="Ej: Cultivamos siguiendo métodos biodinámicos, respetando los ciclos naturales y sin químicos sintéticos. Cosechamos a mano y fermentamos de forma tradicional..."
-            className="min-h-[100px]"
-            maxLength={500}
-          />
-          
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {philosophyCharCount}/500 caracteres
-            </span>
-            {data.productionPhilosophy && data.productionPhilosophy.length > 50 && (
-              <span className="text-xs text-green-600 flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5" />
-                Gracias por compartir
-              </span>
+          <ChevronDown
+            className={cn(
+              "w-4 h-4 text-muted-foreground transition-transform flex-shrink-0",
+              filosofiaExpanded && "rotate-180"
             )}
+          />
+        </button>
+        {filosofiaExpanded && (
+          <div className="px-4 pb-4 md:px-5 md:pb-5 border-t border-border-subtle">
+            <div className="pt-4 space-y-3">
+              <Textarea
+                value={data.productionPhilosophy || ''}
+                onChange={(e) => handleInputChange('productionPhilosophy', e.target.value)}
+                placeholder="Ej: Cultivamos siguiendo métodos biodinámicos, respetando los ciclos naturales y sin químicos sintéticos. Cosechamos a mano y fermentamos de forma tradicional..."
+                className="min-h-[90px]"
+                maxLength={500}
+              />
+
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{philosophyCharCount}/500</span>
+                {data.productionPhilosophy && data.productionPhilosophy.length > 50 && (
+                  <span className="text-xs text-green-600 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Gracias por compartir
+                  </span>
+                )}
+              </div>
+
+              <div className="p-3 bg-origen-crema/30 rounded-lg border border-origen-pradera/30">
+                <p className="text-xs text-origen-bosque flex items-center gap-2">
+                  <Info className="w-4 h-4 text-origen-pradera" />
+                  Los compradores valoran la transparencia. Sé específico sobre tus métodos.
+                </p>
+              </div>
+            </div>
           </div>
-          
-          <div className="p-3 bg-origen-crema/30 rounded-lg border border-origen-pradera/30">
-            <p className="text-xs text-origen-bosque flex items-center gap-2">
-              <Info className="w-4 h-4 text-origen-pradera" />
-              Los compradores valoran la transparencia. Sé específico sobre tus métodos.
-            </p>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* ====================================================================
           CARD 4: VALORES
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Heart className="w-6 h-6 text-origen-pradera" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <Heart className="w-5 h-5 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">Valores</h2>
-            <p className="text-sm text-muted-foreground">Selecciona los que mejor te representen</p>
+            <h2 className="text-lg font-semibold text-origen-bosque">Valores</h2>
+            <p className="text-xs text-muted-foreground">Selecciona los que mejor te representen</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {CORE_VALUES.map((value) => {
             const IconComponent = value.icon;
             const isSelected = data.values?.includes(value.id);
@@ -460,7 +477,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                 type="button"
                 onClick={() => handleValueSelect(value.id)}
                 className={cn(
-                  "group relative bg-surface-alt rounded-xl p-4 border-2 transition-all",
+                  "group relative bg-surface-alt rounded-xl p-2.5 border-2 transition-all",
                   "hover:shadow-lg hover:scale-[1.02]",
                   "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
                   isSelected
@@ -469,30 +486,27 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                 )}
               >
                 {isSelected && (
-                  <div className="absolute top-2 right-2">
-                    <div className="w-5 h-5 rounded-full bg-origen-pradera flex items-center justify-center">
-                      <CheckCircle2 className="w-3 h-3 text-white" />
+                  <div className="absolute top-1.5 right-1.5">
+                    <div className="w-4 h-4 rounded-full bg-origen-pradera flex items-center justify-center">
+                      <CheckCircle2 className="w-2.5 h-2.5 text-white" />
                     </div>
                   </div>
                 )}
                 <div className="flex flex-col items-center text-center">
                   <div className={cn(
-                    "w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-all",
+                    "w-9 h-9 rounded-lg flex items-center justify-center mb-1.5 transition-all",
                     isSelected
                       ? "bg-gradient-to-br from-origen-pradera to-origen-hoja text-white shadow-md"
                       : "bg-origen-crema text-origen-bosque group-hover:scale-110"
                   )}>
-                    <IconComponent className="w-6 h-6" />
+                    <IconComponent className="w-5 h-5" />
                   </div>
                   <span className={cn(
-                    "text-sm font-medium",
+                    "text-xs font-medium",
                     isSelected ? "text-origen-bosque" : "text-foreground"
                   )}>
                     {value.name}
                   </span>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    {value.description}
-                  </p>
                 </div>
               </button>
             );
@@ -515,144 +529,115 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       </div>
 
       {/* ====================================================================
-          CARD 5: CERTIFICACIONES
+          CARD 5: CERTIFICACIONES (colapsable)
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <FileBadge className="w-6 h-6 text-origen-pradera" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-xl font-bold text-origen-bosque">Certificaciones y sellos de calidad</h2>
-              <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full border border-amber-200">
-                Requiere verificación
-              </span>
+      <div className="bg-surface-alt rounded-2xl border border-border shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setCertificacionesExpanded(e => !e)}
+          className="w-full flex items-center justify-between p-4 md:p-5 text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+              <FileBadge className="w-5 h-5 text-origen-pradera" />
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Añade certificaciones oficiales. Nuestro equipo verificará los documentos en el paso 5.
-            </p>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base font-semibold text-origen-bosque">Certificaciones</h2>
+                <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">Requiere verificación</span>
+                {data.certifications && data.certifications.length > 0 && (
+                  <span className="text-xs text-green-600 font-medium">{data.certifications.length} seleccionada(s)</span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">Sellos de calidad que verificamos en el Paso 6</p>
+            </div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {AVAILABLE_CERTIFICATIONS.map((cert) => {
-            const IconComponent = cert.icon;
-            const isSelected = data.certifications?.some(c => c.id === cert.id);
-            const isVerified = data.certifications?.find(c => c.id === cert.id)?.verified;
-            
-            return (
-              <button
-                key={cert.id}
-                type="button"
-                onClick={() => handleCertificationToggle(cert.id)}
-                className={cn(
-                  "relative flex items-start gap-4 p-5 rounded-xl border-2 transition-all text-left",
-                  "hover:shadow-md hover:scale-[1.01]",
-                  "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
-                  isSelected
-                    ? "border-origen-pradera bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5"
-                    : "border-border hover:border-origen-pradera bg-surface-alt"
-                )}
-              >
-                <div className={cn(
-                  "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all",
-                  isSelected
-                    ? "bg-gradient-to-br from-origen-pradera to-origen-hoja text-white shadow-md"
-                    : "bg-origen-crema text-origen-bosque"
-                )}>
-                  <IconComponent className="w-6 h-6" />
-                </div>
-                
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-origen-bosque">{cert.name}</h3>
-                    {isVerified && (
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Verificado
-                      </span>
+          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform flex-shrink-0", certificacionesExpanded && "rotate-180")} />
+        </button>
+        {certificacionesExpanded && (
+          <div className="px-4 pb-4 md:px-5 md:pb-5 border-t border-border-subtle">
+            <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+              {AVAILABLE_CERTIFICATIONS.map((cert) => {
+                const IconComponent = cert.icon;
+                const isSelected = data.certifications?.some(c => c.id === cert.id);
+                return (
+                  <button
+                    key={cert.id}
+                    type="button"
+                    onClick={() => handleCertificationToggle(cert.id)}
+                    className={cn(
+                      "relative flex items-start gap-3 p-3.5 rounded-xl border-2 transition-all text-left",
+                      "hover:shadow-md focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
+                      isSelected
+                        ? "border-origen-pradera bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5"
+                        : "border-border hover:border-origen-pradera bg-surface-alt"
                     )}
-                    {isSelected && !isVerified && (
-                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                        Pendiente
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">{cert.issuingBody}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{cert.description}</p>
-                </div>
-
-                {isSelected && (
-                  <div className="absolute top-3 right-3">
-                    <div className="w-5 h-5 rounded-full bg-origen-pradera flex items-center justify-center">
-                      <CheckCircle2 className="w-3 h-3 text-white" />
+                  >
+                    <div className={cn(
+                      "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
+                      isSelected
+                        ? "bg-gradient-to-br from-origen-pradera to-origen-hoja text-white"
+                        : "bg-origen-crema text-origen-bosque"
+                    )}>
+                      <IconComponent className="w-5 h-5" />
                     </div>
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-6 p-4 bg-blue-50/30 rounded-lg border border-blue-100">
-          <p className="text-xs text-blue-700 flex items-start gap-2">
-            <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <span>
-              <strong>Proceso de verificación:</strong> En el paso 5 (Documentación) podrás subir los certificados oficiales. 
-              Una vez verificados, aparecerán con un sello de confianza en tu perfil público.
-            </span>
-          </p>
-        </div>
-        
-        {data.certifications && data.certifications.length > 0 && (
-          <div className="mt-4 p-3 bg-origen-pradera/5 rounded-lg border border-origen-pradera/30">
-            <p className="text-xs text-origen-bosque flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-origen-pradera" />
-              Has seleccionado {data.certifications.length} certificación(es). Recuerda subir los documentos en el paso 5.
-            </p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-origen-bosque">{cert.name}</p>
+                      <p className="text-xs text-muted-foreground">{cert.issuingBody}</p>
+                    </div>
+                    {isSelected && (
+                      <CheckCircle2 className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
 
       {/* ====================================================================
-          CARD 6: FOTOS DEL EQUIPO
+          CARD 6: FOTOS DEL EQUIPO (colapsable)
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <Camera className="w-6 h-6 text-origen-pradera" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-origen-bosque">Fotos del equipo o proceso</h2>
-              <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-1 rounded-full">Recomendado</span>
+      <div className="bg-surface-alt rounded-2xl border border-border shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setFotosExpanded(e => !e)}
+          className="w-full flex items-center justify-between p-4 md:p-5 text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+              <Camera className="w-5 h-5 text-origen-pradera" />
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Las imágenes generan confianza. Los perfiles con fotos del productor reciben <span className="font-semibold text-origen-pradera">+40% visitas</span>.
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-semibold text-origen-bosque">Fotos del equipo o proceso</h2>
+                <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-0.5 rounded-full">Recomendado</span>
+                {data.photos && data.photos.length > 0 && (
+                  <span className="text-xs text-green-600">{data.photos.length} foto(s)</span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">Los perfiles con fotos reciben +40% visitas</p>
+            </div>
           </div>
-        </div>
-
-        <FileUpload
-          value={data.photos || []}
-          onChange={(files) => handleInputChange('photos', files)}
-          helperText="Arrastra fotos de tu equipo, taller o proceso de elaboración"
-          accept="image/*"
-          multiple={true}
-          maxSize={5}
-          qualityRequirement={IMAGE_QUALITY_PRESETS.profileGallery}
-          dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.profileGallery)}
-        />
-        
-        <div className="mt-4 text-xs text-muted-foreground flex items-center gap-2 bg-origen-crema/30 p-3 rounded-lg">
-          <Info className="w-4 h-4 text-origen-pradera flex-shrink-0" />
-          <span>
-            <strong>Consejo:</strong> Una foto tuya, de tus manos trabajando o de tu equipo genera mucha más confianza que solo productos.
-          </span>
-        </div>
+          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform flex-shrink-0", fotosExpanded && "rotate-180")} />
+        </button>
+        {fotosExpanded && (
+          <div className="px-4 pb-4 md:px-5 md:pb-5 border-t border-border-subtle">
+            <div className="pt-4">
+              <FileUpload
+                value={data.photos || []}
+                onChange={(files) => handleInputChange('photos', files)}
+                helperText="Arrastra fotos de tu equipo, taller o proceso de elaboración"
+                accept="image/*"
+                multiple={true}
+                maxSize={5}
+                qualityRequirement={IMAGE_QUALITY_PRESETS.profileGallery}
+                dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.profileGallery)}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
