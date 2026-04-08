@@ -158,6 +158,105 @@ export function isProductValid(product: OnboardingProduct): boolean {
 }
 
 // ============================================================================
+// SELECT PERSONALIZADO (selector de categoría de producto)
+// ============================================================================
+
+interface ProductSelectProps {
+  value: string;
+  onValueChange: (value: string) => void;
+  placeholder: string;
+  children: React.ReactNode;
+}
+
+const ProductSelect: React.FC<ProductSelectProps> = ({ value, onValueChange, placeholder, children }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [selectedLabel, setSelectedLabel] = React.useState('');
+  const selectRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  React.useEffect(() => {
+    if (value) {
+      const allItems = React.Children.toArray(children);
+      const option = allItems.find((child: any) => child.props?.value === value);
+      if (option && React.isValidElement(option)) {
+        setSelectedLabel(option.props.children as string);
+      }
+    } else {
+      setSelectedLabel('');
+    }
+  }, [value, children]);
+
+  return (
+    <div ref={selectRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        role="combobox"
+        aria-expanded={isOpen}
+        data-testid="product-category-option"
+        className={cn(
+          'flex w-full items-center justify-between rounded-xl border bg-surface-alt px-4 py-3 text-left transition-all',
+          'border-border hover:border-origen-pradera focus:border-origen-pradera focus:outline-none focus:ring-2 focus:ring-origen-pradera/20',
+        )}
+      >
+        <span className={cn('text-sm', value ? 'text-origen-oscuro' : 'text-text-subtle')}>
+          {selectedLabel || placeholder}
+        </span>
+        <ChevronDown className={cn('h-4 w-4 text-muted-foreground transition-transform', isOpen && 'rotate-180')} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 mt-2 w-full rounded-xl border border-border bg-surface-alt shadow-lg animate-in fade-in-0 zoom-in-95">
+          <div className="max-h-56 overflow-auto p-1">
+            {React.Children.map(children, (child) => {
+              if (React.isValidElement(child) && (child as React.ReactElement<{ value?: string }>).props.value !== undefined) {
+                return React.cloneElement(child as React.ReactElement<{ onSelect?: (v: string) => void; isSelected?: boolean }>, {
+                  onSelect: (v: string) => { onValueChange(v); setIsOpen(false); },
+                  isSelected: (child as React.ReactElement<{ value: string }>).props.value === value,
+                });
+              }
+              return child;
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface ProductSelectItemProps {
+  value: string;
+  children: React.ReactNode;
+  onSelect?: (value: string) => void;
+  isSelected?: boolean;
+}
+
+const ProductSelectItem: React.FC<ProductSelectItemProps> = ({ value, children, onSelect, isSelected }) => (
+  <button
+    type="button"
+    onClick={() => onSelect?.(value)}
+    data-testid="product-category-item"
+    className={cn(
+      'relative flex w-full cursor-pointer select-none items-center rounded-lg px-3 py-2.5 text-sm outline-none transition-colors',
+      'hover:bg-origen-crema hover:text-origen-bosque focus:bg-origen-crema focus:text-origen-bosque',
+      isSelected && 'bg-origen-pradera/10 font-medium text-origen-bosque',
+    )}
+  >
+    <span className="flex-1 text-left">{children}</span>
+    {isSelected && <CheckCircle2 className="h-4 w-4 text-origen-pradera flex-shrink-0" />}
+  </button>
+);
+
+// ============================================================================
 // SUBCOMPONENTE: CARD DE PRODUCTO
 // ============================================================================
 
@@ -310,47 +409,45 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
           </div>
 
           {/* Categoría de producto */}
-          <div className="space-y-3" data-testid="product-category-selector">
+          <div className="space-y-2" data-testid="product-category-selector">
             <p className="text-sm font-medium text-origen-bosque">
               Categoría <span className="text-red-500">*</span>
             </p>
             {productCategories.length === 0 ? (
               <p className="text-xs text-muted-foreground">Cargando categorías…</p>
             ) : (
-              <div className="space-y-3">
-                {productCategories.map((parent) => {
-                  const options = parent.children && parent.children.length > 0
-                    ? parent.children
-                    : [{ id: parent.id, name: parent.name, slug: parent.slug }];
-                  return (
-                    <div key={parent.id}>
-                      {parent.children && parent.children.length > 0 && (
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
-                          {parent.name}
-                        </p>
-                      )}
-                      <div className="flex flex-wrap gap-2">
-                        {options.map((opt) => (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            data-testid="product-category-option"
-                            onClick={() => onChange({ ...product, categoryId: opt.id })}
-                            className={cn(
-                              'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
-                              product.categoryId === opt.id
-                                ? 'bg-origen-bosque text-white border-origen-bosque'
-                                : 'bg-surface text-muted-foreground border-border hover:border-origen-bosque/50',
-                            )}
-                          >
-                            {opt.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  );
+              <ProductSelect
+                value={product.categoryId || ''}
+                onValueChange={(value) => onChange({ ...product, categoryId: value })}
+                placeholder="Selecciona una categoría"
+              >
+                {productCategories.flatMap((parent) => {
+                  const options =
+                    parent.children && parent.children.length > 0
+                      ? parent.children
+                      : [{ id: parent.id, name: parent.name, slug: parent.slug }];
+                  const hasChildren = parent.children && parent.children.length > 0;
+                  const items: React.ReactNode[] = [];
+                  if (hasChildren) {
+                    items.push(
+                      <div
+                        key={`group-${parent.id}`}
+                        className="px-3 pt-2 pb-0.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide border-t border-border-subtle first:border-t-0"
+                      >
+                        {parent.name}
+                      </div>,
+                    );
+                  }
+                  options.forEach((opt) => {
+                    items.push(
+                      <ProductSelectItem key={opt.id} value={opt.id}>
+                        {opt.name}
+                      </ProductSelectItem>,
+                    );
+                  });
+                  return items;
                 })}
-              </div>
+              </ProductSelect>
             )}
             {!product.categoryId && productCategories.length > 0 && (
               <p className="text-xs text-amber-700 flex items-center gap-1">

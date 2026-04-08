@@ -405,28 +405,23 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
 
         <div className="space-y-4">
 
-          {/* Tipo de entidad — pills scrollables en mobile */}
-          <div className="space-y-3">
+          {/* Tipo de entidad — selector compacto para reducir scroll en mobile */}
+          <div className="space-y-2">
             <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
               Forma jurídica <span className="text-red-500">*</span>
             </label>
-            <div className="flex flex-wrap gap-2">
+            <Select
+              value={data.entityType || ''}
+              onValueChange={(value) => handleInputChange('entityType', value as EntityType)}
+              placeholder="Selecciona forma jurídica"
+            >
               {(Object.entries(ENTITY_TYPE_LABELS) as [EntityType, string][]).map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => handleInputChange('entityType', key)}
-                  className={cn(
-                    'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
-                    data.entityType === key
-                      ? 'bg-origen-pradera text-white border-origen-pradera shadow-sm'
-                      : 'bg-surface text-muted-foreground border-border hover:border-origen-pradera/50 hover:text-origen-bosque',
-                  )}
-                >
+                <SelectItem key={key} value={key}>
                   {label}
-                </button>
+                </SelectItem>
               ))}
-            </div>
+            </Select>
+            <p className="text-xs text-muted-foreground">Puedes cambiarlo más adelante desde tu perfil fiscal.</p>
           </div>
 
           {/* Nombre del representante legal — solo si no es autónomo */}

@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@arcediano/ux-library';
 import { MobileStepperBar } from '@/components/features/onboarding/components/MobileStepperBar';
 import { MobileNavBar } from '@/components/features/onboarding/components/MobileNavBar';
+import { StepValidationPanel } from '@/components/features/onboarding/components/StepValidationPanel';
 import { uploadFile } from '@/lib/api/media';
 import { GatewayError } from '@/lib/api/client';
 import { validateSpanishTaxId } from '@/lib/utils/tax-id';
@@ -958,24 +959,10 @@ export default function OnboardingPage() {
               </h1>
 
               {!isStepValid && stepValidationMessages.length > 0 && (
-                <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                  <p className="text-sm font-semibold text-amber-800 mb-2">Para continuar en este paso:</p>
-                  <ul className="space-y-1 text-xs text-amber-700">
-                    {stepValidationMessages.map((message) => (
-                      <li key={message} className="flex items-start gap-2">
-                        <span className="mt-1 w-1.5 h-1.5 rounded-full bg-amber-600 flex-shrink-0" />
-                        <span>{message}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    type="button"
-                    onClick={focusFirstIncompleteField}
-                    className="mt-3 text-xs font-medium text-amber-800 underline underline-offset-2 hover:text-amber-900"
-                  >
-                    Ir al primer campo pendiente
-                  </button>
-                </div>
+                <StepValidationPanel
+                  messages={stepValidationMessages}
+                  onFocusFirstIncompleteField={focusFirstIncompleteField}
+                />
               )}
             </div>
 

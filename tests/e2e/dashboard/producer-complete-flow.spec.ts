@@ -447,9 +447,16 @@ async function completeOnboardingStep1(page: Page, profile: ProducerProfile): Pr
 
   const ob = profile.onboarding;
 
-  await page
-    .getByRole('button', { name: /Autónomo \/ Empresario individual/i })
-    .click();
+  const entityOption = page.getByRole('button', { name: /Autónomo \/ Empresario individual/i }).first();
+  if (await entityOption.isVisible().catch(() => false)) {
+    await entityOption.click();
+  } else {
+    const entitySelector = page
+      .getByRole('button', { name: /Selecciona forma jurídica|Forma jurídica|Autónomo \/ Empresario individual/i })
+      .first();
+    await entitySelector.click();
+    await page.getByRole('button', { name: /Autónomo \/ Empresario individual/i }).first().click();
+  }
 
   await page.getByLabel(/Nombre del representante legal/i).fill(`${profile.firstName} ${profile.lastName}`);
   await page.getByLabel(/NIF \/ CIF \/ NIE/i).fill(ob.taxId);
@@ -547,10 +554,15 @@ async function completeOnboardingStep3(page: Page, profile: ProducerProfile): Pr
     await page.getByLabel(/Precio de referencia/i).fill(product.price);
 
     // Seleccionar la primera categoría de producto disponible en el selector API
-    const productCategoryOption = page.locator('[data-testid="product-category-option"]').first();
-    if (await productCategoryOption.count()) {
-      await productCategoryOption.click();
-      await page.waitForTimeout(200);
+    const productCategoryCombobox = page.locator('[data-testid="product-category-option"]').first();
+    if (await productCategoryCombobox.count()) {
+      await productCategoryCombobox.click();
+      await page.waitForTimeout(300);
+      const firstCategoryItem = page.locator('[data-testid="product-category-item"]').first();
+      if (await firstCategoryItem.count()) {
+        await firstCategoryItem.click();
+        await page.waitForTimeout(200);
+      }
     }
 
     await page.getByRole('button', { name: new RegExp(`^${product.unitLabel}$`, 'i') }).click();
@@ -585,11 +597,16 @@ async function completeOnboardingStep3(page: Page, profile: ProducerProfile): Pr
       // ── Fijar categoría si el hint de advertencia está visible ──
       const categoryMissingHint = page.getByText(/Asigna una categoría al producto para continuar/i).first();
       if (await categoryMissingHint.isVisible().catch(() => false)) {
-        // Seleccionar la primera categoría de producto disponible (cargada desde API)
-        const productCategoryOption = page.locator('[data-testid="product-category-option"]').first();
-        if (await productCategoryOption.count()) {
-          await productCategoryOption.click();
-          await page.waitForTimeout(200);
+        // Abrir el combobox y seleccionar la primera categoría disponible
+        const productCategoryCombobox = page.locator('[data-testid="product-category-option"]').first();
+        if (await productCategoryCombobox.count()) {
+          await productCategoryCombobox.click();
+          await page.waitForTimeout(300);
+          const firstCategoryItem = page.locator('[data-testid="product-category-item"]').first();
+          if (await firstCategoryItem.count()) {
+            await firstCategoryItem.click();
+            await page.waitForTimeout(200);
+          }
         }
       }
 
