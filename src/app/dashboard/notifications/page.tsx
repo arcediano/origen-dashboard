@@ -1,16 +1,13 @@
 /**
  * @page NotificationsPage
- * @description Preferencias de notificaciones — HV06 mobile-first
+ * @description Centro de actividad (bandeja + preferencias) — mobile-first
  */
 
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   Bell,
-  Mail,
-  Smartphone,
   ShoppingBag,
   Star,
   Package,
@@ -25,7 +22,6 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent } from '@arcediano/ux-library';
 import { Button } from '@arcediano/ux-library';
 import { NotificationToggleRow } from './components/NotificationToggleRow';
-import { SegmentedControl, type SegmentItem } from './components/SegmentedControl';
 import { gatewayClient } from '@/lib/api/client';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
 import {
@@ -35,20 +31,6 @@ import {
 } from '@/lib/api/notifications';
 import type { Notification } from '@/types/notification';
 
-// ─── TABS CONFIG ──────────────────────────────────────────────────────────────
-
-const SEGMENTS: SegmentItem[] = [
-  { value: 'inbox', label: 'Bandeja', icon: Inbox },
-  { value: 'preferences', label: 'Preferencias', icon: Bell },
-];
-
-const PREFERENCE_SEGMENTS: SegmentItem[] = [
-  { value: 'email', label: 'Email',       icon: Mail       },
-  { value: 'push',  label: 'Push',        icon: Smartphone },
-];
-
-// ─── COMPONENT ────────────────────────────────────────────────────────────────
-
 export default function NotificationsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -57,7 +39,6 @@ export default function NotificationsPage() {
   const initialView = viewParam === 'preferences' ? 'preferences' : 'inbox';
 
   const [activeView, setActiveView] = useState<'inbox' | 'preferences'>(initialView);
-  const [activeTab, setActiveTab] = useState<'email' | 'push'>('email');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isInboxLoading, setIsInboxLoading] = useState(true);
   const [isInboxUpdating, setIsInboxUpdating] = useState(false);
@@ -138,6 +119,10 @@ export default function NotificationsPage() {
   const handleViewChange = (view: 'inbox' | 'preferences') => {
     setActiveView(view);
     router.replace(`/dashboard/notifications?view=${view}`, { scroll: false });
+
+    const targetId = view === 'inbox' ? 'notifications-inbox' : 'notifications-preferences';
+    const target = document.getElementById(targetId);
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleSave = async () => {
@@ -163,62 +148,70 @@ export default function NotificationsPage() {
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema"
-      >
+      <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
         <PageHeader
           title="Notificaciones"
-          description="Gestiona tu bandeja y cómo quieres recibir avisos"
+          description="Centro de actividad para revisar eventos y definir cómo quieres recibir avisos"
           badgeIcon={Bell}
-          badgeText={activeView === 'inbox' ? 'Bandeja' : 'Preferencias'}
+          badgeText="Centro de actividad"
           tooltip="Notificaciones"
-          tooltipDetailed="Define qué avisos llegan a la campana y cómo quieres recibirlos."
-          actions={
-            activeView === 'preferences' ? (
-              <div className="hidden lg:block">
-                <Button onClick={handleSave}>
-                  <span className="inline-flex items-center gap-2">
-                    <Save className="w-4 h-4" />
-                    <span>Guardar preferencias</span>
-                  </span>
-                </Button>
-              </div>
-            ) : (
-              <div className="hidden lg:flex items-center gap-2">
-                <Button variant="outline" onClick={() => void loadInbox()}>
-                  <span className="inline-flex items-center gap-2">
-                    <RefreshCw className="w-4 h-4" />
-                    <span>Actualizar</span>
-                  </span>
-                </Button>
-                <Button onClick={handleMarkAll} disabled={!unreadCount || isInboxUpdating}>
-                  <span className="inline-flex items-center gap-2">
-                    <CheckCheck className="w-4 h-4" />
-                    <span>Marcar todas</span>
-                  </span>
-                </Button>
-              </div>
-            )
-          }
+          tooltipDetailed="Define qué avisos llegan a la campana y cómo quieres recibirlos, sin navegar entre múltiples tabs."
         />
 
-        <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8">
+        <div className="container mx-auto max-w-6xl space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => handleViewChange('inbox')}
+              className={`rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+                activeView === 'inbox'
+                  ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
+                  : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+              }`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <Inbox className="h-4 w-4" />
+                Bandeja
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleViewChange('preferences')}
+              className={`rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+                activeView === 'preferences'
+                  ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
+                  : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+              }`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                Preferencias
+              </span>
+            </button>
+          </div>
 
-        {/* Vista principal */}
-        <SegmentedControl
-          items={SEGMENTS}
-          active={activeView}
-          onChange={(v) => handleViewChange(v as 'inbox' | 'preferences')}
-          className="max-w-lg"
-        />
-
-        {activeView === 'inbox' && (
-          <Card variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
+          <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
             <CardContent className="p-0">
-              <div className="border-b border-border-subtle px-4 py-3 text-sm text-muted-foreground sm:px-6">
-                Tienes <span className="font-semibold text-origen-bosque">{unreadCount}</span> notificación(es) sin leer.
+              <div className="border-b border-border-subtle px-4 py-4 sm:px-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    Tienes <span className="font-semibold text-origen-bosque">{unreadCount}</span> notificación(es) sin leer.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => void loadInbox()}>
+                      <span className="inline-flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4" />
+                        <span>Actualizar</span>
+                      </span>
+                    </Button>
+                    <Button onClick={handleMarkAll} disabled={!unreadCount || isInboxUpdating}>
+                      <span className="inline-flex items-center gap-2">
+                        <CheckCheck className="w-4 h-4" />
+                        <span>Marcar todas</span>
+                      </span>
+                    </Button>
+                  </div>
+                </div>
               </div>
               {isInboxLoading ? (
                 <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">Cargando notificaciones...</div>
@@ -237,20 +230,19 @@ export default function NotificationsPage() {
               )}
             </CardContent>
           </Card>
-        )}
 
-        {activeView === 'preferences' && (
-          <>
-            <SegmentedControl
-              items={PREFERENCE_SEGMENTS}
-              active={activeTab}
-              onChange={(v) => setActiveTab(v as 'email' | 'push')}
-              className="max-w-lg"
-            />
-
-            <Card variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
+          <Card id="notifications-preferences" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
               <CardContent className="p-0">
-                {activeTab === 'email' && (
+                <div className="grid gap-0 lg:grid-cols-2">
+                  <div className="px-4 pb-2 pt-4 sm:px-6">
+                    <h3 className="text-sm font-semibold text-origen-bosque">Email</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">Avisos que recibes por correo.</p>
+                  </div>
+                  <div className="px-4 pb-2 pt-4 sm:px-6 lg:border-l lg:border-border-subtle">
+                    <h3 className="text-sm font-semibold text-origen-bosque">Push</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">Avisos directos en la app/dispositivo.</p>
+                  </div>
+
                   <div className="px-4 sm:px-6 divide-y divide-border-subtle">
                     <NotificationToggleRow
                       icon={ShoppingBag}
@@ -285,10 +277,8 @@ export default function NotificationsPage() {
                       divider={false}
                     />
                   </div>
-                )}
 
-                {activeTab === 'push' && (
-                  <div className="px-4 sm:px-6 divide-y divide-border-subtle">
+                  <div className="px-4 sm:px-6 divide-y divide-border-subtle lg:border-l lg:border-border-subtle">
                     <NotificationToggleRow
                       icon={ShoppingBag}
                       title="Nuevos pedidos"
@@ -322,44 +312,48 @@ export default function NotificationsPage() {
                       divider={false}
                     />
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
-          </>
-        )}
 
-        {/* Espacio extra en móvil para el botón sticky */}
-        <div className="h-4 lg:hidden" />
+          <div className="hidden lg:flex lg:justify-end">
+            <Button onClick={handleSave}>
+              <span className="inline-flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                <span>{saved ? 'Preferencias guardadas' : 'Guardar preferencias'}</span>
+              </span>
+            </Button>
+          </div>
+
+          {/* Espacio extra en móvil para el botón sticky */}
+          <div className="h-4 lg:hidden" />
         </div>
-      </motion.div>
+      </div>
 
       {/* ── Botón guardar sticky en móvil ── */}
-      {activeView === 'preferences' && (
-        <div
+      <div
+        className={`
+          fixed bottom-[calc(88px+env(safe-area-inset-bottom))]
+          left-4 right-4
+          lg:hidden z-30
+        `}
+      >
+        <button
+          onClick={handleSave}
           className={`
-            fixed bottom-[calc(88px+env(safe-area-inset-bottom))]
-            left-4 right-4
-            lg:hidden z-30
+            w-full flex items-center justify-center gap-2
+            rounded-2xl py-3.5
+            text-sm font-semibold shadow-lg
+            transition-colors
+            ${saved
+              ? 'bg-origen-pradera text-white'
+              : 'bg-origen-bosque text-white active:bg-origen-pino'}
           `}
         >
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={handleSave}
-            className={`
-              w-full flex items-center justify-center gap-2
-              rounded-2xl py-3.5
-              text-sm font-semibold shadow-lg
-              transition-colors
-              ${saved
-                ? 'bg-origen-pradera text-white'
-                : 'bg-origen-bosque text-white active:bg-origen-pino'}
-            `}
-          >
-            <Save className="w-4 h-4" />
-            {saved ? '¡Guardado!' : 'Guardar preferencias'}
-          </motion.button>
-        </div>
-      )}
+          <Save className="w-4 h-4" />
+          {saved ? '¡Guardado!' : 'Guardar preferencias'}
+        </button>
+      </div>
     </>
   );
 }
