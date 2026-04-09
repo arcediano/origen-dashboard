@@ -72,7 +72,7 @@ export default function AccountPage() {
             {accountSections.map((section) => {
               const Icon = section.icon;
               return (
-                <Card key={section.title} className="flex h-full flex-col rounded-2xl border border-border-subtle shadow-sm transition-all hover:shadow-lg">
+                <Card key={section.title} className="flex h-full min-h-[220px] flex-col rounded-2xl border border-border-subtle shadow-sm transition-all hover:shadow-lg">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2 text-base">
@@ -83,7 +83,7 @@ export default function AccountPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="flex flex-1 flex-col pt-0">
-                    <p className="text-sm leading-relaxed text-muted-foreground">
+                    <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
                       {section.description}
                     </p>
                     <div className="flex-1" />
