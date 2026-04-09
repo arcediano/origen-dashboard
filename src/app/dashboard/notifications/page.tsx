@@ -104,6 +104,31 @@ export default function NotificationsPage() {
     };
   }, [notifications]);
 
+  const groupedNotifications = useMemo(() => {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(startOfToday);
+    startOfWeek.setDate(startOfWeek.getDate() - 7);
+
+    const groups: Array<{ key: 'today' | 'week' | 'older'; label: string; items: Notification[] }> = [
+      { key: 'today', label: 'Hoy', items: [] },
+      { key: 'week', label: 'Ultimos 7 dias', items: [] },
+      { key: 'older', label: 'Anteriores', items: [] },
+    ];
+
+    for (const notification of filteredNotifications) {
+      if (notification.timestamp >= startOfToday) {
+        groups[0].items.push(notification);
+      } else if (notification.timestamp >= startOfWeek) {
+        groups[1].items.push(notification);
+      } else {
+        groups[2].items.push(notification);
+      }
+    }
+
+    return groups.filter((group) => group.items.length > 0);
+  }, [filteredNotifications]);
+
   const loadInbox = async () => {
     setIsInboxLoading(true);
     try {
@@ -304,13 +329,22 @@ export default function NotificationsPage() {
               ) : filteredNotifications.length === 0 ? (
                 <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">No hay notificaciones por ahora.</div>
               ) : (
-                <div className="divide-y divide-border-subtle">
-                  {filteredNotifications.map((notification) => (
-                    <NotificationItem
-                      key={notification.id}
-                      notification={notification}
-                      onMarkAsRead={handleMarkAsRead}
-                    />
+                <div>
+                  {groupedNotifications.map((group) => (
+                    <div key={group.key}>
+                      <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:px-6">
+                        {group.label}
+                      </div>
+                      <div className="divide-y divide-border-subtle">
+                        {group.items.map((notification) => (
+                          <NotificationItem
+                            key={notification.id}
+                            notification={notification}
+                            onMarkAsRead={handleMarkAsRead}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
