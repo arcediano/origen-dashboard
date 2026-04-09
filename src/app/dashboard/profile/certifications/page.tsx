@@ -2,8 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { 
   FileBadge, 
   Shield, 
@@ -20,6 +19,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
+import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
 import { Button, Badge } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
@@ -63,7 +63,6 @@ const itemVariants = {
 
 export default function CertificationsPage() {
   const router = useRouter();
-  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('certifications');
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
 
@@ -190,29 +189,7 @@ export default function CertificationsPage() {
           containerClassName="max-w-6xl"
         />
 
-        <nav aria-label="Secciones de perfil comercial" className="mt-3 flex flex-wrap gap-2">
-          {[
-            { href: '/dashboard/profile/personal', label: 'Datos personales' },
-            { href: '/dashboard/profile/business', label: 'Negocio' },
-            { href: '/dashboard/profile/certifications', label: 'Certificaciones' },
-          ].map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
-                    : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
-                }`}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+        <ProfileSectionNav className="mt-3" />
 
       <div className="mt-6">
         <motion.div 
