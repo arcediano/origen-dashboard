@@ -24,7 +24,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library'
 import { Button, Badge } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 
 interface Certification {
@@ -48,22 +47,8 @@ interface LegalDocument {
   expiryDate?: string;
 }
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring" as const,
-      stiffness: 300,
-      damping: 25
-    }
-  }
-};
-
 export default function CertificationsPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('certifications');
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
 
   // Datos mock
@@ -191,12 +176,7 @@ export default function CertificationsPage() {
 
         <ProfileSectionNav className="mt-3" />
 
-      <div className="mt-6">
-        <motion.div 
-          variants={itemVariants}
-          initial="hidden"
-          animate="visible"
-        >
+      <div className="mt-6 space-y-6">
           {/* Barra de progreso */}
           <Card className="border-origen-pradera/20 mb-8">
             <CardContent className="p-6">
@@ -217,29 +197,6 @@ export default function CertificationsPage() {
             </CardContent>
           </Card>
 
-          {/* TABS - CORREGIDO: Usando las props icon y badge */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger 
-                value="certifications"
-              >
-                <span className="flex items-center gap-2">
-                  <Award className="w-4 h-4" />
-                  Certificaciones
-                </span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="documents"
-              >
-                <span className="flex items-center gap-2">
-                  <FileBadge className="w-4 h-4" />
-                  Documentos legales
-                </span>
-              </TabsTrigger>
-            </TabsList>
-
-            {/* TAB: CERTIFICACIONES */}
-            <TabsContent value="certifications" className="space-y-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
@@ -318,10 +275,7 @@ export default function CertificationsPage() {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
 
-            {/* TAB: DOCUMENTOS LEGALES */}
-            <TabsContent value="documents" className="space-y-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
@@ -446,8 +400,6 @@ export default function CertificationsPage() {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
 
           <Alert className="mt-6">
             <Shield className="w-4 h-4" />
@@ -456,7 +408,6 @@ export default function CertificationsPage() {
               lo que aumenta la credibilidad con los compradores.
             </AlertDescription>
           </Alert>
-        </motion.div>
       </div>
       </div>
     </div>

@@ -37,30 +37,12 @@ import {
   CardTitle,
   Input,
   Label,
-  Separator,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
+  Separator
 } from '@arcediano/ux-library';
 import { Textarea } from '@arcediano/ux-library';
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring" as const,
-      stiffness: 300,
-      damping: 25
-    }
-  }
-};
-
 export default function BusinessInfoPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('basic');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -149,7 +131,7 @@ export default function BusinessInfoPage() {
 
         <div className="mt-6">
           {/* TARJETA DE BANNER Y LOGO */}
-          <motion.div variants={itemVariants} initial="hidden" animate="visible" className="mb-6">
+          <div className="mb-6">
             <Card className="overflow-hidden border border-border shadow-sm">
               {/* Banner */}
               <div className="h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
@@ -194,15 +176,10 @@ export default function BusinessInfoPage() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
           {/* Barra de acciones */}
-          <motion.div 
-            variants={itemVariants}
-            initial="hidden"
-            animate="visible"
-            className="flex justify-end mb-8"
-          >
+          <div className="mb-8 flex justify-end">
             {!isEditing ? (
               <Button onClick={() => setIsEditing(true)} size="lg">
                 <span className="flex items-center gap-2">
@@ -235,30 +212,19 @@ export default function BusinessInfoPage() {
                 </Button>
               </div>
             )}
-          </motion.div>
+          </div>
 
           {/* Estado de verificación */}
-          <motion.div variants={itemVariants} initial="hidden" animate="visible" className="mb-8">
+          <div className="mb-8">
             <Alert className="bg-green-50 border-green-200">
               <CheckCircle className="w-4 h-4 text-green-600" />
               <AlertDescription className="text-green-800">
                 Tu negocio ha sido verificado. La información fiscal está confirmada.
               </AlertDescription>
             </Alert>
-          </motion.div>
+          </div>
 
-          {/* Tabs de navegación */}
-          <motion.div variants={itemVariants} initial="hidden" animate="visible">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-8">
-                <TabsTrigger value="basic">Información básica</TabsTrigger>
-                <TabsTrigger value="contact">Contacto y ubicación</TabsTrigger>
-                <TabsTrigger value="social">Redes sociales</TabsTrigger>
-                <TabsTrigger value="description">Descripción</TabsTrigger>
-              </TabsList>
-
-              {/* TAB 1: INFORMACIÓN BÁSICA */}
-              <TabsContent value="basic" className="space-y-6">
+          <div className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -361,10 +327,7 @@ export default function BusinessInfoPage() {
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
 
-              {/* TAB 2: CONTACTO Y UBICACIÓN */}
-              <TabsContent value="contact" className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -483,10 +446,7 @@ export default function BusinessInfoPage() {
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
 
-              {/* TAB 3: REDES SOCIALES */}
-              <TabsContent value="social">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -558,10 +518,7 @@ export default function BusinessInfoPage() {
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
 
-              {/* TAB 4: DESCRIPCIÓN */}
-              <TabsContent value="description">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -586,9 +543,7 @@ export default function BusinessInfoPage() {
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>
