@@ -42,6 +42,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isInboxLoading, setIsInboxLoading] = useState(true);
   const [isInboxUpdating, setIsInboxUpdating] = useState(false);
+  const [activityFilter, setActivityFilter] = useState<'all' | 'operativas' | 'cuenta' | 'marketing'>('all');
 
   const [emailSettings, setEmailSettings] = useState({
     orders:    true,
@@ -63,6 +64,45 @@ export default function NotificationsPage() {
     () => notifications.filter((notification) => !notification.read).length,
     [notifications],
   );
+
+  const filteredNotifications = useMemo(() => {
+    const byFilter = notifications.filter((notification) => {
+      const category = notification.category;
+      if (activityFilter === 'all') return true;
+      if (activityFilter === 'operativas') return category === 'ORDER' || category === 'PRODUCT' || category === 'REVIEW';
+      if (activityFilter === 'cuenta') return category === 'ACCOUNT' || category === 'SYSTEM';
+      return category === 'MARKETING';
+    });
+
+    const priorityScore: Record<string, number> = {
+      URGENT: 0,
+      HIGH: 1,
+      MEDIUM: 2,
+      LOW: 3,
+    };
+
+    return [...byFilter].sort((a, b) => {
+      // Priorizar no leídas
+      if (a.read !== b.read) return a.read ? 1 : -1;
+
+      // Luego prioridad de negocio/canonica
+      const aPriority = priorityScore[a.priority ?? 'MEDIUM'] ?? 2;
+      const bPriority = priorityScore[b.priority ?? 'MEDIUM'] ?? 2;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+
+      // Último criterio: más recientes primero
+      return b.timestamp.getTime() - a.timestamp.getTime();
+    });
+  }, [notifications, activityFilter]);
+
+  const filterCounts = useMemo(() => {
+    return {
+      all: notifications.length,
+      operativas: notifications.filter((n) => n.category === 'ORDER' || n.category === 'PRODUCT' || n.category === 'REVIEW').length,
+      cuenta: notifications.filter((n) => n.category === 'ACCOUNT' || n.category === 'SYSTEM').length,
+      marketing: notifications.filter((n) => n.category === 'MARKETING').length,
+    };
+  }, [notifications]);
 
   const loadInbox = async () => {
     setIsInboxLoading(true);
@@ -193,6 +233,52 @@ export default function NotificationsPage() {
           <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
             <CardContent className="p-0">
               <div className="border-b border-border-subtle px-4 py-4 sm:px-6">
+                <div className="mb-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActivityFilter('all')}
+                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      activityFilter === 'all'
+                        ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
+                        : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+                    }`}
+                  >
+                    Todo ({filterCounts.all})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActivityFilter('operativas')}
+                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      activityFilter === 'operativas'
+                        ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
+                        : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+                    }`}
+                  >
+                    Operativas ({filterCounts.operativas})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActivityFilter('cuenta')}
+                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      activityFilter === 'cuenta'
+                        ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
+                        : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+                    }`}
+                  >
+                    Cuenta y sistema ({filterCounts.cuenta})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActivityFilter('marketing')}
+                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      activityFilter === 'marketing'
+                        ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
+                        : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+                    }`}
+                  >
+                    Marketing ({filterCounts.marketing})
+                  </button>
+                </div>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm text-muted-foreground">
                     Tienes <span className="font-semibold text-origen-bosque">{unreadCount}</span> notificación(es) sin leer.
@@ -215,11 +301,11 @@ export default function NotificationsPage() {
               </div>
               {isInboxLoading ? (
                 <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">Cargando notificaciones...</div>
-              ) : notifications.length === 0 ? (
+              ) : filteredNotifications.length === 0 ? (
                 <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">No hay notificaciones por ahora.</div>
               ) : (
                 <div className="divide-y divide-border-subtle">
-                  {notifications.map((notification) => (
+                  {filteredNotifications.map((notification) => (
                     <NotificationItem
                       key={notification.id}
                       notification={notification}
