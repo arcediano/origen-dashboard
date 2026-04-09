@@ -161,7 +161,7 @@ const baseNotification: Notification = {
 };
 
 describe('NotificationItem — seguridad de URLs de acción', () => {
-  it('renderiza como botón principal y muestra acción rápida cuando la URL interna es válida', () => {
+  it('renderiza como botón principal y navega por click completo cuando la URL interna es válida', () => {
     render(
       <NotificationItem
         notification={{ ...baseNotification, actionUrl: '/dashboard/pedidos/123' }}
@@ -170,7 +170,7 @@ describe('NotificationItem — seguridad de URLs de acción', () => {
 
     expect(screen.queryByRole('link')).toBeNull();
     expect(screen.getByRole('button', { name: /notificación de prueba/i })).toBeDefined();
-    expect(screen.getByRole('button', { name: /^ver detalle$/i })).toBeDefined();
+    expect(screen.queryByRole('button', { name: /marcar como leida/i })).toBeNull();
   });
 
   it('bloquea URLs https:// externas y renderiza un <button> en su lugar', () => {
@@ -181,7 +181,8 @@ describe('NotificationItem — seguridad de URLs de acción', () => {
     );
 
     expect(screen.queryByRole('link')).toBeNull();
-    expect(screen.getByRole('button')).toBeDefined();
+    expect(screen.getByRole('button', { name: /notificación de prueba/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /marcar como leida/i })).toBeDefined();
   });
 
   it('bloquea rutas de red (//) y renderiza un <button>', () => {
@@ -192,7 +193,8 @@ describe('NotificationItem — seguridad de URLs de acción', () => {
     );
 
     expect(screen.queryByRole('link')).toBeNull();
-    expect(screen.getByRole('button')).toBeDefined();
+    expect(screen.getByRole('button', { name: /notificación de prueba/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /marcar como leida/i })).toBeDefined();
   });
 
   it('bloquea el protocolo javascript: y renderiza un <button>', () => {
@@ -203,14 +205,16 @@ describe('NotificationItem — seguridad de URLs de acción', () => {
     );
 
     expect(screen.queryByRole('link')).toBeNull();
-    expect(screen.getByRole('button')).toBeDefined();
+    expect(screen.getByRole('button', { name: /notificación de prueba/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /marcar como leida/i })).toBeDefined();
   });
 
   it('renderiza un <button> cuando no hay actionUrl', () => {
     render(<NotificationItem notification={baseNotification} />);
 
     expect(screen.queryByRole('link')).toBeNull();
-    expect(screen.getByRole('button')).toBeDefined();
+    expect(screen.getByRole('button', { name: /notificación de prueba/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /marcar como leida/i })).toBeDefined();
   });
 
   it('llama onMarkAsRead con el id cuando se hace click en una notificación no leída', () => {

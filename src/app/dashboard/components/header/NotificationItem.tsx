@@ -183,6 +183,7 @@ export function NotificationItem({
               event.stopPropagation();
               markAsReadOnly();
             }}
+            aria-label="Marcar como leida"
             className="rounded-lg border border-origen-pradera/30 bg-origen-pradera/10 px-2.5 py-1 text-[11px] font-medium text-origen-bosque transition-colors hover:bg-origen-pradera/15"
           >
             Marcar como leida
@@ -197,6 +198,7 @@ export function NotificationItem({
       role="button"
       tabIndex={0}
       className={cn(containerClass, 'w-full text-left cursor-pointer')}
+      aria-label={notification.title}
       onClick={handleClick}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
