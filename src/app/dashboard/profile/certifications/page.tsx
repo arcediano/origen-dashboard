@@ -2,7 +2,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   FileBadge, 
   Shield, 
@@ -62,6 +63,7 @@ const itemVariants = {
 
 export default function CertificationsPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('certifications');
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
 
@@ -176,17 +178,43 @@ export default function CertificationsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8 max-w-7xl">
-      <PageHeader
-        title="Certificaciones y Documentos"
-        description="Gestiona tus certificaciones de calidad y documentación legal"
-        badgeIcon={FileBadge}
-        badgeText="Verificación"
-        showBackButton={true}
-        onBack={() => router.back()}
-      />
+    <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
+      <div className="container mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+        <PageHeader
+          title="Perfil comercial"
+          description="Gestiona tus datos personales, de negocio y certificaciones desde una única estructura"
+          badgeIcon={FileBadge}
+          badgeText="Certificaciones"
+          showBackButton={true}
+          onBack={() => router.back()}
+          containerClassName="max-w-6xl"
+        />
 
-      <div className="mt-8">
+        <nav aria-label="Secciones de perfil comercial" className="mt-3 flex flex-wrap gap-2">
+          {[
+            { href: '/dashboard/profile/personal', label: 'Datos personales' },
+            { href: '/dashboard/profile/business', label: 'Negocio' },
+            { href: '/dashboard/profile/certifications', label: 'Certificaciones' },
+          ].map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
+                    : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+                }`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+      <div className="mt-6">
         <motion.div 
           variants={itemVariants}
           initial="hidden"
@@ -452,6 +480,7 @@ export default function CertificationsPage() {
             </AlertDescription>
           </Alert>
         </motion.div>
+      </div>
       </div>
     </div>
   );

@@ -2,7 +2,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   User, 
   Mail, 
@@ -52,6 +53,7 @@ const containerVariants: Variants = {
 
 export default function PersonalInfoPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState({
@@ -102,19 +104,44 @@ export default function PersonalInfoPage() {
       <div className="fixed top-0 right-0 w-64 h-64 bg-origen-pradera/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
       <div className="fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-      <div className="container mx-auto px-4 sm:px-6 py-8 max-w-7xl">
+      <div className="container mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
         {/* PageHeader con sus márgenes internos */}
         <PageHeader
-          title="Información personal"
-          description="Gestiona tus datos personales y de contacto"
+          title="Perfil comercial"
+          description="Gestiona tus datos personales, de negocio y certificaciones desde una única estructura"
           badgeIcon={User}
           badgeText="Datos personales"
           showBackButton={true}
           onBack={() => router.back()}
+          containerClassName="max-w-6xl"
         />
 
+        <nav aria-label="Secciones de perfil comercial" className="mt-3 flex flex-wrap gap-2">
+          {[
+            { href: '/dashboard/profile/personal', label: 'Datos personales' },
+            { href: '/dashboard/profile/business', label: 'Negocio' },
+            { href: '/dashboard/profile/certifications', label: 'Certificaciones' },
+          ].map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
+                    : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+                }`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
         {/* Contenido con el mismo espaciado que en Mi Negocio */}
-        <div className="mt-8">
+        <div className="mt-6">
           <motion.div 
             variants={containerVariants}
             initial="hidden"
