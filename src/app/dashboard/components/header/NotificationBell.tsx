@@ -81,7 +81,20 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
   }, [isOpen]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
-  const previewNotifications = notifications.slice(0, 6);
+  const previewNotifications = notifications.slice(0, 5);
+
+  const groupedPreviewNotifications = (() => {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const today = previewNotifications.filter((notification) => notification.timestamp >= startOfToday);
+    const older = previewNotifications.filter((notification) => notification.timestamp < startOfToday);
+
+    return [
+      { key: 'today', label: 'Hoy', items: today },
+      { key: 'older', label: 'Anteriores', items: older },
+    ].filter((group) => group.items.length > 0);
+  })();
 
   const handleMarkAsRead = useCallback(async (id: string) => {
     // Optimistic: remove from list immediately (all fetched notifications are unread)
@@ -159,7 +172,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
 
           {unreadCount > 0 && (
             <span
-              className="absolute -top-1 -right-1 min-w-[1.2rem] h-5 px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center shadow-lg bg-origen-menta shadow-menta-glow-lg"
+              className="absolute -top-1 -right-1 min-w-[1.2rem] h-5 px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center shadow-lg bg-red-500 border border-white"
               role="status"
               aria-live="polite"
               aria-label={`${unreadCount} notificaciones sin leer`}
@@ -235,14 +248,23 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                   <p className="text-xs text-text-subtle mt-1">No hay notificaciones nuevas</p>
                 </div>
               ) : (
-                <div className="divide-y divide-border-subtle">
-                  {previewNotifications.map(notification => (
-                    <NotificationItem
-                      key={notification.id}
-                      notification={notification}
-                      onMarkAsRead={handleMarkAsRead}
-                      onClose={close}
-                    />
+                <div>
+                  {groupedPreviewNotifications.map((group) => (
+                    <div key={group.key}>
+                      <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                        {group.label}
+                      </div>
+                      <div className="divide-y divide-border-subtle">
+                        {group.items.map(notification => (
+                          <NotificationItem
+                            key={notification.id}
+                            notification={notification}
+                            onMarkAsRead={handleMarkAsRead}
+                            onClose={close}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}

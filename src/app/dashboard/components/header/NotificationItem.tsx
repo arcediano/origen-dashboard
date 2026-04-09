@@ -40,6 +40,7 @@ export function NotificationItem({
   onClose 
 }: NotificationItemProps) {
   const router = useRouter();
+  const safeUrl = getSafeActionUrl(notification.action?.url ?? notification.actionUrl);
 
   // ==========================================================================
   // FUNCIONES AUXILIARES
@@ -106,50 +107,25 @@ export function NotificationItem({
   /**
    * Maneja el clic en la notificación
    */
-  const handleClick = () => {
+  const markAsReadOnly = () => {
     if (!notification.read) {
       onMarkAsRead?.(notification.id);
     }
+  };
+
+  const handleClick = () => {
+    markAsReadOnly();
+
+    if (safeUrl) {
+      router.push(safeUrl);
+    }
+
     onClose?.();
-  };
-
-  const getQuickActionLabel = () => {
-    if (notification.action?.label) return notification.action.label;
-
-    if (notification.eventType === 'NEW_ORDER' || notification.eventType === 'ORDER_STATUS_CHANGED') {
-      return 'Ver pedido';
-    }
-
-    if (notification.eventType === 'NEW_REVIEW') {
-      return 'Ver reseña';
-    }
-
-    if (
-      notification.eventType === 'PRODUCT_LOW_STOCK' ||
-      notification.eventType === 'PRODUCT_APPROVED' ||
-      notification.eventType === 'PRODUCT_REJECTED'
-    ) {
-      return 'Ver producto';
-    }
-
-    if (notification.category === 'ACCOUNT') {
-      return 'Revisar cuenta';
-    }
-
-    return 'Ver detalle';
-  };
-
-  const handleOpenAction = () => {
-    if (!safeUrl) return;
-    handleClick();
-    router.push(safeUrl);
   };
 
   // ==========================================================================
   // RENDER
   // ==========================================================================
-
-  const safeUrl = getSafeActionUrl(notification.action?.url ?? notification.actionUrl);
 
   const containerClass = cn(
     'block px-4 py-3 hover:bg-surface transition-colors relative group',
@@ -199,29 +175,18 @@ export function NotificationItem({
         <div className="absolute inset-y-0 right-0 w-1 bg-origen-menta opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
 
-      {safeUrl && (
+      {!safeUrl && !notification.read && (
         <div className="mt-2 flex justify-end">
           <button
             type="button"
             onClick={(event) => {
               event.stopPropagation();
-              handleOpenAction();
+              markAsReadOnly();
             }}
             className="rounded-lg border border-origen-pradera/30 bg-origen-pradera/10 px-2.5 py-1 text-[11px] font-medium text-origen-bosque transition-colors hover:bg-origen-pradera/15"
           >
-            {getQuickActionLabel()}
+            Marcar como leida
           </button>
-        </div>
-      )}
-
-      {/* Metadata adicional (si existe) - opcional */}
-      {notification.metadata && (
-        <div className="mt-2 pl-13 text-[10px] text-text-subtle border-l-2 border-border pl-3">
-          {Object.entries(notification.metadata).map(([key, value]) => (
-            <span key={key} className="mr-2">
-              {key}: {String(value)}
-            </span>
-          ))}
         </div>
       )}
     </>

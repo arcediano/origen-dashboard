@@ -65,23 +65,11 @@ export default function NotificationsPage() {
       return category === 'MARKETING';
     });
 
-    const priorityScore: Record<string, number> = {
-      URGENT: 0,
-      HIGH: 1,
-      MEDIUM: 2,
-      LOW: 3,
-    };
-
     return [...byFilter].sort((a, b) => {
       // Priorizar no leídas
       if (a.read !== b.read) return a.read ? 1 : -1;
 
-      // Luego prioridad de negocio/canonica
-      const aPriority = priorityScore[a.priority ?? 'MEDIUM'] ?? 2;
-      const bPriority = priorityScore[b.priority ?? 'MEDIUM'] ?? 2;
-      if (aPriority !== bPriority) return aPriority - bPriority;
-
-      // Último criterio: más recientes primero
+      // Dentro de cada grupo: más recientes primero
       return b.timestamp.getTime() - a.timestamp.getTime();
     });
   }, [notifications, activityFilter]);
@@ -98,22 +86,17 @@ export default function NotificationsPage() {
   const groupedNotifications = useMemo(() => {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfWeek = new Date(startOfToday);
-    startOfWeek.setDate(startOfWeek.getDate() - 7);
 
-    const groups: Array<{ key: 'today' | 'week' | 'older'; label: string; items: Notification[] }> = [
+    const groups: Array<{ key: 'today' | 'older'; label: string; items: Notification[] }> = [
       { key: 'today', label: 'Hoy', items: [] },
-      { key: 'week', label: 'Ultimos 7 dias', items: [] },
       { key: 'older', label: 'Anteriores', items: [] },
     ];
 
     for (const notification of filteredNotifications) {
       if (notification.timestamp >= startOfToday) {
         groups[0].items.push(notification);
-      } else if (notification.timestamp >= startOfWeek) {
-        groups[1].items.push(notification);
       } else {
-        groups[2].items.push(notification);
+        groups[1].items.push(notification);
       }
     }
 
@@ -232,55 +215,60 @@ export default function NotificationsPage() {
           <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
             <CardContent className="p-0">
               <div className="border-b border-border-subtle px-4 py-4 sm:px-6">
-                <div className="mb-3 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setActivityFilter('all')}
-                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                      activityFilter === 'all'
-                        ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
-                        : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
-                    }`}
-                  >
-                    Todo ({filterCounts.all})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActivityFilter('operativas')}
-                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                      activityFilter === 'operativas'
-                        ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
-                        : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
-                    }`}
-                  >
-                    Operativas ({filterCounts.operativas})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActivityFilter('cuenta')}
-                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                      activityFilter === 'cuenta'
-                        ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
-                        : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
-                    }`}
-                  >
-                    Cuenta y sistema ({filterCounts.cuenta})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActivityFilter('marketing')}
-                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                      activityFilter === 'marketing'
-                        ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
-                        : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
-                    }`}
-                  >
-                    Marketing ({filterCounts.marketing})
-                  </button>
+                <div className="mb-3">
+                  <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible">
+                    <button
+                      type="button"
+                      onClick={() => setActivityFilter('all')}
+                      className={`min-w-max rounded-full px-4 py-2 text-xs font-medium transition-colors ${
+                        activityFilter === 'all'
+                          ? 'bg-origen-bosque text-white'
+                          : 'bg-surface text-text-subtle border border-border-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+                      }`}
+                    >
+                      Todo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActivityFilter('operativas')}
+                      className={`min-w-max rounded-full px-4 py-2 text-xs font-medium transition-colors ${
+                        activityFilter === 'operativas'
+                          ? 'bg-origen-bosque text-white'
+                          : 'bg-surface text-text-subtle border border-border-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+                      }`}
+                    >
+                      Operativas
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActivityFilter('cuenta')}
+                      className={`min-w-max rounded-full px-4 py-2 text-xs font-medium transition-colors ${
+                        activityFilter === 'cuenta'
+                          ? 'bg-origen-bosque text-white'
+                          : 'bg-surface text-text-subtle border border-border-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+                      }`}
+                    >
+                      Cuenta y sistema
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActivityFilter('marketing')}
+                      className={`min-w-max rounded-full px-4 py-2 text-xs font-medium transition-colors ${
+                        activityFilter === 'marketing'
+                          ? 'bg-origen-bosque text-white'
+                          : 'bg-surface text-text-subtle border border-border-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
+                      }`}
+                    >
+                      Marketing
+                    </button>
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm text-muted-foreground">
                     Tienes <span className="font-semibold text-origen-bosque">{unreadCount}</span> notificación(es) sin leer.
+                  </p>
+                  <p className="text-xs text-text-subtle">
+                    Resultados: {filteredNotifications.length} · Todo {filterCounts.all} · Operativas {filterCounts.operativas} · Cuenta {filterCounts.cuenta} · Marketing {filterCounts.marketing}
                   </p>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" onClick={() => void loadInbox()}>

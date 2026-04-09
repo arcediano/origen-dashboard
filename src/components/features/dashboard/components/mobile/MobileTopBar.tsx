@@ -186,7 +186,9 @@ export function MobileTopBar() {
           >
             <Bell className="w-[18px] h-[18px] stroke-[1.8]" />
             {liveNotificationCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 border-2 border-surface-alt" />
+              <span className="absolute -top-1 -right-1 min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-red-500 border border-white text-[10px] font-bold text-white flex items-center justify-center">
+                {liveNotificationCount > 9 ? '9+' : liveNotificationCount}
+              </span>
             )}
           </motion.button>
         </div>
