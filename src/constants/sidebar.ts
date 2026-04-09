@@ -59,6 +59,7 @@ export interface DashboardBreadcrumbItem {
 }
 
 const PAGE_TITLES: Record<string, string> = {
+  '/dashboard/perfil': 'Perfil',
   '/dashboard': 'Inicio',
   '/dashboard/orders': 'Pedidos',
   '/dashboard/products': 'Productos',
@@ -206,15 +207,15 @@ export const MOBILE_ROOT_TABS: RootTabItem[] = [
     matchPaths: ['/dashboard/configuracion/pagos*'],
   },
   {
-    id: 'cuenta',
-    label: 'Cuenta',
+    id: 'perfil',
+    label: 'Perfil',
     icon: User,
-    href: '/dashboard/account',
+    href: '/dashboard/perfil',
     matchPaths: [
+      '/dashboard/perfil*',
       '/dashboard/account*',
       '/dashboard/configuracion*',
       '/dashboard/security*',
-      '/dashboard/notifications*',
       '/dashboard/profile/settings*',
     ],
   },

@@ -6,26 +6,28 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Bell, ChevronLeft, Leaf, Menu } from 'lucide-react';
+import { Bell, ChevronLeft, Leaf, Sparkles } from 'lucide-react';
 import { getDashboardPageTitle, isRootMobileTab } from '@/constants/sidebar';
-import { getUnreadCount } from '@/lib/api/notifications';
+import { fetchUnreadNotifications, markAllNotificationsAsRead, markNotificationAsRead, getUnreadCount } from '@/lib/api/notifications';
+import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
+import type { Notification } from '@/types/notification';
 
-interface MobileTopBarProps {
-  notificationCount?: number;
-  onMenuOpen?: () => void;
-}
-
-export function MobileTopBar({ notificationCount = 0, onMenuOpen }: MobileTopBarProps) {
+export function MobileTopBar() {
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [liveNotificationCount, setLiveNotificationCount] = useState(notificationCount);
+  const [liveNotificationCount, setLiveNotificationCount] = useState(0);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifList, setNotifList] = useState<Notification[]>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [isUpdatingAll, setIsUpdatingAll] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -51,12 +53,52 @@ export function MobileTopBar({ notificationCount = 0, onMenuOpen }: MobileTopBar
     };
   }, []);
 
+  const openNotifications = useCallback(async () => {
+    setIsNotifOpen(true);
+    if (notifList.length === 0) {
+      setNotifLoading(true);
+      try {
+        const response = await fetchUnreadNotifications();
+        if (response.data) setNotifList(response.data);
+      } catch {
+        // silently fail
+      } finally {
+        setNotifLoading(false);
+      }
+    }
+  }, [notifList.length]);
+
+  const closeNotifications = useCallback(() => setIsNotifOpen(false), []);
+
+  const handleMarkAsRead = useCallback((id: string) => {
+    setNotifList(prev => prev.filter(n => n.id !== id));
+    setLiveNotificationCount(prev => Math.max(0, prev - 1));
+    void markNotificationAsRead(id);
+  }, []);
+
+  const handleMarkAllAsRead = useCallback(async () => {
+    if (isUpdatingAll) return;
+    const snapshot = notifList.slice();
+    setIsUpdatingAll(true);
+    setNotifList([]);
+    setLiveNotificationCount(0);
+    setIsNotifOpen(false);
+    try {
+      await markAllNotificationsAsRead();
+    } catch {
+      setNotifList(snapshot);
+    } finally {
+      setIsUpdatingAll(false);
+    }
+  }, [notifList, isUpdatingAll]);
+
   if (!mounted) return null;
 
   const isRoot = isRootMobileTab(pathname);
   const subTitle = getDashboardPageTitle(pathname);
 
   return (
+    <>
     <header
       className={cn(
         'lg:hidden fixed top-0 inset-x-0 z-40',
@@ -127,32 +169,115 @@ export function MobileTopBar({ notificationCount = 0, onMenuOpen }: MobileTopBar
           )}
         </AnimatePresence>
 
-        {/* Zona derecha — accesos persistentes */}
+        {/* Zona derecha — campana de notificaciones */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          <motion.div whileTap={{ scale: 0.82 }}>
-            <Link
-              href="/dashboard/notifications?view=inbox"
-              className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-origen-pradera/10 transition-colors"
-              aria-label={liveNotificationCount > 0 ? `Notificaciones (${liveNotificationCount})` : 'Notificaciones'}
-            >
-              <Bell className="w-[18px] h-[18px] text-foreground stroke-[1.8]" />
-              {liveNotificationCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 border-2 border-surface-alt" />
-              )}
-            </Link>
-          </motion.div>
           <motion.button
             whileTap={{ scale: 0.82 }}
-            onClick={onMenuOpen}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-origen-pradera/10 transition-colors text-foreground border border-transparent"
+            onClick={() => { void openNotifications(); }}
+            className={cn(
+              'relative w-9 h-9 rounded-full flex items-center justify-center transition-colors',
+              isNotifOpen
+                ? 'bg-origen-pradera/10 text-origen-bosque'
+                : 'hover:bg-origen-pradera/10 text-foreground',
+            )}
             type="button"
-            aria-label="Abrir menú"
+            aria-label={liveNotificationCount > 0 ? `Notificaciones (${liveNotificationCount})` : 'Notificaciones'}
+            aria-expanded={isNotifOpen}
           >
-            <Menu className="w-[18px] h-[18px]" />
+            <Bell className="w-[18px] h-[18px] stroke-[1.8]" />
+            {liveNotificationCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 border-2 border-surface-alt" />
+            )}
           </motion.button>
         </div>
 
       </div>
     </header>
+
+    {/* Panel de notificaciones */}
+    <AnimatePresence>
+      {isNotifOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="lg:hidden fixed inset-0 z-30 bg-black/20"
+            style={{ top: '56px' }}
+            onClick={closeNotifications}
+          />
+          {/* Panel */}
+          <motion.div
+            ref={panelRef}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="lg:hidden fixed inset-x-3 z-40 bg-surface-alt rounded-2xl shadow-xl border border-border-subtle overflow-hidden"
+            style={{ top: 'calc(56px + 8px + env(safe-area-inset-top))' }}
+            role="dialog"
+            aria-label="Notificaciones recientes"
+          >
+            {/* Cabecera del panel */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-gradient-to-r from-origen-crema to-surface-alt">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-origen-menta/10 flex items-center justify-center">
+                  <Bell className="w-3.5 h-3.5 text-origen-menta" />
+                </div>
+                <h3 className="text-sm font-semibold text-origen-bosque">Notificaciones</h3>
+              </div>
+              {liveNotificationCount > 0 && (
+                <button
+                  onClick={() => { void handleMarkAllAsRead(); }}
+                  disabled={isUpdatingAll}
+                  className="text-xs text-origen-menta hover:text-origen-pradera font-medium disabled:opacity-50 transition-colors"
+                >
+                  Marcar todas
+                </button>
+              )}
+            </div>
+
+            {/* Lista — máx 5 notificaciones */}
+            <div className="max-h-[60vh] overflow-y-auto">
+              {notifLoading ? (
+                <div className="px-4 py-8 text-center">
+                  <div className="w-10 h-10 rounded-full bg-origen-crema mx-auto mb-2 animate-pulse" />
+                  <p className="text-sm text-text-subtle">Cargando...</p>
+                </div>
+              ) : notifList.length === 0 ? (
+                <div className="px-4 py-8 text-center">
+                  <div className="w-14 h-14 rounded-full bg-origen-crema flex items-center justify-center mx-auto mb-3">
+                    <Sparkles className="w-7 h-7 text-origen-pradera/40" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">¡Todo al día!</p>
+                  <p className="text-xs text-text-subtle mt-1">No hay notificaciones nuevas</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-border-subtle">
+                  {notifList.slice(0, 5).map(notification => (
+                    <NotificationItem
+                      key={notification.id}
+                      notification={notification}
+                      onMarkAsRead={handleMarkAsRead}
+                      onClose={closeNotifications}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-border-subtle p-2 bg-surface">
+              <Link
+                href="/dashboard/notifications"
+                className="block w-full text-center text-xs text-muted-foreground hover:text-origen-bosque py-2 transition-colors font-medium"
+                onClick={closeNotifications}
+              >
+                Ver todas las notificaciones
+              </Link>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+    </>
   );
 }

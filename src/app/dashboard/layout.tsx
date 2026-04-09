@@ -145,7 +145,7 @@ function DashboardContentWrapper({
       </div>
 
       {/* Header móvil nativo */}
-      <MobileTopBar onMenuOpen={() => setIsMobileMenuOpen(true)} />
+      <MobileTopBar />
 
       <main className={cn(
         "transition-all duration-300",
