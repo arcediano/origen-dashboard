@@ -1,26 +1,15 @@
 /**
  * @page NotificationsPage
- * @description Centro de actividad (bandeja + preferencias) — mobile-first
+ * @description Bandeja de notificaciones (solo listado + filtros)
  */
 
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Bell,
-  ShoppingBag,
-  Star,
-  Package,
-  Megaphone,
-  Save,
-  CheckCheck,
-  RefreshCw,
-} from 'lucide-react';
+import { Bell, CheckCheck, RefreshCw, Search, SlidersHorizontal, X } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent } from '@arcediano/ux-library';
-import { Button } from '@arcediano/ux-library';
-import { NotificationToggleRow } from './components/NotificationToggleRow';
-import { gatewayClient } from '@/lib/api/client';
+import { Card, CardContent, Button } from '@arcediano/ux-library';
+import { FilterBottomSheet } from '@/components/shared/mobile';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
 import {
   fetchNotifications,
@@ -29,84 +18,95 @@ import {
 } from '@/lib/api/notifications';
 import type { Notification } from '@/types/notification';
 
+type NotificationTypeFilter = 'all' | 'operativas' | 'cuenta' | 'marketing';
+type ReadFilter = 'all' | 'unread' | 'read';
+
+function normalizeDateBoundary(value: string, mode: 'from' | 'to'): Date | null {
+  if (!value) return null;
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  if (mode === 'to') {
+    date.setHours(23, 59, 59, 999);
+  }
+  return date;
+}
+
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isInboxLoading, setIsInboxLoading] = useState(true);
   const [isInboxUpdating, setIsInboxUpdating] = useState(false);
-  const [activityFilter, setActivityFilter] = useState<'all' | 'operativas' | 'cuenta' | 'marketing'>('all');
 
-  const [emailSettings, setEmailSettings] = useState({
-    orders:    true,
-    reviews:   true,
-    marketing: false,
-    stock:     true,
-  });
-
-  const [pushSettings, setPushSettings] = useState({
-    orders:    true,
-    lowStock:  true,
-    reviews:   true,
-    campaigns: false,
-  });
-
-  const [saved, setSaved] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<NotificationTypeFilter>('all');
+  const [readFilter, setReadFilter] = useState<ReadFilter>('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const unreadCount = useMemo(
     () => notifications.filter((notification) => !notification.read).length,
     [notifications],
   );
 
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (typeFilter !== 'all') count += 1;
+    if (readFilter !== 'all') count += 1;
+    if (dateFrom) count += 1;
+    if (dateTo) count += 1;
+    return count;
+  }, [typeFilter, readFilter, dateFrom, dateTo]);
+
   const filteredNotifications = useMemo(() => {
+    const search = searchQuery.trim().toLowerCase();
+    const fromBoundary = normalizeDateBoundary(dateFrom, 'from');
+    const toBoundary = normalizeDateBoundary(dateTo, 'to');
+
     const byFilter = notifications.filter((notification) => {
       const category = notification.category;
-      if (activityFilter === 'all') return true;
-      if (activityFilter === 'operativas') return category === 'ORDER' || category === 'PRODUCT' || category === 'REVIEW';
-      if (activityFilter === 'cuenta') return category === 'ACCOUNT' || category === 'SYSTEM';
-      return category === 'MARKETING';
+
+      if (search) {
+        const inTitle = notification.title.toLowerCase().includes(search);
+        const inDescription = notification.description.toLowerCase().includes(search);
+        if (!inTitle && !inDescription) return false;
+      }
+
+      if (typeFilter === 'operativas' && !(category === 'ORDER' || category === 'PRODUCT' || category === 'REVIEW')) return false;
+      if (typeFilter === 'cuenta' && !(category === 'ACCOUNT' || category === 'SYSTEM')) return false;
+      if (typeFilter === 'marketing' && category !== 'MARKETING') return false;
+
+      if (readFilter === 'unread' && notification.read) return false;
+      if (readFilter === 'read' && !notification.read) return false;
+
+      if (fromBoundary && notification.timestamp < fromBoundary) return false;
+      if (toBoundary && notification.timestamp > toBoundary) return false;
+
+      return true;
     });
 
     return [...byFilter].sort((a, b) => {
-      // Priorizar no leídas
       if (a.read !== b.read) return a.read ? 1 : -1;
-
-      // Dentro de cada grupo: más recientes primero
       return b.timestamp.getTime() - a.timestamp.getTime();
     });
-  }, [notifications, activityFilter]);
-
-  const filterCounts = useMemo(() => {
-    return {
-      all: notifications.length,
-      operativas: notifications.filter((n) => n.category === 'ORDER' || n.category === 'PRODUCT' || n.category === 'REVIEW').length,
-      cuenta: notifications.filter((n) => n.category === 'ACCOUNT' || n.category === 'SYSTEM').length,
-      marketing: notifications.filter((n) => n.category === 'MARKETING').length,
-    };
-  }, [notifications]);
+  }, [notifications, searchQuery, typeFilter, readFilter, dateFrom, dateTo]);
 
   const groupedNotifications = useMemo(() => {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    const groups: Array<{ key: 'today' | 'older'; label: string; items: Notification[] }> = [
-      { key: 'today', label: 'Hoy', items: [] },
-      { key: 'older', label: 'Anteriores', items: [] },
-    ];
+    const today = filteredNotifications.filter((notification) => notification.timestamp >= startOfToday);
+    const older = filteredNotifications.filter((notification) => notification.timestamp < startOfToday);
 
-    for (const notification of filteredNotifications) {
-      if (notification.timestamp >= startOfToday) {
-        groups[0].items.push(notification);
-      } else {
-        groups[1].items.push(notification);
-      }
-    }
-
-    return groups.filter((group) => group.items.length > 0);
+    return [
+      { key: 'today', label: 'Hoy', items: today },
+      { key: 'older', label: 'Anteriores', items: older },
+    ].filter((group) => group.items.length > 0);
   }, [filteredNotifications]);
 
   const loadInbox = async () => {
     setIsInboxLoading(true);
     try {
-      const response = await fetchNotifications({ page: 1, limit: 30 });
+      const response = await fetchNotifications({ page: 1, limit: 50 });
       if (response.data) {
         setNotifications(response.data.notifications);
       }
@@ -147,295 +147,206 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleSave = async () => {
-    let saveOk = false;
-    try {
-      await gatewayClient.put('/notifications/preferences', {
-        preferences: [
-          {
-            eventType: 'NEW_ORDER',
-            email: emailSettings.orders,
-            inApp: true,
-            push: pushSettings.orders,
-            frequency: 'INSTANT',
-          },
-          {
-            eventType: 'NEW_REVIEW',
-            email: emailSettings.reviews,
-            inApp: true,
-            push: pushSettings.reviews,
-            frequency: 'INSTANT',
-          },
-          {
-            eventType: 'REVIEW_REPLY',
-            email: emailSettings.reviews,
-            inApp: true,
-            push: pushSettings.reviews,
-            frequency: 'INSTANT',
-          },
-          {
-            eventType: 'PRODUCT_LOW_STOCK',
-            email: emailSettings.stock,
-            inApp: true,
-            push: pushSettings.lowStock,
-            frequency: 'INSTANT',
-          },
-          {
-            eventType: 'PROMOTION_CREATED',
-            email: emailSettings.marketing,
-            inApp: true,
-            push: pushSettings.campaigns,
-            frequency: 'INSTANT',
-          },
-        ],
-      });
-      saveOk = true;
-    } catch (err) {
-      console.error('[notifications] Error guardando preferencias:', err);
-    }
-    if (saveOk) {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    }
+  const clearFilters = () => {
+    setTypeFilter('all');
+    setReadFilter('all');
+    setDateFrom('');
+    setDateTo('');
   };
 
   return (
-    <>
-      <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
-        <PageHeader
-          title="Notificaciones"
-          description="Centro de actividad para revisar eventos y definir cómo quieres recibir avisos"
-          badgeIcon={Bell}
-          badgeText="Centro de actividad"
-          tooltip="Notificaciones"
-          tooltipDetailed="Define qué avisos llegan a la campana y cómo quieres recibirlos, sin navegar entre múltiples tabs."
-        />
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
+      <PageHeader
+        title="Notificaciones"
+        description="Revisa y filtra tu actividad de forma rápida"
+        badgeIcon={Bell}
+        badgeText="Bandeja"
+        tooltip="Notificaciones"
+        tooltipDetailed="Filtra por tipo, estado de lectura y rango de fechas."
+      />
 
-        <div className="container mx-auto space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-          <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
-            <CardContent className="p-0">
-              <div className="border-b border-border-subtle px-4 py-4 sm:px-6">
-                <div className="mb-3">
-                  <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible">
+      <div className="container mx-auto space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+        <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
+          <CardContent className="p-0">
+            <div className="border-b border-border-subtle px-4 py-4 sm:px-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar por título o detalle..."
+                    className="w-full h-10 pl-9 pr-8 text-sm bg-surface-alt border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
+                    aria-label="Buscar notificaciones"
+                  />
+                  {searchQuery && (
                     <button
                       type="button"
-                      onClick={() => setActivityFilter('all')}
-                      className={`min-w-max rounded-full px-4 py-2 text-xs font-medium transition-colors ${
-                        activityFilter === 'all'
-                          ? 'bg-origen-bosque text-white'
-                          : 'bg-surface text-text-subtle border border-border-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
-                      }`}
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque transition-colors"
+                      aria-label="Limpiar búsqueda"
                     >
-                      Todo
+                      <X className="w-3.5 h-3.5" />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setActivityFilter('operativas')}
-                      className={`min-w-max rounded-full px-4 py-2 text-xs font-medium transition-colors ${
-                        activityFilter === 'operativas'
-                          ? 'bg-origen-bosque text-white'
-                          : 'bg-surface text-text-subtle border border-border-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
-                      }`}
-                    >
-                      Operativas
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActivityFilter('cuenta')}
-                      className={`min-w-max rounded-full px-4 py-2 text-xs font-medium transition-colors ${
-                        activityFilter === 'cuenta'
-                          ? 'bg-origen-bosque text-white'
-                          : 'bg-surface text-text-subtle border border-border-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
-                      }`}
-                    >
-                      Cuenta y sistema
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActivityFilter('marketing')}
-                      className={`min-w-max rounded-full px-4 py-2 text-xs font-medium transition-colors ${
-                        activityFilter === 'marketing'
-                          ? 'bg-origen-bosque text-white'
-                          : 'bg-surface text-text-subtle border border-border-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
-                      }`}
-                    >
-                      Marketing
-                    </button>
-                  </div>
+                  )}
                 </div>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm text-muted-foreground">
-                    Tienes <span className="font-semibold text-origen-bosque">{unreadCount}</span> notificación(es) sin leer.
-                  </p>
-                  <p className="text-xs text-text-subtle">
-                    Resultados: {filteredNotifications.length} · Todo {filterCounts.all} · Operativas {filterCounts.operativas} · Cuenta {filterCounts.cuenta} · Marketing {filterCounts.marketing}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" onClick={() => void loadInbox()}>
-                      <span className="inline-flex items-center gap-2">
-                        <RefreshCw className="w-4 h-4" />
-                        <span>Actualizar</span>
-                      </span>
-                    </Button>
-                    <Button onClick={handleMarkAll} disabled={!unreadCount || isInboxUpdating}>
-                      <span className="inline-flex items-center gap-2">
-                        <CheckCheck className="w-4 h-4" />
-                        <span>Marcar todas</span>
-                      </span>
-                    </Button>
-                  </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsFilterOpen(true)}
+                  className={
+                    activeFilterCount > 0
+                      ? 'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors bg-origen-bosque border-origen-bosque text-white'
+                      : 'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors bg-surface-alt border-border text-origen-bosque'
+                  }
+                  aria-label="Abrir filtros"
+                >
+                  <SlidersHorizontal className="w-4 h-4" />
+                  <span>Filtros</span>
+                  {activeFilterCount > 0 && (
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/25 text-[10px] font-bold">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              <div className="hidden lg:grid lg:grid-cols-3 lg:gap-3">
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value as NotificationTypeFilter)}
+                  className="h-10 rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm text-origen-bosque focus:outline-none focus:ring-1 focus:ring-origen-pradera/30"
+                  aria-label="Filtrar por tipo"
+                >
+                  <option value="all">Todos los tipos</option>
+                  <option value="operativas">Operativas</option>
+                  <option value="cuenta">Cuenta y sistema</option>
+                  <option value="marketing">Marketing</option>
+                </select>
+
+                <select
+                  value={readFilter}
+                  onChange={(e) => setReadFilter(e.target.value as ReadFilter)}
+                  className="h-10 rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm text-origen-bosque focus:outline-none focus:ring-1 focus:ring-origen-pradera/30"
+                  aria-label="Filtrar por estado de lectura"
+                >
+                  <option value="all">Leídas y no leídas</option>
+                  <option value="unread">Solo no leídas</option>
+                  <option value="read">Solo leídas</option>
+                </select>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="h-10 rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm text-origen-bosque focus:outline-none focus:ring-1 focus:ring-origen-pradera/30"
+                    aria-label="Filtrar desde fecha"
+                  />
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="h-10 rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm text-origen-bosque focus:outline-none focus:ring-1 focus:ring-origen-pradera/30"
+                    aria-label="Filtrar hasta fecha"
+                  />
                 </div>
               </div>
-              {isInboxLoading ? (
-                <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">Cargando notificaciones...</div>
-              ) : filteredNotifications.length === 0 ? (
-                <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">No hay notificaciones por ahora.</div>
-              ) : (
-                <div>
-                  {groupedNotifications.map((group) => (
-                    <div key={group.key}>
-                      <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:px-6">
-                        {group.label}
-                      </div>
-                      <div className="divide-y divide-border-subtle">
-                        {group.items.map((notification) => (
-                          <NotificationItem
-                            key={notification.id}
-                            notification={notification}
-                            onMarkAsRead={handleMarkAsRead}
-                          />
-                        ))}
-                      </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground">
+                  Pendientes: <span className="font-semibold text-origen-bosque">{unreadCount}</span>
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" onClick={() => void loadInbox()}>
+                    <span className="inline-flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4" />
+                      <span>Actualizar</span>
+                    </span>
+                  </Button>
+                  <Button onClick={handleMarkAll} disabled={!unreadCount || isInboxUpdating}>
+                    <span className="inline-flex items-center gap-2">
+                      <CheckCheck className="w-4 h-4" />
+                      <span>Marcar todas</span>
+                    </span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {isInboxLoading ? (
+              <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">Cargando notificaciones...</div>
+            ) : filteredNotifications.length === 0 ? (
+              <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">No hay notificaciones para estos filtros.</div>
+            ) : (
+              <div>
+                {groupedNotifications.map((group) => (
+                  <div key={group.key}>
+                    <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:px-6">
+                      {group.label}
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card id="notifications-preferences" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
-              <CardContent className="p-0">
-                <div className="grid gap-0 lg:grid-cols-2">
-                  <div className="px-4 pb-2 pt-4 sm:px-6">
-                    <h3 className="text-sm font-semibold text-origen-bosque">Email</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">Avisos que recibes por correo.</p>
+                    <div className="divide-y divide-border-subtle">
+                      {group.items.map((notification) => (
+                        <NotificationItem
+                          key={notification.id}
+                          notification={notification}
+                          onMarkAsRead={handleMarkAsRead}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <div className="px-4 pb-2 pt-4 sm:px-6 lg:border-l lg:border-border-subtle">
-                    <h3 className="text-sm font-semibold text-origen-bosque">Push</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">Avisos directos en la app/dispositivo.</p>
-                  </div>
-
-                  <div className="px-4 sm:px-6 divide-y divide-border-subtle">
-                    <NotificationToggleRow
-                      icon={ShoppingBag}
-                      title="Nuevos pedidos"
-                      description="Recibe un email cuando llegue un nuevo pedido"
-                      checked={emailSettings.orders}
-                      onChange={(v) => setEmailSettings((s) => ({ ...s, orders: v }))}
-                      divider={false}
-                    />
-                    <NotificationToggleRow
-                      icon={Star}
-                      title="Nuevas reseñas"
-                      description="Cuando un cliente deje una reseña"
-                      checked={emailSettings.reviews}
-                      onChange={(v) => setEmailSettings((s) => ({ ...s, reviews: v }))}
-                      divider={false}
-                    />
-                    <NotificationToggleRow
-                      icon={Package}
-                      title="Stock bajo"
-                      description="Alertas cuando un producto esté por agotarse"
-                      checked={emailSettings.stock}
-                      onChange={(v) => setEmailSettings((s) => ({ ...s, stock: v }))}
-                      divider={false}
-                    />
-                    <NotificationToggleRow
-                      icon={Megaphone}
-                      title="Marketing y promociones"
-                      description="Ofertas, novedades y recomendaciones"
-                      checked={emailSettings.marketing}
-                      onChange={(v) => setEmailSettings((s) => ({ ...s, marketing: v }))}
-                      divider={false}
-                    />
-                  </div>
-
-                  <div className="px-4 sm:px-6 divide-y divide-border-subtle lg:border-l lg:border-border-subtle">
-                    <NotificationToggleRow
-                      icon={ShoppingBag}
-                      title="Nuevos pedidos"
-                      description="Notificación push para nuevos pedidos"
-                      checked={pushSettings.orders}
-                      onChange={(v) => setPushSettings((s) => ({ ...s, orders: v }))}
-                      divider={false}
-                    />
-                    <NotificationToggleRow
-                      icon={Package}
-                      title="Stock bajo"
-                      description="Alertas de inventario en tiempo real"
-                      checked={pushSettings.lowStock}
-                      onChange={(v) => setPushSettings((s) => ({ ...s, lowStock: v }))}
-                      divider={false}
-                    />
-                    <NotificationToggleRow
-                      icon={Star}
-                      title="Nuevas reseñas"
-                      description="Notificaciones cuando recibas una reseña"
-                      checked={pushSettings.reviews}
-                      onChange={(v) => setPushSettings((s) => ({ ...s, reviews: v }))}
-                      divider={false}
-                    />
-                    <NotificationToggleRow
-                      icon={Megaphone}
-                      title="Campañas"
-                      description="Resultados y actualizaciones de campañas"
-                      checked={pushSettings.campaigns}
-                      onChange={(v) => setPushSettings((s) => ({ ...s, campaigns: v }))}
-                      divider={false}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-          <div className="hidden lg:flex lg:justify-end">
-            <Button onClick={handleSave}>
-              <span className="inline-flex items-center gap-2">
-                <Save className="w-4 h-4" />
-                <span>{saved ? 'Preferencias guardadas' : 'Guardar preferencias'}</span>
-              </span>
-            </Button>
-          </div>
-
-          {/* Espacio extra en móvil para el botón sticky */}
-          <div className="h-4 lg:hidden" />
-        </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* ── Botón guardar sticky en móvil ── */}
-      <div
-        className={`
-          fixed bottom-[calc(88px+env(safe-area-inset-bottom))]
-          left-4 right-4
-          lg:hidden z-30
-        `}
-      >
-        <button
-          onClick={handleSave}
-          className={`
-            w-full flex items-center justify-center gap-2
-            rounded-2xl py-3.5
-            text-sm font-semibold shadow-lg
-            transition-colors
-            ${saved
-              ? 'bg-origen-pradera text-white'
-              : 'bg-origen-bosque text-white active:bg-origen-pino'}
-          `}
-        >
-          <Save className="w-4 h-4" />
-          {saved ? '¡Guardado!' : 'Guardar preferencias'}
-        </button>
-      </div>
-    </>
+      <FilterBottomSheet
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        title="Filtros de notificaciones"
+        sections={[
+          {
+            type: 'chips',
+            id: 'type',
+            title: 'Tipo',
+            options: [
+              { label: 'Todos', value: 'all' },
+              { label: 'Operativas', value: 'operativas' },
+              { label: 'Cuenta y sistema', value: 'cuenta' },
+              { label: 'Marketing', value: 'marketing' },
+            ],
+            value: typeFilter,
+            onChange: (value) => setTypeFilter(value as NotificationTypeFilter),
+          },
+          {
+            type: 'chips',
+            id: 'read',
+            title: 'Estado de lectura',
+            options: [
+              { label: 'Todas', value: 'all' },
+              { label: 'No leídas', value: 'unread' },
+              { label: 'Leídas', value: 'read' },
+            ],
+            value: readFilter,
+            onChange: (value) => setReadFilter(value as ReadFilter),
+          },
+          {
+            type: 'daterange',
+            id: 'date',
+            title: 'Rango de fechas',
+            valueFrom: dateFrom,
+            valueTo: dateTo,
+            onChangeFrom: setDateFrom,
+            onChangeTo: setDateTo,
+          },
+        ]}
+        onClearAll={clearFilters}
+        resultCount={filteredNotifications.length}
+        resultLabel="notificaciones"
+      />
+    </div>
   );
 }

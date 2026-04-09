@@ -49,8 +49,8 @@ export default function PerfilPage() {
     {
       id: 'configuraciones',
       label: 'Configuraciones',
-      description: 'Preferencias de notificaciones y ajustes',
-      href: '/dashboard/notifications?view=preferences',
+      description: 'Preferencias de notificaciones por email y push',
+      href: '/dashboard/configuracion',
       icon: Settings2,
     },
     {

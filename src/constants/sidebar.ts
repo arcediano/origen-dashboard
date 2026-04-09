@@ -73,7 +73,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/account': 'Cuenta',
   '/dashboard/notifications': 'Notificaciones',
   '/dashboard/security': 'Seguridad',
-  '/dashboard/configuracion': 'Cuenta',
+  '/dashboard/configuracion': 'Configuraciones',
   '/dashboard/configuracion/envios': 'Envíos',
   '/dashboard/configuracion/pagos': 'Cobros',
   '/dashboard/configuracion/perfil': 'Ajustes de perfil',
@@ -94,7 +94,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   settings: 'Ajustes de perfil',
   notifications: 'Notificaciones',
   security: 'Seguridad',
-  configuracion: 'Cuenta',
+  configuracion: 'Configuraciones',
   envios: 'Envíos',
   pagos: 'Cobros',
 };
@@ -268,9 +268,7 @@ const CRUMB_LOGICAL_PARENT: Record<string, DashboardBreadcrumbItem> = {
 };
 
 // Override final href for segments that redirect to a canonical URL
-const CRUMB_HREF_OVERRIDE: Record<string, string> = {
-  '/dashboard/configuracion': '/dashboard/account',
-};
+const CRUMB_HREF_OVERRIDE: Record<string, string> = {};
 
 export function getDashboardBreadcrumbs(pathname: string): DashboardBreadcrumbItem[] {
   const segments = pathname.split('/').filter(Boolean);
