@@ -45,6 +45,21 @@ function DashboardContentWrapper({
 
   const { isAuthenticated, isProducer, isLoading: authLoading, user } = useAuth();
 
+  const buildLoginRedirectUrl = () => {
+    if (typeof window === 'undefined') return '/auth/login';
+
+    const rawNotice = window.sessionStorage.getItem('auth:logout-notice');
+    if (!rawNotice) return '/auth/login';
+
+    try {
+      const parsed = JSON.parse(rawNotice) as { reason?: string; message?: string };
+      if (!parsed?.reason || !parsed?.message) return '/auth/login';
+      return `/auth/login?reason=${encodeURIComponent(parsed.reason)}&message=${encodeURIComponent(parsed.message)}`;
+    } catch {
+      return '/auth/login';
+    }
+  };
+
   // Debug: Log del estado de autenticación (solo en desarrollo)
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') {
@@ -65,7 +80,7 @@ function DashboardContentWrapper({
     if (!isAuthenticated) {
       // BUG FIX: antes solo se redirigía si isAuthenticated && !isProducer,
       // dejando a usuarios no autenticados con pantalla en blanco.
-      router.replace('/auth/login');
+      router.replace(buildLoginRedirectUrl());
       return;
     }
 

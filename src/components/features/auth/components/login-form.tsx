@@ -10,7 +10,7 @@
 
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -39,8 +39,32 @@ import { cn } from '@/lib/utils';
 
 function SessionBanner() {
   const searchParams = useSearchParams();
-  const message = searchParams.get('message');
-  const reason = searchParams.get('reason');
+  const [fallbackNotice, setFallbackNotice] = useState<{ reason: string; message: string } | null>(null);
+
+  const queryMessage = searchParams.get('message');
+  const queryReason = searchParams.get('reason');
+
+  useEffect(() => {
+    if (queryMessage) return;
+    if (typeof window === 'undefined') return;
+
+    const rawNotice = window.sessionStorage.getItem('auth:logout-notice');
+    if (!rawNotice) return;
+
+    try {
+      const parsed = JSON.parse(rawNotice) as { reason?: string; message?: string };
+      if (parsed?.reason && parsed?.message) {
+        setFallbackNotice({ reason: parsed.reason, message: parsed.message });
+      }
+    } catch {
+      // noop: si el JSON es inválido no mostramos fallback
+    } finally {
+      window.sessionStorage.removeItem('auth:logout-notice');
+    }
+  }, [queryMessage]);
+
+  const message = queryMessage ?? fallbackNotice?.message ?? null;
+  const reason = queryReason ?? fallbackNotice?.reason ?? null;
 
   if (!message) return null;
 

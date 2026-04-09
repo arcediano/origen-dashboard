@@ -169,8 +169,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       hidden:     'Sesión cerrada por seguridad tras un periodo de inactividad prolongada.',
     };
 
+    const message = messages[reason];
+
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem(
+        'auth:logout-notice',
+        JSON.stringify({ reason, message })
+      );
+    }
+
     router.replace(
-      `/auth/login?reason=${reason}&message=${encodeURIComponent(messages[reason])}`
+      `/auth/login?reason=${reason}&message=${encodeURIComponent(message)}`
     );
   }, [router]);
 
