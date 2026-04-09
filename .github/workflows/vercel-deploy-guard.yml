@@ -1,0 +1,213 @@
+name: Vercel Deploy Guard
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  quality-gates:
+    name: Typecheck and Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Run tests
+        run: npm test
+
+  vercel-observability:
+    name: Vercel Deploy Observability
+    runs-on: ubuntu-latest
+    needs: quality-gates
+
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      GITHUB_SHA: ${{ github.sha }}
+
+    steps:
+      - name: Validate required secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${VERCEL_TOKEN}" || (echo "Missing secret: VERCEL_TOKEN" && exit 1)
+          test -n "${VERCEL_PROJECT_ID}" || (echo "Missing secret: VERCEL_PROJECT_ID" && exit 1)
+          test -n "${VERCEL_TEAM_ID}" || (echo "Missing secret: VERCEL_TEAM_ID" && exit 1)
+
+      - name: Wait for deployment associated with current commit
+        id: locate_deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const token = process.env.VERCEL_TOKEN;
+          const projectId = process.env.VERCEL_PROJECT_ID;
+          const teamId = process.env.VERCEL_TEAM_ID;
+          const sha = process.env.GITHUB_SHA;
+          const out = process.env.GITHUB_OUTPUT;
+
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          async function listDeployments() {
+            const url = new URL('https://api.vercel.com/v6/deployments');
+            url.searchParams.set('projectId', projectId);
+            url.searchParams.set('teamId', teamId);
+            url.searchParams.set('target', 'production');
+            url.searchParams.set('limit', '20');
+
+            const response = await fetch(url, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!response.ok) {
+              const body = await response.text();
+              throw new Error(`Unable to list deployments: ${response.status} ${body}`);
+            }
+
+            return response.json();
+          }
+
+          async function run() {
+            const timeoutMs = 15 * 60 * 1000;
+            const startedAt = Date.now();
+
+            while (Date.now() - startedAt < timeoutMs) {
+              const data = await listDeployments();
+              const deployments = data.deployments || [];
+
+              const match = deployments.find((deployment) => {
+                const meta = deployment.meta || {};
+                return (
+                  meta.githubCommitSha === sha ||
+                  meta.githubCommitRef === 'main' && meta.githubCommitSha?.startsWith(sha.slice(0, 7))
+                );
+              });
+
+              if (match) {
+                const fs = await import('node:fs');
+                fs.appendFileSync(out, `deployment_id=${match.uid}\n`);
+                fs.appendFileSync(out, `deployment_url=${match.url}\n`);
+                fs.appendFileSync(out, `deployment_state=${match.readyState || 'UNKNOWN'}\n`);
+                console.log(`Matched deployment ${match.uid} (${match.url})`);
+                return;
+              }
+
+              console.log('No deployment matched yet. Retrying in 15s...');
+              await sleep(15000);
+            }
+
+            throw new Error('No production deployment associated with current commit was found within 15 minutes.');
+          }
+
+          run().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Poll deployment status and print diagnostic logs on failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const token = process.env.VERCEL_TOKEN;
+          const teamId = process.env.VERCEL_TEAM_ID;
+          const deploymentId = process.env.DEPLOYMENT_ID;
+          const deploymentUrl = process.env.DEPLOYMENT_URL;
+          const initialState = process.env.DEPLOYMENT_STATE;
+
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          async function getDeployment() {
+            const url = new URL(`https://api.vercel.com/v13/deployments/${deploymentId}`);
+            url.searchParams.set('teamId', teamId);
+
+            const response = await fetch(url, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!response.ok) {
+              const body = await response.text();
+              throw new Error(`Unable to fetch deployment ${deploymentId}: ${response.status} ${body}`);
+            }
+
+            return response.json();
+          }
+
+          async function getBuildEvents() {
+            const url = new URL(`https://api.vercel.com/v2/deployments/${deploymentId}/events`);
+            url.searchParams.set('teamId', teamId);
+            url.searchParams.set('limit', '200');
+
+            const response = await fetch(url, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!response.ok) {
+              const body = await response.text();
+              console.error(`Could not fetch build events: ${response.status} ${body}`);
+              return [];
+            }
+
+            const data = await response.json();
+            return data || [];
+          }
+
+          async function run() {
+            console.log(`Initial deployment state: ${initialState}`);
+            console.log(`Inspect URL: https://${deploymentUrl}`);
+
+            const timeoutMs = 20 * 60 * 1000;
+            const startedAt = Date.now();
+
+            while (Date.now() - startedAt < timeoutMs) {
+              const deployment = await getDeployment();
+              const state = deployment.readyState || 'UNKNOWN';
+              console.log(`Current deployment state: ${state}`);
+
+              if (state === 'READY') {
+                console.log('Deployment is READY.');
+                return;
+              }
+
+              if (state === 'ERROR' || state === 'CANCELED') {
+                console.error(`Deployment ended in ${state}. Fetching build events...`);
+                const events = await getBuildEvents();
+                for (const event of events) {
+                  const message = event.text || event.payload || JSON.stringify(event);
+                  console.error(`[vercel-event] ${message}`);
+                }
+                throw new Error(`Deployment failed with state ${state}`);
+              }
+
+              await sleep(15000);
+            }
+
+            throw new Error('Timed out waiting for deployment to finish.');
+          }
+
+          run().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+        env:
+          DEPLOYMENT_ID: ${{ steps.locate_deploy.outputs.deployment_id }}
+          DEPLOYMENT_URL: ${{ steps.locate_deploy.outputs.deployment_url }}
+          DEPLOYMENT_STATE: ${{ steps.locate_deploy.outputs.deployment_state }}
