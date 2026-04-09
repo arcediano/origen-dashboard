@@ -228,8 +228,19 @@ export function NotificationItem({
   );
 
   return (
-    <button type="button" className={cn(containerClass, 'w-full text-left')} onClick={handleClick}>
+    <div
+      role="button"
+      tabIndex={0}
+      className={cn(containerClass, 'w-full text-left cursor-pointer')}
+      onClick={handleClick}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleClick();
+        }
+      }}
+    >
       {content}
-    </button>
+    </div>
   );
 }

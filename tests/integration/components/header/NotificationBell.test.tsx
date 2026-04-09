@@ -158,16 +158,16 @@ const baseNotification: Notification = {
 };
 
 describe('NotificationItem — seguridad de URLs de acción', () => {
-  it('renderiza como enlace (<a>) cuando la URL es una ruta interna válida', () => {
+  it('renderiza como botón principal y muestra acción rápida cuando la URL interna es válida', () => {
     render(
       <NotificationItem
         notification={{ ...baseNotification, actionUrl: '/dashboard/pedidos/123' }}
       />,
     );
 
-    const link = screen.getByRole('link');
-    expect(link).toBeDefined();
-    expect(link.getAttribute('href')).toBe('/dashboard/pedidos/123');
+    expect(screen.queryByRole('link')).toBeNull();
+    expect(screen.getByRole('button', { name: /notificación de prueba/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /^ver detalle$/i })).toBeDefined();
   });
 
   it('bloquea URLs https:// externas y renderiza un <button> en su lugar', () => {
@@ -219,7 +219,7 @@ describe('NotificationItem — seguridad de URLs de acción', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('link'));
+    fireEvent.click(screen.getByRole('button', { name: /notificación de prueba/i }));
     expect(onMarkAsRead).toHaveBeenCalledWith('test-1');
   });
 
@@ -232,7 +232,7 @@ describe('NotificationItem — seguridad de URLs de acción', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('link'));
+    fireEvent.click(screen.getByRole('button', { name: /notificación de prueba/i }));
     expect(onMarkAsRead).not.toHaveBeenCalled();
   });
 });
