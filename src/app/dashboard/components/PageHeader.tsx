@@ -72,9 +72,9 @@ export function PageHeader({
       {/* ── DESKTOP: header decorativo completo (≥ lg) ── */}
       <div className="hidden lg:block">
         <div className="absolute inset-0 bg-gradient-to-b from-origen-pradera/[0.02] to-transparent pointer-events-none" />
-        <div className={cn('relative container mx-auto px-6 py-8 sm:py-10', containerClassName)}>
+        <div className={cn('relative container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7', containerClassName)}>
           {/* Fila superior: badge + acciones */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             {(BadgeIcon || badgeText) && (
               <div className="inline-flex items-center gap-2 bg-surface-alt px-4 py-2 rounded-full border border-origen-pradera/20 shadow-sm">
                 {BadgeIcon && (
@@ -107,10 +107,10 @@ export function PageHeader({
             )}
             <div className="flex-1">
               <div className="relative inline-block">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-origen-bosque leading-tight">{title}</h1>
+                <h1 className="text-2xl font-bold leading-tight text-origen-bosque sm:text-3xl lg:text-3xl">{title}</h1>
               </div>
               {description && (
-                <p className="text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed">{description}</p>
+                <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">{description}</p>
               )}
             </div>
           </div>
