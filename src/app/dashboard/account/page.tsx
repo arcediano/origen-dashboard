@@ -53,10 +53,9 @@ export default function AccountPage() {
         badgeText="Cuenta"
         tooltip="Cuenta"
         tooltipDetailed="Este espacio concentra las tareas personales y de configuración para evitar duplicidades entre perfil, ajustes y seguridad."
-        containerClassName="max-w-6xl"
       />
 
-      <div className="container mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 space-y-6">
+      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 space-y-6">
         <div className="rounded-[28px] border border-origen-pradera/25 bg-gradient-to-br from-origen-crema via-surface-alt to-surface p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex-shrink-0">
@@ -69,23 +68,22 @@ export default function AccountPage() {
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
             {accountSections.map((section) => {
               const Icon = section.icon;
               return (
-                <Link key={section.title} href={section.href} className="block">
-                  <Card className="h-full rounded-2xl border border-border-subtle shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-origen-pradera/10">
-                          <Icon className="h-4.5 w-4.5 text-origen-pradera" />
+                <Link key={section.title} href={section.href} className="block group">
+                  <Card className="h-full rounded-2xl border border-border-subtle bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-origen-pradera/30 hover:shadow-md hover:bg-origen-crema/40">
+                    <CardContent className="p-5">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-origen-pradera/15 to-origen-hoja/15 transition-colors group-hover:from-origen-pradera/25 group-hover:to-origen-hoja/25">
+                          <Icon className="h-5 w-5 text-origen-pradera" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{section.meta}</p>
-                          <h3 className="mt-0.5 text-[15px] font-semibold text-origen-bosque">{section.title}</h3>
-                          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground sm:text-sm">{section.description}</p>
+                          <h3 className="text-[15px] font-semibold text-origen-bosque">{section.title}</h3>
+                          <p className="mt-1 text-sm text-muted-foreground leading-snug">{section.description}</p>
                         </div>
-                        <ChevronRight className="mt-1 h-3.5 w-3.5 text-text-subtle" />
+                        <ChevronRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-text-subtle transition-transform group-hover:translate-x-0.5" />
                       </div>
                     </CardContent>
                   </Card>

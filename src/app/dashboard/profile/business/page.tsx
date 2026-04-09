@@ -116,7 +116,7 @@ export default function BusinessInfoPage() {
       <div className="fixed top-0 right-0 w-64 h-64 bg-origen-pradera/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
       <div className="fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-      <div className="container mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
         <PageHeader
           title="Perfil comercial"
           description="Gestiona tus datos personales, de negocio y certificaciones desde una única estructura"
@@ -124,7 +124,6 @@ export default function BusinessInfoPage() {
           badgeText="Negocio"
           showBackButton={true}
           onBack={() => router.back()}
-          containerClassName="max-w-6xl"
         />
 
         <ProfileSectionNav className="mt-3" />

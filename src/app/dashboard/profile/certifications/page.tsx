@@ -163,7 +163,7 @@ export default function CertificationsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
-      <div className="container mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
         <PageHeader
           title="Perfil comercial"
           description="Gestiona tus datos personales, de negocio y certificaciones desde una única estructura"
@@ -171,7 +171,6 @@ export default function CertificationsPage() {
           badgeText="Certificaciones"
           showBackButton={true}
           onBack={() => router.back()}
-          containerClassName="max-w-6xl"
         />
 
         <ProfileSectionNav className="mt-3" />

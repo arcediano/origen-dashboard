@@ -259,6 +259,17 @@ export function isRootMobileTab(pathname: string): boolean {
   return MOBILE_ROOT_TABS.some((tab) => matchesNavigationItem(pathname, { matchPaths: tab.matchPaths }) && pathname === tab.href);
 }
 
+// Routes that need a logical parent crumb injected (not reflected in URL structure)
+const CRUMB_LOGICAL_PARENT: Record<string, DashboardBreadcrumbItem> = {
+  '/dashboard/security': { href: '/dashboard/account', label: 'Cuenta' },
+  '/dashboard/notifications': { href: '/dashboard/account', label: 'Cuenta' },
+};
+
+// Override final href for segments that redirect to a canonical URL
+const CRUMB_HREF_OVERRIDE: Record<string, string> = {
+  '/dashboard/configuracion': '/dashboard/account',
+};
+
 export function getDashboardBreadcrumbs(pathname: string): DashboardBreadcrumbItem[] {
   const segments = pathname.split('/').filter(Boolean);
   const breadcrumbs: DashboardBreadcrumbItem[] = [{ href: '/dashboard', label: 'Inicio' }];
@@ -267,13 +278,19 @@ export function getDashboardBreadcrumbs(pathname: string): DashboardBreadcrumbIt
   for (let index = 1; index < segments.length; index += 1) {
     const segment = segments[index];
     accumulated += `/${segment}`;
-    const href = `/dashboard${accumulated}`;
+    const rawHref = `/dashboard${accumulated}`;
+    const href = CRUMB_HREF_OVERRIDE[rawHref] ?? rawHref;
 
     let label = SEGMENT_LABELS[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
 
     if (/^\d+$/.test(segment) || /^[a-f0-9-]{8,}$/i.test(segment)) {
       if (segments[index - 1] === 'orders') label = 'Detalle del pedido';
       if (segments[index - 1] === 'products') label = 'Detalle del producto';
+    }
+
+    // Inject a logical parent crumb for orphan routes (e.g., /security → Cuenta first)
+    if (index === 1 && CRUMB_LOGICAL_PARENT[rawHref]) {
+      breadcrumbs.push(CRUMB_LOGICAL_PARENT[rawHref]);
     }
 
     breadcrumbs.push({ href, label });

@@ -223,7 +223,7 @@ export default function NotificationsPage() {
           tooltipDetailed="Define qué avisos llegan a la campana y cómo quieres recibirlos, sin navegar entre múltiples tabs."
         />
 
-        <div className="container mx-auto max-w-6xl space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+        <div className="container mx-auto space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
