@@ -51,6 +51,59 @@ interface BackendListResponse {
   };
 }
 
+const ALLOWED_ACTION_TYPES: NotificationActionType[] = [
+  'OPEN_URL',
+  'OPEN_ORDER',
+  'OPEN_PRODUCT',
+  'OPEN_REVIEW',
+  'NONE',
+];
+
+function logNotificationApiEvent(level: 'info' | 'warn' | 'error', event: string, payload: Record<string, unknown>) {
+  const logger = level === 'error' ? console.error : level === 'warn' ? console.warn : console.info;
+  logger('[notifications-api]', { event, ...payload });
+}
+
+function isValidBackendNotification(item: unknown): item is BackendNotification {
+  if (!item || typeof item !== 'object') return false;
+
+  const candidate = item as Partial<BackendNotification>;
+  const hasRequiredStrings =
+    typeof candidate.id === 'string' &&
+    typeof candidate.eventType === 'string' &&
+    typeof candidate.title === 'string' &&
+    typeof candidate.body === 'string' &&
+    typeof candidate.createdAt === 'string';
+
+  if (!hasRequiredStrings || typeof candidate.isRead !== 'boolean') return false;
+
+  const createdAt = candidate.createdAt;
+  return typeof createdAt === 'string' && !Number.isNaN(new Date(createdAt).getTime());
+}
+
+function sanitizeBackendNotifications(data: unknown[], context: string): BackendNotification[] {
+  const valid: BackendNotification[] = [];
+  let dropped = 0;
+
+  for (const item of data) {
+    if (isValidBackendNotification(item)) {
+      valid.push(item);
+      continue;
+    }
+    dropped += 1;
+  }
+
+  if (dropped > 0) {
+    logNotificationApiEvent('warn', 'invalid_payload_items_dropped', {
+      context,
+      dropped,
+      received: data.length,
+    });
+  }
+
+  return valid;
+}
+
 // â”€â”€â”€ Mappers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function mapPriority(raw?: string): NotificationPriority | undefined {
@@ -80,8 +133,11 @@ function mapCanonicalCategory(eventType: string, category?: string): Notificatio
 
 function mapAction(n: BackendNotification): NotificationAction | undefined {
   if (!n.actionUrl && !n.actionType) return undefined;
+  const rawActionType = n.actionType?.toUpperCase();
   const type: NotificationActionType =
-    (n.actionType as NotificationActionType | undefined) ?? 'OPEN_URL';
+    rawActionType && ALLOWED_ACTION_TYPES.includes(rawActionType as NotificationActionType)
+      ? (rawActionType as NotificationActionType)
+      : 'OPEN_URL';
   return {
     type,
     label: n.actionLabel,
@@ -132,7 +188,8 @@ export async function fetchNotifications(params?: {
       `/notifications${qs ? `?${qs}` : ''}`,
     );
 
-    const notifications = (res.data ?? []).map(mapBackendNotification);
+    const backendItems = sanitizeBackendNotifications(res.data ?? [], 'fetchNotifications');
+    const notifications = backendItems.map(mapBackendNotification);
     const meta = res.meta;
     const byType: Record<string, number> = {
       product: 0,
@@ -173,7 +230,11 @@ export async function fetchUnreadNotifications(): Promise<ApiResponse<Notificati
     const res = await gatewayClient.get<BackendListResponse>(
       '/notifications?unreadOnly=true&limit=50',
     );
-    const notifications = (res.data ?? []).map(mapBackendNotification);
+    const backendItems = sanitizeBackendNotifications(res.data ?? [], 'fetchUnreadNotifications');
+    const notifications = backendItems.map(mapBackendNotification);
+    logNotificationApiEvent('info', 'unread_notifications_loaded', {
+      count: notifications.length,
+    });
     return { data: notifications, status: 200 };
   } catch (err) {
     console.error('[notifications] fetchUnreadNotifications', err);

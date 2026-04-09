@@ -60,6 +60,9 @@ describe('NotificationBell', () => {
 
     expect(await screen.findByText('Nuevo pedido recibido')).toBeDefined();
     expect(screen.getByText('Producto aprobado')).toBeDefined();
+
+    const viewAllLink = screen.getByRole('link', { name: /ver todas las notificaciones/i });
+    expect(viewAllLink.getAttribute('href')).toBe('/dashboard/notifications');
   });
 
   it('elimina la notificación del listado (update optimista) al hacer click en ella', async () => {

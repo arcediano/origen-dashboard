@@ -27,7 +27,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const buttonContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Cargar notificaciones solo una vez
@@ -62,7 +62,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
       const target = event.target as Node;
       
       if (
-        buttonRef.current?.contains(target) ||
+        buttonContainerRef.current?.contains(target) ||
         dropdownRef.current?.contains(target)
       ) {
         return;
@@ -141,28 +141,34 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
 
   return (
     <div className="relative notifications-menu">
-      <Button
-        ref={buttonRef}
-        variant="ghost"
-        size="icon"
-        className={cn(
-          'relative text-foreground hover:text-origen-bosque hover:bg-origen-pradera/10 transition-all',
-          isOpen && 'bg-origen-pradera/10 text-origen-bosque'
-        )}
-        onClick={toggleOpen}
-        aria-label={unreadCount > 0 ? `Notificaciones (${unreadCount})` : 'Notificaciones'}
-        aria-expanded={isOpen}
-        aria-haspopup="dialog"
-        aria-controls="notification-bell-panel"
-      >
-        <Bell className="w-5 h-5" />
-        
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[1.2rem] h-5 px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center shadow-lg bg-origen-menta shadow-menta-glow-lg">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </Button>
+      <div ref={buttonContainerRef}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            'relative text-foreground hover:text-origen-bosque hover:bg-origen-pradera/10 transition-all',
+            isOpen && 'bg-origen-pradera/10 text-origen-bosque'
+          )}
+          onClick={toggleOpen}
+          aria-label={unreadCount > 0 ? `Notificaciones (${unreadCount})` : 'Notificaciones'}
+          aria-expanded={isOpen}
+          aria-haspopup="dialog"
+          aria-controls="notification-bell-panel"
+        >
+          <Bell className="w-5 h-5" />
+
+          {unreadCount > 0 && (
+            <span
+              className="absolute -top-1 -right-1 min-w-[1.2rem] h-5 px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center shadow-lg bg-origen-menta shadow-menta-glow-lg"
+              role="status"
+              aria-live="polite"
+              aria-label={`${unreadCount} notificaciones sin leer`}
+            >
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </Button>
+      </div>
 
       <AnimatePresence>
         {isOpen && (
@@ -251,7 +257,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
             {/* Footer */}
             <div className="border-t border-border-subtle p-2 bg-surface">
               <Link
-                  href="/dashboard/notifications?view=inbox"
+                  href="/dashboard/notifications"
                 className="block w-full text-center text-xs text-muted-foreground hover:text-origen-bosque py-2 transition-colors font-medium"
                 onClick={close}
               >
