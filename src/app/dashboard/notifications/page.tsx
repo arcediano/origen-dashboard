@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @page NotificationsPage
  * @description Bandeja de notificaciones (solo listado + filtros)
  */
@@ -6,16 +6,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, CheckCheck, RefreshCw, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Bell, Search, SlidersHorizontal, X } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, Button } from '@arcediano/ux-library';
+import { Card, CardContent } from '@arcediano/ux-library';
 import { FilterBottomSheet } from '@/components/shared/mobile';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
-import {
-  fetchNotifications,
-  markAllNotificationsAsRead,
-  markNotificationAsRead,
-} from '@/lib/api/notifications';
+import { fetchNotifications, markNotificationAsRead } from '@/lib/api/notifications';
 import type { Notification } from '@/types/notification';
 
 type NotificationTypeFilter = 'all' | 'operativas' | 'cuenta' | 'marketing';
@@ -34,7 +30,6 @@ function normalizeDateBoundary(value: string, mode: 'from' | 'to'): Date | null 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isInboxLoading, setIsInboxLoading] = useState(true);
-  const [isInboxUpdating, setIsInboxUpdating] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<NotificationTypeFilter>('all');
@@ -57,7 +52,16 @@ export default function NotificationsPage() {
     return count;
   }, [typeFilter, readFilter, dateFrom, dateTo]);
 
+  const hasInvalidDateRange = useMemo(() => {
+    if (!dateFrom || !dateTo) return false;
+    const from = new Date(`${dateFrom}T00:00:00`).getTime();
+    const to = new Date(`${dateTo}T23:59:59`).getTime();
+    return from > to;
+  }, [dateFrom, dateTo]);
+
   const filteredNotifications = useMemo(() => {
+    if (hasInvalidDateRange) return [];
+
     const search = searchQuery.trim().toLowerCase();
     const fromBoundary = normalizeDateBoundary(dateFrom, 'from');
     const toBoundary = normalizeDateBoundary(dateTo, 'to');
@@ -88,7 +92,7 @@ export default function NotificationsPage() {
       if (a.read !== b.read) return a.read ? 1 : -1;
       return b.timestamp.getTime() - a.timestamp.getTime();
     });
-  }, [notifications, searchQuery, typeFilter, readFilter, dateFrom, dateTo]);
+  }, [notifications, searchQuery, typeFilter, readFilter, dateFrom, dateTo, hasInvalidDateRange]);
 
   const groupedNotifications = useMemo(() => {
     const now = new Date();
@@ -128,22 +132,8 @@ export default function NotificationsPage() {
     try {
       await markNotificationAsRead(id);
     } catch (error) {
-      console.error('[notifications] Error marcando notificación como leída:', error);
+      console.error('[notifications] Error marcando notificacion como leida:', error);
       void loadInbox();
-    }
-  };
-
-  const handleMarkAll = async () => {
-    if (!unreadCount || isInboxUpdating) return;
-    setIsInboxUpdating(true);
-    setNotifications((current) => current.map((notification) => ({ ...notification, read: true })));
-    try {
-      await markAllNotificationsAsRead();
-    } catch (error) {
-      console.error('[notifications] Error marcando todas como leídas:', error);
-      void loadInbox();
-    } finally {
-      setIsInboxUpdating(false);
     }
   };
 
@@ -158,7 +148,7 @@ export default function NotificationsPage() {
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
       <PageHeader
         title="Notificaciones"
-        description="Revisa y filtra tu actividad de forma rápida"
+        description="Revisa y filtra tu actividad de forma rapida"
         badgeIcon={Bell}
         badgeText="Bandeja"
         tooltip="Notificaciones"
@@ -176,7 +166,7 @@ export default function NotificationsPage() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar por título o detalle..."
+                    placeholder="Buscar por titulo o detalle..."
                     className="w-full h-10 pl-9 pr-8 text-sm bg-surface-alt border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
                     aria-label="Buscar notificaciones"
                   />
@@ -185,7 +175,7 @@ export default function NotificationsPage() {
                       type="button"
                       onClick={() => setSearchQuery('')}
                       className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque transition-colors"
-                      aria-label="Limpiar búsqueda"
+                      aria-label="Limpiar busqueda"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -231,9 +221,9 @@ export default function NotificationsPage() {
                   className="h-10 rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm text-origen-bosque focus:outline-none focus:ring-1 focus:ring-origen-pradera/30"
                   aria-label="Filtrar por estado de lectura"
                 >
-                  <option value="all">Leídas y no leídas</option>
-                  <option value="unread">Solo no leídas</option>
-                  <option value="read">Solo leídas</option>
+                  <option value="all">Leidas y no leidas</option>
+                  <option value="unread">Solo no leidas</option>
+                  <option value="read">Solo leidas</option>
                 </select>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -254,25 +244,14 @@ export default function NotificationsPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-3">
                 <p className="text-sm text-muted-foreground">
                   Pendientes: <span className="font-semibold text-origen-bosque">{unreadCount}</span>
                 </p>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" onClick={() => void loadInbox()}>
-                    <span className="inline-flex items-center gap-2">
-                      <RefreshCw className="w-4 h-4" />
-                      <span>Actualizar</span>
-                    </span>
-                  </Button>
-                  <Button onClick={handleMarkAll} disabled={!unreadCount || isInboxUpdating}>
-                    <span className="inline-flex items-center gap-2">
-                      <CheckCheck className="w-4 h-4" />
-                      <span>Marcar todas</span>
-                    </span>
-                  </Button>
-                </div>
               </div>
+              {hasInvalidDateRange && (
+                <p className="text-xs text-red-600">La fecha Desde no puede ser mayor que la fecha Hasta.</p>
+              )}
             </div>
 
             {isInboxLoading ? (
@@ -327,8 +306,8 @@ export default function NotificationsPage() {
             title: 'Estado de lectura',
             options: [
               { label: 'Todas', value: 'all' },
-              { label: 'No leídas', value: 'unread' },
-              { label: 'Leídas', value: 'read' },
+              { label: 'No leidas', value: 'unread' },
+              { label: 'Leidas', value: 'read' },
             ],
             value: readFilter,
             onChange: (value) => setReadFilter(value as ReadFilter),

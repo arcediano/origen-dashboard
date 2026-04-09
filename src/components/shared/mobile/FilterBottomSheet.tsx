@@ -1,19 +1,19 @@
-/**
+﻿/**
  * @component FilterBottomSheet
- * @description Panel de filtros a pantalla completa para móvil.
+ * @description Panel de filtros a pantalla completa para mÃ³vil.
  *
- * ARQUITECTURA DEFINITIVA — dos elementos fixed independientes:
+ * ARQUITECTURA DEFINITIVA â€” dos elementos fixed independientes:
  *
- *  1. Sheet (z-60):  position:fixed, bottom:-100vh → bottom:0
+ *  1. Sheet (z-60):  position:fixed, bottom:-100vh â†’ bottom:0
  *     - Pantalla completa (100dvh/100vh).
  *     - Contenedor de scroll simple. Sin flex, sin grid, sin overflow:hidden.
  *     - padding-bottom reserva espacio para el footer.
  *
  *  2. Footer (z-62): position:fixed, bottom:0, SIEMPRE en el viewport.
  *     - Elemento completamente independiente del sheet.
- *     - Garantía absoluta: nunca puede quedar fuera de pantalla.
+ *     - GarantÃ­a absoluta: nunca puede quedar fuera de pantalla.
  *
- *  Sin Framer Motion, sin CSS transform → sin bug iOS Safari overflow.
+ *  Sin Framer Motion, sin CSS transform â†’ sin bug iOS Safari overflow.
  */
 
 'use client';
@@ -23,7 +23,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// ─── TIPOS ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ TIPOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface ChipOption {
   label: string;
@@ -85,7 +85,7 @@ export interface FilterBottomSheetProps {
   title?: string;
 }
 
-// ─── DRAFT STATE ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ DRAFT STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type DraftValue =
   | { type: 'chips'; value: string }
@@ -117,7 +117,7 @@ function clearDraft(sections: FilterSection[]): Draft {
   return d;
 }
 
-// ─── SECCIONES ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ SECCIONES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function ChipsSection({ section, value, onChange }: {
   section: FilterSection & { type: 'chips' };
@@ -175,13 +175,13 @@ function DateRangeSection({ section, from, to, onFrom, onTo }: {
   return (
     <div>
       <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wide mb-3">{section.title}</p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Desde</label>
+          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Desde (AAAA-MM-DD)</label>
           <input type="date" value={from} onChange={(e) => onFrom(e.target.value)} className={dateInputCls} />
         </div>
         <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Hasta</label>
+          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Hasta (AAAA-MM-DD)</label>
           <input type="date" value={to} onChange={(e) => onTo(e.target.value)} className={dateInputCls} />
         </div>
       </div>
@@ -202,19 +202,19 @@ function NumberRangeSection({ section, min, max, onMin, onMax }: {
   return (
     <div>
       <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wide mb-3">{section.title}</p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Mínimo</label>
+          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">MÃ­nimo</label>
           <div className="relative">
             {section.prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-text-subtle pointer-events-none">{section.prefix}</span>}
             <input type="number" value={min} onChange={(e) => onMin(e.target.value)} placeholder="0" className={inputCls} min="0" inputMode="decimal" />
           </div>
         </div>
         <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Máximo</label>
+          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">MÃ¡ximo</label>
           <div className="relative">
             {section.prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-subtle pointer-events-none">{section.prefix}</span>}
-            <input type="number" value={max} onChange={(e) => onMax(e.target.value)} placeholder="∞" className={inputCls} min="0" inputMode="decimal" />
+            <input type="number" value={max} onChange={(e) => onMax(e.target.value)} placeholder="âˆž" className={inputCls} min="0" inputMode="decimal" />
           </div>
         </div>
       </div>
@@ -271,7 +271,7 @@ function TogglesSection({ section, values, onToggle }: {
   );
 }
 
-// ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
+// â”€â”€â”€ COMPONENTE PRINCIPAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function FilterBottomSheet({
   isOpen,
@@ -286,13 +286,13 @@ export function FilterBottomSheet({
   const [mounted, setMounted]   = useState(false);
   const [visible, setVisible]   = useState(false);
 
-  // ── Sincronizar draft al abrir ────────────────────────────────────────────
+  // â”€â”€ Sincronizar draft al abrir â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     if (isOpen) setDraft(buildDraft(sections));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  // ── Animación: mounted controla si el DOM existe, visible dispara la transición CSS
+  // â”€â”€ AnimaciÃ³n: mounted controla si el DOM existe, visible dispara la transiciÃ³n CSS
   useEffect(() => {
     if (isOpen) {
       setMounted(true);
@@ -304,8 +304,8 @@ export function FilterBottomSheet({
     }
   }, [isOpen]);
 
-  // ── Bloquear scroll del body (iOS-safe) ──────────────────────────────────
-  // iOS Safari ignora overflow:hidden en body. La técnica correcta es position:fixed + top:-scrollY.
+  // â”€â”€ Bloquear scroll del body (iOS-safe) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // iOS Safari ignora overflow:hidden en body. La tÃ©cnica correcta es position:fixed + top:-scrollY.
   useEffect(() => {
     if (isOpen) {
       const scrollY = window.scrollY;
@@ -331,7 +331,7 @@ export function FilterBottomSheet({
     };
   }, [isOpen]);
 
-  // ── Notificar BottomTabBar ────────────────────────────────────────────────
+  // â”€â”€ Notificar BottomTabBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     window.dispatchEvent(new CustomEvent('filter-sheet:toggle', { detail: { open: isOpen } }));
     return () => {
@@ -339,7 +339,7 @@ export function FilterBottomSheet({
     };
   }, [isOpen]);
 
-  // ── Helpers draft ─────────────────────────────────────────────────────────
+  // â”€â”€ Helpers draft â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const setChips  = (id: string, v: string) =>
     setDraft((p) => ({ ...p, [id]: { type: 'chips', value: v } }));
   const setDateFrom = (id: string, v: string) =>
@@ -381,14 +381,14 @@ export function FilterBottomSheet({
     return false;
   });
 
-  // ── Transición CSS: animar top (más fiable que bottom+height en móvil) ───
+  // â”€â”€ TransiciÃ³n CSS: animar top (mÃ¡s fiable que bottom+height en mÃ³vil) â”€â”€â”€
   const transition = 'top 0.38s cubic-bezier(0.32, 0.72, 0, 1)';
 
   if (!mounted) return null;
 
   return createPortal(
     <>
-      {/* ── Overlay ── */}
+      {/* â”€â”€ Overlay â”€â”€ */}
       <div
         style={{
           position: 'fixed', inset: 0, zIndex: 55,
@@ -401,12 +401,12 @@ export function FilterBottomSheet({
         aria-hidden
       />
 
-      {/* ── Sheet (pantalla completa, flex column) ──────────────────────────
+      {/* â”€â”€ Sheet (pantalla completa, flex column) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Usa display:flex para que el footer sea parte del layout y siempre
           quede visible en la parte inferior sin trucos de z-index.
-          - top animado: 100% (oculto) → 0 (visible)
-          - overflow:hidden en el contenedor; scroll solo en el área de contenido
-          ─────────────────────────────────────────────────────────────────── */}
+          - top animado: 100% (oculto) â†’ 0 (visible)
+          - overflow:hidden en el contenedor; scroll solo en el Ã¡rea de contenido
+          â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div
         role="dialog"
         aria-modal
@@ -436,7 +436,7 @@ export function FilterBottomSheet({
           </button>
         </div>
 
-        {/* Secciones de filtros — área scrollable */}
+        {/* Secciones de filtros â€” Ã¡rea scrollable */}
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
           <div style={{ padding:'20px', display:'flex', flexDirection:'column', gap:24 }}>
             {sections.map((section) => {
@@ -494,7 +494,7 @@ export function FilterBottomSheet({
           </div>
         </div>
 
-        {/* Footer — parte del flex layout, siempre al fondo */}
+        {/* Footer â€” parte del flex layout, siempre al fondo */}
         <div
           style={{
             flexShrink: 0,
@@ -530,3 +530,4 @@ export function FilterBottomSheet({
     document.body,
   );
 }
+

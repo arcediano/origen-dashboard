@@ -1,13 +1,12 @@
-/**
+﻿/**
  * @file sidebar.ts
- * @description Fuente única de navegación del dashboard
+ * @description Fuente unica de navegacion del dashboard
  */
 
 import {
   CreditCard,
   LayoutDashboard,
   Package,
-  Settings,
   ShoppingBag,
   Star,
   Truck,
@@ -64,9 +63,9 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/orders': 'Pedidos',
   '/dashboard/products': 'Productos',
   '/dashboard/products/create': 'Nuevo producto',
-  '/dashboard/reviews': 'Reseñas',
+  '/dashboard/reviews': 'Resenas',
   '/dashboard/profile': 'Perfil comercial',
-  '/dashboard/profile/personal': 'Información personal',
+  '/dashboard/profile/personal': 'Informacion personal',
   '/dashboard/profile/business': 'Mi negocio',
   '/dashboard/profile/certifications': 'Certificaciones',
   '/dashboard/profile/settings': 'Ajustes de perfil',
@@ -74,7 +73,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/notifications': 'Notificaciones',
   '/dashboard/security': 'Seguridad',
   '/dashboard/configuracion': 'Configuraciones',
-  '/dashboard/configuracion/envios': 'Envíos',
+  '/dashboard/configuracion/envios': 'Envios',
   '/dashboard/configuracion/pagos': 'Cobros',
   '/dashboard/configuracion/perfil': 'Ajustes de perfil',
   '/dashboard/business': 'Mi negocio',
@@ -85,9 +84,9 @@ const SEGMENT_LABELS: Record<string, string> = {
   orders: 'Pedidos',
   products: 'Productos',
   create: 'Nuevo producto',
-  reviews: 'Reseñas',
+  reviews: 'Resenas',
   profile: 'Perfil comercial',
-  personal: 'Información personal',
+  personal: 'Informacion personal',
   business: 'Mi negocio',
   certifications: 'Certificaciones',
   account: 'Cuenta',
@@ -95,7 +94,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   notifications: 'Notificaciones',
   security: 'Seguridad',
   configuracion: 'Configuraciones',
-  envios: 'Envíos',
+  envios: 'Envios',
   pagos: 'Cobros',
 };
 
@@ -126,7 +125,7 @@ const OPERATIONS_ITEMS: MenuItem[] = [
   },
   {
     id: 'resenas',
-    label: 'Reseñas',
+    label: 'Resenas',
     icon: Star,
     href: '/dashboard/reviews',
     matchPaths: ['/dashboard/reviews*'],
@@ -143,7 +142,7 @@ const BUSINESS_ITEMS: MenuItem[] = [
   },
   {
     id: 'envios',
-    label: 'Logística',
+    label: 'Logistica',
     icon: Truck,
     href: '/dashboard/configuracion/envios',
     matchPaths: ['/dashboard/configuracion/envios*'],
@@ -157,21 +156,10 @@ const BUSINESS_ITEMS: MenuItem[] = [
   },
 ];
 
-const SETTINGS_ITEMS: MenuItem[] = [
-  {
-    id: 'cuenta',
-    label: 'Cuenta',
-    icon: Settings,
-    href: '/dashboard/account',
-    matchPaths: ['/dashboard/account*', '/dashboard/security*', '/dashboard/notifications*', '/dashboard/configuracion', '/dashboard/profile/settings*'],
-  },
-];
-
 export const DASHBOARD_NAV_SECTIONS: NavigationSection[] = [
   { id: 'general', label: 'General', items: GENERAL_ITEMS },
-  { id: 'operacion', label: 'Operación', items: OPERATIONS_ITEMS },
+  { id: 'operacion', label: 'Operacion', items: OPERATIONS_ITEMS },
   { id: 'negocio', label: 'Negocio', items: BUSINESS_ITEMS },
-  { id: 'cuenta', label: 'Cuenta', items: SETTINGS_ITEMS },
 ];
 
 export const MENU_ITEMS: MenuItem[] = DASHBOARD_NAV_SECTIONS.flatMap((section) => section.items);
@@ -260,14 +248,12 @@ export function isRootMobileTab(pathname: string): boolean {
   return MOBILE_ROOT_TABS.some((tab) => matchesNavigationItem(pathname, { matchPaths: tab.matchPaths }) && pathname === tab.href);
 }
 
-// Routes that need a logical parent crumb injected (not reflected in URL structure)
 const CRUMB_LOGICAL_PARENT: Record<string, DashboardBreadcrumbItem> = {
   '/dashboard/security': { href: '/dashboard/account', label: 'Cuenta' },
   '/dashboard/notifications': { href: '/dashboard/account', label: 'Cuenta' },
   '/dashboard/profile': { href: '/dashboard/account', label: 'Cuenta' },
 };
 
-// Override final href for segments that redirect to a canonical URL
 const CRUMB_HREF_OVERRIDE: Record<string, string> = {};
 
 export function getDashboardBreadcrumbs(pathname: string): DashboardBreadcrumbItem[] {
@@ -288,7 +274,6 @@ export function getDashboardBreadcrumbs(pathname: string): DashboardBreadcrumbIt
       if (segments[index - 1] === 'products') label = 'Detalle del producto';
     }
 
-    // Inject a logical parent crumb for orphan routes (e.g., /security → Cuenta first)
     if (index === 1 && CRUMB_LOGICAL_PARENT[rawHref]) {
       breadcrumbs.push(CRUMB_LOGICAL_PARENT[rawHref]);
     }
