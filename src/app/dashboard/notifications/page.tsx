@@ -165,24 +165,55 @@ export default function NotificationsPage() {
   };
 
   const handleSave = async () => {
+    let saveOk = false;
     try {
       await gatewayClient.put('/notifications/preferences', {
         preferences: [
-          { eventType: 'NEW_ORDER',   channel: 'EMAIL', enabled: emailSettings.orders },
-          { eventType: 'NEW_REVIEW',  channel: 'EMAIL', enabled: emailSettings.reviews },
-          { eventType: 'MARKETING',   channel: 'EMAIL', enabled: emailSettings.marketing },
-          { eventType: 'LOW_STOCK',   channel: 'EMAIL', enabled: emailSettings.stock },
-          { eventType: 'NEW_ORDER',   channel: 'PUSH',  enabled: pushSettings.orders },
-          { eventType: 'LOW_STOCK',   channel: 'PUSH',  enabled: pushSettings.lowStock },
-          { eventType: 'NEW_REVIEW',  channel: 'PUSH',  enabled: pushSettings.reviews },
-          { eventType: 'CAMPAIGN',    channel: 'PUSH',  enabled: pushSettings.campaigns },
+          {
+            eventType: 'NEW_ORDER',
+            email: emailSettings.orders,
+            inApp: true,
+            push: pushSettings.orders,
+            frequency: 'INSTANT',
+          },
+          {
+            eventType: 'NEW_REVIEW',
+            email: emailSettings.reviews,
+            inApp: true,
+            push: pushSettings.reviews,
+            frequency: 'INSTANT',
+          },
+          {
+            eventType: 'REVIEW_REPLY',
+            email: emailSettings.reviews,
+            inApp: true,
+            push: pushSettings.reviews,
+            frequency: 'INSTANT',
+          },
+          {
+            eventType: 'PRODUCT_LOW_STOCK',
+            email: emailSettings.stock,
+            inApp: true,
+            push: pushSettings.lowStock,
+            frequency: 'INSTANT',
+          },
+          {
+            eventType: 'PROMOTION_CREATED',
+            email: emailSettings.marketing,
+            inApp: true,
+            push: pushSettings.campaigns,
+            frequency: 'INSTANT',
+          },
         ],
       });
+      saveOk = true;
     } catch (err) {
       console.error('[notifications] Error guardando preferencias:', err);
     }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    if (saveOk) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
   };
 
   return (

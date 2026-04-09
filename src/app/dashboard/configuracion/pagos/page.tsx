@@ -5,14 +5,56 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Button } from '@arcediano/ux-library';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
 import { CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@arcediano/ux-library';
+import { loadOnboardingData } from '@/lib/api/onboarding';
 
 export default function PagosPage() {
-  const [isConnected] = useState(true);
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
+  const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
+  const [acceptedTermsAt, setAcceptedTermsAt] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadPaymentState = async () => {
+      setIsLoading(true);
+      setLoadError(null);
+      try {
+        const response = await loadOnboardingData();
+        const payment = response?.data?.payment;
+
+        if (!mounted) return;
+
+        setIsConnected(!!payment?.stripeConnected);
+        setStripeAccountId(payment?.stripeAccountId ?? null);
+        setAcceptedTermsAt(payment?.acceptedTermsAt ?? null);
+      } catch (error) {
+        if (!mounted) return;
+        setLoadError(error instanceof Error ? error.message : 'Error al cargar estado de cobros');
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    };
+
+    void loadPaymentState();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleConnectStripe = () => {
+    router.push('/onboarding?step=6');
+  };
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
@@ -28,6 +70,12 @@ export default function PagosPage() {
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+
+        {loadError && (
+          <Alert className="mb-5 border-feedback-danger/30 bg-feedback-danger/10">
+            <AlertDescription>{loadError}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="mb-5 rounded-[28px] border border-origen-pradera/25 bg-gradient-to-br from-origen-crema via-surface-alt to-surface p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
@@ -62,7 +110,7 @@ export default function PagosPage() {
                   Conectado
                 </span>
               ) : (
-                <Button variant="primary">
+                <Button variant="primary" onClick={handleConnectStripe} disabled={isLoading}>
                   Conectar Stripe
                 </Button>
               )}
@@ -77,8 +125,16 @@ export default function PagosPage() {
                   <div>
                     <p className="text-sm font-medium text-origen-bosque">Cuenta verificada</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Puedes recibir pagos de forma inmediata. Comisión: 1.4% + 0.25€ por transacción.
+                      Puedes recibir pagos de forma inmediata.
                     </p>
+                    {stripeAccountId && (
+                      <p className="text-xs text-muted-foreground mt-1">Cuenta Stripe: {stripeAccountId}</p>
+                    )}
+                    {acceptedTermsAt && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Terminos aceptados: {new Date(acceptedTermsAt).toLocaleDateString('es-ES')}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

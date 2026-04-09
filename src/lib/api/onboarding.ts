@@ -16,6 +16,55 @@ interface StepSaveResponse {
   success: boolean;
 }
 
+export interface OnboardingDataResponse {
+  success: boolean;
+  data: OnboardingData;
+}
+
+export interface OnboardingData {
+  fiscal?: {
+    businessName?: string;
+    legalName?: string;
+    taxId?: string;
+    businessPhone?: string;
+    categories?: string[];
+    entityType?: string;
+    legalRepresentativeName?: string;
+    billingAddress?: {
+      street?: string;
+      streetNumber?: string;
+      streetComplement?: string | null;
+      city?: string;
+      province?: string;
+      postalCode?: string;
+    } | null;
+  } | null;
+  location?: {
+    street?: string;
+    streetNumber?: string;
+    streetComplement?: string | null;
+    city?: string;
+    province?: string;
+    postalCode?: string;
+    foundedYear?: number | null;
+    teamSize?: 'ONE_TWO' | 'THREE_FIVE' | 'SIX_TEN' | 'ELEVEN_PLUS' | string | null;
+  } | null;
+  story?: {
+    businessName?: string;
+    tagline?: string | null;
+    description?: string | null;
+    productionPhilosophy?: string | null;
+    values?: string[];
+    website?: string | null;
+    instagramHandle?: string | null;
+  } | null;
+  payment?: {
+    stripeConnected?: boolean;
+    stripeAccountId?: string | null;
+    acceptedTermsAt?: string | null;
+  } | null;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const TEAM_SIZE_MAP: Record<string, 'ONE_TWO' | 'THREE_FIVE' | 'SIX_TEN' | 'ELEVEN_PLUS'> = {
@@ -197,6 +246,6 @@ export async function completeOnboarding(): Promise<{ success: boolean; onboardi
 
 // ─── Cargar datos guardados ────────────────────────────────────────────────────
 
-export async function loadOnboardingData(): Promise<any> {
+export async function loadOnboardingData(): Promise<OnboardingDataResponse> {
   return gatewayClient.get('/producers/onboarding/data');
 }

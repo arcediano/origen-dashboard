@@ -117,7 +117,7 @@ function mapCategory(eventType: string, category?: string): Notification['type']
   if (cat === 'ORDER' || eventType.startsWith('ORDER') || eventType === 'NEW_ORDER') return 'order';
   if (cat === 'REVIEW' || eventType.startsWith('REVIEW') || eventType === 'NEW_REVIEW') return 'product';
   if (cat === 'PRODUCT' || eventType.startsWith('PRODUCT')) return 'product';
-  if (cat === 'MARKETING' || eventType === 'PROMOTION_CREATED' || eventType === 'CAMPAIGN') return 'product';
+  if (cat === 'MARKETING' || eventType === 'PROMOTION_CREATED') return 'product';
   return 'system';
 }
 
@@ -126,7 +126,7 @@ function mapCanonicalCategory(eventType: string, category?: string): Notificatio
   if (cat === 'ORDER' || eventType.startsWith('ORDER') || eventType === 'NEW_ORDER') return 'ORDER';
   if (cat === 'REVIEW' || eventType.startsWith('REVIEW') || eventType === 'NEW_REVIEW') return 'REVIEW';
   if (cat === 'PRODUCT' || eventType.startsWith('PRODUCT')) return 'PRODUCT';
-  if (cat === 'MARKETING' || eventType === 'PROMOTION_CREATED' || eventType === 'CAMPAIGN') return 'MARKETING';
+  if (cat === 'MARKETING' || eventType === 'PROMOTION_CREATED') return 'MARKETING';
   if (cat === 'ACCOUNT' || eventType.startsWith('ACCOUNT') || eventType.startsWith('CERTIFICATION')) return 'ACCOUNT';
   return 'SYSTEM';
 }

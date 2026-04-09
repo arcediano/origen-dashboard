@@ -28,6 +28,11 @@ export interface AuthUser {
   updatedAt: string;
 }
 
+export interface UpdateCurrentUserPayload {
+  firstName?: string;
+  lastName?: string;
+}
+
 export interface LoginResponse {
   success: boolean;
   message: string;
@@ -116,6 +121,13 @@ export async function refreshTokens(): Promise<void> {
 export async function getCurrentUser(): Promise<AuthUser> {
   const response = await gatewayClient.get<{ success: boolean; data: AuthUser }>('/auth/userinfo');
   return response.data;
+}
+
+/**
+ * Actualiza datos básicos del usuario autenticado.
+ */
+export async function updateCurrentUser(payload: UpdateCurrentUserPayload): Promise<void> {
+  await gatewayClient.patch('/auth/me', payload);
 }
 
 /**
