@@ -263,6 +263,7 @@ export function isRootMobileTab(pathname: string): boolean {
 const CRUMB_LOGICAL_PARENT: Record<string, DashboardBreadcrumbItem> = {
   '/dashboard/security': { href: '/dashboard/account', label: 'Cuenta' },
   '/dashboard/notifications': { href: '/dashboard/account', label: 'Cuenta' },
+  '/dashboard/profile': { href: '/dashboard/account', label: 'Cuenta' },
 };
 
 // Override final href for segments that redirect to a canonical URL

@@ -36,11 +36,11 @@ export default function AccountPage() {
       meta: 'Pagos',
     },
     {
-      title: 'Negocio',
+      title: 'Perfil comercial',
       description: 'Actualiza la identidad comercial de tu tienda y tus documentos.',
       href: '/dashboard/profile',
       icon: Store,
-      meta: 'Perfil',
+      meta: 'Perfil comercial',
     },
   ];
 
