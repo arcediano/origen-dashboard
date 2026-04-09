@@ -13,11 +13,9 @@ import {
   Package,
   Megaphone,
   Save,
-  Inbox,
   CheckCheck,
   RefreshCw,
 } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent } from '@arcediano/ux-library';
 import { Button } from '@arcediano/ux-library';
@@ -32,13 +30,6 @@ import {
 import type { Notification } from '@/types/notification';
 
 export default function NotificationsPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const viewParam = searchParams.get('view');
-  const initialView = viewParam === 'preferences' ? 'preferences' : 'inbox';
-
-  const [activeView, setActiveView] = useState<'inbox' | 'preferences'>(initialView);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isInboxLoading, setIsInboxLoading] = useState(true);
   const [isInboxUpdating, setIsInboxUpdating] = useState(false);
@@ -145,14 +136,6 @@ export default function NotificationsPage() {
     void loadInbox();
   }, []);
 
-  useEffect(() => {
-    const normalizedView = viewParam === 'preferences' ? 'preferences' : 'inbox';
-    if (viewParam !== normalizedView) {
-      router.replace(`/dashboard/notifications?view=${normalizedView}`, { scroll: false });
-    }
-    setActiveView(normalizedView);
-  }, [viewParam, router]);
-
   const handleMarkAsRead = async (id: string) => {
     setNotifications((current) =>
       current.map((notification) =>
@@ -179,15 +162,6 @@ export default function NotificationsPage() {
     } finally {
       setIsInboxUpdating(false);
     }
-  };
-
-  const handleViewChange = (view: 'inbox' | 'preferences') => {
-    setActiveView(view);
-    router.replace(`/dashboard/notifications?view=${view}`, { scroll: false });
-
-    const targetId = view === 'inbox' ? 'notifications-inbox' : 'notifications-preferences';
-    const target = document.getElementById(targetId);
-    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleSave = async () => {
@@ -224,37 +198,6 @@ export default function NotificationsPage() {
         />
 
         <div className="container mx-auto space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => handleViewChange('inbox')}
-              className={`rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
-                activeView === 'inbox'
-                  ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
-                  : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
-              }`}
-            >
-              <span className="inline-flex items-center gap-2">
-                <Inbox className="h-4 w-4" />
-                Bandeja
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleViewChange('preferences')}
-              className={`rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
-                activeView === 'preferences'
-                  ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
-                  : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'
-              }`}
-            >
-              <span className="inline-flex items-center gap-2">
-                <Bell className="h-4 w-4" />
-                Preferencias
-              </span>
-            </button>
-          </div>
-
           <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
             <CardContent className="p-0">
               <div className="border-b border-border-subtle px-4 py-4 sm:px-6">

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Bell, ChevronRight, CreditCard, HelpCircle, KeyRound, MonitorCog, Settings2, Store } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Button, Card, CardContent, CardHeader, CardTitle, Label, Toggle } from '@arcediano/ux-library';
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Label, Toggle } from '@arcediano/ux-library';
 
 export default function AccountPage() {
   const [preferences, setPreferences] = useState({
@@ -17,30 +17,30 @@ export default function AccountPage() {
     {
       title: 'Notificaciones',
       description: 'Consulta la bandeja y ajusta cómo quieres recibir avisos.',
-      href: '/dashboard/notifications?view=inbox',
+      href: '/dashboard/notifications',
       icon: Bell,
-      meta: 'Inbox y preferencias',
+      meta: 'Actividad',
     },
     {
       title: 'Seguridad',
       description: 'Cambia tu contraseña y activa verificación en dos pasos.',
       href: '/dashboard/security',
       icon: KeyRound,
-      meta: 'Acceso y protección',
+      meta: 'Protección',
     },
     {
       title: 'Cobros',
       description: 'Revisa Stripe, verificación y estado de tus cobros.',
       href: '/dashboard/configuracion/pagos',
       icon: CreditCard,
-      meta: 'Stripe y pagos',
+      meta: 'Pagos',
     },
     {
       title: 'Negocio',
       description: 'Actualiza la identidad comercial de tu tienda y tus documentos.',
       href: '/dashboard/profile',
       icon: Store,
-      meta: 'Perfil comercial',
+      meta: 'Perfil',
     },
   ];
 
@@ -68,26 +68,37 @@ export default function AccountPage() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {accountSections.map((section) => {
               const Icon = section.icon;
               return (
-                <Link key={section.title} href={section.href} className="block group">
-                  <Card className="h-full rounded-2xl border border-border-subtle bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-origen-pradera/30 hover:shadow-md hover:bg-origen-crema/40">
-                    <CardContent className="p-5">
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-origen-pradera/15 to-origen-hoja/15 transition-colors group-hover:from-origen-pradera/25 group-hover:to-origen-hoja/25">
-                          <Icon className="h-5 w-5 text-origen-pradera" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="text-[15px] font-semibold text-origen-bosque">{section.title}</h3>
-                          <p className="mt-1 text-sm text-muted-foreground leading-snug">{section.description}</p>
-                        </div>
-                        <ChevronRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-text-subtle transition-transform group-hover:translate-x-0.5" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <Card key={section.title} className="h-full rounded-2xl border border-border-subtle shadow-sm transition-all hover:shadow-lg">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <Icon className="h-5 w-5 text-origen-pradera" />
+                        <span>{section.title}</span>
+                      </CardTitle>
+                      <Badge variant="neutral" size="xs">{section.meta}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex h-full flex-col pt-0">
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {section.description}
+                    </p>
+                    <div className="flex-1" />
+                    <div className="mt-4 flex justify-end">
+                      <Link href={section.href}>
+                        <Button variant="outline" size="sm">
+                          <span className="inline-flex items-center gap-1">
+                            Ver detalles
+                            <ChevronRight className="h-4 w-4" />
+                          </span>
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>

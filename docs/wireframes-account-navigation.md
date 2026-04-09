@@ -14,6 +14,7 @@
 - Comercial: valor y acción visible en < 3 seg.
 - Tokens semánticos: sin valores hardcoded; usar palette y tokens del sistema.
 - Accesibilidad: WCAG AA mínimo, foco visible, contraste ≥ 4.5.
+- Requisito canónico de cards dashboard: para cards de acceso/gestión usar el mismo patrón visual de `/dashboard/profile` (estructura `CardHeader + CardContent + CTA outline`, título `text-base`, descripción `text-sm leading-relaxed`).
 
 ---
 
@@ -139,12 +140,12 @@
 
 ## 3. Notificaciones (`/dashboard/notifications`)
 
-### 3a. Vista Inbox (`?view=inbox`)
+### 3. Vista Unificada (Inbox + Preferencias en continuidad)
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │ Notificaciones                                      │
-│ [Bandeja ●] [Preferencias]    [Actualizar] [✓ Todo] │
+│ [Actualizar] [✓ Todo]                               │
 │                                                     │
 │  Filtros rápidos:                                   │
 │  [Todos] [Pedidos] [Productos] [Sistema]            │
@@ -165,29 +166,11 @@
 │  └──────────────────────────────────────────────┘   │
 │                                                     │
 │  [Cargar más]                                       │
-└─────────────────────────────────────────────────────┘
-```
-
-### 3b. Vista Preferencias (`?view=preferences`)
-
-```
-┌─────────────────────────────────────────────────────┐
-│ Notificaciones                                      │
-│ [Bandeja] [Preferencias ●]                          │
 │                                                     │
-│  Canal:  [Email ●] [Push]                           │
-│                                                     │
-│  ┌──────────────────────────────────────────────┐   │
-│  │  📦 Pedidos              [●──] ON            │   │
-│  │  📋 Reseñas              [●──] ON            │   │
-│  │  🔔 Stock bajo           [●──] ON            │   │
-│  │  📣 Marketing            [──●] OFF           │   │
-│  └──────────────────────────────────────────────┘   │
-│                                                     │
-│  Frecuencia:                                        │
-│  ○ Inmediato  ● Resumen diario  ○ Resumen semanal   │
-│                                                     │
-│  [Guardar preferencias]                             │
+│  ───────────────────────────────────────────────     │
+│  Preferencias de notificación                        │
+│  Email / Push en la misma pantalla                   │
+│  [Guardar preferencias]                              │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -195,7 +178,7 @@
 
 | Elemento | Token |
 |----------|-------|
-| Tab activo | `SegmentedControl value activo` → `bg-origen-bosque text-white` |
+| Selector de vista | Eliminado (Inbox y Preferencias visibles en la misma pantalla) |
 | Notificación no leída | `border-l-2 border-origen-pradera bg-origen-pastel/30` |
 | Notificación leída | `border border-border-subtle bg-surface` |
 | Dot de prioridad URGENT | `bg-red-500` |
@@ -207,7 +190,7 @@
 
 ### Estados
 
-- **Inbox vacío**: ilustración + "Todo al día" + CTA a preferencias
+- **Inbox vacío**: ilustración + "Todo al día" + CTA a filtros
 - **Error de carga**: alerta + botón Reintentar
 - **Actualizando**: spinner sobre lista sin bloquear scroll
 
