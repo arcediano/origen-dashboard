@@ -106,7 +106,7 @@ export function UserMenu({
         aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-controls={menuId}
-        aria-label="Abrir menu de usuario"
+        aria-label="Abrir menú de usuario"
         type="button"
       >
         <Avatar
