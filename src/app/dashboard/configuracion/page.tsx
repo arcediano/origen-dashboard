@@ -87,6 +87,8 @@ export default function ConfiguracionPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     const resolveChannel = (
       preferencesByEvent: Map<PreferenceEventType, NotificationPreferenceDto>,
@@ -107,7 +109,9 @@ export default function ConfiguracionPage() {
 
     const loadPreferences = async () => {
       try {
-        const response = await gatewayClient.get<GetPreferencesResponse>('/notifications/preferences');
+        const response = await gatewayClient.get<GetPreferencesResponse>('/notifications/preferences', {
+          fetchOptions: { signal: controller.signal },
+        });
         const preferences = Array.isArray(response?.data) ? response.data : [];
         const preferencesByEvent = new Map<PreferenceEventType, NotificationPreferenceDto>(
           preferences.map((item) => [item.eventType, item]),
@@ -144,6 +148,8 @@ export default function ConfiguracionPage() {
 
     return () => {
       cancelled = true;
+      clearTimeout(timeoutId);
+      controller.abort();
     };
   }, []);
 
@@ -251,22 +257,30 @@ export default function ConfiguracionPage() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="text-[10px] uppercase tracking-wide text-text-subtle sm:hidden">Email</span>
+                        <div className="flex flex-col items-center gap-1 min-w-[94px]">
+                          <span className="text-[10px] uppercase tracking-wide text-text-subtle">Email</span>
                           <Toggle
                             checked={emailSettings[key]}
                             onCheckedChange={(checked) => setEmailSettings((current) => ({ ...current, [key]: checked }))}
+                            variant="leaf"
+                            toggleSize="sm"
                             aria-label={`Activar ${config.title} por email`}
-                          />
+                          >
+                            {emailSettings[key] ? 'Activo' : 'Desactivado'}
+                          </Toggle>
                         </div>
 
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="text-[10px] uppercase tracking-wide text-text-subtle sm:hidden">Push</span>
+                        <div className="flex flex-col items-center gap-1 min-w-[94px]">
+                          <span className="text-[10px] uppercase tracking-wide text-text-subtle">Push</span>
                           <Toggle
                             checked={pushSettings[key]}
                             onCheckedChange={(checked) => setPushSettings((current) => ({ ...current, [key]: checked }))}
+                            variant="seed"
+                            toggleSize="sm"
                             aria-label={`Activar ${config.title} por push`}
-                          />
+                          >
+                            {pushSettings[key] ? 'Activo' : 'Desactivado'}
+                          </Toggle>
                         </div>
                       </div>
                     </div>
