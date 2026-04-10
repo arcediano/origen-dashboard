@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bell, Megaphone, Package, Save, ShoppingBag, Star } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, Button, Toggle } from '@arcediano/ux-library';
@@ -19,6 +19,37 @@ interface ChannelState {
   stock: boolean;
   marketing: boolean;
 }
+
+type PreferenceEventType =
+  | 'NEW_ORDER'
+  | 'NEW_REVIEW'
+  | 'REVIEW_REPLY'
+  | 'PRODUCT_LOW_STOCK'
+  | 'PROMOTION_CREATED';
+
+interface NotificationPreferenceDto {
+  eventType: PreferenceEventType;
+  email?: boolean;
+  push?: boolean;
+}
+
+interface GetPreferencesResponse {
+  data?: NotificationPreferenceDto[];
+}
+
+const DEFAULT_CHANNEL_SETTINGS: ChannelState = {
+  orders: true,
+  reviews: true,
+  marketing: false,
+  stock: true,
+};
+
+const PREFERENCE_GROUPS: Record<PreferenceKey, PreferenceEventType[]> = {
+  orders: ['NEW_ORDER'],
+  reviews: ['NEW_REVIEW', 'REVIEW_REPLY'],
+  stock: ['PRODUCT_LOW_STOCK'],
+  marketing: ['PROMOTION_CREATED'],
+};
 
 const LABELS: Record<PreferenceKey, { title: string; description: string; icon: React.ElementType }> = {
   orders: {
@@ -44,27 +75,80 @@ const LABELS: Record<PreferenceKey, { title: string; description: string; icon: 
 };
 
 export default function ConfiguracionPage() {
-  const [emailSettings, setEmailSettings] = useState<ChannelState>({
-    orders: true,
-    reviews: true,
-    marketing: false,
-    stock: true,
-  });
+  const [emailSettings, setEmailSettings] = useState<ChannelState>(DEFAULT_CHANNEL_SETTINGS);
 
-  const [pushSettings, setPushSettings] = useState<ChannelState>({
-    orders: true,
-    reviews: true,
-    marketing: false,
-    stock: true,
-  });
+  const [pushSettings, setPushSettings] = useState<ChannelState>(DEFAULT_CHANNEL_SETTINGS);
 
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingPreferences, setIsLoadingPreferences] = useState(true);
 
   const rows = useMemo(() => (Object.keys(LABELS) as PreferenceKey[]), []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolveChannel = (
+      preferencesByEvent: Map<PreferenceEventType, NotificationPreferenceDto>,
+      eventTypes: PreferenceEventType[],
+      channel: 'email' | 'push',
+      fallback: boolean,
+    ): boolean => {
+      const matched = eventTypes
+        .map((eventType) => preferencesByEvent.get(eventType))
+        .filter((value): value is NotificationPreferenceDto => !!value);
+
+      if (matched.length === 0) {
+        return fallback;
+      }
+
+      return matched.every((item) => item[channel] !== false);
+    };
+
+    const loadPreferences = async () => {
+      try {
+        const response = await gatewayClient.get<GetPreferencesResponse>('/notifications/preferences');
+        const preferences = Array.isArray(response?.data) ? response.data : [];
+        const preferencesByEvent = new Map<PreferenceEventType, NotificationPreferenceDto>(
+          preferences.map((item) => [item.eventType, item]),
+        );
+
+        const nextEmail: ChannelState = {
+          orders: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.orders, 'email', DEFAULT_CHANNEL_SETTINGS.orders),
+          reviews: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.reviews, 'email', DEFAULT_CHANNEL_SETTINGS.reviews),
+          stock: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.stock, 'email', DEFAULT_CHANNEL_SETTINGS.stock),
+          marketing: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.marketing, 'email', DEFAULT_CHANNEL_SETTINGS.marketing),
+        };
+
+        const nextPush: ChannelState = {
+          orders: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.orders, 'push', DEFAULT_CHANNEL_SETTINGS.orders),
+          reviews: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.reviews, 'push', DEFAULT_CHANNEL_SETTINGS.reviews),
+          stock: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.stock, 'push', DEFAULT_CHANNEL_SETTINGS.stock),
+          marketing: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.marketing, 'push', DEFAULT_CHANNEL_SETTINGS.marketing),
+        };
+
+        if (!cancelled) {
+          setEmailSettings(nextEmail);
+          setPushSettings(nextPush);
+        }
+      } catch (error) {
+        console.error('[configuracion] Error cargando preferencias:', error);
+      } finally {
+        if (!cancelled) {
+          setIsLoadingPreferences(false);
+        }
+      }
+    };
+
+    void loadPreferences();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleSave = async () => {
-    if (isSaving) return;
+    if (isSaving || isLoadingPreferences) return;
     setIsSaving(true);
     let saveOk = false;
 
@@ -193,10 +277,10 @@ export default function ConfiguracionPage() {
           </Card>
 
           <div className="hidden lg:flex lg:justify-end">
-            <Button onClick={handleSave} disabled={isSaving}>
+            <Button onClick={handleSave} disabled={isSaving || isLoadingPreferences}>
               <span className="inline-flex items-center gap-2">
                 <Save className="w-4 h-4" />
-                <span>{saved ? 'Preferencias guardadas' : isSaving ? 'Guardando...' : 'Guardar preferencias'}</span>
+                <span>{saved ? 'Preferencias guardadas' : isLoadingPreferences ? 'Cargando...' : isSaving ? 'Guardando...' : 'Guardar preferencias'}</span>
               </span>
             </Button>
           </div>
@@ -207,7 +291,7 @@ export default function ConfiguracionPage() {
         <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
           <button
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || isLoadingPreferences}
             className={
               saved
                 ? 'w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-colors bg-origen-pradera text-white'
@@ -215,7 +299,7 @@ export default function ConfiguracionPage() {
             }
           >
             <Save className="w-4 h-4" />
-            {saved ? 'Guardado' : isSaving ? 'Guardando...' : 'Guardar preferencias'}
+            {saved ? 'Guardado' : isLoadingPreferences ? 'Cargando...' : isSaving ? 'Guardando...' : 'Guardar preferencias'}
           </button>
         </div>
       </div>
