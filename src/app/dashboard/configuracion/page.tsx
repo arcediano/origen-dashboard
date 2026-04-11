@@ -78,6 +78,7 @@ export default function ConfiguracionPage() {
   const [emailSettings, setEmailSettings] = useState<ChannelState>(DEFAULT_CHANNEL_SETTINGS);
 
   const [pushSettings, setPushSettings] = useState<ChannelState>(DEFAULT_CHANNEL_SETTINGS);
+  const [activeChannel, setActiveChannel] = useState<'email' | 'push'>('email');
 
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -230,12 +231,30 @@ export default function ConfiguracionPage() {
                 <p className="text-sm font-semibold text-origen-bosque">Canales de comunicacion</p>
                 <p className="mt-1 text-xs text-muted-foreground">Para cada aviso elige si quieres recibirlo por Email y/o Push.</p>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:w-[260px]">
-                  <div className="rounded-xl border border-border-subtle bg-surface px-3 py-2 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setActiveChannel('email')}
+                    className={
+                      activeChannel === 'email'
+                        ? 'rounded-xl border border-origen-pradera bg-origen-pastel px-3 py-2 text-center'
+                        : 'rounded-xl border border-border-subtle bg-surface px-3 py-2 text-center'
+                    }
+                    aria-pressed={activeChannel === 'email'}
+                  >
                     <p className="text-[11px] font-semibold text-origen-bosque uppercase tracking-wide">Email</p>
-                  </div>
-                  <div className="rounded-xl border border-border-subtle bg-surface px-3 py-2 text-center">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveChannel('push')}
+                    className={
+                      activeChannel === 'push'
+                        ? 'rounded-xl border border-origen-pradera bg-origen-pastel px-3 py-2 text-center'
+                        : 'rounded-xl border border-border-subtle bg-surface px-3 py-2 text-center'
+                    }
+                    aria-pressed={activeChannel === 'push'}
+                  >
                     <p className="text-[11px] font-semibold text-origen-bosque uppercase tracking-wide">Push</p>
-                  </div>
+                  </button>
                 </div>
               </div>
 
@@ -246,7 +265,7 @@ export default function ConfiguracionPage() {
 
                   return (
                     <div key={key} className="px-4 py-4 sm:px-6">
-                      <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 sm:gap-4">
+                      <div className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto] items-center gap-3 sm:gap-4">
                         <div className="min-w-0 flex items-start gap-3">
                           <div className="w-9 h-9 rounded-xl bg-origen-pastel flex items-center justify-center flex-shrink-0 mt-0.5">
                             <Icon className="w-4 h-4 text-origen-pino" />
@@ -257,7 +276,7 @@ export default function ConfiguracionPage() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col items-center gap-1 min-w-[94px]">
+                        <div className="hidden sm:flex flex-col items-center gap-1 min-w-[94px]">
                           <span className="text-[10px] uppercase tracking-wide text-text-subtle">Email</span>
                           <Toggle
                             checked={emailSettings[key]}
@@ -265,12 +284,10 @@ export default function ConfiguracionPage() {
                             variant="leaf"
                             toggleSize="sm"
                             aria-label={`Activar ${config.title} por email`}
-                          >
-                            {emailSettings[key] ? 'Activo' : 'Desactivado'}
-                          </Toggle>
+                          />
                         </div>
 
-                        <div className="flex flex-col items-center gap-1 min-w-[94px]">
+                        <div className="hidden sm:flex flex-col items-center gap-1 min-w-[94px]">
                           <span className="text-[10px] uppercase tracking-wide text-text-subtle">Push</span>
                           <Toggle
                             checked={pushSettings[key]}
@@ -278,9 +295,26 @@ export default function ConfiguracionPage() {
                             variant="seed"
                             toggleSize="sm"
                             aria-label={`Activar ${config.title} por push`}
-                          >
-                            {pushSettings[key] ? 'Activo' : 'Desactivado'}
-                          </Toggle>
+                          />
+                        </div>
+
+                        <div className="sm:hidden flex flex-col items-center gap-1 min-w-[94px]">
+                          <span className="text-[10px] uppercase tracking-wide text-text-subtle">
+                            {activeChannel === 'email' ? 'Email' : 'Push'}
+                          </span>
+                          <Toggle
+                            checked={activeChannel === 'email' ? emailSettings[key] : pushSettings[key]}
+                            onCheckedChange={(checked) => {
+                              if (activeChannel === 'email') {
+                                setEmailSettings((current) => ({ ...current, [key]: checked }));
+                              } else {
+                                setPushSettings((current) => ({ ...current, [key]: checked }));
+                              }
+                            }}
+                            variant={activeChannel === 'email' ? 'leaf' : 'seed'}
+                            toggleSize="sm"
+                            aria-label={`Activar ${config.title} por ${activeChannel === 'email' ? 'email' : 'push'}`}
+                          />
                         </div>
                       </div>
                     </div>
