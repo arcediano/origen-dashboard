@@ -86,3 +86,34 @@ export async function loginAsProducer(page: Page, credentials: E2ECredentials): 
 
   await expect(page).not.toHaveURL(/auth\/login/, { timeout: 15_000 });
 }
+
+export async function mockAuthenticatedProducerSession(page: Page): Promise<void> {
+  await page.route('**/api/v1/auth/userinfo', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: {
+          id: 42,
+          email: 'productor@test.es',
+          firstName: 'Test',
+          lastName: 'Productor',
+          role: 'PRODUCER',
+          producerCode: 'PROD-042',
+          onboardingCompleted: true,
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+      }),
+    });
+  });
+
+  await page.route('**/api/v1/auth/logout', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true }),
+    });
+  });
+}

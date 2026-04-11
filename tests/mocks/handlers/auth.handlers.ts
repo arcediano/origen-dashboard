@@ -81,6 +81,23 @@ export const authHandlers = [
     return HttpResponse.json({ success: true, message: 'Email enviado' });
   }),
 
+  // Change password
+  http.patch(`${BASE}/auth/change-password`, async ({ request }) => {
+    const body = await request.json() as Record<string, string>;
+
+    if (body.currentPassword === 'WrongCurrent1!') {
+      return HttpResponse.json(
+        { success: false, message: 'La contraseña actual es incorrecta' },
+        { status: 401 },
+      );
+    }
+
+    return HttpResponse.json({
+      success: true,
+      message: 'Contraseña actualizada correctamente',
+    });
+  }),
+
   // Logout
   http.post(`${BASE}/auth/logout`, () => {
     return HttpResponse.json({ success: true });

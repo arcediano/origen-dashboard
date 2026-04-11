@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Separator } from '@arcediano/ux-library';
 import { changePassword } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
+import { validatePasswordChange } from '@/lib/security/change-password';
 
 export default function SecurityPage() {
   const [isSaving, setIsSaving] = useState(false);
@@ -26,33 +27,8 @@ export default function SecurityPage() {
     confirm: false,
   });
 
-  const validatePasswordForm = (): string | null => {
-    if (!password.current || !password.new || !password.confirm) {
-      return 'Completa todos los campos de contraseña.';
-    }
-
-    if (password.new.length < 8) {
-      return 'La nueva contraseña debe tener al menos 8 caracteres.';
-    }
-
-    const passwordPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).+$/;
-    if (!passwordPolicy.test(password.new)) {
-      return 'La nueva contraseña debe incluir mayúscula, minúscula, número y símbolo.';
-    }
-
-    if (password.new === password.current) {
-      return 'La nueva contraseña debe ser diferente a la actual.';
-    }
-
-    if (password.new !== password.confirm) {
-      return 'Las contraseñas no coinciden.';
-    }
-
-    return null;
-  };
-
   const handleChangePassword = async () => {
-    const validationError = validatePasswordForm();
+    const validationError = validatePasswordChange(password);
     if (validationError) {
       setSaveSuccess(null);
       setSaveError(validationError);
@@ -140,6 +116,7 @@ export default function SecurityPage() {
                   <div className="space-y-2">
                     <Label>Contraseña actual</Label>
                     <Input
+                      aria-label="Contraseña actual"
                       type={showPasswords.current ? 'text' : 'password'}
                       value={password.current}
                       onChange={(e) => setPassword({ ...password, current: e.target.value })}
@@ -156,6 +133,7 @@ export default function SecurityPage() {
                   <div className="space-y-2">
                     <Label>Nueva contraseña</Label>
                     <Input
+                      aria-label="Nueva contraseña"
                       type={showPasswords.next ? 'text' : 'password'}
                       value={password.new}
                       onChange={(e) => setPassword({ ...password, new: e.target.value })}
@@ -172,6 +150,7 @@ export default function SecurityPage() {
                   <div className="space-y-2">
                     <Label>Confirmar contraseña</Label>
                     <Input
+                      aria-label="Confirmar contraseña"
                       type={showPasswords.confirm ? 'text' : 'password'}
                       value={password.confirm}
                       onChange={(e) => setPassword({ ...password, confirm: e.target.value })}
@@ -186,7 +165,12 @@ export default function SecurityPage() {
                     </button>
                   </div>
                   <div className="flex items-end">
-                    <Button onClick={handleChangePassword} disabled={!password.current || !password.new || !password.confirm || isSaving} className="w-full">
+                    <Button
+                      data-testid="change-password-submit"
+                      onClick={handleChangePassword}
+                      disabled={!password.current || !password.new || !password.confirm || isSaving}
+                      className="w-full"
+                    >
                       {isSaving ? 'Actualizando...' : 'Actualizar contraseña'}
                     </Button>
                   </div>

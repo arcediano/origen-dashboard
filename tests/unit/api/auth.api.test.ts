@@ -5,6 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 import {
+  changePassword,
   loginUser,
   logoutUser,
   getCurrentUser,
@@ -189,6 +190,40 @@ describe('logoutUser', () => {
   it('devuelve undefined (void)', async () => {
     const result = await logoutUser();
     expect(result).toBeUndefined();
+  });
+});
+
+// ── changePassword ───────────────────────────────────────────────────────────
+
+describe('changePassword', () => {
+  it('se resuelve sin error con un payload válido', async () => {
+    await expect(
+      changePassword({
+        currentPassword: 'CurrentPass1!',
+        newPassword: 'NewSecurePass1!',
+        confirmPassword: 'NewSecurePass1!',
+      })
+    ).resolves.not.toThrow();
+  });
+
+  it('devuelve undefined (void) cuando la API responde OK', async () => {
+    const result = await changePassword({
+      currentPassword: 'CurrentPass1!',
+      newPassword: 'NewSecurePass1!',
+      confirmPassword: 'NewSecurePass1!',
+    });
+
+    expect(result).toBeUndefined();
+  });
+
+  it('lanza GatewayError cuando la contraseña actual es incorrecta', async () => {
+    await expect(
+      changePassword({
+        currentPassword: 'WrongCurrent1!',
+        newPassword: 'NewSecurePass1!',
+        confirmPassword: 'NewSecurePass1!',
+      })
+    ).rejects.toThrow(GatewayError);
   });
 });
 
