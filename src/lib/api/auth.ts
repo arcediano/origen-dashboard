@@ -33,6 +33,12 @@ export interface UpdateCurrentUserPayload {
   lastName?: string;
 }
 
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export interface LoginResponse {
   success: boolean;
   message: string;
@@ -128,6 +134,13 @@ export async function getCurrentUser(): Promise<AuthUser> {
  */
 export async function updateCurrentUser(payload: UpdateCurrentUserPayload): Promise<void> {
   await gatewayClient.patch('/auth/me', payload);
+}
+
+/**
+ * Cambia la contraseña del usuario autenticado.
+ */
+export async function changePassword(payload: ChangePasswordPayload): Promise<void> {
+  await gatewayClient.patch('/auth/change-password', payload);
 }
 
 /**
