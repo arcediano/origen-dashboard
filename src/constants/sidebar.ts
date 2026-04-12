@@ -259,6 +259,7 @@ const CRUMB_HREF_OVERRIDE: Record<string, string> = {};
 export function getDashboardBreadcrumbs(pathname: string): DashboardBreadcrumbItem[] {
   const segments = pathname.split('/').filter(Boolean);
   const breadcrumbs: DashboardBreadcrumbItem[] = [{ href: '/dashboard', label: 'Inicio' }];
+  const isPaymentsPath = pathname.startsWith('/dashboard/configuracion/pagos');
 
   let accumulated = '';
   for (let index = 1; index < segments.length; index += 1) {
@@ -269,6 +270,10 @@ export function getDashboardBreadcrumbs(pathname: string): DashboardBreadcrumbIt
 
     let label = SEGMENT_LABELS[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
 
+    if (isPaymentsPath && rawHref === '/dashboard/configuracion') {
+      label = 'Mi cuenta';
+    }
+
     if (/^\d+$/.test(segment) || /^[a-f0-9-]{8,}$/i.test(segment)) {
       if (segments[index - 1] === 'orders') label = 'Detalle del pedido';
       if (segments[index - 1] === 'products') label = 'Detalle del producto';
@@ -278,7 +283,10 @@ export function getDashboardBreadcrumbs(pathname: string): DashboardBreadcrumbIt
       breadcrumbs.push(CRUMB_LOGICAL_PARENT[rawHref]);
     }
 
-    breadcrumbs.push({ href, label });
+    breadcrumbs.push({
+      href: isPaymentsPath && rawHref === '/dashboard/configuracion' ? '/dashboard/account' : href,
+      label,
+    });
   }
 
   if (pathname.startsWith('/dashboard/products/') && pathname.endsWith('/edit')) {

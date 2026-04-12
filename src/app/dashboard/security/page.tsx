@@ -9,10 +9,47 @@ import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Separator } from '@arcediano/ux-library';
 import { changePassword } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
-import { validatePasswordChange } from '@/lib/security/change-password';
+
+type PasswordFieldErrors = {
+  current?: string;
+  new?: string;
+  confirm?: string;
+};
+
+function getPasswordFieldErrors(password: { current: string; new: string; confirm: string }): PasswordFieldErrors {
+  const errors: PasswordFieldErrors = {};
+  const hasAnyValue = Boolean(password.current || password.new || password.confirm);
+
+  if (!hasAnyValue) {
+    return errors;
+  }
+
+  if (!password.current) {
+    errors.current = 'La contraseña actual es obligatoria.';
+  }
+
+  if (!password.new) {
+    errors.new = 'La nueva contraseña es obligatoria.';
+  } else if (password.new.length < 8) {
+    errors.new = 'La nueva contraseña debe tener al menos 8 caracteres.';
+  } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).+$/.test(password.new)) {
+    errors.new = 'Incluye mayúscula, minúscula, número y símbolo.';
+  } else if (password.current && password.new === password.current) {
+    errors.new = 'La nueva contraseña debe ser diferente a la actual.';
+  }
+
+  if (!password.confirm) {
+    errors.confirm = 'Confirma la nueva contraseña.';
+  } else if (password.new && password.confirm !== password.new) {
+    errors.confirm = 'Las contraseñas no coinciden.';
+  }
+
+  return errors;
+}
 
 export default function SecurityPage() {
   const [isSaving, setIsSaving] = useState(false);
+  const [didAttemptSubmit, setDidAttemptSubmit] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [password, setPassword] = useState({
@@ -27,13 +64,15 @@ export default function SecurityPage() {
     confirm: false,
   });
 
-  const passwordValidationError = validatePasswordChange(password);
+  const passwordErrors = getPasswordFieldErrors(password);
+  const hasPasswordErrors = Boolean(passwordErrors.current || passwordErrors.new || passwordErrors.confirm);
 
   const handleChangePassword = async () => {
-    const validationError = validatePasswordChange(password);
-    if (validationError) {
+    setDidAttemptSubmit(true);
+
+    if (hasPasswordErrors) {
       setSaveSuccess(null);
-      setSaveError(validationError);
+      setSaveError(null);
       return;
     }
 
@@ -49,6 +88,7 @@ export default function SecurityPage() {
       });
 
       setPassword({ current: '', new: '', confirm: '' });
+      setDidAttemptSubmit(false);
       setSaveSuccess('Contraseña actualizada correctamente. Inicia sesión de nuevo en otros dispositivos.');
     } catch (error) {
       if (error instanceof GatewayError) {
@@ -123,6 +163,7 @@ export default function SecurityPage() {
                       value={password.current}
                       onChange={(e) => setPassword({ ...password, current: e.target.value })}
                       placeholder="••••••••"
+                      error={didAttemptSubmit ? passwordErrors.current : undefined}
                     />
                     <button
                       type="button"
@@ -140,6 +181,7 @@ export default function SecurityPage() {
                       value={password.new}
                       onChange={(e) => setPassword({ ...password, new: e.target.value })}
                       placeholder="••••••••"
+                      error={didAttemptSubmit ? passwordErrors.new : undefined}
                     />
                     <button
                       type="button"
@@ -157,6 +199,7 @@ export default function SecurityPage() {
                       value={password.confirm}
                       onChange={(e) => setPassword({ ...password, confirm: e.target.value })}
                       placeholder="••••••••"
+                      error={didAttemptSubmit ? passwordErrors.confirm : undefined}
                     />
                     <button
                       type="button"
@@ -170,17 +213,13 @@ export default function SecurityPage() {
                     <Button
                       data-testid="change-password-submit"
                       onClick={handleChangePassword}
-                      disabled={!!passwordValidationError || isSaving}
+                      disabled={isSaving}
                       className="w-full"
                     >
                       {isSaving ? 'Actualizando...' : 'Guardar nueva contraseña'}
                     </Button>
                   </div>
                 </div>
-
-                {!saveError && password.current && password.new && password.confirm && passwordValidationError && (
-                  <p className="text-xs text-amber-700">{passwordValidationError}</p>
-                )}
 
               </div>
 
