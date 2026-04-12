@@ -1,18 +1,11 @@
 ﻿'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import { ChevronRight, CreditCard, HelpCircle, KeyRound, MonitorCog, Settings2, Store } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Label, Toggle } from '@arcediano/ux-library';
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
 
 export default function AccountPage() {
-  const [preferences, setPreferences] = useState({
-    compactMode: false,
-    reduceMotion: false,
-    emailDigest: true,
-  });
-
   const accountSections = [
     {
       title: 'Seguridad',
@@ -94,45 +87,7 @@ export default function AccountPage() {
           })}
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-2">
-          <Card className="rounded-2xl border border-border-subtle shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MonitorCog className="h-5 w-5 text-origen-pradera" />
-                Preferencias de interfaz
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between rounded-xl bg-surface-alt p-4">
-                <div>
-                  <Label className="text-sm font-medium text-origen-bosque">Modo compacto</Label>
-                  <p className="mt-1 text-xs text-muted-foreground">Reduce densidad visual en tablas y listas.</p>
-                </div>
-                <Toggle checked={preferences.compactMode} onCheckedChange={(checked) => setPreferences((current) => ({ ...current, compactMode: checked }))} variant="leaf" size="sm" />
-              </div>
-              <div className="flex items-center justify-between rounded-xl bg-surface-alt p-4">
-                <div>
-                  <Label className="text-sm font-medium text-origen-bosque">Reducir movimiento</Label>
-                  <p className="mt-1 text-xs text-muted-foreground">Disminuye animaciones para una experiencia mas estable.</p>
-                </div>
-                <Toggle checked={preferences.reduceMotion} onCheckedChange={(checked) => setPreferences((current) => ({ ...current, reduceMotion: checked }))} variant="leaf" size="sm" />
-              </div>
-              <div className="flex items-center justify-between rounded-xl bg-surface-alt p-4">
-                <div>
-                  <Label className="text-sm font-medium text-origen-bosque">Resumen diario por email</Label>
-                  <p className="mt-1 text-xs text-muted-foreground">Recibe un digest con pedidos, incidencias y cobros.</p>
-                </div>
-                <Toggle checked={preferences.emailDigest} onCheckedChange={(checked) => setPreferences((current) => ({ ...current, emailDigest: checked }))} variant="leaf" size="sm" />
-              </div>
-              <Button className="w-full">
-                <span className="inline-flex items-center gap-2">
-                  <Settings2 className="h-4 w-4" />
-                  <span>Guardar preferencias</span>
-                </span>
-              </Button>
-            </CardContent>
-          </Card>
-
+        <div>
           <Card className="rounded-2xl border border-border-subtle shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

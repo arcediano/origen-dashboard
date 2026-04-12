@@ -114,7 +114,7 @@ export default function PagosPage() {
                       {paymentStage === 'empty' && 'Conecta Stripe para empezar a cobrar'}
                     </h2>
                     <p className="mt-2 max-w-xl text-sm leading-relaxed text-text-subtle sm:text-base">
-                      Centraliza aquí el estado de tu cuenta Stripe, revisa si puedes cobrar y abre directamente el onboarding si necesitas corregir datos fiscales o bancarios.
+                      Revisa estado, verificación y acceso directo a Stripe para activar o actualizar tus datos de cobro.
                     </p>
                   </div>
                 </div>
@@ -187,24 +187,9 @@ export default function PagosPage() {
                       {paymentStage === 'connected' ? <CheckCircle2 className="h-5 w-5 text-origen-pradera" aria-hidden="true" /> : <AlertCircle className="h-5 w-5 text-origen-pradera" aria-hidden="true" />}
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm font-semibold text-origen-bosque">{paymentStage === 'connected' ? 'Puedes modificar tus datos bancarios o fiscales desde aquí' : 'El acceso te lleva al onboarding real de Stripe, no a una pantalla intermedia'}</p>
-                      <p className="text-sm leading-relaxed text-muted-foreground">Cuando pulses el CTA abriremos un Account Link directo de Stripe. Si ya tienes cuenta, renovamos el enlace; si no existe, creamos una nueva y guardamos el `stripeAccountId` antes de redirigir.</p>
+                      <p className="text-sm font-semibold text-origen-bosque">{paymentStage === 'connected' ? 'Puedes editar tus datos de cobro cuando lo necesites.' : 'El botón te lleva directamente al onboarding real de Stripe.'}</p>
+                      <p className="text-sm leading-relaxed text-muted-foreground">El acceso es seguro y siempre se genera con un enlace actualizado.</p>
                     </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-3 md:grid-cols-3">
-                  <div className="rounded-xl border border-border-subtle p-4">
-                    <p className="text-sm font-medium text-origen-bosque">1. Abre Stripe</p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Accede al onboarding o edición con un enlace válido y seguro.</p>
-                  </div>
-                  <div className="rounded-xl border border-border-subtle p-4">
-                    <p className="text-sm font-medium text-origen-bosque">2. Actualiza datos</p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Revisa identidad fiscal, cuenta bancaria y cualquier requisito pendiente.</p>
-                  </div>
-                  <div className="rounded-xl border border-border-subtle p-4">
-                    <p className="text-sm font-medium text-origen-bosque">3. Vuelve al panel</p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Stripe te devolverá al dashboard cuando termines o si necesitas reanudar luego.</p>
                   </div>
                 </div>
               </CardContent>
@@ -215,34 +200,22 @@ export default function PagosPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <ShieldCheck className="h-5 w-5 text-origen-pradera" aria-hidden="true" />
-                    Checklist de cobros
+                    Proximos pasos
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="rounded-xl border border-border-subtle bg-surface-alt p-4">
-                    <p className="text-sm font-medium text-origen-bosque">Cuenta Stripe {paymentStage === 'empty' ? 'sin iniciar' : 'registrada'}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{paymentStage === 'empty' ? 'Todavía no existe una cuenta de cobro asociada.' : 'Ya existe una cuenta y puedes retomarla o editarla.'}</p>
+                    <p className="text-sm font-medium text-origen-bosque">{paymentStage === 'empty' ? 'Inicia tu cuenta Stripe' : paymentStage === 'pending' ? 'Completa la verificacion pendiente' : 'Mantén tus datos al dia'}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{paymentStage === 'empty' ? 'Sin cuenta activa no podrás recibir liquidaciones.' : paymentStage === 'pending' ? 'Finaliza el alta para habilitar cobros.' : 'Actualiza datos fiscales o bancarios cuando cambien.'}</p>
                   </div>
                   <div className="rounded-xl border border-border-subtle bg-surface-alt p-4">
-                    <p className="text-sm font-medium text-origen-bosque">Documentación y verificación</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Stripe puede pedir validar identidad, fiscalidad o cuenta bancaria según cambios recientes.</p>
+                    <p className="text-sm font-medium text-origen-bosque">Documentacion y verificacion</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Ten a mano documentación fiscal y bancaria para evitar pausas de pago.</p>
                   </div>
                   <div className="rounded-xl border border-border-subtle bg-surface-alt p-4">
-                    <p className="text-sm font-medium text-origen-bosque">Edición segura</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Si decides modificar la cuenta, el acceso abre Stripe directamente para evitar pasos manuales extra.</p>
+                    <p className="text-sm font-medium text-origen-bosque">Acceso directo y seguro</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Siempre entrarás con un enlace temporal válido generado para tu cuenta.</p>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-2xl border border-border-subtle shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <AlertCircle className="h-5 w-5 text-origen-pradera" aria-hidden="true" />
-                    Recomendación operativa
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-relaxed text-muted-foreground">Revisa tus datos de cobro cada vez que cambies razón social, IBAN o titularidad. Si Stripe detecta inconsistencias puede pausar la liquidación hasta que completes la verificación.</p>
                 </CardContent>
               </Card>
             </div>
