@@ -23,8 +23,8 @@ import { cn } from '@/lib/utils';
 
 import { Button } from '@arcediano/ux-library';
 import { Checkbox } from '@arcediano/ux-library';
-import { saveStep6 } from '@/lib/api/onboarding';
 import { Spinner } from '@/components/shared';
+import { startStripeOnboarding } from '@/lib/stripe/connect-client';
 
 import {
   CreditCard,
@@ -87,45 +87,14 @@ export function EnhancedStep6Stripe({
     setConnectError('');
 
     try {
-      // 1. Crear cuenta Stripe Express
-      const res = await fetch('/api/stripe/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: userEmail,
-          firstName,
-          lastName,
-          businessName,
-          website,
-        }),
+      await startStripeOnboarding({
+        stripeAccountId: data.stripeAccountId,
+        email: userEmail,
+        firstName,
+        lastName,
+        businessName,
+        website,
       });
-
-      const json = await res.json() as {
-        success: boolean;
-        data?: { accountId: string; onboardingUrl: string };
-        error?: string;
-        detail?: string;
-      };
-
-      if (!json.success || !json.data) {
-        const errorMsg = json.detail
-          ? `${json.error}: ${json.detail}`
-          : (json.error ?? 'Error al crear la cuenta Stripe');
-        throw new Error(errorMsg);
-      }
-
-      const { accountId, onboardingUrl } = json.data;
-
-      // 2. Persistir el accountId ANTES de redirigir — si el usuario abandona
-      //    el flujo de Stripe, el ID queda guardado para poder reanudar después
-      await saveStep6({
-        stripeConnected: false,
-        stripeAccountId: accountId,
-        acceptTerms: false,
-      });
-
-      // 3. Redirigir al onboarding de Stripe (misma ventana)
-      window.location.href = onboardingUrl;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error desconocido';
       setConnectError(msg);

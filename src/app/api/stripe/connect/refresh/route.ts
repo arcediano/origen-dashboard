@@ -9,10 +9,27 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { createAccountLink } from '@/lib/stripe/server';
+
+const GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
+
+function isValidStripeAccountId(accountId: string): boolean {
+  return /^acct_[A-Za-z0-9]+$/.test(accountId);
+}
 
 export async function POST(request: NextRequest) {
   try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value;
+
+    if (!accessToken) {
+      return NextResponse.json(
+        { success: false, error: 'No autenticado' },
+        { status: 401 },
+      );
+    }
+
     const body = await request.json();
     const { accountId } = body as { accountId?: string };
 
@@ -20,6 +37,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'accountId es requerido' },
         { status: 400 },
+      );
+    }
+
+    if (!isValidStripeAccountId(accountId)) {
+      return NextResponse.json(
+        { success: false, error: 'accountId inválido' },
+        { status: 400 },
+      );
+    }
+
+    const onboardingRes = await fetch(`${GATEWAY_URL}/api/v1/producers/onboarding/data`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+      },
+    });
+
+    if (!onboardingRes.ok) {
+      return NextResponse.json(
+        { success: false, error: 'No se pudo validar la cuenta Stripe del usuario' },
+        { status: 502 },
+      );
+    }
+
+    const onboardingJson = await onboardingRes.json() as {
+      data?: { payment?: { stripeAccountId?: string | null } };
+    };
+    const ownedAccountId = onboardingJson?.data?.payment?.stripeAccountId;
+
+    if (!ownedAccountId || ownedAccountId !== accountId) {
+      return NextResponse.json(
+        { success: false, error: 'Cuenta Stripe no autorizada para este usuario' },
+        { status: 403 },
       );
     }
 

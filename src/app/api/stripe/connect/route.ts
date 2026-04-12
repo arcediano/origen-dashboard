@@ -16,10 +16,46 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { createConnectAccount, createAccountLink } from '@/lib/stripe/server';
+
+const GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
 
 export async function POST(request: NextRequest) {
   try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value;
+
+    if (!accessToken) {
+      return NextResponse.json(
+        { success: false, error: 'No autenticado' },
+        { status: 401 },
+      );
+    }
+
+    // Validar que el token corresponde a un productor autenticado
+    const onboardingRes = await fetch(`${GATEWAY_URL}/api/v1/producers/onboarding/data`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+      },
+    });
+
+    if (onboardingRes.status === 401 || onboardingRes.status === 403) {
+      return NextResponse.json(
+        { success: false, error: 'Sesión inválida' },
+        { status: 401 },
+      );
+    }
+
+    if (!onboardingRes.ok) {
+      return NextResponse.json(
+        { success: false, error: 'No se pudo validar la sesión del productor' },
+        { status: 502 },
+      );
+    }
+
     const body = await request.json();
     const { email, firstName, lastName, businessName, website } = body as {
       email?: string;
