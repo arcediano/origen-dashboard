@@ -7,20 +7,26 @@ import { AlertCircle, ChevronDown } from 'lucide-react';
 interface StepValidationPanelProps {
   messages: string[];
   onFocusFirstIncompleteField: () => void;
+  currentStep?: number;
 }
 
 export function StepValidationPanel({
   messages,
   onFocusFirstIncompleteField,
+  currentStep,
 }: StepValidationPanelProps) {
   const [isExpanded, setIsExpanded] = React.useState(false);
 
   React.useEffect(() => {
-    // En mobile mantenemos la tarjeta compacta; en desktop abierta por defecto
+    // En desktop abierta por defecto; en mobile abrimos por defecto el paso Capacidad (step 4)
     if (typeof window !== 'undefined') {
-      setIsExpanded(window.innerWidth >= 1024);
+      if (window.innerWidth >= 1024) {
+        setIsExpanded(true);
+      } else {
+        setIsExpanded(currentStep === 4);
+      }
     }
-  }, []);
+  }, [currentStep]);
 
   if (messages.length === 0) {
     return null;

@@ -702,7 +702,7 @@ export function EnhancedStep4Capacity({
       {!data.isInOriginRoute && (
         <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
           
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
                 <Truck className="w-5 h-5 text-origen-pradera" />
@@ -716,7 +716,7 @@ export function EnhancedStep4Capacity({
               type="button"
               variant="outline"
               onClick={handleAddCustomDeliveryOption}
-              className="border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10 flex-shrink-0 whitespace-nowrap"
+              className="w-full justify-center whitespace-nowrap border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10 sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-1.5 inline-block" />
               Añadir método
@@ -753,7 +753,7 @@ export function EnhancedStep4Capacity({
                             inputSize="md"
                             className="text-sm"
                           />
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <Input
                               label="Precio (€)"
                               type="number"
@@ -975,7 +975,7 @@ export function EnhancedStep4Capacity({
       {/* ====================================================================
           TRUST BADGES
       ==================================================================== */}
-      <div className="flex items-center gap-4 pt-2 text-xs text-muted-foreground border-t border-border">
+      <div className="flex flex-wrap items-center gap-3 border-t border-border pt-2 text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <Lock className="w-3.5 h-3.5 text-origen-pradera" />
           <span>Configuración guardada</span>

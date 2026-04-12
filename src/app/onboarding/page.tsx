@@ -430,7 +430,9 @@ export default function OnboardingPage() {
         break;
       }
       case 4: {
-        if (formData.step4.deliveryOptions.length < 1) messages.push('Añade al menos un método de envío.');
+        if (!formData.step4.isInOriginRoute && formData.step4.deliveryOptions.length < 1) {
+          messages.push('Añade al menos un método de envío.');
+        }
         if (formData.step4.includedZones.length < 1) messages.push('Añade al menos una zona de entrega incluida.');
         if (!formData.step4.minOrderAmount || formData.step4.minOrderAmount <= 0) messages.push('El pedido mínimo debe ser mayor que 0 €.');
         break;
@@ -718,6 +720,11 @@ export default function OnboardingPage() {
           <EnhancedStep4Capacity
             data={formData.step4}
             onChange={handleStep4Change}
+            producerLocation={{
+              province: formData.step1.province,
+              city: formData.step1.city,
+              postalCode: formData.step1.postalCode,
+            }}
           />
         );
       case 5:
@@ -800,7 +807,7 @@ export default function OnboardingPage() {
       {/* ====================================================================
           MAIN - Layout: Timeline vertical (4) + Formulario (8)
       ==================================================================== */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 lg:py-8 pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 lg:py-8 pb-[calc(9.5rem+env(safe-area-inset-bottom))] lg:pb-8">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
 
           {/* ====================================================================
@@ -962,6 +969,7 @@ export default function OnboardingPage() {
                 <StepValidationPanel
                   messages={stepValidationMessages}
                   onFocusFirstIncompleteField={focusFirstIncompleteField}
+                  currentStep={currentStep}
                 />
               )}
             </div>
