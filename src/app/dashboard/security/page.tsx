@@ -27,6 +27,8 @@ export default function SecurityPage() {
     confirm: false,
   });
 
+  const passwordValidationError = validatePasswordChange(password);
+
   const handleChangePassword = async () => {
     const validationError = validatePasswordChange(password);
     if (validationError) {
@@ -112,7 +114,7 @@ export default function SecurityPage() {
                   Cambiar contraseña
                 </h3>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                   <div className="space-y-2">
                     <Label>Contraseña actual</Label>
                     <Input
@@ -164,17 +166,22 @@ export default function SecurityPage() {
                       {showPasswords.confirm ? 'Ocultar' : 'Mostrar'}
                     </button>
                   </div>
-                  <div className="flex items-end">
+                  <div className="lg:col-start-3 flex items-end">
                     <Button
                       data-testid="change-password-submit"
                       onClick={handleChangePassword}
-                      disabled={!password.current || !password.new || !password.confirm || isSaving}
+                      disabled={!!passwordValidationError || isSaving}
                       className="w-full"
                     >
-                      {isSaving ? 'Actualizando...' : 'Actualizar contraseña'}
+                      {isSaving ? 'Actualizando...' : 'Guardar nueva contraseña'}
                     </Button>
                   </div>
                 </div>
+
+                {!saveError && password.current && password.new && password.confirm && passwordValidationError && (
+                  <p className="text-xs text-amber-700">{passwordValidationError}</p>
+                )}
+
               </div>
 
               <Separator className="my-4" />

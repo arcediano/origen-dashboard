@@ -87,9 +87,7 @@ export default function ConfiguracionPage() {
   const rows = useMemo(() => (Object.keys(LABELS) as PreferenceKey[]), []);
 
   useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    let isMounted = true;
 
     const resolveChannel = (
       preferencesByEvent: Map<PreferenceEventType, NotificationPreferenceDto>,
@@ -110,9 +108,7 @@ export default function ConfiguracionPage() {
 
     const loadPreferences = async () => {
       try {
-        const response = await gatewayClient.get<GetPreferencesResponse>('/notifications/preferences', {
-          fetchOptions: { signal: controller.signal },
-        });
+        const response = await gatewayClient.get<GetPreferencesResponse>('/notifications/preferences');
         const preferences = Array.isArray(response?.data) ? response.data : [];
         const preferencesByEvent = new Map<PreferenceEventType, NotificationPreferenceDto>(
           preferences.map((item) => [item.eventType, item]),
@@ -132,14 +128,14 @@ export default function ConfiguracionPage() {
           marketing: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.marketing, 'push', DEFAULT_CHANNEL_SETTINGS.marketing),
         };
 
-        if (!cancelled) {
+        if (isMounted) {
           setEmailSettings(nextEmail);
           setPushSettings(nextPush);
         }
       } catch (error) {
         console.error('[configuracion] Error cargando preferencias:', error);
       } finally {
-        if (!cancelled) {
+        if (isMounted) {
           setIsLoadingPreferences(false);
         }
       }
@@ -148,9 +144,7 @@ export default function ConfiguracionPage() {
     void loadPreferences();
 
     return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-      controller.abort();
+      isMounted = false;
     };
   }, []);
 
