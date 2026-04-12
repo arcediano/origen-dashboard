@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Bell, Megaphone, Package, Save, ShoppingBag, Star } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, Button, Toggle } from '@arcediano/ux-library';
@@ -83,13 +83,12 @@ export default function ConfiguracionPage() {
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingPreferences, setIsLoadingPreferences] = useState(true);
+  const [isRefreshingByChannel, setIsRefreshingByChannel] = useState(false);
 
   const rows = useMemo(() => (Object.keys(LABELS) as PreferenceKey[]), []);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const resolveChannel = (
+  const resolveChannel = useCallback(
+    (
       preferencesByEvent: Map<PreferenceEventType, NotificationPreferenceDto>,
       eventTypes: PreferenceEventType[],
       channel: 'email' | 'push',
@@ -104,9 +103,18 @@ export default function ConfiguracionPage() {
       }
 
       return matched.every((item) => item[channel] !== false);
-    };
+    },
+    [],
+  );
 
-    const loadPreferences = async () => {
+  const loadPreferences = useCallback(
+    async (mode: 'initial' | 'channel-switch' | 'post-save' = 'initial') => {
+      if (mode === 'initial') {
+        setIsLoadingPreferences(true);
+      } else {
+        setIsRefreshingByChannel(true);
+      }
+
       try {
         const response = await gatewayClient.get<GetPreferencesResponse>('/notifications/preferences');
         const preferences = Array.isArray(response?.data) ? response.data : [];
@@ -128,25 +136,21 @@ export default function ConfiguracionPage() {
           marketing: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.marketing, 'push', DEFAULT_CHANNEL_SETTINGS.marketing),
         };
 
-        if (isMounted) {
-          setEmailSettings(nextEmail);
-          setPushSettings(nextPush);
-        }
+        setEmailSettings(nextEmail);
+        setPushSettings(nextPush);
       } catch (error) {
         console.error('[configuracion] Error cargando preferencias:', error);
       } finally {
-        if (isMounted) {
-          setIsLoadingPreferences(false);
-        }
+        setIsLoadingPreferences(false);
+        setIsRefreshingByChannel(false);
       }
-    };
+    },
+    [resolveChannel],
+  );
 
-    void loadPreferences();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  useEffect(() => {
+    void loadPreferences('initial');
+  }, [loadPreferences]);
 
   const handleSave = async () => {
     if (isSaving || isLoadingPreferences) return;
@@ -194,6 +198,7 @@ export default function ConfiguracionPage() {
         ],
       });
       saveOk = true;
+      await loadPreferences('post-save');
     } catch (error) {
       console.error('[configuracion] Error guardando preferencias:', error);
     } finally {
@@ -224,10 +229,16 @@ export default function ConfiguracionPage() {
               <div className="border-b border-border-subtle px-4 py-4 sm:px-6 bg-surface-alt/70">
                 <p className="text-sm font-semibold text-origen-bosque">Canales de comunicacion</p>
                 <p className="mt-1 text-xs text-muted-foreground">Para cada aviso elige si quieres recibirlo por Email y/o Push.</p>
+                {isRefreshingByChannel && (
+                  <p className="mt-1 text-[11px] text-text-subtle">Actualizando preferencias del canal seleccionado...</p>
+                )}
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:w-[260px]">
                   <button
                     type="button"
-                    onClick={() => setActiveChannel('email')}
+                    onClick={() => {
+                      setActiveChannel('email');
+                      void loadPreferences('channel-switch');
+                    }}
                     className={
                       activeChannel === 'email'
                         ? 'rounded-xl border border-origen-pradera bg-origen-pastel px-3 py-2 text-center'
@@ -239,7 +250,10 @@ export default function ConfiguracionPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setActiveChannel('push')}
+                    onClick={() => {
+                      setActiveChannel('push');
+                      void loadPreferences('channel-switch');
+                    }}
                     className={
                       activeChannel === 'push'
                         ? 'rounded-xl border border-origen-pradera bg-origen-pastel px-3 py-2 text-center'

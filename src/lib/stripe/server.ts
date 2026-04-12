@@ -92,8 +92,12 @@ export async function createConnectAccount(params: {
  * @returns Link de onboarding
  */
 export async function createAccountLink(accountId: string) {
+  return createAccountLinkWithBase(accountId);
+}
+
+export async function createAccountLinkWithBase(accountId: string, baseUrl?: string) {
   try {
-    const base = STRIPE_CONFIG.baseUrl;
+    const base = baseUrl ?? STRIPE_CONFIG.baseUrl;
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
       refresh_url: `${base}/onboarding/stripe/refresh?accountId=${accountId}`,

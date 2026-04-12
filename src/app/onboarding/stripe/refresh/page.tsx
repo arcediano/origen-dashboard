@@ -67,10 +67,10 @@ function StripeRefreshContent() {
           No pudimos renovar el enlace de Stripe. Vuelve al onboarding e inténtalo de nuevo.
         </p>
         <button
-          onClick={() => router.push('/onboarding')}
+          onClick={() => router.push('/dashboard/account')}
           className="w-full h-11 bg-origen-bosque text-white rounded-xl text-sm font-medium hover:bg-origen-pino transition-colors"
         >
-          Volver al onboarding
+          Volver a Mi Cuenta
         </button>
       </div>
     );

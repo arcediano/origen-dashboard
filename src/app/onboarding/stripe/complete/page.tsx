@@ -113,10 +113,10 @@ function StripeCompleteContent() {
             No completaste todos los pasos en Stripe. Puedes retomarlo cuando quieras.
           </p>
           <button
-            onClick={() => router.push('/onboarding')}
+            onClick={() => router.push('/dashboard/account')}
             className="w-full h-11 bg-origen-bosque text-white rounded-xl text-sm font-medium hover:bg-origen-pino transition-colors"
           >
-            Volver al onboarding
+            Volver a Mi Cuenta
           </button>
         </>
       )}
@@ -127,10 +127,10 @@ function StripeCompleteContent() {
           <h1 className="text-xl font-bold text-origen-bosque">Error de conexión</h1>
           <p className="text-sm text-muted-foreground mb-4">{errorMessage}</p>
           <button
-            onClick={() => router.push('/onboarding')}
+            onClick={() => router.push('/dashboard/account')}
             className="w-full h-11 bg-origen-bosque text-white rounded-xl text-sm font-medium hover:bg-origen-pino transition-colors"
           >
-            Volver al onboarding
+            Volver a Mi Cuenta
           </button>
         </>
       )}

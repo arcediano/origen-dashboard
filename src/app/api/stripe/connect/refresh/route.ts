@@ -10,7 +10,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createAccountLink } from '@/lib/stripe/server';
+import { createAccountLinkWithBase } from '@/lib/stripe/server';
 
 const GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
 
@@ -20,6 +20,7 @@ function isValidStripeAccountId(accountId: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    const baseUrl = request.nextUrl.origin;
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value;
 
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const accountLink = await createAccountLink(accountId);
+    const accountLink = await createAccountLinkWithBase(accountId, baseUrl);
 
     return NextResponse.json({
       success: true,

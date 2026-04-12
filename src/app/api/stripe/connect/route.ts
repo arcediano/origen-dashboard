@@ -17,12 +17,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createConnectAccount, createAccountLink } from '@/lib/stripe/server';
+import { createConnectAccount, createAccountLinkWithBase } from '@/lib/stripe/server';
 
 const GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
 
 export async function POST(request: NextRequest) {
   try {
+    const baseUrl = request.nextUrl.origin;
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value;
 
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Generar el Account Link con URLs de retorno que incluyen el accountId
-    const accountLink = await createAccountLink(account.id);
+    const accountLink = await createAccountLinkWithBase(account.id, baseUrl);
 
     return NextResponse.json({
       success: true,
