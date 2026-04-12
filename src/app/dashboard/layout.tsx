@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation';
 import { DashboardSidebar } from '@/app/dashboard/components/sidebar/DashboardSidebar';
 import { DashboardHeader } from '@/app/dashboard/components/header/DashboardHeader';
 import { BottomTabBar, MobileTopBar, MobilePageTransition } from '@/components/features/dashboard/components/mobile';
-import { SessionExpiredModal } from '@/components/features/auth/components/session-expired-modal';
 import { cn } from '@/lib/utils';
 import { type SellerStatus } from '@/types/seller';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,7 +40,6 @@ function DashboardContentWrapper({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [sessionExpired, setSessionExpired] = useState(false);
 
   const { isAuthenticated, isProducer, isLoading: authLoading, user } = useAuth();
 
@@ -92,14 +90,6 @@ function DashboardContentWrapper({
     }
   }, [authLoading, isAuthenticated, isProducer, router]);
 
-  // Manejar evento de sesión expirada
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    const handleExpired = () => setSessionExpired(true);
-    window.addEventListener('session:expired', handleExpired);
-    return () => window.removeEventListener('session:expired', handleExpired);
-  }, [isAuthenticated]);
-
   // Inicializar responsive y montar componente
   useEffect(() => {
     if (!isAuthenticated || !isProducer) return;
@@ -131,8 +121,6 @@ function DashboardContentWrapper({
 
   return (
       <div className="min-h-screen bg-gradient-to-br from-surface via-surface-alt to-surface">
-      <SessionExpiredModal isOpen={sessionExpired} />
-
       {/* Sidebar — solo desktop */}
       <DashboardSidebar
         isMobileOpen={isMobileMenuOpen}

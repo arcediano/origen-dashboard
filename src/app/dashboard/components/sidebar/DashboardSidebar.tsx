@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@arcediano/ux-library';
-import { ChevronRight, CirclePlus, HelpCircle, Leaf, LogOut, X } from 'lucide-react';
+import { HelpCircle, Leaf, LogOut, X } from 'lucide-react';
 import { SidebarMenuItem } from './SidebarMenuItem';
 import { DASHBOARD_NAV_SECTIONS } from '@/constants/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -69,20 +69,6 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
         </section>
       ))}
     </>
-  );
-
-  const quickAction = (
-    <Link
-      href="/dashboard/products/create"
-      onClick={handleItemClick}
-      className="flex items-center justify-between rounded-2xl bg-origen-bosque px-4 py-3 text-sm font-semibold text-white shadow-sm transition-transform hover:translate-y-[-1px] active:scale-[0.98]"
-    >
-      <span className="flex items-center gap-2">
-        <CirclePlus className="h-4 w-4" />
-        Nuevo producto
-      </span>
-      <ChevronRight className="h-4 w-4" />
-    </Link>
   );
 
   const footer = (
@@ -150,7 +136,6 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
                   <p className="truncate text-xs text-muted-foreground">{userEmail}</p>
                 </div>
               </div>
-              {quickAction}
             </div>
           </div>
 
@@ -173,7 +158,6 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
             <span className="block text-xs font-medium text-muted-foreground">Panel del productor</span>
           </div>
         </Link>
-        {quickAction}
       </div>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">{navSections}</nav>
