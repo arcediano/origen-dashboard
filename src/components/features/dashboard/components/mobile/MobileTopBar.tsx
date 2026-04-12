@@ -97,6 +97,14 @@ export function MobileTopBar() {
   const isRoot = isRootMobileTab(pathname);
   const subTitle = getDashboardPageTitle(pathname);
 
+  const handleBackNavigation = () => {
+    if (pathname.startsWith('/dashboard/configuracion/pagos')) {
+      router.push('/dashboard/account');
+      return;
+    }
+    router.back();
+  };
+
   return (
     <>
     <header
@@ -147,7 +155,7 @@ export function MobileTopBar() {
             >
               <motion.button
                 whileTap={{ scale: 0.82 }}
-                onClick={() => router.back()}
+                onClick={handleBackNavigation}
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-surface-alt/80 hover:bg-origen-pradera/10 transition-colors text-origen-bosque border border-border-subtle flex-shrink-0"
                 type="button"
                 aria-label="Volver"

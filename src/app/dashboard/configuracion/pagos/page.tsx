@@ -5,11 +5,12 @@
 
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Button } from '@arcediano/ux-library';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
-import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis } from 'lucide-react';
+import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, ChevronRight, Key } from 'lucide-react';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { loadOnboardingData } from '@/lib/api/onboarding';
 import { startStripeOnboarding } from '@/lib/stripe/connect-client';
@@ -218,6 +219,19 @@ export default function PagosPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              <Link href="/dashboard/account" className="block rounded-2xl border border-border-subtle bg-surface p-4 shadow-sm transition-colors hover:bg-surface-alt">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-origen-pradera/10">
+                    <Key className="h-4 w-4 text-origen-pradera" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-origen-bosque">Volver a Mi cuenta</p>
+                    <p className="text-xs text-muted-foreground">Regresa a seguridad, cobros y perfil comercial.</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-text-subtle" />
+                </div>
+              </Link>
             </div>
           </div>
         </div>

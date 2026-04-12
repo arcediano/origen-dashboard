@@ -18,11 +18,6 @@ type PasswordFieldErrors = {
 
 function getPasswordFieldErrors(password: { current: string; new: string; confirm: string }): PasswordFieldErrors {
   const errors: PasswordFieldErrors = {};
-  const hasAnyValue = Boolean(password.current || password.new || password.confirm);
-
-  if (!hasAnyValue) {
-    return errors;
-  }
 
   if (!password.current) {
     errors.current = 'La contraseña actual es obligatoria.';
