@@ -120,6 +120,36 @@ Reemplaza el mock `setTimeout` de `security/page.tsx` por integración real con 
 
 ---
 
+## Sprint 26 — Configuraciones de Alertas por Canal y Evento (Abril 2026)
+
+### Separacion real Email/Push y granularidad por tipo de alerta
+
+**Fecha**: 2026-04-12  
+**Agentes**: @desarrollador-codigo, @analista-pruebas, @documentador-tecnico
+
+#### Descripcion
+
+Se corrige la seccion `Configuraciones` para distinguir de forma real por canal (`email`, `push`) y por tipo de alerta (`eventType`), eliminando la agrupacion de `NEW_REVIEW` + `REVIEW_REPLY` en un unico toggle y alineando defaults con la politica del backend.
+
+#### Archivos afectados
+
+| Archivo | Cambio |
+|---------|--------|
+| `src/app/dashboard/configuracion/page.tsx` | Refactor de estado/mapeo: defaults por canal, filas independientes para `Nuevas resenas` y `Respuesta a resena`, guardado via payload canonico |
+| `src/lib/notifications/preferences-config.ts` | NUEVO - fuente unica para mapeo `eventType <-> key`, defaults por canal y constructor de payload |
+| `tests/unit/lib/notifications/preferences-config.test.ts` | NUEVO - pruebas unitarias de defaults, independencia `NEW_REVIEW/REVIEW_REPLY` y payload por canal |
+
+#### Gates de calidad
+
+| Gate | Estado | Detalle |
+|------|--------|---------|
+| Compilacion (`tsc --noEmit`) | ✅ Sin errores | Ejecutado en `origen-dashboard` |
+| Tests unitarios (`vitest run tests/unit`) | ✅ 320/320 PASS | Incluye nueva suite `preferences-config.test.ts` |
+| Seguridad | ✅ Sin cambios de superficie sensible | Alcance UI + mapeo de preferencias |
+| Documentacion | ✅ Completa | Este archivo + plan Sprint 26 |
+
+---
+
 ## Historial de ADRs relacionados
 
 - [ADR-001](./adr/ADR-001-canonical-navigation-routes.md) — Rutas canónicas de navegación en cuenta del productor

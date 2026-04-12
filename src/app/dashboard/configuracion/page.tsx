@@ -6,50 +6,22 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Bell, Megaphone, Package, Save, ShoppingBag, Star } from 'lucide-react';
+import { Bell, Megaphone, MessageCircle, Package, Save, ShoppingBag, Star } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, Button, Toggle } from '@arcediano/ux-library';
 import { gatewayClient } from '@/lib/api/client';
-
-type PreferenceKey = 'orders' | 'reviews' | 'stock' | 'marketing';
-
-interface ChannelState {
-  orders: boolean;
-  reviews: boolean;
-  stock: boolean;
-  marketing: boolean;
-}
-
-type PreferenceEventType =
-  | 'NEW_ORDER'
-  | 'NEW_REVIEW'
-  | 'REVIEW_REPLY'
-  | 'PRODUCT_LOW_STOCK'
-  | 'PROMOTION_CREATED';
-
-interface NotificationPreferenceDto {
-  eventType: PreferenceEventType;
-  email?: boolean;
-  push?: boolean;
-}
+import {
+  buildChannelStateFromPreferences,
+  buildPreferencesPayload,
+  DEFAULT_EMAIL_SETTINGS,
+  DEFAULT_PUSH_SETTINGS,
+  NotificationPreferenceDto,
+  PreferenceKey,
+} from '@/lib/notifications/preferences-config';
 
 interface GetPreferencesResponse {
   data?: NotificationPreferenceDto[];
 }
-
-const DEFAULT_CHANNEL_SETTINGS: ChannelState = {
-  orders: true,
-  reviews: true,
-  marketing: false,
-  stock: true,
-};
-
-const PREFERENCE_GROUPS: Record<PreferenceKey, PreferenceEventType[]> = {
-  orders: ['NEW_ORDER'],
-  reviews: ['NEW_REVIEW', 'REVIEW_REPLY'],
-  stock: ['PRODUCT_LOW_STOCK'],
-  marketing: ['PROMOTION_CREATED'],
-};
 
 const LABELS: Record<PreferenceKey, { title: string; description: string; icon: React.ElementType }> = {
   orders: {
@@ -57,10 +29,15 @@ const LABELS: Record<PreferenceKey, { title: string; description: string; icon: 
     description: 'Aviso cuando llega un nuevo pedido',
     icon: ShoppingBag,
   },
-  reviews: {
+  newReview: {
     title: 'Nuevas resenas',
     description: 'Aviso cuando recibes una nueva resena',
     icon: Star,
+  },
+  reviewReply: {
+    title: 'Respuesta a resena',
+    description: 'Aviso cuando recibes respuesta en una resena',
+    icon: MessageCircle,
   },
   stock: {
     title: 'Stock bajo',
@@ -75,9 +52,8 @@ const LABELS: Record<PreferenceKey, { title: string; description: string; icon: 
 };
 
 export default function ConfiguracionPage() {
-  const [emailSettings, setEmailSettings] = useState<ChannelState>(DEFAULT_CHANNEL_SETTINGS);
-
-  const [pushSettings, setPushSettings] = useState<ChannelState>(DEFAULT_CHANNEL_SETTINGS);
+  const [emailSettings, setEmailSettings] = useState(DEFAULT_EMAIL_SETTINGS);
+  const [pushSettings, setPushSettings] = useState(DEFAULT_PUSH_SETTINGS);
   const [activeChannel, setActiveChannel] = useState<'email' | 'push'>('email');
 
   const [saved, setSaved] = useState(false);
@@ -86,26 +62,6 @@ export default function ConfiguracionPage() {
   const [isRefreshingByChannel, setIsRefreshingByChannel] = useState(false);
 
   const rows = useMemo(() => (Object.keys(LABELS) as PreferenceKey[]), []);
-
-  const resolveChannel = useCallback(
-    (
-      preferencesByEvent: Map<PreferenceEventType, NotificationPreferenceDto>,
-      eventTypes: PreferenceEventType[],
-      channel: 'email' | 'push',
-      fallback: boolean,
-    ): boolean => {
-      const matched = eventTypes
-        .map((eventType) => preferencesByEvent.get(eventType))
-        .filter((value): value is NotificationPreferenceDto => !!value);
-
-      if (matched.length === 0) {
-        return fallback;
-      }
-
-      return matched.every((item) => item[channel] !== false);
-    },
-    [],
-  );
 
   const loadPreferences = useCallback(
     async (mode: 'initial' | 'channel-switch' | 'post-save' = 'initial') => {
@@ -118,26 +74,8 @@ export default function ConfiguracionPage() {
       try {
         const response = await gatewayClient.get<GetPreferencesResponse>('/notifications/preferences');
         const preferences = Array.isArray(response?.data) ? response.data : [];
-        const preferencesByEvent = new Map<PreferenceEventType, NotificationPreferenceDto>(
-          preferences.map((item) => [item.eventType, item]),
-        );
-
-        const nextEmail: ChannelState = {
-          orders: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.orders, 'email', DEFAULT_CHANNEL_SETTINGS.orders),
-          reviews: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.reviews, 'email', DEFAULT_CHANNEL_SETTINGS.reviews),
-          stock: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.stock, 'email', DEFAULT_CHANNEL_SETTINGS.stock),
-          marketing: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.marketing, 'email', DEFAULT_CHANNEL_SETTINGS.marketing),
-        };
-
-        const nextPush: ChannelState = {
-          orders: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.orders, 'push', DEFAULT_CHANNEL_SETTINGS.orders),
-          reviews: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.reviews, 'push', DEFAULT_CHANNEL_SETTINGS.reviews),
-          stock: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.stock, 'push', DEFAULT_CHANNEL_SETTINGS.stock),
-          marketing: resolveChannel(preferencesByEvent, PREFERENCE_GROUPS.marketing, 'push', DEFAULT_CHANNEL_SETTINGS.marketing),
-        };
-
-        setEmailSettings(nextEmail);
-        setPushSettings(nextPush);
+        setEmailSettings(buildChannelStateFromPreferences(preferences, 'email'));
+        setPushSettings(buildChannelStateFromPreferences(preferences, 'push'));
       } catch (error) {
         console.error('[configuracion] Error cargando preferencias:', error);
       } finally {
@@ -145,7 +83,7 @@ export default function ConfiguracionPage() {
         setIsRefreshingByChannel(false);
       }
     },
-    [resolveChannel],
+    [],
   );
 
   useEffect(() => {
@@ -159,43 +97,7 @@ export default function ConfiguracionPage() {
 
     try {
       await gatewayClient.put('/notifications/preferences', {
-        preferences: [
-          {
-            eventType: 'NEW_ORDER',
-            email: emailSettings.orders,
-            inApp: true,
-            push: pushSettings.orders,
-            frequency: 'INSTANT',
-          },
-          {
-            eventType: 'NEW_REVIEW',
-            email: emailSettings.reviews,
-            inApp: true,
-            push: pushSettings.reviews,
-            frequency: 'INSTANT',
-          },
-          {
-            eventType: 'REVIEW_REPLY',
-            email: emailSettings.reviews,
-            inApp: true,
-            push: pushSettings.reviews,
-            frequency: 'INSTANT',
-          },
-          {
-            eventType: 'PRODUCT_LOW_STOCK',
-            email: emailSettings.stock,
-            inApp: true,
-            push: pushSettings.stock,
-            frequency: 'INSTANT',
-          },
-          {
-            eventType: 'PROMOTION_CREATED',
-            email: emailSettings.marketing,
-            inApp: true,
-            push: pushSettings.marketing,
-            frequency: 'INSTANT',
-          },
-        ],
+        preferences: buildPreferencesPayload(emailSettings, pushSettings),
       });
       saveOk = true;
       await loadPreferences('post-save');
