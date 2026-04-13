@@ -67,7 +67,7 @@ interface StepInventoryProps {
 // ============================================================================
 
 const InventorySchema = z.object({
-  sku: z.string().min(3, 'Mínimo 3 caracteres').max(30, 'Máximo 30 caracteres'),
+  sku: z.string().max(30, 'Máximo 30 caracteres').optional(),
   stock: z.number().min(0, 'El stock no puede ser negativo'),
   lowStockThreshold: z.number().min(0, 'El umbral debe ser positivo'),
 });
@@ -145,8 +145,8 @@ export function StepInventory({
   const [localTouched, setLocalTouched] = useState<Record<string, boolean>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  // Validar si el paso está completo
-  const isStepComplete = formData?.sku && formData.sku.trim() !== '';
+  // El SKU lo asigna el backend; el paso depende del estado del inventario editable.
+  const isStepComplete = (formData?.stock ?? 0) >= 0 && (formData?.lowStockThreshold ?? 0) >= 0;
 
   const validateField = useCallback((field: string, value: any) => {
     try {
@@ -225,7 +225,6 @@ export function StepInventory({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Input
             label="SKU"
-            required
             tooltip="El SKU (Stock Keeping Unit) es un código único para tu inventario interno. El backend lo generará automáticamente."
             value={formData?.sku || ''}
             onChange={(e) => handleChange('sku', e.target.value.toUpperCase())}

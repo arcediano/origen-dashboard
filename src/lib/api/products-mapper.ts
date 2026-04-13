@@ -24,6 +24,11 @@ import {
   type Product,
   type ProductImage,
   type Dimensions,
+  type Certification,
+  type DynamicAttribute,
+  type NutritionalInfo,
+  type PriceTier,
+  type ProductionInfo,
 } from '@/types/product';
 
 // ─── TIPOS DE RESPUESTA DEL BACKEND ──────────────────────────────────────────
@@ -32,6 +37,103 @@ import {
 export interface ApiProductImage {
   key: string;
   url: string;
+}
+
+export interface ApiPriceTier {
+  id: string;
+  minQuantity: number;
+  maxQuantity?: number;
+  type: string;
+  value?: number;
+  buyQuantity?: number;
+  payQuantity?: number;
+  label?: string;
+  savings?: number;
+}
+
+export interface ApiVitaminInfo {
+  id: string;
+  name: string;
+  amount: number;
+  unit: string;
+  dailyValue?: number;
+}
+
+export interface ApiNutritionalInfo {
+  servingSize: string;
+  servingSizeValue: number;
+  servingSizeUnit: 'g' | 'ml';
+  calories?: number;
+  protein?: number;
+  totalFat?: number;
+  saturatedFat?: number;
+  transFat?: number;
+  cholesterol?: number;
+  sodium?: number;
+  carbohydrates?: number;
+  dietaryFiber?: number;
+  sugars?: number;
+  addedSugars?: number;
+  allergens: string[];
+  mayContain: string[];
+  ingredients: string[];
+  preparationInstructions?: string;
+  storageInstructions?: string;
+  isGlutenFree?: boolean;
+  isLactoseFree?: boolean;
+  isVegan?: boolean;
+  isVegetarian?: boolean;
+  isNutFree?: boolean;
+  isEggFree?: boolean;
+  isSoyFree?: boolean;
+  vitamins: ApiVitaminInfo[];
+}
+
+export interface ApiCertification {
+  certificationId: string;
+  name: string;
+  issuingBody: string;
+  certificateNumber?: string;
+  issueDate?: string;
+  expiryDate?: string;
+  status: 'ACTIVE' | 'EXPIRED' | 'PENDING';
+  verified: boolean;
+  verificationUrl?: string;
+  category?: 'ORGANIC' | 'QUALITY' | 'SAFETY' | 'SUSTAINABILITY' | 'ORIGIN';
+  logoId?: string;
+  documentIds: string[];
+}
+
+export interface ApiProductionMedia {
+  id: string;
+  url?: string;
+}
+
+export interface ApiProductionInfo {
+  story: string;
+  farmName: string;
+  origin: string;
+  producerName?: string;
+  productionMethod: string;
+  sustainabilityInfo?: string;
+  animalWelfare?: string;
+  artisanProcess?: string;
+  practices: string[];
+  harvestDate?: string;
+  productionDate?: string;
+  expiryDate?: string;
+  batchNumber: string;
+  media: ApiProductionMedia[];
+}
+
+export interface ApiProductAttribute {
+  id: string;
+  name: string;
+  type: 'TEXT' | 'NUMBER' | 'BOOLEAN' | 'DATE';
+  value: string | number | boolean;
+  unit?: string;
+  visible: boolean;
+  description?: string;
 }
 
 /**
@@ -77,6 +179,7 @@ export interface ApiProduct {
   weight?: number;
   weightUnit?: string;
   dimensions?: { length?: number; width?: number; height?: number; unit?: string };
+  shippingClass?: string;
   // Estado
   status: string;     // 'ACTIVE' | 'DRAFT' | 'INACTIVE' | 'OUT_OF_STOCK' | 'PENDING_APPROVAL' | 'SCHEDULED'
   visibility: string; // 'PUBLIC' | 'PRIVATE' | 'PASSWORD'
@@ -88,6 +191,12 @@ export interface ApiProduct {
   revenue: number;
   views: number;
   conversion?: number;
+  priceTiers: ApiPriceTier[];
+  nutritionalInfo?: ApiNutritionalInfo;
+  certifications: ApiCertification[];
+  productionInfo?: ApiProductionInfo;
+  attributes: ApiProductAttribute[];
+  lastOrderDate?: string;
   // Timestamps
   createdAt: string;
   updatedAt: string;
@@ -153,12 +262,122 @@ function mapApiImage(
   };
 }
 
+function mapPriceTier(tier: ApiPriceTier): PriceTier {
+  return {
+    id: tier.id,
+    minQuantity: tier.minQuantity,
+    maxQuantity: tier.maxQuantity,
+    type: tier.type.toLowerCase() as PriceTier['type'],
+    value: tier.value,
+    buyQuantity: tier.buyQuantity,
+    payQuantity: tier.payQuantity,
+    label: tier.label,
+    savings: tier.savings,
+  };
+}
+
+function mapNutritionalInfo(info?: ApiNutritionalInfo): NutritionalInfo | undefined {
+  if (!info) return undefined;
+  return {
+    servingSize: info.servingSize,
+    servingSizeValue: info.servingSizeValue,
+    servingSizeUnit: info.servingSizeUnit,
+    calories: info.calories,
+    protein: info.protein,
+    totalFat: info.totalFat,
+    saturatedFat: info.saturatedFat,
+    transFat: info.transFat,
+    cholesterol: info.cholesterol,
+    sodium: info.sodium,
+    carbohydrates: info.carbohydrates,
+    dietaryFiber: info.dietaryFiber,
+    sugars: info.sugars,
+    addedSugars: info.addedSugars,
+    allergens: info.allergens ?? [],
+    mayContain: info.mayContain ?? [],
+    ingredients: info.ingredients ?? [],
+    preparationInstructions: info.preparationInstructions ?? '',
+    storageInstructions: info.storageInstructions ?? '',
+    isGlutenFree: info.isGlutenFree,
+    isLactoseFree: info.isLactoseFree,
+    isVegan: info.isVegan,
+    isVegetarian: info.isVegetarian,
+    isNutFree: info.isNutFree,
+    isEggFree: info.isEggFree,
+    isSoyFree: info.isSoyFree,
+    vitamins: (info.vitamins ?? []).map((vitamin) => ({
+      id: vitamin.id,
+      name: vitamin.name,
+      amount: vitamin.amount,
+      unit: vitamin.unit,
+      dailyValue: vitamin.dailyValue,
+    })),
+  };
+}
+
+function mapCertification(item: ApiCertification): Certification {
+  return {
+    id: item.certificationId,
+    name: item.name,
+    issuingBody: item.issuingBody,
+    certificateNumber: item.certificateNumber,
+    issueDate: item.issueDate ? new Date(item.issueDate) : undefined,
+    expiryDate: item.expiryDate ? new Date(item.expiryDate) : undefined,
+    status: item.status.toLowerCase() as Certification['status'],
+    verified: item.verified,
+    verificationUrl: item.verificationUrl,
+    category: item.category?.toLowerCase() as Certification['category'] | undefined,
+    documents: (item.documentIds ?? []).map((id) => ({
+      id,
+      name: id,
+      url: id,
+      size: 0,
+      type: 'application/octet-stream',
+      uploadedAt: new Date(),
+    })),
+  };
+}
+
+function mapProductionInfo(info?: ApiProductionInfo): ProductionInfo | undefined {
+  if (!info) return undefined;
+  return {
+    story: info.story,
+    farmName: info.farmName,
+    origin: info.origin,
+    producerName: info.producerName,
+    productionMethod: info.productionMethod,
+    sustainabilityInfo: info.sustainabilityInfo ?? '',
+    animalWelfare: info.animalWelfare ?? '',
+    artisanProcess: info.artisanProcess ?? '',
+    practices: info.practices ?? [],
+    harvestDate: info.harvestDate ? new Date(info.harvestDate) : undefined,
+    productionDate: info.productionDate ? new Date(info.productionDate) : undefined,
+    expiryDate: info.expiryDate ? new Date(info.expiryDate) : undefined,
+    batchNumber: info.batchNumber,
+    media: (info.media ?? []).map((media, index) => ({
+      id: media.id,
+      type: 'image',
+      url: media.url ?? media.id,
+      sortOrder: index,
+    })),
+  };
+}
+
+function mapAttribute(attribute: ApiProductAttribute): DynamicAttribute {
+  return {
+    id: attribute.id,
+    name: attribute.name,
+    type: attribute.type.toLowerCase() as DynamicAttribute['type'],
+    value: attribute.value,
+    unit: attribute.unit,
+    visible: attribute.visible,
+    description: attribute.description,
+  };
+}
+
 /**
  * Mapea un producto de la API al tipo Product del frontend.
- * Los campos complejos (certifications, nutritionalInfo, priceTiers, attributes,
- * productionInfo) no están presentes en la respuesta básica del listado —
- * se inicializan vacíos. El detalle de producto los completará si el endpoint
- * de detalle los incluye en el futuro.
+ * Los campos complejos ya pueden venir en detalle y en listados protegidos del dashboard.
  */
 export function mapApiProductToProduct(api: ApiProduct): Product {
   // Mapear imagen principal
@@ -188,7 +407,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
 
     basePrice:    api.basePrice,
     comparePrice: api.comparePrice,
-    priceTiers:   [],   // No en respuesta básica; se rellenarán en detalle
+    priceTiers:   (api.priceTiers ?? []).map(mapPriceTier),
 
     sku:              api.sku,
     barcode:          api.barcode,
@@ -200,11 +419,12 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     weight:        api.weight,
     weightUnit:    api.weightUnit as 'kg' | 'g' | undefined,
     dimensions:    api.dimensions as Dimensions | undefined,
+    shippingClass: api.shippingClass,
 
-    nutritionalInfo: undefined,   // No en respuesta básica del listado
-    certifications:  [],
-    productionInfo:  undefined,
-    attributes:      [],
+    nutritionalInfo: mapNutritionalInfo(api.nutritionalInfo),
+    certifications:  (api.certifications ?? []).map(mapCertification),
+    productionInfo:  mapProductionInfo(api.productionInfo),
+    attributes:      (api.attributes ?? []).map(mapAttribute),
 
     status:      STATUS_MAP[api.status]     ?? 'draft',
     visibility:  VISIBILITY_MAP[api.visibility] ?? 'private',
@@ -219,6 +439,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
 
     createdAt: new Date(api.createdAt),
     updatedAt: new Date(api.updatedAt),
+    lastOrderDate: api.lastOrderDate ? new Date(api.lastOrderDate) : undefined,
   };
 }
 

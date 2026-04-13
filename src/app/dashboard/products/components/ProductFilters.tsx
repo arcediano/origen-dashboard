@@ -32,11 +32,18 @@ export interface ProductFiltersProps {
   onViewModeChange: (mode: 'grid' | 'list') => void;
   totalProducts: number;
   onClearFilters: () => void;
-  categories?: string[];
+  categories?: Array<{ value: string; label: string }>;
   className?: string;
 }
 
-const DEFAULT_CATEGORIES = ['Quesos', 'Aceites', 'Mieles', 'Embutidos', 'Vinos', 'Panadería'];
+const DEFAULT_CATEGORIES = [
+  { value: 'quesos', label: 'Quesos' },
+  { value: 'aceites', label: 'Aceites' },
+  { value: 'mieles', label: 'Mieles' },
+  { value: 'embutidos', label: 'Embutidos' },
+  { value: 'vinos', label: 'Vinos' },
+  { value: 'panaderia', label: 'Panadería' },
+];
 
 const STATUS_OPTIONS = [
   { value: 'active',       label: 'Activos' },
@@ -167,7 +174,9 @@ export function ProductFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">Todas las categorías</SelectItem>
-            {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+            {categories.map((category) => (
+              <SelectItem key={category.value} value={category.value}>{category.label}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -233,7 +242,7 @@ export function ProductFilters({
         sections={[
           {
             type: 'chips', id: 'category', title: 'Categoría',
-            options: [{ label: 'Todas', value: '' }, ...categories.map(c => ({ label: c, value: c }))],
+            options: [{ label: 'Todas', value: '' }, ...categories.map((category) => ({ label: category.label, value: category.value }))],
             value: selectedCategory, onChange: onCategoryChange,
           },
           {

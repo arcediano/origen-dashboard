@@ -153,3 +153,50 @@ Se corrige la seccion `Configuraciones` para distinguir de forma real por canal 
 ## Historial de ADRs relacionados
 
 - [ADR-001](./adr/ADR-001-canonical-navigation-routes.md) — Rutas canónicas de navegación en cuenta del productor
+
+---
+
+## Sprint 26 — Productos y Onboarding alineados con backend (Abril 2026)
+
+### Listado server-driven, detalle protegido y persistencia rica del producto
+
+**Fecha**: 2026-04-13  
+**Agentes**: @desarrollador-codigo, @documentador-tecnico
+
+#### Descripción
+
+Se reemplaza el flujo híbrido de productos del dashboard por contratos reales de backend para filtros, paginación, estadísticas y detalle protegido del productor. Además, el payload de creación/edición pasa a cubrir las estructuras ya definidas en Prisma (`priceTiers`, `nutritionalInfo`, `productionInfo`, `certifications`, `attributes`), eliminando la pérdida silenciosa de datos entre formulario y persistencia.
+
+También se endurece la lectura pública para evitar que productos no publicados queden accesibles por ID/slug fuera del dashboard, y se elimina la visualización de tendencias simuladas en el panel expandido del listado.
+
+#### Archivos afectados
+
+| Archivo | Cambio |
+|---------|--------|
+| `src/app/dashboard/products/page.tsx` | Listado de productos movido a filtros/paginación server-side; consumo de stats y facetas reales |
+| `src/app/dashboard/products/components/ProductFilters.tsx` | Filtros adaptados a categorías dinámicas con `value/label` y facetas del backend |
+| `src/app/dashboard/products/components/ProductStats.tsx` | KPIs ampliados para mostrar ventas, vistas, rating e ingresos reales |
+| `src/app/dashboard/products/components/ProductExpandableDetails.tsx` | Eliminadas métricas semanales simuladas; solo se muestran datos reales disponibles |
+| `src/app/dashboard/products/components/steps/StepInventory.tsx` | SKU dejado como informativo/no editable; completitud basada en inventario real |
+| `src/hooks/useProductForm.ts` | Corrección de cálculo de pasos completados, publicación y cancelación a ruta canónica |
+| `src/lib/api/products.ts` | Payload rico de producto, stats/facets reales y detalle protegido del productor |
+| `src/lib/api/products-mapper.ts` | Soporte completo para relaciones anidadas devueltas por backend |
+| `src/modules/products/products/products.controller.ts` | Nuevos endpoints `stats`, `facets`, detalle protegido y endurecimiento de lecturas públicas |
+| `src/modules/products/products/products.service.ts` | Persistencia/lectura de relaciones ricas, filtros server-side y generación segura de SKU |
+| `src/modules/products/products/dto/create-product.dto.ts` | DTO ampliado con estructuras anidadas del formulario |
+| `src/modules/products/products/dto/product-response.dto.ts` | DTO de respuesta ampliado con estructuras ricas del producto |
+| `src/modules/proxy/products.controller.ts` | Proxy de nuevos endpoints de productos del productor |
+
+#### Gates de calidad
+
+| Gate | Estado | Detalle |
+|------|--------|---------|
+| Compilación (`tsc --noEmit`) | ✅ Sin errores | Verificado en `origen-dashboard`, `origen-master-microservices` y `origen-gateway` |
+| Tests unitarios | ✅ Parcial relevante en verde | `vitest run tests/unit/hooks/useProductFilters.test.ts` → 44/44 PASS |
+| Seguridad | ✅ Mejora aplicada | El dashboard deja de depender del detalle público por ID; los borradores ya no se leen por endpoint público |
+| Documentación | ✅ Este archivo | Registro actualizado con alcance real del refactor |
+
+#### Notas
+
+- No se añadieron todavía tests unitarios dedicados para `stats/facets/detail protegido` en backend y gateway; el cambio quedó validado por compilación limpia y por la superficie unitaria existente del dashboard.
+- La serie histórica de ventas sigue pendiente de instrumentación backend; mientras tanto, el frontend deja explícitamente de mostrar datos inventados.

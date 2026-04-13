@@ -18,7 +18,6 @@ import {
   type ApiProductsListResponse,
   mapApiProductToProduct,
   mapApiProducts,
-  computeProductStats,
   mapStatusToApi,
   mapVisibilityToApi,
   type ProductStats,
@@ -56,6 +55,17 @@ export interface CreateProductResponse {
   redirectUrl: string;
 }
 
+export interface ProductFacetCategory {
+  id: string;
+  name: string;
+  slug: string;
+  count: number;
+}
+
+export interface ProductFacetsResponse {
+  categories: ProductFacetCategory[];
+}
+
 // ─── HELPERS INTERNOS ─────────────────────────────────────────────────────────
 
 /**
@@ -78,11 +88,49 @@ function mapSortBy(sortBy?: string): string | undefined {
   if (!sortBy) return undefined;
   const map: Record<string, string> = {
     newest:       'newest',
+    oldest:       'oldest',
+    'name-asc':   'name_asc',
+    'name-desc':  'name_desc',
     'price-asc':  'price_asc',
     'price-desc': 'price_desc',
+    'stock-asc':  'stock_asc',
+    'stock-desc': 'stock_desc',
     'sales-desc': 'sales',
   };
   return map[sortBy] ?? 'newest';
+}
+
+function mapPriceTierType(type: string): string {
+  const map: Record<string, string> = {
+    fixed: 'FIXED',
+    percentage: 'PERCENTAGE',
+    bundle: 'BUNDLE',
+  };
+  return map[type] ?? 'FIXED';
+}
+
+function mapCertificationStatus(status: string): string {
+  const map: Record<string, string> = {
+    active: 'ACTIVE',
+    expired: 'EXPIRED',
+    pending: 'PENDING',
+  };
+  return map[status] ?? 'PENDING';
+}
+
+function mapCertificationCategory(category?: string): string | undefined {
+  if (!category) return undefined;
+  return category.toUpperCase();
+}
+
+function mapAttributeType(type: string): string {
+  const map: Record<string, string> = {
+    text: 'TEXT',
+    number: 'NUMBER',
+    boolean: 'BOOLEAN',
+    date: 'DATE',
+  };
+  return map[type] ?? 'TEXT';
 }
 
 /**
@@ -110,6 +158,16 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
 
     basePrice:         formData.basePrice,
     comparePrice:      formData.comparePrice || undefined,
+    priceTiers:        formData.priceTiers.map((tier) => ({
+      minQuantity: tier.minQuantity,
+      maxQuantity: tier.maxQuantity,
+      type: mapPriceTierType(tier.type),
+      value: tier.value,
+      buyQuantity: tier.buyQuantity,
+      payQuantity: tier.payQuantity,
+      label: tier.label,
+      savings: tier.savings,
+    })),
 
     // El backend genera el SKU si está vacío
     sku:               formData.sku || undefined,
@@ -123,6 +181,78 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
     weight:     formData.weight,
     weightUnit: formData.weightUnit,
     dimensions: formData.dimensions,
+    shippingClass: formData.shippingClass || undefined,
+
+    nutritionalInfo: formData.nutritionalInfo
+      ? {
+          servingSize: formData.nutritionalInfo.servingSize,
+          servingSizeValue: formData.nutritionalInfo.servingSizeValue,
+          servingSizeUnit: formData.nutritionalInfo.servingSizeUnit,
+          calories: formData.nutritionalInfo.calories,
+          protein: formData.nutritionalInfo.protein,
+          totalFat: formData.nutritionalInfo.totalFat,
+          saturatedFat: formData.nutritionalInfo.saturatedFat,
+          transFat: formData.nutritionalInfo.transFat,
+          cholesterol: formData.nutritionalInfo.cholesterol,
+          sodium: formData.nutritionalInfo.sodium,
+          carbohydrates: formData.nutritionalInfo.carbohydrates,
+          dietaryFiber: formData.nutritionalInfo.dietaryFiber,
+          sugars: formData.nutritionalInfo.sugars,
+          addedSugars: formData.nutritionalInfo.addedSugars,
+          allergens: formData.nutritionalInfo.allergens,
+          mayContain: formData.nutritionalInfo.mayContain,
+          ingredients: formData.nutritionalInfo.ingredients,
+          preparationInstructions: formData.nutritionalInfo.preparationInstructions,
+          storageInstructions: formData.nutritionalInfo.storageInstructions,
+          isGlutenFree: formData.nutritionalInfo.isGlutenFree,
+          isLactoseFree: formData.nutritionalInfo.isLactoseFree,
+          isVegan: formData.nutritionalInfo.isVegan,
+          isVegetarian: formData.nutritionalInfo.isVegetarian,
+          isNutFree: formData.nutritionalInfo.isNutFree,
+          isEggFree: formData.nutritionalInfo.isEggFree,
+          isSoyFree: formData.nutritionalInfo.isSoyFree,
+          vitamins: formData.nutritionalInfo.vitamins,
+        }
+      : undefined,
+    certifications: formData.certifications.map((certification) => ({
+      certificationId: certification.id,
+      name: certification.name,
+      issuingBody: certification.issuingBody,
+      certificateNumber: certification.certificateNumber,
+      issueDate: certification.issueDate?.toISOString(),
+      expiryDate: certification.expiryDate?.toISOString(),
+      status: mapCertificationStatus(certification.status),
+      verified: certification.verified,
+      verificationUrl: certification.verificationUrl,
+      category: mapCertificationCategory(certification.category),
+      documentIds: certification.documents?.map((document) => document.id) ?? [],
+    })),
+    productionInfo: formData.productionInfo
+      ? {
+          story: formData.productionInfo.story,
+          farmName: formData.productionInfo.farmName,
+          origin: formData.productionInfo.origin,
+          producerName: formData.productionInfo.producerName,
+          productionMethod: formData.productionInfo.productionMethod,
+          sustainabilityInfo: formData.productionInfo.sustainabilityInfo,
+          animalWelfare: formData.productionInfo.animalWelfare,
+          artisanProcess: formData.productionInfo.artisanProcess,
+          practices: formData.productionInfo.practices,
+          harvestDate: formData.productionInfo.harvestDate?.toISOString(),
+          productionDate: formData.productionInfo.productionDate?.toISOString(),
+          expiryDate: formData.productionInfo.expiryDate?.toISOString(),
+          batchNumber: formData.productionInfo.batchNumber,
+          media: formData.productionInfo.media.map((media) => ({ id: media.id, url: media.url })),
+        }
+      : undefined,
+    attributes: formData.attributes.map((attribute) => ({
+      name: attribute.name,
+      type: mapAttributeType(attribute.type),
+      value: attribute.value,
+      unit: attribute.unit,
+      visible: attribute.visible,
+      description: attribute.description,
+    })),
 
     status:     mapStatusToApi(formData.status),
     visibility: mapVisibilityToApi(formData.visibility),
@@ -141,7 +271,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
     'name', 'shortDescription', 'fullDescription', 'categoryId', 'subcategoryId',
     'tags', 'basePrice', 'comparePrice', 'sku', 'barcode', 'stock',
     'lowStockThreshold', 'trackInventory', 'allowBackorders',
-    'weight', 'weightUnit', 'dimensions',
+    'weight', 'weightUnit', 'dimensions', 'shippingClass',
   ];
 
   for (const key of scalar) {
@@ -159,6 +289,76 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
   if (product.gallery !== undefined) {
     body.galleryImageUrls = product.gallery.map(img => img.url);
     body.galleryImageKeys = product.gallery.map(img => img.id);
+  }
+
+  if (product.priceTiers !== undefined) {
+    body.priceTiers = product.priceTiers.map((tier) => ({
+      minQuantity: tier.minQuantity,
+      maxQuantity: tier.maxQuantity,
+      type: mapPriceTierType(tier.type),
+      value: tier.value,
+      buyQuantity: tier.buyQuantity,
+      payQuantity: tier.payQuantity,
+      label: tier.label,
+      savings: tier.savings,
+    }));
+  }
+
+  if (product.nutritionalInfo !== undefined) {
+    body.nutritionalInfo = product.nutritionalInfo
+      ? {
+          ...product.nutritionalInfo,
+          vitamins: product.nutritionalInfo.vitamins,
+        }
+      : null;
+  }
+
+  if (product.certifications !== undefined) {
+    body.certifications = product.certifications.map((certification) => ({
+      certificationId: certification.id,
+      name: certification.name,
+      issuingBody: certification.issuingBody,
+      certificateNumber: certification.certificateNumber,
+      issueDate: certification.issueDate?.toISOString(),
+      expiryDate: certification.expiryDate?.toISOString(),
+      status: mapCertificationStatus(certification.status),
+      verified: certification.verified,
+      verificationUrl: certification.verificationUrl,
+      category: mapCertificationCategory(certification.category),
+      documentIds: certification.documents?.map((document) => document.id) ?? [],
+    }));
+  }
+
+  if (product.productionInfo !== undefined) {
+    body.productionInfo = product.productionInfo
+      ? {
+          story: product.productionInfo.story,
+          farmName: product.productionInfo.farmName,
+          origin: product.productionInfo.origin,
+          producerName: product.productionInfo.producerName,
+          productionMethod: product.productionInfo.productionMethod,
+          sustainabilityInfo: product.productionInfo.sustainabilityInfo,
+          animalWelfare: product.productionInfo.animalWelfare,
+          artisanProcess: product.productionInfo.artisanProcess,
+          practices: product.productionInfo.practices,
+          harvestDate: product.productionInfo.harvestDate?.toISOString(),
+          productionDate: product.productionInfo.productionDate?.toISOString(),
+          expiryDate: product.productionInfo.expiryDate?.toISOString(),
+          batchNumber: product.productionInfo.batchNumber,
+          media: product.productionInfo.media.map((media) => ({ id: media.id, url: media.url })),
+        }
+      : null;
+  }
+
+  if (product.attributes !== undefined) {
+    body.attributes = product.attributes.map((attribute) => ({
+      name: attribute.name,
+      type: mapAttributeType(attribute.type),
+      value: attribute.value,
+      unit: attribute.unit,
+      visible: attribute.visible,
+      description: attribute.description,
+    }));
   }
 
   return body;
@@ -223,9 +423,9 @@ export async function fetchProducts(params?: {
   page?: number;
   limit?: number;
   search?: string;
-  category?: string;
+  categoryId?: string;
   status?: string;
-  stock?: string;
+  stockState?: string;
   sortBy?: string;
 }): Promise<ApiResponse<PaginatedResponse<Product>>> {
   try {
@@ -238,37 +438,23 @@ export async function fetchProducts(params?: {
 
     if (params?.search)                                query.search    = params.search;
     if (params?.status && params.status !== 'todos')   query.status    = mapStatusToApi(params.status);
-
-    // categoryId — el dashboard filtra por nombre; el backend usa ID.
-    // Si el filtro de categoría llega como ID directamente, se pasa tal cual.
-    // La integración completa con la API de categorías llegará con `categories.ts`.
-    if (params?.category && params.category !== 'Todas') {
-      query.categoryId = params.category;
-    }
+    if (params?.categoryId)                             query.categoryId = params.categoryId;
+    if (params?.stockState)                            query.stockState = params.stockState;
 
     const raw = await gatewayClient.get<ApiProductsListResponse>(
       '/products/producer/my-products',
       { params: query as Record<string, string | number | boolean | undefined | null> },
     );
 
-    let items = mapApiProducts(raw.data);
-
-    // Filtro de stock — aplicado en cliente sobre los resultados paginados.
-    // Nota: esto afecta al conteo total si hay menos resultados de los esperados.
-    if (params?.stock && params.stock !== 'todos') {
-      items = applyStockFilter(items, params.stock);
-    }
-
-    const total = params?.stock && params.stock !== 'todos' ? items.length : raw.total;
-    const limit = params?.limit ?? 10;
+    const items = mapApiProducts(raw.data);
 
     return {
       data: {
         items,
-        total,
+        total: raw.total,
         page:       raw.page,
         limit:      raw.limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(raw.total / raw.limit),
       },
       status: 200,
     };
@@ -278,30 +464,12 @@ export async function fetchProducts(params?: {
 }
 
 /**
- * Aplica filtros de stock sobre una lista de productos ya mapeados.
- */
-function applyStockFilter(products: Product[], stockFilter: string): Product[] {
-  switch (stockFilter) {
-    case 'bajo':
-      return products.filter(
-        p => p.stock > 0 && p.lowStockThreshold > 0 && p.stock <= p.lowStockThreshold,
-      );
-    case 'agotado':
-      return products.filter(p => p.stock === 0 || p.status === 'out_of_stock');
-    case 'disponible':
-      return products.filter(p => p.stock > 0);
-    default:
-      return products;
-  }
-}
-
-/**
  * Obtiene un producto por su ID.
- * Ruta backend: GET /products/:id
+ * Ruta backend: GET /products/producer/my-products/:id
  */
 export async function fetchProductById(id: string): Promise<ApiResponse<Product>> {
   try {
-    const raw = await gatewayClient.get<ApiProduct>(`/products/${id}`);
+    const raw = await gatewayClient.get<ApiProduct>(`/products/producer/my-products/${id}`);
     return { data: mapApiProductToProduct(raw), status: 200 };
   } catch (error) {
     return handleError(error, 'fetchProductById');
@@ -309,21 +477,23 @@ export async function fetchProductById(id: string): Promise<ApiResponse<Product>
 }
 
 /**
- * Calcula las estadísticas de productos del productor.
- * Obtiene todos los productos (límite alto) y aplica `computeProductStats` en cliente.
- *
- * Optimización futura: añadir GET /products/producer/stats en products-service.
+ * Obtiene las estadísticas agregadas del productor desde el backend.
  */
 export async function fetchProductStats(): Promise<ApiResponse<ProductStats>> {
   try {
-    const raw = await gatewayClient.get<ApiProductsListResponse>(
-      '/products/producer/my-products',
-      { params: { page: 1, limit: 500 } },
-    );
-    const products = mapApiProducts(raw.data);
-    return { data: computeProductStats(products), status: 200 };
+    const raw = await gatewayClient.get<ProductStats>('/products/producer/my-products/stats');
+    return { data: raw, status: 200 };
   } catch (error) {
     return handleError(error, 'fetchProductStats');
+  }
+}
+
+export async function fetchProductFacets(): Promise<ApiResponse<ProductFacetsResponse>> {
+  try {
+    const raw = await gatewayClient.get<ProductFacetsResponse>('/products/producer/my-products/facets');
+    return { data: raw, status: 200 };
+  } catch (error) {
+    return handleError(error, 'fetchProductFacets');
   }
 }
 
@@ -352,7 +522,7 @@ export async function createProduct(
     const product = mapApiProductToProduct(raw);
 
     return {
-      data: { product, redirectUrl: `/products/${product.id}` },
+      data: { product, redirectUrl: `/dashboard/products/${product.id}` },
       status: 201,
     };
   } catch (error) {

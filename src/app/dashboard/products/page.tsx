@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
 import { Package, Plus, RefreshCw } from 'lucide-react';
@@ -23,7 +23,7 @@ import { DeleteProductDialog } from './components/ProductDialogs/DeleteProductDi
 
 // Hooks y APIs
 import { useProductFilters } from '@/hooks/useProductFilters';
-import { fetchProducts, fetchProductStats } from '@/lib/api/products';
+import { fetchProductFacets, fetchProducts, fetchProductStats } from '@/lib/api/products';
 import { type Product } from '@/types/product';
 import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 
@@ -64,13 +64,20 @@ export default function ProductosPage() {
 
   // Estado de datos
   const [products, setProducts] = useState<Product[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [serverTotalPages, setServerTotalPages] = useState(0);
+  const [categories, setCategories] = useState<Array<{ value: string; label: string }>>([]);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
+    draft: 0,
+    inactive: 0,
     lowStock: 0,
     outOfStock: 0,
     totalRevenue: 0,
     avgRating: 0,
+    totalSales: 0,
+    totalViews: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,12 +102,15 @@ export default function ProductosPage() {
     setSortBy,
     currentPage,
     setCurrentPage,
-    filteredProducts,
-    totalPages,
-    paginatedProducts,
     hasFilters,
     clearFilters,
+    resetPagination,
   } = useProductFilters(products);
+
+  const categoryOptions = useMemo(
+    () => categories.length > 0 ? categories : [],
+    [categories],
+  );
 
   // ==========================================================================
   // CARGA DE DATOS
@@ -108,7 +118,27 @@ export default function ProductosPage() {
 
   useEffect(() => {
     loadData();
+  }, [currentPage, searchQuery, selectedCategory, selectedStatus, selectedStock, sortBy]);
+
+  useEffect(() => {
+    loadFacets();
   }, []);
+
+  useEffect(() => {
+    resetPagination();
+  }, [searchQuery, selectedCategory, selectedStatus, selectedStock, sortBy, resetPagination]);
+
+  const loadFacets = async () => {
+    const facetsResponse = await fetchProductFacets();
+    if (facetsResponse.data) {
+      setCategories(
+        facetsResponse.data.categories.map((category) => ({
+          value: category.id,
+          label: category.name,
+        })),
+      );
+    }
+  };
 
   const loadData = async () => {
     setIsLoading(true);
@@ -116,7 +146,15 @@ export default function ProductosPage() {
 
     try {
       const [productsResponse, statsResponse] = await Promise.all([
-        fetchProducts(),
+        fetchProducts({
+          page: currentPage,
+          limit: 10,
+          search: searchQuery || undefined,
+          categoryId: selectedCategory || undefined,
+          status: selectedStatus || undefined,
+          stockState: selectedStock || undefined,
+          sortBy: sortBy || undefined,
+        }),
         fetchProductStats()
       ]);
 
@@ -124,6 +162,8 @@ export default function ProductosPage() {
         setError(productsResponse.error);
       } else if (productsResponse.data) {
         setProducts(productsResponse.data.items);
+        setTotalProducts(productsResponse.data.total);
+        setServerTotalPages(productsResponse.data.totalPages);
       }
 
       if (statsResponse.data) {
@@ -166,6 +206,7 @@ export default function ProductosPage() {
 
   const handleConfirmDelete = (productId: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
+    setTotalProducts((prev) => Math.max(0, prev - 1));
   };
 
   // ==========================================================================
@@ -194,7 +235,7 @@ export default function ProductosPage() {
       {/* Cabecera */}
         <PageHeader
           title="Mi catálogo"
-          description={`${filteredProducts.length} productos en total`}
+          description={`${totalProducts} productos en total`}
           badgeIcon={Package}
           badgeText="Gestión de productos"
           tooltip="Catálogo de productos"
@@ -255,14 +296,15 @@ export default function ProductosPage() {
               onSortChange={setSortBy}
               viewMode={viewMode}
               onViewModeChange={setViewMode}
-              totalProducts={filteredProducts.length}
+              totalProducts={totalProducts}
               onClearFilters={clearFilters}
+              categories={categoryOptions}
             />
           </motion.div>
 
           {/* Resultados */}
           <motion.div variants={itemVariants}>
-            {filteredProducts.length === 0 ? (
+            {products.length === 0 ? (
               <Card className="p-8 sm:p-12 bg-surface-alt border border-border-subtle">
                 <div className="flex flex-col items-center justify-center text-center">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-origen-pastel flex items-center justify-center mb-3 sm:mb-4">
@@ -297,7 +339,7 @@ export default function ProductosPage() {
               <>
                 {/* ── MOBILE list (< lg) ── */}
                 <ProductMobileList
-                  products={paginatedProducts}
+                  products={products}
                   onView={handleView}
                   onEdit={handleEdit}
                   onAdjustStock={handleAdjustStock}
@@ -308,7 +350,7 @@ export default function ProductosPage() {
                 {/* ── DESKTOP: grid / table (≥ lg) ── */}
                 {viewMode === 'grid' ? (
                   <div className="hidden lg:grid grid-cols-3 xl:grid-cols-4 gap-4">
-                    {paginatedProducts.map((product) => (
+                    {products.map((product) => (
                       <ProductCard
                         key={product.id}
                         product={product}
@@ -321,7 +363,7 @@ export default function ProductosPage() {
                 ) : (
                   <div className="hidden lg:block">
                     <ProductTable
-                      products={paginatedProducts}
+                      products={products}
                       onAdjustStock={handleAdjustStock}
                       onView={handleView}
                       onEdit={handleEdit}
@@ -331,10 +373,10 @@ export default function ProductosPage() {
                 )}
 
                 {/* Paginación */}
-                {totalPages > 1 && (
+                {serverTotalPages > 1 && (
                   <Pagination
                     currentPage={currentPage}
-                    totalPages={totalPages}
+                    totalPages={serverTotalPages}
                     onPageChange={setCurrentPage}
                     className="mt-6"
                   />

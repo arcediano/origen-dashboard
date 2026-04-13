@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { 
-  TrendingUp, 
+  TrendingUp,
   DollarSign, 
   ShoppingBag, 
   Eye, 
@@ -15,8 +15,6 @@ import {
   Calendar,
   Package,
   Clock,
-  TrendingDown,
-  Award,
   Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -31,54 +29,6 @@ export interface ProductExpandableDetailsProps {
   product: Product;
   /** Clase CSS adicional */
   className?: string;
-}
-
-// ============================================================================
-// COMPONENTE DE GRÁFICA CON DATOS DE EJEMPLO
-// ============================================================================
-
-interface SalesChartProps {
-  /** Datos de ventas de los últimos 7 días */
-  data?: number[];
-  /** Días de la semana */
-  labels?: string[];
-}
-
-function SalesChart({ 
-  data = [18, 24, 15, 30, 22, 28, 35],
-  labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] 
-}: SalesChartProps) {
-  const max = Math.max(...data);
-  
-  return (
-    <div className="space-y-2">
-      <div className="h-24 flex items-end gap-2">
-        {data.map((value, i) => {
-          const height = (value / max) * 100;
-          return (
-            <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
-              <div className="relative w-full">
-                {/* Tooltip con valor al hacer hover */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                  {value} ventas
-                </div>
-                {/* Barra */}
-                <div 
-                  className="w-full bg-gradient-to-t from-origen-pradera to-origen-menta rounded-t-sm hover:from-origen-pradera/80 hover:to-origen-menta/80 transition-all cursor-pointer"
-                  style={{ height: `${height}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-        {labels.map((label, i) => (
-          <span key={i} className="flex-1 text-center">{label}</span>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 // ============================================================================
@@ -98,30 +48,6 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
   const revenuePerSale = product.revenue && product.revenue > 0 && product.sales && product.sales > 0
     ? (product.revenue / product.sales).toFixed(2)
     : null;
-
-  // Datos de ejemplo específicos para cada producto (simulados)
-  const getSalesData = () => {
-    // Generar datos diferentes según el ID del producto para que no sean todos iguales
-    const seed = parseInt(product.id) || 1;
-    return [
-      12 + (seed % 10),
-      18 + (seed % 8),
-      15 + (seed % 12),
-      22 + (seed % 5),
-      19 + (seed % 7),
-      25 + (seed % 15),
-      30 + (seed % 10)
-    ];
-  };
-
-  const getTrend = () => {
-    const total = getSalesData().reduce((a, b) => a + b, 0);
-    const avg = total / 7;
-    return avg > 20 ? '+23%' : avg > 15 ? '+15%' : '+8%';
-  };
-
-  const salesData = getSalesData();
-  const trend = getTrend();
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -156,10 +82,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
             <span className="text-xs font-medium text-muted-foreground">Ventas</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{product.sales || 0}</p>
-          <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
-            <TrendingUp className="w-3 h-3" />
-            <span>+12% vs semana ant.</span>
-          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Ventas confirmadas acumuladas</p>
         </div>
 
         {/* Ingresos */}
@@ -169,10 +92,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
             <span className="text-xs font-medium text-muted-foreground">Ingresos</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{product.revenue?.toFixed(2) || 0}€</p>
-          <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
-            <TrendingUp className="w-3 h-3" />
-            <span>+8% vs semana ant.</span>
-          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Ingresos acumulados registrados</p>
         </div>
 
         {/* Vistas */}
@@ -182,10 +102,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
             <span className="text-xs font-medium text-muted-foreground">Vistas</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{product.views || 0}</p>
-          <div className="flex items-center gap-1 mt-2 text-xs text-amber-600">
-            <TrendingDown className="w-3 h-3" />
-            <span>-3% vs semana ant.</span>
-          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Visitas capturadas por catálogo</p>
         </div>
 
         {/* Conversión */}
@@ -195,33 +112,33 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
             <span className="text-xs font-medium text-muted-foreground">Conversión</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{conversionRate || 0}%</p>
-          <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
-            <TrendingUp className="w-3 h-3" />
-            <span>+0.5% vs semana ant.</span>
-          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Calculada sobre ventas y vistas reales</p>
         </div>
       </div>
 
-      {/* Gráfica de ventas con datos de ejemplo */}
+      {/* Estado de analítica */}
       <div className="p-5 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
         <div className="flex items-center justify-between mb-4">
           <h5 className="text-sm font-medium text-origen-bosque flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-origen-pradera" />
-            Tendencia de ventas (últimos 7 días)
+            Analítica disponible
           </h5>
-          <span className="text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full border border-green-200">
-            {trend} vs semana anterior
-          </span>
         </div>
-        <SalesChart data={salesData} />
-        <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 bg-origen-pradera rounded-sm"></span>
-            <span>Ventas diarias</span>
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="rounded-xl border border-border/60 bg-white/70 p-4">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Último pedido</p>
+            <p className="mt-2 text-sm font-semibold text-origen-bosque">
+              {product.lastOrderDate ? new Date(product.lastOrderDate).toLocaleDateString() : 'Sin pedidos todavía'}
+            </p>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="font-medium">Total semana: {salesData.reduce((a, b) => a + b, 0)} uds</span>
-            <span className="font-medium">Media diaria: {Math.round(salesData.reduce((a, b) => a + b, 0) / 7)} uds</span>
+          <div className="rounded-xl border border-border/60 bg-white/70 p-4">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Ingreso medio por venta</p>
+            <p className="mt-2 text-sm font-semibold text-origen-bosque">{revenuePerSale ? `${revenuePerSale}€` : 'Sin datos suficientes'}</p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-white/70 p-4">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Serie histórica</p>
+            <p className="mt-2 text-sm font-semibold text-origen-bosque">Pendiente de instrumentación</p>
+            <p className="mt-1 text-xs text-muted-foreground">No se muestran tendencias simuladas.</p>
           </div>
         </div>
       </div>

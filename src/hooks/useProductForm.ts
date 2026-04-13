@@ -54,7 +54,15 @@ import {
 // ============================================================================
 
 const STORAGE_KEY = 'origen-nuevo-producto-draft-v10';
-const TOTAL_STEPS = 7;
+const FORM_STEP_KEYS: FormStepId[] = [
+  'basic',
+  'images',
+  'pricing',
+  'nutritional',
+  'production',
+  'inventory',
+  'certifications',
+];
 
 // ============================================================================
 // FUNCIONES DE TRANSFORMACIÓN (helpers puros)
@@ -231,21 +239,32 @@ export function useProductForm(productId?: string) {
   // ==========================================================================
 
   useEffect(() => {
+    const nutritional = formData.nutritionalInfo;
+    const production = formData.productionInfo;
+    const hasNutritionalData = Boolean(
+      nutritional?.servingSizeValue
+      || nutritional?.ingredients?.length
+      || nutritional?.allergens?.length
+      || nutritional?.storageInstructions
+      || nutritional?.preparationInstructions,
+    );
+    const hasProductionData = Boolean(
+      production?.story
+      || production?.origin
+      || production?.farmName
+      || production?.productionMethod
+      || production?.batchNumber
+      || production?.practices?.length
+      || production?.media?.length,
+    );
+
     setCompletedTabs({
       basic: !!(formData.name && formData.categoryId),
       images: !!(formData.gallery && formData.gallery.length > 0),
       pricing: !!(formData.basePrice && formData.basePrice > 0),
-      nutritional: !!(
-        formData.nutritionalInfo?.servingSizeValue && 
-        formData.nutritionalInfo?.ingredients?.length > 0
-      ),
-      production: !!(
-        formData.productionInfo?.story || 
-        formData.productionInfo?.origin || 
-        (formData.productionInfo?.practices?.length || 0) > 0 || 
-        (formData.productionInfo?.media?.length || 0) > 0
-      ),
-      inventory: true,
+      nutritional: hasNutritionalData,
+      production: hasProductionData,
+      inventory: formData.stock >= 0 && formData.lowStockThreshold >= 0,
       certifications: true,
     });
   }, [formData]);
@@ -324,7 +343,8 @@ export function useProductForm(productId?: string) {
   }, [formData, productId]);
 
   const handlePublish = useCallback(async () => {
-    if (Object.keys(completedTabs).length !== TOTAL_STEPS) return;
+    const allCompleted = FORM_STEP_KEYS.every((step) => completedTabs[step]);
+    if (!allCompleted) return;
     
     setIsPublishing(true);
     setPublishStatus('idle');
@@ -368,7 +388,7 @@ export function useProductForm(productId?: string) {
   }, [formData, completedTabs, productId]);
 
   const handleCancel = useCallback(() => {
-    router.push('/products');
+    router.push('/dashboard/products');
   }, [router]);
 
   // ==========================================================================
@@ -397,7 +417,7 @@ export function useProductForm(productId?: string) {
     skuSuggestion,
     
     // Valores computados
-    allStepsCompleted: Object.keys(completedTabs).length === TOTAL_STEPS,
+    allStepsCompleted: FORM_STEP_KEYS.every((step) => completedTabs[step]),
     hasCertifications: formData.certifications.length > 0,
     certificationsApproved: formData.certifications.every(c => c.verified) || false,
     isEditMode: !!productId,
