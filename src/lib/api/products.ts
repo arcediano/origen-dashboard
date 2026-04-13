@@ -13,6 +13,7 @@
 
 import { gatewayClient, GatewayError } from './client';
 import { type Product, type ProductFormData } from '@/types/product';
+import { uploadFile } from './media';
 import {
   type ApiProduct,
   type ApiProductsListResponse,
@@ -121,6 +122,80 @@ function mapCertificationStatus(status: string): string {
 function mapCertificationCategory(category?: string): string | undefined {
   if (!category) return undefined;
   return category.toUpperCase();
+}
+
+function isHttpUrl(url?: string): boolean {
+  return Boolean(url && /^https?:\/\//i.test(url));
+}
+
+async function normalizeProductImagesForApi(
+  images: Product['gallery'],
+  productId?: string,
+): Promise<Product['gallery']> {
+  const normalized = await Promise.all(images.map(async (image, index) => {
+    if (isHttpUrl(image.url) && !image.file && !image.id.startsWith('temp-')) {
+      return image;
+    }
+
+    if (!image.file) {
+      throw new Error(`La imagen ${index + 1} no se subio correctamente. Vuelve a cargarla antes de publicar.`);
+    }
+
+    const uploadCategory = productId
+      ? `products/${productId}/images`
+      : 'products/drafts/images';
+
+    const uploaded = await uploadFile(image.file, uploadCategory, {
+      entityType: 'products',
+      entityId: productId,
+    });
+    if (!uploaded.url) {
+      throw new Error(`No se pudo obtener URL publica para la imagen ${index + 1}.`);
+    }
+
+    return {
+      ...image,
+      id: uploaded.key,
+      url: uploaded.url,
+      file: null,
+      uploading: false,
+      progress: 100,
+    };
+  }));
+
+  return normalized;
+}
+
+async function normalizeFormDataBeforeSubmit(formData: ProductFormData): Promise<ProductFormData> {
+  if (!formData.gallery?.length) {
+    return formData;
+  }
+
+  const normalizedGallery = await normalizeProductImagesForApi(formData.gallery);
+  const normalizedMain = normalizedGallery.find((img) => img.isMain) ?? normalizedGallery[0];
+
+  return {
+    ...formData,
+    gallery: normalizedGallery,
+    mainImage: normalizedMain,
+  };
+}
+
+async function normalizePartialProductBeforeSubmit(productData: Partial<Product>): Promise<Partial<Product>> {
+  if (!productData.gallery) {
+    return productData;
+  }
+
+  const normalizedGallery = await normalizeProductImagesForApi(productData.gallery, productData.id);
+  const normalizedMain = productData.mainImage
+    ? normalizedGallery.find((image) => image.id === productData.mainImage?.id)
+    : normalizedGallery.find((image) => image.isMain);
+
+  return {
+    ...productData,
+    gallery: normalizedGallery,
+    mainImage: normalizedMain ?? productData.mainImage,
+  };
 }
 
 function mapAttributeType(type: string): string {
@@ -508,7 +583,8 @@ export async function createProduct(
   formData: ProductFormData,
 ): Promise<ApiResponse<CreateProductResponse>> {
   try {
-    const validation = validateProductForm(formData);
+    const normalizedFormData = await normalizeFormDataBeforeSubmit(formData);
+    const validation = validateProductForm(normalizedFormData);
     if (!validation.valid) {
       return {
         error:   'Error de validación',
@@ -517,7 +593,7 @@ export async function createProduct(
       };
     }
 
-    const body = formDataToApiBody(formData);
+    const body = formDataToApiBody(normalizedFormData);
     const raw  = await gatewayClient.post<ApiProduct>('/products', body);
     const product = mapApiProductToProduct(raw);
 
@@ -539,7 +615,8 @@ export async function saveProductDraft(
   formData: ProductFormData,
 ): Promise<ApiResponse<{ draftId: string; message: string }>> {
   try {
-    const body = { ...formDataToApiBody(formData), status: 'DRAFT' };
+    const normalizedFormData = await normalizeFormDataBeforeSubmit(formData);
+    const body = { ...formDataToApiBody(normalizedFormData), status: 'DRAFT' };
     const raw  = await gatewayClient.post<ApiProduct>('/products', body);
     return {
       data: { draftId: raw.id, message: 'Borrador guardado' },
@@ -560,7 +637,8 @@ export async function updateProduct(
   productData: Partial<Product>,
 ): Promise<ApiResponse<Product>> {
   try {
-    const body = partialProductToApiBody(productData);
+    const normalizedProductData = await normalizePartialProductBeforeSubmit({ ...productData, id });
+    const body = partialProductToApiBody(normalizedProductData);
     const raw  = await gatewayClient.put<ApiProduct>(`/products/${id}`, body);
     return { data: mapApiProductToProduct(raw), status: 200 };
   } catch (error) {

@@ -1,6 +1,6 @@
 /**
  * Cliente para subida de archivos a S3 a través del gateway.
- * El gateway proxy reenvía los archivos al producers-service / MediaController.
+ * El gateway proxy reenvía los archivos al media-service.
  *
  * Los archivos de tipo 'media' (imágenes) se guardan en el bucket público;
  * los de tipo 'document' (PDFs, certificados) en el bucket privado.
@@ -27,6 +27,11 @@ function resolveEntityType(category: string): 'products' | 'producers' | 'certif
   return 'producers';
 }
 
+export interface UploadFileOptions {
+  entityType?: 'products' | 'producers' | 'certifications';
+  entityId?: string;
+}
+
 
 export interface UploadResult {
   key: string;
@@ -37,16 +42,24 @@ export interface UploadResult {
  * Sube un archivo al bucket S3 correspondiente.
  *
  * @param file     - Objeto File del input/drop zone
- * @param category - Carpeta de destino dentro del bucket:
+ * @param category - Ruta lógica de destino dentro del espacio del productor:
  *   'visual/logo' | 'visual/banner' | 'visual/products' | 'visual/location' |
  *   'visual/team' | 'documents/cif' | 'documents/seguro-rc' |
  *   'documents/manipulador-alimentos' | 'documents/certifications/{certId}'
+ * @param options  - Contexto adicional para organización de rutas en backend
  */
-export async function uploadFile(file: File, category: string): Promise<UploadResult> {
+export async function uploadFile(
+  file: File,
+  category: string,
+  options: UploadFileOptions = {},
+): Promise<UploadResult> {
   const form = new FormData();
   form.append('file', file);
   form.append('category', category);
-  form.append('entityType', resolveEntityType(category));
+  form.append('entityType', options.entityType ?? resolveEntityType(category));
+  if (options.entityId) {
+    form.append('entityId', options.entityId);
+  }
 
   const url = typeof window !== 'undefined'
     ? `${window.location.origin}${UPLOAD_PATH}`

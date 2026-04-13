@@ -534,7 +534,10 @@ export default function OnboardingPage() {
             .filter((p) => p.photo?.file)
             .map(async (p) => ({
               productId: p.id,
-              imageKey: (await uploadFile(p.photo!.file!, `products/${p.id}`)).key,
+              imageKey: (await uploadFile(p.photo!.file!, `products/${p.id}/images`, {
+                entityType: 'products',
+                entityId: p.id,
+              })).key,
             })),
         );
         await saveStepProducts(formData.step_products.products, productImageKeys);
@@ -569,7 +572,10 @@ export default function OnboardingPage() {
             .filter((c) => (c as any).file)
             .map(async (c) => ({
               certificationId: c.certificationId,
-              documentKey: (await uploadFile((c as any).file, `documents/certifications/${c.certificationId}`)).key,
+              documentKey: (await uploadFile((c as any).file, `documents/certifications/${c.certificationId}`, {
+                entityType: 'certifications',
+                entityId: c.certificationId,
+              })).key,
             })),
         );
         await saveStep5(formData.step5, { cifKey, seguroRcKey, manipuladorAlimentosKey, certificationDocumentKeys });
