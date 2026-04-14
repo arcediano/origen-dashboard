@@ -112,13 +112,13 @@ export function SidebarMenuItem({
           {(isActive || hasActiveChild) && (
             <motion.div
               layoutId="activeNav"
-              className="absolute left-0 w-1 h-6 rounded-full bg-origen-menta shadow-menta-glow"
+              className="absolute left-0 w-1 h-6 rounded-full bg-origen-menta"
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             />
           )}
         </button>
 
-        {/* Renderizar submenús anidados */}
+        {/* Renderizar submenús anidados */
         <div>
           {submenu.map((item) => {
             if ('submenu' in item) {
@@ -181,7 +181,7 @@ export function SidebarMenuItem({
       {isActive && (
         <motion.div
           layoutId="activeNav"
-          className="absolute left-0 w-1 h-6 rounded-full bg-origen-menta shadow-menta-glow"
+          className="absolute left-0 w-1 h-6 rounded-full bg-origen-menta"
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         />
       )}

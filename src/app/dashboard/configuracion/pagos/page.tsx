@@ -5,12 +5,11 @@
 
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Button } from '@arcediano/ux-library';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
-import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, ChevronRight, Key, Loader2 } from 'lucide-react';
+import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { loadOnboardingData } from '@/lib/api/onboarding';
 import { startStripeOnboarding } from '@/lib/stripe/connect-client';
@@ -101,6 +100,52 @@ export default function PagosPage() {
           </Alert>
         )}
 
+        {isLoading ? (
+          <div className="space-y-5">
+            {/* Hero skeleton */}
+            <div className="rounded-[30px] border border-origen-pradera/20 bg-[linear-gradient(135deg,rgba(246,243,232,0.92),rgba(255,255,255,0.98))] p-4 shadow-sm sm:p-6 animate-pulse">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="h-12 w-12 rounded-2xl bg-border-subtle flex-shrink-0" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-3.5 w-40 rounded-full bg-border-subtle" />
+                    <div className="h-7 w-72 rounded-full bg-border-subtle" />
+                    <div className="h-3 w-56 rounded-full bg-border-subtle" />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3 lg:min-w-[300px]">
+                  <div className="h-7 w-36 rounded-full bg-border-subtle" />
+                  <div className="h-10 w-full rounded-xl bg-border-subtle" />
+                </div>
+              </div>
+            </div>
+            {/* Grid skeleton */}
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)] animate-pulse">
+              <div className="rounded-2xl border border-border-subtle shadow-sm p-6 space-y-4">
+                <div className="h-5 w-48 rounded-full bg-border-subtle" />
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="rounded-2xl border border-border-subtle bg-surface-alt p-4 space-y-2">
+                      <div className="h-3 w-16 rounded-full bg-border-subtle" />
+                      <div className="h-4 w-24 rounded-full bg-border-subtle" />
+                      <div className="h-3 w-full rounded-full bg-border-subtle" />
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-2xl border border-origen-pradera/20 bg-origen-crema/40 p-4 h-20" />
+              </div>
+              <div className="rounded-2xl border border-border-subtle shadow-sm p-6 space-y-4">
+                <div className="h-5 w-36 rounded-full bg-border-subtle" />
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="rounded-xl border border-border-subtle bg-surface-alt p-4 space-y-1.5">
+                    <div className="h-4 w-40 rounded-full bg-border-subtle" />
+                    <div className="h-3 w-full rounded-full bg-border-subtle" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
         <div className="space-y-5">
           <section className="rounded-[30px] border border-origen-pradera/20 bg-[linear-gradient(135deg,rgba(246,243,232,0.92),rgba(255,255,255,0.98))] p-4 shadow-sm sm:p-6">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -229,22 +274,10 @@ export default function PagosPage() {
                   </div>
                 </CardContent>
               </Card>
-
-              <Link href="/dashboard/account" className="block rounded-2xl border border-border-subtle bg-surface p-4 shadow-sm transition-colors hover:bg-surface-alt">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-origen-pradera/10">
-                    <Key className="h-4 w-4 text-origen-pradera" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-origen-bosque">Volver a Mi cuenta</p>
-                    <p className="text-xs text-muted-foreground">Regresa a seguridad, cobros y perfil comercial.</p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-text-subtle" />
-                </div>
-              </Link>
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

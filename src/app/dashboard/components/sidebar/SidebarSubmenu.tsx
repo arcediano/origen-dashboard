@@ -79,7 +79,7 @@ export function SidebarSubmenu({
                   {isActive && (
                     <motion.div
                       layoutId="activeSubmenuIndicator"
-                      className="absolute left-0 w-1 h-5 rounded-full bg-origen-menta shadow-menta-glow"
+                      className="absolute left-0 w-1 h-5 rounded-full bg-origen-menta"
                       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     />
                   )}

@@ -7,7 +7,7 @@
 
 'use client';
 
-import { Package, CheckCircle, AlertCircle, Star } from 'lucide-react';
+import { Package, CheckCircle, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SoftStatCard } from '@/components/shared/SoftStatCard';
 
@@ -16,7 +16,6 @@ export interface ProductStatsProps {
   active: number;
   lowStock: number;
   outOfStock: number;
-  avgRating?: number;
   className?: string;
 }
 
@@ -25,11 +24,10 @@ export function ProductStats({
   active,
   lowStock,
   outOfStock,
-  avgRating,
   className,
 }: ProductStatsProps) {
   return (
-    <div className={cn('grid grid-cols-2 xl:grid-cols-5 gap-3 sm:gap-4', className)}>
+    <div className={cn('grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4', className)}>
       <SoftStatCard
         label="Total productos"
         value={total}
@@ -61,14 +59,6 @@ export function ProductStats({
         bg="from-red-400/8 to-transparent"
         border="border-red-200/60"
         iconColor="text-feedback-danger"
-      />
-      <SoftStatCard
-        label="Rating medio"
-        value={avgRating ?? 0}
-        icon={Star}
-        bg="from-amber-400/8 to-transparent"
-        border="border-amber-200/60"
-        iconColor="text-amber-500"
       />
     </div>
   );

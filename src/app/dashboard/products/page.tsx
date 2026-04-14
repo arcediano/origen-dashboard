@@ -276,7 +276,6 @@ export default function ProductosPage() {
               active={stats.active}
               lowStock={stats.lowStock}
               outOfStock={stats.outOfStock}
-              avgRating={stats.avgRating}
             />
           </motion.div>
 
