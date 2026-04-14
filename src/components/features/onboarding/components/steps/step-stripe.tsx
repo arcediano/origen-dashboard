@@ -94,6 +94,7 @@ export function EnhancedStep6Stripe({
         lastName,
         businessName,
         website,
+        source: 'onboarding',
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error desconocido';
@@ -132,7 +133,7 @@ export function EnhancedStep6Stripe({
               </p>
             </div>
           </div>
-          <span className="self-start sm:self-center text-xs font-medium bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full whitespace-nowrap border border-amber-200">
+          <span className="self-start sm:self-center text-xs font-medium bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200">
             Pendiente de configurar
           </span>
         </div>
@@ -141,14 +142,14 @@ export function EnhancedStep6Stripe({
       {/* ──────────────────────────────────────────────────────────────────────
           CARD 1: CÓMO FUNCIONAN LOS PAGOS
       ────────────────────────────────────────────────────────────────────── */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm">
 
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
             <CreditCard className="w-6 h-6 text-origen-pradera" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">¿Cómo funcionan los pagos?</h2>
+            <h2 className="text-lg font-bold text-origen-bosque sm:text-xl">¿Cómo funcionan los pagos?</h2>
             <p className="text-sm text-muted-foreground">Stripe es nuestro proveedor de pagos certificado</p>
           </div>
         </div>
@@ -198,7 +199,7 @@ export function EnhancedStep6Stripe({
           CARD 2: CONECTAR CUENTA
       ────────────────────────────────────────────────────────────────────── */}
       <div className={cn(
-        'bg-surface-alt rounded-2xl border p-6 md:p-8 shadow-sm transition-all',
+        'bg-surface-alt rounded-2xl border p-4 md:p-5 shadow-sm transition-all',
         data.stripeConnected ? 'border-green-200' : 'border-border hover:border-origen-pradera/30',
       )}>
 
@@ -215,7 +216,7 @@ export function EnhancedStep6Stripe({
             }
           </div>
           <div>
-            <h2 className="text-xl font-bold text-origen-bosque">
+            <h2 className="text-lg font-bold text-origen-bosque sm:text-xl">
               {data.stripeConnected ? '¡Cuenta conectada!' : 'Conectar cuenta de cobro'}
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -270,7 +271,7 @@ export function EnhancedStep6Stripe({
                 <button
                   type="button"
                   onClick={() => setConnectError('')}
-                  className="text-xs font-medium text-red-700 underline underline-offset-2 whitespace-nowrap self-end sm:self-auto"
+                  className="self-end text-xs font-medium text-red-700 underline underline-offset-2 sm:self-auto"
                 >
                   Reintentar
                 </button>
@@ -282,6 +283,7 @@ export function EnhancedStep6Stripe({
               onClick={handleConnect}
               disabled={isConnecting}
               size="lg"
+              className="w-full sm:w-auto"
             >
               {isConnecting ? (
                 <span className="flex items-center gap-2">
@@ -311,7 +313,7 @@ export function EnhancedStep6Stripe({
       {/* ──────────────────────────────────────────────────────────────────────
           CARD 3: TÉRMINOS
       ────────────────────────────────────────────────────────────────────── */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:border-origen-pradera/30 transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:border-origen-pradera/30 transition-all">
         <div className="flex items-start gap-4">
           <Checkbox
             id="accept-terms"

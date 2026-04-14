@@ -28,6 +28,7 @@ describe('startStripeOnboarding', () => {
         accountId: 'acct_123',
         url: 'https://connect.stripe.com/setup/s/recent-link',
         createdAt: Date.now(),
+        source: 'onboarding',
       }),
     );
 
@@ -46,6 +47,7 @@ describe('startStripeOnboarding', () => {
         accountId: 'acct_prev',
         url: 'https://connect.stripe.com/setup/s/recent-link',
         createdAt: Date.now(),
+        source: 'onboarding',
       }),
     );
 
@@ -65,6 +67,30 @@ describe('startStripeOnboarding', () => {
     expect(window.location.href).toBe('https://connect.stripe.com/setup/s/create-new-link');
   });
 
+  it('ignora cache cuando el contexto de origen difiere', async () => {
+    window.localStorage.setItem(
+      LOCAL_STORAGE_KEY,
+      JSON.stringify({
+        accountId: 'acct_ctx',
+        url: 'https://connect.stripe.com/setup/s/onboarding-link',
+        createdAt: Date.now(),
+        source: 'onboarding',
+      }),
+    );
+
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      json: async () => ({
+        success: true,
+        data: { onboardingUrl: 'https://connect.stripe.com/setup/s/payments-link' },
+      }),
+    } as Response);
+
+    await startStripeOnboarding({ stripeAccountId: 'acct_ctx', source: 'account_payments' });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(window.location.href).toBe('https://connect.stripe.com/setup/s/payments-link');
+  });
+
   it('renueva account link cuando no hay cache valido y existe stripeAccountId', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       json: async () => ({
@@ -78,7 +104,7 @@ describe('startStripeOnboarding', () => {
     expect(fetchSpy).toHaveBeenCalledWith('/api/stripe/connect/refresh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accountId: 'acct_456' }),
+      body: JSON.stringify({ accountId: 'acct_456', source: 'onboarding' }),
     });
     expect(window.location.href).toBe('https://connect.stripe.com/setup/s/new-refresh-link');
   });
@@ -111,6 +137,7 @@ describe('startStripeOnboarding', () => {
         lastName: 'Ruiz',
         businessName: 'Huerta Ana',
         website: 'https://huerta.example.com',
+        source: 'onboarding',
       }),
     });
 
@@ -129,6 +156,7 @@ describe('startStripeOnboarding', () => {
         accountId: 'acct_expired',
         url: 'https://connect.stripe.com/setup/s/expired-link',
         createdAt: Date.now() - 10 * 60 * 1000,
+        source: 'onboarding',
       }),
     );
 

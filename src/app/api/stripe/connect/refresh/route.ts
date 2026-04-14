@@ -32,7 +32,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { accountId } = body as { accountId?: string };
+    const { accountId, source } = body as {
+      accountId?: string;
+      source?: 'onboarding' | 'account_payments';
+    };
+    const normalizedSource = source === 'account_payments' ? 'account_payments' : 'onboarding';
 
     if (!accountId) {
       return NextResponse.json(
@@ -75,7 +79,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const accountLink = await createAccountLinkWithBase(accountId, baseUrl);
+    const accountLink = await createAccountLinkWithBase(accountId, baseUrl, normalizedSource);
 
     return NextResponse.json({
       success: true,

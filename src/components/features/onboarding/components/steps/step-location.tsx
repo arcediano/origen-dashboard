@@ -328,7 +328,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
   };
 
   const capitalizeWords = (str: string) =>
-    str.trim().toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+    str.trim().toLowerCase().replace(/(?:^|\s)\S/g, (c) => c.toUpperCase());
 
   const handlePostalCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 5);

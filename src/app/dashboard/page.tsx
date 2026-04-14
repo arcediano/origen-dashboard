@@ -115,16 +115,6 @@ export default function ProducerDashboard() {
       });
     }
 
-    if (producer?.accountStatus === 'pending') {
-      dashboardAlerts.push({
-        id: 'account-pending',
-        type: 'info',
-        title: 'Verificación en revisión',
-        description: 'Tu cuenta sigue pendiente de validación. Revisa certificaciones y documentación si falta algo.',
-        dismissible: false,
-      });
-    }
-
     if (producer && profileCompleteness < 100) {
       dashboardAlerts.push({
         id: 'profile-incomplete',

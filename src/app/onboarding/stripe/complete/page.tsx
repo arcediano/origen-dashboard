@@ -8,7 +8,7 @@
  *   1. Lee `accountId` de los query params
  *   2. Verifica el estado de la cuenta con GET /api/stripe/status
  *   3. Si detailsSubmitted → actualiza step 6 como conectado vía saveStep6()
- *   4. Redirige a /onboarding con mensaje de éxito
+ *   4. Redirige al origen del flujo con mensaje de éxito
  *
  * Nota: `useSearchParams()` requiere Suspense — el contenido se extrae a
  * `StripeCompleteContent` y la página lo envuelve con un fallback de carga.
@@ -26,12 +26,18 @@ import { Spinner } from '@/components/shared';
 
 type VerificationState = 'verifying' | 'success' | 'incomplete' | 'error';
 
+function resolveReturnPath(source: string | null): string {
+  return source === 'account_payments' ? '/dashboard/configuracion/pagos' : '/onboarding';
+}
+
 // ─── Contenido principal (usa useSearchParams) ────────────────────────────────
 
 function StripeCompleteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const accountId = searchParams.get('accountId');
+  const source = searchParams.get('source');
+  const returnPath = React.useMemo(() => resolveReturnPath(source), [source]);
 
   const [state, setState] = React.useState<VerificationState>('verifying');
   const [errorMessage, setErrorMessage] = React.useState('');
@@ -68,16 +74,20 @@ function StripeCompleteContent() {
       }
 
       // 2. Actualizar el paso 6 en BD como conectado
-      await saveStep6({
-        stripeConnected: true,
-        stripeAccountId: acctId,
-        acceptTerms: true,
-      });
+      // Si viene desde "Mi cuenta > Cobros" (modificación), la cuenta ya está conectada
+      // y no hay que re-disparar el workflow de revisión
+      if (source !== 'account_payments') {
+        await saveStep6({
+          stripeConnected: true,
+          stripeAccountId: acctId,
+          acceptTerms: true,
+        });
+      }
 
       setState('success');
 
-      // 3. Redirigir al onboarding tras 2 segundos
-      setTimeout(() => router.push('/onboarding'), 2000);
+      // 3. Redirigir al origen del flujo tras 2 segundos
+      setTimeout(() => router.push(returnPath), 2000);
     } catch {
       setState('error');
       setErrorMessage('Ocurrió un error al procesar la conexión con Stripe.');
@@ -100,7 +110,7 @@ function StripeCompleteContent() {
           <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto" />
           <h1 className="text-xl font-bold text-origen-bosque">¡Cuenta conectada!</h1>
           <p className="text-sm text-muted-foreground">
-            Tu cuenta Stripe está lista para recibir pagos. Redirigiendo al onboarding...
+            Tu cuenta Stripe está lista para recibir pagos. Redirigiendo...
           </p>
         </>
       )}
@@ -113,10 +123,10 @@ function StripeCompleteContent() {
             No completaste todos los pasos en Stripe. Puedes retomarlo cuando quieras.
           </p>
           <button
-            onClick={() => router.push('/dashboard/account')}
+            onClick={() => router.push(returnPath)}
             className="w-full h-11 bg-origen-bosque text-white rounded-xl text-sm font-medium hover:bg-origen-pino transition-colors"
           >
-            Volver a Mi Cuenta
+            Volver
           </button>
         </>
       )}
@@ -127,10 +137,10 @@ function StripeCompleteContent() {
           <h1 className="text-xl font-bold text-origen-bosque">Error de conexión</h1>
           <p className="text-sm text-muted-foreground mb-4">{errorMessage}</p>
           <button
-            onClick={() => router.push('/dashboard/account')}
+            onClick={() => router.push(returnPath)}
             className="w-full h-11 bg-origen-bosque text-white rounded-xl text-sm font-medium hover:bg-origen-pino transition-colors"
           >
-            Volver a Mi Cuenta
+            Volver
           </button>
         </>
       )}

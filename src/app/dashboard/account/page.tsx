@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ChevronRight, CreditCard, HelpCircle, KeyRound, MonitorCog, Settings2, Store } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
+import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
 
 export default function AccountPage() {
   const accountSections = [
@@ -54,38 +54,27 @@ export default function AccountPage() {
           </div>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {accountSections.map((section) => {
+        <Card className="rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
+          {accountSections.map((section, index) => {
             const Icon = section.icon;
             return (
-              <Card key={section.title} className="flex h-full min-h-[220px] flex-col rounded-2xl border border-border-subtle shadow-sm transition-all hover:shadow-lg">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Icon className="h-5 w-5 text-origen-pradera" />
-                      <span>{section.title}</span>
-                    </CardTitle>
-                    <Badge variant="neutral" size="xs">{section.meta}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col pt-0">
-                  <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">{section.description}</p>
-                  <div className="flex-1" />
-                  <div className="mt-4 flex justify-end">
-                    <Link href={section.href}>
-                      <Button variant="outline" size="sm">
-                        <span className="inline-flex items-center gap-1">
-                          Ver detalles
-                          <ChevronRight className="h-4 w-4" />
-                        </span>
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+              <Link
+                key={section.title}
+                href={section.href}
+                className={`flex items-center gap-4 p-4 hover:bg-surface-alt transition-colors ${index > 0 ? 'border-t border-border-subtle' : ''}`}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-origen-pradera/10 flex-shrink-0">
+                  <Icon className="h-5 w-5 text-origen-pradera" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-origen-bosque">{section.title}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{section.description}</p>
+                </div>
+                <ChevronRight className="h-5 w-5 text-text-subtle flex-shrink-0" />
+              </Link>
             );
           })}
-        </div>
+        </Card>
 
         <div>
           <Card className="rounded-2xl border border-border-subtle shadow-sm">

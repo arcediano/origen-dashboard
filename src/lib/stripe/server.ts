@@ -10,6 +10,12 @@
 import Stripe from 'stripe';
 import { STRIPE_CONFIG, calculatePlatformFee } from './config';
 
+export type StripeOnboardingSource = 'onboarding' | 'account_payments';
+
+function normalizeOnboardingSource(source?: string): StripeOnboardingSource {
+  return source === 'account_payments' ? 'account_payments' : 'onboarding';
+}
+
 // Inicialización lazy — evita que next build falle cuando STRIPE_SECRET_KEY
 // no está definida durante el análisis estático de páginas.
 let _stripe: Stripe | null = null;
@@ -95,13 +101,19 @@ export async function createAccountLink(accountId: string) {
   return createAccountLinkWithBase(accountId);
 }
 
-export async function createAccountLinkWithBase(accountId: string, baseUrl?: string) {
+export async function createAccountLinkWithBase(
+  accountId: string,
+  baseUrl?: string,
+  source?: string,
+) {
   try {
     const base = baseUrl ?? STRIPE_CONFIG.baseUrl;
+    const resolvedSource = normalizeOnboardingSource(source);
+    const sourceParam = `source=${resolvedSource}`;
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
-      refresh_url: `${base}/onboarding/stripe/refresh?accountId=${accountId}`,
-      return_url: `${base}/onboarding/stripe/complete?accountId=${accountId}`,
+      refresh_url: `${base}/onboarding/stripe/refresh?accountId=${accountId}&${sourceParam}`,
+      return_url: `${base}/onboarding/stripe/complete?accountId=${accountId}&${sourceParam}`,
       type: 'account_onboarding',
     });
 

@@ -181,7 +181,7 @@ export const MOBILE_ROOT_TABS: RootTabItem[] = [
   },
   {
     id: 'inicio',
-    label: 'Inicio',
+    label: '',
     icon: LayoutDashboard,
     href: '/dashboard',
     matchPaths: ['/dashboard'],

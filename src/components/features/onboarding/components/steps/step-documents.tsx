@@ -163,7 +163,7 @@ export function EnhancedStep5Documents({
       {/* ====================================================================
           PROGRESS BAR
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-3 md:p-4 shadow-sm hover:shadow-md transition-all">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
@@ -409,7 +409,7 @@ export function EnhancedStep5Documents({
       {/* ====================================================================
           CARD 3: RESUMEN DE VERIFICACIÓN
       ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm hover:shadow-md transition-all">
+      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md transition-all">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-full bg-origen-pradera/10 flex items-center justify-center">
             <Shield className="w-5 h-5 text-origen-pradera" />

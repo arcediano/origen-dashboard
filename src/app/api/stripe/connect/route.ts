@@ -64,7 +64,9 @@ export async function POST(request: NextRequest) {
       lastName?: string;
       businessName?: string;
       website?: string;
+      source?: 'onboarding' | 'account_payments';
     };
+    const source = body?.source === 'account_payments' ? 'account_payments' : 'onboarding';
 
     const account = await createConnectAccount({
       sellerId: `producer-${Date.now()}`,
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Generar el Account Link con URLs de retorno que incluyen el accountId
-    const accountLink = await createAccountLinkWithBase(account.id, baseUrl);
+    const accountLink = await createAccountLinkWithBase(account.id, baseUrl, source);
 
     return NextResponse.json({
       success: true,

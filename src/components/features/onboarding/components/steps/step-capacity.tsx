@@ -30,7 +30,9 @@ import {
   Plus,
   X,
   Recycle,
-  Users
+  Users,
+  Check,
+  Pencil
 } from 'lucide-react';
 
 // ============================================================================
@@ -240,21 +242,21 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
   return (
     <div className="space-y-4">
       {/* Tabs de tipo — colores de marca */}
-      <div className="flex gap-0 border border-border rounded-xl overflow-hidden">
+      <div className="grid grid-cols-3 border border-border rounded-xl overflow-hidden">
         {(['province', 'postal', 'named'] as const).map((type, i) => (
           <button
             key={type}
             type="button"
             onClick={() => { setZoneType(type); setParseError(''); setZoneValue(''); setZoneName(''); }}
             className={cn(
-              "flex-1 py-2.5 px-2 text-xs font-semibold transition-all",
+              "min-h-11 px-2 py-2 text-[11px] leading-tight font-semibold transition-all",
               i > 0 && "border-l border-border",
               zoneType === type
                 ? "bg-origen-pradera text-white"
                 : "bg-surface-alt text-muted-foreground hover:bg-origen-crema/40 hover:text-origen-bosque"
             )}
           >
-            {type === 'province' ? 'Provincia' : type === 'postal' ? 'Cód. Postal' : 'Zona con nombre'}
+            {type === 'province' ? 'Provincia' : type === 'postal' ? 'Cód. Postal' : 'Zona'}
           </button>
         ))}
       </div>
@@ -270,7 +272,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
           />
         )}
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <div className="flex-1">
             <Input
               value={zoneValue}
@@ -289,9 +291,10 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
             onClick={handleAddZone}
             disabled={zoneType === 'named' ? (!zoneName.trim() || !zoneValue.trim()) : !zoneValue.trim()}
             variant="primary"
-            className="flex-shrink-0"
+            className="w-full sm:w-auto sm:flex-shrink-0"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 mr-1.5" />
+            Añadir zona
           </Button>
         </div>
 
@@ -590,7 +593,7 @@ export function EnhancedStep4Capacity({
               </p>
             </div>
           </div>
-          <span className="self-start sm:self-center text-xs font-medium bg-green-100 text-green-700 px-2.5 py-1 rounded-full border border-green-200 whitespace-nowrap">
+          <span className="self-start sm:self-center text-xs font-medium bg-green-100 text-green-700 px-2.5 py-1 rounded-full border border-green-200">
             Nivel 1 · Ruta Origen
           </span>
         </div>
@@ -620,7 +623,7 @@ export function EnhancedStep4Capacity({
               </div>
             </div>
           </div>
-          <span className="self-start sm:self-center text-xs font-medium bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200 whitespace-nowrap">
+          <span className="self-start sm:self-center text-xs font-medium bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200">
             Nivel 2 · Transporte
           </span>
         </div>
@@ -637,7 +640,7 @@ export function EnhancedStep4Capacity({
               </p>
             </div>
           </div>
-          <span className="self-start sm:self-center text-xs font-medium bg-surface text-muted-foreground px-2.5 py-1 rounded-full border border-border whitespace-nowrap">
+          <span className="self-start sm:self-center text-xs font-medium bg-surface text-muted-foreground px-2.5 py-1 rounded-full border border-border">
             Nivel 3 · Propio
           </span>
         </div>
@@ -716,7 +719,7 @@ export function EnhancedStep4Capacity({
               type="button"
               variant="outline"
               onClick={handleAddCustomDeliveryOption}
-              className="w-full justify-center whitespace-nowrap border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10 sm:w-auto"
+              className="w-full justify-center border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10 sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-1.5 inline-block" />
               Añadir método
@@ -731,9 +734,9 @@ export function EnhancedStep4Capacity({
               return (
                 <div
                   key={option.id}
-                  className="p-5 bg-surface-alt rounded-xl border-2 border-border hover:border-origen-pradera/50 transition-all"
+                  className="rounded-xl border-2 border-border bg-surface-alt p-4 transition-all hover:border-origen-pradera/50"
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                     <div className="w-9 h-9 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
                       <Icon className="w-5 h-5 text-origen-pradera" />
                     </div>
@@ -774,9 +777,9 @@ export function EnhancedStep4Capacity({
                         </div>
                       ) : (
                         <>
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold text-origen-bosque">{option.name}</h3>
-                            <span className="text-xl font-bold text-origen-pradera">{option.price.toFixed(2)}€</span>
+                          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                            <h3 className="text-base font-semibold text-origen-bosque sm:text-lg">{option.name}</h3>
+                            <span className="text-lg font-bold text-origen-pradera sm:text-xl">{option.price.toFixed(2)}€</span>
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">{option.description}</p>
                           <p className="text-xs text-muted-foreground mt-1">Entrega: {option.estimatedDays} días</p>
@@ -790,7 +793,7 @@ export function EnhancedStep4Capacity({
                         onClick={() => setEditingOption(isEditing ? null : option.id)}
                         className="p-2 text-text-subtle hover:text-origen-bosque transition-colors"
                       >
-                        {isEditing ? '✓' : '✎'}
+                        {isEditing ? <Check className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
                       </button>
                       {option.id.startsWith('custom-') && (
                         <button
@@ -958,15 +961,24 @@ export function EnhancedStep4Capacity({
             <div className="pl-4 animate-in slide-in-from-top-2 duration-300">
               <Input
                 label="Describe tu packaging"
+                required
                 value={data.packagingDescription || ''}
                 onChange={(e) => handleInputChange('packagingDescription', e.target.value)}
                 placeholder="Cajas de cartón 100% reciclado, papel kraft, etiquetas compostables..."
                 inputSize="md"
               />
-              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                <Info className="w-3.5 h-3.5" />
-                Esta información aparecerá destacada en tu perfil
-              </p>
+              {!data.packagingDescription?.trim() && (
+                <p className="text-xs text-feedback-danger mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  Obligatorio para continuar
+                </p>
+              )}
+              {data.packagingDescription?.trim() && (
+                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                  <Info className="w-3.5 h-3.5" />
+                  Esta información aparecerá destacada en tu perfil
+                </p>
+              )}
             </div>
           )}
         </div>

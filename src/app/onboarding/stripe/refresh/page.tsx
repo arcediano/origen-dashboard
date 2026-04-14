@@ -21,12 +21,18 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { RefreshCw } from 'lucide-react';
 import { Spinner } from '@/components/shared';
 
+function resolveReturnPath(source: string | null): string {
+  return source === 'account_payments' ? '/dashboard/configuracion/pagos' : '/onboarding';
+}
+
 // ─── Contenido principal (usa useSearchParams) ────────────────────────────────
 
 function StripeRefreshContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const accountId = searchParams.get('accountId');
+  const source = searchParams.get('source');
+  const returnPath = React.useMemo(() => resolveReturnPath(source), [source]);
 
   const [error, setError] = React.useState(false);
 
@@ -44,7 +50,7 @@ function StripeRefreshContent() {
       const res = await fetch('/api/stripe/connect/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accountId: acctId }),
+        body: JSON.stringify({ accountId: acctId, source: source === 'account_payments' ? 'account_payments' : 'onboarding' }),
       });
       const json = await res.json() as { success: boolean; data?: { onboardingUrl: string } };
 
@@ -67,10 +73,10 @@ function StripeRefreshContent() {
           No pudimos renovar el enlace de Stripe. Vuelve al onboarding e inténtalo de nuevo.
         </p>
         <button
-          onClick={() => router.push('/dashboard/account')}
+          onClick={() => router.push(returnPath)}
           className="w-full h-11 bg-origen-bosque text-white rounded-xl text-sm font-medium hover:bg-origen-pino transition-colors"
         >
-          Volver a Mi Cuenta
+          Volver
         </button>
       </div>
     );

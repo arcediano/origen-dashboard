@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Button } from '@arcediano/ux-library';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
-import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, ChevronRight, Key } from 'lucide-react';
+import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, ChevronRight, Key, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { loadOnboardingData } from '@/lib/api/onboarding';
 import { startStripeOnboarding } from '@/lib/stripe/connect-client';
@@ -74,6 +74,7 @@ export default function PagosPage() {
         stripeAccountId,
         businessName: businessName ?? undefined,
         website: website ?? undefined,
+        source: 'account_payments',
       });
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : 'No se pudo abrir Stripe');
@@ -90,6 +91,7 @@ export default function PagosPage() {
         badgeText="Cobros"
         tooltip="Cobros"
         tooltipDetailed="Conecta y gestiona tu cuenta de Stripe para recibir pagos, revisar verificaciones y evitar bloqueos."
+        showBackButton
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
@@ -110,9 +112,13 @@ export default function PagosPage() {
                   <div>
                     <p className="text-sm font-semibold text-origen-bosque leading-tight">Panel de cobros y liquidación</p>
                     <h2 className="mt-1 text-2xl font-semibold tracking-tight text-origen-bosque sm:text-3xl">
-                      {paymentStage === 'connected' && 'Tu cuenta está lista para recibir pagos'}
-                      {paymentStage === 'pending' && 'Te queda un paso para activar los cobros'}
-                      {paymentStage === 'empty' && 'Conecta Stripe para empezar a cobrar'}
+                      {isLoading
+                        ? 'Verificando estado de cobros...'
+                        : paymentStage === 'connected'
+                          ? 'Tu cuenta está lista para recibir pagos'
+                          : paymentStage === 'pending'
+                            ? 'Te queda un paso para activar los cobros'
+                            : 'Conecta Stripe para empezar a cobrar'}
                     </h2>
                     <p className="mt-2 max-w-xl text-sm leading-relaxed text-text-subtle sm:text-base">
                       Revisa estado, verificación y acceso directo a Stripe para activar o actualizar tus datos de cobro.
@@ -137,15 +143,19 @@ export default function PagosPage() {
 
                 <Button onClick={handleOpenStripe} disabled={isLoading || isOpeningStripe} className="w-full lg:w-auto">
                   <span className="inline-flex items-center gap-2">
-                    <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                    {isLoading
+                      ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      : <ArrowUpRight className="h-4 w-4" aria-hidden="true" />}
                     <span>
-                      {isOpeningStripe
-                        ? 'Abriendo Stripe...'
-                        : paymentStage === 'connected'
-                          ? 'Modificar cuenta en Stripe'
-                          : paymentStage === 'pending'
-                            ? 'Continuar onboarding de Stripe'
-                            : 'Crear cuenta de cobro'}
+                      {isLoading
+                        ? 'Cargando estado...'
+                        : isOpeningStripe
+                          ? 'Abriendo Stripe...'
+                          : paymentStage === 'connected'
+                            ? 'Modificar cuenta en Stripe'
+                            : paymentStage === 'pending'
+                              ? 'Continuar onboarding de Stripe'
+                              : 'Crear cuenta de cobro'}
                     </span>
                   </span>
                 </Button>

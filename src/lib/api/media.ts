@@ -83,7 +83,10 @@ export async function uploadFile(
       throw new Error('Formato de archivo no permitido. Comprueba que el tipo de archivo sea correcto.');
     }
     if (response.status === 401) {
-      throw new Error('Tu sesión ha expirado. Recarga la página e inicia sesión de nuevo.');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('session:expired'));
+      }
+      throw new Error('Tu sesión ha expirado.');
     }
     const data = await response.json().catch(() => ({}));
     const message = (data as any)?.message ?? 'Error al subir el archivo. Inténtalo de nuevo.';

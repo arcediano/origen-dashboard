@@ -3,6 +3,8 @@ import { saveStep6 } from '@/lib/api/onboarding';
 const STRIPE_ONBOARDING_CACHE_KEY = 'origen:stripe:onboarding-link';
 const STRIPE_ONBOARDING_CACHE_TTL_MS = 4 * 60 * 1000;
 
+export type StripeOnboardingSource = 'onboarding' | 'account_payments';
+
 interface StripeOnboardingResponse {
   success: boolean;
   data?: {
@@ -20,6 +22,7 @@ export interface StartStripeOnboardingOptions {
   lastName?: string;
   businessName?: string;
   website?: string;
+  source?: StripeOnboardingSource;
 }
 
 function resolveErrorMessage(response: StripeOnboardingResponse, fallback: string): string {
@@ -39,9 +42,10 @@ interface StripeOnboardingLinkCache {
   accountId?: string;
   url: string;
   createdAt: number;
+  source: StripeOnboardingSource;
 }
 
-function readCachedOnboardingLink(accountId?: string | null): string | null {
+function readCachedOnboardingLink(accountId: string | null | undefined, source: StripeOnboardingSource): string | null {
   if (typeof window === 'undefined') return null;
 
   if (!accountId) {
@@ -55,6 +59,10 @@ function readCachedOnboardingLink(accountId?: string | null): string | null {
   try {
     const parsed = JSON.parse(raw) as StripeOnboardingLinkCache;
     if (!parsed.url || !parsed.createdAt || !isTrustedStripeUrl(parsed.url)) return null;
+
+    if (parsed.source !== source) {
+      return null;
+    }
 
     const isExpired = Date.now() - parsed.createdAt > STRIPE_ONBOARDING_CACHE_TTL_MS;
     if (isExpired) return null;
@@ -70,7 +78,7 @@ function readCachedOnboardingLink(accountId?: string | null): string | null {
   }
 }
 
-function cacheOnboardingLink(url: string, accountId?: string): void {
+function cacheOnboardingLink(url: string, source: StripeOnboardingSource, accountId?: string): void {
   if (typeof window === 'undefined') return;
 
   if (!isTrustedStripeUrl(url)) {
@@ -79,6 +87,7 @@ function cacheOnboardingLink(url: string, accountId?: string): void {
 
   const payload: StripeOnboardingLinkCache = {
     url,
+    source,
     accountId,
     createdAt: Date.now(),
   };
@@ -87,7 +96,8 @@ function cacheOnboardingLink(url: string, accountId?: string): void {
 }
 
 export async function startStripeOnboarding(options: StartStripeOnboardingOptions): Promise<void> {
-  const cachedLink = readCachedOnboardingLink(options.stripeAccountId);
+  const source = options.source ?? 'onboarding';
+  const cachedLink = readCachedOnboardingLink(options.stripeAccountId, source);
   if (cachedLink) {
     window.location.href = cachedLink;
     return;
@@ -97,7 +107,7 @@ export async function startStripeOnboarding(options: StartStripeOnboardingOption
     const res = await fetch('/api/stripe/connect/refresh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accountId: options.stripeAccountId }),
+      body: JSON.stringify({ accountId: options.stripeAccountId, source }),
     });
 
     const json = await res.json() as StripeOnboardingResponse;
@@ -109,7 +119,7 @@ export async function startStripeOnboarding(options: StartStripeOnboardingOption
       throw new Error('URL de Stripe no válida');
     }
 
-    cacheOnboardingLink(json.data.onboardingUrl, options.stripeAccountId ?? undefined);
+    cacheOnboardingLink(json.data.onboardingUrl, source, options.stripeAccountId ?? undefined);
     window.location.href = json.data.onboardingUrl;
     return;
   }
@@ -123,6 +133,7 @@ export async function startStripeOnboarding(options: StartStripeOnboardingOption
       lastName: options.lastName,
       businessName: options.businessName,
       website: options.website,
+      source,
     }),
   });
 
@@ -141,6 +152,6 @@ export async function startStripeOnboarding(options: StartStripeOnboardingOption
     acceptTerms: false,
   });
 
-  cacheOnboardingLink(json.data.onboardingUrl, json.data.accountId);
+  cacheOnboardingLink(json.data.onboardingUrl, source, json.data.accountId);
   window.location.href = json.data.onboardingUrl;
 }
