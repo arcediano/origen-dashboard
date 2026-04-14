@@ -694,7 +694,6 @@ export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete
   }, [autoExpandFirstIncomplete]);
 
   const canAddMore = data.products.length < MAX_PRODUCTS;
-  const hasMinimum = data.products.length >= 1;
 
   const handleAdd = () => {
     const newProduct = createEmptyProduct();
@@ -731,22 +730,22 @@ export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete
         </div>
         <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
           <Info className="w-3.5 h-3.5 text-origen-pradera" />
-          Añade entre 1 y 5 productos. Podrás completar el catálogo desde tu panel.
+          Este paso es opcional. Puedes añadir hasta 5 productos ahora o completarlo más tarde desde "Mi catálogo".
         </p>
       </div>
 
-      {/* Aviso si no hay productos */}
-      {!hasMinimum && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-amber-800">Añade al menos un producto para continuar</p>
-            <p className="text-xs text-amber-700 mt-0.5">
-              Los compradores necesitan ver qué vendes. Define tu primer producto a continuación.
-            </p>
-          </div>
+      {/* Aviso opcional */}
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3">
+        <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-semibold text-blue-800">Este paso es opcional</p>
+          <p className="text-xs text-blue-700 mt-0.5">
+            Puedes añadir tus productos ahora o hacerlo más tarde desde{' '}
+            <span className="font-medium">"Mi catálogo"</span> en tu dashboard.
+            Los productos que añadas aquí se guardarán como borradores privados listos para publicar.
+          </p>
         </div>
-      )}
+      </div>
 
       {/* Lista de productos */}
       <div className="space-y-3">

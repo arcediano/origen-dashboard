@@ -408,11 +408,8 @@ export default function OnboardingPage() {
       }
       case 2: {
         const products = formData.step_products.products;
-        if (products.length < 1) {
-          messages.push('Añade al menos un producto para continuar.');
-          break;
-        }
-
+        // Los productos son opcionales — el usuario puede añadirlos más tarde
+        // desde su panel de catálogo. Solo validamos los que ya tiene rellenados.
         products.forEach((product, index) => {
           const errors = getProductErrors(product);
           if (errors.length > 0) {

@@ -118,7 +118,7 @@ export function SidebarMenuItem({
           )}
         </button>
 
-        {/* Renderizar submenús anidados */
+        {/* Renderizar submenús anidados */}
         <div>
           {submenu.map((item) => {
             if ('submenu' in item) {
