@@ -325,8 +325,8 @@ export default function BusinessInfoPage() {
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
         <PageHeader
-          title="Perfil comercial"
-          description="Gestiona tus datos personales, de negocio y certificaciones desde una unica estructura"
+          title="Información del negocio"
+          description="Gestiona los datos oficiales de tu empresa, contacto, dirección fiscal, categorías y redes sociales"
           badgeIcon={Store}
           badgeText="Negocio"
           showBackButton={true}

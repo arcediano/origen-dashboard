@@ -165,8 +165,8 @@ export default function CertificationsPage() {
     <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
         <PageHeader
-          title="Perfil comercial"
-          description="Gestiona tus datos personales, de negocio y certificaciones desde una única estructura"
+          title="Certificaciones y documentos"
+          description="Sube y gestiona tus certificados de calidad y la documentación obligatoria para acreditar tu tienda"
           badgeIcon={FileBadge}
           badgeText="Certificaciones"
           showBackButton={true}

@@ -292,8 +292,8 @@ export default function PersonalInfoPage() {
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
         <PageHeader
-          title="Perfil comercial"
-          description="Gestiona tus datos personales, de negocio y certificaciones desde una unica estructura"
+          title="Datos personales"
+          description="Actualiza tu nombre, datos de contacto, dirección y foto de perfil de tu cuenta de productor"
           badgeIcon={User}
           badgeText="Datos personales"
           showBackButton={true}
@@ -349,8 +349,8 @@ export default function PersonalInfoPage() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-4">
-                        <div>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                          <div className="min-w-0">
                           <h2 className="text-xl font-bold text-origen-bosque truncate">{form.name || 'Perfil de productor'}</h2>
                           <p className="text-sm text-muted-foreground truncate">{form.email || 'Sin email disponible'}</p>
                           <div className="flex flex-wrap gap-2 mt-2">
@@ -586,6 +586,20 @@ export default function PersonalInfoPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Barra de guardado sticky – solo móvil */}
+      {isEditing && (
+        <div className="fixed left-0 right-0 bottom-[calc(88px+env(safe-area-inset-bottom))] lg:hidden z-30 px-4 sm:px-6">
+          <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={handleCancel}>Cancelar</Button>
+              <Button className="flex-1" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? 'Guardando...' : 'Guardar cambios'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
