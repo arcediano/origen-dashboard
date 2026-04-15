@@ -18,7 +18,7 @@ export function ProfileSectionNav({ className }: ProfileSectionNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Secciones de perfil comercial" className={cn('flex flex-wrap gap-2', className)}>
+    <nav aria-label="Secciones de perfil comercial" className={cn('flex flex-nowrap overflow-x-auto gap-2 scrollbar-none pb-1', className)}>
       {PROFILE_NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href;
 

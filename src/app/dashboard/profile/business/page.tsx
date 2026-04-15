@@ -357,7 +357,7 @@ export default function BusinessInfoPage() {
 
           <div className="mb-6">
             <Card className="overflow-hidden border border-border shadow-sm">
-              <div className="h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
+              <div className="h-32 sm:h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
                 {form.banner ? (
                   <img src={form.banner} alt="Banner" className="w-full h-full object-cover" />
                 ) : (
@@ -773,6 +773,20 @@ export default function BusinessInfoPage() {
           </div>
         </div>
       </div>
+
+      {/* Barra de guardado sticky – solo móvil */}
+      {isEditing && (
+        <div className="fixed left-0 right-0 bottom-[calc(88px+env(safe-area-inset-bottom))] lg:hidden z-30 px-4 sm:px-6">
+          <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={handleCancel}>Cancelar</Button>
+              <Button className="flex-1" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? 'Guardando...' : 'Guardar cambios'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

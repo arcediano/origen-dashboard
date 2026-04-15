@@ -187,7 +187,7 @@ export default function CertificationsPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="w-48">
+                  <div className="w-full sm:w-48">
                     <Progress value={overallProgress} className="h-2.5" />
                   </div>
                   <span className="text-lg font-bold text-origen-pradera">{overallProgress}%</span>
