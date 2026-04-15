@@ -93,3 +93,36 @@ export const notificationsEmptyHandler = http.get(`${BASE}/notifications`, () =>
 export const notificationsErrorHandler = http.get(`${BASE}/notifications`, () => {
   return HttpResponse.json({ message: 'Internal server error' }, { status: 500 });
 });
+
+// ─── Preferences handlers ──────────────────────────────────────────────────
+
+export const mockPreferences = [
+  { eventType: 'NEW_ORDER',         inApp: true, email: true,  push: false, frequency: 'INSTANT',      updatedAt: new Date().toISOString() },
+  { eventType: 'ORDER_STATUS_CHANGED', inApp: true, email: true,  push: false, frequency: 'INSTANT',   updatedAt: new Date().toISOString() },
+  { eventType: 'ORDER_CANCELLED',   inApp: true, email: true,  push: false, frequency: 'INSTANT',      updatedAt: new Date().toISOString() },
+  { eventType: 'PRODUCT_LOW_STOCK', inApp: true, email: true,  push: false, frequency: 'INSTANT',      updatedAt: new Date().toISOString() },
+  { eventType: 'PRODUCT_APPROVED',  inApp: true, email: true,  push: false, frequency: 'INSTANT',      updatedAt: new Date().toISOString() },
+  { eventType: 'PRODUCT_REJECTED',  inApp: true, email: true,  push: false, frequency: 'INSTANT',      updatedAt: new Date().toISOString() },
+  { eventType: 'ACCOUNT_VERIFIED',  inApp: true, email: true,  push: false, frequency: 'INSTANT',      updatedAt: new Date().toISOString() },
+  { eventType: 'SYSTEM_ALERT',      inApp: true, email: true,  push: false, frequency: 'INSTANT',      updatedAt: new Date().toISOString() },
+  { eventType: 'PROMOTION_CREATED', inApp: true, email: false, push: false, frequency: 'WEEKLY_DIGEST', updatedAt: new Date().toISOString() },
+];
+
+export const preferencesHandlers = [
+  // GET /notifications/preferences
+  http.get(`${BASE}/notifications/preferences`, () => {
+    return HttpResponse.json({ userId: 42, preferences: mockPreferences });
+  }),
+
+  // PATCH /notifications/preferences/:eventType
+  http.patch(`${BASE}/notifications/preferences/:eventType`, async ({ params, request }) => {
+    const eventType = decodeURIComponent(params['eventType'] as string);
+    const body = await request.json() as Record<string, unknown>;
+    const base = mockPreferences.find((p) => p.eventType === eventType);
+    if (!base) {
+      return HttpResponse.json({ message: 'Not found' }, { status: 404 });
+    }
+    const updated = { ...base, ...body, updatedAt: new Date().toISOString() };
+    return HttpResponse.json({ success: true, data: { ...updated, userId: 42 } });
+  }),
+];

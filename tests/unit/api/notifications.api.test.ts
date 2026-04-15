@@ -11,6 +11,8 @@ import {
   fetchUnreadNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
+  fetchNotificationPreferences,
+  updateNotificationPreference,
 } from '@/lib/api/notifications';
 
 const BASE = TEST_API_BASE;
@@ -84,5 +86,88 @@ describe('notifications api', () => {
     const result = await markAllNotificationsAsRead();
     expect(result.status).toBe(200);
     expect(result.data?.count).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('notification preferences api', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('loads preferences and maps canonical shape', async () => {
+    const result = await fetchNotificationPreferences();
+
+    expect(result.status).toBe(200);
+    expect(Array.isArray(result.data)).toBe(true);
+    expect(result.data!.length).toBeGreaterThan(0);
+
+    const first = result.data![0];
+    expect(first.userId).toBe(42);
+    expect(typeof first.eventType).toBe('string');
+    expect(typeof first.email).toBe('boolean');
+    expect(typeof first.push).toBe('boolean');
+    expect(typeof first.inApp).toBe('boolean');
+    expect(first.updatedAt).toBeInstanceOf(Date);
+  });
+
+  it('normalises unknown frequency values to INSTANT', async () => {
+    server.use(
+      http.get(`${TEST_API_BASE}/notifications/preferences`, () => {
+        return HttpResponse.json({
+          userId: 1,
+          preferences: [
+            {
+              eventType: 'NEW_ORDER',
+              inApp: true,
+              email: true,
+              push: false,
+              frequency: 'UNKNOWN_FREQ',
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        });
+      }),
+    );
+
+    const result = await fetchNotificationPreferences();
+    expect(result.status).toBe(200);
+    expect(result.data![0].frequency).toBe('INSTANT');
+  });
+
+  it('returns error when preferences endpoint fails', async () => {
+    server.use(
+      http.get(`${TEST_API_BASE}/notifications/preferences`, () => {
+        return HttpResponse.json({ message: 'error' }, { status: 500 });
+      }),
+    );
+
+    const result = await fetchNotificationPreferences();
+    expect(result.status).toBe(500);
+    expect(result.error).toBeDefined();
+  });
+
+  it('updates a preference channel and returns mapped result', async () => {
+    const result = await updateNotificationPreference('NEW_ORDER', { email: false });
+
+    expect(result.status).toBe(200);
+    expect(result.data).toBeDefined();
+    expect(result.data!.eventType).toBe('NEW_ORDER');
+    expect(result.data!.email).toBe(false);
+    expect(result.data!.updatedAt).toBeInstanceOf(Date);
+  });
+
+  it('returns error when update endpoint returns 404', async () => {
+    const result = await updateNotificationPreference('NONEXISTENT_EVENT', { email: true });
+
+    expect(result.status).toBe(500);
+    expect(result.error).toBeDefined();
+  });
+
+  it('WEEKLY_DIGEST frequency is preserved', async () => {
+    const result = await fetchNotificationPreferences();
+    expect(result.status).toBe(200);
+
+    const promo = result.data!.find((p) => p.eventType === 'PROMOTION_CREATED');
+    expect(promo?.frequency).toBe('WEEKLY_DIGEST');
   });
 });
