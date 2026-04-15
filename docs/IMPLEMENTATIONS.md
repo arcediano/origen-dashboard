@@ -200,3 +200,50 @@ También se endurece la lectura pública para evitar que productos no publicados
 
 - No se añadieron todavía tests unitarios dedicados para `stats/facets/detail protegido` en backend y gateway; el cambio quedó validado por compilación limpia y por la superficie unitaria existente del dashboard.
 - La serie histórica de ventas sigue pendiente de instrumentación backend; mientras tanto, el frontend deja explícitamente de mostrar datos inventados.
+
+---
+
+## Sprint 25 — Release Readiness & Go Live (Abril 2026)
+
+### QA integral, parche de seguridad next@15.5.15 y deploy
+
+**Fecha**: 2026-04-29  
+**Commit**: `8265ae8`  
+**Agentes**: @analista-pruebas, @auditor-seguridad, @ingeniero-devops, @documentador-tecnico
+
+#### Descripción
+
+Sprint de cierre para `origen-dashboard` Sprint 24. Se amplió la cobertura de tests para las funcionalidades implementadas en Sprint 24 (NotificationsPreferencesPanel, preferences API, security audit log), se realizó la auditoría OWASP del código nuevo, se parcheó la dependencia de producción `next` a la versión `15.5.15` (que corrige 3 CVEs de alta severidad) y se desplegó a Vercel.
+
+#### Archivos afectados
+
+| Archivo | Cambio |
+|---------|--------|
+| `tests/mocks/handlers/notifications.handlers.ts` | Añadido `preferencesHandlers`: `GET /notifications/preferences` y `PATCH /notifications/preferences/:eventType` con `mockPreferences` (9 entradas) |
+| `tests/mocks/server.ts` | Registrado `preferencesHandlers` en `setupServer()` |
+| `tests/unit/api/notifications.api.test.ts` | Añadido `describe('notification preferences api')` con 6 nuevos tests para `fetchNotificationPreferences` y `updateNotificationPreference` |
+| `tests/unit/components/notifications/NotificationToggleRow.test.tsx` | NUEVO — 6 tests unitarios para el componente `NotificationToggleRow` (diseño mobile-first, Sprint 24) |
+| `package.json` | `next` bumped de `^15.1.0` a `15.5.15` (fix GHSA-ggv3-7p47-pfv8, GHSA-3x4c-7xq6-9pq8, GHSA-q4gf-8mx6-v5v3) |
+
+#### Gates de calidad
+
+| Gate | Estado | Detalle |
+|------|--------|---------|
+| Compilación (`tsc --noEmit`) | ✅ Sin errores | Sin cambios de código fuente en Sprint 25 — compilación Sprint 24 ya validada |
+| Tests unitarios (`vitest run`) | ✅ **409/409 PASS** | 29 ficheros de test — incluyendo 12 tests nuevos Sprint 25 |
+| Seguridad | ✅ APROBADO | `next@15.5.15` parchea 3 CVEs altos; código Sprint 24 auditado sin hallazgos OWASP |
+| Documentación | ✅ Este archivo | Registro actualizado |
+
+#### CVEs parcheados (next@15.5.15)
+
+| CVE | Severidad | Descripción |
+|-----|-----------|-------------|
+| GHSA-ggv3-7p47-pfv8 | High | HTTP request smuggling en rewrites |
+| GHSA-3x4c-7xq6-9pq8 | High | next/image disk cache DoS (almacenamiento ilimitado) |
+| GHSA-q4gf-8mx6-v5v3 | High | Denial of Service con Server Components |
+
+#### Notas operativas
+
+- `npm install` debe ejecutarse para materializar el bump de `next@15.5.15` en `node_modules` (requiere token GitHub Packages).
+- Las vulnerabilidades transitivas de `qs` y `picomatch` (alta severidad, `--omit=dev`) se resuelven con `npm audit fix` tras el install.
+
