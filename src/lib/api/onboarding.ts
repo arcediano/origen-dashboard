@@ -244,8 +244,16 @@ export async function completeOnboarding(): Promise<{ success: boolean; onboardi
   return gatewayClient.post('/producers/onboarding/complete');
 }
 
-// ─── Cargar datos guardados ────────────────────────────────────────────────────
+// ─── Cargar datos guardados (wizard de onboarding) ────────────────────────────
 
 export async function loadOnboardingData(): Promise<OnboardingDataResponse> {
   return gatewayClient.get('/producers/onboarding/data');
+}
+
+// ─── Cargar perfil del productor (páginas de edición del dashboard) ────────────
+// Endpoint ligero: sin logistics, products, certifications ni onboarding progress.
+// Usar esto en business/page.tsx, personal/page.tsx y cobros/page.tsx.
+
+export async function loadProducerProfile(): Promise<OnboardingDataResponse> {
+  return gatewayClient.get('/producers/profile');
 }

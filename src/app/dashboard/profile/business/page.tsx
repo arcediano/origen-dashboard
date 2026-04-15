@@ -32,7 +32,7 @@ import {
   Label,
 } from '@arcediano/ux-library';
 import { Textarea } from '@arcediano/ux-library';
-import { loadOnboardingData, saveStep1, saveStep2, type OnboardingData } from '@/lib/api/onboarding';
+import { loadOnboardingData, loadProducerProfile, saveStep1, saveStep2, type OnboardingData } from '@/lib/api/onboarding';
 
 type BusinessFormState = {
   businessName: string;
@@ -148,7 +148,7 @@ export default function BusinessInfoPage() {
       setLoadError(null);
 
       try {
-        const response = await loadOnboardingData();
+        const response = await loadProducerProfile();
         if (!response?.data) {
           throw new Error('No hay datos de onboarding para el perfil comercial.');
         }

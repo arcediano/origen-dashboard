@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library'
 import { Button, Input, Label, Badge } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { getCurrentUser, updateCurrentUser, type AuthUser } from '@/lib/api/auth';
-import { loadOnboardingData, saveStep1, saveStep2, type OnboardingData } from '@/lib/api/onboarding';
+import { loadOnboardingData, loadProducerProfile, saveStep1, saveStep2, type OnboardingData } from '@/lib/api/onboarding';
 
 type PersonalFormState = {
   name: string;

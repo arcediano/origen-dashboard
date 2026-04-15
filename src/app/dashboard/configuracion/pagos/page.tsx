@@ -11,7 +11,7 @@ import { Button, Badge } from '@arcediano/ux-library';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
 import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
-import { loadOnboardingData } from '@/lib/api/onboarding';
+import { loadProducerProfile } from '@/lib/api/onboarding';
 import { startStripeOnboarding } from '@/lib/stripe/connect-client';
 
 export default function PagosPage() {
@@ -31,7 +31,7 @@ export default function PagosPage() {
       setIsLoading(true);
       setLoadError(null);
       try {
-        const response = await loadOnboardingData();
+        const response = await loadProducerProfile();
         const story = response?.data?.story;
         const fiscal = response?.data?.fiscal;
         const payment = response?.data?.payment;
