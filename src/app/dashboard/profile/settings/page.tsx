@@ -6,12 +6,12 @@
  */
 import { redirect } from 'next/navigation';
 
-export default function SettingsPage({
+export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: { tab?: string };
+  searchParams: Promise<{ tab?: string }>;
 }) {
-  const tab = searchParams?.tab;
+  const { tab } = await searchParams;
   if (tab === 'security' || tab === 'password' || tab === '2fa') {
     redirect('/dashboard/security');
   }

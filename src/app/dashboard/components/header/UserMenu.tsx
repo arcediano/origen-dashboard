@@ -96,6 +96,35 @@ export function UserMenu({
     };
   }, [isOpen]);
 
+  // Navegación por teclado dentro del menú (Arrow Up/Down, Home, End)
+  const handleMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = Array.from(
+      dropdownRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []
+    );
+    const idx = items.indexOf(document.activeElement as HTMLElement);
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      items[(idx + 1) % items.length]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      items[(idx - 1 + items.length) % items.length]?.focus();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      items[0]?.focus();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      items[items.length - 1]?.focus();
+    }
+  };
+
+  // Mover foco al primer menuitem cuando el menú se abre
+  useEffect(() => {
+    if (isOpen && dropdownRef.current) {
+      const first = dropdownRef.current.querySelector<HTMLElement>('[role="menuitem"]');
+      first?.focus();
+    }
+  }, [isOpen]);
+
   return (
     <div className="relative">
       <button
@@ -139,6 +168,7 @@ export function UserMenu({
             id={menuId}
             role="menu"
             aria-label="Opciones de cuenta"
+            onKeyDown={handleMenuKeyDown}
           >
             <div className="px-5 py-5 bg-gradient-to-r from-origen-crema/40 to-transparent border-b border-border-subtle">
               <div className="flex items-start gap-4">
@@ -160,7 +190,7 @@ export function UserMenu({
             </div>
 
             <div className="py-2">
-              <Link href="/dashboard/account" onClick={closeMenu}>
+              <Link href="/dashboard/account" onClick={closeMenu} role="menuitem">
                 <div className="flex items-center gap-3 px-4 py-3 hover:bg-origen-crema/50 transition-colors group">
                   <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
                     <User className="w-5 h-5 text-text-subtle group-hover:text-origen-pradera" />
@@ -175,7 +205,7 @@ export function UserMenu({
             </div>
 
             <div className="py-2 border-t border-border-subtle">
-              <Link href="/dashboard/configuracion" onClick={closeMenu}>
+              <Link href="/dashboard/configuracion" onClick={closeMenu} role="menuitem">
                 <div className="flex items-center gap-3 px-4 py-3 hover:bg-origen-crema/50 transition-colors group">
                   <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10">
                     <Settings2 className="w-5 h-5 text-text-subtle group-hover:text-origen-pradera" />
@@ -190,14 +220,14 @@ export function UserMenu({
             </div>
 
             <div className="px-5 py-3 bg-surface border-y border-border-subtle">
-              <Link href="/ayuda" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-origen-pradera" onClick={closeMenu}>
+              <Link href="/ayuda" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-origen-pradera" onClick={closeMenu} role="menuitem">
                 <HelpCircle className="w-4 h-4" />
                 <span>Centro de ayuda</span>
               </Link>
             </div>
 
             <div className="py-2">
-              <button onClick={handleLogout} className="w-full px-4 py-3 hover:bg-red-50 transition-colors group" type="button">
+              <button onClick={handleLogout} className="w-full px-4 py-3 hover:bg-red-50 transition-colors group" type="button" role="menuitem">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
                     <LogOut className="w-5 h-5 text-red-500" />

@@ -195,6 +195,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
             onClick={(e) => e.stopPropagation()}
             id="notification-bell-panel"
             role="dialog"
+            aria-modal="true"
             aria-label="Notificaciones recientes"
           >
             {/* Cabecera */}
@@ -210,6 +211,8 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                   <button
                     onClick={handleMarkAllAsRead}
                     disabled={isUpdating}
+                    type="button"
+                    aria-label="Marcar todas las notificaciones como leídas"
                     className="text-xs text-origen-menta hover:text-origen-pradera transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Marcar todas
@@ -234,6 +237,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                   <p className="text-xs text-text-subtle mt-1">las notificaciones</p>
                   <button
                     onClick={() => void loadNotifications()}
+                    type="button"
                     className="mt-3 text-xs text-origen-menta hover:text-origen-pradera transition-colors font-medium"
                   >
                     Reintentar

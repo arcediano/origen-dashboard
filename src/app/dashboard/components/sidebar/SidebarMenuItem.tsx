@@ -69,6 +69,8 @@ export function SidebarMenuItem({
       <div className="space-y-0.5">
         <button
           onClick={toggleSubmenu}
+          aria-expanded={isOpen}
+          aria-controls={`sidebar-submenu-${id}`}
           className={cn(
             'group relative w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-all',
             itemPadding,
@@ -83,7 +85,7 @@ export function SidebarMenuItem({
               (isActive || hasActiveChild)
                 ? 'text-origen-menta'
                 : 'text-text-subtle group-hover:text-origen-pradera'
-            )} />
+            )} aria-hidden="true" />
             <span className={cn(
               'truncate',
               (isActive || hasActiveChild)
@@ -105,7 +107,7 @@ export function SidebarMenuItem({
               'w-4 h-4 transition-transform',
               isOpen ? 'rotate-180' : '',
               (isActive || hasActiveChild) ? 'text-origen-menta' : 'text-text-subtle'
-            )} />
+            )} aria-hidden="true" />
           </div>
 
           {/* Indicador de sección activa */}
@@ -119,7 +121,7 @@ export function SidebarMenuItem({
         </button>
 
         {/* Renderizar submenús anidados */}
-        <div>
+        <div id={`sidebar-submenu-${id}`}>
           {submenu.map((item) => {
             if ('submenu' in item) {
               return (
@@ -162,7 +164,7 @@ export function SidebarMenuItem({
         <Icon className={cn(
           'w-5 h-5 flex-shrink-0 transition-colors',
           isActive ? 'text-origen-menta' : 'text-text-subtle group-hover:text-origen-pradera'
-        )} />
+        )} aria-hidden="true" />
         <span className={cn(
           'truncate',
           isActive ? 'text-origen-bosque font-semibold' : 'text-muted-foreground group-hover:text-origen-bosque'

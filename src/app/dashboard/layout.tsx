@@ -135,13 +135,17 @@ function DashboardContentWrapper({
       {/* Header móvil nativo */}
       <MobileTopBar />
 
-      <main className={cn(
-        "transition-all duration-300",
-        // Desktop: desplazar por sidebar
-        !isMobile && "lg:ml-72",
-        // Mobile: espacio para header fijo (56px) y barra flotante (72px + safe-area + margen)
-        isMobile && "pt-14 pb-[calc(88px+env(safe-area-inset-bottom))]"
-      )}>
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className={cn(
+          "transition-all duration-300",
+          // Desktop: desplazar por sidebar
+          !isMobile && "lg:ml-72",
+          // Mobile: espacio para header fijo (56px) y barra flotante (72px + safe-area + margen)
+          isMobile && "pt-14 pb-[calc(88px+env(safe-area-inset-bottom))]"
+        )}
+      >
         <MobilePageTransition>
           <div className="w-full">
             {children}

@@ -19,11 +19,12 @@ export function DashboardBreadcrumb() {
     <nav aria-label="Breadcrumb" className="flex items-center text-sm">
       <ol className="flex items-center space-x-1">
         <li>
-          <Link 
-            href="/dashboard" 
+          <Link
+            href="/dashboard"
             className="text-muted-foreground hover:text-origen-pradera transition-colors"
+            aria-label="Ir al inicio del dashboard"
           >
-            <Home className="w-4 h-4" />
+            <Home className="w-4 h-4" aria-hidden="true" />
           </Link>
         </li>
         {breadcrumbs.slice(1).map((crumb, index) => (
