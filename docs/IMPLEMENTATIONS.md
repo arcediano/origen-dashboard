@@ -34,6 +34,49 @@ Historial de todas las implementaciones significativas en el proyecto `origen-da
 
 ---
 
+## Sprint 26 — Integraciones de perfil: Stripe webhook, Certificaciones y Logo/Banner (Abril 2026)
+
+**Fecha**: 2026-04-15  
+**Agentes**: @desarrollador-codigo
+
+### Stripe webhook (`origen-master-microservices`)
+
+| Archivo | Cambio |
+|---------|--------|
+| `src/modules/producers/producers/stripe-webhook.service.ts` | **NUEVO** — verifica firma HMAC y maneja `account.updated` → actualiza `PaymentConfig.stripeConnected` |
+| `src/modules/producers/producers/producers.controller.ts` | `POST /producers/webhooks/stripe` — endpoint público, sin guard, seguridad vía HMAC |
+| `src/modules/producers/producers/producers.module.ts` | `StripeWebhookService` registrado como provider |
+| `src/main.ts` | `NestFactory.create(AppModule, { rawBody: true })` — requerido para verificación de firma |
+| `.env.example` | `STRIPE_SECRET_KEY` y `STRIPE_WEBHOOK_SECRET` añadidos |
+
+**Decisión de tipos**: Con `module: commonjs` + `moduleResolution: node`, el paquete `stripe` v22 resuelve al tipo CJS `export = StripeConstructor` (namespace). Se usa `InstanceType<typeof Stripe>` para el cliente y `ReturnType<StripeClient['webhooks']['constructEvent']>` para el tipo de evento.
+
+### Certificaciones — integración API real (`origen-dashboard`)
+
+| Archivo | Cambio |
+|---------|--------|
+| `src/lib/api/onboarding.ts` | `OnboardingData` extendida con `certifications[]` y `documents[]`; nueva función `saveCertificationDocuments` |
+| `src/app/dashboard/profile/certifications/page.tsx` | Reescrita completamente — carga real via `loadOnboardingData()`, upload via `uploadFile` + `saveCertificationDocuments`, estados VERIFIED/PENDING/REJECTED, barra de progreso real |
+| `origen-master-microservices/src/modules/producers/producers/producers.service.ts` | `getOnboardingData` ahora incluye `documents: true` en el Prisma include |
+
+### Logo/Banner upload (`origen-dashboard`)
+
+| Archivo | Cambio |
+|---------|--------|
+| `src/app/dashboard/profile/business/page.tsx` | Botones Camera ahora disparan file picker; upload via `uploadFile('visual/logo')` y `uploadFile('visual/banner')`; preview inmediato en UI; keys guardadas en `handleSave` via `saveStep3({ logoKey, bannerKey })` |
+
+### Gates de calidad
+
+| Gate | Estado |
+|------|--------|
+| Compilación `tsc --noEmit` — `origen-dashboard` | ✅ Sin errores |
+| Compilación `tsc --noEmit` — `origen-master-microservices` | ✅ Sin errores |
+| Tests `vitest run` — `origen-dashboard` | ✅ 409/409 tests verdes — 29 ficheros |
+| Seguridad | ✅ Sin guards omitidos — webhook asegurado por HMAC Stripe |
+| Documentación | ✅ Este archivo |
+
+---
+
 ### Limpieza de código muerto (chore)
 
 **Fecha**: 2026-04-09  

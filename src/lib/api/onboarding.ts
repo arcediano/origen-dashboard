@@ -63,6 +63,21 @@ export interface OnboardingData {
     stripeAccountId?: string | null;
     acceptedTermsAt?: string | null;
   } | null;
+  certifications?: Array<{
+    certificationId: string;
+    name: string;
+    issuingBody: string;
+    documentDocId?: string | null;
+    status: 'PENDING' | 'VERIFIED' | 'REJECTED';
+    verifiedAt?: string | null;
+  }> | null;
+  documents?: Array<{
+    type: 'CIF' | 'SEGURO_RC' | 'MANIPULADOR_ALIMENTOS';
+    docServiceId: string;
+    status: 'PENDING' | 'VERIFIED' | 'REJECTED';
+    verifiedAt?: string | null;
+    rejectedReason?: string | null;
+  }> | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -239,6 +254,24 @@ export async function saveStepProducts(
 }
 
 // ─── Completar onboarding ─────────────────────────────────────────────────────
+
+/**
+ * Guarda documentos desde la página de certificaciones del dashboard.
+ * Wrapper simplificado sobre el Paso 5 del onboarding.
+ */
+export async function saveCertificationDocuments(keys: {
+  cifKey?: string;
+  seguroRcKey?: string;
+  manipuladorAlimentosKey?: string;
+  certificationDocuments: Array<{ certificationId: string; documentKey: string }>;
+}): Promise<StepSaveResponse> {
+  return gatewayClient.post('/producers/onboarding/step/5', {
+    cifKey: keys.cifKey,
+    seguroRcKey: keys.seguroRcKey,
+    manipuladorAlimentosKey: keys.manipuladorAlimentosKey,
+    certificationDocuments: keys.certificationDocuments,
+  });
+}
 
 export async function completeOnboarding(): Promise<{ success: boolean; onboardingCompleted: boolean }> {
   return gatewayClient.post('/producers/onboarding/complete');

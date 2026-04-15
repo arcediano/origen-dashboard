@@ -169,8 +169,6 @@ export default function PersonalInfoPage() {
     const nextErrors: Record<string, string> = {};
 
     if (!form.name.trim()) nextErrors.name = 'El nombre es obligatorio';
-    if (!form.email.trim()) nextErrors.email = 'El email es obligatorio';
-    else if (!/\S+@\S+\.\S+/.test(form.email)) nextErrors.email = 'Email no valido';
     if (!form.phone.trim()) nextErrors.phone = 'El telefono es obligatorio';
 
     setErrors(nextErrors);
@@ -430,16 +428,18 @@ export default function PersonalInfoPage() {
 
                     <div className="space-y-1">
                       <Label htmlFor="email" className="text-sm font-medium">
-                        Email <span className="text-red-500">*</span>
+                        Email
                       </Label>
                       <Input
                         id="email"
                         type="email"
                         value={form.email}
                         disabled={true}
-                        className="h-10 bg-surface"
+                        className="h-10 bg-surface cursor-not-allowed"
                         placeholder="tu@email.com"
+                        title="El email no puede modificarse aquí. Contacta con soporte para cambiar tu dirección."
                       />
+                      <p className="text-xs text-muted-foreground">El email no se puede modificar desde este panel.</p>
                     </div>
 
                     <div className="space-y-1">

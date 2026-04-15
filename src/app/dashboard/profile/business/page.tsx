@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Store,
@@ -32,7 +32,8 @@ import {
   Label,
 } from '@arcediano/ux-library';
 import { Textarea } from '@arcediano/ux-library';
-import { loadOnboardingData, loadProducerProfile, saveStep1, saveStep2, type OnboardingData } from '@/lib/api/onboarding';
+import { loadOnboardingData, loadProducerProfile, saveStep1, saveStep2, saveStep3, type OnboardingData } from '@/lib/api/onboarding';
+import { uploadFile } from '@/lib/api/media';
 
 type BusinessFormState = {
   businessName: string;
@@ -43,7 +44,6 @@ type BusinessFormState = {
   description: string;
   categories: string[];
   phone: string;
-  email: string;
   website: string;
   address: string;
   city: string;
@@ -52,9 +52,6 @@ type BusinessFormState = {
   country: string;
   socialMedia: {
     instagram: string;
-    facebook: string;
-    twitter: string;
-    youtube: string;
   };
   logo: string | null;
   banner: string | null;
@@ -69,7 +66,6 @@ const EMPTY_FORM: BusinessFormState = {
   description: '',
   categories: [],
   phone: '',
-  email: '',
   website: '',
   address: '',
   city: '',
@@ -78,9 +74,6 @@ const EMPTY_FORM: BusinessFormState = {
   country: 'Espana',
   socialMedia: {
     instagram: '',
-    facebook: '',
-    twitter: '',
-    youtube: '',
   },
   logo: null,
   banner: null,
@@ -134,6 +127,11 @@ export default function BusinessInfoPage() {
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
   const [newCategory, setNewCategory] = useState('');
+  const [logoKey, setLogoKey] = useState<string | null>(null);
+  const [bannerKey, setBannerKey] = useState<string | null>(null);
+  const [isUploadingVisual, setIsUploadingVisual] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const producerInitial = useMemo(() => {
     if (!form.businessName) return 'P';
@@ -164,7 +162,6 @@ export default function BusinessInfoPage() {
           description: data.story?.description ?? '',
           categories: data.fiscal?.categories ?? [],
           phone: data.fiscal?.businessPhone ?? '',
-          email: '',
           website: data.story?.website ?? '',
           address: [data.location?.street, data.location?.streetNumber].filter(Boolean).join(' ').trim(),
           city: data.location?.city ?? '',
@@ -173,9 +170,6 @@ export default function BusinessInfoPage() {
           country: 'Espana',
           socialMedia: {
             instagram: data.story?.instagramHandle ?? '',
-            facebook: '',
-            twitter: '',
-            youtube: '',
           },
           logo: null,
           banner: null,
@@ -235,11 +229,47 @@ export default function BusinessInfoPage() {
     }));
   };
 
+  const handleLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingVisual(true);
+    setSaveError(null);
+    try {
+      const { key, url } = await uploadFile(file, 'visual/logo');
+      setLogoKey(key);
+      setForm((prev) => ({ ...prev, logo: url ?? URL.createObjectURL(file) }));
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Error al subir el logo.');
+    } finally {
+      setIsUploadingVisual(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleBannerFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingVisual(true);
+    setSaveError(null);
+    try {
+      const { key, url } = await uploadFile(file, 'visual/banner');
+      setBannerKey(key);
+      setForm((prev) => ({ ...prev, banner: url ?? URL.createObjectURL(file) }));
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Error al subir el banner.');
+    } finally {
+      setIsUploadingVisual(false);
+      e.target.value = '';
+    }
+  };
+
   const handleCancel = () => {
     setForm(initialForm);
     setErrors({});
     setSaveError(null);
     setSaveSuccess(null);
+    setLogoKey(null);
+    setBannerKey(null);
     setIsEditing(false);
   };
 
@@ -303,11 +333,17 @@ export default function BusinessInfoPage() {
     setSaveSuccess(null);
 
     try {
-      await Promise.all([
+      const saves: Promise<unknown>[] = [
         saveStep1(step1Payload, []),
         saveStep2(step2Payload, []),
-      ]);
+      ];
+      if (logoKey || bannerKey) {
+        saves.push(saveStep3({ ...(logoKey && { logoKey }), ...(bannerKey && { bannerKey }) }));
+      }
+      await Promise.all(saves);
 
+      setLogoKey(null);
+      setBannerKey(null);
       setInitialForm(form);
       setIsEditing(false);
       setSaveSuccess('Perfil comercial sincronizado con API real.');
@@ -366,10 +402,24 @@ export default function BusinessInfoPage() {
                   </div>
                 )}
                 {isEditing && (
-                  <button className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-surface-alt shadow-lg flex items-center justify-center text-origen-bosque hover:text-origen-pradera transition-colors">
+                  <button
+                    type="button"
+                    disabled={isUploadingVisual}
+                    onClick={() => bannerInputRef.current?.click()}
+                    className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-surface-alt shadow-lg flex items-center justify-center text-origen-bosque hover:text-origen-pradera transition-colors disabled:opacity-50"
+                    aria-label="Cambiar banner"
+                  >
                     <Camera className="w-5 h-5" />
                   </button>
                 )}
+                <input
+                  ref={bannerInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleBannerFileChange}
+                  aria-label="Subir banner"
+                />
               </div>
 
               <CardContent className="relative px-6 pb-6">
@@ -385,10 +435,25 @@ export default function BusinessInfoPage() {
                       )}
                     </div>
                     {isEditing && (
-                      <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Cambiar logo"
+                        onClick={() => logoInputRef.current?.click()}
+                        onKeyDown={(e) => e.key === 'Enter' && logoInputRef.current?.click()}
+                        className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                      >
                         <Camera className="w-8 h-8 text-white" />
                       </div>
                     )}
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={handleLogoFileChange}
+                      aria-label="Subir logo"
+                    />
                   </div>
 
                   <div className="flex-1 pb-2">
@@ -581,19 +646,6 @@ export default function BusinessInfoPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="businessEmail">Email de contacto</Label>
-                    <Input
-                      id="businessEmail"
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      disabled={true}
-                      className="bg-surface"
-                      placeholder="Se gestiona desde autenticacion"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
                     <Label htmlFor="website">Sitio web</Label>
                     <Input
                       id="website"
@@ -693,54 +745,6 @@ export default function BusinessInfoPage() {
                       disabled={!isEditing}
                       className={!isEditing ? 'bg-surface' : ''}
                       placeholder="@usuario"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="facebook">Facebook</Label>
-                    <Input
-                      id="facebook"
-                      value={form.socialMedia.facebook}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          socialMedia: { ...form.socialMedia, facebook: e.target.value },
-                        })
-                      }
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="twitter">Twitter / X</Label>
-                    <Input
-                      id="twitter"
-                      value={form.socialMedia.twitter}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          socialMedia: { ...form.socialMedia, twitter: e.target.value },
-                        })
-                      }
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="youtube">YouTube</Label>
-                    <Input
-                      id="youtube"
-                      value={form.socialMedia.youtube}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          socialMedia: { ...form.socialMedia, youtube: e.target.value },
-                        })
-                      }
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
                     />
                   </div>
                 </div>
