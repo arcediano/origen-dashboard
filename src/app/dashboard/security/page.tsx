@@ -3,12 +3,49 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { AlertTriangle, ChevronRight, Key, Shield, Smartphone } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronRight, Clock, Key, Lock, Shield, Smartphone } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Separator } from '@arcediano/ux-library';
 import { changePassword } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
+
+// ─── TIPOS INTERNOS ───────────────────────────────────────────────────────────
+
+type SecurityEventKind =
+  | 'PASSWORD_CHANGED'
+  | 'PASSWORD_CHANGE_FAILED'
+  | '2FA_ENABLED'
+  | '2FA_DISABLED';
+
+interface SecurityAuditEntry {
+  kind:      SecurityEventKind;
+  label:     string;
+  timestamp: Date;
+  ok:        boolean;
+}
+
+function logSecurityEvent(
+  kind: SecurityEventKind,
+  meta: Record<string, unknown> = {},
+): SecurityAuditEntry {
+  const entry: SecurityAuditEntry = {
+    kind,
+    label: SECURITY_LABELS[kind] ?? kind,
+    timestamp: new Date(),
+    ok: !kind.endsWith('_FAILED'),
+  };
+  // Estrucutra observable compatible con herramientas de APM
+  console.info('[security-audit]', { event: kind, ok: entry.ok, ts: entry.timestamp.toISOString(), ...meta });
+  return entry;
+}
+
+const SECURITY_LABELS: Record<SecurityEventKind, string> = {
+  PASSWORD_CHANGED:       'Contraseña actualizada',
+  PASSWORD_CHANGE_FAILED: 'Intento fallido de cambio de contraseña',
+  '2FA_ENABLED':          'Verificación en dos pasos activada',
+  '2FA_DISABLED':         'Verificación en dos pasos desactivada',
+};
 
 type PasswordFieldErrors = {
   current?: string;
@@ -59,6 +96,14 @@ export default function SecurityPage() {
     confirm: false,
   });
 
+  // Historial de auditoría local (sesión actual)
+  const [auditLog, setAuditLog] = useState<SecurityAuditEntry[]>([]);
+
+  const addAuditEntry = (kind: SecurityEventKind) => {
+    const entry = logSecurityEvent(kind);
+    setAuditLog((prev) => [entry, ...prev].slice(0, 5));
+  };
+
   const passwordErrors = getPasswordFieldErrors(password);
   const hasPasswordErrors = Boolean(passwordErrors.current || passwordErrors.new || passwordErrors.confirm);
 
@@ -85,7 +130,9 @@ export default function SecurityPage() {
       setPassword({ current: '', new: '', confirm: '' });
       setDidAttemptSubmit(false);
       setSaveSuccess('Contraseña actualizada correctamente. Inicia sesión de nuevo en otros dispositivos.');
+      addAuditEntry('PASSWORD_CHANGED');
     } catch (error) {
+      addAuditEntry('PASSWORD_CHANGE_FAILED');
       if (error instanceof GatewayError) {
         setSaveError(error.message || 'No se pudo actualizar la contraseña.');
       } else {
@@ -259,6 +306,49 @@ export default function SecurityPage() {
                     </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* ── Historial de auditoría (sesión actual) ── */}
+            <Card className="rounded-2xl border border-border-subtle shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-origen-pradera" />
+                  Actividad reciente
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {auditLog.length === 0 ? (
+                  <div className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-alt p-4">
+                    <Lock className="mt-0.5 h-4 w-4 text-text-subtle flex-shrink-0" aria-hidden="true" />
+                    <p className="text-xs text-text-subtle">
+                      Ninguna acción de seguridad realizada en esta sesión. Los cambios
+                      de contraseña y de 2FA quedarán registrados aquí.
+                    </p>
+                  </div>
+                ) : (
+                  <ul className="divide-y divide-border-subtle" aria-label="Historial de actividad de seguridad">
+                    {auditLog.map((entry, idx) => (
+                      <li key={idx} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+                        {entry.ok ? (
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-green-600 flex-shrink-0" aria-hidden="true" />
+                        ) : (
+                          <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500 flex-shrink-0" aria-hidden="true" />
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-origen-bosque">{entry.label}</p>
+                          <p className="text-[11px] text-text-subtle mt-0.5">
+                            {entry.timestamp.toLocaleTimeString('es-ES', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                            })}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </CardContent>
             </Card>
 

@@ -16,6 +16,8 @@ import type {
   NotificationActionType,
   NotificationStats,
   NotificationsResponse,
+  NotificationPreference,
+  NotificationFrequency,
 } from '@/types/notification';
 import type { ApiResponse } from './products';
 
@@ -294,3 +296,85 @@ export async function markAllNotificationsAsRead(): Promise<
   }
 }
 
+// ─── PREFERENCIAS ─────────────────────────────────────────────────────────────
+
+export interface NotificationPreferencePayload {
+  email?:     boolean;
+  push?:      boolean;
+  inApp?:     boolean;
+  frequency?: NotificationFrequency;
+}
+
+interface BackendPreference {
+  eventType:   string;
+  inApp:       boolean;
+  email:       boolean;
+  push:        boolean;
+  frequency:   string;
+  mutedUntil?: string;
+  updatedAt:   string;
+}
+
+function mapBackendPreference(raw: BackendPreference, userId: number): NotificationPreference {
+  const freq = raw.frequency?.toUpperCase();
+  const frequency: NotificationFrequency =
+    freq === 'DAILY_DIGEST' || freq === 'WEEKLY_DIGEST' ? freq : 'INSTANT';
+  return {
+    userId,
+    eventType: raw.eventType,
+    inApp: raw.inApp ?? true,
+    email: raw.email ?? false,
+    push: raw.push ?? false,
+    frequency,
+    mutedUntil: raw.mutedUntil ? new Date(raw.mutedUntil) : undefined,
+    updatedAt: new Date(raw.updatedAt),
+  };
+}
+
+/**
+ * Obtiene las preferencias de notificación del usuario autenticado.
+ */
+export async function fetchNotificationPreferences(): Promise<
+  ApiResponse<NotificationPreference[]>
+> {
+  try {
+    const res = await gatewayClient.get<{ userId: number; preferences: BackendPreference[] }>(
+      '/notifications/preferences',
+    );
+    const userId = res?.userId ?? 0;
+    const prefs = (res?.preferences ?? []).map((p) =>
+      mapBackendPreference(p, userId),
+    );
+    logNotificationApiEvent('info', 'preferences_loaded', { count: prefs.length });
+    return { data: prefs, status: 200 };
+  } catch (err) {
+    console.error('[notifications] fetchNotificationPreferences', err);
+    return { error: 'Error al cargar preferencias de notificacion', status: 500 };
+  }
+}
+
+/**
+ * Actualiza los canales habilitados para un tipo de evento concreto.
+ */
+export async function updateNotificationPreference(
+  eventType: string,
+  payload: NotificationPreferencePayload,
+): Promise<ApiResponse<NotificationPreference>> {
+  try {
+    const res = await gatewayClient.patch<{
+      success: boolean;
+      data?: BackendPreference & { userId: number };
+    }>(`/notifications/preferences/${encodeURIComponent(eventType)}`, payload);
+
+    if (!res?.data) {
+      return { error: 'Respuesta inesperada del servidor', status: 500 };
+    }
+
+    const pref = mapBackendPreference(res.data, res.data.userId ?? 0);
+    logNotificationApiEvent('info', 'preference_updated', { eventType });
+    return { data: pref, status: 200 };
+  } catch (err) {
+    console.error('[notifications] updateNotificationPreference', err);
+    return { error: 'Error al actualizar preferencia', status: 500 };
+  }
+}
