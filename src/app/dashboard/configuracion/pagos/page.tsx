@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Button } from '@arcediano/ux-library';
+import { Button, Badge } from '@arcediano/ux-library';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
 import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
@@ -82,18 +82,17 @@ export default function PagosPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
-      <PageHeader
-        title="Cobros"
-        description="Gestiona Stripe, el estado de tu cuenta y cómo cobras tus ventas"
-        badgeIcon={CreditCard}
-        badgeText="Cobros"
-        tooltip="Cobros"
-        tooltipDetailed="Conecta y gestiona tu cuenta de Stripe para recibir pagos, revisar verificaciones y evitar bloqueos."
-        showBackButton
-      />
-
+    <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+        <PageHeader
+          title="Cobros"
+          description="Gestiona Stripe, el estado de tu cuenta y cómo cobras tus ventas"
+          badgeIcon={CreditCard}
+          badgeText="Cobros"
+          tooltip="Cobros"
+          tooltipDetailed="Conecta y gestiona tu cuenta de Stripe para recibir pagos, revisar verificaciones y evitar bloqueos."
+          showBackButton
+        />
         {loadError && (
           <Alert className="mb-5 border-feedback-danger/30 bg-feedback-danger/10">
             <AlertDescription>{loadError}</AlertDescription>
@@ -103,7 +102,7 @@ export default function PagosPage() {
         {isLoading ? (
           <div className="space-y-5">
             {/* Hero skeleton */}
-            <div className="rounded-[30px] border border-origen-pradera/20 bg-[linear-gradient(135deg,rgba(246,243,232,0.92),rgba(255,255,255,0.98))] p-4 shadow-sm sm:p-6 animate-pulse">
+            <div className="rounded-2xl border border-origen-pradera/20 bg-origen-crema/50 p-4 shadow-sm sm:p-6 animate-pulse">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex items-start gap-3">
                   <div className="h-12 w-12 rounded-2xl bg-border-subtle flex-shrink-0" />
@@ -147,7 +146,7 @@ export default function PagosPage() {
           </div>
         ) : (
         <div className="space-y-5">
-          <section className="rounded-[30px] border border-origen-pradera/20 bg-[linear-gradient(135deg,rgba(246,243,232,0.92),rgba(255,255,255,0.98))] p-4 shadow-sm sm:p-6">
+          <section className="rounded-2xl border border-origen-pradera/20 bg-origen-crema/50 p-4 shadow-sm sm:p-6">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl">
                 <div className="flex items-start gap-3">
@@ -174,10 +173,14 @@ export default function PagosPage() {
 
               <div className="flex w-full flex-col gap-3 lg:w-auto lg:min-w-[300px]">
                 <div className="flex flex-wrap gap-2">
-                  <span className={paymentStage === 'connected' ? 'inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700' : paymentStage === 'pending' ? 'inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700' : 'inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-xs font-medium text-text-subtle'}>
+                  <Badge
+                    variant={paymentStage === 'connected' ? 'success' : paymentStage === 'pending' ? 'warning' : 'neutral'}
+                    size="sm"
+                    className="flex items-center gap-1.5"
+                  >
                     {paymentStage === 'connected' ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> : paymentStage === 'pending' ? <CircleEllipsis className="h-3.5 w-3.5" aria-hidden="true" /> : <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />}
                     {paymentStage === 'connected' ? 'Cobros activos' : paymentStage === 'pending' ? 'Onboarding pendiente' : 'Sin cuenta de cobro'}
-                  </span>
+                  </Badge>
                   {acceptedTermsAt && (
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-xs font-medium text-text-subtle">
                       <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />

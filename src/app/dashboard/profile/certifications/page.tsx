@@ -153,11 +153,11 @@ export default function CertificationsPage() {
   const getStatusBadge = (status: string) => {
     switch(status) {
       case 'verified':
-        return <Badge variant="success" size="sm" className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Verificado</Badge>;
+        return <Badge variant="success" size="sm" className="flex items-center gap-1 w-fit"><CheckCircle className="w-3 h-3" /> Verificado</Badge>;
       case 'pending':
-        return <Badge variant="warning" size="sm" className="flex items-center gap-1"><Clock className="w-3 h-3" /> Pendiente</Badge>;
+        return <Badge variant="warning" size="sm" className="flex items-center gap-1 w-fit"><Clock className="w-3 h-3" /> Pendiente</Badge>;
       default:
-        return <Badge variant="neutral" size="sm">Pendiente de subir</Badge>;
+        return <Badge variant="neutral" size="sm" className="w-fit">Pendiente de subir</Badge>;
     }
   };
 
