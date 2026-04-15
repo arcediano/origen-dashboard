@@ -130,7 +130,11 @@ export default function ConfiguracionPage() {
 
                   return (
                     <div key={key} className="px-4 py-4 sm:px-6">
-                      <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 sm:gap-4">
+                      {/* Mobile: texto arriba (ancho completo) + toggles abajo.
+                          sm+: grid de 3 columnas como antes. */}
+                      <div className="flex flex-col gap-3 sm:grid sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-4">
+
+                        {/* Bloque de texto — ocupa ancho completo en móvil */}
                         <div className="min-w-0 flex items-start gap-3">
                           <div className="w-9 h-9 rounded-xl bg-origen-pastel flex items-center justify-center flex-shrink-0 mt-0.5">
                             <Icon className="w-4 h-4 text-origen-pino" />
@@ -141,26 +145,29 @@ export default function ConfiguracionPage() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col items-center gap-1 min-w-[78px] sm:min-w-[94px]">
-                          <span className="text-[10px] uppercase tracking-wide text-text-subtle">Email</span>
-                          <Toggle
-                            checked={emailSettings[key]}
-                            onCheckedChange={(checked) => setEmailSettings((current) => ({ ...current, [key]: checked }))}
-                            variant="leaf"
-                            toggleSize="sm"
-                            aria-label={`Activar ${config.title} por email`}
-                          />
-                        </div>
+                        {/* Wrapper de toggles: fila en móvil (alineado con texto), invisible en sm+ (sm:contents) */}
+                        <div className="flex items-center gap-4 pl-12 sm:contents">
+                          <div className="flex flex-col items-center gap-1 min-w-[78px] sm:min-w-[94px]">
+                            <span className="text-[10px] uppercase tracking-wide text-text-subtle">Email</span>
+                            <Toggle
+                              checked={emailSettings[key]}
+                              onCheckedChange={(checked) => setEmailSettings((current) => ({ ...current, [key]: checked }))}
+                              variant="leaf"
+                              toggleSize="sm"
+                              aria-label={`Activar ${config.title} por email`}
+                            />
+                          </div>
 
-                        <div className="flex flex-col items-center gap-1 min-w-[78px] sm:min-w-[94px]">
-                          <span className="text-[10px] uppercase tracking-wide text-text-subtle">Push</span>
-                          <Toggle
-                            checked={pushSettings[key]}
-                            onCheckedChange={(checked) => setPushSettings((current) => ({ ...current, [key]: checked }))}
-                            variant="seed"
-                            toggleSize="sm"
-                            aria-label={`Activar ${config.title} por push`}
-                          />
+                          <div className="flex flex-col items-center gap-1 min-w-[78px] sm:min-w-[94px]">
+                            <span className="text-[10px] uppercase tracking-wide text-text-subtle">Push</span>
+                            <Toggle
+                              checked={pushSettings[key]}
+                              onCheckedChange={(checked) => setPushSettings((current) => ({ ...current, [key]: checked }))}
+                              variant="seed"
+                              toggleSize="sm"
+                              aria-label={`Activar ${config.title} por push`}
+                            />
+                          </div>
                         </div>
 
                       </div>
