@@ -61,7 +61,7 @@ export function VisitsChart({ period = '6m' }: VisitsChartProps) {
         : 'Visitas: último año vs año anterior';
 
   return (
-    <section className="rounded-[24px] border border-border-subtle bg-surface-alt p-4 shadow-sm sm:p-5" data-testid="visits-chart">
+    <section className="rounded-[24px] border border-border-subtle bg-surface-alt p-4 shadow-sm sm:p-5 overflow-hidden" data-testid="visits-chart">
       <div className="mb-3">
         <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">{title}</h3>
       </div>

@@ -229,7 +229,7 @@ export function SalesChart({ period = '6m' }: SalesChartProps) {
   }, [period]);
 
   return (
-    <section className="rounded-[24px] border border-border-subtle bg-surface-alt p-4 shadow-sm sm:p-5" data-testid="sales-chart">
+    <section className="rounded-[24px] border border-border-subtle bg-surface-alt p-4 shadow-sm sm:p-5 overflow-hidden" data-testid="sales-chart">
       <div className="mb-3 flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">{title}</h3>
         {isLoading && <span className="text-[11px] text-text-subtle">Actualizando...</span>}

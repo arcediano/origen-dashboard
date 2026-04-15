@@ -5,7 +5,6 @@
 
 import {
   CreditCard,
-  Heart,
   LayoutDashboard,
   Package,
   ShoppingBag,
@@ -189,11 +188,11 @@ export const MOBILE_ROOT_TABS: RootTabItem[] = [
     isCentral: true,
   },
   {
-    id: 'favoritos',
-    label: 'Favoritos',
-    icon: Heart,
-    href: '/dashboard/favoritos',
-    matchPaths: ['/dashboard/favoritos*'],
+    id: 'resenas',
+    label: 'Reseñas',
+    icon: Star,
+    href: '/dashboard/reviews',
+    matchPaths: ['/dashboard/reviews*'],
   },
   {
     id: 'perfil',
