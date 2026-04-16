@@ -268,6 +268,35 @@ export default function OnboardingPage() {
     }
   });
 
+  /**
+   * Construye la URL pública de una clave S3 usando NEXT_PUBLIC_CDN_BASE_URL.
+   * Fallback para when the backend no devuelve URLs precalculadas todavía.
+   */
+  const buildCdnUrl = (key: string): string => {
+    const base = (process.env.NEXT_PUBLIC_CDN_BASE_URL ?? '').replace(/\/$/, '');
+    return base ? `${base}/${key}` : key;
+  };
+
+  /**
+   * Resuelve la lista de imágenes con { key, url } desde la respuesta del backend.
+   * Estrategia de tres niveles (más reciente → más robusto):
+   *   1. d.visual.teamPhotoUrls  — nuevo formato inline (backend ≥ commit 2549558)
+   *   2. d.visualUrls.teamPhotos — campo separado (backend ≥ commit 2549558 variante)
+   *   3. d.visual.teamPhotoDocIds — claves raw + CDN env var (cualquier versión del backend)
+   */
+  const resolveImageList = (
+    inline: any[] | undefined | null,
+    separate: any[] | undefined | null,
+    rawKeys: string[] | undefined | null,
+  ): Array<{ key: string; url: string }> => {
+    if (Array.isArray(inline) && inline.length > 0) return inline;
+    if (Array.isArray(separate) && separate.length > 0) return separate;
+    if (Array.isArray(rawKeys) && rawKeys.length > 0) {
+      return rawKeys.map((k) => ({ key: k, url: buildCdnUrl(k) }));
+    }
+    return [];
+  };
+
   useEffect(() => {
     loadOnboardingData()
       .then((res: any) => {
@@ -295,18 +324,25 @@ export default function OnboardingPage() {
             // Dirección de facturación (Sprint 2)
             billingAddressSameAsProduction: d.fiscal?.billingAddress == null,
             billingAddress: d.fiscal?.billingAddress ?? prev.step1.billingAddress,
-            // Fotos de ubicación guardadas previamente
-            locationImages: Array.isArray(d.visualUrls?.locationImages) && d.visualUrls.locationImages.length > 0
-              ? d.visualUrls.locationImages.map((img: any) => ({
-                  id: img.key,
-                  key: img.key,
-                  name: (img.key as string).split('/').pop() || 'location-image',
-                  size: 0,
-                  type: 'image/jpeg',
-                  url: img.url,
-                  preview: img.url,
-                }))
-              : prev.step1.locationImages,
+            // Fotos de ubicación guardadas previamente (3-level fallback)
+            locationImages: (() => {
+              const imgs = resolveImageList(
+                d.visual?.locationImageUrls,
+                d.visualUrls?.locationImages,
+                d.visual?.locationImageDocIds,
+              );
+              return imgs.length > 0
+                ? imgs.map((img) => ({
+                    id: img.key,
+                    key: img.key,
+                    name: img.key.split('/').pop() || 'location-image',
+                    size: 0,
+                    type: 'image/jpeg',
+                    url: img.url,
+                    preview: img.url,
+                  }))
+                : prev.step1.locationImages;
+            })(),
           },
           step2: {
             ...prev.step2,
@@ -317,18 +353,25 @@ export default function OnboardingPage() {
             values: d.story?.values?.length ? d.story.values : prev.step2.values,
             website: d.story?.website ?? prev.step2.website,
             instagramHandle: d.story?.instagramHandle ?? prev.step2.instagramHandle,
-            // Fotos de equipo guardadas previamente
-            photos: Array.isArray(d.visualUrls?.teamPhotos) && d.visualUrls.teamPhotos.length > 0
-              ? d.visualUrls.teamPhotos.map((img: any) => ({
-                  id: img.key,
-                  key: img.key,
-                  name: (img.key as string).split('/').pop() || 'team-photo',
-                  size: 0,
-                  type: 'image/jpeg',
-                  url: img.url,
-                  preview: img.url,
-                }))
-              : prev.step2.photos,
+            // Fotos de equipo guardadas previamente (3-level fallback)
+            photos: (() => {
+              const imgs = resolveImageList(
+                d.visual?.teamPhotoUrls,
+                d.visualUrls?.teamPhotos,
+                d.visual?.teamPhotoDocIds,
+              );
+              return imgs.length > 0
+                ? imgs.map((img) => ({
+                    id: img.key,
+                    key: img.key,
+                    name: img.key.split('/').pop() || 'team-photo',
+                    size: 0,
+                    type: 'image/jpeg',
+                    url: img.url,
+                    preview: img.url,
+                  }))
+                : prev.step2.photos;
+            })(),
             // Certificaciones declaradas previamente
             certifications: Array.isArray(d.certifications) && d.certifications.length > 0
               ? d.certifications.map((c: any) => ({
@@ -342,29 +385,23 @@ export default function OnboardingPage() {
           step3: {
             ...prev.step3,
             introVideo: d.story?.introVideoUrl ?? prev.step3.introVideo,
-            // Logo y banner guardados previamente
-            logo: d.visualUrls?.logoUrl
-              ? {
-                  id: d.visualUrls.logoKey as string,
-                  key: d.visualUrls.logoKey as string,
-                  name: 'logo',
-                  size: 0,
-                  type: 'image/jpeg',
-                  url: d.visualUrls.logoUrl as string,
-                  preview: d.visualUrls.logoUrl as string,
-                }
-              : prev.step3.logo,
-            banner: d.visualUrls?.bannerUrl
-              ? {
-                  id: d.visualUrls.bannerKey as string,
-                  key: d.visualUrls.bannerKey as string,
-                  name: 'banner',
-                  size: 0,
-                  type: 'image/jpeg',
-                  url: d.visualUrls.bannerUrl as string,
-                  preview: d.visualUrls.bannerUrl as string,
-                }
-              : prev.step3.banner,
+            // Logo y banner guardados previamente (3-level fallback)
+            logo: (() => {
+              const logoUrl = d.visual?.logoUrl ?? d.visualUrls?.logoUrl
+                ?? (d.visual?.logoDocId ? buildCdnUrl(d.visual.logoDocId) : null);
+              const logoKey = d.visual?.logoDocId ?? d.visualUrls?.logoKey ?? null;
+              return logoUrl && logoKey
+                ? { id: logoKey, key: logoKey, name: 'logo', size: 0, type: 'image/jpeg', url: logoUrl, preview: logoUrl }
+                : prev.step3.logo;
+            })(),
+            banner: (() => {
+              const bannerUrl = d.visual?.bannerUrl ?? d.visualUrls?.bannerUrl
+                ?? (d.visual?.bannerDocId ? buildCdnUrl(d.visual.bannerDocId) : null);
+              const bannerKey = d.visual?.bannerDocId ?? d.visualUrls?.bannerKey ?? null;
+              return bannerUrl && bannerKey
+                ? { id: bannerKey, key: bannerKey, name: 'banner', size: 0, type: 'image/jpeg', url: bannerUrl, preview: bannerUrl }
+                : prev.step3.banner;
+            })(),
           },
           step4: d.logistics ? {
             ...prev.step4,
