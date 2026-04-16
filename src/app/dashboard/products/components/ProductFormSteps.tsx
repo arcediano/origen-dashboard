@@ -40,6 +40,8 @@ interface ProductFormStepsProps {
   onPriceTiersChange: (tiers: PriceTier[]) => void;
   onImagesChange: (images: any[]) => void;
   skuSuggestion?: string;
+  /** ID del producto en modo edición — permite llamadas granulares a la API de certs. */
+  productId?: string;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -53,6 +55,7 @@ export function ProductFormSteps({
   onPriceTiersChange,
   onImagesChange,
   skuSuggestion,
+  productId,
 }: ProductFormStepsProps) {
   return (
     <AnimatePresence mode="wait">
@@ -126,6 +129,7 @@ export function ProductFormSteps({
             onAttributesChange={(attrs) => onInputChange('attributes', attrs)}
             completed={completedTabs.certifications}
             productCategory={formData.categoryId}
+            productId={productId}
           />
         )}
       </motion.div>

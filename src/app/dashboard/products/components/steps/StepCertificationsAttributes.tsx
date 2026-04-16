@@ -46,11 +46,13 @@ import {
   Bean,
   Sprout,
   Lightbulb,
-  TrendingUp
+  TrendingUp,
+  Search,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { 
   Certification, 
   DynamicAttribute, 
@@ -58,6 +60,12 @@ import type {
   CertificationStatus,
   CertificationCategory 
 } from '@/types/product';
+import {
+  getCertificationsCatalog,
+  addProductCertification,
+  removeProductCertification,
+  type CatalogCertification,
+} from '@/lib/api/products';
 
 interface StepCertificationsAttributesProps {
   certifications?: Certification[];
@@ -66,6 +74,8 @@ interface StepCertificationsAttributesProps {
   onAttributesChange: (attrs: DynamicAttribute[]) => void;
   completed?: boolean;
   productCategory?: string;
+  /** ID del producto cuando estamos en modo edición. Permite llamadas granulares al backend. */
+  productId?: string;
 }
 
 // ============================================================================
@@ -309,7 +319,8 @@ export function StepCertificationsAttributes({
   onCertificationsChange,
   onAttributesChange,
   completed,
-  productCategory = 'general'
+  productCategory = 'general',
+  productId,
 }: StepCertificationsAttributesProps) {
   
   const [activeTab, setActiveTab] = useState('certifications');
@@ -319,6 +330,16 @@ export function StepCertificationsAttributes({
   const [editingAttr, setEditingAttr] = useState<DynamicAttribute | null>(null);
   const [verifyingCert, setVerifyingCert] = useState<string | null>(null);
   const [showExampleTooltip, setShowExampleTooltip] = useState<string | null>(null);
+
+  // ── Catálogo de certificaciones ──────────────────────────────────────────
+  const [catalogSearch, setCatalogSearch] = useState('');
+  const [catalogResults, setCatalogResults] = useState<CatalogCertification[]>([]);
+  const [isLoadingCatalog, setIsLoadingCatalog] = useState(false);
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
+  const [certActionError, setCertActionError] = useState<string | null>(null);
+  const [certActionLoading, setCertActionLoading] = useState<string | null>(null);
+  const catalogRef = useRef<HTMLDivElement>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const [newCert, setNewCert] = useState<Partial<Certification>>({
     name: '',
@@ -338,6 +359,33 @@ export function StepCertificationsAttributes({
 
   const categoryExamples = ATTRIBUTE_EXAMPLES[productCategory] || ATTRIBUTE_EXAMPLES.quesos;
   const isStepComplete = certifications.length > 0 || attributes.length > 0;
+
+  // ── Búsqueda en catálogo con debounce ────────────────────────────────────
+
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+
+    if (!catalogSearch.trim()) {
+      setCatalogResults([]);
+      return;
+    }
+
+    setIsLoadingCatalog(true);
+    searchDebounceRef.current = setTimeout(async () => {
+      const res = await getCertificationsCatalog({ search: catalogSearch.trim(), limit: 10 });
+      if (!res.error && res.data) {
+        // Filtrar certs ya añadidas al producto
+        const existing = new Set(certifications.map((c) => c.id));
+        setCatalogResults(res.data.items.filter((item) => !existing.has(item.id)));
+      }
+      setIsLoadingCatalog(false);
+    }, 350);
+
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalogSearch]);
 
   // ============================================================================
   // FUNCIONES AUXILIARES
@@ -376,6 +424,42 @@ export function StepCertificationsAttributes({
     resetCertForm();
   };
 
+  /**
+   * Selecciona una certificación del catálogo.
+   * En modo edición: llama a POST /products/:id/certifications de inmediato.
+   * En modo creación: añade al estado local para bundlear con el submit del formulario.
+   */
+  const handleSelectFromCatalog = async (item: CatalogCertification) => {
+    setCertActionError(null);
+
+    // Validar duplicado
+    if (certifications.some((c) => c.id === item.id)) return;
+
+    if (productId) {
+      setCertActionLoading(item.id);
+      const res = await addProductCertification(productId, item.id);
+      setCertActionLoading(null);
+      if (res.error) {
+        setCertActionError(res.error);
+        return;
+      }
+    }
+
+    const cert: Certification = {
+      id:          item.id,
+      name:        item.name,
+      issuingBody: item.issuingBody,
+      status:      'active',
+      verified:    false,
+      category:    item.category.toLowerCase() as CertificationCategory,
+    };
+
+    onCertificationsChange([...certifications, cert]);
+    setCatalogSearch('');
+    setCatalogResults([]);
+    setIsCatalogOpen(false);
+  };
+
   const handleUpdateCertification = () => {
     if (!editingCert) return;
 
@@ -394,7 +478,19 @@ export function StepCertificationsAttributes({
     resetCertForm();
   };
 
-  const handleDeleteCertification = (id: string) => {
+  const handleDeleteCertification = async (id: string) => {
+    setCertActionError(null);
+
+    if (productId) {
+      setCertActionLoading(id);
+      const res = await removeProductCertification(productId, id);
+      setCertActionLoading(null);
+      if (res.error) {
+        setCertActionError(res.error);
+        return;
+      }
+    }
+
     onCertificationsChange(certifications.filter(c => c.id !== id));
   };
 
@@ -586,7 +682,97 @@ export function StepCertificationsAttributes({
                 </div>
               </div>
 
-              {/* Botón añadir certificación */}
+              {/* Error global de acción */}
+              {certActionError && (
+                <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {certActionError}
+                  <button
+                    type="button"
+                    onClick={() => setCertActionError(null)}
+                    className="ml-auto"
+                    aria-label="Cerrar error"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* ── Buscador de catálogo ──────────────────────────────────── */}
+              <div className="relative" ref={catalogRef}>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                  <input
+                    type="text"
+                    value={catalogSearch}
+                    onChange={(e) => {
+                      setCatalogSearch(e.target.value);
+                      setIsCatalogOpen(true);
+                    }}
+                    onFocus={() => setIsCatalogOpen(true)}
+                    placeholder="Buscar en el catálogo de certificaciones…"
+                    className="w-full h-11 pl-9 pr-10 rounded-xl border border-border bg-white text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
+                    aria-label="Buscar certificación en el catálogo"
+                    aria-expanded={isCatalogOpen && (catalogResults.length > 0 || isLoadingCatalog)}
+                    aria-haspopup="listbox"
+                    aria-autocomplete="list"
+                  />
+                  {isLoadingCatalog && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
+                  )}
+                  {catalogSearch && !isLoadingCatalog && (
+                    <button
+                      type="button"
+                      onClick={() => { setCatalogSearch(''); setCatalogResults([]); setIsCatalogOpen(false); }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label="Limpiar búsqueda"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Resultados */}
+                <AnimatePresence>
+                  {isCatalogOpen && catalogResults.length > 0 && (
+                    <motion.ul
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      role="listbox"
+                      aria-label="Resultados del catálogo"
+                      className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-xl border border-border bg-white shadow-lg"
+                    >
+                      {catalogResults.map((item) => (
+                        <li
+                          key={item.id}
+                          role="option"
+                          aria-selected={false}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => handleSelectFromCatalog(item)}
+                            disabled={certActionLoading === item.id}
+                            className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm hover:bg-origen-crema/40 transition-colors focus:outline-none focus:bg-origen-crema/40 text-left"
+                          >
+                            <span className="flex items-center gap-2 min-w-0">
+                              <Award className="w-4 h-4 shrink-0 text-origen-pradera" aria-hidden="true" />
+                              <span className="truncate font-medium">{item.name}</span>
+                              <span className="shrink-0 text-xs text-muted-foreground">· {item.issuingBody}</span>
+                            </span>
+                            {certActionLoading === item.id
+                              ? <Loader2 className="w-4 h-4 shrink-0 animate-spin text-origen-pradera" aria-label="Añadiendo…" />
+                              : <Plus className="w-4 h-4 shrink-0 text-origen-pradera" aria-hidden="true" />
+                            }
+                          </button>
+                        </li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Botón añadir certificación manual */}
               <div className="flex justify-end">
                 <Button
                   size="sm"
@@ -596,7 +782,7 @@ export function StepCertificationsAttributes({
                   }}
                   leftIcon={<Plus className="w-4 h-4" />}
                 >
-                  {showCertForm ? 'Cancelar' : 'Nueva certificación'}
+                  {showCertForm ? 'Cancelar' : 'Certificación manual'}
                 </Button>
               </div>
 
@@ -614,29 +800,7 @@ export function StepCertificationsAttributes({
                         {editingCert ? 'Editar certificación' : 'Nueva certificación'}
                       </h4>
 
-                      {/* Certificaciones predefinidas */}
-                      <div className="mb-4">
-                        <p className="text-xs text-muted-foreground mb-2">Selecciona una certificación común:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {PREDEFINED_CERTIFICATIONS.map((cert) => (
-                            <button
-                              key={cert.id}
-                              onClick={() => setNewCert({
-                                ...newCert,
-                                name: cert.name,
-                                issuingBody: cert.body,
-                                category: cert.category,
-                              })}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-surface-alt rounded-full border border-border hover:border-origen-pradera hover:bg-origen-crema/30 transition-all text-xs"
-                              title={cert.description}
-                            >
-                              <span className="text-origen-pradera">{cert.icon}</span>
-                              {cert.name}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
+                      {/* Formulario manual — nombre, organismo, etc. */}
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
                           <Input
@@ -817,9 +981,14 @@ export function StepCertificationsAttributes({
                                 </button>
                                 <button
                                   onClick={() => handleDeleteCertification(cert.id)}
-                                  className="p-1.5 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
+                                  disabled={certActionLoading === cert.id}
+                                  className="p-1.5 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                                  aria-label={`Eliminar ${cert.name}`}
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  {certActionLoading === cert.id
+                                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                                    : <Trash2 className="w-4 h-4" />
+                                  }
                                 </button>
                               </div>
                             </div>

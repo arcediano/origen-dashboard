@@ -70,6 +70,7 @@ export interface OnboardingData {
     documentDocId?: string | null;
     status: 'PENDING' | 'VERIFIED' | 'REJECTED';
     verifiedAt?: string | null;
+    rejectedReason?: string | null;
   }> | null;
   documents?: Array<{
     type: 'CIF' | 'SEGURO_RC' | 'MANIPULADOR_ALIMENTOS';

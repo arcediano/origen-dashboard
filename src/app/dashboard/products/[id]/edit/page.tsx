@@ -134,6 +134,7 @@ export default function EditProductPage() {
               onPriceTiersChange={handlePriceTiersChange}
               onImagesChange={handleImagesChange}
               skuSuggestion={skuSuggestion}
+              productId={productId}
             />
 
             <CreateProductNavigation

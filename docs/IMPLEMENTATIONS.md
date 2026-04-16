@@ -193,6 +193,48 @@ Se corrige la seccion `Configuraciones` para distinguir de forma real por canal 
 
 ---
 
+## Sprint 29 — Certificaciones de producto: selector en formulario (Abril 2026)
+
+### Selector de catálogo de certificaciones en formulario de producto
+
+**Fecha**: 2026-04-16  
+**US**: US-DASH-2901  
+**Agentes**: @desarrollador-codigo, @analista-pruebas, @auditor-seguridad
+
+#### Descripción
+
+Reemplaza la lista predefinida estática de certificaciones en `StepCertificationsAttributes` por un combobox de búsqueda en tiempo real contra el catálogo maestro del backend. En modo edición (cuando existe `productId`), los cambios se persisten inmediatamente vía API.
+
+#### Archivos afectados
+
+| Archivo | Cambio |
+|---------|--------|
+| `src/lib/api/products.ts` | Añadidas: `CatalogCertification` interface, `getCertificationsCatalog()`, `addProductCertification()`, `removeProductCertification()` |
+| `src/lib/api/onboarding.ts` | `rejectedReason?: string \| null` añadido a `OnboardingData.certifications[]` (fix pre-existente Sprint 28) |
+| `src/app/dashboard/products/components/steps/StepCertificationsAttributes.tsx` | Prop `productId?: string`; combobox con debounce 350ms; wiring API en modo edit; spinner en delete; error banner |
+| `src/app/dashboard/products/components/ProductFormSteps.tsx` | Prop `productId?: string` propagada a `StepCertificationsAttributes` |
+| `src/app/dashboard/products/[id]/edit/page.tsx` | Pasa `productId={productId}` a `ProductFormSteps` |
+| `tests/unit/certifications-catalog-api.test.ts` | NUEVO — 9 tests unitarios de las 3 funciones API |
+
+#### Decisiones técnicas
+
+- Debounce de 350ms en búsqueda para reducir requests al backend
+- En modo create (`productId` ausente): cambios solo en estado local hasta submit del formulario
+- En modo edit: cada add/remove persiste inmediatamente (UX clear — sin botón "guardar paso")
+- `URLSearchParams` usado para construir query string — previene injection
+- Spinner `Loader2` en botón delete con `disabled` para prevenir clicks duplicados
+
+#### Gates de calidad
+
+| Gate | Estado | Detalle |
+|------|--------|---------|
+| Compilación (`tsc --noEmit`) | ✅ Sin errores | `origen-dashboard` verificado |
+| Tests unitarios | ✅ 9/9 PASS | `certifications-catalog-api.test.ts` |
+| Seguridad | ✅ APROBADO | @auditor-seguridad — sin hallazgos |
+| Documentación | ✅ Este archivo | |
+
+---
+
 ## Historial de ADRs relacionados
 
 - [ADR-001](./adr/ADR-001-canonical-navigation-routes.md) — Rutas canónicas de navegación en cuenta del productor

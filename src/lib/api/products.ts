@@ -769,3 +769,87 @@ export async function suggestSku(
 
   return { data: { suggestedSku: `${prefix}-${code}-XXX` }, status: 200 };
 }
+
+// ─── CATÁLOGO DE CERTIFICACIONES ─────────────────────────────────────────────
+
+export interface CatalogCertification {
+  id: string;
+  name: string;
+  issuingBody: string;
+  category: string;
+  logoId?: string | null;
+  description?: string | null;
+}
+
+/**
+ * Obtiene el catálogo maestro de certificaciones disponibles.
+ * Endpoint público (no requiere auth): GET /products/certifications/catalog
+ */
+export async function getCertificationsCatalog(params?: {
+  search?: string;
+  category?: string;
+  page?: number;
+  limit?: number;
+}): Promise<ApiResponse<PaginatedResponse<CatalogCertification>>> {
+  try {
+    const qs = new URLSearchParams();
+    if (params?.search)   qs.set('search', params.search);
+    if (params?.category) qs.set('category', params.category);
+    if (params?.page)     qs.set('page', String(params.page));
+    if (params?.limit)    qs.set('limit', String(params.limit ?? 20));
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+
+    const raw = await gatewayClient.get<{ items: CatalogCertification[]; total: number; page: number; limit: number }>(
+      `/products/certifications/catalog${query}`,
+    );
+
+    return {
+      data: {
+        items:      raw.items ?? [],
+        total:      raw.total ?? 0,
+        page:       raw.page  ?? 1,
+        limit:      raw.limit ?? 20,
+        totalPages: Math.ceil((raw.total ?? 0) / (raw.limit ?? 20)),
+      },
+      status: 200,
+    };
+  } catch (error) {
+    return handleError(error, 'getCertificationsCatalog');
+  }
+}
+
+/**
+ * Añade una certificación existente del catálogo a un producto.
+ * Ruta backend: POST /products/:id/certifications
+ * Body: { certificationId: string }
+ */
+export async function addProductCertification(
+  productId: string,
+  certificationId: string,
+): Promise<ApiResponse<{ certificationId: string }>> {
+  try {
+    const raw = await gatewayClient.post<{ certificationId: string }>(
+      `/products/${productId}/certifications`,
+      { certificationId },
+    );
+    return { data: raw, status: 201 };
+  } catch (error) {
+    return handleError(error, 'addProductCertification');
+  }
+}
+
+/**
+ * Elimina una certificación de un producto.
+ * Ruta backend: DELETE /products/:id/certifications/:certificationId
+ */
+export async function removeProductCertification(
+  productId: string,
+  certificationId: string,
+): Promise<ApiResponse<null>> {
+  try {
+    await gatewayClient.delete(`/products/${productId}/certifications/${certificationId}`);
+    return { status: 200, data: null };
+  } catch (error) {
+    return handleError(error, 'removeProductCertification');
+  }
+}
