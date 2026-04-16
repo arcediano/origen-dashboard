@@ -35,6 +35,7 @@ interface CertItem {
   issuingBody: string;
   status: DocStatus | null; // null = no doc subido aún
   verifiedAt: string | null;
+  rejectedReason: string | null;
 }
 
 interface LegalDocItem {
@@ -123,6 +124,7 @@ export default function CertificationsPage() {
         issuingBody: c.issuingBody,
         status: c.documentDocId ? (c.status as DocStatus) : null,
         verifiedAt: c.verifiedAt ?? null,
+        rejectedReason: c.rejectedReason ?? null,
       }));
 
       // Documentos legales obligatorios: construct from known types + merge API data
@@ -318,7 +320,7 @@ export default function CertificationsPage() {
                             <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
                               <p className="text-xs text-red-700 flex items-center gap-2">
                                 <AlertCircle className="w-3.5 h-3.5" />
-                                Certificado rechazado. Por favor sube una nueva versión del documento.
+                                {cert.rejectedReason ?? 'Certificado rechazado. Por favor sube una nueva versión del documento.'}
                               </p>
                             </div>
                           )}
