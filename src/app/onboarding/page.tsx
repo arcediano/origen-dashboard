@@ -295,6 +295,18 @@ export default function OnboardingPage() {
             // Dirección de facturación (Sprint 2)
             billingAddressSameAsProduction: d.fiscal?.billingAddress == null,
             billingAddress: d.fiscal?.billingAddress ?? prev.step1.billingAddress,
+            // Fotos de ubicación guardadas previamente
+            locationImages: Array.isArray(d.visualUrls?.locationImages) && d.visualUrls.locationImages.length > 0
+              ? d.visualUrls.locationImages.map((img: any) => ({
+                  id: img.key,
+                  key: img.key,
+                  name: (img.key as string).split('/').pop() || 'location-image',
+                  size: 0,
+                  type: 'image/jpeg',
+                  url: img.url,
+                  preview: img.url,
+                }))
+              : prev.step1.locationImages,
           },
           step2: {
             ...prev.step2,
@@ -305,10 +317,54 @@ export default function OnboardingPage() {
             values: d.story?.values?.length ? d.story.values : prev.step2.values,
             website: d.story?.website ?? prev.step2.website,
             instagramHandle: d.story?.instagramHandle ?? prev.step2.instagramHandle,
+            // Fotos de equipo guardadas previamente
+            photos: Array.isArray(d.visualUrls?.teamPhotos) && d.visualUrls.teamPhotos.length > 0
+              ? d.visualUrls.teamPhotos.map((img: any) => ({
+                  id: img.key,
+                  key: img.key,
+                  name: (img.key as string).split('/').pop() || 'team-photo',
+                  size: 0,
+                  type: 'image/jpeg',
+                  url: img.url,
+                  preview: img.url,
+                }))
+              : prev.step2.photos,
+            // Certificaciones declaradas previamente
+            certifications: Array.isArray(d.certifications) && d.certifications.length > 0
+              ? d.certifications.map((c: any) => ({
+                  id: c.certificationId,
+                  name: c.name,
+                  issuingBody: c.issuingBody,
+                  verified: c.status === 'VERIFIED',
+                }))
+              : prev.step2.certifications,
           },
           step3: {
             ...prev.step3,
             introVideo: d.story?.introVideoUrl ?? prev.step3.introVideo,
+            // Logo y banner guardados previamente
+            logo: d.visualUrls?.logoUrl
+              ? {
+                  id: d.visualUrls.logoKey as string,
+                  key: d.visualUrls.logoKey as string,
+                  name: 'logo',
+                  size: 0,
+                  type: 'image/jpeg',
+                  url: d.visualUrls.logoUrl as string,
+                  preview: d.visualUrls.logoUrl as string,
+                }
+              : prev.step3.logo,
+            banner: d.visualUrls?.bannerUrl
+              ? {
+                  id: d.visualUrls.bannerKey as string,
+                  key: d.visualUrls.bannerKey as string,
+                  name: 'banner',
+                  size: 0,
+                  type: 'image/jpeg',
+                  url: d.visualUrls.bannerUrl as string,
+                  preview: d.visualUrls.bannerUrl as string,
+                }
+              : prev.step3.banner,
           },
           step4: d.logistics ? {
             ...prev.step4,
@@ -528,9 +584,14 @@ export default function OnboardingPage() {
       case 0: {
         let locationImageKeys: string[] = [];
         try {
-          locationImageKeys = await Promise.all(
+          // Claves de imágenes ya subidas previamente (hidratadas desde servidor)
+          const existingKeys = formData.step1.locationImages
+            .filter((f) => !f.file && f.key)
+            .map((f) => f.key!);
+          const newKeys = await Promise.all(
             formData.step1.locationImages.filter((f) => f.file).map((f) => uploadFile(f.file!, 'visual/location').then((r) => r.key)),
           );
+          locationImageKeys = [...existingKeys, ...newKeys];
         } catch (uploadErr) {
           throw new Error(`No se pudieron subir las fotos del local: ${getUserFriendlyError(uploadErr)}`);
         }
@@ -538,9 +599,14 @@ export default function OnboardingPage() {
         break;
       }
       case 1: {
-        const teamPhotoKeys = await Promise.all(
+        // Combinar claves existentes con nuevas subidas
+        const existingTeamKeys = formData.step2.photos
+          .filter((f) => !f.file && f.key)
+          .map((f) => f.key!);
+        const newTeamKeys = await Promise.all(
           formData.step2.photos.filter((f) => f.file).map((f) => uploadFile(f.file!, 'visual/team').then((r) => r.key)),
         );
+        const teamPhotoKeys = [...existingTeamKeys, ...newTeamKeys];
         await saveStep2(formData.step2, teamPhotoKeys);
         break;
       }
@@ -560,12 +626,13 @@ export default function OnboardingPage() {
         break;
       }
       case 3: {
+        // Usar clave existente si no se sube una nueva imagen
         const logoKey = formData.step3.logo?.file
           ? (await uploadFile(formData.step3.logo.file, 'visual/logo')).key
-          : undefined;
+          : formData.step3.logo?.key;
         const bannerKey = formData.step3.banner?.file
           ? (await uploadFile(formData.step3.banner.file, 'visual/banner')).key
-          : undefined;
+          : formData.step3.banner?.key;
         await saveStep3({ logoKey, bannerKey, introVideoUrl: formData.step3.introVideo });
         break;
       }

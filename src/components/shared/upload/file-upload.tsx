@@ -47,6 +47,8 @@ export interface UploadedFile {
   url?: string;
   preview?: string;
   status?: string;
+  /** Clave S3 del fichero ya subido — presente en archivos hidratados desde el servidor */
+  key?: string;
 }
 
 export interface FileUploadProps {
