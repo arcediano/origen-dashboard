@@ -353,8 +353,27 @@ export default function OnboardingPage() {
           } : prev.step6,
         }));
         if (d.onboarding?.currentStep) {
-          const savedStep = Math.min(d.onboarding.currentStep - 1, STEPS.length - 1);
-          setCurrentStep(Math.max(0, savedStep));
+          // El backend numera los pasos 1-6 (sin paso de Productos).
+          // El frontend tiene 7 pasos (0-6) con "Productos" en el índice 2,
+          // entre "Historia" (índice 1, backend paso 2) y "Perfil visual" (índice 3, backend paso 3).
+          // Mapeo correcto:
+          //   backendStep 1 → frontend 0 (Ubicación)
+          //   backendStep 2 → frontend 1 (Historia)
+          //   backendStep 3 + sin productos → frontend 2 (Productos)
+          //   backendStep 3 + con productos → frontend 3 (Perfil visual)
+          //   backendStep 4 → frontend 4 (Capacidad)
+          //   backendStep 5 → frontend 5 (Documentación)
+          //   backendStep 6 → frontend 6 (Pagos)
+          const hasProducts = Array.isArray(d.products) && d.products.length > 0;
+          let savedStep: number;
+          if (d.onboarding.currentStep >= 4) {
+            savedStep = d.onboarding.currentStep; // pasos 4,5,6 coinciden con índices frontend 4,5,6
+          } else if (d.onboarding.currentStep === 3) {
+            savedStep = hasProducts ? 3 : 2; // con productos → Visual; sin → Productos
+          } else {
+            savedStep = d.onboarding.currentStep - 1; // 1→0, 2→1
+          }
+          setCurrentStep(Math.max(0, Math.min(savedStep, STEPS.length - 1)));
         }
       })
       .catch((error: unknown) => {
