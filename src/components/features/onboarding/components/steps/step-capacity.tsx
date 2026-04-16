@@ -291,10 +291,12 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
             onClick={handleAddZone}
             disabled={zoneType === 'named' ? (!zoneName.trim() || !zoneValue.trim()) : !zoneValue.trim()}
             variant="primary"
-            className="w-full sm:w-auto sm:flex-shrink-0"
+            className="w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap"
           >
-            <Plus className="w-4 h-4 mr-1.5" />
-            Añadir zona
+            <span className="inline-flex items-center gap-1.5">
+              <Plus className="w-4 h-4 flex-shrink-0" />
+              Añadir zona
+            </span>
           </Button>
         </div>
 
@@ -521,30 +523,18 @@ export function EnhancedStep4Capacity({
     handleInputChange('deliveryOptions', data.deliveryOptions.filter(opt => opt.id !== optionId));
   };
 
-  // Determinar si el productor está en ruta (simulado)
+  // Sincronizar isInOriginRoute con la provincia del productor
+  // IMPORTANTE: no pre-inyectar métodos de envío por defecto — el productor configura los suyos
   React.useEffect(() => {
-    if (producerLocation?.province) {
-      const isInRoute = ORIGEN_ROUTES.some(route =>
-        route.provinces.includes(producerLocation.province.toLowerCase())
-      );
-      
-      // Si está en ruta, forzamos opciones de Origen
-      if (isInRoute && !data.isInOriginRoute) {
-        handleInputChange('isInOriginRoute', true);
-        handleInputChange('deliveryOptions', [{
-          id: 'origen-route',
-          name: 'Envío con Origen',
-          description: 'Entrega en ruta semanal',
-          price: 3.90,
-          estimatedDays: '1-2',
-          icon: Route
-        }]);
-      } else if (!isInRoute && !data.deliveryOptions?.length) {
-        handleInputChange('isInOriginRoute', false);
-        handleInputChange('deliveryOptions', DEFAULT_DELIVERY_OPTIONS);
-      }
+    if (!producerLocation?.province) return;
+    const isInRoute = ORIGEN_ROUTES.some(route =>
+      route.provinces.includes(producerLocation.province.toLowerCase())
+    );
+    if (isInRoute !== data.isInOriginRoute) {
+      handleInputChange('isInOriginRoute', isInRoute);
     }
-  }, [producerLocation]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [producerLocation?.province]);
 
   // ========================================================================
   // RENDER
@@ -787,21 +777,28 @@ export function EnhancedStep4Capacity({
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <button
                         type="button"
                         onClick={() => setEditingOption(isEditing ? null : option.id)}
-                        className="p-2 text-text-subtle hover:text-origen-bosque transition-colors"
+                        aria-label={isEditing ? 'Confirmar cambios' : 'Editar método de envío'}
+                        className={cn(
+                          'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl transition-colors',
+                          isEditing
+                            ? 'bg-origen-pradera text-white hover:bg-origen-bosque'
+                            : 'text-text-subtle hover:text-origen-bosque hover:bg-surface'
+                        )}
                       >
-                        {isEditing ? <Check className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+                        {isEditing ? <Check className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
                       </button>
                       {option.id.startsWith('custom-') && (
                         <button
                           type="button"
                           onClick={() => handleRemoveDeliveryOption(option.id)}
-                          className="p-2 text-text-subtle hover:text-red-600 transition-colors"
+                          aria-label="Eliminar método de envío"
+                          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
                         >
-                          <X className="w-4 h-4" />
+                          <X className="w-5 h-5" />
                         </button>
                       )}
                     </div>
@@ -812,10 +809,15 @@ export function EnhancedStep4Capacity({
           </div>
 
           {!hasDeliveryOptions && (
-            <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-red-200">
-              <p className="text-xs text-red-700 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4" />
-                Añade al menos un método de envío para continuar
+            <div className="mt-4 p-5 bg-origen-crema/30 rounded-xl border-2 border-dashed border-border text-center">
+              <Truck className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm font-medium text-origen-bosque mb-1">Sin métodos de envío configurados</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Define cómo vas a entregar tus pedidos: precio, tiempo estimado y descripción.
+              </p>
+              <p className="text-xs text-red-700 flex items-center justify-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                Añade al menos un método para poder continuar
               </p>
             </div>
           )}
