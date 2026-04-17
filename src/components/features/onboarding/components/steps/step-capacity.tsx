@@ -479,10 +479,11 @@ export function EnhancedStep4Capacity({
   };
 
   const handleRemoveZone = (id: string) => {
-    handleInputChange('includedZones', data.includedZones.filter(z => z.id !== id));
-    if (data.excludedZones) {
-      handleInputChange('excludedZones', data.excludedZones.filter(z => z.id !== id));
-    }
+    onChange({
+      ...data,
+      includedZones: data.includedZones.filter(z => z.id !== id),
+      excludedZones: (data.excludedZones ?? []).filter(z => z.id !== id),
+    });
   };
 
   const handleToggleExclude = (zoneId: string) => {
@@ -750,7 +751,7 @@ export function EnhancedStep4Capacity({
                             <Input
                               label="Precio (€)"
                               type="number"
-                              value={option.price}
+                              value={option.price > 0 ? option.price : ''}
                               onChange={(e) => handleDeliveryOptionChange(option.id, 'price', parseFloat(e.target.value) || 0)}
                               min={0}
                               step={0.5}
