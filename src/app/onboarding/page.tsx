@@ -437,7 +437,17 @@ export default function OnboardingPage() {
               availabilityType: p.availabilityType ?? 'year_round',
               activeMonths: p.activeMonths ?? [],
               leadTimeDays: p.leadTimeDays ?? undefined,
-              photo: p.imageUrl ? { preview: p.imageUrl, url: p.imageUrl } : undefined,
+              photo: p.imageUrl && p.imageKey
+                ? {
+                    id: p.imageKey,
+                    key: p.imageKey,
+                    name: p.imageKey.split('/').pop() || 'product-image',
+                    size: 0,
+                    type: 'image/jpeg',
+                    url: p.imageUrl,
+                    preview: p.imageUrl,
+                  }
+                : undefined,
             })),
           } : prev.step_products,
           step6: d.payment ? {
@@ -648,7 +658,8 @@ export default function OnboardingPage() {
         break;
       }
       case 2: {
-        const productImageKeys = await Promise.all(
+        // Subir nuevas imágenes (las que tienen File adjunto)
+        const newImageKeys = await Promise.all(
           formData.step_products.products
             .filter((p) => p.photo?.file)
             .map(async (p) => ({
@@ -659,7 +670,11 @@ export default function OnboardingPage() {
               })).key,
             })),
         );
-        await saveStepProducts(formData.step_products.products, productImageKeys);
+        // Preservar claves S3 de imágenes ya subidas (hidratadas del servidor)
+        const existingImageKeys = formData.step_products.products
+          .filter((p) => !p.photo?.file && p.photo?.key)
+          .map((p) => ({ productId: p.id, imageKey: p.photo!.key! }));
+        await saveStepProducts(formData.step_products.products, [...newImageKeys, ...existingImageKeys]);
         break;
       }
       case 3: {
