@@ -1,50 +1,50 @@
 /**
  * @page ProductoDetallePage
- * @description P�gina de detalle de producto � experiencia app nativa
+ * @description Página de detalle de producto — experiencia app nativa.
+ *              Incluye gestión de estado (DRAFT/ACTIVE/INACTIVE) y visibilidad
+ *              en el marketplace directamente desde la vista de detalle.
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-// Componentes UI
-import { Button, Badge, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@arcediano/ux-library';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@arcediano/ux-library';
+// Componentes UI — @arcediano/ux-library
+import {
+  Button, Badge, StatusBadge,
+  Card, CardContent, CardHeader, CardTitle,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+  Tabs, TabsContent, TabsList, TabsTrigger,
+  Switch,
+  Sheet, SheetContent, SheetHeader, SheetTitle,
+  ActionBar,
+  toast,
+  ProductImage,
+} from '@arcediano/ux-library';
 import { PageHeader } from '../../components/PageHeader';
 import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
-import { ProductImage } from '@arcediano/ux-library';
 
 // Iconos
 import {
-  Package, Eye, Trash2, DollarSign, TrendingUp, Star, Tag, CheckCircle, AlertCircle,
-  Clock, FileText, Award, Leaf, FlaskConical, Droplet,
+  Package, Eye, EyeOff, Trash2, DollarSign, TrendingUp, Star, Tag, CheckCircle,
+  AlertCircle, Clock, FileText, Award, Leaf, FlaskConical, Droplet,
   Milk, Percent, Info, AlertTriangle, ShoppingBag, Wheat, Bean, Nut, Egg, Fish,
   Shell, Sprout, RefreshCw, Edit, ChevronDown, Thermometer, Archive, ArrowLeft,
+  Globe, Lock, PlayCircle, PauseCircle, Send, MoreVertical,
 } from 'lucide-react';
 
 import { type Product } from '@/types/product';
-import { fetchProductById, deleteProduct } from '@/lib/api/products';
+import { fetchProductById, deleteProduct, updateProduct } from '@/lib/api/products';
 
 // ============================================================================
 // COMPONENTES AUXILIARES
 // ============================================================================
 
-const StatusBadge = ({ status }: { status: Product['status'] }) => {
-  const statusMap = {
-    active:       { variant: 'success' as const, label: 'Activo',    icon: CheckCircle },
-    inactive:     { variant: 'neutral' as const, label: 'Inactivo',  icon: Clock       },
-    out_of_stock: { variant: 'danger'  as const, label: 'Sin stock', icon: AlertCircle },
-    draft:        { variant: 'neutral' as const, label: 'Borrador',  icon: FileText    },
-  };
-  const { variant, label, icon: Icon } = statusMap[status] || statusMap.draft;
-  return <Badge variant={variant} icon={<Icon className="w-3 h-3" />}>{label}</Badge>;
-};
-
-// -- Acorde�n de secci�n (solo m�vil) ------------------------------------------
+// -- Acordeón de sección (solo móvil) ------------------------------------------
 function SectionAccordion({
   title, icon: Icon, defaultOpen = false, children,
 }: { title: string; icon: React.ElementType; defaultOpen?: boolean; children: React.ReactNode }) {
@@ -54,6 +54,7 @@ function SectionAccordion({
       <button
         onClick={() => setOpen(v => !v)}
         className="w-full flex items-center gap-3 px-4 py-4 text-left"
+        aria-expanded={open}
       >
         <div className="w-8 h-8 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
           <Icon className="w-4 h-4 text-origen-pradera" />
@@ -67,6 +68,140 @@ function SectionAccordion({
         </div>
       )}
     </div>
+  );
+}
+
+// -- Tarjeta de gestión: Estado y Visibilidad ----------------------------------
+interface StatusVisibilityCardProps {
+  product: Product;
+  onStatusChange: (status: Product['status']) => Promise<void>;
+  onVisibilityChange: (visible: boolean) => Promise<void>;
+  isUpdating: boolean;
+}
+
+function StatusVisibilityCard({
+  product, onStatusChange, onVisibilityChange, isUpdating,
+}: StatusVisibilityCardProps) {
+  const isPublic   = product.visibility === 'public';
+  const isDraft    = product.status === 'draft';
+  const isActive   = product.status === 'active';
+  const isInactive = product.status === 'inactive';
+
+  // Transiciones posibles por estado actual
+  const transitions: Array<{
+    toStatus: Product['status'];
+    label: string;
+    icon: React.ElementType;
+    variant: 'primary' | 'secondary' | 'ghost';
+    show: boolean;
+  }> = [
+    { toStatus: 'active',   label: 'Publicar',    icon: PlayCircle,  variant: 'primary',   show: isDraft || isInactive },
+    { toStatus: 'inactive', label: 'Pausar',       icon: PauseCircle, variant: 'secondary', show: isActive },
+    { toStatus: 'draft',    label: 'Pasar a borrador', icon: FileText, variant: 'ghost',    show: isActive || isInactive },
+  ];
+
+  const visibleTransitions = transitions.filter(t => t.show);
+
+  return (
+    <Card variant="elevated">
+      <CardHeader spacing="sm">
+        <CardTitle size="sm" className="flex items-center gap-2">
+          <Send className="w-4 h-4 text-origen-pradera" />
+          Estado y publicación
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Estado actual */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-text-subtle">Estado actual</span>
+          <StatusBadge status={product.status as any} />
+        </div>
+
+        {/* Botones de transición */}
+        {visibleTransitions.length > 0 && (
+          <div className="flex flex-col gap-2">
+            {visibleTransitions.map(t => (
+              <Button
+                key={t.toStatus}
+                variant={t.variant}
+                size="sm"
+                leftIcon={<t.icon className="w-4 h-4" />}
+                onClick={() => onStatusChange(t.toStatus)}
+                disabled={isUpdating}
+                loading={isUpdating}
+                loadingText="Actualizando..."
+                className="w-full"
+              >
+                {t.label}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        {/* Separador */}
+        <div className="border-t border-border-subtle pt-3">
+          {/* Toggle visibilidad marketplace */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              {isPublic
+                ? <Globe className="w-4 h-4 text-origen-pradera shrink-0" />
+                : <Lock  className="w-4 h-4 text-text-subtle shrink-0" />}
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-origen-bosque leading-tight">
+                  {isPublic ? 'Visible en marketplace' : 'Oculto en marketplace'}
+                </p>
+                <p className="text-xs text-text-subtle leading-tight mt-0.5">
+                  {isPublic ? 'Los compradores pueden verlo' : 'Solo visible para ti'}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={isPublic}
+              onCheckedChange={onVisibilityChange}
+              disabled={isUpdating || isDraft}
+              aria-label="Visibilidad en marketplace"
+              trackCheckedColor="bg-origen-bosque"
+            />
+          </div>
+          {isDraft && (
+            <p className="text-[11px] text-text-subtle mt-2 flex items-center gap-1">
+              <Info className="w-3 h-3 shrink-0" />
+              Publica el producto primero para hacerlo visible.
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// -- Bottom sheet de cambio de estado (móvil) ----------------------------------
+interface StatusSheetProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  product: Product;
+  onStatusChange: (status: Product['status']) => Promise<void>;
+  onVisibilityChange: (visible: boolean) => Promise<void>;
+  isUpdating: boolean;
+}
+
+function StatusSheet({
+  open, onOpenChange, product, onStatusChange, onVisibilityChange, isUpdating,
+}: StatusSheetProps) {
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" className="rounded-t-3xl px-6 pb-8">
+        <SheetHeader className="mb-5">
+          <SheetTitle className="text-left text-origen-bosque">Gestionar producto</SheetTitle>
+        </SheetHeader>
+        <StatusVisibilityCard
+          product={product}
+          onStatusChange={async (s) => { await onStatusChange(s); onOpenChange(false); }}
+          onVisibilityChange={async (v) => { await onVisibilityChange(v); onOpenChange(false); }}
+          isUpdating={isUpdating}
+        />
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -172,10 +307,10 @@ function NutritionalContent({ info }: { info: NonNullable<Product['nutritionalIn
         </div>
       )}
 
-      {/* Al�rgenos */}
+      {/* Alérgenos */}
       {info.allergens.length > 0 && (
         <div>
-          <p className="text-[10px] font-bold text-text-subtle uppercase tracking-wider mb-2">Al�rgenos</p>
+          <p className="text-[10px] font-bold text-text-subtle uppercase tracking-wider mb-2">Alérgenos</p>
           <div className="flex flex-wrap gap-1.5">
             {info.allergens.map(a => {
               const Icon = allergenIcon(a);
@@ -243,6 +378,38 @@ function ProductionContent({ info, formatDate }: {
           </div>
         </div>
       )}
+// -- Contenido de producci\u00f3n ---------------------------------------------------
+function ProductionContent({ info, formatDate }: {
+  info: NonNullable<Product['productionInfo']>;
+  formatDate: (d?: Date | string | null) => string;
+}) {
+  return (
+    <div className="space-y-4">
+      {info.story && (
+        <p className="text-sm text-text-subtle leading-relaxed italic border-l-2 border-origen-pradera/40 pl-3">
+          "{info.story}"
+        </p>
+      )}
+      <div>
+        <InfoRow label="Productor" value={info.farmName} />
+        <InfoRow label="Origen" value={info.origin} />
+        <InfoRow label="M\u00e9todo" value={info.productionMethod} />
+        <InfoRow label="Lote" value={info.batchNumber} />
+        <InfoRow label="Cosecha" value={info.harvestDate ? formatDate(info.harvestDate) : undefined} />
+        <InfoRow label="Caducidad" value={info.expiryDate ? formatDate(info.expiryDate) : undefined} />
+      </div>
+      {info.practices && info.practices.length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold text-text-subtle uppercase tracking-wider mb-2">Pr\u00e1cticas</p>
+          <div className="flex flex-wrap gap-1.5">
+            {info.practices.map(p => (
+              <Badge key={p} variant="leaf" size="sm">
+                <Leaf className="w-3 h-3 mr-1" />{p}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
       {info.sustainabilityInfo && (
         <p className="text-xs text-text-subtle leading-relaxed">{info.sustainabilityInfo}</p>
       )}
@@ -263,7 +430,7 @@ function PricingContent({
     <div className="space-y-4">
       <div className="rounded-xl bg-origen-crema/40 p-3">
         <InfoRow label="Precio base" value={<span className="font-bold text-origen-bosque text-sm">{formatCurrency(product.basePrice)}</span>} />
-        {product.comparePrice && <InfoRow label="Precio comparaci�n" value={formatCurrency(product.comparePrice)} />}
+        {product.comparePrice && <InfoRow label="Precio comparaci\u00f3n" value={formatCurrency(product.comparePrice)} />}
         {hasDiscount && <InfoRow label="Descuento" value={<span className="text-green-600 font-medium">-{discountPercentage}%</span>} />}
       </div>
       {product.priceTiers && product.priceTiers.length > 0 && (
@@ -273,7 +440,81 @@ function PricingContent({
             {product.priceTiers.map(tier => (
               <div key={tier.id} className="flex items-center justify-between rounded-xl border border-border-subtle p-3 text-xs">
                 <span className="text-text-subtle">
-                  {tier.minQuantity}{tier.maxQuantity ? `�${tier.maxQuantity}` : '+'} uds.
+                  {tier.minQuantity}{tier.maxQuantity ? `\u2013${tier.maxQuantity}` : '+'} uds.
+                </span>
+                <span className="font-semibold text-origen-bosque">
+                  {tier.type === 'percentage' ? `-${tier.value}%` : formatCurrency(tier.value)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// -- Contenido de inventario ---------------------------------------------------
+function InventoryContent({ product }: { product: Product }) {
+  const stockLevel = product.stock ?? 0;
+  const lowStockThreshold = product.lowStockThreshold ?? 5;
+  const stockColor = stockLevel === 0 ? 'text-red-600' : stockLevel <= lowStockThreshold ? 'text-amber-600' : 'text-origen-bosque';
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl bg-origen-crema/40 p-3">
+        <InfoRow label="SKU" value={<span className="font-mono">{product.sku}</span>} />
+        {product.barcode && <InfoRow label="C\u00f3digo de barras" value={<span className="font-mono">{product.barcode}</span>} />}
+        <InfoRow label="Stock actual" value={<span className={cn('font-bold', stockColor)}>{stockLevel} uds.</span>} />
+        <InfoRow label="Alerta stock bajo" value={`${lowStockThreshold} uds.`} />
+        <InfoRow label="Control de inventario" value={product.trackInventory ? 'S\u00ed' : 'No'} />
+        <InfoRow label="Pedidos sin stock" value={product.allowBackorders ? 'Permitidos' : 'No permitidos'} />
+      </div>
+      {(product.weight || product.dimensions) && (
+        <div>
+          <p className="text-[10px] font-bold text-text-subtle uppercase tracking-wider mb-2">Dimensiones</p>
+          <div className="rounded-xl bg-origen-crema/40 p-3">
+            {product.weight && <InfoRow label="Peso" value={`${product.weight} ${product.weightUnit || 'kg'}`} />}
+            {product.dimensions && (
+              <InfoRow label="Medidas" value={`${product.dimensions.length || 0}\u00d7${product.dimensions.width || 0}\u00d7${product.dimensions.height || 0} cm`} />
+            )}
+            {product.shippingClass && <InfoRow label="Clase de env\u00edo" value={product.shippingClass} />}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// -- Contenido de atributos ----------------------------------------------------
+function AttributesContent({ product }: { product: Product }) {
+  const visible = product.attributes.filter(a => a.visible);
+  if (!visible.length) return <p className="text-xs text-text-subtle text-center py-4">Sin atributos definidos</p>;
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {visible.map(attr => (
+        <div key={attr.id} className="p-3 rounded-xl border border-border-subtle bg-origen-crema/20">
+          <p className="text-[10px] text-text-subtle uppercase tracking-wider mb-0.5">{attr.name}</p>
+          <p className="text-sm font-semibold text-origen-bosque truncate">
+            {attr.type === 'boolean' ? (attr.value ? 'S\u00ed' : 'No') : attr.value}
+            {attr.unit && attr.type !== 'boolean' ? ` ${attr.unit}` : ''}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+�n" value={formatCurrency(product.comparePrice)} />}
+        {hasDiscount && <InfoRow label="Descuento" value={<span className="text-green-600 font-medium">-{discountPercentage}%</span>} />}
+      </div>
+      {product.priceTiers && product.priceTiers.length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold text-text-subtle uppercase tracking-wider mb-2">Precios por volumen</p>
+          <div className="space-y-2">
+            {product.priceTiers.map(tier => (
+              <div key={tier.id} className="flex items-center justify-between rounded-xl border border-border-subtle p-3 text-xs">
+                <span className="text-text-subtle">
+                  {tier.minQuantity}{tier.maxQuantity ? `–${tier.maxQuantity}` : '+'} uds.
                 </span>
                 <span className="font-semibold text-origen-bosque">
                   {tier.type === 'percentage' ? `-${tier.value}%` : formatCurrency(tier.value)}
@@ -309,7 +550,7 @@ function InventoryContent({ product }: { product: Product }) {
           <div className="rounded-xl bg-origen-crema/40 p-3">
             {product.weight && <InfoRow label="Peso" value={`${product.weight} ${product.weightUnit || 'kg'}`} />}
             {product.dimensions && (
-              <InfoRow label="Medidas" value={`${product.dimensions.length || 0}�${product.dimensions.width || 0}�${product.dimensions.height || 0} cm`} />
+              <InfoRow label="Medidas" value={`${product.dimensions.length || 0}×${product.dimensions.width || 0}×${product.dimensions.height || 0} cm`} />
             )}
             {product.shippingClass && <InfoRow label="Clase de env�o" value={product.shippingClass} />}
           </div>
@@ -347,17 +588,19 @@ export default function ProductoDetallePage() {
   const params = useParams();
   const productId = params.id as string;
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [product, setProduct]               = useState<Product | null>(null);
+  const [isLoading, setIsLoading]           = useState(true);
+  const [error, setError]                   = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleting, setIsDeleting]         = useState(false);
+  const [isUpdating, setIsUpdating]         = useState(false);
+  const [showStatusSheet, setShowStatusSheet] = useState(false);
 
   useEffect(() => {
     if (productId) loadProduct();
   }, [productId]);
 
-  const loadProduct = async () => {
+  const loadProduct = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -369,12 +612,12 @@ export default function ProductoDetallePage() {
       } else {
         setError('Producto no encontrado');
       }
-    } catch (err) {
+    } catch {
       setError('Error al cargar el producto');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [productId]);
 
   const handleDelete = async () => {
     if (!product) return;
@@ -382,15 +625,61 @@ export default function ProductoDetallePage() {
     try {
       const response = await deleteProduct(product.id);
       if (response.error) {
-        setError(response.error);
+        toast({ title: 'Error al eliminar', description: response.error, variant: 'destructive' });
       } else {
-        router.push('/products');
+        toast({ title: 'Producto eliminado', description: `"${product.name}" fue eliminado.` });
+        router.push('/dashboard/products');
       }
     } catch {
-      setError('Error al eliminar el producto');
+      toast({ title: 'Error', description: 'No se pudo eliminar el producto.', variant: 'destructive' });
     } finally {
       setIsDeleting(false);
       setShowDeleteDialog(false);
+    }
+  };
+
+  const handleStatusChange = async (newStatus: Product['status']) => {
+    if (!product) return;
+    setIsUpdating(true);
+    try {
+      const response = await updateProduct(product.id, { status: newStatus });
+      if (response.error) {
+        toast({ title: 'Error al actualizar', description: response.error, variant: 'destructive' });
+      } else if (response.data) {
+        setProduct(response.data);
+        const labels: Record<Product['status'], string> = {
+          active: 'Producto publicado', inactive: 'Producto pausado',
+          draft: 'Pasado a borrador', out_of_stock: 'Marcado sin stock',
+        };
+        toast({ title: labels[newStatus] || 'Estado actualizado', description: `"${product.name}" ${newStatus === 'active' ? 'ya es visible en el marketplace.' : 'actualizado correctamente.'}` });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'No se pudo actualizar el estado.', variant: 'destructive' });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleVisibilityChange = async (visible: boolean) => {
+    if (!product) return;
+    setIsUpdating(true);
+    try {
+      const response = await updateProduct(product.id, { visibility: visible ? 'public' : 'private' });
+      if (response.error) {
+        toast({ title: 'Error al actualizar', description: response.error, variant: 'destructive' });
+      } else if (response.data) {
+        setProduct(response.data);
+        toast({
+          title: visible ? 'Producto visible' : 'Producto oculto',
+          description: visible
+            ? 'Ya aparece en el marketplace para compradores.'
+            : 'Solo tú puedes verlo ahora.',
+        });
+      }
+    } catch {
+      toast({ title: 'Error', description: 'No se pudo cambiar la visibilidad.', variant: 'destructive' });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -398,12 +687,12 @@ export default function ProductoDetallePage() {
     if (!date) return 'No disponible';
     try {
       return new Date(date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
-    } catch { return 'Fecha inv�lida'; }
+    } catch { return 'Fecha inválida'; }
   };
 
   const formatCurrency = (value?: number | null) => {
-    if (value === undefined || value === null) return '0,00 �';
-    return value.toFixed(2).replace('.', ',') + ' �';
+    if (value === undefined || value === null) return '0,00 €';
+    return value.toFixed(2).replace('.', ',') + ' €';
   };
 
   if (isLoading) return <LoadingSkeleton />;
@@ -437,7 +726,20 @@ export default function ProductoDetallePage() {
   const lowStockThreshold = product.lowStockThreshold ?? 5;
   const stockColor = stockLevel === 0 ? 'error' : stockLevel <= lowStockThreshold ? 'warning' : 'success';
 
-  // Secciones del acorde�n / tabs
+  // Secciones del acorde\u00f3n / tabs
+  const sections = [
+    {
+      id: 'nutritional', title: 'Nutricional', icon: FlaskConical, show: !!product.nutritionalInfo,
+      content: product.nutritionalInfo
+        ? <NutritionalContent info={product.nutritionalInfo} />
+        : <p className="text-xs text-text-subtle text-center py-4">Sin informaci\u00f3n nutricional</p>,
+    },
+    {
+      id: 'production', title: 'Producci\u00f3n', icon: Leaf, show: !!product.productionInfo,
+      content: product.productionInfo
+        ? <ProductionContent info={product.productionInfo} formatDate={formatDate} />
+        : <p className="text-xs text-text-subtle text-center py-4">Sin informaci\u00f3n de producci\u00f3n</p>,
+    },�n / tabs
   const sections = [
     {
       id: 'nutritional', title: 'Nutricional', icon: FlaskConical, show: !!product.nutritionalInfo,
@@ -490,11 +792,11 @@ export default function ProductoDetallePage() {
         {/* ===== CABECERA ===== */}
         <PageHeader
           title={product.name}
-          description={`${product.categoryName || product.categoryId} � ${product.sku || 'Sin SKU'}`}
+          description={`${product.categoryName || product.categoryId} · ${product.sku || 'Sin SKU'}`}
           badgeIcon={Package}
           badgeText={product.status === 'active' ? 'Activo' : product.status === 'inactive' ? 'Inactivo' : product.status === 'out_of_stock' ? 'Sin stock' : 'Borrador'}
           tooltip="Detalle del producto"
-          tooltipDetailed="Informaci�n completa del producto, incluyendo datos nutricionales, producci�n y m�tricas."
+          tooltipDetailed="Información completa del producto, incluyendo datos nutricionales, producción y métricas."
           showBackButton
           onBack={() => router.back()}
           actions={
@@ -506,7 +808,7 @@ export default function ProductoDetallePage() {
               )}
               <div className="hidden lg:flex items-center gap-2">
                 <Link href={`/dashboard/products/${product.id}/edit`}>
-                  <Button variant="primary" leftIcon={<Edit className="w-4 h-4" />}>Editar</Button>
+                  <Button variant="secondary" leftIcon={<Edit className="w-4 h-4" />}>Editar</Button>
                 </Link>
                 <Button
                   variant="destructive"
@@ -524,12 +826,22 @@ export default function ProductoDetallePage() {
         {/* ===== CONTENIDO PRINCIPAL ===== */}
         <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-2">
 
-          {/* -- M�tricas m�vil: precio destacado + grid 2�3 -- */}
+          {/* -- Métricas móvil: precio destacado + grid 2×3 -- */}
           <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible" className="lg:hidden mb-5">
-            {/* Precio destacado */}
+            {/* Precio destacado + estado */}
             <div className="rounded-2xl p-5 bg-gradient-to-br from-origen-bosque to-origen-pino text-white mb-3 relative overflow-hidden">
               <div className="absolute right-4 top-4 w-20 h-20 rounded-full bg-white/5" />
-              <p className="text-xs font-semibold text-white/70 uppercase tracking-widest mb-1">Precio de venta</p>
+              <div className="flex items-start justify-between mb-2">
+                <p className="text-xs font-semibold text-white/70 uppercase tracking-widest">Precio de venta</p>
+                <button
+                  onClick={() => setShowStatusSheet(true)}
+                  className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 active:bg-white/30 rounded-full px-3 py-1 transition-colors"
+                  aria-label="Gestionar estado"
+                >
+                  <MoreVertical className="w-3.5 h-3.5 text-white" />
+                  <span className="text-xs font-medium text-white">Gestionar</span>
+                </button>
+              </div>
               <p className="text-4xl font-extrabold tabular-nums">{formatCurrency(product.basePrice)}</p>
               {hasDiscount && (
                 <div className="flex items-center gap-2 mt-2">
@@ -537,25 +849,29 @@ export default function ProductoDetallePage() {
                   <span className="bg-white/20 rounded-full px-2 py-0.5 text-xs font-bold">-{discountPercentage}%</span>
                 </div>
               )}
-              <div className="mt-3">
-                <StatusBadge status={product.status} />
+              <div className="mt-3 flex items-center gap-2 flex-wrap">
+                <StatusBadge status={product.status as any} />
+                {product.visibility === 'public'
+                  ? <Badge variant="leaf" icon={<Globe className="w-3 h-3" />}>Marketplace</Badge>
+                  : <Badge variant="neutral" icon={<Lock className="w-3 h-3" />}>Oculto</Badge>
+                }
               </div>
             </div>
 
-            {/* Grid 2�3 de m�tricas */}
+            {/* Grid 2x3 de m\u00e9tricas */}
             <div className="grid grid-cols-2 gap-3">
               {/* Stock */}
               <motion.div custom={1} variants={cardVariants}
                 className={cn('rounded-2xl p-4 border',
                   stockColor === 'error' ? 'bg-feedback-danger-subtle/80 border-red-100' :
-                  stockColor === 'warning' ? 'bg-amber-50/80 border-amber-100' :
+                  stockColor === 'warning' ? 'bg-origen-menta/10 border-origen-menta/30' :
                   'bg-origen-pastel/60 border-origen-hoja/20'
                 )}
               >
                 <div className="flex items-center gap-1.5 mb-2">
                   <Package className={cn('w-4 h-4',
                     stockColor === 'error' ? 'text-feedback-danger' :
-                    stockColor === 'warning' ? 'text-amber-500' : 'text-origen-hoja'
+                    stockColor === 'warning' ? 'text-origen-menta' : 'text-origen-hoja'
                   )} />
                   <span className="text-xs text-text-subtle">Stock</span>
                 </div>
@@ -563,23 +879,23 @@ export default function ProductoDetallePage() {
                 <p className="text-xs text-text-subtle">unidades</p>
               </motion.div>
 
-              {/* Valoraci�n */}
-              <motion.div custom={2} variants={cardVariants} className="rounded-2xl p-4 border bg-amber-50/80 border-amber-100">
+              {/* Valoraci\u00f3n */}
+              <motion.div custom={2} variants={cardVariants} className="rounded-2xl p-4 border bg-origen-menta/10 border-origen-menta/30">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <Star className="w-4 h-4 text-amber-500" />
-                  <span className="text-xs text-text-subtle">Valoraci�n</span>
+                  <Star className="w-4 h-4 text-origen-menta" />
+                  <span className="text-xs text-text-subtle">Valoraci\u00f3n</span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <p className="text-2xl font-bold text-origen-bosque">{product.rating?.toFixed(1) || '�'}</p>
+                  <p className="text-2xl font-bold text-origen-bosque">{product.rating?.toFixed(1) || '\u2013'}</p>
                   <span className="text-xs text-text-disabled">/5</span>
                 </div>
-                <p className="text-xs text-text-subtle">{product.reviewCount || 0} rese�as</p>
+                <p className="text-xs text-text-subtle">{product.reviewCount || 0} rese\u00f1as</p>
               </motion.div>
 
               {/* Ventas */}
-              <motion.div custom={3} variants={cardVariants} className="rounded-2xl p-4 border bg-blue-50/80 border-blue-100">
+              <motion.div custom={3} variants={cardVariants} className="rounded-2xl p-4 border bg-origen-bosque/5 border-origen-bosque/10">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <TrendingUp className="w-4 h-4 text-blue-500" />
+                  <TrendingUp className="w-4 h-4 text-origen-bosque" />
                   <span className="text-xs text-text-subtle">Ventas</span>
                 </div>
                 <p className="text-2xl font-bold text-origen-bosque">{product.sales || 0}</p>
@@ -587,22 +903,22 @@ export default function ProductoDetallePage() {
               </motion.div>
 
               {/* Vistas */}
-              <motion.div custom={4} variants={cardVariants} className="rounded-2xl p-4 border bg-purple-50/80 border-purple-100">
+              <motion.div custom={4} variants={cardVariants} className="rounded-2xl p-4 border bg-origen-crema/80 border-origen-pradera/20">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <Eye className="w-4 h-4 text-purple-500" />
+                  <Eye className="w-4 h-4 text-origen-pradera" />
                   <span className="text-xs text-text-subtle">Vistas</span>
                 </div>
                 <p className="text-2xl font-bold text-origen-bosque">{product.views || 0}</p>
                 {product.conversion && (
-                  <p className="text-xs text-purple-600">{product.conversion.toFixed(1)}% conv.</p>
+                  <p className="text-xs text-origen-hoja">{product.conversion.toFixed(1)}% conv.</p>
                 )}
               </motion.div>
 
-              {/* Conversi�n */}
-              <motion.div custom={5} variants={cardVariants} className="rounded-2xl p-4 border bg-green-50/80 border-green-100">
+              {/* Conversi\u00f3n */}
+              <motion.div custom={5} variants={cardVariants} className="rounded-2xl p-4 border bg-origen-hoja/5 border-origen-hoja/20">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <ShoppingBag className="w-4 h-4 text-green-500" />
-                  <span className="text-xs text-text-subtle">Conversi�n</span>
+                  <ShoppingBag className="w-4 h-4 text-origen-hoja" />
+                  <span className="text-xs text-text-subtle">Conversi\u00f3n</span>
                 </div>
                 <p className="text-2xl font-bold text-origen-bosque">{product.conversion?.toFixed(1) || '0.0'}%</p>
                 <p className="text-xs text-text-subtle">de vistas</p>
@@ -624,35 +940,35 @@ export default function ProductoDetallePage() {
             </div>
           </motion.div>
 
-          {/* -- Metricas desktop: fila horizontal -- */}
+          {/* -- M\u00e9tricas desktop: fila horizontal -- */}
           <div className="hidden lg:block overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 mb-8">
             <div className="grid grid-cols-7 gap-4 w-auto">
-              <div className="p-4 bg-gradient-to-br from-origen-pradera/5 to-transparent rounded-xl border border-origen-pradera/10">
+              <div className="p-4 bg-gradient-to-br from-origen-pradera/8 to-origen-pradera/3 rounded-xl border border-origen-pradera/15">
                 <div className="flex items-center gap-2 mb-2"><DollarSign className="w-5 h-5 text-origen-pradera" /><span className="text-xs font-medium text-text-subtle">Precio</span></div>
                 <p className="text-2xl font-bold text-origen-bosque">{formatCurrency(product.basePrice)}</p>
-                {hasDiscount && <div className="flex items-center gap-1 mt-2 text-xs"><span className="text-text-disabled line-through">{formatCurrency(product.comparePrice)}</span><span className="text-green-600 font-medium">(-{discountPercentage}%)</span></div>}
+                {hasDiscount && <div className="flex items-center gap-1 mt-2 text-xs"><span className="text-text-disabled line-through">{formatCurrency(product.comparePrice)}</span><span className="text-origen-hoja font-medium">(-{discountPercentage}%)</span></div>}
               </div>
-              <div className={cn('p-4 rounded-xl border', stockColor === 'error' ? 'bg-feedback-danger-subtle/50 border-red-100' : stockColor === 'warning' ? 'bg-amber-50/50 border-amber-100' : 'bg-origen-hoja/5 border-origen-hoja/20')}>
-                <div className="flex items-center gap-2 mb-2"><Package className={cn('w-5 h-5', stockColor === 'error' ? 'text-feedback-danger' : stockColor === 'warning' ? 'text-amber-500' : 'text-origen-hoja')} /><span className="text-xs font-medium text-text-subtle">Stock</span></div>
+              <div className={cn('p-4 rounded-xl border', stockColor === 'error' ? 'bg-feedback-danger-subtle/50 border-red-100' : stockColor === 'warning' ? 'bg-origen-menta/10 border-origen-menta/30' : 'bg-origen-hoja/5 border-origen-hoja/20')}>
+                <div className="flex items-center gap-2 mb-2"><Package className={cn('w-5 h-5', stockColor === 'error' ? 'text-feedback-danger' : stockColor === 'warning' ? 'text-origen-menta' : 'text-origen-hoja')} /><span className="text-xs font-medium text-text-subtle">Stock</span></div>
                 <p className="text-2xl font-bold text-origen-bosque">{stockLevel} uds</p>
               </div>
-              <div className="p-4 bg-amber-50/50 rounded-xl border border-amber-100">
-                <div className="flex items-center gap-2 mb-2"><Star className="w-5 h-5 text-amber-500" /><span className="text-xs font-medium text-text-subtle">Valoración</span></div>
+              <div className="p-4 bg-origen-menta/10 rounded-xl border border-origen-menta/30">
+                <div className="flex items-center gap-2 mb-2"><Star className="w-5 h-5 text-origen-menta" /><span className="text-xs font-medium text-text-subtle">Valoraci\u00f3n</span></div>
                 <div className="flex items-baseline gap-1"><p className="text-2xl font-bold text-origen-bosque">{product.rating?.toFixed(1) || '0.0'}</p><span className="text-xs text-text-disabled">/5</span></div>
-                <p className="text-xs text-text-subtle mt-2">{product.reviewCount || 0} reseñas</p>
+                <p className="text-xs text-text-subtle mt-2">{product.reviewCount || 0} rese\u00f1as</p>
               </div>
-              <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                <div className="flex items-center gap-2 mb-2"><TrendingUp className="w-5 h-5 text-blue-500" /><span className="text-xs font-medium text-text-subtle">Ventas</span></div>
+              <div className="p-4 bg-origen-bosque/5 rounded-xl border border-origen-bosque/10">
+                <div className="flex items-center gap-2 mb-2"><TrendingUp className="w-5 h-5 text-origen-bosque" /><span className="text-xs font-medium text-text-subtle">Ventas</span></div>
                 <p className="text-2xl font-bold text-origen-bosque">{product.sales || 0}</p>
-                <div className="flex items-center gap-1 mt-2 text-xs text-blue-600"><DollarSign className="w-3 h-3" /><span>{formatCurrency(product.revenue)}</span></div>
+                <div className="flex items-center gap-1 mt-2 text-xs text-origen-hoja"><DollarSign className="w-3 h-3" /><span>{formatCurrency(product.revenue)}</span></div>
               </div>
-              <div className="p-4 bg-purple-50/50 rounded-xl border border-purple-100">
-                <div className="flex items-center gap-2 mb-2"><Eye className="w-5 h-5 text-purple-500" /><span className="text-xs font-medium text-text-subtle">Vistas</span></div>
+              <div className="p-4 bg-origen-crema/80 rounded-xl border border-origen-pradera/20">
+                <div className="flex items-center gap-2 mb-2"><Eye className="w-5 h-5 text-origen-pradera" /><span className="text-xs font-medium text-text-subtle">Vistas</span></div>
                 <p className="text-2xl font-bold text-origen-bosque">{product.views || 0}</p>
-                {product.conversion && <div className="flex items-center gap-1 mt-2 text-xs text-purple-600"><TrendingUp className="w-3 h-3" /><span>{product.conversion.toFixed(1)}% conv.</span></div>}
+                {product.conversion && <div className="flex items-center gap-1 mt-2 text-xs text-origen-hoja"><TrendingUp className="w-3 h-3" /><span>{product.conversion.toFixed(1)}% conv.</span></div>}
               </div>
-              <div className="p-4 bg-green-50/50 rounded-xl border border-green-100">
-                <div className="flex items-center gap-2 mb-2"><TrendingUp className="w-5 h-5 text-green-500" /><span className="text-xs font-medium text-text-subtle">Conversión</span></div>
+              <div className="p-4 bg-origen-hoja/5 rounded-xl border border-origen-hoja/20">
+                <div className="flex items-center gap-2 mb-2"><TrendingUp className="w-5 h-5 text-origen-hoja" /><span className="text-xs font-medium text-text-subtle">Conversi\u00f3n</span></div>
                 <p className="text-2xl font-bold text-origen-bosque">{product.conversion?.toFixed(1) || '0.0'}%</p>
               </div>
               <div className="p-4 bg-origen-crema/50 rounded-xl border border-origen-pradera/10">
@@ -662,13 +978,30 @@ export default function ProductoDetallePage() {
                 </p>
               </div>
             </div>
-          </div>
+
+
+
+
+
+
+
+
 
           {/* ===== DOS COLUMNAS ===== */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
             {/* COLUMNA IZQUIERDA (4/12) */}
             <div className="lg:col-span-4 space-y-4">
+
+              {/* Gestión de estado y visibilidad — solo desktop */}
+              <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible" className="hidden lg:block">
+                <StatusVisibilityCard
+                  product={product}
+                  onStatusChange={handleStatusChange}
+                  onVisibilityChange={handleVisibilityChange}
+                  isUpdating={isUpdating}
+                />
+              </motion.div>
 
               {/* Imagen principal */}
               <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
@@ -826,41 +1159,61 @@ export default function ProductoDetallePage() {
           </div>
         </div>
 
-        {/* ===== ACCIONES STICKY � SOLO M�VIL ===== */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 px-4 pb-[calc(env(safe-area-inset-bottom)+80px)] pt-3 bg-gradient-to-t from-surface via-surface/95 to-transparent pointer-events-none">
-          <div className="pointer-events-auto flex items-center gap-3">
-            {/* Editar � CTA principal */}
-            <Link href={`/dashboard/products/${product.id}/edit`} className="flex-1">
-              <Button variant="primary" size="lg" leftIcon={<Edit className="w-4 h-4" />}>
-                Editar producto
-              </Button>
-            </Link>
-            {/* Eliminar � icono solo, acci�n destructiva controlada */}
-            <Button
-              variant="destructive"
-              size="icon"
-              onClick={() => setShowDeleteDialog(true)}
-              disabled={isDeleting}
-              aria-label="Eliminar producto"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
 
-        {/* ===== DI�LOGO DE ELIMINACI�N ===== */}
+� SOLO M�VIL ===== */}
+        {/* ===== BARRA DE ACCIONES MÓVIL (ActionBar de UXLibrary) ===== */}
+        <ActionBar
+          primaryAction={{
+            id: 'edit',
+            label: 'Editar producto',
+            leftIcon: <Edit className="w-4 h-4" />,
+            onClick: () => router.push(`/dashboard/products/${product.id}/edit`),
+          }}
+          secondaryActions={[
+            {
+              id: 'status',
+              label: 'Gestionar estado',
+              leftIcon: <Send className="w-4 h-4" />,
+              variant: 'secondary',
+              onClick: () => setShowStatusSheet(true),
+              disabled: isUpdating,
+            },
+            {
+              id: 'delete',
+              label: 'Eliminar',
+              leftIcon: <Trash2 className="w-4 h-4" />,
+              variant: 'destructive',
+              onClick: () => setShowDeleteDialog(true),
+              disabled: isDeleting,
+            },
+          ]}
+        />
+
+        {/* ===== BOTTOM SHEET: GESTIÓN DE ESTADO (móvil) ===== */}
+        <StatusSheet
+          open={showStatusSheet}
+          onOpenChange={setShowStatusSheet}
+          product={product}
+          onStatusChange={handleStatusChange}
+          onVisibilityChange={handleVisibilityChange}
+          isUpdating={isUpdating}
+        />
+
+        {/* ===== DIÁLOGO DE ELIMINACIÓN ===== */}
         <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <DialogContent>
             <DialogHeader>
               <div className="flex items-center gap-2">
                 <Trash2 className="w-5 h-5 text-red-600" />
-                <DialogTitle>�Eliminar producto?</DialogTitle>
+                <DialogTitle>¿Eliminar producto?</DialogTitle>
               </div>
-              <DialogDescription>Esta acci�n no se puede deshacer.</DialogDescription>
+              <DialogDescription>Esta acción no se puede deshacer.</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
-                Se eliminar� permanentemente <span className="font-semibold text-origen-bosque">{product.name}</span> del cat�logo, incluyendo todas sus variantes, im�genes y estad�sticas.
+                Se eliminará permanentemente{' '}
+                <span className="font-semibold text-origen-bosque">{product.name}</span>{' '}
+                del catálogo, incluyendo todas sus variantes, imágenes y estadísticas.
               </p>
               {product.sales && product.sales > 0 && (
                 <p className="text-amber-600 text-sm flex items-center gap-1 mt-2">
@@ -881,8 +1234,10 @@ export default function ProductoDetallePage() {
                 variant="destructive"
                 onClick={handleDelete}
                 disabled={isDeleting}
+                loading={isDeleting}
+                loadingText="Eliminando..."
               >
-                {isDeleting ? 'Eliminando...' : 'Eliminar permanentemente'}
+                Eliminar permanentemente
               </Button>
             </div>
           </DialogContent>
@@ -891,4 +1246,27 @@ export default function ProductoDetallePage() {
     </MobilePullRefresh>
   );
 }
+� CTA principal */}
+� icono solo, acci�n destructiva controlada */}
+�LOGO DE ELIMINACI�N ===== */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <div className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                <DialogTitle>�Eliminar producto?</DialogTitle>
+              </div>
+              <DialogDescription>Esta acci�n no se puede deshacer.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Se eliminar� permanentemente <span className="font-semibold text-origen-bosque">{product.name}</span> del cat�logo, incluyendo todas sus variantes, im�genes y estad�sticas.
+              </p>
+              {product.sales && product.sales > 0 && (
+                <p className="text-amber-600 text-sm flex items-center gap-1 mt-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  Este producto tiene {product.sales} ventas registradas.
+                </p>
+              )}
+            </div>
 
