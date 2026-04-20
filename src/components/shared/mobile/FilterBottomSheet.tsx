@@ -22,6 +22,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DateRangeInput } from '@arcediano/ux-library';
 
 // â”€â”€â”€ TIPOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -160,13 +161,6 @@ function ChipsSection({ section, value, onChange }: {
   );
 }
 
-const dateInputCls = [
-  'w-full h-12 px-3 text-sm font-medium text-origen-bosque',
-  'bg-surface border border-border-subtle rounded-xl',
-  'focus:outline-none focus:ring-2 focus:ring-origen-pradera/25 focus:border-origen-pradera transition-colors',
-  '[&::-webkit-calendar-picker-indicator]:opacity-40',
-].join(' ');
-
 function DateRangeSection({ section, from, to, onFrom, onTo }: {
   section: FilterSection & { type: 'daterange' };
   from: string; to: string;
@@ -175,16 +169,15 @@ function DateRangeSection({ section, from, to, onFrom, onTo }: {
   return (
     <div>
       <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wide mb-3">{section.title}</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Desde (AAAA-MM-DD)</label>
-          <input type="date" value={from} onChange={(e) => onFrom(e.target.value)} className={dateInputCls} />
-        </div>
-        <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Hasta (AAAA-MM-DD)</label>
-          <input type="date" value={to} onChange={(e) => onTo(e.target.value)} className={dateInputCls} />
-        </div>
-      </div>
+      <DateRangeInput
+        labelFrom="Desde"
+        labelTo="Hasta"
+        valueFrom={from}
+        valueTo={to}
+        onChangeFrom={onFrom}
+        onChangeTo={onTo}
+        inputSize="md"
+      />
     </div>
   );
 }

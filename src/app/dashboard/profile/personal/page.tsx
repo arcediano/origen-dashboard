@@ -7,7 +7,7 @@ import { motion, type Variants } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
-import { Button, Input, Label, Badge } from '@arcediano/ux-library';
+import { Button, Input, Label, Badge, DateInput } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { getCurrentUser, updateCurrentUser, type AuthUser } from '@/lib/api/auth';
 import { loadOnboardingData, loadProducerProfile, saveStep1, saveStep2, type OnboardingData } from '@/lib/api/onboarding';
@@ -458,16 +458,13 @@ export default function PersonalInfoPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <Label htmlFor="birthDate" className="text-sm font-medium">
-                        Fecha de nacimiento
-                      </Label>
-                      <Input
+                      <DateInput
                         id="birthDate"
-                        type="date"
+                        label="Fecha de nacimiento"
                         value={form.birthDate}
                         onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
                         disabled={true}
-                        className="h-10 bg-surface"
+                        inputSize="md"
                       />
                     </div>
                   </CardContent>

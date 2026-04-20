@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Bell, Search, Settings2, SlidersHorizontal, X } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent } from '@arcediano/ux-library';
+import { Card, CardContent, DateRangeInput } from '@arcediano/ux-library';
 import { FilterBottomSheet } from '@/components/shared/mobile';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
 import { SegmentedControl } from './components/SegmentedControl';
@@ -251,22 +251,15 @@ export default function NotificationsPage() {
                   <option value="read">Solo leidas</option>
                 </select>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="date"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                    className="h-10 rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm text-origen-bosque focus:outline-none focus:ring-1 focus:ring-origen-pradera/30"
-                    aria-label="Filtrar desde fecha"
-                  />
-                  <input
-                    type="date"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                    className="h-10 rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm text-origen-bosque focus:outline-none focus:ring-1 focus:ring-origen-pradera/30"
-                    aria-label="Filtrar hasta fecha"
-                  />
-                </div>
+                <DateRangeInput
+                  labelFrom="Desde"
+                  labelTo="Hasta"
+                  valueFrom={dateFrom}
+                  valueTo={dateTo}
+                  onChangeFrom={setDateFrom}
+                  onChangeTo={setDateTo}
+                  inputSize="sm"
+                />
               </div>
 
               <div className="flex items-center justify-between gap-3">
@@ -274,9 +267,6 @@ export default function NotificationsPage() {
                   Pendientes: <span className="font-semibold text-origen-bosque">{unreadCount}</span>
                 </p>
               </div>
-              {hasInvalidDateRange && (
-                <p className="text-xs text-red-600">La fecha Desde no puede ser mayor que la fecha Hasta.</p>
-              )}
             </div>
 
             {isInboxLoading ? (

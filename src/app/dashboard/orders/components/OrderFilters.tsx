@@ -9,13 +9,13 @@
 'use client';
 
 import React from 'react';
-import { Search, X, SlidersHorizontal, CalendarIcon, CalendarRange, Euro, ChevronDown } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Euro, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FilterBottomSheet } from '@/components/shared/mobile';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
-import { Input, Button } from '@arcediano/ux-library';
+import { Input, Button, DateInput } from '@arcediano/ux-library';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
 
 export interface OrderFiltersProps {
@@ -177,11 +177,11 @@ export function OrderFilters({
 
         <div className="flex items-center gap-1.5">
           <div className="w-40">
-            <Input type="date" value={formatDate(filters.dateFrom)} onChange={(e) => set('dateFrom', e.target.value ? new Date(e.target.value) : undefined)} inputSize="sm" leftIcon={<CalendarIcon />} className="bg-surface-alt border-border" title="Desde" />
+            <DateInput value={formatDate(filters.dateFrom)} onChange={(e) => set('dateFrom', e.target.value ? new Date(e.target.value) : undefined)} inputSize="sm" className="bg-surface-alt border-border" aria-label="Fecha desde" />
           </div>
           <span className="text-text-subtle text-xs">—</span>
           <div className="w-40">
-            <Input type="date" value={formatDate(filters.dateTo)} onChange={(e) => set('dateTo', e.target.value ? new Date(e.target.value) : undefined)} inputSize="sm" leftIcon={<CalendarRange />} className="bg-surface-alt border-border" title="Hasta" />
+            <DateInput value={formatDate(filters.dateTo)} onChange={(e) => set('dateTo', e.target.value ? new Date(e.target.value) : undefined)} inputSize="sm" className="bg-surface-alt border-border" aria-label="Fecha hasta" />
           </div>
         </div>
 

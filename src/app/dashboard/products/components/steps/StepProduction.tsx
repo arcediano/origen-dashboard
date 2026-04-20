@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Button, Input, Badge } from '@arcediano/ux-library';
+import { Button, Input, Badge, DateInput } from '@arcediano/ux-library';
 import { Checkbox } from '@arcediano/ux-library';
 import { ImageUploader } from '../../components/ImageUploader';
 import { Tooltip } from '@arcediano/ux-library';
@@ -379,23 +379,23 @@ export function StepProduction({
               </Select>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Input
+                <DateInput
                   label="Fecha de cosecha"
-                  type="date"
                   value={productionInfo.harvestDate ? new Date(productionInfo.harvestDate).toISOString().split('T')[0] : ''}
                   onChange={(e) => handleChange('harvestDate', e.target.value ? new Date(e.target.value) : undefined)}
+                  inputSize="md"
                 />
-                <Input
+                <DateInput
                   label="Fecha de producción"
-                  type="date"
                   value={productionInfo.productionDate ? new Date(productionInfo.productionDate).toISOString().split('T')[0] : ''}
                   onChange={(e) => handleChange('productionDate', e.target.value ? new Date(e.target.value) : undefined)}
+                  inputSize="md"
                 />
-                <Input
+                <DateInput
                   label="Fecha de caducidad"
-                  type="date"
                   value={productionInfo.expiryDate ? new Date(productionInfo.expiryDate).toISOString().split('T')[0] : ''}
                   onChange={(e) => handleChange('expiryDate', e.target.value ? new Date(e.target.value) : undefined)}
+                  inputSize="md"
                 />
               </div>
 

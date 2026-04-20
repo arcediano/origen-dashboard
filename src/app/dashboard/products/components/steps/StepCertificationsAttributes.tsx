@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Button, Input, Badge } from '@arcediano/ux-library';
+import { Button, Input, Badge, DateInput } from '@arcediano/ux-library';
 import {
   Card, CardContent,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
@@ -840,24 +840,19 @@ export function StepCertificationsAttributes({
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Fecha emisión</p>
-                            <Input
-                              type="date"
-                              value={formatDateForInput(newCert.issueDate)}
-                              onChange={(e) => setNewCert({ ...newCert, issueDate: parseDateFromInput(e.target.value) })}
-                              className="h-11 rounded-xl"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Fecha caducidad</p>
-                            <Input
-                              type="date"
-                              value={formatDateForInput(newCert.expiryDate)}
-                              onChange={(e) => setNewCert({ ...newCert, expiryDate: parseDateFromInput(e.target.value) })}
-                              className="h-11 rounded-xl"
-                            />
-                          </div>
+                          <DateInput
+                            label="Fecha emisión"
+                            value={formatDateForInput(newCert.issueDate)}
+                            onChange={(e) => setNewCert({ ...newCert, issueDate: parseDateFromInput(e.target.value) })}
+                            inputSize="md"
+                          />
+                          <DateInput
+                            label="Fecha caducidad"
+                            value={formatDateForInput(newCert.expiryDate)}
+                            onChange={(e) => setNewCert({ ...newCert, expiryDate: parseDateFromInput(e.target.value) })}
+                            min={formatDateForInput(newCert.issueDate) || undefined}
+                            inputSize="md"
+                          />
                         </div>
 
                         {/* Documentos */}
@@ -1210,11 +1205,10 @@ export function StepCertificationsAttributes({
                             </Select>
                           )}
                           {newAttr.type === 'date' && (
-                            <Input
-                              type="date"
+                            <DateInput
                               value={newAttr.value as string || ''}
                               onChange={(e) => setNewAttr({ ...newAttr, value: e.target.value })}
-                              className="h-11 rounded-xl"
+                              inputSize="md"
                             />
                           )}
                           

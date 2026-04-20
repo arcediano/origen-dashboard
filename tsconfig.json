@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@origen/ux-library": ["../origen-UXLibrary/src/index.ts"]
+      "@origen/ux-library": ["../origen-UXLibrary/src/index.ts"],
+      "@arcediano/ux-library": ["../origen-UXLibrary/src/index.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

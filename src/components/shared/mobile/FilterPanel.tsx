@@ -16,6 +16,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { DateRangeInput } from '@arcediano/ux-library';
 import type { FilterSection, ChipOption, ToggleOption } from './FilterBottomSheet';
 
 export type { FilterSection, ChipOption, ToggleOption };
@@ -113,15 +114,6 @@ function ChipsSection({
 
 // ─── SECCIÓN: RANGO DE FECHAS ─────────────────────────────────────────────────
 
-const dateInputCls = [
-  'w-full h-10 px-3 text-sm font-medium text-origen-bosque',
-  'bg-surface border border-border-subtle rounded-xl',
-  'focus:outline-none focus:ring-2 focus:ring-origen-pradera/25 focus:border-origen-pradera',
-  'transition-colors',
-  '[&::-webkit-calendar-picker-indicator]:opacity-75',
-  'hover:[&::-webkit-calendar-picker-indicator]:opacity-100',
-].join(' ');
-
 function DateRangeSection({
   section,
   from,
@@ -140,16 +132,15 @@ function DateRangeSection({
       <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
         {section.title}
       </p>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="text-xs font-medium text-text-secondary mb-1 block uppercase tracking-wide">Desde</label>
-          <input type="date" value={from} onChange={(e) => onFrom(e.target.value)} className={dateInputCls} />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-text-secondary mb-1 block uppercase tracking-wide">Hasta</label>
-          <input type="date" value={to} onChange={(e) => onTo(e.target.value)} className={dateInputCls} />
-        </div>
-      </div>
+      <DateRangeInput
+        labelFrom="Desde"
+        labelTo="Hasta"
+        valueFrom={from}
+        valueTo={to}
+        onChangeFrom={onFrom}
+        onChangeTo={onTo}
+        inputSize="sm"
+      />
     </div>
   );
 }
