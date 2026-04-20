@@ -415,17 +415,22 @@ export function useProductForm(productId?: string) {
         if (response.error) setError(response.error);
         else setLastSaved(new Date());
       } else {
-        // Creación: guardar en localStorage
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-        setLastSaved(new Date());
-        await saveProductDraft(formData);
+        // Creación: guardar como borrador en la API (sube imágenes y crea el producto)
+        const response = await saveProductDraft(formData);
+        if (response.error) {
+          setError(response.error);
+        } else {
+          // Borrador guardado correctamente: limpiar localStorage y navegar a la lista
+          localStorage.removeItem(STORAGE_KEY);
+          router.push('/dashboard/products');
+        }
       }
     } catch (error) {
       setError('Error al guardar el producto');
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId]);
+  }, [formData, productId, router]);
 
   const handlePublish = useCallback(async () => {
     const allCompleted = FORM_STEP_KEYS.every((step) => completedTabs[step]);

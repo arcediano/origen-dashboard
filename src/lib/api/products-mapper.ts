@@ -253,9 +253,13 @@ function mapApiImage(
   isMain: boolean,
   sortOrder: number,
 ): ProductImage {
+  // Si el backend no devuelve url (campo null o vacío), construirla desde la clave S3
+  // usando la variable de entorno NEXT_PUBLIC_CDN_BASE_URL.
+  const cdnBase = process.env.NEXT_PUBLIC_CDN_BASE_URL ?? '';
+  const url = img.url || (cdnBase && img.key ? `${cdnBase}/${img.key}` : '');
   return {
     id: img.key,           // La clave S3 actúa como identificador único de la imagen
-    url: img.url,
+    url,
     alt: productName,
     isMain,
     sortOrder,
@@ -380,8 +384,9 @@ function mapAttribute(attribute: ApiProductAttribute): DynamicAttribute {
  * Los campos complejos ya pueden venir en detalle y en listados protegidos del dashboard.
  */
 export function mapApiProductToProduct(api: ApiProduct): Product {
-  // Mapear imagen principal
-  const mainImage: ProductImage | undefined = api.mainImage?.url
+  // Mapear imagen principal — usar cuando exista key o url (la función mapApiImage
+  // construirá la url a partir de la clave S3 si url viene nulo del backend).
+  const mainImage: ProductImage | undefined = api.mainImage
     ? mapApiImage(api.mainImage, api.name, true, 0)
     : undefined;
 
