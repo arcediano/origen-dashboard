@@ -640,10 +640,10 @@ export default function ProductoDetallePage() {
               </div>
             )}
 
-            <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-8">
+            <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6">
 
               {/* ══ COLUMNA IZQUIERDA ══════════════════════════════════════════ */}
-              <div className="lg:col-span-4 flex flex-col gap-4 mb-4 lg:mb-0">
+              <div className="lg:col-span-5 flex flex-col gap-4 mb-4 lg:mb-0">
 
                 {/* ── Tarjeta del producto (hero) — estilo onboarding ── */}
                 <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
@@ -651,7 +651,7 @@ export default function ProductoDetallePage() {
 
                     {/* Imagen + nombre + KPIs */}
                     <div className="flex items-start gap-4 mb-4">
-                      <div className="w-20 h-20 rounded-2xl overflow-hidden bg-origen-crema/80 flex items-center justify-center shrink-0 border border-border-subtle">
+                      <div className="w-24 h-24 rounded-2xl overflow-hidden bg-origen-crema/80 flex items-center justify-center shrink-0 border border-border-subtle">
                         {mainImage
                           ? <ProductImg src={mainImage.url} alt={mainImage.alt || product.name} className="w-full h-full object-cover" />
                           : <Package className="w-9 h-9 text-origen-pradera/40" />}
@@ -669,8 +669,8 @@ export default function ProductoDetallePage() {
                           {product.categoryName || product.categoryId}
                         </p>
                         {/* Precio + Stock — únicos KPIs relevantes */}
-                        <div className="flex items-center gap-3">
-                          <div>
+                        <div className="flex items-center flex-wrap gap-x-3 gap-y-1.5">
+                          <div className="shrink-0">
                             <p className="text-[10px] font-semibold text-text-subtle uppercase tracking-wider leading-none mb-1">
                               Precio
                             </p>
@@ -679,7 +679,7 @@ export default function ProductoDetallePage() {
                             </p>
                           </div>
                           <div className="w-px h-7 bg-border-subtle shrink-0" />
-                          <div>
+                          <div className="shrink-0">
                             <p className="text-[10px] font-semibold text-text-subtle uppercase tracking-wider leading-none mb-1">
                               Stock
                             </p>
@@ -688,12 +688,9 @@ export default function ProductoDetallePage() {
                             </p>
                           </div>
                           {hasDiscount && (
-                            <>
-                              <div className="w-px h-7 bg-border-subtle shrink-0" />
-                              <div className="bg-green-50 border border-green-100 rounded-xl px-2 py-0.5">
-                                <p className="text-xs font-bold text-green-700">−{discountPct}%</p>
-                              </div>
-                            </>
+                            <div className="bg-green-50 border border-green-100 rounded-xl px-2 py-0.5 shrink-0">
+                              <p className="text-xs font-bold text-green-700">−{discountPct}%</p>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -780,7 +777,7 @@ export default function ProductoDetallePage() {
               </div>
 
               {/* ══ COLUMNA DERECHA (secciones acordeón) ════════════════════════ */}
-              <div className="lg:col-span-8 flex flex-col gap-3">
+              <div className="lg:col-span-7 flex flex-col gap-3">
                 {sections.map((s, i) => (
                   <SectionAccordion
                     key={s.id}
