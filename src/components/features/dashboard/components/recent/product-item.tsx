@@ -37,7 +37,7 @@ export function ProductItem({
   };
 
   return (
-    <Link href={`/products/${id}`} className="block group relative">
+    <Link href={`/dashboard/products/${id}`} className="block group relative">
       {/* EFECTO EXACTO DE BENEFITSSECTION */}
       <div className={cn(
         "absolute inset-0 rounded-2xl transition-transform duration-300",

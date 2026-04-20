@@ -53,6 +53,12 @@ const nextConfig = {
       __dirname,
       "../origen-UXLibrary/src/compat/dashboard/atoms",
     );
+    // Apunta @arcediano/ux-library al fuente local para que DateInput y demás
+    // componentes nuevos estén disponibles sin necesidad de publicar el paquete.
+    config.resolve.alias["@arcediano/ux-library"] = path.join(
+      __dirname,
+      "../origen-UXLibrary/src/index.ts",
+    );
     return config;
   },
 };
