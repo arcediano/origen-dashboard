@@ -307,9 +307,9 @@ export function useProductForm(productId?: string) {
       pricing: !!(formData.basePrice && formData.basePrice > 0),
       nutritional: hasNutritionalData,
       production: hasProductionData,
-      // Inventario: stock ≥0 no es suficiente (stock=0 es el default).
-      // Se requiere que el SKU esté asignado (indica que el paso fue revisado).
-      inventory: formData.stock >= 0 && formData.lowStockThreshold >= 0 && !!(formData.sku),
+      // Inventario: se considera completado cuando el productor ha revisado
+      // los valores de stock — los campos tienen defaults válidos (0 / 5).
+      inventory: formData.stock >= 0 && formData.lowStockThreshold >= 0,
       certifications: true,
     });
   }, [formData]);
@@ -362,8 +362,7 @@ export function useProductForm(productId?: string) {
           errors.push('Precio de venta (debe ser mayor que 0)');
         break;
       case 'inventory':
-        if (!formData.sku)
-          errors.push('SKU del producto (identificador único)');
+        // SKU lo asigna el backend — no se requiere aquí.
         break;
       // nutritional, production y certifications son pasos opcionales — no bloquean
       default:

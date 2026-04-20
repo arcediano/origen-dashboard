@@ -221,21 +221,30 @@ export function StepInventory({
           </div>
         </div>
 
-        {/* SKU y Código de barras */}
+        {/* SKU — informativo + Código de barras */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Input
-            label="SKU"
-            tooltip="El SKU (Stock Keeping Unit) es un código único para tu inventario interno. El backend lo generará automáticamente."
-            value={formData?.sku || ''}
-            onChange={(e) => handleChange('sku', e.target.value.toUpperCase())}
-            inputSize="lg"
-            className="font-mono"
-            placeholder={skuSuggestion || "El backend generará el SKU"}
-            helperText={skuSuggestion && !formData?.sku ? `Sugerencia: ${skuSuggestion}` : undefined}
-            error={localTouched.sku ? validationErrors.sku : undefined}
-            success={!!formData?.sku && !validationErrors.sku}
-            disabled
-          />
+          <div className="flex flex-col gap-1.5">
+            <p className="text-xs font-medium text-foreground flex items-center gap-1">
+              SKU
+              <Tooltip content="El SKU (Stock Keeping Unit) es el código único de inventario. Se genera automáticamente al guardar el producto.">
+                <span className="w-3.5 h-3.5 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[10px] cursor-default select-none font-bold leading-none">?</span>
+              </Tooltip>
+            </p>
+            <div className="flex items-center gap-2 h-12 px-4 rounded-xl border border-dashed border-origen-pradera/30 bg-origen-crema/40">
+              <Sparkles className="w-4 h-4 text-origen-pradera/60 shrink-0" />
+              <span className="text-sm text-muted-foreground">
+                {formData?.sku
+                  ? <span className="font-mono font-semibold text-origen-bosque">{formData.sku}</span>
+                  : 'Se asignará al guardar el producto'}
+              </span>
+            </div>
+            {skuSuggestion && !formData?.sku && (
+              <p className="text-xs text-text-subtle flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-origen-pradera/60" />
+                Referencia estimada: <span className="font-mono">{skuSuggestion}</span>
+              </p>
+            )}
+          </div>
 
           <Input
             label="Código de barras"
@@ -325,10 +334,10 @@ export function StepInventory({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Peso */}
             <div>
-              <div className="flex gap-2 items-end">
-                <div className="flex-1">
+              <div className="flex gap-2">
+                <div className="flex-1 min-w-0">
                   <Input
-                    label="Peso"
+                    label="Peso del producto"
                     tooltip="El peso es necesario para calcular los costes de envío. Incluye el peso del producto más el embalaje."
                     type="number"
                     value={formData?.weight || ''}
@@ -339,36 +348,43 @@ export function StepInventory({
                     placeholder="0.5"
                   />
                 </div>
-                <Select
-                  value={formData?.weightUnit || 'kg'}
-                  onValueChange={(v) => handleChange('weightUnit', v)}
-                >
-                  <SelectTrigger className="h-12 w-20 rounded-xl mb-0">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="kg">kg</SelectItem>
-                    <SelectItem value="g">g</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col gap-1.5 shrink-0">
+                  <span className="text-xs font-medium text-foreground">Unidad</span>
+                  <Select
+                    value={formData?.weightUnit || 'kg'}
+                    onValueChange={(v) => handleChange('weightUnit', v)}
+                  >
+                    <SelectTrigger className="h-12 w-20 rounded-xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="kg">kg</SelectItem>
+                      <SelectItem value="g">g</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
-            <Select
-              value={formData?.shippingClass || ''}
-              onValueChange={(v) => handleChange('shippingClass', v)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar clase" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="standard">Estándar</SelectItem>
-                <SelectItem value="express">Express</SelectItem>
-                <SelectItem value="fragile">Frágil</SelectItem>
-                <SelectItem value="perishable">Perecedero</SelectItem>
-                <SelectItem value="bulky">Voluminoso</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-foreground">Tipo de paquete</span>
+              <Select
+                value={formData?.shippingClass || ''}
+                onValueChange={(v) => handleChange('shippingClass', v)}
+              >
+                <SelectTrigger className="h-12 rounded-xl">
+                  <SelectValue placeholder="Seleccionar tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="standard">Estándar</SelectItem>
+                  <SelectItem value="express">Express / urgente</SelectItem>
+                  <SelectItem value="fragile">Frágil</SelectItem>
+                  <SelectItem value="perishable">Perecedero / frío</SelectItem>
+                  <SelectItem value="bulky">Voluminoso</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-text-subtle">Indica cómo debe tratarse el paquete durante el envío</p>
+            </div>
           </div>
 
           {/* Dimensiones */}
