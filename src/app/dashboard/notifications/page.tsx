@@ -8,17 +8,15 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, Search, Settings2, SlidersHorizontal, X } from 'lucide-react';
+import { Bell, Search, SlidersHorizontal, X } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, DateRangeInput } from '@arcediano/ux-library';
 import { FilterBottomSheet } from '@/components/shared/mobile';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
-import { SegmentedControl } from './components/SegmentedControl';
-import { NotificationsPreferencesPanel } from './components/NotificationsPreferencesPanel';
+
 import { fetchNotifications, markNotificationAsRead } from '@/lib/api/notifications';
 import type { Notification } from '@/types/notification';
 
-type NotificationsTab = 'inbox' | 'preferences';
 type NotificationTypeFilter = 'all' | 'operativas' | 'cuenta' | 'marketing';
 type ReadFilter = 'all' | 'unread' | 'read';
 
@@ -33,7 +31,6 @@ function normalizeDateBoundary(value: string, mode: 'from' | 'to'): Date | null 
 }
 
 export default function NotificationsPage() {
-  const [activeTab, setActiveTab] = useState<NotificationsTab>('inbox');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isInboxLoading, setIsInboxLoading] = useState(true);
 
@@ -163,24 +160,6 @@ export default function NotificationsPage() {
 
       <div className="container mx-auto space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
 
-        {/* ── Tabs ── */}
-        <SegmentedControl
-          layoutId="notifications-tabs"
-          items={[
-            { value: 'inbox',       label: 'Bandeja',        icon: Bell      },
-            { value: 'preferences', label: 'Configuración',  icon: Settings2 },
-          ]}
-          active={activeTab}
-          onChange={(v) => setActiveTab(v as NotificationsTab)}
-        />
-
-        {/* ── Tab: Configuración ── */}
-        {activeTab === 'preferences' && (
-          <NotificationsPreferencesPanel />
-        )}
-
-        {/* ── Tab: Bandeja ── */}
-        {activeTab === 'inbox' && (
         <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
           <CardContent className="p-0">
             <div className="border-b border-border-subtle px-4 py-4 sm:px-6 space-y-3">
@@ -295,7 +274,6 @@ export default function NotificationsPage() {
             )}
           </CardContent>
         </Card>
-        )} {/* end activeTab === 'inbox' */}
       </div>
 
       {/* FilterBottomSheet — siempre montado (portal), visible solo cuando isFilterOpen */}

@@ -158,7 +158,7 @@ function NutricionalSection({ info }: { info: NonNullable<Product['nutritionalIn
 
   return (
     <div className="space-y-4 pt-3">
-      <div className="rounded-2xl bg-origen-crema/50 border border-border-subtle p-4">
+      <div>
         <SectionLabel>Por {info.servingSize}</SectionLabel>
         <div className="grid grid-cols-2 gap-x-6">
           {info.calories != null && <InfoRow label="Calorías" value={`${info.calories} kcal`} />}
@@ -215,7 +215,7 @@ function ProduccionSection({ info, formatDate }: {
           "{info.story}"
         </p>
       )}
-      <div className="rounded-2xl bg-origen-crema/50 border border-border-subtle p-4">
+      <div>
         <InfoRow label="Productor" value={info.farmName} />
         <InfoRow label="Origen" value={info.origin} />
         <InfoRow label="Método" value={info.productionMethod} />
@@ -248,7 +248,7 @@ function PreciosSection({ product, formatCurrency, hasDiscount, discountPct }: {
 }) {
   return (
     <div className="space-y-4 pt-3">
-      <div className="rounded-2xl bg-origen-crema/50 border border-border-subtle p-4">
+      <div>
         <InfoRow label="Precio de venta" value={
           <span className="text-sm font-bold text-origen-bosque">{formatCurrency(product.basePrice)}</span>
         } />
@@ -266,7 +266,7 @@ function PreciosSection({ product, formatCurrency, hasDiscount, discountPct }: {
           <SectionLabel>Precios por volumen</SectionLabel>
           <div className="space-y-2">
             {product.priceTiers.map(tier => (
-              <div key={tier.id} className="flex justify-between items-center rounded-2xl border border-border-subtle p-3.5 bg-surface">
+              <div key={tier.id} className="flex justify-between items-center py-2.5 border-b border-border-subtle last:border-0">
                 <span className="text-xs text-text-subtle">
                   {tier.minQuantity}{tier.maxQuantity ? `–${tier.maxQuantity}` : '+'} uds.
                 </span>
@@ -291,7 +291,7 @@ function InventarioSection({ product }: { product: Product }) {
 
   return (
     <div className="space-y-4 pt-3">
-      <div className="rounded-2xl bg-origen-crema/50 border border-border-subtle p-4">
+      <div>
         <InfoRow label="SKU" value={<span className="font-mono">{product.sku}</span>} />
         {product.barcode && (
           <InfoRow label="Código de barras" value={<span className="font-mono">{product.barcode}</span>} />
@@ -304,7 +304,7 @@ function InventarioSection({ product }: { product: Product }) {
         <InfoRow label="Pedidos sin stock" value={product.allowBackorders ? 'Permitidos' : 'No permitidos'} />
       </div>
       {(product.weight || product.dimensions) && (
-        <div className="rounded-2xl bg-origen-crema/50 border border-border-subtle p-4">
+        <div className="pt-3 border-t border-border-subtle">
           <SectionLabel>Logística</SectionLabel>
           {product.weight && (
             <InfoRow label="Peso" value={`${product.weight} ${product.weightUnit || 'kg'}`} />
@@ -336,7 +336,7 @@ function AtributosSection({ product }: { product: Product }) {
   return (
     <div className="grid grid-cols-2 gap-2.5 pt-3">
       {visible.map(attr => (
-        <div key={attr.id} className="p-3.5 rounded-2xl border border-border-subtle bg-origen-crema/30">
+        <div key={attr.id} className="p-3 rounded-xl bg-origen-crema/30">
           <p className="text-[10px] font-semibold text-text-subtle uppercase tracking-wider mb-1">{attr.name}</p>
           <p className="text-sm font-semibold text-origen-bosque truncate">
             {attr.type === 'boolean' ? (attr.value ? 'Sí' : 'No') : String(attr.value)}
@@ -787,9 +787,9 @@ export default function ProductoDetallePage() {
                   <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
                     <div className="rounded-[28px] border border-border-subtle bg-surface p-4 sm:p-5">
                       <SectionLabel>Certificaciones</SectionLabel>
-                      <div className="space-y-2">
+                      <div className="divide-y divide-border-subtle">
                         {product.certifications.map(cert => (
-                          <div key={cert.id} className="flex items-center gap-3 p-3 rounded-2xl bg-origen-crema/50 border border-border-subtle">
+                          <div key={cert.id} className="flex items-center gap-3 py-3">
                             <div className={cn(
                               'w-8 h-8 rounded-xl flex items-center justify-center shrink-0',
                               cert.verified
