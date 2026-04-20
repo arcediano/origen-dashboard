@@ -7,9 +7,9 @@
 
 import { useParams } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
-import { Package } from 'lucide-react';
+import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw } from 'lucide-react';
 
-import { Badge } from '@arcediano/ux-library';
+import { Badge, ActionBar } from '@arcediano/ux-library';
 import { PageHeader } from '../../../components/PageHeader';
 import { PageLoader } from '@/components/shared/loading/page-loader';
 import { PageError } from '@/components/shared/error/page-error';
@@ -76,6 +76,21 @@ export default function EditProductPage() {
 
   const handleTabChange = (tab: FormStepId) => setActiveTab(tab);
 
+  // ─── Navegación por pasos (usado por ActionBar móvil) ─────────────────────
+  const currentIndex = FORM_STEPS.findIndex(s => s.id === activeTab);
+  const isFirstStep  = currentIndex === 0;
+  const isLastStep   = currentIndex === FORM_STEPS.length - 1;
+  const prevStep     = !isFirstStep ? FORM_STEPS[currentIndex - 1].id as FormStepId : null;
+  const nextStep     = !isLastStep  ? FORM_STEPS[currentIndex + 1].id as FormStepId : null;
+  const canPublish   = allStepsCompleted && (!hasCertifications || certificationsApproved);
+
+  const handlePrev = () => {
+    if (prevStep) { handleTabChange(prevStep); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  };
+  const handleNext = () => {
+    if (nextStep) { handleTabChange(nextStep); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  };
+
   if (isLoading) return <PageLoader message="Cargando producto..." />;
   if (error) return <PageError title="Error al cargar" message={error} onRetry={reloadProduct} />;
 
@@ -95,14 +110,14 @@ export default function EditProductPage() {
         showBackButton
         onBack={() => setShowCancelDialog(true)}
         actions={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {lastSaved && (
-              <span className="text-xs text-text-disabled">
-                {isAutoSaving ? 'Guardando...' : `Último guardado: ${lastSaved.toLocaleTimeString()}`}
+              <span className="text-xs text-text-subtle">
+                {isAutoSaving ? 'Guardando...' : `Guardado ${lastSaved.toLocaleTimeString()}`}
               </span>
             )}
             {isEditMode && formData.sku && (
-              <Badge variant="leaf" size="sm" className="flex items-center gap-1">
+              <Badge variant="leaf" size="sm" className="hidden sm:flex items-center gap-1">
                 <Package className="w-3 h-3" />
                 SKU: {formData.sku}
               </Badge>
@@ -111,7 +126,7 @@ export default function EditProductPage() {
         }
       />
 
-      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-[calc(152px+env(safe-area-inset-bottom))] lg:pb-8">
         <CreateProductProgress
           currentTab={activeTab}
           completedTabs={completedTabs}
@@ -137,19 +152,22 @@ export default function EditProductPage() {
               productId={productId}
             />
 
-            <CreateProductNavigation
-              currentTab={activeTab}
-              onTabChange={handleTabChange}
-              completedTabs={completedTabs}
-              onSave={handleSave}
-              isSaving={isSaving}
-              allStepsCompleted={allStepsCompleted}
-              hasCertifications={hasCertifications}
-              certificationsApproved={certificationsApproved}
-              onPublish={handlePublish}
-              isPublishing={isPublishing}
-              publishStatus={publishStatus}
-            />
+            {/* Navegación de pasos — sólo visible en ≥ sm; en móvil usa ActionBar */}
+            <div className="hidden sm:block">
+              <CreateProductNavigation
+                currentTab={activeTab}
+                onTabChange={handleTabChange}
+                completedTabs={completedTabs}
+                onSave={handleSave}
+                isSaving={isSaving}
+                allStepsCompleted={allStepsCompleted}
+                hasCertifications={hasCertifications}
+                certificationsApproved={certificationsApproved}
+                onPublish={handlePublish}
+                isPublishing={isPublishing}
+                publishStatus={publishStatus}
+              />
+            </div>
           </div>
 
           <ProductFormSidebar
@@ -158,6 +176,39 @@ export default function EditProductPage() {
           />
         </motion.div>
       </div>
+
+      {/* ── ActionBar móvil — navegación entre pasos con pulgar ── */}
+      <ActionBar
+        primaryAction={{
+          id: 'primary',
+          label: isLastStep ? 'Publicar' : 'Siguiente',
+          onClick: isLastStep ? handlePublish : handleNext,
+          disabled: isLastStep ? (isPublishing || !canPublish) : false,
+          loading: isLastStep ? isPublishing : false,
+          loadingText: isPublishing ? 'Publicando...' : undefined,
+          rightIcon: !isLastStep ? <ChevronRight className="w-4 h-4" /> : undefined,
+          leftIcon: isLastStep ? <Send className="w-4 h-4" /> : undefined,
+        }}
+        secondaryActions={[
+          {
+            id: 'prev',
+            label: 'Anterior',
+            onClick: handlePrev,
+            disabled: isFirstStep,
+            leftIcon: <ChevronLeft className="w-4 h-4" />,
+          },
+          {
+            id: 'save',
+            label: isSaving ? 'Guardando...' : 'Guardar',
+            onClick: handleSave,
+            disabled: isSaving,
+            loading: isSaving,
+            leftIcon: isSaving
+              ? <RefreshCw className="w-4 h-4 animate-spin" />
+              : <Save className="w-4 h-4" />,
+          },
+        ]}
+      />
 
       <CreateProductCancelDialog
         open={showCancelDialog}
