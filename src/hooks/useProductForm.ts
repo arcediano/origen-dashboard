@@ -30,7 +30,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { 
   PriceTier, 
@@ -71,7 +71,18 @@ const FORM_STEP_KEYS: FormStepId[] = [
 /**
  * Convierte un Product de API a ProductFormData para el formulario
  */
-const productToFormData = (product: Product): ProductFormData => ({
+const productToFormData = (product: Product): ProductFormData => {
+  // Si el producto es un borrador de onboarding, gallery[] llega vacío aunque
+  // mainImage sí existe. En ese caso la inyectamos para que el paso Imágenes
+  // no aparezca siempre como pendiente.
+  const gallery: ProductFormData['gallery'] =
+    product.gallery.length > 0
+      ? product.gallery
+      : product.mainImage
+        ? [{ ...product.mainImage, isMain: true, sortOrder: 0 }]
+        : [];
+
+  return ({
   name: product.name,
   shortDescription: product.shortDescription,
   fullDescription: product.fullDescription,
@@ -80,7 +91,7 @@ const productToFormData = (product: Product): ProductFormData => ({
   subcategoryId: product.subcategoryId,
   tags: product.tags,
   mainImage: product.mainImage,
-  gallery: product.gallery,
+  gallery,
   basePrice: product.basePrice,
   comparePrice: product.comparePrice,
   priceTiers: product.priceTiers || [],
@@ -100,7 +111,8 @@ const productToFormData = (product: Product): ProductFormData => ({
   attributes: product.attributes || [],
   status: product.status === 'active' ? 'active' : 'draft',
   visibility: product.visibility || 'public',
-});
+  });
+};
 
 /**
  * Convierte ProductFormData a Partial<Product> para enviar a la API
@@ -171,6 +183,9 @@ export function useProductForm(productId?: string) {
   const [publishStatus, setPublishStatus] = useState<'idle' | 'success' | 'pending_approval' | 'error'>('idle');
   const [skuSuggestion, setSkuSuggestion] = useState<string>('');
   
+  // Ref para evitar que el auto-guardado dispare en la carga inicial
+  const isInitialDataLoad = useRef(true);
+  
   // Dialog States
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -196,6 +211,7 @@ export function useProductForm(productId?: string) {
       if (response.error) {
         setError(response.error);
       } else if (response.data) {
+        isInitialDataLoad.current = true;
         setFormData(productToFormData(response.data));
         setLastSaved(new Date());
       }
@@ -219,17 +235,39 @@ export function useProductForm(productId?: string) {
   };
 
   // ==========================================================================
-  // AUTO-GUARDADO (solo creación)
+  // AUTO-GUARDADO
   // ==========================================================================
 
   useEffect(() => {
-    if (!productId && Object.keys(formData).length > 0) {
+    // Saltar el primer render tras cargar datos (no guardar lo que acaba de llegar de la API)
+    if (isInitialDataLoad.current) {
+      isInitialDataLoad.current = false;
+      return;
+    }
+
+    if (!productId) {
+      // Modo creación: auto-save en localStorage cada 2 s
       const timer = setTimeout(() => {
         setIsAutoSaving(true);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
         setLastSaved(new Date());
         setTimeout(() => setIsAutoSaving(false), 500);
       }, 2000);
+      return () => clearTimeout(timer);
+    } else {
+      // Modo edición: auto-save en API cada 3 s (más conservador)
+      const timer = setTimeout(async () => {
+        setIsAutoSaving(true);
+        try {
+          const productData = formDataToProduct(formData);
+          await updateProduct(productId, productData);
+          setLastSaved(new Date());
+        } catch {
+          // Silencioso — no interrumpir la UX; el usuario puede guardar manualmente
+        } finally {
+          setIsAutoSaving(false);
+        }
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [formData, productId]);
@@ -241,12 +279,17 @@ export function useProductForm(productId?: string) {
   useEffect(() => {
     const nutritional = formData.nutritionalInfo;
     const production = formData.productionInfo;
+    // Nutricional: los alérgenos solos (del onboarding) no son suficientes.
+    // Se requiere servingSizeValue > 0 + al menos un campo de contenido.
     const hasNutritionalData = Boolean(
-      nutritional?.servingSizeValue
-      || nutritional?.ingredients?.length
-      || nutritional?.allergens?.length
-      || nutritional?.storageInstructions
-      || nutritional?.preparationInstructions,
+      (nutritional?.servingSizeValue && nutritional.servingSizeValue > 0)
+      && (
+        nutritional?.calories
+        || nutritional?.ingredients?.length
+        || nutritional?.storageInstructions
+        || nutritional?.preparationInstructions
+        || nutritional?.allergens?.length
+      ),
     );
     const hasProductionData = Boolean(
       production?.story
@@ -264,7 +307,9 @@ export function useProductForm(productId?: string) {
       pricing: !!(formData.basePrice && formData.basePrice > 0),
       nutritional: hasNutritionalData,
       production: hasProductionData,
-      inventory: formData.stock >= 0 && formData.lowStockThreshold >= 0,
+      // Inventario: stock ≥0 no es suficiente (stock=0 es el default).
+      // Se requiere que el SKU esté asignado (indica que el paso fue revisado).
+      inventory: formData.stock >= 0 && formData.lowStockThreshold >= 0 && !!(formData.sku),
       certifications: true,
     });
   }, [formData]);

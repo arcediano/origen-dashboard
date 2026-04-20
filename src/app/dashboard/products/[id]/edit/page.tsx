@@ -7,7 +7,7 @@
 
 import { useParams } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
-import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw } from 'lucide-react';
+import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 
 import { Badge, ActionBar } from '@arcediano/ux-library';
 import { PageHeader } from '../../../components/PageHeader';
@@ -132,6 +132,37 @@ export default function EditProductPage() {
           completedTabs={completedTabs}
           onTabChange={handleTabChange}
         />
+
+        {/* Callout informativo para borradores incompletos */}
+        {formData.status === 'draft' && !allStepsCompleted && (() => {
+          const pendingSteps = Object.entries(completedTabs)
+            .filter(([, done]) => !done)
+            .map(([id]) => FORM_STEPS.find(s => s.id === id)?.label)
+            .filter(Boolean);
+          return (
+            <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 mt-4">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-amber-800">
+                  Borrador — este producto no se puede publicar todavía
+                </p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  Pasos pendientes:{' '}
+                  <span className="font-medium">{pendingSteps.join(', ')}</span>.
+                  Complétalos para poder publicar el producto.
+                </p>
+              </div>
+            </div>
+          );
+        })()}
+        {formData.status === 'draft' && allStepsCompleted && (
+          <div className="flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3.5 mt-4">
+            <CheckCircle className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-green-800">
+              <span className="font-semibold">¡Todo completado!</span> Llega al último paso y pulsa “Publicar” para que sea visible en el marketplace.
+            </p>
+          </div>
+        )}
 
         <motion.div
           variants={containerVariants}

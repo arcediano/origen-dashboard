@@ -620,6 +620,26 @@ export default function ProductoDetallePage() {
 
         <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-[calc(152px+env(safe-area-inset-bottom))] lg:pb-10">
           <div className="max-w-5xl mx-auto">
+
+            {/* ── Banner borrador — visible hasta que el producto esté activo ── */}
+            {product.status === 'draft' && (
+              <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 mb-4">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-amber-800">Este producto es un borrador</p>
+                  <p className="text-xs text-amber-700 mt-0.5">
+                    No es visible en el marketplace. Completa toda la información en el formulario de edición antes de publicarlo.
+                  </p>
+                </div>
+                <Link href={`/dashboard/products/${product.id}/edit`} className="shrink-0">
+                  <Button variant="outline" size="sm" leftIcon={<Edit className="w-3.5 h-3.5" />}
+                    className="border-amber-300 text-amber-800 hover:bg-amber-100 text-xs">
+                    Completar
+                  </Button>
+                </Link>
+              </div>
+            )}
+
             <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-8">
 
               {/* ══ COLUMNA IZQUIERDA ══════════════════════════════════════════ */}

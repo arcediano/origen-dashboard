@@ -35,6 +35,20 @@ export function ProductCard({
 
   const mainImage = product.mainImage || product.gallery?.[0];
 
+  // Calcular % de completitud solo para borradores
+  const isDraft = product.status === 'draft';
+  const completionChecks = isDraft
+    ? [
+        !!(product.name && product.categoryId),
+        !!(product.gallery?.length > 0 || product.mainImage),
+        !!(product.basePrice && product.basePrice > 0),
+        !!(product.sku),
+      ]
+    : [];
+  const completionPct = isDraft
+    ? Math.round((completionChecks.filter(Boolean).length / completionChecks.length) * 100)
+    : 100;
+
   return (
     <div
       className={cn(
@@ -69,6 +83,30 @@ export function ProductCard({
           </p>
           <StatusBadge status={product.status} size="xs" />
         </div>
+
+        {/* Barra de completitud para borradores */}
+        {isDraft && (
+          <div className="mb-2">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] text-text-subtle">Completitud</span>
+              <span className={cn(
+                'text-[10px] font-semibold',
+                completionPct === 100 ? 'text-origen-hoja' : completionPct >= 50 ? 'text-amber-600' : 'text-feedback-danger',
+              )}>
+                {completionPct}%
+              </span>
+            </div>
+            <div className="h-1 rounded-full bg-border-subtle overflow-hidden">
+              <div
+                className={cn(
+                  'h-full rounded-full transition-all duration-300',
+                  completionPct === 100 ? 'bg-origen-hoja' : completionPct >= 50 ? 'bg-amber-400' : 'bg-feedback-danger',
+                )}
+                style={{ width: `${completionPct}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Categoría */}
         <p className="text-[11px] text-text-subtle mb-3 truncate">
