@@ -10,5 +10,10 @@
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "src/app/api/upload/route.ts": {
+      "maxDuration": 30
+    }
+  }
 }
