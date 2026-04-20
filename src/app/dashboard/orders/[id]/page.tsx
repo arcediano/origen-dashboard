@@ -11,7 +11,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink } from 'lucide-react';
+import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info } from 'lucide-react';
 
 // Componentes UI
 import {
@@ -118,6 +118,109 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ============================================================================
+// SUB-COMPONENTE: TARJETA DE ESTADO (desktop sidebar)
+// ============================================================================
+
+function OrderStatusCard({
+  order,
+  onUpdateStatus,
+  isUpdating,
+  onCancelRequest,
+}: {
+  order: Order;
+  onUpdateStatus: (status: Order['status']) => Promise<void>;
+  isUpdating: boolean;
+  onCancelRequest: () => void;
+}) {
+  const status     = statusConfig[order.status];
+  const isTerminal = ['delivered', 'cancelled', 'refunded'].includes(order.status);
+  const canCancel  = ['pending', 'processing', 'shipped'].includes(order.status);
+
+  const next: { label: string; next: Order['status']; icon: React.ElementType } | null =
+    order.status === 'pending'    ? { label: 'Marcar como procesando', next: 'processing', icon: Package     } :
+    order.status === 'processing' ? { label: 'Marcar como enviado',    next: 'shipped',    icon: Truck       } :
+    order.status === 'shipped'    ? { label: 'Marcar como entregado',  next: 'delivered',  icon: CheckCircle } :
+    null;
+
+  return (
+    <div className="rounded-[28px] border border-border-subtle bg-surface overflow-hidden">
+      {/* Band de color semántico */}
+      <div className={cn('px-5 py-3 flex items-center justify-between', status.bandBg)}>
+        <div className="flex items-center gap-2">
+          <status.icon className={cn('w-4 h-4', status.color)} />
+          <span className={cn('text-sm font-semibold', status.color)}>{status.label}</span>
+        </div>
+        <span className="text-xs text-text-subtle tabular-nums">
+          {format(order.createdAt, 'dd MMM yyyy', { locale: es })}
+        </span>
+      </div>
+
+      <div className="p-4 sm:p-5 space-y-3">
+        {/* Total */}
+        <div className="flex items-end justify-between pt-0.5">
+          <span className="text-xs text-text-subtle">Total del pedido</span>
+          <span className={cn('text-2xl font-extrabold tabular-nums leading-none', status.color)}>
+            {order.total.toFixed(2)}€
+          </span>
+        </div>
+
+        {/* Pago inline */}
+        <div className="flex items-center justify-between py-2 border-t border-border-subtle">
+          <div className="flex items-center gap-1.5">
+            <CreditCard className="w-3.5 h-3.5 text-text-subtle shrink-0" />
+            <span className="text-xs text-text-subtle capitalize">{order.payment.method}</span>
+          </div>
+          <Badge variant={order.payment.status === 'paid' ? 'success' : 'warning'} size="xs">
+            {order.payment.status === 'paid' ? 'Pagado' : 'Pendiente'}
+          </Badge>
+        </div>
+
+        {/* Acciones disponibles */}
+        {!isTerminal && (
+          <div className="space-y-2 border-t border-border-subtle pt-3">
+            <SectionLabel>Actualizar estado</SectionLabel>
+            {next && (
+              <Button
+                variant="primary"
+                size="sm"
+                leftIcon={<next.icon className="w-4 h-4" />}
+                onClick={() => onUpdateStatus(next.next)}
+                loading={isUpdating}
+                loadingText="Actualizando..."
+                className="w-full justify-start"
+              >
+                {next.label}
+              </Button>
+            )}
+            {canCancel && (
+              <Button
+                variant="ghost"
+                size="sm"
+                leftIcon={<XCircle className="w-4 h-4 text-feedback-danger" />}
+                onClick={onCancelRequest}
+                disabled={isUpdating}
+                className="w-full justify-start text-feedback-danger hover:bg-red-50"
+              >
+                Cancelar pedido
+              </Button>
+            )}
+          </div>
+        )}
+
+        {isTerminal && (
+          <p className="text-[11px] text-text-subtle border-t border-border-subtle pt-3 flex items-center gap-1.5">
+            <Info className="w-3 h-3 shrink-0" />
+            {order.status === 'delivered' ? 'Pedido completado correctamente.' :
+             order.status === 'cancelled' ? 'Este pedido fue cancelado.' :
+             'Este pedido fue reembolsado.'}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -128,6 +231,7 @@ export default function OrderDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
   const [showStatusSheet, setShowStatusSheet] = useState(false);
+  const [showCancelSheet, setShowCancelSheet]   = useState(false);
 
   useEffect(() => {
     loadOrder();
@@ -160,6 +264,7 @@ export default function OrderDetailPage() {
       if (response.data) {
         setOrder(response.data);
         setShowStatusSheet(false);
+        setShowCancelSheet(false);
       }
     } catch (err) {
       console.error('Error actualizando estado:', err);
@@ -182,8 +287,9 @@ export default function OrderDetailPage() {
     );
   }
 
-  const status = statusConfig[order.status];
+  const status    = statusConfig[order.status];
   const canUpdate = !['delivered', 'cancelled', 'refunded'].includes(order.status);
+  const canCancel  = ['pending', 'processing', 'shipped'].includes(order.status);
 
   // Acción principal según estado
   const nextAction: { label: string; next: Order['status']; icon: React.ElementType } | null =
@@ -258,37 +364,14 @@ export default function OrderDetailPage() {
                 </div>
               </motion.div>
 
-              {/* Desktop card — más compacta, con el action button */}
-              <motion.div
-                custom={0}
-                variants={cardVariants}
-                className="hidden lg:block rounded-[28px] border border-border-subtle bg-surface overflow-hidden"
-              >
-                <div className={cn('px-5 py-3.5 flex items-center justify-between rounded-t-[28px]', status.bandBg)}>
-                  <div className="flex items-center gap-2">
-                    <status.icon className={cn('w-4 h-4', status.color)} />
-                    <span className={cn('text-sm font-semibold', status.color)}>{status.label}</span>
-                  </div>
-                  <Badge variant={status.variant} size="xs">{status.label}</Badge>
-                </div>
-
-                {/* Acción en desktop */}
-                {canUpdate && nextAction && (
-                  <div className="px-5 py-4 border-t border-border-subtle">
-                    <SectionLabel>Actualizar estado</SectionLabel>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      leftIcon={<nextAction.icon className="w-4 h-4" />}
-                      onClick={() => handleUpdateStatus(nextAction.next)}
-                      loading={updating}
-                      loadingText="Actualizando..."
-                      className="w-full justify-start"
-                    >
-                      {nextAction.label}
-                    </Button>
-                  </div>
-                )}
+              {/* Desktop status card */}
+              <motion.div custom={0} variants={cardVariants} className="hidden lg:block">
+                <OrderStatusCard
+                  order={order}
+                  onUpdateStatus={handleUpdateStatus}
+                  isUpdating={updating}
+                  onCancelRequest={() => setShowCancelSheet(true)}
+                />
               </motion.div>
 
               {/* ── Cliente ── */}
@@ -480,6 +563,14 @@ export default function OrderDetailPage() {
               onClick: () => setShowStatusSheet(true),
               disabled: updating,
             }}
+            secondaryActions={canCancel ? [{
+              id: 'cancel-order',
+              label: 'Cancelar pedido',
+              leftIcon: <XCircle className="w-4 h-4" />,
+              onClick: () => setShowCancelSheet(true),
+              disabled: updating,
+              className: 'text-feedback-danger',
+            }] : []}
           />
         )}
 
@@ -510,6 +601,41 @@ export default function OrderDetailPage() {
                   {nextAction.label}
                 </Button>
               )}
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* ── Sheet de confirmación de cancelación ── */}
+        <Sheet open={showCancelSheet} onOpenChange={setShowCancelSheet}>
+          <SheetContent side="bottom" className="rounded-t-[28px] px-5 pb-8">
+            <SheetHeader className="mb-5">
+              <SheetTitle className="text-left text-feedback-danger">Cancelar pedido</SheetTitle>
+            </SheetHeader>
+            <div className="space-y-3">
+              <p className="text-sm text-text-subtle leading-relaxed">
+                ¿Seguro que quieres cancelar el pedido{' '}
+                <span className="font-semibold text-origen-bosque">{order.orderNumber}</span>?{' '}
+                Esta acción no se puede deshacer.
+              </p>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() => setShowCancelSheet(false)}
+                className="w-full"
+              >
+                Mantener pedido
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                leftIcon={<XCircle className="w-4 h-4" />}
+                onClick={() => handleUpdateStatus('cancelled')}
+                loading={updating}
+                loadingText="Cancelando..."
+                className="w-full text-feedback-danger hover:bg-red-50"
+              >
+                Sí, cancelar pedido
+              </Button>
             </div>
           </SheetContent>
         </Sheet>
