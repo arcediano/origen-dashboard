@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -53,12 +54,11 @@ const nextConfig = {
       __dirname,
       "../origen-UXLibrary/src/compat/dashboard/atoms",
     );
-    // Apunta @arcediano/ux-library al fuente local para que DateInput y demás
-    // componentes nuevos estén disponibles sin necesidad de publicar el paquete.
-    config.resolve.alias["@arcediano/ux-library"] = path.join(
-      __dirname,
-      "../origen-UXLibrary/src/index.ts",
-    );
+    // En monorepo local apunta al fuente vivo; en CI usa el paquete npm instalado.
+    const uxLibLocal = path.join(__dirname, "../origen-UXLibrary/src/index.ts");
+    if (fs.existsSync(uxLibLocal)) {
+      config.resolve.alias["@arcediano/ux-library"] = uxLibLocal;
+    }
     return config;
   },
 };
