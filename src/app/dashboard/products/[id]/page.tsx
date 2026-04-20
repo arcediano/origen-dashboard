@@ -631,16 +631,20 @@ export default function ProductoDetallePage() {
 
                     {/* Imagen + nombre + KPIs */}
                     <div className="flex items-start gap-4 mb-4">
-                      <div className="w-24 h-24 rounded-2xl overflow-hidden bg-origen-crema/80 flex items-center justify-center shrink-0 border border-border-subtle">
+                      <div className="w-20 h-20 rounded-2xl overflow-hidden bg-origen-crema/80 flex items-center justify-center shrink-0 border border-border-subtle">
                         {mainImage
                           ? <ProductImg src={mainImage.url} alt={mainImage.alt || product.name} className="w-full h-full object-cover" />
-                          : <Package className="w-10 h-10 text-origen-pradera/40" />}
+                          : <Package className="w-9 h-9 text-origen-pradera/40" />}
                       </div>
                       <div className="flex-1 min-w-0 pt-0.5">
-                        <div className="flex items-start justify-between gap-2 mb-1.5">
-                          <h1 className="text-sm font-bold text-origen-bosque leading-snug">{product.name}</h1>
+                        {/* Badge encima, separado del nombre */}
+                        <div className="mb-1.5">
                           <StatusBadge status={product.status as any} />
                         </div>
+                        {/* Nombre truncado — máx 2 líneas, nunca rompe la imagen */}
+                        <h1 className="text-sm font-bold text-origen-bosque leading-snug line-clamp-2 break-words mb-1">
+                          {product.name}
+                        </h1>
                         <p className="text-xs text-text-subtle mb-3 truncate">
                           {product.categoryName || product.categoryId}
                         </p>
@@ -650,23 +654,23 @@ export default function ProductoDetallePage() {
                             <p className="text-[10px] font-semibold text-text-subtle uppercase tracking-wider leading-none mb-1">
                               Precio
                             </p>
-                            <p className="text-base font-bold text-origen-bosque tabular-nums">
+                            <p className="text-sm font-bold text-origen-bosque tabular-nums">
                               {formatCurrency(product.basePrice)}
                             </p>
                           </div>
-                          <div className="w-px h-8 bg-border-subtle shrink-0" />
+                          <div className="w-px h-7 bg-border-subtle shrink-0" />
                           <div>
                             <p className="text-[10px] font-semibold text-text-subtle uppercase tracking-wider leading-none mb-1">
                               Stock
                             </p>
-                            <p className={cn('text-base font-bold tabular-nums', stockColor)}>
+                            <p className={cn('text-sm font-bold tabular-nums', stockColor)}>
                               {stock} uds
                             </p>
                           </div>
                           {hasDiscount && (
                             <>
-                              <div className="w-px h-8 bg-border-subtle shrink-0" />
-                              <div className="bg-green-50 border border-green-100 rounded-xl px-2 py-1">
+                              <div className="w-px h-7 bg-border-subtle shrink-0" />
+                              <div className="bg-green-50 border border-green-100 rounded-xl px-2 py-0.5">
                                 <p className="text-xs font-bold text-green-700">−{discountPct}%</p>
                               </div>
                             </>
