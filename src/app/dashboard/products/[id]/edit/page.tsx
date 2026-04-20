@@ -5,9 +5,10 @@
 
 'use client';
 
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
-import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
+import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 
 import { Badge, ActionBar } from '@arcediano/ux-library';
 import { PageHeader } from '../../../components/PageHeader';
@@ -61,6 +62,7 @@ export default function EditProductPage() {
     hasCertifications,
     certificationsApproved,
     isEditMode,
+    currentStepErrors,
     handleInputChange,
     handleNestedChange,
     handlePriceTiersChange,
@@ -74,7 +76,10 @@ export default function EditProductPage() {
   const stepNumber = FORM_STEPS.findIndex(s => s.id === activeTab) + 1;
   const tips = useStepTips(stepNumber, formData);
 
-  const handleTabChange = (tab: FormStepId) => setActiveTab(tab);
+  const handleTabChange = (tab: FormStepId) => {
+    setShowMobileErrors(false);
+    setActiveTab(tab);
+  };
 
   // ─── Navegación por pasos (usado por ActionBar móvil) ─────────────────────
   const currentIndex = FORM_STEPS.findIndex(s => s.id === activeTab);
@@ -84,10 +89,22 @@ export default function EditProductPage() {
   const nextStep     = !isLastStep  ? FORM_STEPS[currentIndex + 1].id as FormStepId : null;
   const canPublish   = allStepsCompleted && (!hasCertifications || certificationsApproved);
 
+  // Estado para el panel de errores del ActionBar móvil
+  const [showMobileErrors, setShowMobileErrors] = useState(false);
+
+  const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing', 'inventory'];
+  const isMobileStepBlocked = BLOCKING_STEPS.includes(activeTab) && currentStepErrors.length > 0;
+
   const handlePrev = () => {
+    setShowMobileErrors(false);
     if (prevStep) { handleTabChange(prevStep); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   };
   const handleNext = () => {
+    if (isMobileStepBlocked) {
+      setShowMobileErrors(true);
+      return;
+    }
+    setShowMobileErrors(false);
     if (nextStep) { handleTabChange(nextStep); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   };
 
@@ -189,6 +206,7 @@ export default function EditProductPage() {
                 currentTab={activeTab}
                 onTabChange={handleTabChange}
                 completedTabs={completedTabs}
+                currentStepErrors={currentStepErrors}
                 onSave={handleSave}
                 isSaving={isSaving}
                 allStepsCompleted={allStepsCompleted}
@@ -208,11 +226,40 @@ export default function EditProductPage() {
         </motion.div>
       </div>
 
+      {/* ── Panel de errores móvil — aparece sobre el ActionBar ── */}
+      {showMobileErrors && currentStepErrors.length > 0 && (
+        <div className="sm:hidden fixed bottom-[calc(80px+env(safe-area-inset-bottom))] left-0 right-0 z-50 mx-4 mb-2">
+          <div className="rounded-2xl border border-red-200 bg-red-50 shadow-lg p-4">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <XCircle className="w-4 h-4 text-red-600 shrink-0" />
+                <p className="text-sm font-semibold text-red-800">Completa los campos obligatorios</p>
+              </div>
+              <button
+                onClick={() => setShowMobileErrors(false)}
+                className="text-red-400 hover:text-red-600 p-1"
+                aria-label="Cerrar"
+              >
+                <XCircle className="w-4 h-4" />
+              </button>
+            </div>
+            <ul className="space-y-1 pl-1">
+              {currentStepErrors.map((err, i) => (
+                <li key={i} className="flex items-center gap-2 text-xs text-red-700">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
+                  {err}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* ── ActionBar móvil — navegación entre pasos con pulgar ── */}
       <ActionBar
         primaryAction={{
           id: 'primary',
-          label: isLastStep ? 'Publicar' : 'Siguiente',
+          label: isLastStep ? 'Publicar' : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
           onClick: isLastStep ? handlePublish : handleNext,
           disabled: isLastStep ? (isPublishing || !canPublish) : false,
           loading: isLastStep ? isPublishing : false,

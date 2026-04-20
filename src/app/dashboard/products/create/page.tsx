@@ -49,6 +49,7 @@ export default function CreateProductPage() {
     allStepsCompleted,
     hasCertifications,
     certificationsApproved,
+    currentStepErrors,
     handleInputChange,
     handleNestedChange,
     handlePriceTiersChange,
@@ -115,6 +116,7 @@ export default function CreateProductPage() {
               currentTab={activeTab}
               onTabChange={handleTabChange}
               completedTabs={completedTabs}
+              currentStepErrors={currentStepErrors}
               onSave={handleSave}
               isSaving={isSaving}
               allStepsCompleted={allStepsCompleted}

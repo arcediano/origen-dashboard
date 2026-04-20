@@ -335,6 +335,47 @@ export function useProductForm(productId?: string) {
   }, [formData.name, formData.categoryId]);
 
   // ==========================================================================
+  // VALIDACIÓN DE CAMPOS OBLIGATORIOS POR PASO
+  // ==========================================================================
+
+  /**
+   * Devuelve los mensajes de error de los campos requeridos para un paso concreto.
+   * Se usa para bloquear la navegación y mostrar al usuario qué falta.
+   */
+  const getStepErrors = useCallback((tab: FormStepId): string[] => {
+    const errors: string[] = [];
+    switch (tab) {
+      case 'basic':
+        if (!formData.name || formData.name.trim().length < 5)
+          errors.push('Nombre del producto (mínimo 5 caracteres)');
+        if (!formData.categoryId)
+          errors.push('Categoría del producto');
+        if (!formData.shortDescription || formData.shortDescription.trim().length < 20)
+          errors.push('Descripción corta (mínimo 20 caracteres)');
+        break;
+      case 'images':
+        if (!formData.gallery || formData.gallery.length === 0)
+          errors.push('Al menos una imagen del producto');
+        break;
+      case 'pricing':
+        if (!formData.basePrice || formData.basePrice <= 0)
+          errors.push('Precio de venta (debe ser mayor que 0)');
+        break;
+      case 'inventory':
+        if (!formData.sku)
+          errors.push('SKU del producto (identificador único)');
+        break;
+      // nutritional, production y certifications son pasos opcionales — no bloquean
+      default:
+        break;
+    }
+    return errors;
+  }, [formData]);
+
+  // Errores del paso activo — para pasarlos directamente a la navegación
+  const currentStepErrors = getStepErrors(activeTab);
+
+  // ==========================================================================
   // HANDLERS DEL FORMULARIO
   // ==========================================================================
 
@@ -466,6 +507,10 @@ export function useProductForm(productId?: string) {
     hasCertifications: formData.certifications.length > 0,
     certificationsApproved: formData.certifications.every(c => c.verified) || false,
     isEditMode: !!productId,
+    
+    // Validación por paso
+    getStepErrors,
+    currentStepErrors,
     
     // Handlers
     handleInputChange,
