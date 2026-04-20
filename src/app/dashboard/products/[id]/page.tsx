@@ -785,9 +785,8 @@ export default function ProductoDetallePage() {
           secondaryActions={[
             {
               id: 'status',
-              label: 'Gestionar estado',
+              label: 'Estado',
               leftIcon: <Send className="w-4 h-4" />,
-              variant: 'secondary',
               onClick: () => setShowStatusSheet(true),
               disabled: isUpdating,
             },
@@ -795,9 +794,9 @@ export default function ProductoDetallePage() {
               id: 'delete',
               label: 'Eliminar',
               leftIcon: <Trash2 className="w-4 h-4" />,
-              variant: 'destructive',
               onClick: () => setShowDeleteDialog(true),
               disabled: isDeleting,
+              className: 'text-feedback-danger hover:text-red-700',
             },
           ]}
         />
