@@ -197,7 +197,7 @@ export default function OrdersPage() {
           ) : (
             <>
               {/* Móvil: lista de tarjetas */}
-              <div className="block lg:hidden rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden shadow-subtle">
+              <div className="block lg:hidden rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden">
                 {isLoading
                   ? Array.from({ length: 5 }).map((_, i) => <OrderCardSkeleton key={i} />)
                   : orders.map((order) => (
