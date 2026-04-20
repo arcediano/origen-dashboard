@@ -365,8 +365,19 @@ function StatusCard({
   const isActive   = product.status === 'active';
   const isInactive = product.status === 'inactive';
 
+  // Completitud del producto — misma lógica que ProductCard
+  const missingFields: string[] = [];
+  if (!product.name || !product.categoryId) missingFields.push('información básica');
+  if (!product.gallery?.length && !product.mainImage) missingFields.push('imágenes');
+  if (!product.basePrice || product.basePrice <= 0) missingFields.push('precio de venta');
+  if (!product.sku) missingFields.push('SKU');
+  const isComplete = missingFields.length === 0;
+
+  // Un borrador incompleto no puede publicarse directamente
+  const canPublishDraft = isDraft && isComplete;
+
   const transitions = [
-    { to: 'active'   as const, label: 'Publicar producto',  icon: PlayCircle,  variant: 'primary'   as const, show: isDraft || isInactive },
+    { to: 'active'   as const, label: 'Publicar producto',  icon: PlayCircle,  variant: 'primary'   as const, show: canPublishDraft || isInactive },
     { to: 'inactive' as const, label: 'Pausar producto',    icon: PauseCircle, variant: 'secondary' as const, show: isActive },
     { to: 'draft'    as const, label: 'Mover a borrador',   icon: FileText,    variant: 'ghost'     as const, show: isActive || isInactive },
   ].filter(t => t.show);
@@ -380,6 +391,37 @@ function StatusCard({
           <StatusBadge status={product.status as any} />
         </div>
       </div>
+
+      {/* Borrador incompleto — explicar por qué no se puede publicar */}
+      {isDraft && !isComplete && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <p className="text-xs font-semibold text-amber-800">No se puede publicar todavía</p>
+          </div>
+          <p className="text-[11px] text-amber-700 leading-relaxed">
+            Faltan datos obligatorios:{' '}
+            <span className="font-medium">{missingFields.join(', ')}</span>.
+          </p>
+          <Link
+            href={`/dashboard/products/${product.id}/edit`}
+            className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 underline underline-offset-2 hover:text-amber-900"
+          >
+            <Edit className="w-3 h-3" /> Completar producto
+          </Link>
+        </div>
+      )}
+
+      {/* Borrador completo pero no publicado — animar a publicar */}
+      {isDraft && isComplete && (
+        <div className="rounded-2xl border border-green-200 bg-green-50 p-3 flex items-start gap-2">
+          <CheckCircle className="w-3.5 h-3.5 text-green-600 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-green-800 leading-relaxed">
+            Toda la información está completa. Puedes publicarlo ahora.
+          </p>
+        </div>
+      )}
+
       {transitions.length > 0 && (
         <div className="flex flex-col gap-2">
           {transitions.map(t => (
@@ -595,6 +637,7 @@ export default function ProductoDetallePage() {
             product.status === 'out_of_stock'? 'Sin stock' : 'Borrador'
           }
           tooltip="Detalle del producto"
+          tooltipDetailed="Consulta y gestiona toda la información de este producto: precio, stock, imágenes, certificaciones y estado de publicación."
           showBackButton
           onBack={() => router.back()}
           actions={
