@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@arcediano/ux-library';
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@arcediano/ux-library';
 
 // ============================================================================
 // TIPOS
@@ -44,23 +44,23 @@ export function CreateProductCancelDialog({
           </div>
           <DialogDescription>Los datos no guardados se perderán.</DialogDescription>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground px-6 pt-4">
           Si cancelas ahora, perderás todos los cambios que no hayas guardado.
           ¿Estás seguro de que quieres salir?
         </p>
-        <div className="flex justify-end gap-2 pt-4">
-          <button
+        <div className="flex justify-end gap-2 px-6 pb-6 pt-4">
+          <Button
+            variant="outline"
             onClick={() => onOpenChange(false)}
-            className="px-4 py-2 text-sm font-medium text-foreground bg-surface-alt border-2 border-border rounded-lg hover:border-origen-pradera transition-colors"
           >
             Continuar
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="destructive"
             onClick={onConfirm}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
           >
             Descartar
-          </button>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

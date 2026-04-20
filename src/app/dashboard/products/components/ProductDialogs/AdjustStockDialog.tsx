@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { Package, Plus, Minus, Save, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@arcediano/ux-library';
+import { Button, Input } from '@arcediano/ux-library';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@arcediano/ux-library';
 import { type Product } from '@/types/product';
 import { updateProductStock } from '@/lib/api/products';
@@ -91,9 +91,9 @@ export function AdjustStockDialog({
           </div>
           <DialogDescription>{`Modifica el stock de ${product.name}`}</DialogDescription>
         </DialogHeader>
-      <div className="space-y-4">
+      <div className="px-6 py-4 space-y-4">
         {/* Información del producto */}
-        <div className="p-4 bg-origen-crema/30 rounded-lg border border-origen-pradera/20">
+        <div className="p-4 bg-surface rounded-lg border border-border-subtle">
           <p className="text-sm font-medium text-origen-bosque">{product.name}</p>
           <p className="text-xs text-muted-foreground mt-1">SKU: {product.sku}</p>
         </div>
@@ -103,10 +103,10 @@ export function AdjustStockDialog({
           <button
             onClick={() => setAdjustmentType('set')}
             className={cn(
-              'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border-2',
+              'flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all border-2',
               adjustmentType === 'set'
-                ? 'bg-origen-pradera text-white border-origen-pradera'
-                : 'bg-surface-alt text-foreground border-border hover:border-origen-pradera'
+                ? 'bg-origen-bosque text-white border-origen-bosque'
+                : 'bg-surface-alt text-origen-bosque border-border-subtle hover:border-origen-pradera'
             )}
           >
             Fijar
@@ -114,10 +114,10 @@ export function AdjustStockDialog({
           <button
             onClick={() => setAdjustmentType('add')}
             className={cn(
-              'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border-2',
+              'flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all border-2',
               adjustmentType === 'add'
-                ? 'bg-green-600 text-white border-green-600'
-                : 'bg-surface-alt text-foreground border-border hover:border-green-600'
+                ? 'bg-origen-hoja text-white border-origen-hoja'
+                : 'bg-surface-alt text-origen-bosque border-border-subtle hover:border-origen-hoja'
             )}
           >
             <Plus className="w-4 h-4 inline mr-1" />
@@ -126,10 +126,10 @@ export function AdjustStockDialog({
           <button
             onClick={() => setAdjustmentType('remove')}
             className={cn(
-              'flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all border-2',
+              'flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all border-2',
               adjustmentType === 'remove'
-                ? 'bg-amber-600 text-white border-amber-600'
-                : 'bg-surface-alt text-foreground border-border hover:border-amber-600'
+                ? 'bg-origen-menta text-white border-origen-menta'
+                : 'bg-surface-alt text-origen-bosque border-border-subtle hover:border-origen-menta'
             )}
           >
             <Minus className="w-4 h-4 inline mr-1" />
@@ -139,65 +139,67 @@ export function AdjustStockDialog({
 
         {/* Input de cantidad */}
         <div>
-          <label htmlFor="stock-value" className="text-xs text-muted-foreground block mb-1">
-            {adjustmentType === 'set' && 'Nuevo stock'}
-            {adjustmentType === 'add' && 'Cantidad a añadir'}
-            {adjustmentType === 'remove' && 'Cantidad a retirar'}
-          </label>
-          <input
+          <Input
             id="stock-value"
             type="number"
+            label={
+              adjustmentType === 'set' ? 'Nuevo stock' :
+              adjustmentType === 'add' ? 'Cantidad a añadir' :
+              'Cantidad a retirar'
+            }
             value={stockValue}
             onChange={(e) => setStockValue(parseInt(e.target.value) || 0)}
             min={0}
-            className="w-full h-10 text-sm border border-border rounded-lg px-3 focus:outline-none focus:ring-1 focus:ring-origen-menta/20 focus:border-origen-pradera"
             autoFocus
           />
         </div>
 
         {/* Resumen del ajuste */}
-        <div className="p-3 bg-origen-crema/30 rounded-lg">
+        <div className="p-3 bg-surface rounded-lg border border-border-subtle">
           <p className="text-xs text-muted-foreground">
-            <span className="font-medium">Stock actual:</span> {product.stock} unidades
+            <span className="font-medium text-foreground">Stock actual:</span> {product.stock} unidades
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            <span className="font-medium">Resultado:</span> {resultValue} unidades
+            <span className="font-medium text-foreground">Resultado:</span>{' '}
+            <span className={cn('font-semibold', resultValue === 0 ? 'text-feedback-danger' : 'text-origen-hoja')}>
+              {resultValue} unidades
+            </span>
           </p>
         </div>
 
         {/* Mensaje de error */}
         {error && (
-          <div className="p-3 bg-feedback-danger-subtle rounded-lg border border-red-200">
-            <p className="text-xs text-red-600">{error}</p>
+          <div className="p-3 bg-feedback-danger-subtle rounded-lg border border-feedback-danger/30">
+            <p className="text-xs text-feedback-danger-text">{error}</p>
           </div>
         )}
       </div>
-        <div className="flex justify-end gap-2 pt-4">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="rounded-xl border-2 hover:border-origen-pradera"
-            disabled={isLoading}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                Procesando...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Save className="w-4 h-4" />
-                Confirmar
-              </span>
-            )}
-          </Button>
-        </div>
+
+      <div className="flex justify-end gap-2 px-6 pb-6">
+        <Button
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={isLoading}
+        >
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleConfirm}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 animate-spin" />
+              Procesando...
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <Save className="w-4 h-4" />
+              Confirmar
+            </span>
+          )}
+        </Button>
+      </div>
       </DialogContent>
     </Dialog>
   );
