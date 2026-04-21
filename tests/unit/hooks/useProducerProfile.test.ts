@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { server } from '../../mocks/server';
 import {
   mockProducerProfile,
@@ -92,7 +92,9 @@ describe('useProducerProfile', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.producer).not.toBeNull();
 
-    await result.current.refetch();
+    await act(async () => {
+      await result.current.refetch();
+    });
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.producer).not.toBeNull();
@@ -109,7 +111,9 @@ describe('useProducerProfile', () => {
     // La API vuelve a funcionar
     server.resetHandlers();
 
-    await result.current.refetch();
+    await act(async () => {
+      await result.current.refetch();
+    });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.error).toBeNull();
