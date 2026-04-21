@@ -103,6 +103,12 @@ export async function uploadFile(
     if (s3Res.status === 403 || s3Res.status === 0) {
       return uploadFileViaProxy(file, category, options);
     }
+    // 404 puede ocurrir si S3 redirige la petición PUT a otra región (301) y el
+    // navegador la reenvía como GET (comportamiento estándar para 301): la clave
+    // no existe aún → S3 devuelve NoSuchKey. Fallback al proxy server-side.
+    if (s3Res.status === 404) {
+      return uploadFileViaProxy(file, category, options);
+    }
     if (s3Res.status === 413) {
       throw new Error('El archivo supera el tamaño máximo permitido.');
     }
