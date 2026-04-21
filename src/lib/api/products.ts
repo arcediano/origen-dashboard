@@ -146,7 +146,9 @@ async function normalizeProductImagesForApi(
       return image;
     }
 
-    if (!image.file) {
+    // Guard: image.file debe ser un File real (no un objeto vacío de localStorage)
+    const isRealFile = image.file instanceof File || (image.file && typeof (image.file as any).name === 'string');
+    if (!image.file || !isRealFile) {
       throw new Error(`La imagen ${index + 1} no se subió correctamente. Vuelve a cargarla antes de publicar.`);
     }
 
