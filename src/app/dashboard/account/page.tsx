@@ -1,10 +1,9 @@
 ﻿'use client';
 
 import Link from 'next/link';
-import { Bell, ChevronRight, CreditCard, HelpCircle, KeyRound, MonitorCog, Settings2, Store } from 'lucide-react';
+import { ChevronRight, CreditCard, HelpCircle, KeyRound, MonitorCog, Settings2, Store } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
-import { NotificationsPreferencesPanel } from '@/app/dashboard/notifications/components/NotificationsPreferencesPanel';
 
 export default function AccountPage() {
   const accountSections = [
@@ -76,14 +75,6 @@ export default function AccountPage() {
             );
           })}
         </Card>
-
-        <div>
-          <div className="flex items-center gap-2 mb-3 px-1">
-            <Bell className="h-4 w-4 text-origen-pradera" />
-            <h2 className="text-sm font-semibold text-origen-bosque">Preferencias de notificaciones</h2>
-          </div>
-          <NotificationsPreferencesPanel />
-        </div>
 
         <div>
           <Card className="rounded-2xl border border-border-subtle shadow-sm">
