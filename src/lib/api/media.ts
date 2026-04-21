@@ -1,29 +1,20 @@
 /**
- * Cliente para subida de archivos a S3 a través del gateway.
- * El gateway proxy reenvía los archivos al media-service.
+ * Cliente para subida de archivos a S3.
  *
- * Los archivos de tipo 'media' (imágenes) se guardan en el bucket público;
- * los de tipo 'document' (PDFs, certificados) en el bucket privado.
+ * Estrategia principal: Presigned PUT URLs.
+ *   1. GET /api/v1/media/presigned-upload → { key, uploadUrl, publicUrl }
+ *   2. PUT ${uploadUrl} directamente a S3 desde el browser (cero bytes por tu servidor)
  *
- * @returns { key, url } — key es la ruta S3 (se almacena en BD); url es la URL
- * pública para imágenes o null para documentos.
+ * Fallback: ruta proxy /api/upload para compatibilidad con uploads de documentos
+ * y otros contextos que no son imágenes de producto.
  */
 
-// Siempre usamos el Route Handler /api/upload del propio Next.js.
-// Este handler lee el accessToken HttpOnly server-side y lo reenvía al gateway
-// con Authorization: Bearer, evitando el problema de cookies no reenviadas
-// en los rewrites de Next.js a orígenes externos.
 const UPLOAD_PATH = '/api/upload';
+const PRESIGNED_PATH = '/api/v1/media/presigned-upload';
 
 function resolveEntityType(category: string): 'products' | 'producers' | 'certifications' {
-  if (category.startsWith('products/')) {
-    return 'products';
-  }
-
-  if (category.startsWith('documents/certifications/')) {
-    return 'certifications';
-  }
-
+  if (category.startsWith('products/')) return 'products';
+  if (category.startsWith('documents/certifications/')) return 'certifications';
   return 'producers';
 }
 
@@ -32,23 +23,87 @@ export interface UploadFileOptions {
   entityId?: string;
 }
 
-
 export interface UploadResult {
   key: string;
   url: string | null;
 }
 
+// ─── PRESIGNED URL UPLOAD ─────────────────────────────────────────────────────
+
 /**
- * Sube un archivo al bucket S3 correspondiente.
+ * Solicita una URL prefirmada de S3 al backend y sube el fichero directamente
+ * desde el browser sin que los bytes pasen por ningún servidor propio.
  *
  * @param file     - Objeto File del input/drop zone
- * @param category - Ruta lógica de destino dentro del espacio del productor:
- *   'visual/logo' | 'visual/banner' | 'visual/products' | 'visual/location' |
- *   'visual/team' | 'documents/cif' | 'documents/seguro-rc' |
- *   'documents/manipulador-alimentos' | 'documents/certifications/{certId}'
- * @param options  - Contexto adicional para organización de rutas en backend
+ * @param category - Ruta lógica de destino (ej: 'products/drafts/images')
+ * @param options  - entityType, entityId
  */
 export async function uploadFile(
+  file: File,
+  category: string,
+  options: UploadFileOptions = {},
+): Promise<UploadResult> {
+  const entityType = options.entityType ?? resolveEntityType(category);
+
+  // ── Paso 1: obtener presigned PUT URL del backend ──────────────────────────
+  const params = new URLSearchParams({ mimeType: file.type, entityType, category });
+  if (options.entityId) params.set('entityId', options.entityId);
+
+  let presignedRes: Response;
+  try {
+    presignedRes = await fetch(`${PRESIGNED_PATH}?${params}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+  } catch {
+    throw new Error('No se pudo conectar al servidor. Comprueba tu conexión.');
+  }
+
+  if (!presignedRes.ok) {
+    if (presignedRes.status === 401) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('session:expired'));
+      }
+      throw new Error('Tu sesión ha expirado.');
+    }
+    const data = await presignedRes.json().catch(() => ({}));
+    throw new Error((data as any)?.message ?? 'Error al preparar la subida del archivo.');
+  }
+
+  const { key, uploadUrl, publicUrl } = await presignedRes.json();
+
+  // ── Paso 2: subir directamente a S3 con PUT binario ───────────────────────
+  let s3Res: Response;
+  try {
+    s3Res = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type },
+      body: file,
+    });
+  } catch {
+    throw new Error('No se pudo conectar con el servicio de almacenamiento. Inténtalo de nuevo.');
+  }
+
+  if (!s3Res.ok) {
+    if (s3Res.status === 403) {
+      throw new Error('La URL de subida ha expirado. Inténtalo de nuevo.');
+    }
+    if (s3Res.status === 413) {
+      throw new Error('El archivo supera el tamaño máximo permitido.');
+    }
+    throw new Error(`Error al subir el archivo a S3 (${s3Res.status}). Inténtalo de nuevo.`);
+  }
+
+  return { key, url: publicUrl };
+}
+
+// ─── PROXY UPLOAD (fallback para documentos y flujos legacy) ─────────────────
+
+/**
+ * Sube un fichero a través del proxy Next.js → gateway → media-service.
+ * Usar solo para documentos privados o contextos donde no sea posible el PUT directo a S3.
+ */
+export async function uploadFileViaProxy(
   file: File,
   category: string,
   options: UploadFileOptions = {},
@@ -57,9 +112,7 @@ export async function uploadFile(
   form.append('file', file);
   form.append('category', category);
   form.append('entityType', options.entityType ?? resolveEntityType(category));
-  if (options.entityId) {
-    form.append('entityId', options.entityId);
-  }
+  if (options.entityId) form.append('entityId', options.entityId);
 
   const url = typeof window !== 'undefined'
     ? `${window.location.origin}${UPLOAD_PATH}`
@@ -67,30 +120,20 @@ export async function uploadFile(
 
   let response: Response;
   try {
-    response = await fetch(url, {
-      method: 'POST',
-      body: form,
-    });
+    response = await fetch(url, { method: 'POST', body: form });
   } catch {
     throw new Error('No se pudo conectar al servidor de archivos. Comprueba tu conexión.');
   }
 
   if (!response.ok) {
-    if (response.status === 413) {
-      throw new Error('El archivo supera el tamaño máximo permitido. Prueba con un archivo más pequeño.');
-    }
-    if (response.status === 415) {
-      throw new Error('Formato de archivo no permitido. Comprueba que el tipo de archivo sea correcto.');
-    }
+    if (response.status === 413) throw new Error('El archivo supera el tamaño máximo permitido.');
+    if (response.status === 415) throw new Error('Formato de archivo no permitido.');
     if (response.status === 401) {
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('session:expired'));
-      }
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('session:expired'));
       throw new Error('Tu sesión ha expirado.');
     }
     const data = await response.json().catch(() => ({}));
-    const message = (data as any)?.message ?? 'Error al subir el archivo. Inténtalo de nuevo.';
-    throw new Error(message);
+    throw new Error((data as any)?.message ?? 'Error al subir el archivo. Inténtalo de nuevo.');
   }
 
   const result = await response.json();
