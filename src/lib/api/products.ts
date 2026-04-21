@@ -269,8 +269,17 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
     dimensions: formData.dimensions,
     shippingClass: formData.shippingClass || undefined,
 
-    // Solo enviar nutritionalInfo si el productor rellenó datos reales (servingSizeValue > 0)
-    nutritionalInfo: (formData.nutritionalInfo?.servingSizeValue ?? 0) > 0
+    // Solo enviar nutritionalInfo si el productor rellenó datos reales (no solo el default de porción)
+    nutritionalInfo: (
+      (formData.nutritionalInfo?.servingSizeValue ?? 0) > 0 &&
+      (
+        formData.nutritionalInfo?.calories != null ||
+        formData.nutritionalInfo?.protein != null ||
+        formData.nutritionalInfo?.totalFat != null ||
+        (formData.nutritionalInfo?.ingredients?.length ?? 0) > 0 ||
+        (formData.nutritionalInfo?.allergens?.length ?? 0) > 0
+      )
+    )
       ? {
           servingSize: formData.nutritionalInfo.servingSize,
           servingSizeValue: formData.nutritionalInfo.servingSizeValue,
@@ -618,6 +627,7 @@ export async function createProduct(
     }
 
     const body = formDataToApiBody(normalizedFormData);
+    console.log('[products] createProduct body:', JSON.stringify(body, null, 2));
     const raw  = await gatewayClient.post<ApiProduct>('/products', body);
     const product = mapApiProductToProduct(raw);
 
@@ -641,6 +651,7 @@ export async function saveProductDraft(
   try {
     const normalizedFormData = await normalizeFormDataBeforeSubmit(formData);
     const body = { ...formDataToApiBody(normalizedFormData), status: 'DRAFT' };
+    console.log('[products] saveProductDraft body:', JSON.stringify(body, null, 2));
     const raw  = await gatewayClient.post<ApiProduct>('/products', body);
     return {
       data: { draftId: raw.id, message: 'Borrador guardado' },

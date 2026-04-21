@@ -19,9 +19,9 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { PRODUCT_CATEGORIES } from '@/types/product';
+import { fetchCategoriesTree, type CategoryTree } from '@/lib/api/categories';
 import { motion } from 'framer-motion';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 
 // ============================================================================
@@ -65,8 +65,13 @@ export function StepBasic({
   
   const [localTouched, setLocalTouched] = useState<Record<string, boolean>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  
+  const [categories, setCategories] = useState<CategoryTree[]>([]);
+
   const allTouched = { ...localTouched, ...touched };
+
+  useEffect(() => {
+    fetchCategoriesTree().then(setCategories).catch(() => setCategories([]));
+  }, []);
 
   const validateField = useCallback((field: string, value: any) => {
     try {
@@ -152,35 +157,46 @@ export function StepBasic({
             <Select
               required
               value={formData?.categoryId || ''}
-              onValueChange={(value) => handleChange('categoryId', value)}
+              onValueChange={(value) => {
+                handleChange('categoryId', value);
+                handleChange('subcategoryId', '');
+              }}
               error={allTouched?.categoryId ? errors?.categoryId : undefined}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar categoría" />
               </SelectTrigger>
               <SelectContent>
-                {PRODUCT_CATEGORIES.map(cat => (
+                {categories.map(cat => (
                   <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
+                    {cat.icon ? `${cat.icon} ${cat.name}` : cat.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Select
-              value={formData?.subcategoryId || ''}
-              onValueChange={(value) => handleChange('subcategoryId', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar subcategoría (opcional)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="artesano">Artesano</SelectItem>
-                <SelectItem value="ecologico">Ecológico</SelectItem>
-                <SelectItem value="premium">Premium</SelectItem>
-                <SelectItem value="tradicional">Tradicional</SelectItem>
-              </SelectContent>
-            </Select>
+            {(() => {
+              const selectedCat = categories.find(c => c.id === formData?.categoryId);
+              const subcategories = selectedCat?.children ?? [];
+              return (
+                <Select
+                  value={formData?.subcategoryId || ''}
+                  onValueChange={(value) => handleChange('subcategoryId', value)}
+                  disabled={subcategories.length === 0}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={subcategories.length > 0 ? 'Seleccionar subcategoría (opcional)' : 'Sin subcategorías'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subcategories.map(sub => (
+                      <SelectItem key={sub.id} value={sub.id}>
+                        {sub.icon ? `${sub.icon} ${sub.name}` : sub.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              );
+            })()}
           </div>
 
           {/* Descripción corta */}

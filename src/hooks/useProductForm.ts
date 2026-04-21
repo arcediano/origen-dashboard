@@ -464,6 +464,7 @@ export function useProductForm(productId?: string) {
         
         if (response.error) {
           setPublishStatus('error');
+          setError(response.error);
         } else {
           setPublishStatus('pending_approval');
         }
@@ -473,6 +474,7 @@ export function useProductForm(productId?: string) {
         
         if (response.error) {
           setPublishStatus('error');
+          setError(response.error);
         } else {
           setPublishStatus('pending_approval');
           localStorage.removeItem(STORAGE_KEY);
