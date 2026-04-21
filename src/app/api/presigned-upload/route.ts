@@ -23,6 +23,10 @@ const GATEWAY_URL =
   process.env.NEXT_PUBLIC_API_GATEWAY_URL ??
   'http://localhost:3000';
 
+if (!process.env.API_GATEWAY_URL && !process.env.NEXT_PUBLIC_API_GATEWAY_URL) {
+  console.error('[presigned-upload] ⚠️  Ninguna variable API_GATEWAY_URL configurada — usando localhost:3000');
+}
+
 export async function GET(req: NextRequest) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
@@ -69,6 +73,11 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  if (!gatewayRes.ok) {
+    console.error(
+      `[presigned-upload] Gateway ${GATEWAY_URL} respondió ${gatewayRes.status}`,
+    );
+  }
   const data = await gatewayRes.json().catch(() => ({}));
   return NextResponse.json(data, { status: gatewayRes.status });
 }
