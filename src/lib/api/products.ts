@@ -267,7 +267,8 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
     dimensions: formData.dimensions,
     shippingClass: formData.shippingClass || undefined,
 
-    nutritionalInfo: formData.nutritionalInfo
+    // Solo enviar nutritionalInfo si el productor rellenó datos reales (servingSizeValue > 0)
+    nutritionalInfo: (formData.nutritionalInfo?.servingSizeValue ?? 0) > 0
       ? {
           servingSize: formData.nutritionalInfo.servingSize,
           servingSizeValue: formData.nutritionalInfo.servingSizeValue,
@@ -311,7 +312,14 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
       category: mapCertificationCategory(certification.category),
       documentIds: certification.documents?.map((document) => document.id) ?? [],
     })),
-    productionInfo: formData.productionInfo
+    // Solo enviar productionInfo si el productor rellenó al menos un campo significativo
+    productionInfo: (
+      formData.productionInfo?.story ||
+      formData.productionInfo?.farmName ||
+      formData.productionInfo?.origin ||
+      formData.productionInfo?.productionMethod ||
+      formData.productionInfo?.batchNumber
+    )
       ? {
           story: formData.productionInfo.story,
           farmName: formData.productionInfo.farmName,
@@ -362,7 +370,12 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
     if (product[key] !== undefined) body[key] = product[key];
   }
 
-  if (product.status !== undefined)     body.status     = mapStatusToApi(product.status);
+  // Los productores solo pueden enviar DRAFT o PENDING_APPROVAL en un PUT.
+  // ACTIVE y OUT_OF_STOCK los gestiona el backend automáticamente (por stock).
+  const PRODUCER_PUT_ALLOWED_STATUSES = ['draft', 'pending_approval', 'inactive'];
+  if (product.status !== undefined && PRODUCER_PUT_ALLOWED_STATUSES.includes(product.status)) {
+    body.status = mapStatusToApi(product.status);
+  }
   if (product.visibility !== undefined) body.visibility = mapVisibilityToApi(product.visibility);
 
   // Imágenes S3

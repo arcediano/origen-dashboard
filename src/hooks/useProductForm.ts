@@ -64,6 +64,15 @@ const FORM_STEP_KEYS: FormStepId[] = [
   'certifications',
 ];
 
+// Pasos que el productor DEBE completar para poder publicar.
+// Los pasos opcionales (nutritional, production, certifications) no bloquean la publicación.
+const REQUIRED_STEPS_FOR_PUBLISH: FormStepId[] = [
+  'basic',
+  'images',
+  'pricing',
+  'inventory',
+];
+
 // ============================================================================
 // FUNCIONES DE TRANSFORMACIÓN (helpers puros)
 // ============================================================================
@@ -433,11 +442,16 @@ export function useProductForm(productId?: string) {
   }, [formData, productId, router]);
 
   const handlePublish = useCallback(async () => {
-    const allCompleted = FORM_STEP_KEYS.every((step) => completedTabs[step]);
-    if (!allCompleted) return;
+    // Solo verificar pasos obligatorios; nutricional, producción y certificaciones son opcionales.
+    const requiredCompleted = REQUIRED_STEPS_FOR_PUBLISH.every((step) => completedTabs[step]);
+    if (!requiredCompleted) {
+      setError('Completa los pasos obligatorios antes de publicar: Información básica, Imágenes, Precio e Inventario.');
+      return;
+    }
     
     setIsPublishing(true);
     setPublishStatus('idle');
+    setError(null);
     
     try {
       if (productId) {
@@ -462,6 +476,7 @@ export function useProductForm(productId?: string) {
         } else {
           setPublishStatus('pending_approval');
           localStorage.removeItem(STORAGE_KEY);
+          setShowSuccessModal(true);
         }
       }
     } catch (error) {
@@ -501,7 +516,7 @@ export function useProductForm(productId?: string) {
     skuSuggestion,
     
     // Valores computados
-    allStepsCompleted: FORM_STEP_KEYS.every((step) => completedTabs[step]),
+    allStepsCompleted: REQUIRED_STEPS_FOR_PUBLISH.every((step) => completedTabs[step]),
     hasCertifications: formData.certifications.length > 0,
     certificationsApproved: formData.certifications.every(c => c.verified) || false,
     isEditMode: !!productId,
