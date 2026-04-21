@@ -228,7 +228,7 @@ const STATUS_MAP: Record<string, Product['status']> = {
   DRAFT:            'draft',
   INACTIVE:         'inactive',
   OUT_OF_STOCK:     'out_of_stock',
-  PENDING_APPROVAL: 'draft',    // Tratado como borrador en el dashboard
+  PENDING_APPROVAL: 'pending_approval',
   SCHEDULED:        'draft',    // Tratado como borrador en el dashboard
 };
 
@@ -498,10 +498,11 @@ export function computeProductStats(products: Product[]): ProductStats {
  */
 export function mapStatusToApi(status: Product['status'] | string): string {
   const map: Record<string, string> = {
-    active:      'ACTIVE',
-    draft:       'DRAFT',
-    inactive:    'INACTIVE',
-    out_of_stock: 'OUT_OF_STOCK',
+    active:           'ACTIVE',
+    draft:            'DRAFT',
+    inactive:         'INACTIVE',
+    out_of_stock:     'OUT_OF_STOCK',
+    pending_approval: 'PENDING_APPROVAL',
   };
   return map[status] ?? 'DRAFT';
 }

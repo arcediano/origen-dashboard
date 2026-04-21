@@ -132,13 +132,22 @@ async function normalizeProductImagesForApi(
   images: Product['gallery'],
   productId?: string,
 ): Promise<Product['gallery']> {
+  // Imágenes temporales sin File (perdidas tras recarga desde localStorage)
+  const lostImages = images.filter(img => img.id.startsWith('temp-') && !img.file);
+  if (lostImages.length > 0) {
+    throw new Error(
+      `${lostImages.length} imagen(es) se perdieron al recargar la página. ` +
+      `Por favor, vuélvelas a subir antes de guardar.`
+    );
+  }
+
   const normalized = await Promise.all(images.map(async (image, index) => {
     if (isHttpUrl(image.url) && !image.file && !image.id.startsWith('temp-')) {
       return image;
     }
 
     if (!image.file) {
-      throw new Error(`La imagen ${index + 1} no se subio correctamente. Vuelve a cargarla antes de publicar.`);
+      throw new Error(`La imagen ${index + 1} no se subió correctamente. Vuelve a cargarla antes de publicar.`);
     }
 
     const uploadCategory = productId

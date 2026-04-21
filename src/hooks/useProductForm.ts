@@ -119,10 +119,10 @@ const productToFormData = (product: Product): ProductFormData => {
  */
 const formDataToProduct = (formData: ProductFormData): Partial<Product> => {
   // Mapeo de estados del formulario a estados del producto
-  const statusMap: Record<string, 'draft' | 'active' | 'inactive' | 'out_of_stock'> = {
+  const statusMap: Record<string, 'draft' | 'pending_approval' | 'active' | 'inactive' | 'out_of_stock'> = {
     'draft': 'draft',
     'active': 'active',
-    'pending_approval': 'draft',
+    'pending_approval': 'pending_approval',
     'scheduled': 'draft',
   };
 
@@ -441,32 +441,26 @@ export function useProductForm(productId?: string) {
     
     try {
       if (productId) {
-        // Edición: actualizar y publicar
+        // Edición: enviar a revisión (PENDING_APPROVAL) para aprobación del admin
         const productData = {
           ...formDataToProduct(formData),
-          status: 'active' as const,
-          publishedAt: new Date()
+          status: 'pending_approval' as const,
         };
         const response = await updateProduct(productId, productData);
         
         if (response.error) {
           setPublishStatus('error');
         } else {
-          setPublishStatus('success');
-          setShowSuccessModal(true);
+          setPublishStatus('pending_approval');
         }
       } else {
-        // Creación: crear nuevo producto
-        const response = await createProduct(formData);
+        // Creación: enviar a revisión (PENDING_APPROVAL)
+        const response = await createProduct({ ...formData, status: 'pending_approval' as const });
         
         if (response.error) {
           setPublishStatus('error');
         } else {
-          const needsApproval = formData.certifications.length > 0 && 
-            !formData.certifications.every(c => c.verified);
-          
-          setPublishStatus(needsApproval ? 'pending_approval' : 'success');
-          if (!needsApproval) setShowSuccessModal(true);
+          setPublishStatus('pending_approval');
           localStorage.removeItem(STORAGE_KEY);
         }
       }

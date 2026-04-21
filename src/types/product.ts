@@ -244,7 +244,7 @@ export interface Product {
   certifications: Certification[];
   productionInfo?: ProductionInfo;
   attributes: DynamicAttribute[];
-  status: 'draft' | 'active' | 'inactive' | 'out_of_stock';
+  status: 'draft' | 'pending_approval' | 'active' | 'inactive' | 'out_of_stock';
   visibility: 'public' | 'private' | 'password';
   publishedAt?: Date;
   sales?: number;

@@ -53,6 +53,11 @@ const STATUS_CONFIG: Record<
     icon: AlertCircle,
     chip: 'bg-feedback-danger-subtle text-red-700 border-red-200',
   },
+  pending_approval: {
+    label: 'En revisión',
+    icon: AlertCircle,
+    chip: 'bg-amber-50 text-amber-700 border-amber-200',
+  },
 };
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────
