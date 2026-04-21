@@ -30,7 +30,7 @@ import {
   AlertCircle, FileText, Award, Leaf, FlaskConical, Droplet, Milk,
   Info, AlertTriangle, Wheat, Bean, Nut, Egg, Fish,
   Shell, Sprout, Edit, ChevronDown, Thermometer, Archive,
-  Globe, Lock, PlayCircle, PauseCircle, Send,
+  Globe, Lock, PauseCircle, Send,
 } from 'lucide-react';
 
 import { type Product } from '@/types/product';
@@ -360,10 +360,11 @@ function StatusCard({
   onVisibilityChange: (v: boolean) => Promise<void>;
   isUpdating: boolean;
 }) {
-  const isPublic   = product.visibility === 'public';
-  const isDraft    = product.status === 'draft';
-  const isActive   = product.status === 'active';
-  const isInactive = product.status === 'inactive';
+  const isPublic          = product.visibility === 'public';
+  const isDraft           = product.status === 'draft';
+  const isActive          = product.status === 'active';
+  const isInactive        = product.status === 'inactive';
+  const isPendingApproval = product.status === 'pending_approval';
 
   // Completitud del producto — misma lógica que ProductCard
   const missingFields: string[] = [];
@@ -373,13 +374,18 @@ function StatusCard({
   if (!product.sku) missingFields.push('SKU');
   const isComplete = missingFields.length === 0;
 
-  // Un borrador incompleto no puede publicarse directamente
-  const canPublishDraft = isDraft && isComplete;
+  // Puede enviar a revisión si el borrador está completo, o si fue rechazado (inactive) y lo corrigió
+  const canSubmitForReview = (isDraft || isInactive) && isComplete;
 
   const transitions = [
-    { to: 'active'   as const, label: 'Publicar producto',  icon: PlayCircle,  variant: 'primary'   as const, show: canPublishDraft || isInactive },
-    { to: 'inactive' as const, label: 'Pausar producto',    icon: PauseCircle, variant: 'secondary' as const, show: isActive },
-    { to: 'draft'    as const, label: 'Mover a borrador',   icon: FileText,    variant: 'ghost'     as const, show: isActive || isInactive },
+    // Enviar a revisión (DRAFT o INACTIVE completo → PENDING_APPROVAL)
+    { to: 'pending_approval' as const, label: 'Enviar a revisión',    icon: Send,        variant: 'primary'   as const, show: canSubmitForReview },
+    // Retirar de revisión (PENDING_APPROVAL → DRAFT)
+    { to: 'draft'            as const, label: 'Retirar de revisión',  icon: FileText,    variant: 'ghost'     as const, show: isPendingApproval },
+    // Pausar producto activo (ACTIVE → INACTIVE)
+    { to: 'inactive'         as const, label: 'Pausar producto',      icon: PauseCircle, variant: 'secondary' as const, show: isActive },
+    // Mover a borrador para editar (ACTIVE o INACTIVE → DRAFT)
+    { to: 'draft'            as const, label: 'Mover a borrador',     icon: FileText,    variant: 'ghost'     as const, show: isActive || isInactive },
   ].filter(t => t.show);
 
   return (
@@ -392,12 +398,25 @@ function StatusCard({
         </div>
       </div>
 
+      {/* En revisión — informar al productor que no puede editar el estado */}
+      {isPendingApproval && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <p className="text-xs font-semibold text-amber-800">Pendiente de revisión</p>
+          </div>
+          <p className="text-[11px] text-amber-700 leading-relaxed">
+            Tu producto está siendo revisado por el equipo de Origen. Te notificaremos cuando sea aprobado o si necesita cambios.
+          </p>
+        </div>
+      )}
+
       {/* Borrador incompleto — explicar por qué no se puede publicar */}
       {isDraft && !isComplete && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 space-y-2">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <p className="text-xs font-semibold text-amber-800">No se puede publicar todavía</p>
+            <p className="text-xs font-semibold text-amber-800">No se puede enviar a revisión</p>
           </div>
           <p className="text-[11px] text-amber-700 leading-relaxed">
             Faltan datos obligatorios:{' '}
@@ -412,12 +431,22 @@ function StatusCard({
         </div>
       )}
 
-      {/* Borrador completo pero no publicado — animar a publicar */}
+      {/* Borrador completo — listo para enviar */}
       {isDraft && isComplete && (
         <div className="rounded-2xl border border-green-200 bg-green-50 p-3 flex items-start gap-2">
           <CheckCircle className="w-3.5 h-3.5 text-green-600 shrink-0 mt-0.5" />
           <p className="text-[11px] text-green-800 leading-relaxed">
-            Toda la información está completa. Puedes publicarlo ahora.
+            Toda la información está completa. Puedes enviarlo a revisión.
+          </p>
+        </div>
+      )}
+
+      {/* Producto inactivo — puede corregir y re-enviar */}
+      {isInactive && isComplete && (
+        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-3 flex items-start gap-2">
+          <Info className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-blue-800 leading-relaxed">
+            El producto está inactivo. Si realizaste correcciones, puedes volver a enviarlo a revisión.
           </p>
         </div>
       )}
@@ -516,7 +545,13 @@ export default function ProductoDetallePage() {
       if (res.error) toast({ title: 'Error', description: res.error, variant: 'error' });
       else if (res.data) {
         setProduct(res.data);
-        toast({ title: 'Estado actualizado', description: `Producto ${newStatus === 'active' ? 'publicado' : 'actualizado'}.` });
+        const statusMessages: Partial<Record<Product['status'], string>> = {
+          pending_approval: 'Enviado a revisión. Te notificaremos cuando sea aprobado.',
+          inactive:         'Producto pausado y ocultado del marketplace.',
+          draft:            'Movido a borrador. Puedes seguir editándolo.',
+          active:           'Producto publicado.',
+        };
+        toast({ title: 'Estado actualizado', description: statusMessages[newStatus] ?? 'Estado actualizado.' });
       }
     } catch {
       toast({ title: 'Error', description: 'No se pudo actualizar.', variant: 'error' });
