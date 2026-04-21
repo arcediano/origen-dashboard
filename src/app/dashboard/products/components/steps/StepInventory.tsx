@@ -226,9 +226,7 @@ export function StepInventory({
           <div className="flex flex-col gap-1.5">
             <p className="text-xs font-medium text-foreground flex items-center gap-1">
               SKU
-              <Tooltip content="El SKU (Stock Keeping Unit) es el código único de inventario. Se genera automáticamente al guardar el producto.">
-                <span className="w-3.5 h-3.5 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[10px] cursor-default select-none font-bold leading-none">?</span>
-              </Tooltip>
+              <Tooltip content="El SKU (Stock Keeping Unit) es el código único de inventario. Se genera automáticamente al guardar el producto." />
             </p>
             <div className="flex items-center gap-2 h-12 px-4 rounded-xl border border-dashed border-origen-pradera/30 bg-origen-crema/40">
               <Sparkles className="w-4 h-4 text-origen-pradera/60 shrink-0" />

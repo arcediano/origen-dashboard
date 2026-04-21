@@ -27,7 +27,7 @@ vi.mock('@/lib/api/client', () => ({
   },
   GatewayError: class GatewayError extends Error {
     status: number;
-    constructor(message: string, status: number) {
+    constructor(status: number, message: string) {
       super(message);
       this.status = status;
     }
@@ -96,7 +96,7 @@ describe('getCertificationsCatalog', () => {
 
   it('devuelve error cuando el gateway falla', async () => {
     const { GatewayError } = await import('@/lib/api/client');
-    mockGet.mockRejectedValueOnce(new GatewayError('Not Found', 404));
+    mockGet.mockRejectedValueOnce(new GatewayError(404, 'Not Found'));
 
     const res = await getCertificationsCatalog();
 
@@ -123,7 +123,7 @@ describe('addProductCertification', () => {
 
   it('devuelve error cuando el gateway falla', async () => {
     const { GatewayError } = await import('@/lib/api/client');
-    mockPost.mockRejectedValueOnce(new GatewayError('Conflict', 409));
+    mockPost.mockRejectedValueOnce(new GatewayError(409, 'Conflict'));
 
     const res = await addProductCertification('prod-123', 'cert-eco');
 
@@ -147,7 +147,7 @@ describe('removeProductCertification', () => {
 
   it('devuelve error cuando el gateway falla', async () => {
     const { GatewayError } = await import('@/lib/api/client');
-    mockDelete.mockRejectedValueOnce(new GatewayError('Forbidden', 403));
+    mockDelete.mockRejectedValueOnce(new GatewayError(403, 'Forbidden'));
 
     const res = await removeProductCertification('prod-123', 'cert-eco');
 
