@@ -10,7 +10,9 @@
  */
 
 const UPLOAD_PATH = '/api/upload';
-const PRESIGNED_PATH = '/api/v1/media/presigned-upload';
+// Server-side route que lee la cookie HttpOnly y llama al gateway con Bearer token.
+// Evita problemas de cookie-forwarding en rewrites de Next.js y expone la sesión al cliente.
+const PRESIGNED_PATH = '/api/presigned-upload';
 
 function resolveEntityType(category: string): 'products' | 'producers' | 'certifications' {
   if (category.startsWith('products/')) return 'products';
@@ -56,7 +58,13 @@ export async function uploadFile(
       credentials: 'include',
     });
   } catch {
-    throw new Error('No se pudo conectar al servidor. Comprueba tu conexión.');
+    // Conectividad: caer al proxy clásico
+    return uploadFileViaProxy(file, category, options);
+  }
+
+  // Endpoint no disponible aún (despliegue pendiente en backend) → fallback al proxy
+  if (presignedRes.status === 404 || presignedRes.status === 502 || presignedRes.status === 503) {
+    return uploadFileViaProxy(file, category, options);
   }
 
   if (!presignedRes.ok) {
@@ -72,6 +80,11 @@ export async function uploadFile(
 
   const { key, uploadUrl, publicUrl } = await presignedRes.json();
 
+  if (!uploadUrl) {
+    // Respuesta inesperada del backend → fallback al proxy
+    return uploadFileViaProxy(file, category, options);
+  }
+
   // ── Paso 2: subir directamente a S3 con PUT binario ───────────────────────
   let s3Res: Response;
   try {
@@ -81,17 +94,19 @@ export async function uploadFile(
       body: file,
     });
   } catch {
-    throw new Error('No se pudo conectar con el servicio de almacenamiento. Inténtalo de nuevo.');
+    // S3 inaccesible desde el browser → fallback al proxy (server-side puede alcanzarlo)
+    return uploadFileViaProxy(file, category, options);
   }
 
   if (!s3Res.ok) {
-    if (s3Res.status === 403) {
-      throw new Error('La URL de subida ha expirado. Inténtalo de nuevo.');
+    // CORS o credenciales S3 aún no configuradas → fallback al proxy
+    if (s3Res.status === 403 || s3Res.status === 0) {
+      return uploadFileViaProxy(file, category, options);
     }
     if (s3Res.status === 413) {
       throw new Error('El archivo supera el tamaño máximo permitido.');
     }
-    throw new Error(`Error al subir el archivo a S3 (${s3Res.status}). Inténtalo de nuevo.`);
+    throw new Error(`Error al subir el archivo (${s3Res.status}). Inténtalo de nuevo.`);
   }
 
   return { key, url: publicUrl };
