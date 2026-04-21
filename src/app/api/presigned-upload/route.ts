@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
   const entityId    = searchParams.get('entityId');
   const category    = searchParams.get('category');
 
-  if (!mimeType || !entityType) {
+  if (!mimeType || mimeType === 'undefined' || !entityType) {
     return NextResponse.json(
       { success: false, message: 'mimeType y entityType son obligatorios' },
       { status: 400 },

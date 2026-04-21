@@ -14,6 +14,22 @@ const UPLOAD_PATH = '/api/upload';
 // Evita problemas de cookie-forwarding en rewrites de Next.js y expone la sesión al cliente.
 const PRESIGNED_PATH = '/api/presigned-upload';
 
+function guessMimeType(filename: string): string {
+  const ext = filename.split('.').pop()?.toLowerCase() ?? '';
+  const map: Record<string, string> = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    webp: 'image/webp',
+    gif: 'image/gif',
+    svg: 'image/svg+xml',
+    heic: 'image/heic',
+    heif: 'image/heif',
+    pdf: 'application/pdf',
+  };
+  return map[ext] ?? 'application/octet-stream';
+}
+
 function resolveEntityType(category: string): 'products' | 'producers' | 'certifications' {
   if (category.startsWith('products/')) return 'products';
   if (category.startsWith('documents/certifications/')) return 'certifications';
@@ -48,7 +64,9 @@ export async function uploadFile(
   const entityType = options.entityType ?? resolveEntityType(category);
 
   // ── Paso 1: obtener presigned PUT URL del backend ──────────────────────────
-  const params = new URLSearchParams({ mimeType: file.type, entityType, category });
+  const resolvedMimeType =
+    file.type && file.type !== 'undefined' ? file.type : guessMimeType(file.name);
+  const params = new URLSearchParams({ mimeType: resolvedMimeType, entityType, category });
   if (options.entityId) params.set('entityId', options.entityId);
 
   let presignedRes: Response;
