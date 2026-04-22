@@ -182,6 +182,7 @@ export function StepCertificationsAttributes({
 
   const [activeTab, setActiveTab] = useState('certifications');
   const [showCertForm, setShowCertForm] = useState(false);
+  const [showCatalogPanel, setShowCatalogPanel] = useState(false);
   const [showAttrForm, setShowAttrForm] = useState(false);
   const [editingCert, setEditingCert] = useState<Certification | null>(null);
   const [editingAttr, setEditingAttr] = useState<DynamicAttribute | null>(null);
@@ -191,13 +192,12 @@ export function StepCertificationsAttributes({
   const [catalogSearch, setCatalogSearch] = useState('');
   const [catalogCategory, setCatalogCategory] = useState('');
   const [catalogResults, setCatalogResults] = useState<CatalogCertification[]>([]);
+  const [catalogSearched, setCatalogSearched] = useState(false);
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(false);
-  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const [certActionError, setCertActionError] = useState<string | null>(null);
   const [certActionLoading, setCertActionLoading] = useState<string | null>(null);
-  const catalogRef = useRef<HTMLDivElement>(null);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const catalogInputRef = useRef<HTMLInputElement>(null);
 
   const [newCert, setNewCert] = useState<Partial<Certification>>({
     name: '', issuingBody: '', certificateNumber: '',
@@ -211,57 +211,51 @@ export function StepCertificationsAttributes({
   const categoryExamples = ATTRIBUTE_EXAMPLES[productCategory] || ATTRIBUTE_EXAMPLES.quesos;
   const isStepComplete = certifications.length > 0 || attributes.length > 0;
 
-  // ── Cerrar catálogo al clicar fuera ─────────────────────────────────────────
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (catalogRef.current && !catalogRef.current.contains(e.target as Node)) {
-        setIsCatalogOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
   // ── Búsqueda en catálogo con debounce ────────────────────────────────────────
   const searchCatalog = useCallback(async (query: string, category: string) => {
     setIsLoadingCatalog(true);
+    setCatalogSearched(false);
     const res = await getCertificationsCatalog({
       search:   query.trim() || undefined,
       category: category     || undefined,
-      limit: 10,
+      limit: 20,
     });
     if (!res.error && res.data) {
       const existing = new Set(certifications.map((c) => c.id));
       setCatalogResults(res.data.items.filter((item) => !existing.has(item.id)));
+    } else {
+      setCatalogResults([]);
     }
+    setCatalogSearched(true);
     setIsLoadingCatalog(false);
   }, [certifications]);
 
   useEffect(() => {
+    if (!showCatalogPanel) return;
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
 
-    // Si hay texto o categoría seleccionada → buscar con debounce
-    if (catalogSearch.trim() || catalogCategory) {
-      setIsLoadingCatalog(true);
-      searchDebounceRef.current = setTimeout(() => {
-        searchCatalog(catalogSearch, catalogCategory);
-      }, 350);
-    } else {
-      // Sin filtros → limpiar resultados (las sugerencias de foco se gestionan por separado)
-      if (!isCatalogOpen) setCatalogResults([]);
-    }
+    setIsLoadingCatalog(true);
+    searchDebounceRef.current = setTimeout(() => {
+      searchCatalog(catalogSearch, catalogCategory);
+    }, catalogSearch.trim() ? 350 : 0);
 
     return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [catalogSearch, catalogCategory]);
+  }, [catalogSearch, catalogCategory, showCatalogPanel]);
 
-  // ── Top-5 sugerencias al hacer foco sin texto ────────────────────────────────
-  const handleSearchFocus = async () => {
-    setIsCatalogOpen(true);
-    if (!catalogSearch.trim() && !catalogCategory) {
-      setIsLoadingCatalog(true);
-      await searchCatalog('', '');
-    }
+  const openCatalogPanel = () => {
+    setShowCatalogPanel(true);
+    setShowCertForm(false);
+    // Foco al input en el siguiente tick
+    setTimeout(() => catalogInputRef.current?.focus(), 50);
+  };
+
+  const closeCatalogPanel = () => {
+    setShowCatalogPanel(false);
+    setCatalogSearch('');
+    setCatalogCategory('');
+    setCatalogResults([]);
+    setCatalogSearched(false);
   };
 
   // ============================================================================
@@ -321,9 +315,7 @@ export function StepCertificationsAttributes({
     };
 
     onCertificationsChange([...certifications, cert]);
-    setCatalogSearch('');
-    setCatalogResults([]);
-    setIsCatalogOpen(false);
+    closeCatalogPanel();
   };
 
   const handleUpdateCertification = async () => {
@@ -383,6 +375,12 @@ export function StepCertificationsAttributes({
     setNewCert({ name: '', issuingBody: '', certificateNumber: '', status: 'pending', verified: false, documents: [] });
     setShowCertForm(false);
     setEditingCert(null);
+  };
+
+  const openManualForm = () => {
+    closeCatalogPanel();
+    resetCertForm();
+    setShowCertForm(true);
   };
 
   // ============================================================================
@@ -543,120 +541,157 @@ export function StepCertificationsAttributes({
                 </div>
               )}
 
-              {/* ── Buscador de catálogo ───────────────────────────────────── */}
-              <div className="space-y-2" ref={catalogRef}>
-                {/* Fila: input de búsqueda + selector de categoría */}
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={catalogSearch}
-                      onChange={(e) => { setCatalogSearch(e.target.value); setIsCatalogOpen(true); }}
-                      onFocus={handleSearchFocus}
-                      placeholder="Buscar en el catálogo de certificaciones…"
-                      className="w-full h-11 pl-9 pr-10 rounded-xl border border-border bg-white text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
-                      aria-label="Buscar certificación en el catálogo"
-                      aria-expanded={isCatalogOpen && (catalogResults.length > 0 || isLoadingCatalog)}
-                      aria-haspopup="listbox"
-                    />
-                    {isLoadingCatalog && (
-                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
-                    )}
-                    {catalogSearch && !isLoadingCatalog && (
-                      <button
-                        type="button"
-                        onClick={() => { setCatalogSearch(''); setCatalogResults([]); setIsCatalogOpen(false); }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        aria-label="Limpiar búsqueda"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Filtro de categoría */}
-                  <Select
-                    value={catalogCategory}
-                    onValueChange={(v) => { setCatalogCategory(v); setIsCatalogOpen(true); }}
+              {/* ── Acciones principales ───────────────────────────────────── */}
+              {!showCatalogPanel && !showCertForm && (
+                <div className="flex gap-3">
+                  <Button
+                    className="flex-1"
+                    variant="outline"
+                    onClick={openCatalogPanel}
+                    leftIcon={<Search className="w-4 h-4" />}
                   >
-                    <SelectTrigger className="w-auto min-w-[160px] h-11 rounded-xl gap-1.5">
-                      <Filter className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
-                      <SelectValue placeholder="Categoría" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORY_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    Buscar en catálogo oficial
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    onClick={openManualForm}
+                    leftIcon={<Plus className="w-4 h-4" />}
+                  >
+                    Añadir manualmente
+                  </Button>
                 </div>
+              )}
 
-                {/* Resultados desplegables */}
-                <AnimatePresence>
-                  {isCatalogOpen && (catalogResults.length > 0 || isLoadingCatalog) && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      className="relative z-50"
-                    >
-                      <ul
-                        role="listbox"
-                        aria-label="Resultados del catálogo"
-                        className="absolute w-full max-h-56 overflow-y-auto rounded-xl border border-border bg-white shadow-lg"
-                      >
-                        {isLoadingCatalog && catalogResults.length === 0 && (
-                          <li className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground">
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Buscando…
-                          </li>
-                        )}
-                        {catalogResults.map((item) => (
-                          <li key={item.id} role="option" aria-selected={false}>
+              {/* ── Panel catálogo ─────────────────────────────────────────── */}
+              <AnimatePresence>
+                {showCatalogPanel && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="p-5 bg-white rounded-xl border-2 border-origen-pradera/20 space-y-4">
+                      {/* Cabecera del panel */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-origen-bosque">Catálogo oficial de Origen</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Certificaciones reconocidas: DOP, IGP, Ecológico UE, ISO, Comercio Justo y más
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={closeCatalogPanel}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-alt transition-colors"
+                          aria-label="Cerrar catálogo"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Input de búsqueda + filtro categoría */}
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                          <input
+                            ref={catalogInputRef}
+                            type="text"
+                            value={catalogSearch}
+                            onChange={(e) => setCatalogSearch(e.target.value)}
+                            placeholder="Buscar por nombre u organismo…"
+                            className="w-full h-11 pl-9 pr-10 rounded-xl border border-border bg-white text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
+                          />
+                          {catalogSearch && (
                             <button
                               type="button"
-                              onClick={() => handleSelectFromCatalog(item)}
-                              disabled={certActionLoading === item.id}
-                              className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm hover:bg-origen-crema/40 transition-colors focus:outline-none focus:bg-origen-crema/40 text-left"
+                              onClick={() => setCatalogSearch('')}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                             >
-                              <span className="flex items-center gap-2 min-w-0">
-                                <Award className="w-4 h-4 shrink-0 text-origen-pradera" />
-                                <span className="truncate font-medium">{item.name}</span>
-                                <span className="shrink-0 text-xs text-muted-foreground">· {item.issuingBody}</span>
-                              </span>
-                              {certActionLoading === item.id
-                                ? <Loader2 className="w-4 h-4 shrink-0 animate-spin text-origen-pradera" />
-                                : <Plus className="w-4 h-4 shrink-0 text-origen-pradera" />
-                              }
+                              <X className="w-4 h-4" />
                             </button>
-                          </li>
-                        ))}
-                        {!isLoadingCatalog && catalogResults.length === 0 && (catalogSearch || catalogCategory) && (
-                          <li className="py-4 text-center text-sm text-muted-foreground">
-                            No se encontraron certificaciones
-                          </li>
-                        )}
-                      </ul>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                          )}
+                        </div>
+                        <Select
+                          value={catalogCategory}
+                          onValueChange={setCatalogCategory}
+                        >
+                          <SelectTrigger className="w-auto min-w-[150px] h-11 rounded-xl gap-1.5">
+                            <Filter className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                            <SelectValue placeholder="Categoría" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CATEGORY_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-              {/* Botón añadir certificación manual */}
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => { resetCertForm(); setShowCertForm(!showCertForm); }}
-                  leftIcon={<Plus className="w-4 h-4" />}
-                >
-                  {showCertForm ? 'Cancelar' : 'Certificación manual'}
-                </Button>
-              </div>
+                      {/* Resultados */}
+                      <div className="rounded-xl border border-border overflow-hidden">
+                        {isLoadingCatalog && (
+                          <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Buscando en el catálogo…
+                          </div>
+                        )}
+
+                        {!isLoadingCatalog && catalogResults.length > 0 && (
+                          <ul role="listbox" className="max-h-56 overflow-y-auto divide-y divide-border">
+                            {catalogResults.map((item) => (
+                              <li key={item.id} role="option" aria-selected={false}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSelectFromCatalog(item)}
+                                  disabled={certActionLoading === item.id}
+                                  className="w-full flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-origen-crema/40 transition-colors focus:outline-none focus:bg-origen-crema/40 text-left disabled:opacity-50"
+                                >
+                                  <span className="flex items-center gap-3 min-w-0">
+                                    <Award className="w-4 h-4 shrink-0 text-origen-pradera" />
+                                    <span className="min-w-0">
+                                      <span className="block truncate font-medium text-origen-bosque">{item.name}</span>
+                                      <span className="block text-xs text-muted-foreground">{item.issuingBody}</span>
+                                    </span>
+                                  </span>
+                                  {certActionLoading === item.id
+                                    ? <Loader2 className="w-4 h-4 shrink-0 animate-spin text-origen-pradera" />
+                                    : <Plus className="w-4 h-4 shrink-0 text-origen-pradera" />
+                                  }
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        {!isLoadingCatalog && catalogSearched && catalogResults.length === 0 && (
+                          <div className="py-8 px-6 text-center space-y-3">
+                            <Award className="w-10 h-10 text-origen-pradera/30 mx-auto" />
+                            <div>
+                              <p className="text-sm font-medium text-foreground">
+                                {catalogSearch
+                                  ? `No encontramos "${catalogSearch}" en el catálogo`
+                                  : 'El catálogo está vacío por el momento'}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                El catálogo de Origen incluye certificaciones verificadas y reconocidas oficialmente.
+                                Si tu certificación no aparece, añádela manualmente y el equipo la revisará.
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={openManualForm}
+                              leftIcon={<Plus className="w-3.5 h-3.5" />}
+                            >
+                              Añadir manualmente
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Formulario de certificación */}
               <AnimatePresence>
@@ -908,30 +943,13 @@ export function StepCertificationsAttributes({
                 </div>
               )}
 
-              {certifications.length === 0 && !showCertForm && (
+              {certifications.length === 0 && !showCertForm && !showCatalogPanel && (
                 <div className="text-center py-10 bg-origen-crema/20 rounded-xl border-2 border-dashed border-origen-pradera/30">
                   <Award className="w-12 h-12 text-origen-pradera/40 mx-auto mb-3" />
                   <p className="text-sm font-semibold text-foreground">Sin certificaciones</p>
                   <p className="text-xs text-muted-foreground max-w-sm mx-auto mt-1">
-                    Busca en el catálogo oficial o añade una certificación manual para diferenciar tu producto
+                    Usa los botones de arriba para buscar en el catálogo oficial o añadir una certificación manual
                   </p>
-                  <div className="flex justify-center gap-2 mt-4">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => inputRef.current?.focus()}
-                      leftIcon={<Search className="w-3 h-3" />}
-                    >
-                      Buscar en catálogo
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => setShowCertForm(true)}
-                      leftIcon={<Plus className="w-3 h-3" />}
-                    >
-                      Añadir manual
-                    </Button>
-                  </div>
                 </div>
               )}
             </motion.div>
