@@ -132,36 +132,29 @@ async function normalizeProductImagesForApi(
   images: Product['gallery'],
   productId?: string,
 ): Promise<Product['gallery']> {
-  // Imágenes temporales sin File (perdidas tras recarga desde localStorage)
-  const lostImages = images.filter(img => img.id.startsWith('temp-') && !img.file);
-  if (lostImages.length > 0) {
-    throw new Error(
-      `${lostImages.length} imagen(es) se perdieron al recargar la página. ` +
-      `Por favor, vuélvelas a subir antes de guardar.`
-    );
-  }
-
   const normalized = await Promise.all(images.map(async (image, index) => {
-    if (isHttpUrl(image.url) && !image.file && !image.id.startsWith('temp-')) {
+    // Imagen ya subida a S3: tiene URL HTTP y no hay archivo pendiente de subir
+    if (isHttpUrl(image.url) && !image.file) {
       return image;
     }
 
-    // Guard: image.file debe ser un File real (no un objeto vacío de localStorage)
-    const isRealFile = image.file instanceof File || (image.file && typeof (image.file as any).name === 'string');
-    if (!image.file || !isRealFile) {
-      throw new Error(`La imagen ${index + 1} no se subió correctamente. Vuelve a cargarla antes de publicar.`);
+    // Sin archivo: la imagen se perdió (p.ej. tras recargar desde localStorage)
+    if (!image.file) {
+      throw new Error(
+        `La imagen ${index + 1} se perdió al recargar la página. Vuelve a añadirla antes de guardar.`
+      );
     }
 
     const uploadCategory = productId
       ? `products/${productId}/images`
       : 'products/drafts/images';
 
-    const uploaded = await uploadFile(image.file, uploadCategory, {
+    const uploaded = await uploadFile(image.file as File, uploadCategory, {
       entityType: 'products',
       entityId: productId,
     });
     if (!uploaded.url) {
-      throw new Error(`No se pudo obtener URL publica para la imagen ${index + 1}.`);
+      throw new Error(`No se pudo obtener la URL pública para la imagen ${index + 1}.`);
     }
 
     return {

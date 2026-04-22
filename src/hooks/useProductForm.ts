@@ -256,9 +256,16 @@ export function useProductForm(productId?: string) {
 
     if (!productId) {
       // Modo creación: auto-save en localStorage cada 2 s
+      // Las imágenes con File pendiente se omiten del draft (File no es serializable
+      // y se perdería al recargar; el usuario debe volver a añadirlas igualmente)
       const timer = setTimeout(() => {
         setIsAutoSaving(true);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+        const draftData = {
+          ...formData,
+          gallery: formData.gallery.filter(img => !img.file),
+          mainImage: formData.mainImage?.file ? undefined : formData.mainImage,
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(draftData));
         setLastSaved(new Date());
         setTimeout(() => setIsAutoSaving(false), 500);
       }, 2000);
