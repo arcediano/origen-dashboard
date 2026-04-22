@@ -163,7 +163,9 @@ export function StepBasic({
               value={categoriesLoading ? '' : (formData?.categoryId || '')}
               disabled={categoriesLoading}
               onValueChange={(value) => {
+                const cat = categories.find(c => c.id === value);
                 handleChange('categoryId', value);
+                handleChange('categoryName', cat?.name ?? '');
                 handleChange('subcategoryId', '');
                 handleChange('subcategoryName', '');
               }}
