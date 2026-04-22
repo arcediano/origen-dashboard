@@ -52,6 +52,7 @@ export default function CreateProductPage() {
     allStepsCompleted,
     hasCertifications,
     certificationsApproved,
+    hasPendingManualCerts,
     currentStepErrors,
     handleInputChange,
     handleNestedChange,
@@ -131,6 +132,7 @@ export default function CreateProductPage() {
               allStepsCompleted={allStepsCompleted}
               hasCertifications={hasCertifications}
               certificationsApproved={certificationsApproved}
+              hasPendingManualCerts={hasPendingManualCerts}
               onPublish={handlePublish}
               isPublishing={isPublishing}
               publishStatus={publishStatus}

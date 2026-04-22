@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 import {
   Button, Badge, StatusBadge,
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle,
   Switch,
   Sheet, SheetContent, SheetHeader, SheetTitle,
   ActionBar,
@@ -917,43 +917,66 @@ export default function ProductoDetallePage() {
 
         {/* ── DIÁLOGO ELIMINAR ── */}
         <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <div className="flex items-center gap-2.5 mb-1">
-                <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
-                  <Trash2 className="w-4 h-4 text-feedback-danger" />
-                </div>
-                <DialogTitle>¿Eliminar producto?</DialogTitle>
+          <DialogContent
+            showCloseButton={false}
+            closeOnOutsideClick={!isDeleting}
+            className="sm:max-w-sm p-0 overflow-hidden"
+          >
+            {/* Zona de icono + título */}
+            <div className="flex flex-col items-center text-center px-6 pt-8 pb-5">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 border border-red-100 shadow-sm">
+                <Trash2 className="w-7 h-7 text-red-600" />
               </div>
-              <DialogDescription>Esta acción no se puede deshacer.</DialogDescription>
-            </DialogHeader>
-            <p className="text-sm text-text-subtle leading-relaxed">
-              Se eliminará permanentemente{' '}
-              <span className="font-semibold text-origen-bosque">"{product.name}"</span>{' '}
-              del catálogo, incluyendo todas sus imágenes y estadísticas.
+              <DialogTitle className="text-xl">¿Eliminar producto?</DialogTitle>
+              <DialogDescription className="mt-1.5 text-sm">
+                Esta acción es permanente y no se puede deshacer.
+              </DialogDescription>
+            </div>
+
+            {/* Bloque destacado: nombre del producto */}
+            <div className="mx-6 mb-4 rounded-xl border border-border bg-surface px-4 py-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-text-subtle mb-0.5">
+                Producto a eliminar
+              </p>
+              <p className="text-sm font-semibold text-origen-bosque truncate">{product.name}</p>
+            </div>
+
+            {/* Texto explicativo */}
+            <p className="mx-6 mb-4 text-sm text-text-subtle leading-relaxed">
+              Se eliminarán permanentemente todas sus imágenes, variantes, atributos y estadísticas asociadas.
             </p>
+
+            {/* Alerta ventas */}
             {product.sales && product.sales > 0 && (
-              <div className="flex items-start gap-2.5 rounded-2xl bg-amber-50 border border-amber-200 p-3.5 mt-2">
+              <div className="mx-6 mb-4 flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-700">
-                  Este producto tiene {product.sales} ventas registradas.
+                <p className="text-xs text-amber-700 leading-relaxed">
+                  Este producto tiene <span className="font-semibold">{product.sales} ventas registradas</span>. Su historial de ventas no se podrá recuperar.
                 </p>
               </div>
             )}
-            <div className="flex justify-end gap-2 pt-3">
-              <Button variant="secondary" onClick={() => setShowDeleteDialog(false)} disabled={isDeleting}>
+
+            <DialogFooter className="flex-col-reverse sm:flex-row gap-2 px-6 py-4">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowDeleteDialog(false)}
+                disabled={isDeleting}
+              >
                 Cancelar
               </Button>
               <Button
                 variant="destructive"
+                className="flex-1"
                 onClick={handleDelete}
                 disabled={isDeleting}
                 loading={isDeleting}
                 loadingText="Eliminando..."
+                leftIcon={!isDeleting ? <Trash2 className="w-4 h-4" /> : undefined}
               >
-                Eliminar permanentemente
+                Eliminar producto
               </Button>
-            </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 

@@ -128,7 +128,7 @@ export function ProductFormSteps({
             onCertificationsChange={(certs) => onInputChange('certifications', certs)}
             onAttributesChange={(attrs) => onInputChange('attributes', attrs)}
             completed={completedTabs.certifications}
-            productCategory={formData.categoryId}
+            productCategory={formData.categoryName || formData.categoryId}
             productId={productId}
           />
         )}

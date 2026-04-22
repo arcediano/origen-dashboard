@@ -6,7 +6,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Save, Send, RefreshCw, Shield, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Save, Send, RefreshCw, Shield, CheckCircle, AlertCircle, XCircle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@arcediano/ux-library';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
@@ -37,6 +37,8 @@ export interface CreateProductNavigationProps {
   hasCertifications: boolean;
   /** Si las certificaciones están aprobadas */
   certificationsApproved: boolean;
+  /** Si hay certificaciones manuales pendientes de validación */
+  hasPendingManualCerts: boolean;
   /** Función para publicar */
   onPublish: () => void;
   /** Si está publicando */
@@ -61,6 +63,7 @@ export function CreateProductNavigation({
   allStepsCompleted,
   hasCertifications,
   certificationsApproved,
+  hasPendingManualCerts,
   onPublish,
   isPublishing,
   publishStatus,
@@ -105,12 +108,12 @@ export function CreateProductNavigation({
     }
   };
 
-  const canPublish = allStepsCompleted && (!hasCertifications || certificationsApproved);
+  const canPublish = allStepsCompleted;
 
   const getPublishButtonText = () => {
     if (isPublishing) return 'Publicando...';
     if (!allStepsCompleted) return 'Completa todos los pasos';
-    if (hasCertifications && !certificationsApproved) return 'Pendiente de verificación';
+    if (hasPendingManualCerts) return 'Pendiente de validación';
     return 'Publicar';
   };
 
@@ -171,12 +174,21 @@ export function CreateProductNavigation({
           {/* Botón siguiente o publicar */}
           {isLastStep ? (
             <Button
-              variant="primary"
+              variant={hasPendingManualCerts && allStepsCompleted ? 'outline' : 'primary'}
               onClick={onPublish}
               disabled={isPublishing || !canPublish}
-              leftIcon={isPublishing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              className={cn('w-full sm:w-auto', !canPublish && 'opacity-50 cursor-not-allowed')}
-              title={!canPublish ? 'Completa todos los pasos y verifica las certificaciones' : undefined}
+              leftIcon={isPublishing
+                ? <RefreshCw className="w-4 h-4 animate-spin" />
+                : hasPendingManualCerts && allStepsCompleted
+                  ? <Clock className="w-4 h-4" />
+                  : <Send className="w-4 h-4" />
+              }
+              className={cn(
+                'w-full sm:w-auto',
+                !canPublish && 'opacity-50 cursor-not-allowed',
+                hasPendingManualCerts && allStepsCompleted && 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100',
+              )}
+              title={!canPublish ? 'Completa todos los pasos' : undefined}
             >
               {getPublishButtonText()}
             </Button>
@@ -216,6 +228,18 @@ export function CreateProductNavigation({
             <p className="text-xs font-medium text-blue-800">Certificaciones pendientes</p>
             <p className="text-[10px] text-blue-600 mt-0.5">
               Revisaremos tus documentos en 24-48 horas.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isLastStep && hasPendingManualCerts && allStepsCompleted && (
+        <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-2">
+          <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-medium text-amber-800">Certificaciones manuales en revisión</p>
+            <p className="text-[10px] text-amber-700 mt-0.5">
+              Puedes publicar el producto ahora. Las certificaciones manuales no aparecerán en la ficha hasta que sean validadas por nuestro equipo (24-48 h).
             </p>
           </div>
         </div>

@@ -147,9 +147,18 @@ const ATTRIBUTE_EXAMPLES: Record<string, Array<{
   ],
 };
 
-// ============================================================================
-// UTILIDADES
-// ============================================================================
+/** Mapea el nombre de categoría a la clave de ejemplos de atributos */
+const resolveExamplesKey = (categoryName: string): string => {
+  const lower = categoryName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (lower.includes('queso') || lower.includes('lacteo')) return 'quesos';
+  if (lower.includes('vino') || lower.includes('bebida')) return 'vinos';
+  if (lower.includes('aceite'))                            return 'aceites';
+  if (lower.includes('miel'))                              return 'mieles';
+  if (lower.includes('embutido') || lower.includes('charcuteria') || lower.includes('jamon')) return 'embutidos';
+  return lower; // puede coincidir con una clave directa (e.g. 'general')
+};
+
+
 
 const formatDate = (date?: Date | string): string => {
   if (!date) return '';
@@ -213,7 +222,8 @@ export function StepCertificationsAttributes({
     name: '', type: 'text', value: '', visible: true,
   });
 
-  const categoryExamples = ATTRIBUTE_EXAMPLES[productCategory] || ATTRIBUTE_EXAMPLES.general;
+  const categoryExamples = ATTRIBUTE_EXAMPLES[resolveExamplesKey(productCategory)] || ATTRIBUTE_EXAMPLES.general;
+  const categoryDisplayName = productCategory !== 'general' && productCategory ? productCategory : null;
   const isStepComplete = certifications.length > 0 || attributes.length > 0;
 
   // ── iOS-safe body scroll lock cuando el bottom sheet está abierto ───────────
@@ -302,6 +312,7 @@ export function StepCertificationsAttributes({
       documents: newCert.documents || [],
       verificationUrl: newCert.verificationUrl,
       category: newCert.category as CertificationCategory,
+      source: 'manual',
     };
     onCertificationsChange([...certifications, cert]);
     resetCertForm();
@@ -330,6 +341,7 @@ export function StepCertificationsAttributes({
       verified:        item.verified,
       category:        item.category?.toLowerCase() as CertificationCategory,
       documents:       [],
+      source:          'catalog',
     };
 
     onCertificationsChange([...certifications, cert]);
@@ -1101,7 +1113,7 @@ export function StepCertificationsAttributes({
               <div>
                 <p className="text-sm font-semibold text-origen-bosque mb-3 flex items-center gap-2">
                   <Star className="w-4 h-4 text-origen-pradera" />
-                  Atributos comunes para {productCategory}
+                  Atributos comunes{categoryDisplayName ? ` para ${categoryDisplayName}` : ''}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {categoryExamples.map((example, idx) => (

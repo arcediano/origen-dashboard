@@ -544,6 +544,7 @@ export function useProductForm(productId?: string) {
     allStepsCompleted: REQUIRED_STEPS_FOR_PUBLISH.every((step) => completedTabs[step]),
     hasCertifications: formData.certifications.length > 0,
     certificationsApproved: formData.certifications.every(c => c.verified) || false,
+    hasPendingManualCerts: formData.certifications.some(c => c.source === 'manual' && !c.verified),
     isEditMode: !!productId,
     
     // Validación por paso

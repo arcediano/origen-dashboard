@@ -119,6 +119,8 @@ export interface Certification {
   verificationUrl?: string;
   category?: CertificationCategory;
   logo?: string;
+  /** 'manual' = añadida por el productor manualmente; 'catalog' = seleccionada del catálogo oficial */
+  source?: 'catalog' | 'manual';
 }
 
 // Para compatibilidad (opcional)
