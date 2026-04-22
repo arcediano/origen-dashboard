@@ -53,7 +53,7 @@ import {
 // CONSTANTES
 // ============================================================================
 
-const STORAGE_KEY = 'origen-nuevo-producto-draft-v10';
+const STORAGE_KEY = 'origen-nuevo-producto-draft-v11';
 const FORM_STEP_KEYS: FormStepId[] = [
   'basic',
   'images',
