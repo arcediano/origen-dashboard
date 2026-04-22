@@ -111,11 +111,11 @@ describe('addProductCertification', () => {
   it('llama a POST /products/:id/certifications con certificationId correcto', async () => {
     mockPost.mockResolvedValueOnce({ certificationId: 'cert-eco' });
 
-    const res = await addProductCertification('prod-123', 'cert-eco');
+    const res = await addProductCertification('prod-123', { certificationId: 'cert-eco', source: 'CATALOG' });
 
     expect(mockPost).toHaveBeenCalledWith(
       '/products/prod-123/certifications',
-      { certificationId: 'cert-eco' },
+      { certificationId: 'cert-eco', source: 'CATALOG' },
     );
     expect(res.status).toBe(201);
     expect(res.data?.certificationId).toBe('cert-eco');
@@ -125,7 +125,7 @@ describe('addProductCertification', () => {
     const { GatewayError } = await import('@/lib/api/client');
     mockPost.mockRejectedValueOnce(new GatewayError(409, 'Conflict'));
 
-    const res = await addProductCertification('prod-123', 'cert-eco');
+    const res = await addProductCertification('prod-123', { certificationId: 'cert-eco' });
 
     expect(res.error).toBeTruthy();
     expect(res.status).toBe(409);
