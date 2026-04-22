@@ -859,3 +859,29 @@ export async function removeProductCertification(
     return handleError(error, 'removeProductCertification');
   }
 }
+
+/**
+ * Actualiza los datos específicos del producto de una certificación ya asignada.
+ * (certificateNumber, issueDate, expiryDate, documentIds)
+ * Ruta backend: PATCH /products/:id/certifications/:certificationId
+ */
+export async function updateProductCertification(
+  productId: string,
+  certificationId: string,
+  data: {
+    certificateNumber?: string;
+    issueDate?: string;
+    expiryDate?: string;
+    documentIds?: string[];
+  },
+): Promise<ApiResponse<{ certificationId: string }>> {
+  try {
+    const raw = await gatewayClient.patch<{ certificationId: string }>(
+      `/products/${productId}/certifications/${certificationId}`,
+      data,
+    );
+    return { data: raw, status: 200 };
+  } catch (error) {
+    return handleError(error, 'updateProductCertification');
+  }
+}
