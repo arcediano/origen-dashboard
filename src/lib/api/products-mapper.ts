@@ -102,6 +102,7 @@ export interface ApiCertification {
   category?: 'ORGANIC' | 'QUALITY' | 'SAFETY' | 'SUSTAINABILITY' | 'ORIGIN';
   logoId?: string;
   documentIds: string[];
+  source?: 'CATALOG' | 'MANUAL';
 }
 
 export interface ApiProductionMedia {
@@ -331,6 +332,7 @@ function mapCertification(item: ApiCertification): Certification {
     verified: item.verified,
     verificationUrl: item.verificationUrl,
     category: item.category?.toLowerCase() as Certification['category'] | undefined,
+    source: item.source === 'MANUAL' ? 'manual' : 'catalog',
     documents: (item.documentIds ?? []).map((id) => ({
       id,
       name: id,

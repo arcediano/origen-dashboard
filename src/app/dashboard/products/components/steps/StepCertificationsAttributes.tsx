@@ -324,7 +324,10 @@ export function StepCertificationsAttributes({
 
     if (productId) {
       setCertActionLoading(item.id);
-      const res = await addProductCertification(productId, item.id);
+      const res = await addProductCertification(productId, {
+        certificationId: item.id,
+        source: 'CATALOG',
+      });
       setCertActionLoading(null);
       if (res.error) {
         setCertActionError(res.error);

@@ -304,17 +304,21 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
         }
       : undefined,
     certifications: formData.certifications.map((certification) => ({
-      certificationId: certification.id || undefined,
+      // Para certs manuales (source === 'manual') no se envía certificationId;
+      // el backend las identifica por name + issuingBody y crea el registro maestro.
+      certificationId: certification.source === 'catalog' ? (certification.id || undefined) : undefined,
       name: certification.name || undefined,
       issuingBody: certification.issuingBody || undefined,
       certificateNumber: certification.certificateNumber || undefined,
       issueDate: certification.issueDate?.toISOString(),
       expiryDate: certification.expiryDate?.toISOString(),
       status: mapCertificationStatus(certification.status),
-      verified: certification.verified,
+      verified: false, // Productores no pueden auto-verificar
       verificationUrl: certification.verificationUrl || undefined,
       category: mapCertificationCategory(certification.category),
+      // documentIds contiene S3 keys reales (tras subida en DocumentUploader)
       documentIds: certification.documents?.map((document) => document.id) ?? [],
+      source: certification.source === 'manual' ? 'MANUAL' : 'CATALOG',
     })),
     // Solo enviar productionInfo si el productor rellenó al menos un campo significativo
     productionInfo: (
@@ -825,18 +829,28 @@ export async function getCertificationsCatalog(params?: {
 }
 
 /**
- * Añade una certificación existente del catálogo a un producto.
+ * Añade una certificación a un producto.
+ * - Cert de catálogo: enviar certificationId
+ * - Cert manual: omitir certificationId, enviar name + issuingBody
  * Ruta backend: POST /products/:id/certifications
- * Body: { certificationId: string }
  */
 export async function addProductCertification(
   productId: string,
-  certificationId: string,
+  data: {
+    certificationId?: string;
+    name?: string;
+    issuingBody?: string;
+    certificateNumber?: string;
+    issueDate?: string;
+    expiryDate?: string;
+    documentIds?: string[];
+    source?: 'CATALOG' | 'MANUAL';
+  },
 ): Promise<ApiResponse<{ certificationId: string }>> {
   try {
     const raw = await gatewayClient.post<{ certificationId: string }>(
       `/products/${productId}/certifications`,
-      { certificationId },
+      data,
     );
     return { data: raw, status: 201 };
   } catch (error) {
