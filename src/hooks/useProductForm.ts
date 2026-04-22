@@ -330,7 +330,7 @@ export function useProductForm(productId?: string) {
   useEffect(() => {
     const getSkuSuggestion = async () => {
       if (formData.name?.length >= 3 && formData.categoryId) {
-        const response = await suggestSku(formData.name, formData.categoryId);
+        const response = await suggestSku(formData.name);
         if (response.data) {
           setSkuSuggestion(response.data.suggestedSku);
         }

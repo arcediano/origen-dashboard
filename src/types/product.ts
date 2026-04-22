@@ -390,19 +390,6 @@ export const defaultFormData: ProductFormData = {
 // CONSTANTES COMPARTIDAS
 // ============================================================================
 
-export const PRODUCT_CATEGORIES = [
-  { id: 'quesos', name: 'Quesos', icon: '🧀' },
-  { id: 'aceites', name: 'Aceites', icon: '🫒' },
-  { id: 'vinos', name: 'Vinos', icon: '🍷' },
-  { id: 'embutidos', name: 'Embutidos', icon: '🥩' },
-  { id: 'mieles', name: 'Mieles', icon: '🍯' },
-  { id: 'conservas', name: 'Conservas', icon: '🥫' },
-  { id: 'panaderia', name: 'Panadería', icon: '🍞' },
-  { id: 'dulces', name: 'Dulces y Postres', icon: '🍰' },
-  { id: 'bebidas', name: 'Bebidas', icon: '🥤' },
-  { id: 'otros', name: 'Otros', icon: '📦' },
-];
-
 export const ALLERGENS = [
   'Gluten',
   'Crustáceos',

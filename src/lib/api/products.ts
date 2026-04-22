@@ -757,36 +757,16 @@ export async function updateProductStock(
 // ─── SKU ──────────────────────────────────────────────────────────────────────
 
 /**
- * Verifica si un SKU ya está en uso en el catálogo.
- * El backend valida la unicidad en el momento de crear/actualizar y devuelve 409.
- * Esta función es una comprobación preventiva para UX — el backend es la fuente de verdad.
- *
- * Nota: no hay endpoint dedicado en products-service; el backend retorna 409 si hay conflicto.
- * Se mantiene la función para compatibilidad con el formulario — siempre devuelve false.
- */
-export async function checkSkuExists(sku: string): Promise<ApiResponse<{ exists: boolean }>> {
-  // Sin endpoint dedicado — la validación real ocurre en el backend al crear/editar.
-  return { data: { exists: false }, status: 200 };
-}
-
-/**
- * Genera una sugerencia de SKU en cliente a partir del nombre y categoría.
+ * Genera una sugerencia de SKU en cliente a partir del nombre del producto.
  * Lógica puramente local — no hay endpoint en el backend para esto.
+ * El backend genera el SKU final si el campo llega vacío.
  */
 export async function suggestSku(
   productName: string,
-  categoryId: string,
 ): Promise<ApiResponse<{ suggestedSku: string }>> {
   if (!productName || productName.trim().length < 3) {
     return { data: { suggestedSku: 'PRO-XXX-001' }, status: 200 };
   }
-
-  const prefixes: Record<string, string> = {
-    quesos:    'QUE', aceites:   'ACE', vinos:   'VIN', embutidos: 'EMB',
-    mieles:    'MIE', panaderia: 'PAN', conservas: 'CON', dulces:  'DUL',
-    bebidas:   'BEB',
-  };
-  const prefix = prefixes[categoryId] ?? 'PRO';
 
   const nameParts = productName
     .toUpperCase()
@@ -802,7 +782,7 @@ export async function suggestSku(
 
   if (code.length < 2) code = (code + 'XX').substring(0, 3);
 
-  return { data: { suggestedSku: `${prefix}-${code}-XXX` }, status: 200 };
+  return { data: { suggestedSku: `PRO-${code}-XXX` }, status: 200 };
 }
 
 // ─── CATÁLOGO DE CERTIFICACIONES ─────────────────────────────────────────────
