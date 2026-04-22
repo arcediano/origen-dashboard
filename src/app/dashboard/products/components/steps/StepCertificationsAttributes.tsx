@@ -107,6 +107,13 @@ const ATTRIBUTE_EXAMPLES: Record<string, Array<{
   description: string;
   icon: React.ReactNode;
 }>> = {
+  general: [
+    { name: 'Origen geográfico', type: 'text',    example: 'Cataluña, España',   description: 'Región o lugar de producción',          icon: <Globe     className="w-4 h-4" /> },
+    { name: 'Variedad',          type: 'text',    example: 'Premium, Artesanal',  description: 'Tipo o variedad del producto',           icon: <Tag       className="w-4 h-4" /> },
+    { name: 'Temporada',         type: 'text',    example: 'Primavera-Verano',    description: 'Período de disponibilidad del producto',  icon: <Calendar  className="w-4 h-4" /> },
+    { name: 'Elaboración',       type: 'text',    example: 'Artesanal, Industrial', description: 'Método de elaboración principal',      icon: <Leaf      className="w-4 h-4" /> },
+    { name: 'Sin aditivos',      type: 'boolean', example: 'Sí',                 description: 'El producto no contiene aditivos artificiales', icon: <Zap  className="w-4 h-4" /> },
+  ],
   quesos: [
     { name: 'Tipo de leche',      type: 'text',   example: 'Oveja, Vaca, Cabra, Mezcla',    description: 'Indica el origen de la leche utilizada',   icon: <Milk className="w-4 h-4" /> },
     { name: 'Tiempo de curación', type: 'number', example: '12', unit: 'meses',              description: 'Período de maduración del queso',           icon: <Clock className="w-4 h-4" /> },
@@ -206,7 +213,7 @@ export function StepCertificationsAttributes({
     name: '', type: 'text', value: '', visible: true,
   });
 
-  const categoryExamples = ATTRIBUTE_EXAMPLES[productCategory] || ATTRIBUTE_EXAMPLES.quesos;
+  const categoryExamples = ATTRIBUTE_EXAMPLES[productCategory] || ATTRIBUTE_EXAMPLES.general;
   const isStepComplete = certifications.length > 0 || attributes.length > 0;
 
   // ── iOS-safe body scroll lock cuando el bottom sheet está abierto ───────────
@@ -433,6 +440,8 @@ export function StepCertificationsAttributes({
 
   const applyExample = (example: any) => {
     setNewAttr({ name: example.name, type: example.type, value: '', unit: example.unit, visible: true });
+    setEditingAttr(null);
+    setShowAttrForm(true); // abre el formulario inmediatamente con el ejemplo pre-cargado
   };
 
   // ============================================================================
@@ -1053,16 +1062,37 @@ export function StepCertificationsAttributes({
               exit={{ opacity: 0, x: 20 }}
               className="space-y-6"
             >
-              {/* Explicación */}
+              {/* Explicación + preview de cómo aparecen en la tienda */}
               <div className="p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
                 <div className="flex items-start gap-3">
                   <Lightbulb className="w-5 h-5 text-origen-pradera shrink-0 mt-0.5" />
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-origen-bosque">¿Qué son los atributos?</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Características específicas de tu producto que no aparecen en otros campos.
-                      Ayudan a los clientes a encontrarlo y a tomar decisiones de compra.
+                      Características específicas de tu producto que no aparecen en los campos estándar.
+                      Ayudan a los clientes a comparar y elegir — por ejemplo: variedad de uva, tipo de leche, tiempo de curación, etc.
                     </p>
+                    {/* Mini preview de cómo se ven en la ficha */}
+                    <div className="mt-3 p-3 bg-white rounded-lg border border-border">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                        Así se ven en la ficha del producto (sección "Características"):
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { label: 'Tipo de leche', value: 'Oveja' },
+                          { label: 'Curación', value: '12 meses' },
+                          { label: 'Maduración', value: 'En cueva' },
+                        ].map((item) => (
+                          <span
+                            key={item.label}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-origen-crema/60 border border-border text-xs"
+                          >
+                            <span className="font-medium text-origen-bosque">{item.label}:</span>
+                            <span className="text-muted-foreground">{item.value}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1100,7 +1130,7 @@ export function StepCertificationsAttributes({
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 5 }}
-                            className="absolute -top-2 right-4 z-10"
+                            className="hidden sm:block absolute -top-2 right-4 z-10"
                           >
                             <span className="inline-flex items-center gap-1 px-2 py-1 bg-origen-oscuro text-white text-[10px] rounded shadow-lg">
                               <Plus className="w-3 h-3" /> Click para usar
@@ -1108,6 +1138,12 @@ export function StepCertificationsAttributes({
                           </motion.div>
                         )}
                       </AnimatePresence>
+                      {/* Chip "Usar" siempre visible en móvil */}
+                      <div className="absolute top-2 right-2 sm:hidden">
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-origen-pradera/10 text-origen-pradera text-[10px] rounded-full font-medium border border-origen-pradera/20">
+                          <Plus className="w-2.5 h-2.5" /> Usar
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1118,7 +1154,14 @@ export function StepCertificationsAttributes({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => { resetAttrForm(); setShowAttrForm(!showAttrForm); }}
+                  onClick={() => {
+                    if (showAttrForm) {
+                      resetAttrForm();
+                    } else {
+                      resetAttrForm();
+                      setShowAttrForm(true);
+                    }
+                  }}
                   leftIcon={<Plus className="w-4 h-4" />}
                 >
                   {showAttrForm ? 'Cancelar' : 'Atributo personalizado'}
@@ -1218,16 +1261,21 @@ export function StepCertificationsAttributes({
                           />
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-start gap-2">
                           <Checkbox
                             id="attr-visible"
                             checked={newAttr.visible}
                             onCheckedChange={(checked) => setNewAttr({ ...newAttr, visible: checked as boolean })}
-                            className="data-[state=checked]:bg-origen-pradera"
+                            className="data-[state=checked]:bg-origen-pradera mt-0.5"
                           />
-                          <label htmlFor="attr-visible" className="text-sm text-foreground cursor-pointer">
-                            Visible en la ficha del producto
-                          </label>
+                          <div>
+                            <label htmlFor="attr-visible" className="text-sm text-foreground cursor-pointer">
+                              Visible en la ficha del producto
+                            </label>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              Aparecerá en la sección "Características" de tu producto en la tienda
+                            </p>
+                          </div>
                         </div>
 
                         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
