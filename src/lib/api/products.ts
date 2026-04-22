@@ -402,6 +402,8 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
       payQuantity: tier.payQuantity,
       label: tier.label,
       savings: Math.max(0, tier.savings ?? 0),
+    }));
+  }
 
   if (product.nutritionalInfo !== undefined) {
     body.nutritionalInfo = product.nutritionalInfo
