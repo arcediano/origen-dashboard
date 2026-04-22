@@ -470,13 +470,17 @@ export function StepCertificationsAttributes({
               ref={withAutoFocus ? catalogInputRef : undefined}
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus={withAutoFocus}
-              type="search"
+              type="text"
               inputMode="search"
               autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
               value={catalogSearch}
               onChange={(e) => setCatalogSearch(e.target.value)}
               placeholder="Buscar por nombre u organismo…"
-              className="w-full h-12 pl-10 pr-10 rounded-xl border border-border bg-white text-base placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
+              className="w-full h-12 pl-10 pr-10 rounded-xl border border-border bg-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
+              style={{ fontSize: '16px', WebkitAppearance: 'none' }}
             />
             {catalogSearch && (
               <button
