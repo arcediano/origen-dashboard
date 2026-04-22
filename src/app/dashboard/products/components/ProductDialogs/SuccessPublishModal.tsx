@@ -42,7 +42,7 @@ export function SuccessPublishModal({
     if (open) {
       const timer = setTimeout(() => {
         onOpenChange(false);
-        router.push('/products');
+        router.push('/dashboard/products');
       }, 2000);
 
       return () => clearTimeout(timer);
