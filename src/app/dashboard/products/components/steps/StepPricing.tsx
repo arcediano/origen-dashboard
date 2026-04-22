@@ -411,7 +411,7 @@ export function StepPricing({
                   </h4>
 
                   {/* Selector de tipo */}
-                  <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
                     {[
                       { id: 'percentage', icon: Percent, label: 'Porcentaje', desc: '% de descuento' },
                       { id: 'fixed', icon: DollarSign, label: 'Precio fijo', desc: 'Precio especial' },

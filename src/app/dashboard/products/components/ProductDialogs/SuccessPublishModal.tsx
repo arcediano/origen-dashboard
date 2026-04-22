@@ -54,7 +54,7 @@ export function SuccessPublishModal({
       <DialogContent>
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <Clock className="w-6 h-6 text-amber-500" />
+            <Clock className="w-6 h-6 text-origen-pradera" />
             <DialogTitle>Producto enviado a revisión</DialogTitle>
           </div>
           <DialogDescription>{`${productName} está pendiente de verificación por el equipo de Origen`}</DialogDescription>
@@ -62,8 +62,8 @@ export function SuccessPublishModal({
         <div className="py-6">
           <div className="flex flex-col items-center text-center">
             {/* Icono animado */}
-            <div className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mb-4 animate-in zoom-in-50 duration-500">
-              <Package className="w-10 h-10 text-amber-600" />
+            <div className="w-20 h-20 rounded-full bg-origen-pradera/10 flex items-center justify-center mb-4 animate-in zoom-in-50 duration-500">
+              <Package className="w-10 h-10 text-origen-pradera" />
             </div>
 
             <h4 className="text-lg font-semibold text-origen-bosque mb-2">
@@ -75,19 +75,19 @@ export function SuccessPublishModal({
             </p>
 
             {/* Indicador de carga */}
-            <div className="w-12 h-12 rounded-full border-4 border-amber-200 border-t-amber-500 animate-spin mb-2" />
+            <div className="w-12 h-12 rounded-full border-4 border-origen-pradera/20 border-t-origen-pradera animate-spin mb-2" />
 
             <p className="text-xs text-text-subtle">Redirigiendo a tus productos...</p>
 
             {/* Datos del estado */}
             <div className="grid grid-cols-2 gap-3 w-full mt-6">
-              <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <div className="p-3 bg-origen-crema/50 rounded-lg border border-origen-pradera/20">
                 <p className="text-xs text-muted-foreground">Plazo de revisión</p>
                 <p className="text-sm font-semibold text-origen-bosque">24-48 horas</p>
               </div>
-              <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <div className="p-3 bg-origen-crema/50 rounded-lg border border-origen-pradera/20">
                 <p className="text-xs text-muted-foreground">Estado</p>
-                <p className="text-sm font-semibold text-amber-600">Pendiente</p>
+                <p className="text-sm font-semibold text-origen-pradera">Pendiente</p>
               </div>
             </div>
           </div>

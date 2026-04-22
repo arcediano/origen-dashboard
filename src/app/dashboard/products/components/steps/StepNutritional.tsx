@@ -274,7 +274,7 @@ export function StepNutritional({
                       value={nutritionalInfo.servingSizeUnit}
                       onValueChange={(v) => handleChange('servingSizeUnit', v as 'g' | 'ml')}
                     >
-                      <SelectTrigger className="h-12 w-24 rounded-xl">
+                      <SelectTrigger className="h-12 w-24 shrink-0 rounded-xl">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

@@ -352,7 +352,7 @@ export function StepInventory({
                     value={formData?.weightUnit || 'kg'}
                     onValueChange={(v) => handleChange('weightUnit', v)}
                   >
-                    <SelectTrigger className="h-12 w-20 rounded-xl">
+                    <SelectTrigger className="h-12 w-20 shrink-0 rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -388,7 +388,7 @@ export function StepInventory({
           {/* Dimensiones */}
           <div className="space-y-1.5">
             <p className="text-sm font-semibold text-origen-bosque">Dimensiones del paquete <span className="text-text-subtle font-normal">(cm)</span></p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <Input
                 label="Largo"
                 type="number"
