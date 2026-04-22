@@ -19,6 +19,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@arcediano/ux-library';
 import type { Order, PaymentStatus } from '@/types/order';
 import { OrderStatusChip } from './OrderStatusChip';
 import { SwipeableRow } from '@/components/shared/mobile';
@@ -50,25 +51,20 @@ export function OrderCardSkeleton() {
 
 // ─── PAYMENT BADGE ────────────────────────────────────────────────────────────
 
-const PAYMENT_CONFIG: Record<
-  PaymentStatus,
-  { label: string; cls: string }
-> = {
-  paid:     { label: 'Pagado',      cls: 'text-origen-bosque bg-origen-pastel'         },
-  pending:  { label: 'Pdte. pago',  cls: 'text-origen-mandarina bg-origen-mandarina/10'},
-  failed:   { label: 'Fallido',     cls: 'text-red-700 bg-feedback-danger-subtle'         },
-  refunded: { label: 'Reembolsado', cls: 'text-text-subtle bg-surface'                 },
+const PAYMENT_CONFIG: Record<PaymentStatus, { label: string; variant: 'success' | 'warning' | 'danger' | 'neutral'; icon: React.ElementType }> = {
+  paid:     { label: 'Pagado',      variant: 'success', icon: CreditCard },
+  pending:  { label: 'Pdte. pago',  variant: 'warning', icon: Banknote   },
+  failed:   { label: 'Fallido',     variant: 'danger',  icon: Banknote   },
+  refunded: { label: 'Reembolsado', variant: 'neutral', icon: Banknote   },
 };
 
 function PaymentBadge({ status }: { status: PaymentStatus }) {
   const cfg = PAYMENT_CONFIG[status] ?? PAYMENT_CONFIG.pending;
-  const Icon = status === 'paid' ? CreditCard : Banknote;
-
+  const Icon = cfg.icon;
   return (
-    <span className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium', cfg.cls)}>
-      <Icon className="w-2.5 h-2.5" />
+    <Badge variant={cfg.variant} size="xs" icon={<Icon className="w-2.5 h-2.5" />}>
       {cfg.label}
-    </span>
+    </Badge>
   );
 }
 

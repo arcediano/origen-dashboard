@@ -1,30 +1,17 @@
-﻿/**
+/**
  * @component FilterBottomSheet
- * @description Panel de filtros a pantalla completa para mÃ³vil.
- *
- * ARQUITECTURA DEFINITIVA â€” dos elementos fixed independientes:
- *
- *  1. Sheet (z-60):  position:fixed, bottom:-100vh â†’ bottom:0
- *     - Pantalla completa (100dvh/100vh).
- *     - Contenedor de scroll simple. Sin flex, sin grid, sin overflow:hidden.
- *     - padding-bottom reserva espacio para el footer.
- *
- *  2. Footer (z-62): position:fixed, bottom:0, SIEMPRE en el viewport.
- *     - Elemento completamente independiente del sheet.
- *     - GarantÃ­a absoluta: nunca puede quedar fuera de pantalla.
- *
- *  Sin Framer Motion, sin CSS transform â†’ sin bug iOS Safari overflow.
+ * @description Panel de filtros a pantalla completa para móvil.
+ *              Usa FilterBottomSheet de @arcediano/ux-library como contenedor
+ *              y añade la lógica de secciones y estado draft específica del dashboard.
  */
 
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { FilterBottomSheet as FilterPanel, DateRangeInput } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
-import { DateRangeInput } from '@arcediano/ux-library';
 
-// â”€â”€â”€ TIPOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── TIPOS ───────────────────────────────────────────────────────────────────
 
 export interface ChipOption {
   label: string;
@@ -86,7 +73,7 @@ export interface FilterBottomSheetProps {
   title?: string;
 }
 
-// â”€â”€â”€ DRAFT STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── DRAFT STATE ─────────────────────────────────────────────────────────────
 
 type DraftValue =
   | { type: 'chips'; value: string }
@@ -118,7 +105,7 @@ function clearDraft(sections: FilterSection[]): Draft {
   return d;
 }
 
-// â”€â”€â”€ SECCIONES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── SECCIONES ───────────────────────────────────────────────────────────────
 
 function ChipsSection({ section, value, onChange }: {
   section: FilterSection & { type: 'chips' };
@@ -197,17 +184,17 @@ function NumberRangeSection({ section, min, max, onMin, onMax }: {
       <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wide mb-3">{section.title}</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">MÃ­nimo</label>
+          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Mínimo</label>
           <div className="relative">
             {section.prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-text-subtle pointer-events-none">{section.prefix}</span>}
             <input type="number" value={min} onChange={(e) => onMin(e.target.value)} placeholder="0" className={inputCls} min="0" inputMode="decimal" />
           </div>
         </div>
         <div>
-          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">MÃ¡ximo</label>
+          <label className="text-[10px] font-medium text-text-subtle mb-1.5 block uppercase tracking-wide">Máximo</label>
           <div className="relative">
             {section.prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-subtle pointer-events-none">{section.prefix}</span>}
-            <input type="number" value={max} onChange={(e) => onMax(e.target.value)} placeholder="âˆž" className={inputCls} min="0" inputMode="decimal" />
+            <input type="number" value={max} onChange={(e) => onMax(e.target.value)} placeholder="∞" className={inputCls} min="0" inputMode="decimal" />
           </div>
         </div>
       </div>
@@ -243,18 +230,8 @@ function TogglesSection({ section, values, onToggle }: {
             >
               {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
               <span className="flex-1 text-left">{opt.label}</span>
-              <div
-                className={cn(
-                  'w-10 h-6 rounded-full p-0.5 transition-colors',
-                  active ? 'bg-origen-bosque' : 'bg-border',
-                )}
-              >
-                <div
-                  className={cn(
-                    'w-5 h-5 rounded-full bg-white shadow-sm transition-transform',
-                    active ? 'translate-x-4' : 'translate-x-0',
-                  )}
-                />
+              <div className={cn('w-10 h-6 rounded-full p-0.5 transition-colors', active ? 'bg-origen-bosque' : 'bg-border')}>
+                <div className={cn('w-5 h-5 rounded-full bg-white shadow-sm transition-transform', active ? 'translate-x-4' : 'translate-x-0')} />
               </div>
             </button>
           );
@@ -264,7 +241,7 @@ function TogglesSection({ section, values, onToggle }: {
   );
 }
 
-// â”€â”€â”€ COMPONENTE PRINCIPAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 
 export function FilterBottomSheet({
   isOpen,
@@ -276,55 +253,14 @@ export function FilterBottomSheet({
   title = 'Filtros',
 }: FilterBottomSheetProps) {
   const [draft, setDraft] = useState<Draft>({});
-  const [mounted, setMounted]   = useState(false);
-  const [visible, setVisible]   = useState(false);
 
-  // â”€â”€ Sincronizar draft al abrir â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Sincronizar draft al abrir
   useEffect(() => {
     if (isOpen) setDraft(buildDraft(sections));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  // â”€â”€ AnimaciÃ³n: mounted controla si el DOM existe, visible dispara la transiciÃ³n CSS
-  useEffect(() => {
-    if (isOpen) {
-      setMounted(true);
-      requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
-    } else {
-      setVisible(false);
-      const id = setTimeout(() => setMounted(false), 380);
-      return () => clearTimeout(id);
-    }
-  }, [isOpen]);
-
-  // â”€â”€ Bloquear scroll del body (iOS-safe) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // iOS Safari ignora overflow:hidden en body. La tÃ©cnica correcta es position:fixed + top:-scrollY.
-  useEffect(() => {
-    if (isOpen) {
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflowY = 'scroll'; // evita salto de scrollbar en desktop
-    } else {
-      const scrollY = Math.abs(parseInt(document.body.style.top || '0', 10));
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflowY = '';
-      window.scrollTo(0, scrollY);
-    }
-    return () => {
-      const scrollY = Math.abs(parseInt(document.body.style.top || '0', 10));
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflowY = '';
-      if (scrollY) window.scrollTo(0, scrollY);
-    };
-  }, [isOpen]);
-
-  // â”€â”€ Notificar BottomTabBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Notificar BottomTabBar (comportamiento específico del dashboard)
   useEffect(() => {
     window.dispatchEvent(new CustomEvent('filter-sheet:toggle', { detail: { open: isOpen } }));
     return () => {
@@ -332,28 +268,28 @@ export function FilterBottomSheet({
     };
   }, [isOpen]);
 
-  // â”€â”€ Helpers draft â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const setChips  = (id: string, v: string) =>
+  // ─── Helpers draft ──────────────────────────────────────────────────────────
+  const setChips    = (id: string, v: string) =>
     setDraft((p) => ({ ...p, [id]: { type: 'chips', value: v } }));
   const setDateFrom = (id: string, v: string) =>
     setDraft((p) => { const c = p[id] as { type:'daterange'; from:string; to:string }|undefined; return { ...p, [id]: { type:'daterange', from:v, to:c?.to??'' } }; });
-  const setDateTo = (id: string, v: string) =>
+  const setDateTo   = (id: string, v: string) =>
     setDraft((p) => { const c = p[id] as { type:'daterange'; from:string; to:string }|undefined; return { ...p, [id]: { type:'daterange', from:c?.from??'', to:v } }; });
-  const setNumMin = (id: string, v: string) =>
+  const setNumMin   = (id: string, v: string) =>
     setDraft((p) => { const c = p[id] as { type:'numberrange'; min:string; max:string }|undefined; return { ...p, [id]: { type:'numberrange', min:v, max:c?.max??'' } }; });
-  const setNumMax = (id: string, v: string) =>
+  const setNumMax   = (id: string, v: string) =>
     setDraft((p) => { const c = p[id] as { type:'numberrange'; min:string; max:string }|undefined; return { ...p, [id]: { type:'numberrange', min:c?.min??'', max:v } }; });
-  const setToggle = (sectionId: string, optionId: string, v: boolean) =>
+  const setToggle   = (sectionId: string, optionId: string, v: boolean) =>
     setDraft((p) => { const c = p[sectionId] as { type:'toggles'; values:Record<string,boolean> }|undefined; return { ...p, [sectionId]: { type:'toggles', values: { ...c?.values, [optionId]: v } } }; });
 
   const handleApply = () => {
     sections.forEach((s) => {
       const d = draft[s.id];
       if (!d) return;
-      if (s.type === 'chips' && d.type === 'chips') s.onChange(d.value);
-      if (s.type === 'daterange' && d.type === 'daterange') { s.onChangeFrom(d.from); s.onChangeTo(d.to); }
+      if (s.type === 'chips'       && d.type === 'chips')       s.onChange(d.value);
+      if (s.type === 'daterange'   && d.type === 'daterange')   { s.onChangeFrom(d.from); s.onChangeTo(d.to); }
       if (s.type === 'numberrange' && d.type === 'numberrange') { s.onChangeMin(d.min); s.onChangeMax(d.max); }
-      if (s.type === 'toggles' && d.type === 'toggles') { s.options.forEach((opt) => opt.onChange(d.values[opt.id] ?? false)); }
+      if (s.type === 'toggles'    && d.type === 'toggles')     { s.options.forEach((opt) => opt.onChange(d.values[opt.id] ?? false)); }
     });
     onClose();
   };
@@ -374,153 +310,90 @@ export function FilterBottomSheet({
     return false;
   });
 
-  // â”€â”€ TransiciÃ³n CSS: animar top (mÃ¡s fiable que bottom+height en mÃ³vil) â”€â”€â”€
-  const transition = 'top 0.38s cubic-bezier(0.32, 0.72, 0, 1)';
-
-  if (!mounted) return null;
-
-  return createPortal(
-    <>
-      {/* â”€â”€ Overlay â”€â”€ */}
-      <div
-        style={{
-          position: 'fixed', inset: 0, zIndex: 55,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          opacity: visible ? 1 : 0,
-          transition: 'opacity 0.25s ease',
-          pointerEvents: visible ? 'auto' : 'none',
-        }}
-        onPointerDown={onClose}
-        aria-hidden
-      />
-
-      {/* â”€â”€ Sheet (pantalla completa, flex column) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          Usa display:flex para que el footer sea parte del layout y siempre
-          quede visible en la parte inferior sin trucos de z-index.
-          - top animado: 100% (oculto) â†’ 0 (visible)
-          - overflow:hidden en el contenedor; scroll solo en el Ã¡rea de contenido
-          â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <div
-        role="dialog"
-        aria-modal
-        aria-label={title}
-        onPointerDown={(e) => e.stopPropagation()}
-        style={{
-          position: 'fixed',
-          top: visible ? 0 : '100%',
-          left: 0, right: 0, bottom: 0,
-          zIndex: 60,
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: 'hsl(var(--surface))',
-          paddingTop: 'env(safe-area-inset-top, 0px)',
-          transition,
-        } as React.CSSProperties}
+  const footer = (
+    <div className="flex gap-3">
+      <button
+        onClick={handleClear}
+        disabled={!hasActive}
+        className={cn(
+          'flex-1 h-12 rounded-2xl border-2 text-sm font-medium transition-all active:scale-95',
+          hasActive
+            ? 'border-origen-bosque/40 text-origen-bosque hover:border-origen-bosque/70'
+            : 'border-border text-text-subtle opacity-40 cursor-not-allowed',
+        )}
       >
-        {/* Header */}
-        <div style={{ flexShrink: 0, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 20px', borderBottom:'1px solid hsl(var(--border-subtle))' }}>
-          <h2 style={{ fontSize:16, fontWeight:600, color:'hsl(var(--bosque))' }}>{title}</h2>
-          <button
-            onClick={onClose}
-            style={{ width:32, height:32, borderRadius:9999, backgroundColor:'hsl(var(--surface-alt))', display:'flex', alignItems:'center', justifyContent:'center', border:'none', cursor:'pointer' }}
-            aria-label="Cerrar filtros"
-          >
-            <X style={{ width:16, height:16, color:'hsl(var(--hoja))' }} />
-          </button>
-        </div>
+        Limpiar filtros
+      </button>
+      <button
+        onClick={handleApply}
+        className="flex-[2] h-12 rounded-2xl bg-origen-bosque text-white text-sm font-semibold active:scale-95 transition-all hover:bg-origen-pino"
+      >
+        {resultCount !== undefined ? `Ver ${resultCount} ${resultLabel}` : 'Aplicar filtros'}
+      </button>
+    </div>
+  );
 
-        {/* Secciones de filtros â€” Ã¡rea scrollable */}
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-          <div style={{ padding:'20px', display:'flex', flexDirection:'column', gap:24 }}>
-            {sections.map((section) => {
-              const d = draft[section.id];
+  return (
+    <FilterPanel
+      open={isOpen}
+      onClose={onClose}
+      title={title}
+      footer={footer}
+    >
+      <div className="flex flex-col gap-6">
+        {sections.map((section) => {
+          const d = draft[section.id];
 
-              if (section.type === 'chips') {
-                return (
-                  <ChipsSection
-                    key={section.id}
-                    section={section}
-                    value={(d?.type === 'chips' ? d.value : '') ?? ''}
-                    onChange={(v) => setChips(section.id, v)}
-                  />
-                );
-              }
-              if (section.type === 'daterange') {
-                const dd = d?.type === 'daterange' ? d : { from: '', to: '' };
-                return (
-                  <DateRangeSection
-                    key={section.id}
-                    section={section}
-                    from={dd.from}
-                    to={dd.to}
-                    onFrom={(v) => setDateFrom(section.id, v)}
-                    onTo={(v) => setDateTo(section.id, v)}
-                  />
-                );
-              }
-              if (section.type === 'numberrange') {
-                const dn = d?.type === 'numberrange' ? d : { min: '', max: '' };
-                return (
-                  <NumberRangeSection
-                    key={section.id}
-                    section={section}
-                    min={dn.min}
-                    max={dn.max}
-                    onMin={(v) => setNumMin(section.id, v)}
-                    onMax={(v) => setNumMax(section.id, v)}
-                  />
-                );
-              }
-              if (section.type === 'toggles') {
-                const dt = d?.type === 'toggles' ? d.values : {};
-                return (
-                  <TogglesSection
-                    key={section.id}
-                    section={section}
-                    values={dt}
-                    onToggle={(optId, v) => setToggle(section.id, optId, v)}
-                  />
-                );
-              }
-              return null;
-            })}
-          </div>
-        </div>
-
-        {/* Footer â€” parte del flex layout, siempre al fondo */}
-        <div
-          style={{
-            flexShrink: 0,
-            display: 'flex',
-            gap: 12,
-            padding: '16px 20px',
-            paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
-            backgroundColor: 'hsl(var(--surface))',
-            borderTop: '1px solid hsl(var(--border-subtle))',
-          } as React.CSSProperties}
-        >
-          <button
-            onClick={handleClear}
-            disabled={!hasActive}
-            className={cn(
-              'flex-1 h-12 rounded-2xl border-2 text-sm font-medium transition-all active:scale-95',
-              hasActive
-                ? 'border-origen-bosque/40 text-origen-bosque hover:border-origen-bosque/70'
-                : 'border-border text-text-subtle opacity-40 cursor-not-allowed',
-            )}
-          >
-            Limpiar filtros
-          </button>
-          <button
-            onClick={handleApply}
-            className="flex-[2] h-12 rounded-2xl bg-origen-bosque text-white text-sm font-semibold active:scale-95 transition-all hover:bg-origen-pino"
-          >
-            {resultCount !== undefined ? `Ver ${resultCount} ${resultLabel}` : 'Aplicar filtros'}
-          </button>
-        </div>
+          if (section.type === 'chips') {
+            return (
+              <ChipsSection
+                key={section.id}
+                section={section}
+                value={(d?.type === 'chips' ? d.value : '') ?? ''}
+                onChange={(v) => setChips(section.id, v)}
+              />
+            );
+          }
+          if (section.type === 'daterange') {
+            const dd = d?.type === 'daterange' ? d : { from: '', to: '' };
+            return (
+              <DateRangeSection
+                key={section.id}
+                section={section}
+                from={dd.from}
+                to={dd.to}
+                onFrom={(v) => setDateFrom(section.id, v)}
+                onTo={(v) => setDateTo(section.id, v)}
+              />
+            );
+          }
+          if (section.type === 'numberrange') {
+            const dn = d?.type === 'numberrange' ? d : { min: '', max: '' };
+            return (
+              <NumberRangeSection
+                key={section.id}
+                section={section}
+                min={dn.min}
+                max={dn.max}
+                onMin={(v) => setNumMin(section.id, v)}
+                onMax={(v) => setNumMax(section.id, v)}
+              />
+            );
+          }
+          if (section.type === 'toggles') {
+            const dt = d?.type === 'toggles' ? d.values : {};
+            return (
+              <TogglesSection
+                key={section.id}
+                section={section}
+                values={dt}
+                onToggle={(optId, v) => setToggle(section.id, optId, v)}
+              />
+            );
+          }
+          return null;
+        })}
       </div>
-    </>,
-    document.body,
+    </FilterPanel>
   );
 }
-
