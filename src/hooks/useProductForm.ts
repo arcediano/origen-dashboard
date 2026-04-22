@@ -32,6 +32,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from '@arcediano/ux-library';
 import type { 
   PriceTier, 
   ProductFormData, 
@@ -235,8 +236,20 @@ export function useProductForm(productId?: string) {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        setFormData(JSON.parse(saved));
+        const parsed = JSON.parse(saved) as ProductFormData;
+        setFormData(parsed);
         setLastSaved(new Date());
+        // Avisar si el borrador tiene datos pero las imágenes no se guardaron
+        // (los objetos File no son serializables en localStorage)
+        if (parsed.name && (!parsed.gallery || parsed.gallery.length === 0)) {
+          setTimeout(() => {
+            toast({
+              title: 'Imágenes pendientes',
+              description: 'El borrador se ha recuperado. Las imágenes no se guardan automáticamente — por favor, vuélvelas a añadir.',
+              variant: 'warning',
+            });
+          }, 500);
+        }
       } catch (e) {
         console.error('Error al cargar borrador:', e);
       }

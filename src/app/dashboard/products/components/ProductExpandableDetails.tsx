@@ -195,7 +195,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
             {product.subcategoryId && (
               <div className="flex justify-between items-center pb-2 border-b border-border/50">
                 <span className="text-sm text-muted-foreground">Subcategoría</span>
-                <span className="text-base font-medium text-muted-foreground capitalize">{product.subcategoryId}</span>
+                <span className="text-base font-medium text-muted-foreground capitalize">{product.subcategoryName || product.subcategoryId}</span>
               </div>
             )}
             <div className="flex justify-between items-center pb-2 border-b border-border/50">

@@ -405,6 +405,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     categoryId:       api.categoryId,
     categoryName:     api.categoryName ?? '',
     subcategoryId:    api.subcategoryId,
+    subcategoryName:  api.subcategoryName,
     tags:             api.tags ?? [],
 
     mainImage,
