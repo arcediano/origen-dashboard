@@ -99,6 +99,7 @@ const productToFormData = (product: Product): ProductFormData => {
   categoryId: product.categoryId,
   categoryName: product.categoryName,
   subcategoryId: product.subcategoryId,
+  subcategoryName: product.subcategoryName,
   tags: product.tags,
   mainImage: product.mainImage,
   gallery,
@@ -487,6 +488,7 @@ export function useProductForm(productId?: string) {
           setError(response.error);
         } else {
           setPublishStatus('pending_approval');
+          setShowSuccessModal(true);
         }
       } else {
         // Creación: enviar a revisión (PENDING_APPROVAL)

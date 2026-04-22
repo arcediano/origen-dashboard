@@ -66,11 +66,15 @@ export function StepBasic({
   const [localTouched, setLocalTouched] = useState<Record<string, boolean>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [categories, setCategories] = useState<CategoryTree[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   const allTouched = { ...localTouched, ...touched };
 
   useEffect(() => {
-    fetchCategoriesTree().then(setCategories).catch(() => setCategories([]));
+    fetchCategoriesTree()
+      .then(setCategories)
+      .catch(() => setCategories([]))
+      .finally(() => setCategoriesLoading(false));
   }, []);
 
   const validateField = useCallback((field: string, value: any) => {
@@ -156,15 +160,21 @@ export function StepBasic({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Select
               required
-              value={formData?.categoryId || ''}
+              value={categoriesLoading ? '' : (formData?.categoryId || '')}
+              disabled={categoriesLoading}
               onValueChange={(value) => {
                 handleChange('categoryId', value);
                 handleChange('subcategoryId', '');
+                handleChange('subcategoryName', '');
               }}
               error={allTouched?.categoryId ? errors?.categoryId : undefined}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar categoría" />
+                <SelectValue placeholder={
+                  categoriesLoading
+                    ? (formData?.categoryName || 'Cargando categorías...')
+                    : 'Seleccionar categoría'
+                } />
               </SelectTrigger>
               <SelectContent>
                 {categories.map(cat => (
@@ -180,12 +190,22 @@ export function StepBasic({
               const subcategories = selectedCat?.children ?? [];
               return (
                 <Select
-                  value={formData?.subcategoryId || ''}
-                  onValueChange={(value) => handleChange('subcategoryId', value)}
-                  disabled={subcategories.length === 0}
+                  value={categoriesLoading ? '' : (formData?.subcategoryId || '')}
+                  disabled={categoriesLoading || subcategories.length === 0}
+                  onValueChange={(value) => {
+                    const sub = subcategories.find(s => s.id === value);
+                    handleChange('subcategoryId', value);
+                    handleChange('subcategoryName', sub?.name ?? '');
+                  }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={subcategories.length > 0 ? 'Seleccionar subcategoría (opcional)' : 'Sin subcategorías'} />
+                    <SelectValue placeholder={
+                      categoriesLoading
+                        ? (formData?.subcategoryName || 'Cargando...')
+                        : subcategories.length > 0
+                          ? 'Seleccionar subcategoría (opcional)'
+                          : 'Sin subcategorías'
+                    } />
                   </SelectTrigger>
                   <SelectContent>
                     {subcategories.map(sub => (

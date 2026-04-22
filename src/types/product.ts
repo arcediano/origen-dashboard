@@ -224,6 +224,7 @@ export interface Product {
   categoryId: string;
   categoryName: string;
   subcategoryId?: string;
+  subcategoryName?: string;
   tags: string[];
   mainImage?: ProductImage;
   gallery: ProductImage[];
@@ -269,6 +270,7 @@ export interface ProductFormData {
   categoryId: string;
   categoryName: string;
   subcategoryId?: string;
+  subcategoryName?: string;
   tags: string[];
   mainImage?: ProductImage;
   gallery: ProductImage[];

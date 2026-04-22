@@ -199,18 +199,6 @@ export function CreateProductNavigation({
       </div>
 
       {/* ── Mensajes de estado de publicación ────────────────────────────── */}
-      {isLastStep && publishStatus === 'pending_approval' && (
-        <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-2">
-          <Shield className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-xs font-medium text-amber-800">Pendiente de verificación</p>
-            <p className="text-[10px] text-amber-600 mt-0.5">
-              Tus certificaciones están siendo verificadas. Te notificaremos cuando estén aprobadas.
-            </p>
-          </div>
-        </div>
-      )}
-
       {isLastStep && publishStatus === 'success' && (
         <div className="p-3 bg-green-50 rounded-xl border border-green-200 flex items-start gap-2">
           <CheckCircle className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
