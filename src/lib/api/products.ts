@@ -224,7 +224,7 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
   return {
     name:              formData.name,
     shortDescription:  formData.shortDescription,
-    fullDescription:   formData.fullDescription,
+    fullDescription:   formData.fullDescription || undefined,
     categoryId:        formData.categoryId,
     subcategoryId:     formData.subcategoryId || undefined,
     tags:              formData.tags,
@@ -620,7 +620,6 @@ export async function createProduct(
     }
 
     const body = formDataToApiBody(normalizedFormData);
-    console.log('[products] createProduct body:', JSON.stringify(body, null, 2));
     const raw  = await gatewayClient.post<ApiProduct>('/products', body);
     const product = mapApiProductToProduct(raw);
 
@@ -644,7 +643,6 @@ export async function saveProductDraft(
   try {
     const normalizedFormData = await normalizeFormDataBeforeSubmit(formData);
     const body = { ...formDataToApiBody(normalizedFormData), status: 'DRAFT' };
-    console.log('[products] saveProductDraft body:', JSON.stringify(body, null, 2));
     const raw  = await gatewayClient.post<ApiProduct>('/products', body);
     return {
       data: { draftId: raw.id, message: 'Borrador guardado' },

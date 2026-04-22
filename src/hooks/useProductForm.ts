@@ -503,6 +503,7 @@ export function useProductForm(productId?: string) {
       }
     } catch (error) {
       setPublishStatus('error');
+      setError('Error inesperado al publicar el producto');
     } finally {
       setIsPublishing(false);
     }
