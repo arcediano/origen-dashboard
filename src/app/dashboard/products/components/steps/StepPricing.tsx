@@ -132,7 +132,7 @@ export function StepPricing({
   const calculateSavings = (tier: PriceTier): number => {
     if (!basePrice) return 0;
     const offerPrice = calculateOfferPrice(tier);
-    return basePrice - offerPrice;
+    return Math.max(0, basePrice - offerPrice);
   };
 
   const calculateDiscountPercent = (tier: PriceTier): number => {

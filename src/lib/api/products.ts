@@ -245,7 +245,7 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
       buyQuantity: tier.buyQuantity,
       payQuantity: tier.payQuantity,
       label: tier.label,
-      savings: tier.savings,
+      savings: Math.max(0, tier.savings ?? 0),
     })),
 
     // El backend genera el SKU si está vacío
@@ -401,9 +401,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
       buyQuantity: tier.buyQuantity,
       payQuantity: tier.payQuantity,
       label: tier.label,
-      savings: tier.savings,
-    }));
-  }
+      savings: Math.max(0, tier.savings ?? 0),
 
   if (product.nutritionalInfo !== undefined) {
     body.nutritionalInfo = product.nutritionalInfo
