@@ -21,6 +21,8 @@ import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductF
 import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
+import { toast } from '@arcediano/ux-library';
+import { useEffect } from 'react';
 
 // ─── Animaciones ──────────────────────────────────────────────────────────────
 
@@ -37,6 +39,7 @@ export default function CreateProductPage() {
     activeTab,
     setActiveTab,
     completedTabs,
+    error,
     isSaving,
     isAutoSaving,
     lastSaved,
@@ -58,6 +61,12 @@ export default function CreateProductPage() {
     handlePublish,
     handleCancel,
   } = useProductForm();
+
+  useEffect(() => {
+    if (error) {
+      toast({ title: 'Error al guardar', description: error, variant: 'error' });
+    }
+  }, [error]);
 
   const stepNumber = FORM_STEPS.findIndex(s => s.id === activeTab) + 1;
   const tips = useStepTips(stepNumber, formData);
