@@ -2,14 +2,12 @@
  * @component StepCertificationsAttributes
  * @description Paso 7: Certificaciones y atributos
  *
- * Cambios respecto a versión anterior:
- * - P0: handleUpdateCertification llama a PATCH /products/:id/certifications/:certId en modo edición
- * - P0: handleSelectFromCatalog propaga certificationId en modo creación para preservar el vínculo al catálogo
- * - P0: Eliminada verificación simulada (setTimeout) — campo verified es de solo lectura
- * - P1: Filtro de categoría en el buscador del catálogo
- * - P1: Sugerencias top-5 al hacer foco sin texto
- * - P1: Fechas y número de certificado visibles en la tarjeta de cada cert
- * - P1: Alerta visual si la cert caduca en menos de 60 días
+ * Mobile UX:
+ * - Catálogo en bottom sheet (slide-up) en móvil, panel inline en desktop
+ * - Input text-base (16px) — evita zoom automático en iOS Safari
+ * - Búsqueda + filtro de categoría apilados verticalmente en móvil
+ * - Tap targets mínimo 44px en tarjetas y resultados
+ * - Scroll lock (iOS-safe) cuando el bottom sheet está abierto
  */
 
 'use client';
@@ -110,35 +108,35 @@ const ATTRIBUTE_EXAMPLES: Record<string, Array<{
   icon: React.ReactNode;
 }>> = {
   quesos: [
-    { name: 'Tipo de leche',     type: 'text',   example: 'Oveja, Vaca, Cabra, Mezcla',    description: 'Indica el origen de la leche utilizada',   icon: <Milk className="w-4 h-4" /> },
-    { name: 'Tiempo de curación',type: 'number', example: '12', unit: 'meses',              description: 'Período de maduración del queso',           icon: <Clock className="w-4 h-4" /> },
-    { name: 'Maduración',        type: 'text',   example: 'En cueva, Cámara, Bodega',       description: 'Método y lugar de maduración',              icon: <Beef className="w-4 h-4" /> },
-    { name: 'Textura',           type: 'text',   example: 'Crema, Pasta dura, Semiduro',    description: 'Consistencia del queso',                    icon: <Beef className="w-4 h-4" /> },
-    { name: 'Intensidad',        type: 'text',   example: 'Suave, Medio, Fuerte',           description: 'Nivel de sabor',                            icon: <Zap className="w-4 h-4" /> },
+    { name: 'Tipo de leche',      type: 'text',   example: 'Oveja, Vaca, Cabra, Mezcla',    description: 'Indica el origen de la leche utilizada',   icon: <Milk className="w-4 h-4" /> },
+    { name: 'Tiempo de curación', type: 'number', example: '12', unit: 'meses',              description: 'Período de maduración del queso',           icon: <Clock className="w-4 h-4" /> },
+    { name: 'Maduración',         type: 'text',   example: 'En cueva, Cámara, Bodega',       description: 'Método y lugar de maduración',              icon: <Beef className="w-4 h-4" /> },
+    { name: 'Textura',            type: 'text',   example: 'Crema, Pasta dura, Semiduro',    description: 'Consistencia del queso',                    icon: <Beef className="w-4 h-4" /> },
+    { name: 'Intensidad',         type: 'text',   example: 'Suave, Medio, Fuerte',           description: 'Nivel de sabor',                            icon: <Zap className="w-4 h-4" /> },
   ],
   vinos: [
-    { name: 'Variedad de uva',   type: 'text',   example: 'Tempranillo, Garnacha, Albariño',description: 'Tipo de uva utilizado',                     icon: <Droplet className="w-4 h-4" /> },
-    { name: 'Añada',             type: 'number', example: '2020', unit: 'año',              description: 'Año de la cosecha',                         icon: <Calendar className="w-4 h-4" /> },
-    { name: 'Crianza',           type: 'text',   example: 'Joven, Crianza, Reserva',        description: 'Tiempo y tipo de envejecimiento',           icon: <Clock className="w-4 h-4" /> },
-    { name: 'Barrica',           type: 'text',   example: '6 meses en roble francés',       description: 'Tipo de madera y tiempo en barrica',        icon: <Award className="w-4 h-4" /> },
-    { name: 'Graduación',        type: 'number', example: '13.5', unit: '% vol',            description: 'Porcentaje de alcohol',                     icon: <Zap className="w-4 h-4" /> },
+    { name: 'Variedad de uva',    type: 'text',   example: 'Tempranillo, Garnacha, Albariño',description: 'Tipo de uva utilizado',                     icon: <Droplet className="w-4 h-4" /> },
+    { name: 'Añada',              type: 'number', example: '2020', unit: 'año',              description: 'Año de la cosecha',                         icon: <Calendar className="w-4 h-4" /> },
+    { name: 'Crianza',            type: 'text',   example: 'Joven, Crianza, Reserva',        description: 'Tiempo y tipo de envejecimiento',           icon: <Clock className="w-4 h-4" /> },
+    { name: 'Barrica',            type: 'text',   example: '6 meses en roble francés',       description: 'Tipo de madera y tiempo en barrica',        icon: <Award className="w-4 h-4" /> },
+    { name: 'Graduación',         type: 'number', example: '13.5', unit: '% vol',            description: 'Porcentaje de alcohol',                     icon: <Zap className="w-4 h-4" /> },
   ],
   aceites: [
-    { name: 'Variedad de aceituna',type: 'text', example: 'Arbequina, Picual, Hojiblanca', description: 'Tipo de aceituna utilizada',                icon: <Droplet className="w-4 h-4" /> },
-    { name: 'Acidez',            type: 'number', example: '0.2', unit: '%',                description: 'Grado de acidez (máximo 0.8° para AOVE)',   icon: <Beef className="w-4 h-4" /> },
-    { name: 'Extracción',        type: 'text',   example: 'Primera prensada en frío',       description: 'Método de extracción del aceite',           icon: <Award className="w-4 h-4" /> },
-    { name: 'Cosecha',           type: 'text',   example: 'Temprana, Tradicional',          description: 'Momento de la recolección',                 icon: <Calendar className="w-4 h-4" /> },
+    { name: 'Variedad de aceituna', type: 'text', example: 'Arbequina, Picual, Hojiblanca', description: 'Tipo de aceituna utilizada',                icon: <Droplet className="w-4 h-4" /> },
+    { name: 'Acidez',             type: 'number', example: '0.2', unit: '%',                description: 'Grado de acidez (máximo 0.8° para AOVE)',   icon: <Beef className="w-4 h-4" /> },
+    { name: 'Extracción',         type: 'text',   example: 'Primera prensada en frío',       description: 'Método de extracción del aceite',           icon: <Award className="w-4 h-4" /> },
+    { name: 'Cosecha',            type: 'text',   example: 'Temprana, Tradicional',          description: 'Momento de la recolección',                 icon: <Calendar className="w-4 h-4" /> },
   ],
   mieles: [
-    { name: 'Floración',         type: 'text',   example: 'Azahar, Romero, Tomillo',        description: 'Tipo de flor de origen',                    icon: <Leaf className="w-4 h-4" /> },
-    { name: 'Textura',           type: 'text',   example: 'Líquida, Cremosa, Cristalizada', description: 'Consistencia de la miel',                   icon: <Droplet className="w-4 h-4" /> },
-    { name: 'Origen botánico',   type: 'text',   example: 'Bosque, Montaña, Dehesa',        description: 'Entorno de las colmenas',                   icon: <TreePine className="w-4 h-4" /> },
+    { name: 'Floración',          type: 'text',   example: 'Azahar, Romero, Tomillo',        description: 'Tipo de flor de origen',                    icon: <Leaf className="w-4 h-4" /> },
+    { name: 'Textura',            type: 'text',   example: 'Líquida, Cremosa, Cristalizada', description: 'Consistencia de la miel',                   icon: <Droplet className="w-4 h-4" /> },
+    { name: 'Origen botánico',    type: 'text',   example: 'Bosque, Montaña, Dehesa',        description: 'Entorno de las colmenas',                   icon: <TreePine className="w-4 h-4" /> },
   ],
   embutidos: [
-    { name: 'Tipo de carne',     type: 'text',   example: 'Cerdo ibérico, Cerdo blanco',    description: 'Raza y tipo de cerdo',                      icon: <Beef className="w-4 h-4" /> },
-    { name: 'Curación',          type: 'number', example: '24', unit: 'meses',              description: 'Tiempo de curación',                        icon: <Clock className="w-4 h-4" /> },
-    { name: 'Alimentación',      type: 'text',   example: 'Bellota, Cebo de campo, Cebo',   description: 'Tipo de alimentación del animal',           icon: <Wheat className="w-4 h-4" /> },
-    { name: 'Pieza',             type: 'text',   example: 'Paleta, Jamón, Lomo, Chorizo',   description: 'Tipo de pieza',                             icon: <Beef className="w-4 h-4" /> },
+    { name: 'Tipo de carne',      type: 'text',   example: 'Cerdo ibérico, Cerdo blanco',    description: 'Raza y tipo de cerdo',                      icon: <Beef className="w-4 h-4" /> },
+    { name: 'Curación',           type: 'number', example: '24', unit: 'meses',              description: 'Tiempo de curación',                        icon: <Clock className="w-4 h-4" /> },
+    { name: 'Alimentación',       type: 'text',   example: 'Bellota, Cebo de campo, Cebo',   description: 'Tipo de alimentación del animal',           icon: <Wheat className="w-4 h-4" /> },
+    { name: 'Pieza',              type: 'text',   example: 'Paleta, Jamón, Lomo, Chorizo',   description: 'Tipo de pieza',                             icon: <Beef className="w-4 h-4" /> },
   ],
 };
 
@@ -211,6 +209,28 @@ export function StepCertificationsAttributes({
   const categoryExamples = ATTRIBUTE_EXAMPLES[productCategory] || ATTRIBUTE_EXAMPLES.quesos;
   const isStepComplete = certifications.length > 0 || attributes.length > 0;
 
+  // ── iOS-safe body scroll lock cuando el bottom sheet está abierto ───────────
+  useEffect(() => {
+    if (!showCatalogPanel) return;
+    if (typeof window === 'undefined') return;
+    const isMobile = window.matchMedia('(max-width: 639px)').matches;
+    if (!isMobile) return;
+
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflowY = 'scroll';
+
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflowY = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, [showCatalogPanel]);
+
   // ── Búsqueda en catálogo con debounce ────────────────────────────────────────
   const searchCatalog = useCallback(async (query: string, category: string) => {
     setIsLoadingCatalog(true);
@@ -246,8 +266,8 @@ export function StepCertificationsAttributes({
   const openCatalogPanel = () => {
     setShowCatalogPanel(true);
     setShowCertForm(false);
-    // Foco al input en el siguiente tick
-    setTimeout(() => catalogInputRef.current?.focus(), 50);
+    // Foco al input del panel de escritorio en el siguiente tick
+    setTimeout(() => catalogInputRef.current?.focus(), 80);
   };
 
   const closeCatalogPanel = () => {
@@ -276,17 +296,10 @@ export function StepCertificationsAttributes({
       verificationUrl: newCert.verificationUrl,
       category: newCert.category as CertificationCategory,
     };
-
     onCertificationsChange([...certifications, cert]);
     resetCertForm();
   };
 
-  /**
-   * Selecciona una certificación del catálogo.
-   * - Modo edición:  llama a POST /products/:id/certifications de inmediato.
-   * - Modo creación: añade al estado local con certificationId explícito para
-   *                  que el backend pueda vincularla al catálogo al publicar.
-   */
   const handleSelectFromCatalog = async (item: CatalogCertification) => {
     setCertActionError(null);
     if (certifications.some((c) => c.id === item.id)) return;
@@ -301,8 +314,6 @@ export function StepCertificationsAttributes({
       }
     }
 
-    // certificationId explícito → el mapper de createProduct lo enviará al backend
-    // permitiéndole vincular a la cert del catálogo en lugar de crear una nueva.
     const cert: Certification & { certificationId?: string } = {
       id:              item.id,
       certificationId: item.id,
@@ -329,7 +340,6 @@ export function StepCertificationsAttributes({
       expiryDate: newCert.expiryDate ? new Date(newCert.expiryDate) : undefined,
     };
 
-    // En modo edición, persistir cambios en el backend
     if (productId) {
       setCertActionLoading(editingCert.id);
       const res = await updateProductCertification(productId, editingCert.id, {
@@ -426,6 +436,146 @@ export function StepCertificationsAttributes({
   };
 
   // ============================================================================
+  // CATALOG PANEL CONTENT (compartido entre mobile sheet y desktop inline)
+  // autoFocus solo en desktop (param) para no disparar el teclado en móvil
+  // ============================================================================
+
+  const renderCatalogContent = (withAutoFocus: boolean) => (
+    <>
+      {/* Cabecera */}
+      <div className="flex items-start justify-between px-4 sm:px-5 pt-4 sm:pt-5 pb-3 shrink-0">
+        <div>
+          <p className="text-sm font-semibold text-origen-bosque">Catálogo oficial de Origen</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Certificaciones reconocidas: DOP, IGP, Ecológico UE, ISO, Comercio Justo y más
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={closeCatalogPanel}
+          className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-alt transition-colors ml-2 shrink-0"
+          aria-label="Cerrar catálogo"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Búsqueda + filtro de categoría */}
+      <div className="px-4 sm:px-5 pb-3 shrink-0">
+        <div className="flex flex-col sm:flex-row gap-2">
+          {/* Input de búsqueda — full width, font-size 16px para evitar zoom en iOS */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <input
+              ref={withAutoFocus ? catalogInputRef : undefined}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus={withAutoFocus}
+              type="search"
+              inputMode="search"
+              autoComplete="off"
+              value={catalogSearch}
+              onChange={(e) => setCatalogSearch(e.target.value)}
+              placeholder="Buscar por nombre u organismo…"
+              className="w-full h-12 pl-10 pr-10 rounded-xl border border-border bg-white text-base placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
+            />
+            {catalogSearch && (
+              <button
+                type="button"
+                onClick={() => setCatalogSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                aria-label="Limpiar búsqueda"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Filtro de categoría — full width en móvil, auto en desktop */}
+          <Select value={catalogCategory} onValueChange={setCatalogCategory}>
+            <SelectTrigger className="h-12 sm:h-11 w-full sm:w-auto sm:min-w-[150px] rounded-xl gap-1.5">
+              <Filter className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+              <SelectValue placeholder="Todas las categorías" />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORY_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Resultados */}
+      {/* En móvil (bottom sheet): flex-1 overflow-y-auto llena la altura restante del sheet */}
+      {/* En desktop (inline): sm:flex-none, el <ul> tiene su propio max-h-56 */}
+      <div
+        className="flex-1 sm:flex-none overflow-y-auto sm:overflow-visible px-4 sm:px-5 pb-4 sm:pb-5"
+        style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+      >
+        <div className="rounded-xl border border-border overflow-hidden">
+          {isLoadingCatalog && (
+            <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Buscando en el catálogo…
+            </div>
+          )}
+
+          {!isLoadingCatalog && catalogResults.length > 0 && (
+            <ul role="listbox" className="divide-y divide-border sm:max-h-56 sm:overflow-y-auto">
+              {catalogResults.map((item) => (
+                <li key={item.id} role="option" aria-selected={false}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectFromCatalog(item)}
+                    disabled={certActionLoading === item.id}
+                    className="w-full flex items-center justify-between gap-3 px-4 py-4 sm:py-3 text-sm active:bg-origen-crema/60 hover:bg-origen-crema/40 transition-colors focus:outline-none text-left disabled:opacity-50 min-h-[60px] sm:min-h-0"
+                  >
+                    <span className="flex items-center gap-3 min-w-0">
+                      <Award className="w-5 h-5 sm:w-4 sm:h-4 shrink-0 text-origen-pradera" />
+                      <span className="min-w-0">
+                        <span className="block font-medium text-origen-bosque">{item.name}</span>
+                        <span className="block text-xs text-muted-foreground mt-0.5">{item.issuingBody}</span>
+                      </span>
+                    </span>
+                    {certActionLoading === item.id
+                      ? <Loader2 className="w-5 h-5 sm:w-4 sm:h-4 shrink-0 animate-spin text-origen-pradera" />
+                      : <Plus className="w-5 h-5 sm:w-4 sm:h-4 shrink-0 text-origen-pradera" />
+                    }
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {!isLoadingCatalog && catalogSearched && catalogResults.length === 0 && (
+            <div className="py-10 px-6 text-center space-y-3">
+              <Award className="w-10 h-10 text-origen-pradera/30 mx-auto" />
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {catalogSearch
+                    ? `No encontramos "${catalogSearch}" en el catálogo`
+                    : 'El catálogo está vacío por el momento'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  El catálogo de Origen incluye certificaciones verificadas y reconocidas oficialmente.
+                  Si tu certificación no aparece, añádela manualmente y el equipo la revisará.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                onClick={openManualForm}
+                leftIcon={<Plus className="w-3.5 h-3.5" />}
+              >
+                Añadir manualmente
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+
+  // ============================================================================
   // RENDER
   // ============================================================================
 
@@ -454,11 +604,12 @@ export function StepCertificationsAttributes({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Badges — simplificados en móvil para evitar 2 filas */}
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             <Badge variant="leaf" size="sm" className="bg-origen-pradera/10">
               {certifications.length} certificaciones
             </Badge>
-            <Badge variant="info" size="sm" className="bg-blue-50 text-blue-700 border-blue-200">
+            <Badge variant="info" size="sm" className="hidden sm:inline-flex bg-blue-50 text-blue-700 border-blue-200">
               {attributes.filter((a) => a.visible).length} atributos
             </Badge>
             {isStepComplete ? (
@@ -470,7 +621,7 @@ export function StepCertificationsAttributes({
                 <AlertCircle className="w-3 h-3" /> Pendiente
               </Badge>
             )}
-            <Badge variant="leaf" size="sm" className="flex items-center gap-1">
+            <Badge variant="leaf" size="sm" className="hidden sm:inline-flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Paso 7 de 7
             </Badge>
           </div>
@@ -487,7 +638,7 @@ export function StepCertificationsAttributes({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "pb-3 text-sm font-medium transition-colors relative flex items-center gap-2",
+                  "pb-3 min-h-[44px] text-sm font-medium transition-colors relative flex items-center gap-2",
                   activeTab === tab.id
                     ? 'text-origen-pradera border-b-2 border-origen-pradera'
                     : 'text-muted-foreground hover:text-foreground'
@@ -533,7 +684,7 @@ export function StepCertificationsAttributes({
                   <button
                     type="button"
                     onClick={() => setCertActionError(null)}
-                    className="ml-auto"
+                    className="ml-auto p-1"
                     aria-label="Cerrar error"
                   >
                     <X className="w-4 h-4" />
@@ -541,11 +692,11 @@ export function StepCertificationsAttributes({
                 </div>
               )}
 
-              {/* ── Acciones principales ───────────────────────────────────── */}
+              {/* ── Acciones principales — apiladas en móvil ─────────────── */}
               {!showCatalogPanel && !showCertForm && (
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <Button
-                    className="flex-1"
+                    className="w-full sm:flex-1"
                     variant="outline"
                     onClick={openCatalogPanel}
                     leftIcon={<Search className="w-4 h-4" />}
@@ -553,7 +704,7 @@ export function StepCertificationsAttributes({
                     Buscar en catálogo oficial
                   </Button>
                   <Button
-                    className="flex-1"
+                    className="w-full sm:flex-1"
                     onClick={openManualForm}
                     leftIcon={<Plus className="w-4 h-4" />}
                   >
@@ -563,137 +714,58 @@ export function StepCertificationsAttributes({
               )}
 
               {/* ── Panel catálogo ─────────────────────────────────────────── */}
+
+              {/* Móvil: overlay backdrop */}
               <AnimatePresence>
                 {showCatalogPanel && (
                   <motion.div
+                    className="fixed inset-0 bg-black/50 z-40 sm:hidden"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={closeCatalogPanel}
+                  />
+                )}
+              </AnimatePresence>
+
+              {/* Móvil: bottom sheet — slide up desde abajo */}
+              <AnimatePresence>
+                {showCatalogPanel && (
+                  <motion.div
+                    className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-[28px] sm:hidden flex flex-col"
+                    style={{ maxHeight: '85dvh' }}
+                    initial={{ y: '100%' }}
+                    animate={{ y: 0 }}
+                    exit={{ y: '100%' }}
+                    transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+                  >
+                    {/* Drag handle visual */}
+                    <div className="flex justify-center pt-3 pb-1 shrink-0">
+                      <div className="w-10 h-1 rounded-full bg-gray-300" />
+                    </div>
+                    {renderCatalogContent(false)}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Desktop: panel inline colapsable */}
+              <AnimatePresence>
+                {showCatalogPanel && (
+                  <motion.div
+                    className="hidden sm:flex flex-col overflow-hidden"
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden"
                   >
-                    <div className="p-5 bg-white rounded-xl border-2 border-origen-pradera/20 space-y-4">
-                      {/* Cabecera del panel */}
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-origen-bosque">Catálogo oficial de Origen</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            Certificaciones reconocidas: DOP, IGP, Ecológico UE, ISO, Comercio Justo y más
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={closeCatalogPanel}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-alt transition-colors"
-                          aria-label="Cerrar catálogo"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      {/* Input de búsqueda + filtro categoría */}
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                          <input
-                            ref={catalogInputRef}
-                            type="text"
-                            value={catalogSearch}
-                            onChange={(e) => setCatalogSearch(e.target.value)}
-                            placeholder="Buscar por nombre u organismo…"
-                            className="w-full h-11 pl-9 pr-10 rounded-xl border border-border bg-white text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
-                          />
-                          {catalogSearch && (
-                            <button
-                              type="button"
-                              onClick={() => setCatalogSearch('')}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                        <Select
-                          value={catalogCategory}
-                          onValueChange={setCatalogCategory}
-                        >
-                          <SelectTrigger className="w-auto min-w-[150px] h-11 rounded-xl gap-1.5">
-                            <Filter className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
-                            <SelectValue placeholder="Categoría" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {CATEGORY_OPTIONS.map((opt) => (
-                              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Resultados */}
-                      <div className="rounded-xl border border-border overflow-hidden">
-                        {isLoadingCatalog && (
-                          <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Buscando en el catálogo…
-                          </div>
-                        )}
-
-                        {!isLoadingCatalog && catalogResults.length > 0 && (
-                          <ul role="listbox" className="max-h-56 overflow-y-auto divide-y divide-border">
-                            {catalogResults.map((item) => (
-                              <li key={item.id} role="option" aria-selected={false}>
-                                <button
-                                  type="button"
-                                  onClick={() => handleSelectFromCatalog(item)}
-                                  disabled={certActionLoading === item.id}
-                                  className="w-full flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-origen-crema/40 transition-colors focus:outline-none focus:bg-origen-crema/40 text-left disabled:opacity-50"
-                                >
-                                  <span className="flex items-center gap-3 min-w-0">
-                                    <Award className="w-4 h-4 shrink-0 text-origen-pradera" />
-                                    <span className="min-w-0">
-                                      <span className="block truncate font-medium text-origen-bosque">{item.name}</span>
-                                      <span className="block text-xs text-muted-foreground">{item.issuingBody}</span>
-                                    </span>
-                                  </span>
-                                  {certActionLoading === item.id
-                                    ? <Loader2 className="w-4 h-4 shrink-0 animate-spin text-origen-pradera" />
-                                    : <Plus className="w-4 h-4 shrink-0 text-origen-pradera" />
-                                  }
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-
-                        {!isLoadingCatalog && catalogSearched && catalogResults.length === 0 && (
-                          <div className="py-8 px-6 text-center space-y-3">
-                            <Award className="w-10 h-10 text-origen-pradera/30 mx-auto" />
-                            <div>
-                              <p className="text-sm font-medium text-foreground">
-                                {catalogSearch
-                                  ? `No encontramos "${catalogSearch}" en el catálogo`
-                                  : 'El catálogo está vacío por el momento'}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                El catálogo de Origen incluye certificaciones verificadas y reconocidas oficialmente.
-                                Si tu certificación no aparece, añádela manualmente y el equipo la revisará.
-                              </p>
-                            </div>
-                            <Button
-                              size="sm"
-                              onClick={openManualForm}
-                              leftIcon={<Plus className="w-3.5 h-3.5" />}
-                            >
-                              Añadir manualmente
-                            </Button>
-                          </div>
-                        )}
-                      </div>
+                    <div className="bg-white rounded-xl border-2 border-origen-pradera/20 flex flex-col overflow-hidden">
+                      {renderCatalogContent(true)}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* Formulario de certificación */}
+              {/* ── Formulario de certificación manual ────────────────────── */}
               <AnimatePresence>
                 {showCertForm && (
                   <motion.div
@@ -702,7 +774,7 @@ export function StepCertificationsAttributes({
                     exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="p-5 bg-origen-crema/30 rounded-xl border-2 border-origen-pradera/20 mb-4">
+                    <div className="p-4 sm:p-5 bg-origen-crema/30 rounded-xl border-2 border-origen-pradera/20 mb-4">
                       <h4 className="text-sm font-semibold text-origen-bosque mb-4">
                         {editingCert ? 'Editar certificación' : 'Nueva certificación'}
                       </h4>
@@ -732,19 +804,22 @@ export function StepCertificationsAttributes({
                             onChange={(e) => setNewCert({ ...newCert, certificateNumber: e.target.value })}
                             placeholder="Ej: ECO-ES-00123"
                           />
-                          <Select
-                            value={newCert.status || 'pending'}
-                            onValueChange={(v) => setNewCert({ ...newCert, status: v as CertificationStatus })}
-                          >
-                            <SelectTrigger className="mt-[22px]">
-                              <SelectValue placeholder="Estado" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="active">Activo</SelectItem>
-                              <SelectItem value="pending">Pendiente</SelectItem>
-                              <SelectItem value="expired">Caducado</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <div>
+                            <label className="text-sm font-medium text-foreground block mb-1.5">Estado</label>
+                            <Select
+                              value={newCert.status || 'pending'}
+                              onValueChange={(v) => setNewCert({ ...newCert, status: v as CertificationStatus })}
+                            >
+                              <SelectTrigger className="h-11 w-full rounded-xl">
+                                <SelectValue placeholder="Estado" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="active">Activo</SelectItem>
+                                <SelectItem value="pending">Pendiente</SelectItem>
+                                <SelectItem value="expired">Caducado</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -773,14 +848,21 @@ export function StepCertificationsAttributes({
                           showVerification={false}
                         />
 
-                        <div className="flex justify-end gap-2 mt-2">
-                          <Button size="sm" variant="secondary" onClick={resetCertForm}>
+                        {/* Botones — full-width en móvil, alineados a la derecha en desktop */}
+                        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={resetCertForm}
+                            className="w-full sm:w-auto"
+                          >
                             Cancelar
                           </Button>
                           <Button
                             size="sm"
                             onClick={editingCert ? handleUpdateCertification : handleAddCertification}
                             disabled={!newCert.name || !newCert.issuingBody || certActionLoading !== null}
+                            className="w-full sm:w-auto"
                             leftIcon={certActionLoading
                               ? <Loader2 className="w-4 h-4 animate-spin" />
                               : <Save className="w-4 h-4" />
@@ -878,15 +960,15 @@ export function StepCertificationsAttributes({
                                   </div>
                                 </div>
 
-                                {/* Acciones */}
-                                <div className="flex items-center gap-1 shrink-0">
+                                {/* Acciones — tap target 44px en móvil */}
+                                <div className="flex items-center gap-0.5 shrink-0">
                                   <button
                                     onClick={() => {
                                       setEditingCert(cert);
                                       setNewCert({ ...cert, issueDate: cert.issueDate, expiryDate: cert.expiryDate });
                                       setShowCertForm(true);
                                     }}
-                                    className="p-1.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
+                                    className="p-2.5 sm:p-1.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 active:bg-origen-pradera/20 transition-colors"
                                     aria-label={`Editar ${cert.name}`}
                                   >
                                     <Edit2 className="w-4 h-4" />
@@ -894,7 +976,7 @@ export function StepCertificationsAttributes({
                                   <button
                                     onClick={() => handleDeleteCertification(cert.id)}
                                     disabled={certActionLoading === cert.id}
-                                    className="p-1.5 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                                    className="p-2.5 sm:p-1.5 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors disabled:opacity-50"
                                     aria-label={`Eliminar ${cert.name}`}
                                   >
                                     {certActionLoading === cert.id
@@ -943,6 +1025,7 @@ export function StepCertificationsAttributes({
                 </div>
               )}
 
+              {/* Empty state — solo cuando no hay panel abierto */}
               {certifications.length === 0 && !showCertForm && !showCatalogPanel && (
                 <div className="text-center py-10 bg-origen-crema/20 rounded-xl border-2 border-dashed border-origen-pradera/30">
                   <Award className="w-12 h-12 text-origen-pradera/40 mx-auto mb-3" />
@@ -990,7 +1073,7 @@ export function StepCertificationsAttributes({
                   {categoryExamples.map((example, idx) => (
                     <div
                       key={idx}
-                      className="relative p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 transition-all cursor-pointer group"
+                      className="relative p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 active:bg-origen-crema/40 transition-all cursor-pointer group"
                       onClick={() => applyExample(example)}
                       onMouseEnter={() => setShowExampleTooltip(example.name)}
                       onMouseLeave={() => setShowExampleTooltip(null)}
@@ -1047,7 +1130,7 @@ export function StepCertificationsAttributes({
                     exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="p-5 bg-origen-crema/30 rounded-xl border-2 border-origen-pradera/20 mb-4">
+                    <div className="p-4 sm:p-5 bg-origen-crema/30 rounded-xl border-2 border-origen-pradera/20 mb-4">
                       <h4 className="text-sm font-semibold text-origen-bosque mb-4">
                         {editingAttr ? 'Editar atributo' : 'Nuevo atributo personalizado'}
                       </h4>
@@ -1066,7 +1149,7 @@ export function StepCertificationsAttributes({
                               value={newAttr.type || 'text'}
                               onValueChange={(v) => setNewAttr({ ...newAttr, type: v as any, value: v === 'boolean' ? false : '' })}
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className="h-11 w-full rounded-xl">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -1105,7 +1188,7 @@ export function StepCertificationsAttributes({
                                 value={newAttr.value ? 'true' : 'false'}
                                 onValueChange={(v) => setNewAttr({ ...newAttr, value: v === 'true' })}
                               >
-                                <SelectTrigger>
+                                <SelectTrigger className="h-11 w-full rounded-xl">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1143,12 +1226,15 @@ export function StepCertificationsAttributes({
                           </label>
                         </div>
 
-                        <div className="flex justify-end gap-2">
-                          <Button size="sm" variant="secondary" onClick={resetAttrForm}>Cancelar</Button>
+                        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+                          <Button size="sm" variant="secondary" onClick={resetAttrForm} className="w-full sm:w-auto">
+                            Cancelar
+                          </Button>
                           <Button
                             size="sm"
                             onClick={editingAttr ? handleUpdateAttribute : handleAddAttribute}
                             disabled={!newAttr.name}
+                            className="w-full sm:w-auto"
                             leftIcon={<Save className="w-4 h-4" />}
                           >
                             {editingAttr ? 'Actualizar' : 'Guardar'}
@@ -1190,23 +1276,26 @@ export function StepCertificationsAttributes({
                             <p className="text-sm text-foreground mt-0.5">{String(attr.value)} {attr.unit}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5">
                           <button
                             onClick={() => handleToggleAttributeVisibility(attr.id)}
-                            className="p-2 rounded-lg text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
+                            className="p-2.5 sm:p-2 rounded-lg text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 active:bg-origen-pradera/20 transition-colors"
                             title={attr.visible ? 'Ocultar' : 'Mostrar'}
+                            aria-label={attr.visible ? 'Ocultar atributo' : 'Mostrar atributo'}
                           >
                             {attr.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                           </button>
                           <button
                             onClick={() => { setEditingAttr(attr); setNewAttr(attr); setShowAttrForm(true); }}
-                            className="p-2 rounded-lg text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
+                            className="p-2.5 sm:p-2 rounded-lg text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 active:bg-origen-pradera/20 transition-colors"
+                            aria-label="Editar atributo"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteAttribute(attr.id)}
-                            className="p-2 rounded-lg text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
+                            className="p-2.5 sm:p-2 rounded-lg text-text-subtle hover:text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors"
+                            aria-label="Eliminar atributo"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
