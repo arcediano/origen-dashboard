@@ -52,6 +52,7 @@ import {
   Search,
   Loader2,
   Filter,
+  XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -341,7 +342,7 @@ export function StepCertificationsAttributes({
       name:            item.name,
       issuingBody:     item.issuingBody,
       status:          'pending',
-      verified:        item.verified,
+      verified:        false,
       category:        item.category?.toLowerCase() as CertificationCategory,
       documents:       [],
       source:          'catalog',
@@ -976,6 +977,14 @@ export function StepCertificationsAttributes({
                                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-origen-pastel text-origen-hoja border border-origen-pradera/30">
                                         <CheckCircle className="w-3 h-3" /> Verificada
                                       </span>
+                                    ) : cert.status === 'under_review' || cert.status === 'UNDER_REVIEW' ? (
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                        <Clock className="w-3 h-3" /> En revisión
+                                      </span>
+                                    ) : cert.status === 'rejected' || cert.status === 'REJECTED' ? (
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-feedback-danger-subtle text-feedback-danger-text border border-feedback-danger/20">
+                                        <XCircle className="w-3 h-3" /> No verificada
+                                      </span>
                                     ) : (
                                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
                                         <Clock className="w-3 h-3" /> Pendiente revisión
@@ -1062,6 +1071,7 @@ export function StepCertificationsAttributes({
                                   showVerification={true}
                                 />
                               </div>
+                            </div>
                           </div>
                         </motion.div>
                       );

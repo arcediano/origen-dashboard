@@ -103,7 +103,7 @@ export interface NutritionalInfo {
 // TIPOS DE CERTIFICACIONES - DEFINICIÓN ÚNICA
 // ============================================================================
 
-export type CertificationStatus = 'active' | 'expired' | 'pending';
+export type CertificationStatus = 'active' | 'expired' | 'pending' | 'under_review' | 'UNDER_REVIEW' | 'rejected' | 'REJECTED';
 export type CertificationCategory = 'organic' | 'quality' | 'safety' | 'sustainability' | 'origin';
 
 export interface Certification {
@@ -121,6 +121,8 @@ export interface Certification {
   logo?: string;
   /** 'manual' = añadida por el productor manualmente; 'catalog' = seleccionada del catálogo oficial */
   source?: 'catalog' | 'manual';
+  /** Notas del admin si la certificación fue rechazada */
+  reviewNotes?: string;
 }
 
 // Para compatibilidad (opcional)
