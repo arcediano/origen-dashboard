@@ -332,3 +332,51 @@ Sprint de cierre para `origen-dashboard` Sprint 24. Se amplió la cobertura de t
 - `npm install` debe ejecutarse para materializar el bump de `next@15.5.15` en `node_modules` (requiere token GitHub Packages).
 - Las vulnerabilidades transitivas de `qs` y `picomatch` (alta severidad, `--omit=dev`) se resuelven con `npm audit fix` tras el install.
 
+
+---
+
+## Sprint 30 — scheduled-publishing-organic-score-tests
+
+**Fecha**: 2026-04-23
+**Commits**: `cb6f5cc`, `b84cd88`, `5c409e4`
+**Agentes**: desarrollador-codigo, analista-pruebas, auditor-seguridad, documentador-tecnico
+**Estado**: ✅ Completado
+
+### Archivos modificados
+
+| Archivo | Tipo | Descripción |
+|---------|------|-------------|
+| `src/lib/api/products.ts` | Modified | Añadida `scheduleProduct(productId, scheduledAt)` — `PATCH /products/:id/schedule` |
+| `src/app/dashboard/products/components/SchedulePublishCard.tsx` | Created | Card con date picker para programar publicación; validación de fecha futura client-side |
+| `src/app/dashboard/products/[id]/edit/page.tsx` | Modified | `SchedulePublishCard` renderizado cuando todos los pasos están completos y status es draft/scheduled |
+| `src/types/product.ts` | Modified | Añadidos `'scheduled'` al union de status, `scheduledAt?: Date`, `organicScore?: number` |
+| `src/components/shared/products/OrganicScoreBadge.tsx` | Created | Badge de 4 niveles (Excelente/Bueno/Regular/Bajo) con colores y leyenda opcional |
+| `src/app/dashboard/products/components/ProductExpandableDetails.tsx` | Modified | `OrganicScoreBadge` junto al SKU cuando `organicScore` está presente |
+| `tests/mocks/handlers/products-patch.handlers.ts` | Created | MSW handlers para `PATCH /products/:id/status` y `PATCH /products/:id/schedule` |
+| `tests/unit/api/products-patch.api.test.ts` | Created | T-01: 10 tests — `updateProductStatus` (4) + `scheduleProduct` (6) |
+| `tests/unit/components/products/OrganicScoreBadge.test.tsx` | Created | T-02: 13 tests — niveles de color, umbrales exactos, props `showLabel`/`size` |
+| `tests/unit/components/products/SchedulePublishCard.test.tsx` | Created | T-03: 7 tests — validación de fecha, submit, mensaje de éxito, toasts de error |
+
+### US implementadas
+
+| US | Feature | Descripción |
+|----|---------|-------------|
+| US-08 | Scheduled publishing (frontend) | Date picker en página de edición de producto |
+| US-09 | Organic score badge (frontend) | `OrganicScoreBadge` visible en fila expandida de la tabla de productos |
+
+### Gates de calidad
+
+| Gate | Estado | Detalle |
+|------|--------|---------|
+| Compilación (`tsc --noEmit`) | ✅ Sin errores | 0 errores TypeScript |
+| Tests T-01 | ✅ **10/10 PASS** | `products-patch.api.test.ts` |
+| Tests T-02 | ✅ **13/13 PASS** | `OrganicScoreBadge.test.tsx` |
+| Tests T-03 | ✅ **7/7 PASS** | `SchedulePublishCard.test.tsx` |
+| Seguridad | ✅ APROBADO | Validación de fecha client-side; backend re-valida (defensa en profundidad) |
+| Documentación | ✅ Este archivo | Registro actualizado |
+
+### Notas técnicas
+
+- `SchedulePublishCard` sólo se renderiza cuando `allStepsCompleted && status ∈ {draft, scheduled}`.
+- `OrganicScoreBadge` recibe `score` en `[0, 1]`; el color se elige con 4 umbrales fijos (`≥0.80`, `≥0.60`, `≥0.40`, `<0.40`).
+- Tests de componente usan `happy-dom` (Vitest) + `@testing-library/react`; `@testing-library/dom` añadido como dev dep por ausencia de transitive resolution.
