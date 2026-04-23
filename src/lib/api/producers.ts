@@ -34,6 +34,32 @@ function normalizeProducerProfile(data: ProducerProfileApi): ProducerProfile {
   };
 }
 
+export interface ProfileViewStats {
+  today: number;
+  week: number;
+  month: number;
+  total: number;
+}
+
+/**
+ * Obtiene estadísticas de visitas al perfil público del productor autenticado.
+ * GET /api/v1/producers/me/profile-views
+ */
+export async function fetchProfileViewStats(): Promise<ApiResponse<ProfileViewStats>> {
+  try {
+    const data = await gatewayClient.get<ProfileViewStats>('/producers/me/profile-views');
+    return { data, status: 200 };
+  } catch (err) {
+    console.error('[producers] fetchProfileViewStats', err);
+    const message =
+      err instanceof GatewayError ? err.message : 'Error al cargar visitas al perfil';
+    return {
+      error: message,
+      status: err instanceof GatewayError ? err.status : 500,
+    };
+  }
+}
+
 /**
  * Obtiene el perfil del productor autenticado.
  * GET /api/v1/producers/me

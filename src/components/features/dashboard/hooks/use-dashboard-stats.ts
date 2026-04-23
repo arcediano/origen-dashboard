@@ -5,6 +5,8 @@
  * Sprint 31: rating conectado a fetchProductStats() → getProducerStats() en products-service.
  *            Agrega reseñas aprobadas por producerId directamente en la BD (Review.producerId).
  *
+ * Sprint 33: profileViews conectado a fetchProfileViewStats() → GET /producers/me/profile-views.
+ *
  * Campos conectados:
  *   - orders.today    → fetchOrderStats() → OrderStats.todayOrders
  *   - revenue.today   → fetchOrderStats() → OrderStats.todayRevenue
@@ -21,6 +23,7 @@ import { useState, useEffect } from 'react';
 import type { DashboardStats } from '../types';
 import { fetchOrderStats } from '@/lib/api/orders';
 import { fetchProductStats } from '@/lib/api/products';
+import { fetchProfileViewStats } from '@/lib/api/producers';
 
 interface UseDashboardStatsResult {
   stats: DashboardStats | null;
@@ -48,9 +51,10 @@ export function useDashboardStats(): UseDashboardStatsResult {
     setError(null);
 
     try {
-      const [orderResult, productResult] = await Promise.all([
+      const [orderResult, productResult, viewsResult] = await Promise.all([
         fetchOrderStats(),
         fetchProductStats(),
+        fetchProfileViewStats(),
       ]);
 
       if (orderResult.error || !orderResult.data) {
@@ -69,8 +73,7 @@ export function useDashboardStats(): UseDashboardStatsResult {
       const ratingTotal   = productResult.data?.rating?.total   ?? 0;
 
       setStats({
-        // TODO: conectar a /api/v1/producers/me/profile-views cuando esté disponible
-        profileViews: { today: 0 },
+        profileViews: { today: viewsResult.data?.today ?? 0 },
         orders: {
           today: orderStats.todayOrders,
         },
