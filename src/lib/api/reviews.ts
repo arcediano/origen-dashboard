@@ -1,216 +1,139 @@
 /**
  * @file reviews.ts
- * @description Llamadas a la API para el sistema de reseñas
+ * @description Llamadas a la API del gateway para el sistema de reseñas del productor.
+ * Sprint 31 HU-04: reemplaza todos los datos mock con llamadas reales a /api/v1/reviews/mine.
+ *
+ * Endpoints del microservicio usados:
+ *   GET  /reviews/mine           — Reseñas de los productos del productor (con filtros)
+ *   GET  /reviews/can-review/:id — Verificar elegibilidad de valoración
+ *   POST /reviews/:id/respond    — Responder a una reseña
+ *   POST /reviews/:id/flag       — Reportar reseña
+ *   POST /reviews/:id/helpful    — Marcar como útil
  */
 
-import { type Review, type ReviewStats, type ReviewsResponse, type ReviewFilters, ReviewStatus } from '@/types/review';
-import { ApiResponse } from './products';
+import type { Review, ReviewStats, ReviewsResponse, ReviewFilters } from '@/types/review';
+import type { ApiResponse } from './products';
+import { gatewayClient, GatewayError } from './client';
 
-// ============================================================================
-// DATOS MOCK
-// ============================================================================
+// ─── TIPOS DE RESPUESTA DEL BACKEND ──────────────────────────────────────────
 
-const MOCK_REVIEWS: Review[] = [
-  {
-    id: 'rev-001',
-    type: 'product',
-    targetId: 'prod-001',
-    targetName: 'Queso Manchego Curado 12 meses',
-    authorId: 'user-123',
-    authorName: 'María García',
-    authorAvatar: 'https://i.pravatar.cc/150?u=123',
-    rating: 5,
-    title: 'Excelente queso, sabor intenso',
-    content: 'Llevo años comprando queso manchego y este es de los mejores. Se nota la curación de 12 meses, textura firme y sabor intenso. Perfecto para tabla de quesos.',
-    status: 'approved',
-    helpful: 24,
-    notHelpful: 2,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), // 5 días
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
-    verifiedPurchase: true,
-    images: ['/mock/review-1.jpg', '/mock/review-2.jpg'],
-    response: {
-      id: 'resp-001',
-      authorId: 'prod-001',
-      authorName: 'Quesería El Gazpacho',
-      authorType: 'producer',
-      content: '¡Gracias por tu reseña María! Nos alegra mucho que disfrutes nuestro queso. Seguimos trabajando con la misma pasión.',
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4)
-    }
-  },
-  {
-    id: 'rev-002',
-    type: 'product',
-    targetId: 'prod-001',
-    targetName: 'Queso Manchego Curado 12 meses',
-    authorId: 'user-456',
-    authorName: 'Carlos Rodríguez',
-    rating: 4,
-    title: 'Muy bueno, pero un poco caro',
-    content: 'El queso es excelente, calidad top. La única pega es el precio, me parece un poco elevado comparado con otros similares.',
-    status: 'approved',
-    helpful: 12,
-    notHelpful: 1,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12),
-    verifiedPurchase: true
-  },
-  {
-    id: 'rev-003',
-    type: 'product',
-    targetId: 'prod-002',
-    targetName: 'Aceite de Oliva Virgen Extra',
-    authorId: 'user-789',
-    authorName: 'Ana Martínez',
-    rating: 5,
-    title: 'Espectacular, como de la abuela',
-    content: 'Este aceite me transporta a mi infancia. Sabor afrutado, picor justo. Ideal para pan con tomate o ensaladas.',
-    status: 'pending',
-    helpful: 8,
-    notHelpful: 0,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 horas
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    verifiedPurchase: true,
-    images: ['/mock/review-3.jpg']
-  },
-  {
-    id: 'rev-004',
-    type: 'producer',
-    targetId: 'prod-001',
-    targetName: 'Quesería El Gazpacho',
-    authorId: 'user-234',
-    authorName: 'Laura Sánchez',
-    rating: 5,
-    title: 'Productor excepcional',
-    content: 'Trato excelente, envío rápido y producto perfecto. Resolvieron todas mis dudas antes de comprar. Volveré a comprar sin duda.',
-    status: 'approved',
-    helpful: 15,
-    notHelpful: 1,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8),
-    verifiedPurchase: true,
-    response: {
-      id: 'resp-002',
-      authorId: 'prod-001',
-      authorName: 'Quesería El Gazpacho',
-      authorType: 'producer',
-      content: '¡Gracias Laura! Nos esforzamos cada día por ofrecer el mejor servicio. Un saludo.',
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7)
-    }
-  },
-  {
-    id: 'rev-005',
-    type: 'product',
-    targetId: 'prod-003',
-    targetName: 'Miel de Romero',
-    authorId: 'user-567',
-    authorName: 'Javier López',
-    rating: 2,
-    title: 'No era lo que esperaba',
-    content: 'La miel estaba cristalizada y el bote llegó un poco abierto. El sabor no es malo, pero la presentación deja que desear.',
-    status: 'flagged',
-    helpful: 3,
-    notHelpful: 5,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15),
-    verifiedPurchase: true,
-    flags: [
-      {
-        id: 'flag-001',
-        reason: 'inappropriate',
-        description: 'El usuario está siendo muy duro sin motivo',
-        reportedBy: 'prod-003',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14),
-        resolved: false
-      }
-    ]
-  },
-  {
-    id: 'rev-006',
-    type: 'producer',
-    targetId: 'prod-004',
-    targetName: 'Aceites La Alquería',
-    authorId: 'user-890',
-    authorName: 'Pedro Gómez',
-    rating: 1,
-    title: 'Pésima experiencia',
-    content: 'Pedido llegó tarde, el producto no correspondía con la descripción y no responden a los mensajes. No recomiendo.',
-    status: 'rejected',
-    helpful: 2,
-    notHelpful: 8,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 20),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 18),
-    verifiedPurchase: true
-  }
-];
+interface ApiReviewResponse {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorType: string;
+  content: string;
+  createdAt: string;
+  updatedAt?: string;
+}
 
-// ============================================================================
-// FUNCIONES AUXILIARES
-// ============================================================================
+interface ApiReviewFlag {
+  id: string;
+  reason: string;
+  description?: string;
+  reportedBy: string;
+  createdAt: string;
+  resolved: boolean;
+  resolvedBy?: string;
+  resolvedAt?: string;
+}
 
-const delay = (ms: number = 400) => new Promise(resolve => setTimeout(resolve, ms));
+interface ApiReview {
+  id: string;
+  type: string;
+  productId?: string;
+  producerId?: string;
+  authorId: string;
+  authorName: string;
+  authorAvatarId?: string;
+  rating: number;
+  title: string;
+  content: string;
+  verifiedPurchase: boolean;
+  helpful: number;
+  notHelpful: number;
+  status: string;
+  imageIds?: string[];
+  response?: ApiReviewResponse | null;
+  flags?: ApiReviewFlag[];
+  createdAt: string;
+  updatedAt: string;
+  product?: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
+}
 
-const calculateStats = (reviews: Review[]): ReviewStats => {
-  const stats = {
-    total: reviews.length,
-    pending: reviews.filter(r => r.status === 'pending').length,
-    approved: reviews.filter(r => r.status === 'approved').length,
-    rejected: reviews.filter(r => r.status === 'rejected').length,
-    flagged: reviews.filter(r => r.status === 'flagged').length,
-    averageRating: 0,
-    byRating: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } as Record<number, number>,
-    helpful: reviews.reduce((acc, r) => acc + r.helpful, 0),
-    notHelpful: reviews.reduce((acc, r) => acc + r.notHelpful, 0)
+interface ApiProducerReviewsResponse {
+  data: ApiReview[];
+  total: number;
+  stats: {
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+    flagged: number;
+    averageRating: number;
   };
+  hasMore: boolean;
+}
 
-  reviews.forEach(r => {
-    stats.byRating[r.rating] = (stats.byRating[r.rating] || 0) + 1;
-  });
+// ─── MAPPER ───────────────────────────────────────────────────────────────────
 
-  const totalRatings = Object.values(stats.byRating).reduce((a, b) => a + b, 0);
-  if (totalRatings > 0) {
-    const sumRatings = Object.entries(stats.byRating).reduce(
-      (acc, [rating, count]) => acc + Number(rating) * count, 0
-    );
-    stats.averageRating = sumRatings / totalRatings;
-  }
+function mapApiReview(api: ApiReview): Review {
+  const cdnBase = process.env.NEXT_PUBLIC_CDN_BASE_URL ?? '';
+  const avatarUrl = api.authorAvatarId
+    ? (cdnBase ? `${cdnBase}/${api.authorAvatarId}` : undefined)
+    : undefined;
 
-  return stats;
-};
+  return {
+    id: api.id,
+    type: api.productId ? 'product' : 'producer',
+    targetId: api.productId ?? api.producerId ?? '',
+    targetName: api.product?.name ?? api.productId ?? '',
+    authorId: api.authorId,
+    authorName: api.authorName,
+    authorAvatar: avatarUrl,
+    rating: api.rating as Review['rating'],
+    title: api.title,
+    content: api.content,
+    status: api.status.toLowerCase() as Review['status'],
+    helpful: api.helpful,
+    notHelpful: api.notHelpful,
+    verifiedPurchase: api.verifiedPurchase,
+    createdAt: new Date(api.createdAt),
+    updatedAt: new Date(api.updatedAt),
+    images: api.imageIds?.length ? api.imageIds : undefined,
+    response: api.response
+      ? {
+          id: api.response.id,
+          authorId: api.response.authorId,
+          authorName: api.response.authorName,
+          authorType: api.response.authorType as 'producer' | 'admin',
+          content: api.response.content,
+          createdAt: new Date(api.response.createdAt),
+          updatedAt: api.response.updatedAt ? new Date(api.response.updatedAt) : undefined,
+        }
+      : undefined,
+    flags: (api.flags ?? []).map((f) => ({
+      id: f.id,
+      reason: f.reason.toLowerCase() as 'inappropriate' | 'spam' | 'fake' | 'offensive' | 'other',
+      description: f.description,
+      reportedBy: f.reportedBy,
+      createdAt: new Date(f.createdAt),
+      resolved: f.resolved,
+      resolvedBy: f.resolvedBy,
+      resolvedAt: f.resolvedAt ? new Date(f.resolvedAt) : undefined,
+    })),
+  };
+}
 
-const filterReviews = (reviews: Review[], filters?: ReviewFilters): Review[] => {
-  if (!filters) return reviews;
-
-  return reviews.filter(review => {
-    if (filters.type && review.type !== filters.type) return false;
-    if (filters.status && review.status !== filters.status) return false;
-    if (filters.rating && review.rating !== filters.rating) return false;
-    if (filters.verifiedOnly && !review.verifiedPurchase) return false;
-    if (filters.hasResponse && !review.response) return false;
-    if (filters.hasImages && (!review.images || review.images.length === 0)) return false;
-    
-    if (filters.search) {
-      const search = filters.search.toLowerCase();
-      const matchesTitle = review.title.toLowerCase().includes(search);
-      const matchesContent = review.content.toLowerCase().includes(search);
-      const matchesAuthor = review.authorName.toLowerCase().includes(search);
-      const matchesTarget = review.targetName.toLowerCase().includes(search);
-      if (!matchesTitle && !matchesContent && !matchesAuthor && !matchesTarget) return false;
-    }
-
-    if (filters.dateFrom && review.createdAt < filters.dateFrom) return false;
-    if (filters.dateTo && review.createdAt > filters.dateTo) return false;
-
-    return true;
-  });
-};
-
-// ============================================================================
-// FUNCIONES DE LA API
-// ============================================================================
+// ─── FUNCIONES PÚBLICAS ───────────────────────────────────────────────────────
 
 /**
- * Obtiene todas las reseñas con filtros
+ * Obtiene las reseñas recibidas por el productor autenticado.
+ * Soporta filtros de estado, valoración y búsqueda textual.
  */
 export async function fetchReviews(params?: {
   page?: number;
@@ -218,234 +141,157 @@ export async function fetchReviews(params?: {
   filters?: ReviewFilters;
 }): Promise<ApiResponse<ReviewsResponse>> {
   try {
-    await delay(600);
+    const { page = 1, limit = 10, filters } = params ?? {};
 
-    let filtered = filterReviews([...MOCK_REVIEWS], params?.filters);
-    
-    // Ordenar por fecha (más recientes primero)
-    filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    const result = await gatewayClient.get<ApiProducerReviewsResponse>('/reviews/mine', {
+      params: {
+        page,
+        limit,
+        status: filters?.status?.toUpperCase(),
+        rating: filters?.rating,
+        search: filters?.search,
+      },
+    });
 
-    const page = params?.page || 1;
-    const limit = params?.limit || 10;
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const paginated = filtered.slice(start, end);
+    const reviews = result.data.map(mapApiReview);
+
+    // Apply client-side filters not supported by the endpoint
+    const filtered = reviews.filter((r) => {
+      if (filters?.verifiedOnly && !r.verifiedPurchase) return false;
+      if (filters?.hasResponse && !r.response) return false;
+      if (filters?.hasImages && (!r.images || r.images.length === 0)) return false;
+      if (filters?.dateFrom && r.createdAt < filters.dateFrom) return false;
+      if (filters?.dateTo && r.createdAt > filters.dateTo) return false;
+      return true;
+    });
+
+    const stats = result.stats;
+    const byRating: ReviewStats['byRating'] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    for (const r of filtered) {
+      const rating = r.rating as keyof typeof byRating;
+      byRating[rating] = (byRating[rating] ?? 0) + 1;
+    }
 
     return {
       data: {
-        reviews: paginated,
-        stats: calculateStats(filtered),
-        hasMore: end < filtered.length
+        reviews: filtered,
+        stats: {
+          total: stats.total,
+          pending: stats.pending,
+          approved: stats.approved,
+          rejected: stats.rejected,
+          flagged: stats.flagged,
+          averageRating: stats.averageRating,
+          byRating,
+          helpful: filtered.reduce((s, r) => s + r.helpful, 0),
+          notHelpful: filtered.reduce((s, r) => s + r.notHelpful, 0),
+        },
+        hasMore: result.hasMore,
       },
-      status: 200
+      status: 200,
     };
   } catch (error) {
+    const msg = error instanceof GatewayError ? error.message : 'Error al cargar reseñas';
     console.error('Error en fetchReviews:', error);
-    return { error: 'Error al cargar reseñas', status: 500 };
+    return { error: msg, status: error instanceof GatewayError ? error.status : 500 };
   }
 }
 
-/**
- * Obtiene reseñas pendientes de moderación
- */
+/** Alias: reseñas con status pending */
 export async function fetchPendingReviews(params?: {
   page?: number;
   limit?: number;
 }): Promise<ApiResponse<ReviewsResponse>> {
-  return fetchReviews({
-    ...params,
-    filters: { status: 'pending' }
-  });
+  return fetchReviews({ ...params, filters: { status: 'pending' } });
 }
 
-/**
- * Obtiene reseñas por tipo (producto o productor)
- */
+/** Reseñas por tipo — el productor solo tiene producto reviews */
 export async function fetchReviewsByType(
   type: 'product' | 'producer',
-  targetId?: string,
-  params?: { page?: number; limit?: number }
+  _targetId?: string,
+  params?: { page?: number; limit?: number },
 ): Promise<ApiResponse<ReviewsResponse>> {
-  let filtered = MOCK_REVIEWS.filter(r => r.type === type);
-  if (targetId) {
-    filtered = filtered.filter(r => r.targetId === targetId);
-  }
-
-  await delay(400);
-
-  const page = params?.page || 1;
-  const limit = params?.limit || 10;
-  const start = (page - 1) * limit;
-  const end = start + limit;
-  const paginated = filtered.slice(start, end);
-
-  return {
-    data: {
-      reviews: paginated,
-      stats: calculateStats(filtered),
-      hasMore: end < filtered.length
-    },
-    status: 200
-  };
+  return fetchReviews({ ...params, filters: { type } });
 }
 
-/**
- * Aprueba una reseña
- */
-export async function approveReview(id: string): Promise<ApiResponse<Review>> {
-  try {
-    await delay(300);
-    const review = MOCK_REVIEWS.find(r => r.id === id);
-    if (!review) {
-      return { error: 'Reseña no encontrada', status: 404 };
-    }
-    review.status = 'approved';
-    review.updatedAt = new Date();
-    return { data: { ...review }, status: 200 };
-  } catch (error) {
-    console.error('Error en approveReview:', error);
-    return { error: 'Error al aprobar reseña', status: 500 };
-  }
+/** Aprueba una reseña (acción de admin — no disponible para el productor) */
+export async function approveReview(_id: string): Promise<ApiResponse<Review>> {
+  return { error: 'Solo el administrador puede aprobar reseñas', status: 403 };
 }
 
-/**
- * Rechaza una reseña
- */
-export async function rejectReview(id: string, reason?: string): Promise<ApiResponse<Review>> {
-  try {
-    await delay(300);
-    const review = MOCK_REVIEWS.find(r => r.id === id);
-    if (!review) {
-      return { error: 'Reseña no encontrada', status: 404 };
-    }
-    review.status = 'rejected';
-    review.updatedAt = new Date();
-    return { data: { ...review }, status: 200 };
-  } catch (error) {
-    console.error('Error en rejectReview:', error);
-    return { error: 'Error al rechazar reseña', status: 500 };
-  }
+/** Rechaza una reseña (acción de admin) */
+export async function rejectReview(_id: string, _reason?: string): Promise<ApiResponse<Review>> {
+  return { error: 'Solo el administrador puede rechazar reseñas', status: 403 };
 }
 
-/**
- * Añade una respuesta a una reseña
- */
+/** Añade una respuesta del productor a una reseña */
 export async function addReviewResponse(
   reviewId: string,
-  response: { authorId: string; authorName: string; content: string }
+  response: { authorId: string; authorName: string; content: string },
 ): Promise<ApiResponse<Review>> {
   try {
-    await delay(400);
-    const review = MOCK_REVIEWS.find(r => r.id === reviewId);
-    if (!review) {
-      return { error: 'Reseña no encontrada', status: 404 };
-    }
-
-    review.response = {
-      id: `resp-${Date.now()}`,
-      authorId: response.authorId,
-      authorName: response.authorName,
-      authorType: 'producer',
+    const result = await gatewayClient.post<ApiReview>(`/reviews/${reviewId}/respond`, {
       content: response.content,
-      createdAt: new Date()
-    };
-    review.updatedAt = new Date();
-
-    return { data: { ...review }, status: 200 };
+    });
+    return { data: mapApiReview(result), status: 200 };
   } catch (error) {
-    console.error('Error en addReviewResponse:', error);
-    return { error: 'Error al añadir respuesta', status: 500 };
+    const msg = error instanceof GatewayError ? error.message : 'Error al añadir respuesta';
+    return { error: msg, status: error instanceof GatewayError ? error.status : 500 };
   }
 }
 
-/**
- * Reporta una reseña
- */
+/** Reporta una reseña inapropiada */
 export async function flagReview(
   reviewId: string,
   reason: 'inappropriate' | 'spam' | 'fake' | 'offensive' | 'other',
-  description?: string
+  description?: string,
 ): Promise<ApiResponse<Review>> {
   try {
-    await delay(300);
-    const review = MOCK_REVIEWS.find(r => r.id === reviewId);
-    if (!review) {
-      return { error: 'Reseña no encontrada', status: 404 };
-    }
-
-    if (!review.flags) review.flags = [];
-    review.flags.push({
-      id: `flag-${Date.now()}`,
-      reason,
-      description,
-      reportedBy: 'current-user',
-      createdAt: new Date(),
-      resolved: false
-    });
-    review.status = 'flagged';
-    review.updatedAt = new Date();
-
-    return { data: { ...review }, status: 200 };
+    await gatewayClient.post(`/reviews/${reviewId}/flag`, { reason: reason.toUpperCase(), description });
+    // Backend returns no body on flag — refetch not needed for dashboard
+    return { data: undefined as unknown as Review, status: 200 };
   } catch (error) {
-    console.error('Error en flagReview:', error);
-    return { error: 'Error al reportar reseña', status: 500 };
+    const msg = error instanceof GatewayError ? error.message : 'Error al reportar reseña';
+    return { error: msg, status: error instanceof GatewayError ? error.status : 500 };
   }
 }
 
-/**
- * Marca una reseña como útil/no útil
- */
-export async function markReviewHelpful(id: string, helpful: boolean): Promise<ApiResponse<Review>> {
+/** Marca una reseña como útil/no útil */
+export async function markReviewHelpful(id: string, _helpful: boolean): Promise<ApiResponse<Review>> {
   try {
-    await delay(200);
-    const review = MOCK_REVIEWS.find(r => r.id === id);
-    if (!review) {
-      return { error: 'Reseña no encontrada', status: 404 };
-    }
-
-    if (helpful) {
-      review.helpful += 1;
-    } else {
-      review.notHelpful += 1;
-    }
-
-    return { data: { ...review }, status: 200 };
+    await gatewayClient.post(`/reviews/${id}/helpful`);
+    return { data: undefined as unknown as Review, status: 200 };
   } catch (error) {
-    console.error('Error en markReviewHelpful:', error);
-    return { error: 'Error al marcar reseña', status: 500 };
+    const msg = error instanceof GatewayError ? error.message : 'Error al marcar reseña';
+    return { error: msg, status: error instanceof GatewayError ? error.status : 500 };
   }
 }
 
-/**
- * Elimina una reseña
- */
-export async function deleteReview(id: string): Promise<ApiResponse<null>> {
-  try {
-    await delay(400);
-    const index = MOCK_REVIEWS.findIndex(r => r.id === id);
-    if (index === -1) {
-      return { error: 'Reseña no encontrada', status: 404 };
-    }
-    MOCK_REVIEWS.splice(index, 1);
-    return { status: 200, data: null };
-  } catch (error) {
-    console.error('Error en deleteReview:', error);
-    return { error: 'Error al eliminar reseña', status: 500 };
-  }
+/** Elimina una reseña (acción de admin — no disponible para el productor) */
+export async function deleteReview(_id: string): Promise<ApiResponse<null>> {
+  return { error: 'Solo el administrador puede eliminar reseñas', status: 403 };
 }
 
-/**
- * Obtiene estadísticas de reseñas
- */
+/** Obtiene solo las estadísticas de reseñas del productor */
 export async function fetchReviewStats(): Promise<ApiResponse<ReviewStats>> {
   try {
-    await delay(300);
+    const result = await gatewayClient.get<ApiProducerReviewsResponse>('/reviews/mine', {
+      params: { page: 1, limit: 1 },
+    });
+
+    const byRating: ReviewStats['byRating'] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
     return {
-      data: calculateStats(MOCK_REVIEWS),
-      status: 200
+      data: {
+        ...result.stats,
+        byRating,
+        helpful: 0,
+        notHelpful: 0,
+      },
+      status: 200,
     };
   } catch (error) {
-    console.error('Error en fetchReviewStats:', error);
-    return { error: 'Error al obtener estadísticas', status: 500 };
+    const msg = error instanceof GatewayError ? error.message : 'Error al obtener estadísticas';
+    return { error: msg, status: error instanceof GatewayError ? error.status : 500 };
   }
 }
