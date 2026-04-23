@@ -397,11 +397,22 @@ export function StepCertificationsAttributes({
     onCertificationsChange(certifications.filter((c) => c.id !== id));
   };
 
-  const handleDocumentsChange = (certId: string, docs: DocumentFile[]) => {
+  const handleDocumentsChange = useCallback(async (certId: string, docs: DocumentFile[]) => {
+    // Actualiza estado local inmediatamente
     onCertificationsChange(
       certifications.map((cert) => cert.id === certId ? { ...cert, documents: docs } : cert)
     );
-  };
+    // Si estamos en modo edición, persiste la lista de documentos al backend
+    if (productId) {
+      const res = await updateProductCertification(productId, certId, {
+        documentIds: docs.filter(d => !d.uploading && !d.error).map(d => d.id),
+      });
+      if (res.error) {
+        setCertActionError(res.error);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [certifications, productId, onCertificationsChange]);
 
   const resetCertForm = () => {
     setNewCert({ name: '', issuingBody: '', certificateNumber: '', status: 'pending', verified: false, documents: [] });
@@ -1039,28 +1050,18 @@ export function StepCertificationsAttributes({
                                 </div>
                               )}
 
-                              {/* Documentos adjuntos */}
-                              {cert.documents && cert.documents.length > 0 && (
-                                <div className="mt-3">
-                                  <p className="text-[10px] text-muted-foreground mb-1.5">Documentos:</p>
-                                  <div className="flex flex-wrap gap-2">
-                                    {cert.documents.map((doc) => (
-                                      <a
-                                        key={doc.id}
-                                        href={doc.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt rounded-lg border border-border text-[10px] text-muted-foreground hover:border-origen-pradera transition-colors"
-                                      >
-                                        <FileText className="w-3 h-3" />
-                                        {doc.name}
-                                        <ExternalLink className="w-2.5 h-2.5" />
-                                      </a>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+                              {/* Documentos adjuntos — gestionables inline */}
+                              <div className="mt-3">
+                                <DocumentUploader
+                                  value={cert.documents || []}
+                                  onChange={(docs) => handleDocumentsChange(cert.id, docs)}
+                                  maxFiles={5}
+                                  maxSize={5}
+                                  acceptedFormats={['pdf', 'jpg', 'jpeg', 'png']}
+                                  label="Documentos acreditativos"
+                                  showVerification={true}
+                                />
+                              </div>
                           </div>
                         </motion.div>
                       );

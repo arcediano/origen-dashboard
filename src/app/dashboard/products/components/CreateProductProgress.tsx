@@ -84,18 +84,18 @@ export function CreateProductProgress({
         <Progress value={progress} variant="leaf" size="sm" showLabel={false} className="mb-4 sm:mb-5" />
         
         {/* Navegación de pasos */}
-        <div className="flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto pb-1 scrollbar-origen">
+        <div className="flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto pb-1 scrollbar-origen snap-x snap-mandatory">
           {FORM_STEPS.map((step, index) => {
             const isActive = step.id === currentTab;
             const isCompleted = completedTabs[step.id];
             const isClickable = index <= currentIndex + 1;
-            
+
             return (
               <button
                 key={step.id}
                 onClick={() => isClickable && onTabChange(step.id as FormStepId)}
                 className={cn(
-                  "group/step relative flex flex-col items-center gap-1.5 sm:gap-2 transition-all duration-300 flex-shrink-0 min-w-[52px] sm:min-w-[60px]",
+                  "group/step relative flex flex-col items-center gap-1.5 sm:gap-2 transition-all duration-300 flex-shrink-0 min-w-[52px] sm:min-w-[60px] snap-start",
                   isClickable ? "cursor-pointer" : "cursor-not-allowed opacity-40"
                 )}
                 disabled={!isClickable}

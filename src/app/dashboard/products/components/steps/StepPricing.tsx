@@ -113,6 +113,7 @@ export function StepPricing({
   const [editingTierId, setEditingTierId] = useState<string | null>(null);
   const [tiers, setTiers] = useState<PriceTier[]>(formData.priceTiers || []);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [priceTouched, setPriceTouched] = useState(false);
 
   // Estado para nueva oferta
   const [newTier, setNewTier] = useState<Partial<PriceTier>>({
@@ -323,14 +324,19 @@ export function StepPricing({
             </div>
             <CurrencyInput
               value={basePrice}
-              onChange={(value) => onInputChange('basePrice', value)}
+              onChange={(value) => {
+                onInputChange('basePrice', value);
+                if (priceTouched) setPriceTouched(true);
+              }}
+              onBlur={() => setPriceTouched(true)}
               min={0.01}
               inputSize="lg"
               className={cn(
                 "h-12 w-full rounded-xl",
-                (touched?.basePrice && errors?.basePrice) && "border-feedback-danger"
+                priceTouched && !hasBasePrice && "border-feedback-danger"
               )}
               placeholder="Ej: 24,50"
+              error={priceTouched && !hasBasePrice ? 'El precio de venta es obligatorio (debe ser mayor que 0)' : undefined}
             />
           </div>
 

@@ -120,7 +120,16 @@ export function CreateProductNavigation({
   };
 
   return (
-    <div className={cn('flex flex-col gap-3 pt-6 mt-6 border-t border-border', className)}>
+    <div className={cn(
+      'flex flex-col gap-3 pt-6 mt-6 border-t border-border',
+      // Sticky bottom bar en móvil — se pega al borde inferior de la pantalla
+      'max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:z-40',
+      'max-sm:bg-background/95 max-sm:backdrop-blur-sm',
+      'max-sm:border-t max-sm:border-border max-sm:mt-0 max-sm:pt-3',
+      'max-sm:px-4 max-sm:pb-[calc(env(safe-area-inset-bottom,0px)+12px)]',
+      'max-sm:shadow-[0_-4px_20px_hsla(var(--bosque)/0.08)]',
+      className,
+    )}>
 
       {/* ── Panel de errores del paso actual ──────────────────────────────── */}
       {showStepErrors && hasErrors && (
