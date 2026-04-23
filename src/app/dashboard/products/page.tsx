@@ -303,7 +303,7 @@ export default function ProductosPage() {
           {/* Resultados */}
           <motion.div variants={itemVariants}>
             {products.length === 0 ? (
-              <Card className="p-8 sm:p-12 bg-surface-alt border border-border-subtle">
+              <Card className="p-8 sm:p-12 bg-surface-alt border border-border shadow-subtle">
                 <div className="flex flex-col items-center justify-center text-center">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-origen-pastel flex items-center justify-center mb-3 sm:mb-4">
                     <Package className="w-8 h-8 text-origen-pradera" />

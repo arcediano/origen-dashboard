@@ -221,7 +221,7 @@ export function ProductMobileList({
 }: ProductMobileListProps) {
   if (isLoading) {
     return (
-      <div className={cn('rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden shadow-subtle', className)}>
+      <div className={cn('rounded-2xl border border-border bg-surface-alt overflow-hidden shadow-subtle', className)}>
         {Array.from({ length: 5 }).map((_, i) => <ProductRowSkeleton key={i} />)}
       </div>
     );
@@ -230,7 +230,7 @@ export function ProductMobileList({
   if (products.length === 0) return null;
 
   return (
-    <div className={cn('rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden shadow-subtle', className)}>
+    <div className={cn('rounded-2xl border border-border bg-surface-alt overflow-hidden shadow-subtle', className)}>
       {products.map((product) => (
         <ProductRow
           key={product.id}

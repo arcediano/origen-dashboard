@@ -52,8 +52,8 @@ export function ProductCard({
   return (
     <div
       className={cn(
-        'rounded-[24px] border border-border-subtle bg-surface cursor-pointer group',
-        'hover:border-origen-pradera/30 hover:shadow-sm transition-all duration-200',
+        'rounded-[24px] border border-border bg-surface-alt shadow-subtle cursor-pointer group',
+        'hover:border-origen-pradera/30 hover:shadow-origen transition-all duration-200',
         className,
       )}
       onClick={() => onView(product.id)}

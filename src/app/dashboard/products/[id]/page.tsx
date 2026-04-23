@@ -87,7 +87,7 @@ function SectionAccordion({
       variants={cardVariants}
       initial="hidden"
       animate="visible"
-      className="rounded-[28px] border border-border-subtle bg-surface overflow-hidden"
+      className="rounded-[28px] border border-border bg-surface-alt shadow-subtle overflow-hidden"
     >
       <button
         onClick={() => setOpen(v => !v)}
@@ -389,7 +389,7 @@ function StatusCard({
   ].filter(t => t.show);
 
   return (
-    <div className="rounded-[28px] border border-border-subtle bg-surface p-4 sm:p-5 space-y-4">
+    <div className="rounded-[28px] border border-border bg-surface-alt shadow-subtle p-4 sm:p-5 space-y-4">
       <div>
         <SectionLabel>Estado y publicación</SectionLabel>
         <div className="flex items-center justify-between">
@@ -794,7 +794,7 @@ export default function ProductoDetallePage() {
                 {/* ── Galería adicional ── */}
                 {product.gallery?.length > 1 && (
                   <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
-                    <div className="rounded-[28px] border border-border-subtle bg-surface p-4">
+                    <div className="rounded-[28px] border border-border bg-surface-alt shadow-subtle p-4">
                       <SectionLabel>Galería</SectionLabel>
                       <div className="grid grid-cols-4 gap-2">
                         {product.gallery.slice(1, 5).map((img, idx) => (
@@ -820,7 +820,7 @@ export default function ProductoDetallePage() {
                 {/* ── Certificaciones ── */}
                 {product.certifications?.length > 0 && (
                   <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
-                    <div className="rounded-[28px] border border-border-subtle bg-surface p-4 sm:p-5">
+                    <div className="rounded-[28px] border border-border bg-surface-alt shadow-subtle p-4 sm:p-5">
                       <SectionLabel>Certificaciones</SectionLabel>
                       <div className="divide-y divide-border-subtle">
                         {product.certifications.map(cert => (

@@ -333,14 +333,25 @@ function mapCertification(item: ApiCertification): Certification {
     verificationUrl: item.verificationUrl,
     category: item.category?.toLowerCase() as Certification['category'] | undefined,
     source: item.source === 'MANUAL' ? 'manual' : 'catalog',
-    documents: (item.documentIds ?? []).map((id) => ({
-      id,
-      name: id,
-      url: id,
-      size: 0,
-      type: 'application/octet-stream',
-      uploadedAt: new Date(),
-    })),
+    documents: (item.documentIds ?? []).map((id) => {
+      // Extract a human-readable filename from the S3 key or URL
+      const filename = decodeURIComponent(id.split('/').pop()?.split('?')[0] ?? id);
+      const ext = filename.split('.').pop()?.toLowerCase() ?? '';
+      const mimeMap: Record<string, string> = {
+        pdf: 'application/pdf',
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        png: 'image/png',
+      };
+      return {
+        id,
+        name: filename,
+        url: id,
+        size: 0,
+        type: mimeMap[ext] ?? 'application/octet-stream',
+        uploadedAt: new Date(),
+      };
+    }),
   };
 }
 

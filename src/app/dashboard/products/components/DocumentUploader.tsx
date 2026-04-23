@@ -146,6 +146,7 @@ export function DocumentUploader({
   };
 
   const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '—';
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
@@ -207,7 +208,7 @@ export function DocumentUploader({
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <FileText className="w-5 h-5 text-origen-pradera shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>
+                  <p className="text-sm font-medium text-foreground truncate" title={doc.name}>{doc.name}</p>
                   <p className="text-[10px] text-text-subtle">{formatFileSize(doc.size)}</p>
                 </div>
               </div>
