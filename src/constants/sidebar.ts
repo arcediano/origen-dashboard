@@ -4,6 +4,7 @@
  */
 
 import {
+  BarChart2,
   CreditCard,
   LayoutDashboard,
   Package,
@@ -58,6 +59,7 @@ export interface DashboardBreadcrumbItem {
 }
 
 const PAGE_TITLES: Record<string, string> = {
+  '/dashboard/analiticas': 'Analíticas',
   '/dashboard/perfil': 'Perfil',
   '/dashboard': 'Inicio',
   '/dashboard/orders': 'Pedidos',
@@ -80,6 +82,7 @@ const PAGE_TITLES: Record<string, string> = {
 };
 
 const SEGMENT_LABELS: Record<string, string> = {
+  analiticas: 'Analíticas',
   dashboard: 'Inicio',
   orders: 'Pedidos',
   products: 'Productos',
@@ -132,6 +135,16 @@ const OPERATIONS_ITEMS: MenuItem[] = [
   },
 ];
 
+const ANALYTICS_ITEMS: MenuItem[] = [
+  {
+    id: 'analiticas',
+    label: 'Analíticas',
+    icon: BarChart2,
+    href: '/dashboard/analiticas',
+    matchPaths: ['/dashboard/analiticas*'],
+  },
+];
+
 const BUSINESS_ITEMS: MenuItem[] = [
   {
     id: 'perfil-comercial',
@@ -160,6 +173,7 @@ export const DASHBOARD_NAV_SECTIONS: NavigationSection[] = [
   { id: 'general', label: 'General', items: GENERAL_ITEMS },
   { id: 'operacion', label: 'Operacion', items: OPERATIONS_ITEMS },
   { id: 'negocio', label: 'Negocio', items: BUSINESS_ITEMS },
+  { id: 'rendimiento', label: 'Rendimiento', items: ANALYTICS_ITEMS },
 ];
 
 export const MENU_ITEMS: MenuItem[] = DASHBOARD_NAV_SECTIONS.flatMap((section) => section.items);
