@@ -84,7 +84,7 @@ export function DocumentUploader({
     // Subir cada archivo a S3 en paralelo
     const results = await Promise.allSettled(
       acceptedFiles.map(async (file, index) => {
-        const result = await uploadFile(file, 'documents/certifications', {
+        const result = await uploadFile(file, 'documents/certifications/', {
           entityType: 'certifications',
         });
         return { index, result };
