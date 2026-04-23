@@ -704,15 +704,15 @@ export function StepCertificationsAttributes({
                 </div>
               </div>
 
-              {/* Error global de acción */}
-              {certActionError && (
-                <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  {certActionError}
+              {/* Error global — solo cuando no hay formulario abierto (delete, catálogo) */}
+              {certActionError && !showCertForm && (
+                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span className="flex-1">{certActionError}</span>
                   <button
                     type="button"
                     onClick={() => setCertActionError(null)}
-                    className="ml-auto p-1"
+                    className="p-1 shrink-0"
                     aria-label="Cerrar error"
                   >
                     <X className="w-4 h-4" />
@@ -875,6 +875,22 @@ export function StepCertificationsAttributes({
                           label="Documentos acreditativos"
                           showVerification={false}
                         />
+
+                        {/* Error inline — visible sin hacer scroll */}
+                        {certActionError && (
+                          <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                            <span className="flex-1">{certActionError}</span>
+                            <button
+                              type="button"
+                              onClick={() => setCertActionError(null)}
+                              className="p-1 shrink-0"
+                              aria-label="Cerrar error"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
 
                         {/* Botones — full-width en móvil, alineados a la derecha en desktop */}
                         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-2">
