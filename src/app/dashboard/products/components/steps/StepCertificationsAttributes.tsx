@@ -503,7 +503,7 @@ export function StepCertificationsAttributes({
               value={catalogSearch}
               onChange={(e) => setCatalogSearch(e.target.value)}
               placeholder="Buscar por nombre u organismo…"
-              className="w-full h-12 pl-10 pr-10 rounded-xl border border-border bg-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
+              className="w-full h-12 pl-10 pr-10 rounded-xl border border-border bg-surface placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
               style={{ fontSize: '16px', WebkitAppearance: 'none' }}
             />
             {catalogSearch && (
@@ -637,7 +637,7 @@ export function StepCertificationsAttributes({
             <Badge variant="leaf" size="sm" className="bg-origen-pradera/10">
               {certifications.length} certificaciones
             </Badge>
-            <Badge variant="info" size="sm" className="hidden sm:inline-flex bg-blue-50 text-blue-700 border-blue-200">
+            <Badge variant="info" size="sm" className="hidden sm:inline-flex bg-origen-pradera/10 text-origen-hoja border-origen-pradera/20">
               {attributes.filter((a) => a.visible).length} atributos
             </Badge>
             {isStepComplete ? (
@@ -693,11 +693,11 @@ export function StepCertificationsAttributes({
               className="space-y-6"
             >
               {/* Mensaje informativo */}
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 flex items-start gap-3">
-                <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+              <div className="p-4 bg-origen-crema/40 rounded-xl border border-origen-pradera/20 flex items-start gap-3">
+                <Info className="w-5 h-5 text-origen-pradera shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-blue-800">Certificaciones verificadas</p>
-                  <p className="text-xs text-blue-600 mt-1">
+                  <p className="text-sm font-medium text-origen-bosque">Certificaciones verificadas</p>
+                  <p className="text-xs text-origen-hoja mt-1">
                     Sube los documentos acreditativos para que podamos verificar tus certificaciones.
                     Una vez verificadas, aparecerá un sello de confianza en tu producto.
                   </p>
@@ -761,7 +761,7 @@ export function StepCertificationsAttributes({
               <AnimatePresence>
                 {showCatalogPanel && (
                   <motion.div
-                    className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-[28px] sm:hidden flex flex-col"
+                    className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-[28px] sm:hidden flex flex-col"
                     style={{ maxHeight: '85dvh' }}
                     initial={{ y: '100%' }}
                     animate={{ y: 0 }}
@@ -770,7 +770,7 @@ export function StepCertificationsAttributes({
                   >
                     {/* Drag handle visual */}
                     <div className="flex justify-center pt-3 pb-1 shrink-0">
-                      <div className="w-10 h-1 rounded-full bg-gray-300" />
+                      <div className="w-10 h-1 rounded-full bg-border" />
                     </div>
                     {renderCatalogContent(false)}
                   </motion.div>
@@ -786,7 +786,7 @@ export function StepCertificationsAttributes({
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                   >
-                    <div className="bg-white rounded-xl border-2 border-origen-pradera/20 flex flex-col overflow-hidden">
+                    <div className="bg-surface rounded-xl border-2 border-origen-pradera/20 flex flex-col overflow-hidden">
                       {renderCatalogContent(true)}
                     </div>
                   </motion.div>
@@ -939,20 +939,20 @@ export function StepCertificationsAttributes({
                           className={cn(
                             "p-4 rounded-xl border-2 transition-all",
                             cert.verified
-                              ? "border-green-200 bg-green-50/30"
+                              ? "border-origen-pradera/30 bg-origen-pastel/20"
                               : isExpired
-                                ? "border-red-200 bg-red-50/20"
+                                ? "border-feedback-danger/30 bg-feedback-danger-subtle/30"
                                 : "border-border bg-surface-alt hover:border-origen-pradera/30"
                           )}
                         >
                           <div className="flex items-start gap-3">
                             <div className={cn(
                               "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                              cert.verified ? "bg-green-100" : isExpired ? "bg-red-100" : "bg-origen-crema"
+                              cert.verified ? "bg-origen-pastel" : isExpired ? "bg-feedback-danger-subtle" : "bg-origen-crema"
                             )}>
                               <Award className={cn(
                                 "w-5 h-5",
-                                cert.verified ? "text-green-600" : isExpired ? "text-red-500" : "text-origen-pradera"
+                                cert.verified ? "text-origen-hoja" : isExpired ? "text-feedback-danger" : "text-origen-pradera"
                               )} />
                             </div>
 
@@ -962,7 +962,7 @@ export function StepCertificationsAttributes({
                                   <div className="flex items-center gap-2 flex-wrap">
                                     <h4 className="text-sm font-semibold text-origen-bosque">{cert.name}</h4>
                                     {cert.verified ? (
-                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-50 text-green-700 border border-green-200">
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-origen-pastel text-origen-hoja border border-origen-pradera/30">
                                         <CheckCircle className="w-3 h-3" /> Verificada
                                       </span>
                                     ) : (
@@ -971,7 +971,7 @@ export function StepCertificationsAttributes({
                                       </span>
                                     )}
                                     {isExpired && (
-                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-700 border border-red-200">
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-feedback-danger-subtle text-feedback-danger-text border border-feedback-danger/20">
                                         <AlertCircle className="w-3 h-3" /> Caducada
                                       </span>
                                     )}
@@ -995,7 +995,7 @@ export function StepCertificationsAttributes({
                                     {cert.expiryDate && (
                                       <p className={cn(
                                         "text-xs flex items-center gap-1",
-                                        isExpired ? "text-red-600 font-medium" : isExpiringSoon ? "text-amber-600 font-medium" : "text-muted-foreground"
+                                        isExpired ? "text-feedback-danger font-medium" : isExpiringSoon ? "text-amber-600 font-medium" : "text-muted-foreground"
                                       )}>
                                         <Clock className="w-3 h-3 shrink-0" />
                                         Caduca {formatDate(cert.expiryDate)}
@@ -1020,7 +1020,7 @@ export function StepCertificationsAttributes({
                                   <button
                                     onClick={() => handleDeleteCertification(cert.id)}
                                     disabled={certActionLoading === cert.id}
-                                    className="p-2.5 sm:p-1.5 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors disabled:opacity-50"
+                                    className="p-2.5 sm:p-1.5 rounded-md text-text-subtle hover:text-feedback-danger hover:bg-feedback-danger-subtle active:bg-feedback-danger-subtle transition-colors disabled:opacity-50"
                                     aria-label={`Eliminar ${cert.name}`}
                                   >
                                     {certActionLoading === cert.id
@@ -1104,7 +1104,7 @@ export function StepCertificationsAttributes({
                       Ayudan a los clientes a comparar y elegir — por ejemplo: variedad de uva, tipo de leche, tiempo de curación, etc.
                     </p>
                     {/* Mini preview de cómo se ven en la ficha */}
-                    <div className="mt-3 p-3 bg-white rounded-lg border border-border">
+                    <div className="mt-3 p-3 bg-surface rounded-lg border border-border">
                       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
                         Así se ven en la ficha del producto (sección "Características"):
                       </p>

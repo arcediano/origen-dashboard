@@ -563,9 +563,9 @@ export function StepNutritional({
                 </div>
               </div>
 
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 flex items-start gap-2">
-                <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-blue-700">
+              <div className="mt-4 p-3 bg-origen-crema/40 rounded-lg border border-origen-pradera/20 flex items-start gap-2">
+                <Info className="w-4 h-4 text-origen-pradera shrink-0 mt-0.5" />
+                <p className="text-xs text-origen-hoja">
                   Estas declaraciones aparecerán como badges en la ficha del producto, ayudando a clientes con necesidades específicas.
                 </p>
               </div>
@@ -626,7 +626,7 @@ export function StepNutritional({
                             <span className="text-sm truncate flex-1">{ingredient}</span>
                             <button
                               onClick={() => removeIngredient(index)}
-                              className="text-text-subtle hover:text-red-600 shrink-0 ml-2"
+                              className="text-text-subtle hover:text-feedback-danger shrink-0 ml-2"
                             >
                               <X className="w-4 h-4" />
                             </button>

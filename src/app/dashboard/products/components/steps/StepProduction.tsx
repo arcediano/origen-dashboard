@@ -539,7 +539,7 @@ export function StepProduction({
                       className={cn("h-11 text-sm mb-2 rounded-lg", videoError && "border-feedback-danger")}
                     />
                     {videoError && (
-                      <p className="text-xs text-red-600 mb-2">{videoError}</p>
+                      <p className="text-xs text-feedback-danger mb-2">{videoError}</p>
                     )}
                     <div className="flex gap-2">
                       <Button
@@ -576,7 +576,7 @@ export function StepProduction({
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
-                          className="relative aspect-video bg-gradient-to-br from-origen-crema to-gray-100 rounded-lg border border-border overflow-hidden group"
+                          className="relative aspect-video bg-gradient-to-br from-origen-crema to-origen-pastel/30 rounded-lg border border-border overflow-hidden group"
                         >
                           {video.thumbnail ? (
                             <img
@@ -593,7 +593,7 @@ export function StepProduction({
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button
                               onClick={() => handleRemoveMedia(video.id)}
-                              className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center hover:bg-red-600 transition-colors"
+                              className="w-10 h-10 bg-feedback-danger rounded-lg flex items-center justify-center hover:bg-feedback-danger/80 transition-colors"
                               title="Eliminar"
                             >
                               <Trash2 className="w-5 h-5 text-white" />

@@ -361,10 +361,10 @@ export function StepPricing({
 
         {/* Descuento calculado vs precio tachado */}
         {formData.comparePrice && formData.comparePrice > basePrice && (
-          <div className="mb-6 p-4 bg-green-50 rounded-xl border border-green-200">
+          <div className="mb-6 p-4 bg-origen-pastel/30 rounded-xl border border-origen-pradera/20">
             <div className="flex items-center gap-2">
-              <Percent className="w-5 h-5 text-green-600" />
-              <span className="text-sm font-medium text-green-700">
+              <Percent className="w-5 h-5 text-origen-hoja" />
+              <span className="text-sm font-medium text-origen-hoja">
                 El cliente ahorra un {Math.round(((formData.comparePrice - basePrice) / formData.comparePrice) * 100)}% respecto al precio tachado
               </span>
             </div>
@@ -582,13 +582,13 @@ export function StepPricing({
                         <>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Precio con oferta:</span>
-                            <span className="font-bold text-green-600">
+                            <span className="font-bold text-origen-hoja">
                               {(basePrice * (1 - (newTier.value || 0) / 100)).toFixed(2)} €
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-xs text-muted-foreground">
                             <span>Ahorro por unidad:</span>
-                            <span className="text-green-600 font-medium">{(basePrice * (newTier.value || 0) / 100).toFixed(2)} €</span>
+                            <span className="text-origen-hoja font-medium">{(basePrice * (newTier.value || 0) / 100).toFixed(2)} €</span>
                           </div>
                         </>
                       )}
@@ -597,11 +597,11 @@ export function StepPricing({
                         <>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Precio con oferta:</span>
-                            <span className="font-bold text-green-600">{(newTier.value || 0).toFixed(2)} €</span>
+                            <span className="font-bold text-origen-hoja">{(newTier.value || 0).toFixed(2)} €</span>
                           </div>
                           <div className="flex items-center justify-between text-xs text-muted-foreground">
                             <span>Ahorro por unidad:</span>
-                            <span className="text-green-600 font-medium">{Math.max(0, basePrice - (newTier.value || 0)).toFixed(2)} €</span>
+                            <span className="text-origen-hoja font-medium">{Math.max(0, basePrice - (newTier.value || 0)).toFixed(2)} €</span>
                           </div>
                         </>
                       )}
@@ -610,7 +610,7 @@ export function StepPricing({
                         <>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Precio efectivo/ud:</span>
-                            <span className="font-bold text-green-600">
+                            <span className="font-bold text-origen-hoja">
                               {((basePrice * (newTier.payQuantity || 1)) / (newTier.buyQuantity || 1)).toFixed(2)} €
                             </span>
                           </div>
@@ -625,7 +625,7 @@ export function StepPricing({
 
                   {/* Error de validación */}
                   {validationError && (
-                    <p className="text-xs text-red-600 flex items-center gap-1">
+                    <p className="text-xs text-feedback-danger flex items-center gap-1">
                       <AlertCircle className="w-3 h-3 shrink-0" />
                       {validationError}
                     </p>
@@ -692,7 +692,7 @@ export function StepPricing({
                                 <h4 className="text-sm font-semibold text-origen-bosque">
                                   {getTierTitle(tier)}
                                 </h4>
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-50 text-green-700 border border-green-200 shrink-0">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-origen-pastel text-origen-hoja border border-origen-pradera/30 shrink-0">
                                   <Zap className="w-2.5 h-2.5" />
                                   -{discount.toFixed(0)}%
                                 </span>
@@ -733,7 +733,7 @@ export function StepPricing({
                               </button>
                               <button
                                 onClick={() => handleDeleteTier(tier.id)}
-                                className="p-2.5 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
+                                className="p-2.5 rounded-md text-text-subtle hover:text-feedback-danger hover:bg-feedback-danger-subtle transition-colors"
                                 title="Eliminar"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -747,9 +747,9 @@ export function StepPricing({
                               <p className="text-[10px] text-muted-foreground">Normal</p>
                               <p className="text-xs sm:text-sm font-medium tabular-nums">{basePrice.toFixed(2)} €</p>
                             </div>
-                            <div className="p-2 bg-green-50 rounded-lg border border-green-200">
+                            <div className="p-2 bg-origen-pastel/30 rounded-lg border border-origen-pradera/20">
                               <p className="text-[10px] text-muted-foreground">Oferta</p>
-                              <p className="text-xs sm:text-sm font-bold text-green-700 tabular-nums">{offerPrice.toFixed(2)} €</p>
+                              <p className="text-xs sm:text-sm font-bold text-origen-hoja tabular-nums">{offerPrice.toFixed(2)} €</p>
                             </div>
                             <div className="p-2 bg-amber-50 rounded-lg">
                               <p className="text-[10px] text-muted-foreground">Ahorro</p>

@@ -89,9 +89,9 @@ const StockLevelIndicator = ({ current, threshold, max }: { current: number; thr
         <span className="text-muted-foreground">Stock actual</span>
         <span className={cn(
           "font-semibold",
-          status === 'success' && "text-green-600",
+          status === 'success' && "text-feedback-success",
           status === 'warning' && "text-amber-600",
-          status === 'danger' && "text-red-600"
+          status === 'danger' && "text-feedback-danger"
         )}>
           {current} unidades
         </span>
@@ -101,7 +101,7 @@ const StockLevelIndicator = ({ current, threshold, max }: { current: number; thr
         max={100} 
         className={cn(
           "h-2 rounded-full",
-          status === 'success' ? "bg-green-500" : 
+          status === 'success' ? "bg-feedback-success" :
           status === 'warning' ? "bg-amber-500" : "bg-feedback-danger"
         )} 
       />
@@ -112,7 +112,7 @@ const StockLevelIndicator = ({ current, threshold, max }: { current: number; thr
         </p>
       )}
       {current === 0 && (
-        <p className="text-xs text-red-600 flex items-center gap-1">
+        <p className="text-xs text-feedback-danger flex items-center gap-1">
           <AlertCircle className="w-4 h-4" />
           Agotado
         </p>
