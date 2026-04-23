@@ -14,6 +14,7 @@ import { motion } from 'framer-motion';
 import {
   AlertCircle,
   CheckCircle2,
+  Clock,
   FileEdit,
   Eye,
   XCircle,
@@ -59,6 +60,11 @@ const STATUS_CONFIG: Record<
     label: 'En revisión',
     icon: AlertCircle,
     chip: 'bg-amber-50 text-amber-700 border-amber-200',
+  },
+  scheduled: {
+    label: 'Programado',
+    icon: Clock,
+    chip: 'bg-blue-50 text-blue-700 border-blue-200',
   },
 };
 

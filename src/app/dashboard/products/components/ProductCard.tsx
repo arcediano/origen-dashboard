@@ -81,7 +81,7 @@ export function ProductCard({
           <p className="text-sm font-semibold text-origen-bosque line-clamp-2 leading-snug flex-1" title={product.name}>
             {product.name}
           </p>
-          <StatusBadge status={product.status} size="xs" />
+          <StatusBadge status={product.status as import('@arcediano/ux-library').StatusType} size="xs" />
         </div>
 
         {/* Barra de completitud para borradores */}

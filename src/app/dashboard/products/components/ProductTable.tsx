@@ -110,7 +110,7 @@ export function ProductTable({
     {
       key: 'estado',
       header: 'Estado',
-      accessor: (item) => <StatusBadge status={item.status} size="sm" />,
+      accessor: (item) => <StatusBadge status={item.status as import('@arcediano/ux-library').StatusType} size="sm" />,
       sortable: true,
       sortValue: (item) => item.status,
     },

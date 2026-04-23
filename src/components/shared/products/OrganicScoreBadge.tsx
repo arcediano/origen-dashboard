@@ -16,7 +16,6 @@
 
 import React from 'react';
 import { Leaf } from 'lucide-react';
-import { Tooltip } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 
 interface OrganicScoreBadgeProps {
@@ -38,21 +37,18 @@ export function OrganicScoreBadge({ score, showLabel = false, size = 'sm', class
   const pct = Math.round(score * 100);
 
   return (
-    <Tooltip
-      content={`Score orgánico: ${pct}% — ${label}. Basado en rating, completitud del perfil, calidad de imagen, stock, antigüedad y ventas.`}
+    <span
+      title={`Score orgánico: ${pct}% — ${label}. Basado en rating, completitud del perfil, calidad de imagen, stock, antigüedad y ventas.`}
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border font-semibold tabular-nums',
+        size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs',
+        color,
+        className,
+      )}
     >
-      <span
-        className={cn(
-          'inline-flex items-center gap-1 rounded-full border font-semibold tabular-nums',
-          size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs',
-          color,
-          className,
-        )}
-      >
-        <Leaf className={cn('shrink-0', size === 'sm' ? 'w-2.5 h-2.5' : 'w-3 h-3')} />
-        {showLabel && <span className="hidden sm:inline">{label}&nbsp;</span>}
-        {pct}%
-      </span>
-    </Tooltip>
+      <Leaf className={cn('shrink-0', size === 'sm' ? 'w-2.5 h-2.5' : 'w-3 h-3')} />
+      {showLabel && <span className="hidden sm:inline">{label}&nbsp;</span>}
+      {pct}%
+    </span>
   );
 }
