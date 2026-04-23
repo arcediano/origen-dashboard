@@ -216,6 +216,10 @@ export interface ProductStats {
   totalSales: number;
   totalViews: number;
   avgRating: number;
+  rating?: {
+    average: number;
+    total: number;
+  };
 }
 
 // ─── MAPAS DE CONVERSIÓN ─────────────────────────────────────────────────────

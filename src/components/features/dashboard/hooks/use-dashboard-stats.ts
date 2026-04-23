@@ -2,22 +2,25 @@
  * @file use-dashboard-stats.ts
  * @description Hook para obtener estadísticas del dashboard.
  * Sprint 16: conectado a datos reales via fetchOrderStats().
+ * Sprint 31: rating conectado a fetchProductStats() → getProducerStats() en products-service.
+ *            Agrega reseñas aprobadas por producerId directamente en la BD (Review.producerId).
  *
- * Campos con endpoint disponible:
+ * Campos conectados:
  *   - orders.today    → fetchOrderStats() → OrderStats.todayOrders
  *   - revenue.today   → fetchOrderStats() → OrderStats.todayRevenue
  *   - totalOrders     → OrderStats.total
  *   - pendingOrders   → OrderStats.pending
  *   - totalRevenue    → OrderStats.totalRevenue
+ *   - rating          → fetchProductStats() → ProductStats.rating.{average, total}
  *
  * Campos sin endpoint real aún (devuelven 0):
  *   - profileViews  → TODO: conectar a /api/v1/producers/me/profile-views cuando esté disponible
- *   - rating        → TODO: conectar a reviews-service cuando esté disponible
  */
 
 import { useState, useEffect } from 'react';
 import type { DashboardStats } from '../types';
 import { fetchOrderStats } from '@/lib/api/orders';
+import { fetchProductStats } from '@/lib/api/products';
 
 interface UseDashboardStatsResult {
   stats: DashboardStats | null;
@@ -45,19 +48,25 @@ export function useDashboardStats(): UseDashboardStatsResult {
     setError(null);
 
     try {
-      const result = await fetchOrderStats();
+      const [orderResult, productResult] = await Promise.all([
+        fetchOrderStats(),
+        fetchProductStats(),
+      ]);
 
-      if (result.error || !result.data) {
-        setError(result.error ?? 'Error al cargar estadísticas');
+      if (orderResult.error || !orderResult.data) {
+        setError(orderResult.error ?? 'Error al cargar estadísticas');
         return;
       }
 
-      const orderStats = result.data;
+      const orderStats = orderResult.data;
 
       // Exponer campos raw para testabilidad directa
       setTotalOrders(orderStats.total);
       setPendingOrders(orderStats.pending);
       setTotalRevenue(orderStats.totalRevenue);
+
+      const ratingAverage = productResult.data?.rating?.average ?? 0;
+      const ratingTotal   = productResult.data?.rating?.total   ?? 0;
 
       setStats({
         // TODO: conectar a /api/v1/producers/me/profile-views cuando esté disponible
@@ -68,8 +77,7 @@ export function useDashboardStats(): UseDashboardStatsResult {
         revenue: {
           today: orderStats.todayRevenue,
         },
-        // TODO: conectar a reviews-service cuando esté disponible el endpoint de ratings
-        rating: { average: 0, total: 0 },
+        rating: { average: ratingAverage, total: ratingTotal },
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar estadísticas';
