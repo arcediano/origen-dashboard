@@ -56,8 +56,8 @@ export function ProductStats({
         label="Agotados"
         value={outOfStock}
         icon={AlertCircle}
-        bg="from-red-400/8 to-transparent"
-        border="border-red-200/60"
+        bg="from-feedback-danger/5 to-transparent"
+        border="border-feedback-danger/10"
         iconColor="text-feedback-danger"
       />
     </div>

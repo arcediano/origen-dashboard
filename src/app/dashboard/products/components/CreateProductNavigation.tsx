@@ -126,20 +126,20 @@ export function CreateProductNavigation({
       {showStepErrors && hasErrors && (
         <div
           id="step-errors-panel"
-          className="rounded-2xl border border-red-200 bg-red-50 p-4"
+          className="rounded-2xl border border-feedback-danger/30 bg-feedback-danger-subtle p-4"
           role="alert"
           aria-live="polite"
         >
           <div className="flex items-start gap-2.5 mb-2">
-            <XCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-            <p className="text-sm font-semibold text-red-800">
+            <XCircle className="w-4 h-4 text-feedback-danger shrink-0 mt-0.5" />
+            <p className="text-sm font-semibold text-feedback-danger-text">
               Completa los campos obligatorios antes de continuar
             </p>
           </div>
           <ul className="space-y-1 pl-6.5 ml-0.5">
             {currentStepErrors.map((err, i) => (
-              <li key={i} className="flex items-center gap-2 text-xs text-red-700">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
+              <li key={i} className="flex items-center gap-2 text-xs text-feedback-danger-text">
+                <span className="w-1.5 h-1.5 rounded-full bg-feedback-danger shrink-0" />
                 {err}
               </li>
             ))}
@@ -211,11 +211,11 @@ export function CreateProductNavigation({
 
       {/* ── Mensajes de estado de publicación ────────────────────────────── */}
       {isLastStep && publishStatus === 'error' && (
-        <div className="p-3 bg-red-50 rounded-xl border border-red-200 flex items-start gap-2">
-          <XCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+        <div className="p-3 bg-feedback-danger-subtle rounded-xl border border-feedback-danger/30 flex items-start gap-2">
+          <XCircle className="w-4 h-4 text-feedback-danger shrink-0 mt-0.5" />
           <div>
-            <p className="text-xs font-medium text-red-800">Error al publicar</p>
-            <p className="text-[10px] text-red-600 mt-0.5">
+            <p className="text-xs font-medium text-feedback-danger-text">Error al publicar</p>
+            <p className="text-[10px] text-feedback-danger mt-0.5">
               {publishError ?? 'No se pudo publicar el producto. Revisa los datos e inténtalo de nuevo.'}
             </p>
           </div>
@@ -223,21 +223,21 @@ export function CreateProductNavigation({
       )}
 
       {isLastStep && publishStatus === 'success' && (
-        <div className="p-3 bg-green-50 rounded-xl border border-green-200 flex items-start gap-2">
-          <CheckCircle className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+        <div className="p-3 bg-origen-pastel/20 rounded-xl border border-origen-pradera/30 flex items-start gap-2">
+          <CheckCircle className="w-4 h-4 text-origen-hoja shrink-0 mt-0.5" />
           <div>
-            <p className="text-xs font-medium text-green-800">¡Publicado con éxito!</p>
-            <p className="text-[10px] text-green-600 mt-0.5">Tu producto ya está visible en el catálogo.</p>
+            <p className="text-xs font-medium text-origen-bosque">¡Publicado con éxito!</p>
+            <p className="text-[10px] text-origen-hoja mt-0.5">Tu producto ya está visible en el catálogo.</p>
           </div>
         </div>
       )}
 
       {isLastStep && hasCertifications && !certificationsApproved && allStepsCompleted && (
-        <div className="p-3 bg-blue-50 rounded-xl border border-blue-200 flex items-start gap-2">
-          <Shield className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+        <div className="p-3 bg-origen-crema/40 rounded-xl border border-origen-pradera/20 flex items-start gap-2">
+          <Shield className="w-4 h-4 text-origen-pradera shrink-0 mt-0.5" />
           <div>
-            <p className="text-xs font-medium text-blue-800">Certificaciones pendientes</p>
-            <p className="text-[10px] text-blue-600 mt-0.5">
+            <p className="text-xs font-medium text-origen-bosque">Certificaciones pendientes</p>
+            <p className="text-[10px] text-origen-hoja mt-0.5">
               Revisaremos tus documentos en 24-48 horas.
             </p>
           </div>

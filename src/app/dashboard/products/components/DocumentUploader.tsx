@@ -220,19 +220,19 @@ export function DocumentUploader({
                   </div>
                 )}
                 {doc.error && (
-                  <div className="flex items-center gap-1 text-red-600">
+                  <div className="flex items-center gap-1 text-feedback-danger">
                     <AlertCircle className="w-3 h-3" />
                     <span className="text-[10px]">{doc.error}</span>
                   </div>
                 )}
                 {showVerification && !doc.uploading && !doc.error && (
-                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <CheckCircle className="w-4 h-4 text-feedback-success" />
                 )}
                 <button
                   type="button"
                   disabled={doc.uploading}
                   onClick={() => handleRemove(doc.id)}
-                  className="p-1 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="p-1 rounded-md text-text-subtle hover:text-feedback-danger hover:bg-feedback-danger-subtle transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <X className="w-4 h-4" />
                 </button>

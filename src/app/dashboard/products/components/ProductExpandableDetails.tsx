@@ -86,9 +86,9 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         </div>
 
         {/* Ingresos */}
-        <div className="p-4 bg-gradient-to-br from-blue-50/50 to-transparent rounded-xl border border-blue-100">
+        <div className="p-4 bg-gradient-to-br from-origen-crema/40 to-transparent rounded-xl border border-origen-pradera/10">
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="w-5 h-5 text-blue-500" />
+            <DollarSign className="w-5 h-5 text-origen-pradera" />
             <span className="text-xs font-medium text-muted-foreground">Ingresos</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{product.revenue?.toFixed(2) || 0}€</p>
@@ -96,9 +96,9 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         </div>
 
         {/* Vistas */}
-        <div className="p-4 bg-gradient-to-br from-purple-50/50 to-transparent rounded-xl border border-purple-100">
+        <div className="p-4 bg-gradient-to-br from-origen-crema/20 to-transparent rounded-xl border border-border-subtle">
           <div className="flex items-center gap-2 mb-2">
-            <Eye className="w-5 h-5 text-purple-500" />
+            <Eye className="w-5 h-5 text-origen-bosque" />
             <span className="text-xs font-medium text-muted-foreground">Vistas</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{product.views || 0}</p>
@@ -106,9 +106,9 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         </div>
 
         {/* Conversión */}
-        <div className="p-4 bg-gradient-to-br from-green-50/50 to-transparent rounded-xl border border-green-100">
+        <div className="p-4 bg-gradient-to-br from-origen-hoja/5 to-transparent rounded-xl border border-origen-hoja/10">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-green-500" />
+            <TrendingUp className="w-5 h-5 text-origen-hoja" />
             <span className="text-xs font-medium text-muted-foreground">Conversión</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{conversionRate || 0}%</p>
@@ -125,17 +125,17 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
           </h5>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-xl border border-border/60 bg-white/70 p-4">
+          <div className="rounded-xl border border-border/60 bg-surface p-4">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Último pedido</p>
             <p className="mt-2 text-sm font-semibold text-origen-bosque">
               {product.lastOrderDate ? new Date(product.lastOrderDate).toLocaleDateString() : 'Sin pedidos todavía'}
             </p>
           </div>
-          <div className="rounded-xl border border-border/60 bg-white/70 p-4">
+          <div className="rounded-xl border border-border/60 bg-surface p-4">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Ingreso medio por venta</p>
             <p className="mt-2 text-sm font-semibold text-origen-bosque">{revenuePerSale ? `${revenuePerSale}€` : 'Sin datos suficientes'}</p>
           </div>
-          <div className="rounded-xl border border-border/60 bg-white/70 p-4">
+          <div className="rounded-xl border border-border/60 bg-surface p-4">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Serie histórica</p>
             <p className="mt-2 text-sm font-semibold text-origen-bosque">Pendiente de instrumentación</p>
             <p className="mt-1 text-xs text-muted-foreground">No se muestran tendencias simuladas.</p>
@@ -165,7 +165,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
             {discount && (
               <div className="flex justify-between items-center pb-2 border-b border-border/50">
                 <span className="text-sm text-muted-foreground">Dto. sobre PVP</span>
-                <span className="text-base font-semibold text-green-600">-{discount}%</span>
+                <span className="text-base font-semibold text-origen-hoja">-{discount}%</span>
               </div>
             )}
             {revenuePerSale && (
@@ -204,7 +204,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
                 <div className={cn(
                   'w-2 h-2 rounded-full',
                   product.stock === 0 ? 'bg-feedback-danger' :
-                  product.lowStockThreshold && product.stock <= product.lowStockThreshold ? 'bg-amber-500' : 'bg-green-500'
+                  product.lowStockThreshold && product.stock <= product.lowStockThreshold ? 'bg-amber-500' : 'bg-feedback-success'
                 )} />
                 <span className="text-base font-semibold text-origen-bosque">{product.stock} uds</span>
               </div>

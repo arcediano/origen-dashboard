@@ -240,10 +240,10 @@ export function ImageUploader({
                 )}
                 <button
                   onClick={() => handleRemove(image.id)}
-                  className="p-1.5 bg-surface-alt rounded-lg hover:bg-red-50 transition-colors"
+                  className="p-1.5 bg-surface-alt rounded-lg hover:bg-feedback-danger-subtle transition-colors"
                   title="Eliminar"
                 >
-                  <X className="w-4 h-4 text-red-500" />
+                  <X className="w-4 h-4 text-feedback-danger" />
                 </button>
               </div>
 

@@ -186,7 +186,7 @@ function NutricionalSection({ info }: { info: NonNullable<Product['nutritionalIn
             {info.allergens.map(a => {
               const Icon = allergenIcons[a] || AlertCircle;
               return (
-                <span key={a} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 border border-red-100 text-red-700 text-xs font-medium">
+                <span key={a} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-feedback-danger-subtle border border-feedback-danger/20 text-feedback-danger-text text-xs font-medium">
                   <Icon className="w-3 h-3" />{a}
                 </span>
               );
@@ -257,7 +257,7 @@ function PreciosSection({ product, formatCurrency, hasDiscount, discountPct }: {
         )}
         {hasDiscount && (
           <InfoRow label="Descuento" value={
-            <span className="text-green-600 font-semibold">−{discountPct}%</span>
+            <span className="text-origen-hoja font-semibold">−{discountPct}%</span>
           } />
         )}
       </div>
@@ -433,9 +433,9 @@ function StatusCard({
 
       {/* Borrador completo — listo para enviar */}
       {isDraft && isComplete && (
-        <div className="rounded-2xl border border-green-200 bg-green-50 p-3 flex items-start gap-2">
-          <CheckCircle className="w-3.5 h-3.5 text-green-600 shrink-0 mt-0.5" />
-          <p className="text-[11px] text-green-800 leading-relaxed">
+        <div className="rounded-2xl border border-origen-pradera/30 bg-origen-pastel/20 p-3 flex items-start gap-2">
+          <CheckCircle className="w-3.5 h-3.5 text-origen-hoja shrink-0 mt-0.5" />
+          <p className="text-[11px] text-origen-bosque leading-relaxed">
             Toda la información está completa. Puedes enviarlo a revisión.
           </p>
         </div>
@@ -443,9 +443,9 @@ function StatusCard({
 
       {/* Producto inactivo — puede corregir y re-enviar */}
       {isInactive && isComplete && (
-        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-3 flex items-start gap-2">
-          <Info className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
-          <p className="text-[11px] text-blue-800 leading-relaxed">
+        <div className="rounded-2xl border border-origen-pradera/20 bg-origen-crema/40 p-3 flex items-start gap-2">
+          <Info className="w-3.5 h-3.5 text-origen-pradera shrink-0 mt-0.5" />
+          <p className="text-[11px] text-origen-bosque leading-relaxed">
             El producto está inactivo. Si realizaste correcciones, puedes volver a enviarlo a revisión.
           </p>
         </div>
@@ -688,7 +688,7 @@ export default function ProductoDetallePage() {
                 leftIcon={<Trash2 className="w-4 h-4 text-feedback-danger" />}
                 onClick={() => setShowDeleteDialog(true)}
                 disabled={isDeleting}
-                className="text-feedback-danger hover:bg-red-50"
+                className="text-feedback-danger hover:bg-feedback-danger-subtle"
               >
                 Eliminar
               </Button>
@@ -766,8 +766,8 @@ export default function ProductoDetallePage() {
                             </p>
                           </div>
                           {hasDiscount && (
-                            <div className="bg-green-50 border border-green-100 rounded-xl px-2 py-0.5 shrink-0">
-                              <p className="text-xs font-bold text-green-700">−{discountPct}%</p>
+                            <div className="bg-origen-pastel/30 border border-origen-pradera/20 rounded-xl px-2 py-0.5 shrink-0">
+                              <p className="text-xs font-bold text-origen-hoja">−{discountPct}%</p>
                             </div>
                           )}
                         </div>
@@ -828,11 +828,11 @@ export default function ProductoDetallePage() {
                             <div className={cn(
                               'w-8 h-8 rounded-xl flex items-center justify-center shrink-0',
                               cert.verified
-                                ? 'bg-green-50 border border-green-100'
+                                ? 'bg-origen-pastel/50 border border-origen-pradera/15'
                                 : 'bg-origen-pastel/50 border border-origen-pradera/15'
                             )}>
                               {cert.verified
-                                ? <CheckCircle className="w-4 h-4 text-green-600" />
+                                ? <CheckCircle className="w-4 h-4 text-origen-hoja" />
                                 : <Award className="w-4 h-4 text-origen-pradera" />}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -895,7 +895,7 @@ export default function ProductoDetallePage() {
               leftIcon: <Trash2 className="w-4 h-4" />,
               onClick: () => setShowDeleteDialog(true),
               disabled: isDeleting,
-              className: 'text-feedback-danger hover:text-red-700',
+              className: 'text-feedback-danger hover:text-feedback-danger',
             },
           ]}
         />
@@ -924,8 +924,8 @@ export default function ProductoDetallePage() {
           >
             {/* Zona de icono + título */}
             <div className="flex flex-col items-center text-center px-6 pt-8 pb-5">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 border border-red-100 shadow-sm">
-                <Trash2 className="w-7 h-7 text-red-600" />
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-feedback-danger-subtle border border-feedback-danger/20 shadow-sm">
+                <Trash2 className="w-7 h-7 text-feedback-danger" />
               </div>
               <DialogTitle className="text-xl">¿Eliminar producto?</DialogTitle>
               <DialogDescription className="mt-1.5 text-sm">
