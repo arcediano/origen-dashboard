@@ -2,12 +2,7 @@
  * @file use-top-products.ts
  * @description Hook para obtener los productos más vendidos del productor.
  * Sprint 16: conectado a datos reales via fetchProducts().
- *
- * TODO(products-service): Se pasa sortBy='sales-desc' que se mapea a sortBy=sales
- * en el backend (ver mapSortBy en lib/api/products.ts). Si products-service no
- * implementa aún el ordenado por ventas, los productos se devuelven en el orden
- * por defecto del endpoint (newest). Pendiente: confirmar soporte de sort=sales
- * en products-service antes de dar este TODO por cerrado.
+ * Sprint 31: confirmado soporte de sort=sales en products-service (campo sales Int en schema).
  */
 
 import { useState, useEffect } from 'react';
@@ -45,9 +40,6 @@ export function useTopProducts(limit?: number): UseTopProductsResult {
 
     try {
       const result = await fetchProducts({
-        // TODO(products-service): sortBy=sales-desc requiere soporte de ordenación por
-        // ventas en products-service. Sin ese soporte, los productos se devuelven en
-        // orden por defecto (newest). Ver mapSortBy en lib/api/products.ts.
         sortBy: 'sales-desc',
         limit: limit ?? 5,
       });
