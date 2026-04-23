@@ -228,7 +228,7 @@ export function StepBasic({
             tooltip="Aparece en búsquedas y vista previa. Incluye los beneficios principales. Máximo 160 caracteres."
             value={formData?.shortDescription || ''}
             onChange={(e) => handleChange('shortDescription', e.target.value)}
-            className="min-h-[100px]"
+            className="min-h-[80px]"
             placeholder="Describe tu producto en 2-3 líneas destacando sus características principales..."
             maxLength={160}
             showCharCount
@@ -242,7 +242,7 @@ export function StepBasic({
               tooltip="Mejora el SEO y la conversión. Incluye características, proceso de elaboración, historia, maridajes y usos recomendados. Mínimo recomendado: 300 caracteres."
               value={formData?.fullDescription || ''}
               onChange={(e) => handleChange('fullDescription', e.target.value)}
-              className="min-h-[180px]"
+              className="min-h-[100px]"
               placeholder="Describe tu producto con detalle: características, proceso de elaboración, maridajes, historia del productor..."
             />
             {fullDescLength < 300 && fullDescLength > 0 && (

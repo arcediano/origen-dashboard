@@ -216,7 +216,7 @@ export function StepInventory({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 6 de 8
+              Paso 6 de 7
             </Badge>
           </div>
         </div>
@@ -352,7 +352,7 @@ export function StepInventory({
                     value={formData?.weightUnit || 'kg'}
                     onValueChange={(v) => handleChange('weightUnit', v)}
                   >
-                    <SelectTrigger className="h-12 w-20 shrink-0 rounded-xl">
+                    <SelectTrigger className="h-12 w-28 shrink-0 rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -388,7 +388,7 @@ export function StepInventory({
           {/* Dimensiones */}
           <div className="space-y-1.5">
             <p className="text-sm font-semibold text-origen-bosque">Dimensiones del paquete <span className="text-text-subtle font-normal">(cm)</span></p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <Input
                 label="Largo"
                 type="number"

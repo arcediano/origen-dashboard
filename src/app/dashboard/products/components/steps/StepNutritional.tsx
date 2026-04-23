@@ -201,7 +201,7 @@ export function StepNutritional({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 4 de 8
+              Paso 4 de 7
             </Badge>
           </div>
         </div>
@@ -321,7 +321,7 @@ export function StepNutritional({
               {/* Macros principales */}
               <div>
                 <h3 className="text-sm font-medium text-origen-bosque mb-3">Macronutrientes (g)</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">Proteínas</p>
                     <Input
@@ -361,7 +361,7 @@ export function StepNutritional({
               {/* Desglose de grasas */}
               <div>
                 <h3 className="text-sm font-medium text-origen-bosque mb-3">Desglose de grasas</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">Saturadas (g)</p>
                     <Input
@@ -401,7 +401,7 @@ export function StepNutritional({
               {/* Otros nutrientes */}
               <div>
                 <h3 className="text-sm font-medium text-origen-bosque mb-3">Otros nutrientes</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">Fibra (g)</p>
                     <Input

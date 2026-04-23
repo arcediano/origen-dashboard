@@ -266,7 +266,7 @@ export function StepProduction({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 5 de 8
+              Paso 5 de 7
             </Badge>
           </div>
         </div>
@@ -568,7 +568,7 @@ export function StepProduction({
 
                 {/* Grid de vídeos existentes */}
                 {mediaItems.filter(m => m.type === 'video').length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-4">
                     <AnimatePresence>
                       {mediaItems.filter(m => m.type === 'video').map((video) => (
                         <motion.div

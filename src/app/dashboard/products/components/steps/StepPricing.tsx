@@ -13,28 +13,27 @@ import {
   CurrencyInput,
   PercentageInput,
 } from '@arcediano/ux-library';
-import { 
-  DollarSign, 
-  Tag, 
-  Plus, 
-  Gift, 
-  CheckCircle, 
+import {
+  DollarSign,
+  Tag,
+  Plus,
+  Gift,
+  CheckCircle,
   Sparkles,
   AlertCircle,
   Package,
-  X,
   Edit2,
   Save,
-  Eye,
   Zap,
   Trash2,
   Hash,
   Percent,
-  GripVertical
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import { z } from 'zod';
 import type { PriceTier } from '@/types/product';
 
@@ -52,7 +51,7 @@ interface StepPricingProps {
 // ============================================================================
 
 const TierSchema = z.object({
-  minQuantity: z.number().min(1, 'Mínimo 1 unidad'),
+  minQuantity: z.number().min(1, 'La cantidad mínima debe ser al menos 1 unidad'),
   maxQuantity: z.number().optional(),
   type: z.enum(['percentage', 'fixed', 'bundle']),
   value: z.number().optional(),
@@ -63,27 +62,58 @@ const TierSchema = z.object({
   if (data.type === 'fixed') return data.value && data.value > 0;
   if (data.type === 'bundle') return data.buyQuantity && data.payQuantity && data.buyQuantity > data.payQuantity;
   return true;
-}, 'Valores de oferta no válidos');
+}, 'Valores no válidos');
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+function getTierValidationError(tier: Partial<PriceTier>): string {
+  if (tier.type === 'percentage') {
+    if (!tier.value || tier.value <= 0) return 'Introduce un porcentaje de descuento mayor que 0%';
+    if (tier.value > 100) return 'El descuento no puede superar el 100%';
+  }
+  if (tier.type === 'fixed') {
+    if (!tier.value || tier.value <= 0) return 'El precio de oferta debe ser mayor que 0€';
+  }
+  if (tier.type === 'bundle') {
+    if (!tier.buyQuantity || !tier.payQuantity) return 'Indica cuántas unidades lleva el cliente y cuántas paga';
+    if (tier.buyQuantity <= tier.payQuantity) return 'Las unidades que se llevan deben ser más que las que pagan (ej: lleva 3, paga 2)';
+  }
+  return 'Revisa los valores de la oferta';
+}
+
+function getTierTitle(tier: Partial<PriceTier>): string {
+  switch (tier.type) {
+    case 'percentage':
+      return `${tier.value ?? 0}% de descuento`;
+    case 'fixed':
+      return `Precio especial ${(tier.value ?? 0).toFixed(2)} €`;
+    case 'bundle':
+      return `${tier.buyQuantity ?? 0}×${tier.payQuantity ?? 0} — lleva ${tier.buyQuantity ?? 0}, paga ${tier.payQuantity ?? 0}`;
+    default:
+      return 'Oferta';
+  }
+}
 
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
-export function StepPricing({ 
+export function StepPricing({
   formData = { basePrice: undefined, comparePrice: undefined, priceTiers: [] },
-  errors = {}, 
-  touched = {}, 
+  errors = {},
+  touched = {},
   onInputChange,
   onPriceTiersChange,
-  completed 
+  completed
 }: StepPricingProps) {
-  
+
   const [showTierForm, setShowTierForm] = useState(false);
   const [editingTierId, setEditingTierId] = useState<string | null>(null);
   const [tiers, setTiers] = useState<PriceTier[]>(formData.priceTiers || []);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
-  
+
   // Estado para nueva oferta
   const [newTier, setNewTier] = useState<Partial<PriceTier>>({
     type: 'percentage',
@@ -95,25 +125,24 @@ export function StepPricing({
 
   const basePrice = formData.basePrice || 0;
   const hasBasePrice = basePrice > 0;
+  const isStepComplete = hasBasePrice;
 
-  // Validar si el paso está completo
-  const isStepComplete = hasBasePrice && basePrice > 0;
+  // ============================================================================
+  // SYNC — se llama directamente en los handlers, sin useEffect
+  // ============================================================================
 
-  // Actualizar tiers en formData cuando cambien
-  useEffect(() => {
-    onInputChange('priceTiers', tiers);
-    if (onPriceTiersChange) {
-      onPriceTiersChange(tiers);
-    }
-  }, [tiers, onInputChange, onPriceTiersChange]);
+  const syncTiers = (newTiers: PriceTier[]) => {
+    setTiers(newTiers);
+    onInputChange('priceTiers', newTiers);
+    onPriceTiersChange?.(newTiers);
+  };
 
   // ============================================================================
   // FUNCIONES DE CÁLCULO
   // ============================================================================
 
-  const calculateOfferPrice = (tier: PriceTier): number => {
+  const calculateOfferPrice = (tier: Partial<PriceTier>): number => {
     if (!basePrice) return 0;
-    
     switch (tier.type) {
       case 'percentage':
         return basePrice * (1 - (tier.value || 0) / 100);
@@ -129,29 +158,14 @@ export function StepPricing({
     }
   };
 
-  const calculateSavings = (tier: PriceTier): number => {
+  const calculateSavings = (tier: Partial<PriceTier>): number => {
     if (!basePrice) return 0;
-    const offerPrice = calculateOfferPrice(tier);
-    return Math.max(0, basePrice - offerPrice);
+    return Math.max(0, basePrice - calculateOfferPrice(tier));
   };
 
-  const calculateDiscountPercent = (tier: PriceTier): number => {
+  const calculateDiscountPercent = (tier: Partial<PriceTier>): number => {
     if (!basePrice) return 0;
-    const savings = calculateSavings(tier);
-    return (savings / basePrice) * 100;
-  };
-
-  const getTierLabel = (tier: Partial<PriceTier>): string => {
-    switch (tier.type) {
-      case 'percentage':
-        return `${tier.value}% dto`;
-      case 'fixed':
-        return `${tier.value}€`;
-      case 'bundle':
-        return `${tier.buyQuantity}x${tier.payQuantity}`;
-      default:
-        return '';
-    }
+    return (calculateSavings(tier) / basePrice) * 100;
   };
 
   // ============================================================================
@@ -160,10 +174,8 @@ export function StepPricing({
 
   const handleAddTier = () => {
     setValidationError(null);
-    
     try {
       TierSchema.parse(newTier);
-      
       const tier: PriceTier = {
         id: `tier-${Date.now()}`,
         minQuantity: newTier.minQuantity || 2,
@@ -172,45 +184,34 @@ export function StepPricing({
         value: newTier.value,
         buyQuantity: newTier.buyQuantity,
         payQuantity: newTier.payQuantity,
-        label: getTierLabel(newTier),
+        label: getTierTitle(newTier),
       };
-      
-      tier.savings = calculateSavings(tier);
-      
-      setTiers([...tiers, tier]);
+      syncTiers([...tiers, tier]);
       resetForm();
       setShowTierForm(false);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setValidationError(error.errors[0]?.message || 'Error de validación');
+        setValidationError(getTierValidationError(newTier));
       }
     }
   };
 
   const handleUpdateTier = () => {
     if (!editingTierId) return;
-    
     try {
       TierSchema.parse(newTier);
-      
-      const updatedTiers = tiers.map(tier => 
-        tier.id === editingTierId 
-          ? { 
-              ...tier, 
-              ...newTier,
-              label: getTierLabel(newTier),
-              savings: calculateSavings({ ...tier, ...newTier } as PriceTier)
-            }
+      const updatedTiers = tiers.map(tier =>
+        tier.id === editingTierId
+          ? { ...tier, ...newTier, label: getTierTitle(newTier) }
           : tier
       );
-      
-      setTiers(updatedTiers);
+      syncTiers(updatedTiers);
       resetForm();
       setShowTierForm(false);
       setEditingTierId(null);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setValidationError(error.errors[0]?.message || 'Error de validación');
+        setValidationError(getTierValidationError(newTier));
       }
     }
   };
@@ -229,11 +230,23 @@ export function StepPricing({
   };
 
   const handleDeleteTier = (id: string) => {
-    setTiers(tiers.filter(t => t.id !== id));
+    syncTiers(tiers.filter(t => t.id !== id));
   };
 
-  const handleReorderTiers = (newOrder: PriceTier[]) => {
-    setTiers(newOrder);
+  const handleMoveTierUp = (id: string) => {
+    const idx = tiers.findIndex(t => t.id === id);
+    if (idx <= 0) return;
+    const next = [...tiers];
+    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+    syncTiers(next);
+  };
+
+  const handleMoveTierDown = (id: string) => {
+    const idx = tiers.findIndex(t => t.id === id);
+    if (idx >= tiers.length - 1) return;
+    const next = [...tiers];
+    [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+    syncTiers(next);
   };
 
   const resetForm = () => {
@@ -272,7 +285,7 @@ export function StepPricing({
               <p className="text-sm text-muted-foreground truncate">Configura el precio y promociones por cantidad</p>
             </div>
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-2">
             {isStepComplete ? (
               <Badge variant="success" size="sm" className="flex items-center gap-1">
@@ -287,7 +300,7 @@ export function StepPricing({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 3 de 8
+              Paso 3 de 7
             </Badge>
           </div>
         </div>
@@ -299,12 +312,12 @@ export function StepPricing({
             <div className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-origen-pradera" />
               <span className="text-sm font-medium text-foreground">
-                Precio base
+                Precio de venta
                 <span className="text-red-500 ml-1">*</span>
               </span>
-              <Tooltip 
+              <Tooltip
                 content="Precio de venta al público"
-                detailed="Todos los descuentos se calculan sobre este valor. Debe ser mayor que 0."
+                detailed="Es el precio que verá el cliente. Todos los descuentos por cantidad se calculan sobre este valor."
                 size="sm"
               />
             </div>
@@ -321,16 +334,17 @@ export function StepPricing({
             />
           </div>
 
-          {/* Precio de referencia */}
+          {/* Precio tachado */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Tag className="h-5 w-5 text-origen-pradera" />
               <span className="text-sm font-medium text-foreground">
-                Precio de referencia
+                Precio tachado
+                <span className="text-xs font-normal text-muted-foreground ml-1">(opcional)</span>
               </span>
-              <Tooltip 
-                content="Precio original para destacar el descuento"
-                detailed="Debe ser mayor que el precio base para mostrar el ahorro. Ejemplo: PVP recomendado."
+              <Tooltip
+                content="PVP sugerido o precio anterior"
+                detailed="Si es mayor que el precio de venta, se mostrará tachado junto al precio actual para destacar el ahorro. Ejemplo: precio habitual en tienda."
                 size="sm"
               />
             </div>
@@ -345,19 +359,19 @@ export function StepPricing({
           </div>
         </div>
 
-        {/* Descuento calculado */}
+        {/* Descuento calculado vs precio tachado */}
         {formData.comparePrice && formData.comparePrice > basePrice && (
           <div className="mb-6 p-4 bg-green-50 rounded-xl border border-green-200">
             <div className="flex items-center gap-2">
               <Percent className="w-5 h-5 text-green-600" />
               <span className="text-sm font-medium text-green-700">
-                {Math.round(((formData.comparePrice - basePrice) / formData.comparePrice) * 100)}% de descuento respecto al precio de referencia
+                El cliente ahorra un {Math.round(((formData.comparePrice - basePrice) / formData.comparePrice) * 100)}% respecto al precio tachado
               </span>
             </div>
           </div>
         )}
 
-        {/* Sección de ofertas */}
+        {/* Sección de ofertas por cantidad */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -388,11 +402,11 @@ export function StepPricing({
             </button>
           </div>
 
-          {/* Mensaje si no hay precio base */}
+          {/* Aviso si no hay precio base */}
           {!hasBasePrice && (
             <Alert variant="warning" className="mb-4">
               <AlertCircle className="w-4 h-4 mr-2" />
-              Necesitas configurar un precio base antes de crear ofertas
+              Configura primero el precio de venta para poder crear ofertas
             </Alert>
           )}
 
@@ -405,23 +419,23 @@ export function StepPricing({
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
-                <div className="p-5 bg-origen-crema/30 rounded-xl border-2 border-origen-pradera/20 mb-4">
-                  <h4 className="text-sm font-medium text-origen-bosque mb-4">
+                <div className="p-4 sm:p-5 bg-origen-crema/30 rounded-xl border-2 border-origen-pradera/20 mb-4 space-y-4">
+                  <h4 className="text-sm font-medium text-origen-bosque">
                     {editingTierId ? 'Editar oferta' : 'Nueva oferta por cantidad'}
                   </h4>
 
                   {/* Selector de tipo */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+                  <div className="grid grid-cols-3 gap-2">
                     {[
-                      { id: 'percentage', icon: Percent, label: 'Porcentaje', desc: '% de descuento' },
-                      { id: 'fixed', icon: DollarSign, label: 'Precio fijo', desc: 'Precio especial' },
-                      { id: 'bundle', icon: Gift, label: 'Pack', desc: 'Lleva X paga Y' }
+                      { id: 'percentage', icon: Percent, label: 'Porcentaje', desc: 'Descuento en % sobre el precio' },
+                      { id: 'fixed', icon: DollarSign, label: 'Precio fijo', desc: 'Precio especial reducido' },
+                      { id: 'bundle', icon: Gift, label: 'Pack', desc: 'Lleva más, paga menos (3×2…)' }
                     ].map((type) => (
                       <button
                         key={type.id}
                         onClick={() => setNewTier({ ...newTier, type: type.id as any })}
                         className={cn(
-                          "flex flex-col items-center p-3 rounded-lg border-2 transition-all",
+                          "flex flex-col items-center p-2 sm:p-3 rounded-lg border-2 transition-all",
                           newTier.type === type.id
                             ? "border-origen-pradera bg-origen-pradera/5"
                             : "border-border hover:border-border bg-surface-alt"
@@ -431,182 +445,194 @@ export function StepPricing({
                           "w-5 h-5 mb-1",
                           newTier.type === type.id ? "text-origen-pradera" : "text-text-subtle"
                         )} />
-                        <span className="text-xs font-medium">{type.label}</span>
-                        <span className="text-[10px] text-text-subtle hidden sm:block">{type.desc}</span>
+                        <span className="text-xs font-medium text-center leading-tight">{type.label}</span>
+                        <span className="text-[10px] text-text-subtle hidden sm:block text-center mt-0.5 leading-tight">{type.desc}</span>
                       </button>
                     ))}
                   </div>
 
-                  {/* Campos según tipo */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                  {/* Campos de cantidad + campo específico del tipo */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Cantidad mínima */}
                     <div>
                       <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                         <Hash className="w-3 h-3 text-origen-pradera" />
-                        Mínimo
+                        Cantidad mínima
                       </p>
                       <Input
                         type="number"
                         value={newTier.minQuantity}
                         onChange={(e) => setNewTier({ ...newTier, minQuantity: parseInt(e.target.value) || 1 })}
                         min={1}
-                        className="h-10"
+                        className="h-11"
+                        placeholder="2"
                       />
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Unidades para activar la oferta</p>
                     </div>
 
+                    {/* Cantidad máxima */}
                     <div>
                       <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                         <Hash className="w-3 h-3 text-origen-pradera" />
-                        Máximo
+                        Cantidad máxima
                       </p>
                       <Input
                         type="number"
                         value={newTier.maxQuantity || ''}
                         onChange={(e) => setNewTier({ ...newTier, maxQuantity: parseInt(e.target.value) || undefined })}
                         min={1}
-                        className="h-10"
+                        className="h-11"
                         placeholder="Sin límite"
                       />
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Opcional — deja vacío si no hay tope</p>
                     </div>
+                  </div>
 
-                    {newTier.type === 'percentage' && (
-                      <div className="lg:col-span-2">
-                        <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                          <Percent className="w-3 h-3 text-origen-pradera" />
-                          Descuento
-                        </p>
-                        <PercentageInput
-                          value={newTier.value || 0}
-                          onChange={(v) => setNewTier({ ...newTier, value: v })}
-                          min={0.1}
-                          max={100}
-                          className="h-10"
-                        />
-                      </div>
-                    )}
+                  {/* Campo específico del tipo */}
+                  {newTier.type === 'percentage' && (
+                    <div>
+                      <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
+                        <Percent className="w-3 h-3 text-origen-pradera" />
+                        Porcentaje de descuento
+                      </p>
+                      <PercentageInput
+                        value={newTier.value || 0}
+                        onChange={(v) => setNewTier({ ...newTier, value: v })}
+                        min={0.1}
+                        max={99}
+                        className="h-11"
+                      />
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        El precio baja este % cuando el cliente compra la cantidad mínima
+                      </p>
+                    </div>
+                  )}
 
-                    {newTier.type === 'fixed' && (
-                      <div className="lg:col-span-2">
-                        <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                          <DollarSign className="w-3 h-3 text-origen-pradera" />
-                          Precio oferta
-                        </p>
-                        <CurrencyInput
-                          value={newTier.value || 0}
-                          onChange={(v) => setNewTier({ ...newTier, value: v })}
-                          min={0.01}
-                          inputSize="md"
-                          className="h-10"
-                        />
-                      </div>
-                    )}
+                  {newTier.type === 'fixed' && (
+                    <div>
+                      <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
+                        <DollarSign className="w-3 h-3 text-origen-pradera" />
+                        Precio de oferta (€ por unidad)
+                      </p>
+                      <CurrencyInput
+                        value={newTier.value || 0}
+                        onChange={(v) => setNewTier({ ...newTier, value: v })}
+                        min={0.01}
+                        inputSize="md"
+                        className="h-11"
+                      />
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        Precio especial que pagará el cliente por unidad al comprar la cantidad mínima
+                      </p>
+                    </div>
+                  )}
 
-                    {newTier.type === 'bundle' && (
-                      <>
+                  {newTier.type === 'bundle' && (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
                         <div>
                           <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                             <Package className="w-3 h-3 text-origen-pradera" />
-                            Lleva
+                            El cliente lleva (uds)
                           </p>
                           <Input
                             type="number"
                             value={newTier.buyQuantity}
                             onChange={(e) => setNewTier({ ...newTier, buyQuantity: parseInt(e.target.value) || 2 })}
                             min={2}
-                            className="h-10"
+                            className="h-11"
                           />
                         </div>
                         <div>
                           <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
                             <Gift className="w-3 h-3 text-origen-pradera" />
-                            Paga
+                            El cliente paga solo (uds)
                           </p>
                           <Input
                             type="number"
                             value={newTier.payQuantity}
                             onChange={(e) => setNewTier({ ...newTier, payQuantity: parseInt(e.target.value) || 1 })}
                             min={1}
-                            className="h-10"
+                            className="h-11"
                           />
                         </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Vista previa en tiempo real */}
-                  {basePrice > 0 && newTier.type && (
-                    <div className="mt-4 p-4 bg-surface-alt rounded-lg border border-origen-pradera/20">
-                      <button
-                        onClick={() => setShowPreview(!showPreview)}
-                        className="flex items-center gap-2 text-xs font-medium text-origen-bosque mb-2"
-                      >
-                        <Eye className="w-4 h-4 text-origen-pradera" />
-                        {showPreview ? 'Ocultar vista previa' : 'Ver vista previa'}
-                      </button>
-                      
-                      <AnimatePresence>
-                        {showPreview && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="space-y-2"
-                          >
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted-foreground">Precio base:</span>
-                              <span className="font-medium">{basePrice.toFixed(2)} €</span>
-                            </div>
-                            
-                            {newTier.type === 'percentage' && newTier.value && (
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">Precio oferta:</span>
-                                <span className="font-bold text-green-600">
-                                  {(basePrice * (1 - newTier.value / 100)).toFixed(2)} €
-                                </span>
-                              </div>
-                            )}
-                            
-                            {newTier.type === 'fixed' && newTier.value && (
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">Precio oferta:</span>
-                                <span className="font-bold text-green-600">
-                                  {newTier.value.toFixed(2)} €
-                                </span>
-                              </div>
-                            )}
-                            
-                            {newTier.type === 'bundle' && newTier.buyQuantity && newTier.payQuantity && (
-                              <>
-                                <div className="flex items-center justify-between text-sm">
-                                  <span className="text-muted-foreground">Precio por unidad:</span>
-                                  <span className="font-bold text-green-600">
-                                    {((basePrice * newTier.payQuantity) / newTier.buyQuantity).toFixed(2)} €
-                                  </span>
-                                </div>
-                                <div className="p-2 bg-amber-50 rounded-lg text-xs text-amber-700">
-                                  Llevas {newTier.buyQuantity}, pagas {newTier.payQuantity} 
-                                  ({newTier.buyQuantity - newTier.payQuantity} gratis)
-                                </div>
-                              </>
-                            )}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                      </div>
+                      {(newTier.buyQuantity || 0) > (newTier.payQuantity || 0) && (
+                        <div className="p-2 bg-amber-50 rounded-lg text-xs text-amber-700">
+                          El cliente lleva <strong>{newTier.buyQuantity}</strong> unidades pero solo paga <strong>{newTier.payQuantity}</strong> — <strong>{(newTier.buyQuantity || 0) - (newTier.payQuantity || 0)}</strong> gratis
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {/* Mensaje de error */}
+                  {/* Vista previa en tiempo real — siempre visible */}
+                  {basePrice > 0 && newTier.type && (
+                    <div className="p-3 sm:p-4 bg-surface-alt rounded-lg border border-origen-pradera/20 space-y-2">
+                      <p className="text-xs font-medium text-origen-bosque">Vista previa del precio</p>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Precio normal:</span>
+                        <span className="font-medium">{basePrice.toFixed(2)} €</span>
+                      </div>
+
+                      {newTier.type === 'percentage' && (newTier.value || 0) > 0 && (
+                        <>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Precio con oferta:</span>
+                            <span className="font-bold text-green-600">
+                              {(basePrice * (1 - (newTier.value || 0) / 100)).toFixed(2)} €
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Ahorro por unidad:</span>
+                            <span className="text-green-600 font-medium">{(basePrice * (newTier.value || 0) / 100).toFixed(2)} €</span>
+                          </div>
+                        </>
+                      )}
+
+                      {newTier.type === 'fixed' && (newTier.value || 0) > 0 && (
+                        <>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Precio con oferta:</span>
+                            <span className="font-bold text-green-600">{(newTier.value || 0).toFixed(2)} €</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Ahorro por unidad:</span>
+                            <span className="text-green-600 font-medium">{Math.max(0, basePrice - (newTier.value || 0)).toFixed(2)} €</span>
+                          </div>
+                        </>
+                      )}
+
+                      {newTier.type === 'bundle' && (newTier.buyQuantity || 0) > (newTier.payQuantity || 0) && (
+                        <>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Precio efectivo/ud:</span>
+                            <span className="font-bold text-green-600">
+                              {((basePrice * (newTier.payQuantity || 1)) / (newTier.buyQuantity || 1)).toFixed(2)} €
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Total pack ({newTier.buyQuantity} uds):</span>
+                            <span className="font-medium">{(basePrice * (newTier.payQuantity || 1)).toFixed(2)} € (en lugar de {(basePrice * (newTier.buyQuantity || 1)).toFixed(2)} €)</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Error de validación */}
                   {validationError && (
-                    <p className="text-xs text-red-600 mt-2 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
+                    <p className="text-xs text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3 shrink-0" />
                       {validationError}
                     </p>
                   )}
 
                   {/* Botones */}
-                  <div className="flex justify-end gap-2 mt-4">
+                  <div className="flex gap-2 pt-1">
                     <Button
                       size="sm"
                       variant="secondary"
+                      className="flex-1 sm:flex-none"
                       onClick={() => {
                         resetForm();
                         setShowTierForm(false);
@@ -617,6 +643,7 @@ export function StepPricing({
                     </Button>
                     <Button
                       size="sm"
+                      className="flex-1 sm:flex-none"
                       onClick={editingTierId ? handleUpdateTier : handleAddTier}
                       leftIcon={<Save className="w-4 h-4" />}
                     >
@@ -628,114 +655,123 @@ export function StepPricing({
             )}
           </AnimatePresence>
 
-          {/* Lista de ofertas */}
+          {/* Lista de ofertas — con botones ↑/↓ en lugar de drag */}
           {tiers.length > 0 && (
-            <Reorder.Group
-              axis="y"
-              values={tiers}
-              onReorder={handleReorderTiers}
-              className="space-y-3"
-            >
+            <div className="space-y-3">
               <AnimatePresence>
-                {tiers.map((tier) => {
+                {tiers.map((tier, index) => {
                   const offerPrice = calculateOfferPrice(tier);
                   const savings = calculateSavings(tier);
                   const discount = calculateDiscountPercent(tier);
-                  
+
                   return (
-                    <Reorder.Item
+                    <motion.div
                       key={tier.id}
-                      value={tier}
-                      className="relative"
+                      layout
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      className="p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 hover:shadow-origen transition-all"
                     >
-                      <motion.div
-                        layout
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        className="p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 hover:shadow-origen transition-all group"
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
-                            {tier.type === 'percentage' && <Percent className="w-5 h-5 text-origen-pradera" />}
-                            {tier.type === 'fixed' && <DollarSign className="w-5 h-5 text-origen-hoja" />}
-                            {tier.type === 'bundle' && <Gift className="w-5 h-5 text-amber-500" />}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <h4 className="text-sm font-semibold text-origen-bosque">
-                                    {tier.label}
-                                  </h4>
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-50 text-green-700 border border-green-200">
-                                    <Zap className="w-2.5 h-2.5" />
-                                    -{discount.toFixed(0)}%
-                                  </span>
-                                </div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Desde {tier.minQuantity} {tier.minQuantity === 1 ? 'unidad' : 'unidades'}
-                                  {tier.maxQuantity && ` · hasta ${tier.maxQuantity}`}
-                                </p>
-                              </div>
-                              
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => handleEditTier(tier)}
-                                  className="p-1.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
-                                >
-                                  <Edit2 className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteTier(tier.id)}
-                                  className="p-1.5 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </div>
-
-                            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                              <div className="p-2 bg-surface rounded-lg">
-                                <p className="text-[10px] text-muted-foreground">Precio normal</p>
-                                <p className="text-sm font-medium">{basePrice.toFixed(2)} €</p>
-                              </div>
-                              <div className="p-2 bg-green-50 rounded-lg border border-green-200">
-                                <p className="text-[10px] text-muted-foreground">Oferta</p>
-                                <p className="text-sm font-bold text-green-700">{offerPrice.toFixed(2)} €</p>
-                              </div>
-                              <div className="p-2 bg-amber-50 rounded-lg col-span-2 sm:col-span-1">
-                                <p className="text-[10px] text-muted-foreground">Ahorro</p>
-                                <p className="text-sm font-bold text-amber-700">{savings.toFixed(2)} €</p>
-                              </div>
-                            </div>
-
-                            {tier.type === 'bundle' && (
-                              <div className="mt-2 p-2 bg-amber-50 rounded-lg text-xs text-amber-700">
-                                {tier.buyQuantity! - tier.payQuantity!} unidad{((tier.buyQuantity! - tier.payQuantity!) !== 1) ? 'es' : ''} gratis
-                              </div>
-                            )}
-                          </div>
+                      <div className="flex items-start gap-3">
+                        {/* Icono del tipo */}
+                        <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
+                          {tier.type === 'percentage' && <Percent className="w-5 h-5 text-origen-pradera" />}
+                          {tier.type === 'fixed' && <DollarSign className="w-5 h-5 text-origen-hoja" />}
+                          {tier.type === 'bundle' && <Gift className="w-5 h-5 text-amber-500" />}
                         </div>
 
-                        {/* Asa para arrastrar */}
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 -ml-6 opacity-0 group-hover:opacity-100 transition-opacity cursor-move">
-                          <GripVertical className="w-4 h-4 text-text-subtle" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h4 className="text-sm font-semibold text-origen-bosque">
+                                  {getTierTitle(tier)}
+                                </h4>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-50 text-green-700 border border-green-200 shrink-0">
+                                  <Zap className="w-2.5 h-2.5" />
+                                  -{discount.toFixed(0)}%
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Desde {tier.minQuantity} {tier.minQuantity === 1 ? 'unidad' : 'unidades'}
+                                {tier.maxQuantity && ` · hasta ${tier.maxQuantity}`}
+                              </p>
+                            </div>
+
+                            {/* Acciones */}
+                            <div className="flex items-center gap-0.5 shrink-0">
+                              {/* Reordenar */}
+                              <div className="flex flex-col">
+                                <button
+                                  onClick={() => handleMoveTierUp(tier.id)}
+                                  disabled={index === 0}
+                                  className="p-1.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  title="Subir"
+                                >
+                                  <ChevronUp className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleMoveTierDown(tier.id)}
+                                  disabled={index === tiers.length - 1}
+                                  className="p-1.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  title="Bajar"
+                                >
+                                  <ChevronDown className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                              <button
+                                onClick={() => handleEditTier(tier)}
+                                className="p-2 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
+                                title="Editar"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteTier(tier.id)}
+                                className="p-2 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
+                                title="Eliminar"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Resumen de precios */}
+                          <div className="mt-3 grid grid-cols-3 gap-2">
+                            <div className="p-2 bg-surface rounded-lg">
+                              <p className="text-[10px] text-muted-foreground">Normal</p>
+                              <p className="text-sm font-medium">{basePrice.toFixed(2)} €</p>
+                            </div>
+                            <div className="p-2 bg-green-50 rounded-lg border border-green-200">
+                              <p className="text-[10px] text-muted-foreground">Oferta</p>
+                              <p className="text-sm font-bold text-green-700">{offerPrice.toFixed(2)} €</p>
+                            </div>
+                            <div className="p-2 bg-amber-50 rounded-lg">
+                              <p className="text-[10px] text-muted-foreground">Ahorro</p>
+                              <p className="text-sm font-bold text-amber-700">{savings.toFixed(2)} €</p>
+                            </div>
+                          </div>
+
+                          {tier.type === 'bundle' && (
+                            <div className="mt-2 p-2 bg-amber-50 rounded-lg text-xs text-amber-700">
+                              {tier.buyQuantity! - tier.payQuantity!} unidad{((tier.buyQuantity! - tier.payQuantity!) !== 1) ? 'es' : ''} gratis
+                            </div>
+                          )}
                         </div>
-                      </motion.div>
-                    </Reorder.Item>
+                      </div>
+                    </motion.div>
                   );
                 })}
               </AnimatePresence>
-            </Reorder.Group>
+            </div>
           )}
 
           {/* Estado vacío */}
           {tiers.length === 0 && !showTierForm && (
             <div className="text-center py-8 bg-origen-crema/20 rounded-xl border-2 border-dashed border-origen-pradera/30">
               <Gift className="w-12 h-12 text-origen-pradera/40 mx-auto mb-3" />
-              <p className="text-sm font-medium text-foreground">No hay ofertas configuradas</p>
+              <p className="text-sm font-medium text-foreground">Sin ofertas configuradas</p>
               <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">
                 Las ofertas por cantidad ayudan a aumentar el ticket medio y fidelizar clientes
               </p>
@@ -750,7 +786,7 @@ export function StepPricing({
                 </Button>
               ) : (
                 <div className="mt-4 text-xs text-amber-600">
-                  Configura primero el precio base
+                  Configura primero el precio de venta
                 </div>
               )}
             </div>
@@ -760,5 +796,3 @@ export function StepPricing({
     </motion.div>
   );
 }
-
-

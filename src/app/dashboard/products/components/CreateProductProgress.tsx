@@ -95,7 +95,7 @@ export function CreateProductProgress({
                 key={step.id}
                 onClick={() => isClickable && onTabChange(step.id as FormStepId)}
                 className={cn(
-                  "group/step relative flex flex-col items-center gap-1 sm:gap-2 transition-all duration-300 flex-shrink-0",
+                  "group/step relative flex flex-col items-center gap-1.5 sm:gap-2 transition-all duration-300 flex-shrink-0 min-w-[52px] sm:min-w-[60px]",
                   isClickable ? "cursor-pointer" : "cursor-not-allowed opacity-40"
                 )}
                 disabled={!isClickable}
@@ -103,7 +103,7 @@ export function CreateProductProgress({
                 aria-current={isActive ? "step" : undefined}
               >
                 <div className={cn(
-                  "relative w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
+                  "relative w-11 h-11 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
                   isActive && "border-origen-pradera bg-origen-pradera/10 shadow-lg shadow-origen-pradera/20",
                   isCompleted && !isActive && "border-origen-pradera bg-origen-pradera text-white",
                   !isActive && !isCompleted && "border-border bg-surface-alt text-text-subtle"
@@ -115,7 +115,7 @@ export function CreateProductProgress({
                   )}
                 </div>
                 <span className={cn(
-                  "text-[8px] sm:text-[10px] font-medium text-center max-w-[40px] sm:max-w-[60px] truncate",
+                  "text-[10px] sm:text-xs font-medium text-center max-w-[52px] sm:max-w-[60px] leading-tight line-clamp-2",
                   isActive && "text-origen-bosque",
                   isCompleted && !isActive && "text-origen-pradera",
                   !isActive && !isCompleted && "text-text-subtle"
