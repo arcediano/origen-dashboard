@@ -7,6 +7,7 @@ import {
   BarChart2,
   CreditCard,
   LayoutDashboard,
+  Megaphone,
   Package,
   ShoppingBag,
   Star,
@@ -60,6 +61,7 @@ export interface DashboardBreadcrumbItem {
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard/analiticas': 'Analíticas',
+  '/dashboard/campanas': 'Campañas',
   '/dashboard/perfil': 'Perfil',
   '/dashboard': 'Inicio',
   '/dashboard/orders': 'Pedidos',
@@ -83,6 +85,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 const SEGMENT_LABELS: Record<string, string> = {
   analiticas: 'Analíticas',
+  campanas: 'Campañas',
   dashboard: 'Inicio',
   orders: 'Pedidos',
   products: 'Productos',
@@ -142,6 +145,13 @@ const ANALYTICS_ITEMS: MenuItem[] = [
     icon: BarChart2,
     href: '/dashboard/analiticas',
     matchPaths: ['/dashboard/analiticas*'],
+  },
+  {
+    id: 'campanas',
+    label: 'Campañas',
+    icon: Megaphone,
+    href: '/dashboard/campanas',
+    matchPaths: ['/dashboard/campanas*'],
   },
 ];
 
