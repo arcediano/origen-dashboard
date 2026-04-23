@@ -247,15 +247,17 @@ export interface Product {
   certifications: Certification[];
   productionInfo?: ProductionInfo;
   attributes: DynamicAttribute[];
-  status: 'draft' | 'pending_approval' | 'active' | 'inactive' | 'out_of_stock';
+  status: 'draft' | 'pending_approval' | 'active' | 'inactive' | 'out_of_stock' | 'scheduled';
   visibility: 'public' | 'private' | 'password';
   publishedAt?: Date;
+  scheduledAt?: Date;
   sales?: number;
   revenue?: number;
   rating?: number;
   reviewCount?: number;
   views?: number;
   conversion?: number;
+  organicScore?: number;
   createdAt: Date;
   updatedAt: Date;
   lastOrderDate?: Date;

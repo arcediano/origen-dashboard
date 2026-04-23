@@ -6,11 +6,11 @@
 'use client';
 
 import React from 'react';
-import { 
+import {
   TrendingUp,
-  DollarSign, 
-  ShoppingBag, 
-  Eye, 
+  DollarSign,
+  ShoppingBag,
+  Eye,
   Star,
   Calendar,
   Package,
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
+import { OrganicScoreBadge } from '@/components/shared/products/OrganicScoreBadge';
 
 // ============================================================================
 // TIPOS
@@ -66,6 +67,9 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
           <span className="text-xs bg-origen-pradera/10 text-origen-pradera px-3 py-1.5 rounded-full border border-origen-pradera/30">
             {product.sku}
           </span>
+          {product.organicScore !== undefined && (
+            <OrganicScoreBadge score={product.organicScore} showLabel />
+          )}
           <span className="text-xs text-muted-foreground flex items-center gap-1">
             <Calendar className="w-3 h-3" />
             Últimos 7 días
