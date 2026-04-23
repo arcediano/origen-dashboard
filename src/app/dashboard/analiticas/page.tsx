@@ -58,17 +58,17 @@ export default async function AnalyticasPage() {
           label="Este mes"
           value={stats.month}
           icon={Calendar}
-          bg="from-blue-400/10 to-transparent"
-          border="border-blue-200/50"
-          iconColor="text-blue-500"
+          bg="from-origen-pradera/5 to-transparent"
+          border="border-origen-pradera/10"
+          iconColor="text-origen-pradera"
         />
         <SoftStatCard
           label="Histórico"
           value={stats.total}
           icon={Eye}
-          bg="from-amber-400/10 to-transparent"
-          border="border-amber-200/50"
-          iconColor="text-amber-500"
+          bg="from-feedback-warning-subtle/20 to-transparent"
+          border="border-feedback-warning/30"
+          iconColor="text-feedback-warning"
         />
       </div>
 

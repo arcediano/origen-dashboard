@@ -6,8 +6,6 @@
  * gradiente muy tenue, borde casi invisible, icono con color sin relleno intenso.
  */
 
-'use client';
-
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 
