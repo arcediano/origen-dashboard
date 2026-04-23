@@ -420,7 +420,9 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
 
   if (product.certifications !== undefined) {
     body.certifications = product.certifications.map((certification) => ({
-      certificationId: certification.id,
+      // Para certs manuales no se envía certificationId (temp ID o sin registro en DB);
+      // el backend las identifica por name + issuingBody y crea/reutiliza el registro maestro.
+      certificationId: certification.source === 'catalog' ? certification.id : undefined,
       name: certification.name,
       issuingBody: certification.issuingBody,
       certificateNumber: certification.certificateNumber,
@@ -431,6 +433,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
       verificationUrl: certification.verificationUrl,
       category: mapCertificationCategory(certification.category),
       documentIds: certification.documents?.map((document) => document.id) ?? [],
+      source: certification.source === 'manual' ? 'MANUAL' : 'CATALOG',
     }));
   }
 
