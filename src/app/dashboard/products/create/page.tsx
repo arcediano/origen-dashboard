@@ -45,6 +45,7 @@ export default function CreateProductPage() {
     lastSaved,
     isPublishing,
     publishStatus,
+    publishError,
     showCancelDialog,
     setShowCancelDialog,
     showSuccessModal,
@@ -136,7 +137,7 @@ export default function CreateProductPage() {
               onPublish={handlePublish}
               isPublishing={isPublishing}
               publishStatus={publishStatus}
-              publishError={error}
+              publishError={publishError}
             />
           </div>
 

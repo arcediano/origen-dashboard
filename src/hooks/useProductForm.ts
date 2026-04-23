@@ -192,6 +192,7 @@ export function useProductForm(productId?: string) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishStatus, setPublishStatus] = useState<'idle' | 'success' | 'pending_approval' | 'error'>('idle');
+  const [publishError, setPublishError] = useState<string | null>(null);
   const [skuSuggestion, setSkuSuggestion] = useState<string>('');
   
   // Ref para evitar que el auto-guardado dispare en la carga inicial
@@ -472,8 +473,8 @@ export function useProductForm(productId?: string) {
     
     setIsPublishing(true);
     setPublishStatus('idle');
-    setError(null);
-    
+    setPublishError(null);
+
     try {
       if (productId) {
         // Edición: enviar a revisión (PENDING_APPROVAL) para aprobación del admin
@@ -482,10 +483,10 @@ export function useProductForm(productId?: string) {
           status: 'pending_approval' as const,
         };
         const response = await updateProduct(productId, productData);
-        
+
         if (response.error) {
           setPublishStatus('error');
-          setError(response.error);
+          setPublishError(response.error);
         } else {
           setPublishStatus('pending_approval');
           setShowSuccessModal(true);
@@ -493,10 +494,10 @@ export function useProductForm(productId?: string) {
       } else {
         // Creación: enviar a revisión (PENDING_APPROVAL)
         const response = await createProduct({ ...formData, status: 'pending_approval' as const });
-        
+
         if (response.error) {
           setPublishStatus('error');
-          setError(response.error);
+          setPublishError(response.error);
         } else {
           setPublishStatus('pending_approval');
           localStorage.removeItem(STORAGE_KEY);
@@ -505,7 +506,7 @@ export function useProductForm(productId?: string) {
       }
     } catch (error) {
       setPublishStatus('error');
-      setError('Error inesperado al publicar el producto');
+      setPublishError('Error inesperado al publicar el producto');
     } finally {
       setIsPublishing(false);
     }
@@ -534,6 +535,7 @@ export function useProductForm(productId?: string) {
     lastSaved,
     isPublishing,
     publishStatus,
+    publishError,
     showCancelDialog,
     setShowCancelDialog,
     showSuccessModal,
