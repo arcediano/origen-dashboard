@@ -318,7 +318,6 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
       category: mapCertificationCategory(certification.category),
       // documentIds contiene S3 keys reales (tras subida en DocumentUploader)
       documentIds: certification.documents?.map((document) => document.id) ?? [],
-      source: certification.source === 'manual' ? 'MANUAL' : 'CATALOG',
     })),
     // Solo enviar productionInfo si el productor rellenó al menos un campo significativo
     productionInfo: (
@@ -433,7 +432,6 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
       verificationUrl: certification.verificationUrl,
       category: mapCertificationCategory(certification.category),
       documentIds: certification.documents?.map((document) => document.id) ?? [],
-      source: certification.source === 'manual' ? 'MANUAL' : 'CATALOG',
     }));
   }
 
