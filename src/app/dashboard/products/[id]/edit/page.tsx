@@ -61,6 +61,7 @@ export default function EditProductPage() {
     allStepsCompleted,
     hasCertifications,
     certificationsApproved,
+    hasPendingManualCerts,
     isEditMode,
     currentStepErrors,
     handleInputChange,
@@ -212,9 +213,11 @@ export default function EditProductPage() {
                 allStepsCompleted={allStepsCompleted}
                 hasCertifications={hasCertifications}
                 certificationsApproved={certificationsApproved}
+                hasPendingManualCerts={hasPendingManualCerts}
                 onPublish={handlePublish}
                 isPublishing={isPublishing}
                 publishStatus={publishStatus}
+                publishError={error}
               />
             </div>
           </div>

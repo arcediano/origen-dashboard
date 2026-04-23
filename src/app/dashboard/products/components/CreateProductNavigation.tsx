@@ -45,6 +45,8 @@ export interface CreateProductNavigationProps {
   isPublishing: boolean;
   /** Estado de publicación */
   publishStatus: 'idle' | 'success' | 'pending_approval' | 'error';
+  /** Mensaje de error de publicación */
+  publishError?: string | null;
   /** Clase CSS adicional */
   className?: string;
 }
@@ -67,6 +69,7 @@ export function CreateProductNavigation({
   onPublish,
   isPublishing,
   publishStatus,
+  publishError,
   className,
 }: CreateProductNavigationProps) {
   const [showStepErrors, setShowStepErrors] = useState(false);
@@ -113,7 +116,6 @@ export function CreateProductNavigation({
   const getPublishButtonText = () => {
     if (isPublishing) return 'Publicando...';
     if (!allStepsCompleted) return 'Completa todos los pasos';
-    if (hasPendingManualCerts) return 'Pendiente de validación';
     return 'Publicar';
   };
 
@@ -174,19 +176,16 @@ export function CreateProductNavigation({
           {/* Botón siguiente o publicar */}
           {isLastStep ? (
             <Button
-              variant={hasPendingManualCerts && allStepsCompleted ? 'outline' : 'primary'}
+              variant="primary"
               onClick={onPublish}
               disabled={isPublishing || !canPublish}
               leftIcon={isPublishing
                 ? <RefreshCw className="w-4 h-4 animate-spin" />
-                : hasPendingManualCerts && allStepsCompleted
-                  ? <Clock className="w-4 h-4" />
-                  : <Send className="w-4 h-4" />
+                : <Send className="w-4 h-4" />
               }
               className={cn(
                 'w-full sm:w-auto',
                 !canPublish && 'opacity-50 cursor-not-allowed',
-                hasPendingManualCerts && allStepsCompleted && 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100',
               )}
               title={!canPublish ? 'Completa todos los pasos' : undefined}
             >
@@ -211,6 +210,18 @@ export function CreateProductNavigation({
       </div>
 
       {/* ── Mensajes de estado de publicación ────────────────────────────── */}
+      {isLastStep && publishStatus === 'error' && (
+        <div className="p-3 bg-red-50 rounded-xl border border-red-200 flex items-start gap-2">
+          <XCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-medium text-red-800">Error al publicar</p>
+            <p className="text-[10px] text-red-600 mt-0.5">
+              {publishError ?? 'No se pudo publicar el producto. Revisa los datos e inténtalo de nuevo.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {isLastStep && publishStatus === 'success' && (
         <div className="p-3 bg-green-50 rounded-xl border border-green-200 flex items-start gap-2">
           <CheckCircle className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />

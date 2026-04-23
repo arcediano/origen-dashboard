@@ -136,6 +136,7 @@ export default function CreateProductPage() {
               onPublish={handlePublish}
               isPublishing={isPublishing}
               publishStatus={publishStatus}
+              publishError={error}
             />
           </div>
 
