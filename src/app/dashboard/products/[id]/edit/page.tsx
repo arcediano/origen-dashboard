@@ -20,6 +20,7 @@ import {
   CreateProductNavigation,
   CreateProductCancelDialog,
   SuccessPublishModal,
+  ProductPreviewModal,
 } from '../../components';
 import { ProductFormSteps } from '../../components/ProductFormSteps';
 import { ProductFormSidebar } from '../../components/ProductFormSidebar';
@@ -93,6 +94,7 @@ export default function EditProductPage() {
 
   // Estado para el panel de errores del ActionBar móvil
   const [showMobileErrors, setShowMobileErrors] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing', 'inventory'];
   const isMobileStepBlocked = BLOCKING_STEPS.includes(activeTab) && currentStepErrors.length > 0;
@@ -219,6 +221,7 @@ export default function EditProductPage() {
                 isPublishing={isPublishing}
                 publishStatus={publishStatus}
                 publishError={publishError}
+                onPreview={() => setShowPreview(true)}
               />
             </div>
           </div>
@@ -302,6 +305,12 @@ export default function EditProductPage() {
         open={showSuccessModal}
         onOpenChange={setShowSuccessModal}
         productName={formData.name || 'Producto'}
+      />
+
+      <ProductPreviewModal
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        formData={formData}
       />
     </div>
   );

@@ -14,6 +14,7 @@ import {
   CreateProductNavigation,
   CreateProductCancelDialog,
   SuccessPublishModal,
+  ProductPreviewModal,
 } from '@/app/dashboard/products/components';
 import { ProductFormSteps } from '@/app/dashboard/products/components/ProductFormSteps';
 import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductFormSidebar';
@@ -22,7 +23,7 @@ import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 import { toast } from '@arcediano/ux-library';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // ─── Animaciones ──────────────────────────────────────────────────────────────
 
@@ -74,6 +75,8 @@ export default function CreateProductPage() {
   const tips = useStepTips(stepNumber, formData);
 
   const handleTabChange = (tab: FormStepId) => setActiveTab(tab);
+
+  const [showPreview, setShowPreview] = useState(false);
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
@@ -139,6 +142,7 @@ export default function CreateProductPage() {
               isPublishing={isPublishing}
               publishStatus={publishStatus}
               publishError={publishError}
+              onPreview={() => setShowPreview(true)}
             />
           </div>
 
@@ -159,6 +163,12 @@ export default function CreateProductPage() {
         open={showSuccessModal}
         onOpenChange={setShowSuccessModal}
         productName={formData.name || 'Producto'}
+      />
+
+      <ProductPreviewModal
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        formData={formData}
       />
     </div>
   );

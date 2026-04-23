@@ -6,7 +6,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Save, Send, RefreshCw, Shield, CheckCircle, AlertCircle, XCircle, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Save, Send, RefreshCw, Shield, CheckCircle, AlertCircle, XCircle, Clock, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@arcediano/ux-library';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
@@ -47,6 +47,8 @@ export interface CreateProductNavigationProps {
   publishStatus: 'idle' | 'success' | 'pending_approval' | 'error';
   /** Mensaje de error de publicación */
   publishError?: string | null;
+  /** Función para abrir la vista previa */
+  onPreview?: () => void;
   /** Clase CSS adicional */
   className?: string;
 }
@@ -70,6 +72,7 @@ export function CreateProductNavigation({
   isPublishing,
   publishStatus,
   publishError,
+  onPreview,
   className,
 }: CreateProductNavigationProps) {
   const [showStepErrors, setShowStepErrors] = useState(false);
@@ -181,6 +184,18 @@ export function CreateProductNavigation({
           >
             {isSaving ? 'Guardando...' : 'Guardar borrador'}
           </Button>
+
+          {/* Botón vista previa */}
+          {onPreview && (
+            <Button
+              variant="outline"
+              onClick={onPreview}
+              leftIcon={<Eye className="w-4 h-4" />}
+              className="w-full sm:w-auto"
+            >
+              Vista previa
+            </Button>
+          )}
 
           {/* Botón siguiente o publicar */}
           {isLastStep ? (
