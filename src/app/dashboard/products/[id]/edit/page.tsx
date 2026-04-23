@@ -24,6 +24,7 @@ import {
 } from '../../components';
 import { ProductFormSteps } from '../../components/ProductFormSteps';
 import { ProductFormSidebar } from '../../components/ProductFormSidebar';
+import { SchedulePublishCard } from '../../components/SchedulePublishCard';
 
 import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
@@ -224,6 +225,14 @@ export default function EditProductPage() {
                 onPreview={() => setShowPreview(true)}
               />
             </div>
+
+            {/* Programar publicación — solo en edición, solo si los pasos están completos */}
+            {allStepsCompleted && ['draft', 'scheduled'].includes(formData.status ?? '') && (
+              <SchedulePublishCard
+                productId={productId}
+                currentScheduledAt={(formData as any).scheduledAt ?? null}
+              />
+            )}
           </div>
 
           <ProductFormSidebar
