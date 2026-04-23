@@ -8,7 +8,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { MessageSquare } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 // Componentes UI
 import { PageLoader } from '@/components/shared';
@@ -21,8 +20,9 @@ import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
 import { Pagination } from '@arcediano/ux-library';
 
 // Hooks y API
-import { fetchReviews } from '@/lib/api/reviews';
+import { fetchReviews, addReviewResponse, flagReview, markReviewHelpful } from '@/lib/api/reviews';
 import type { Review, ReviewFilters as ReviewFiltersType } from '@/types/review';
+import { toast } from '@arcediano/ux-library';
 import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 
 // ============================================================================
@@ -53,10 +53,7 @@ const itemVariants: Variants = {
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
-export default function ReviewsPage() {
-  const router = useRouter();
-
-  const [reviews, setReviews] = useState<Review[]>([]);
+export default function ReviewsPage() {  const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -90,17 +87,35 @@ export default function ReviewsPage() {
   };
 
   const handleRespond = async (reviewId: string, response: string) => {
-    console.log('Responder a reseña:', reviewId, response);
-    loadReviews();
+    const res = await addReviewResponse(reviewId, { authorId: '', authorName: '', content: response });
+    if (res.error) {
+      toast({ title: 'Error al responder', description: res.error, variant: 'error' });
+    } else {
+      toast({ title: 'Respuesta enviada correctamente', variant: 'success' });
+      loadReviews();
+    }
   };
 
   const handleFlag = async (reviewId: string, reason?: string) => {
-    console.log('Reportar reseña:', reviewId, reason);
-    loadReviews();
+    const validReasons = ['inappropriate', 'spam', 'fake', 'offensive', 'other'] as const;
+    const safeReason = validReasons.includes(reason as typeof validReasons[number])
+      ? (reason as typeof validReasons[number])
+      : 'other';
+    const res = await flagReview(reviewId, safeReason);
+    if (res.error) {
+      toast({ title: 'Error al reportar', description: res.error, variant: 'error' });
+    } else {
+      toast({ title: 'Reseña reportada', variant: 'success' });
+      loadReviews();
+    }
   };
 
   const handleHelpful = async (reviewId: string, helpful: boolean) => {
-    console.log('Marcar como útil:', reviewId, helpful);
+    const res = await markReviewHelpful(reviewId, helpful);
+    if (res.error) {
+      toast({ title: 'Error', description: res.error, variant: 'error' });
+      return;
+    }
     setReviews(prev =>
       prev.map(r =>
         r.id === reviewId
