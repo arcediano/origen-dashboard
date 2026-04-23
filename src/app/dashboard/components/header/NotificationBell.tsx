@@ -172,7 +172,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
 
           {unreadCount > 0 && (
             <span
-              className="absolute -top-1 -right-1 min-w-[1.2rem] h-5 px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center bg-red-500 border-2 border-white"
+              className="absolute -top-1 -right-1 min-w-[1.2rem] h-5 px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center bg-feedback-danger border-2 border-white"
               role="status"
               aria-live="polite"
               aria-label={`${unreadCount} notificaciones sin leer`}

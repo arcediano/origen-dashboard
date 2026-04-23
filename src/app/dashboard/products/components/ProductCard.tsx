@@ -30,7 +30,7 @@ export function ProductCard({
   const threshold = product.lowStockThreshold ?? 5;
   const stockColor =
     stock === 0             ? 'bg-feedback-danger text-white' :
-    stock <= threshold      ? 'bg-amber-50 text-amber-700 border-amber-200' :
+    stock <= threshold      ? 'bg-feedback-warning-subtle text-feedback-warning border-feedback-warning/30' :
                               'bg-origen-pastel text-origen-bosque border-origen-pradera/20';
 
   const mainImage = product.mainImage || product.gallery?.[0];
@@ -91,7 +91,7 @@ export function ProductCard({
               <span className="text-[10px] text-text-subtle">Completitud</span>
               <span className={cn(
                 'text-[10px] font-semibold',
-                completionPct === 100 ? 'text-origen-hoja' : completionPct >= 50 ? 'text-amber-600' : 'text-feedback-danger',
+                completionPct === 100 ? 'text-origen-hoja' : completionPct >= 50 ? 'text-feedback-warning' : 'text-feedback-danger',
               )}>
                 {completionPct}%
               </span>
@@ -100,7 +100,7 @@ export function ProductCard({
               <div
                 className={cn(
                   'h-full rounded-full transition-all duration-300',
-                  completionPct === 100 ? 'bg-origen-hoja' : completionPct >= 50 ? 'bg-amber-400' : 'bg-feedback-danger',
+                  completionPct === 100 ? 'bg-origen-hoja' : completionPct >= 50 ? 'bg-feedback-warning' : 'bg-feedback-danger',
                 )}
                 style={{ width: `${completionPct}%` }}
               />

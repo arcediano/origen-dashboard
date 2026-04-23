@@ -392,7 +392,7 @@ export default function CampanasPage() {
             className="rounded-xl border border-border-subtle p-2 text-text-subtle hover:bg-surface"
             aria-label="Refrescar"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
           </button>
           <button
             onClick={() => setShowForm(true)}
@@ -463,14 +463,14 @@ export default function CampanasPage() {
 
       {/* List */}
       {loading ? (
-        <div className="space-y-3">
+        <div className="space-y-3" aria-busy="true" aria-label="Cargando campañas...">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="h-28 animate-pulse rounded-2xl bg-origen-pastel/30" />
           ))}
         </div>
       ) : campaigns.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border-subtle bg-surface-alt px-6 py-10 text-center">
-          <Megaphone className="mx-auto mb-3 h-8 w-8 text-text-subtle" />
+          <Megaphone className="mx-auto mb-3 h-8 w-8 text-text-subtle" aria-hidden="true" />
           <p className="text-sm text-text-subtle">
             Aún no tienes campañas. Crea una para aumentar tu visibilidad.
           </p>

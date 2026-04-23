@@ -37,12 +37,12 @@ export interface MobileStatCardProps {
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 
 const ACCENT_MAP: Record<StatCardAccent, { icon: string; border: string; bg: string }> = {
-  pradera: { icon: 'text-origen-pradera',  border: 'border-l-origen-pradera',  bg: 'from-origen-pradera/5 to-transparent'  },
-  bosque:  { icon: 'text-origen-bosque',   border: 'border-l-origen-bosque',   bg: 'from-origen-bosque/5 to-transparent'   },
-  amber:   { icon: 'text-amber-500',       border: 'border-l-amber-400',       bg: 'from-amber-50/50 to-transparent'       },
-  red:     { icon: 'text-red-500',         border: 'border-l-red-400',         bg: 'from-red-50/50 to-transparent'         },
-  blue:    { icon: 'text-blue-500',        border: 'border-l-blue-400',        bg: 'from-blue-50/50 to-transparent'        },
-  green:   { icon: 'text-green-500',       border: 'border-l-green-400',       bg: 'from-green-50/50 to-transparent'       },
+  pradera: { icon: 'text-origen-pradera',   border: 'border-l-origen-pradera',        bg: 'from-origen-pradera/5 to-transparent'             },
+  bosque:  { icon: 'text-origen-bosque',    border: 'border-l-origen-bosque',         bg: 'from-origen-bosque/5 to-transparent'              },
+  amber:   { icon: 'text-feedback-warning', border: 'border-l-feedback-warning',      bg: 'from-feedback-warning-subtle/20 to-transparent'   },
+  red:     { icon: 'text-feedback-danger',  border: 'border-l-feedback-danger',       bg: 'from-feedback-danger-subtle/20 to-transparent'    },
+  blue:    { icon: 'text-origen-pradera',   border: 'border-l-origen-pradera/60',     bg: 'from-origen-pradera/5 to-transparent'             },
+  green:   { icon: 'text-origen-hoja',      border: 'border-l-origen-hoja',           bg: 'from-origen-hoja/5 to-transparent'                },
 };
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────

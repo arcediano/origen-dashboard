@@ -36,10 +36,10 @@ const STATUS_CONFIG: Record<
   Review['status'],
   { label: string; icon: React.ElementType; cls: string }
 > = {
-  pending:  { label: 'Pendiente',  icon: Clock,       cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+  pending:  { label: 'Pendiente',  icon: Clock,       cls: 'bg-feedback-warning-subtle text-feedback-warning border-feedback-warning/30' },
   approved: { label: 'Aprobada',   icon: CheckCircle2,cls: 'bg-origen-pastel text-origen-bosque border-origen-pradera/30' },
-  rejected: { label: 'Rechazada',  icon: XCircle,     cls: 'bg-feedback-danger-subtle text-red-700 border-red-200' },
-  flagged:  { label: 'Reportada',  icon: AlertCircle, cls: 'bg-feedback-danger-subtle text-red-700 border-red-200' },
+  rejected: { label: 'Rechazada',  icon: XCircle,     cls: 'bg-feedback-danger-subtle text-feedback-danger border-feedback-danger/30' },
+  flagged:  { label: 'Reportada',  icon: AlertCircle, cls: 'bg-feedback-danger-subtle text-feedback-danger border-feedback-danger/30' },
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -52,7 +52,7 @@ function StarRow({ rating }: { rating: number }) {
           key={s}
           className={cn(
             'w-3 h-3',
-            s <= rating ? 'fill-amber-400 text-amber-400' : 'text-gray-200',
+            s <= rating ? 'fill-feedback-warning text-feedback-warning' : 'text-gray-200',
           )}
         />
       ))}

@@ -114,25 +114,25 @@ export function AdjustStockDialog({
           <button
             onClick={() => setAdjustmentType('add')}
             className={cn(
-              'flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all border-2',
+              'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all border-2',
               adjustmentType === 'add'
                 ? 'bg-origen-hoja text-white border-origen-hoja'
                 : 'bg-surface-alt text-origen-bosque border-border-subtle hover:border-origen-hoja'
             )}
           >
-            <Plus className="w-4 h-4 inline mr-1" />
+            <Plus className="w-4 h-4" />
             Añadir
           </button>
           <button
             onClick={() => setAdjustmentType('remove')}
             className={cn(
-              'flex-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all border-2',
+              'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all border-2',
               adjustmentType === 'remove'
                 ? 'bg-origen-menta text-white border-origen-menta'
                 : 'bg-surface-alt text-origen-bosque border-border-subtle hover:border-origen-menta'
             )}
           >
-            <Minus className="w-4 h-4 inline mr-1" />
+            <Minus className="w-4 h-4" />
             Retirar
           </button>
         </div>

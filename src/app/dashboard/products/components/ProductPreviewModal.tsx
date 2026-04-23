@@ -9,10 +9,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Star, Tag, Leaf, Award, CheckCircle, AlertCircle, Eye, ShoppingBag, Package } from 'lucide-react';
+import { X, Tag, Leaf, Award, CheckCircle, AlertCircle, Eye, ShoppingBag, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Badge } from '@arcediano/ux-library';
-import { Button } from '@arcediano/ux-library';
+import { Badge, Button, Dialog, DialogContent } from '@arcediano/ux-library';
 import type { ProductFormData } from '@/types/product';
 
 // ============================================================================
@@ -58,8 +57,6 @@ function MainImage({ src, alt }: { src?: string; alt?: string }) {
 // ============================================================================
 
 export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewModalProps) {
-  if (!open) return null;
-
   const mainImage = formData.gallery.find(img => img.isMain) ?? formData.gallery[0] ?? formData.mainImage;
   const gallery = formData.gallery.filter(img => !img.isMain && img.url && !img.url.startsWith('blob:'));
   const discount = formData.comparePrice && formData.comparePrice > (formData.basePrice ?? 0)
@@ -71,15 +68,13 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
   const hasCerts = formData.certifications?.length > 0;
 
   return (
-    /* Overlay */
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4 sm:p-8"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Vista previa del producto"
-    >
-      <div className="relative w-full max-w-3xl bg-background rounded-2xl shadow-xl overflow-hidden my-auto">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent
+        closeOnOutsideClick
+        showCloseButton={false}
+        className="max-w-3xl w-full p-0 overflow-hidden"
+      >
+        <div className="flex flex-col max-h-[90vh]">
 
         {/* ── Banner PREVIEW ───────────────────────────────────────────────── */}
         <div className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-origen-pradera px-4 py-2.5">
@@ -99,7 +94,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
         </div>
 
         {/* ── Cuerpo ───────────────────────────────────────────────────────── */}
-        <div className="overflow-y-auto max-h-[calc(100vh-8rem)]">
+        <div className="overflow-y-auto flex-1">
 
           {/* Hero: imagen + info principal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
@@ -152,7 +147,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
                 <div className={cn(
                   'w-2 h-2 rounded-full',
                   formData.stock === 0 ? 'bg-feedback-danger' :
-                  formData.stock <= formData.lowStockThreshold ? 'bg-amber-500' : 'bg-feedback-success'
+                  formData.stock <= formData.lowStockThreshold ? 'bg-feedback-warning' : 'bg-feedback-success'
                 )} />
                 <span className="text-xs text-muted-foreground">
                   {formData.stock === 0 ? 'Agotado' :
@@ -234,7 +229,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
                   >
                     {cert.verified
                       ? <CheckCircle className="w-3.5 h-3.5 text-origen-hoja shrink-0" />
-                      : <AlertCircle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                      : <AlertCircle className="w-3.5 h-3.5 text-feedback-warning shrink-0" />
                     }
                     <span className="text-xs font-medium text-origen-bosque">{cert.name}</span>
                     {cert.issuingBody && (
@@ -311,8 +306,9 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
               Cerrar vista previa
             </Button>
           </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
