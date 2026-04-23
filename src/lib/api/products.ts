@@ -900,3 +900,24 @@ export async function updateProductCertification(
     return handleError(error, 'updateProductCertification');
   }
 }
+
+
+/**
+ * Cambia el estado de un producto del productor autenticado.
+ * Transiciones permitidas: DRAFT ↔ PENDING_APPROVAL.
+ * Ruta backend: PATCH /products/:id/status
+ */
+export async function updateProductStatus(
+  productId: string,
+  status: 'DRAFT' | 'PENDING_APPROVAL',
+): Promise<ApiResponse<{ id: string; status: string }>> {
+  try {
+    const raw = await gatewayClient.patch<{ id: string; status: string }>(
+      `/products/${productId}/status`,
+      { status },
+    );
+    return { data: raw, status: 200 };
+  } catch (error) {
+    return handleError(error, 'updateProductStatus');
+  }
+}

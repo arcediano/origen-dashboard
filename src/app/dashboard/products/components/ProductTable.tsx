@@ -23,6 +23,7 @@ export interface ProductTableProps {
   onAdjustStock: (product: Product) => void;
   onView: (id: string) => void;
   onEdit: (id: string) => void;
+  onStatusChange?: (product: Product, newStatus: 'draft' | 'pending_approval') => void;
   className?: string;
   isLoading?: boolean;
   loadingRows?: number;
@@ -57,6 +58,7 @@ export function ProductTable({
   onAdjustStock,
   onView,
   onEdit,
+  onStatusChange,
   className,
   isLoading = false,
   loadingRows = 5,
@@ -128,6 +130,7 @@ export function ProductTable({
           onAdjustStock={onAdjustStock}
           onView={onView}
           onEdit={onEdit}
+          onStatusChange={onStatusChange}
         />
       ),
       className: 'text-right',

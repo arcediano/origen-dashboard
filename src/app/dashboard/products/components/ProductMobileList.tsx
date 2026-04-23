@@ -19,6 +19,8 @@ import {
   XCircle,
   BarChart2,
   ChevronRight,
+  Send,
+  RotateCcw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
@@ -104,13 +106,14 @@ function StatusBadge({ status }: { status: ProductStatus }) {
 // ─── ROW ──────────────────────────────────────────────────────────────────────
 
 interface ProductRowProps {
-  product:        Product;
-  onView:         (id: string) => void;
-  onEdit:         (id: string) => void;
-  onAdjustStock?: (product: Product) => void;
+  product:         Product;
+  onView:          (id: string) => void;
+  onEdit:          (id: string) => void;
+  onAdjustStock?:  (product: Product) => void;
+  onStatusChange?: (product: Product, newStatus: 'draft' | 'pending_approval') => void;
 }
 
-function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps) {
+function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: ProductRowProps) {
   const mainImg    = product.mainImage?.url;
   const isLowStock = product.stock > 0 && product.stock <= product.lowStockThreshold;
 
@@ -134,6 +137,18 @@ function ProductRow({ product, onView, onEdit, onAdjustStock }: ProductRowProps)
       onPress:  () => onAdjustStock?.(product),
       disabled: !onAdjustStock,
     },
+    ...(product.status === 'draft' && onStatusChange ? [{
+      label:   'Revisar',
+      icon:    Send,
+      color:   'pino' as const,
+      onPress: () => onStatusChange(product, 'pending_approval'),
+    }] : []),
+    ...(product.status === 'pending_approval' && onStatusChange ? [{
+      label:   'Borrador',
+      icon:    RotateCcw,
+      color:   'mandarina' as const,
+      onPress: () => onStatusChange(product, 'draft'),
+    }] : []),
   ];
 
   return (
@@ -202,6 +217,7 @@ export interface ProductMobileListProps {
   onView:         (id: string) => void;
   onEdit:         (id: string) => void;
   onAdjustStock?: (product: Product) => void;
+  onStatusChange?: (product: Product, newStatus: 'draft' | 'pending_approval') => void;
   isLoading?:     boolean;
   className?:     string;
 }
@@ -216,6 +232,7 @@ export function ProductMobileList({
   onView,
   onEdit,
   onAdjustStock,
+  onStatusChange,
   isLoading = false,
   className,
 }: ProductMobileListProps) {
@@ -238,6 +255,7 @@ export function ProductMobileList({
           onView={onView}
           onEdit={onEdit}
           onAdjustStock={onAdjustStock}
+          onStatusChange={onStatusChange}
         />
       ))}
     </div>

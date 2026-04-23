@@ -11,7 +11,7 @@ import { motion, type Variants } from 'framer-motion';
 import { Package, Plus, RefreshCw } from 'lucide-react';
 
 // Componentes UI
-import { Button } from '@arcediano/ux-library';
+import { Button, toast } from '@arcediano/ux-library';
 import { PageLoader } from '@/components/shared/loading/page-loader';
 import { PageError } from '@/components/shared/error/page-error';
 import { Card } from '@arcediano/ux-library'
@@ -23,7 +23,7 @@ import { DeleteProductDialog } from './components/ProductDialogs/DeleteProductDi
 
 // Hooks y APIs
 import { useProductFilters } from '@/hooks/useProductFilters';
-import { fetchProductFacets, fetchProducts, fetchProductStats } from '@/lib/api/products';
+import { fetchProductFacets, fetchProducts, fetchProductStats, updateProductStatus } from '@/lib/api/products';
 import { type Product } from '@/types/product';
 import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 
@@ -204,6 +204,24 @@ export default function ProductosPage() {
     setDeleteDialogOpen(true);
   };
 
+  const handleStatusChange = async (product: Product, newStatus: 'draft' | 'pending_approval') => {
+    const res = await updateProductStatus(product.id, newStatus === 'draft' ? 'DRAFT' : 'PENDING_APPROVAL');
+    if (res.error) {
+      toast({ title: 'Error al cambiar estado', description: res.error, variant: 'error' });
+      return;
+    }
+    setProducts((prev) =>
+      prev.map((p) => p.id === product.id ? { ...p, status: newStatus } : p)
+    );
+    toast({
+      title: newStatus === 'pending_approval' ? 'Enviado a revisión' : 'Vuelto a borrador',
+      description: newStatus === 'pending_approval'
+        ? 'El producto está pendiente de aprobación por el equipo.'
+        : 'El producto ha vuelto al estado borrador.',
+      variant: 'success',
+    });
+  };
+
   const handleConfirmDelete = (productId: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
     setTotalProducts((prev) => Math.max(0, prev - 1));
@@ -341,6 +359,7 @@ export default function ProductosPage() {
                   onView={handleView}
                   onEdit={handleEdit}
                   onAdjustStock={handleAdjustStock}
+                  onStatusChange={handleStatusChange}
                   isLoading={isLoading}
                   className="block lg:hidden"
                 />
@@ -365,6 +384,7 @@ export default function ProductosPage() {
                       onAdjustStock={handleAdjustStock}
                       onView={handleView}
                       onEdit={handleEdit}
+                      onStatusChange={handleStatusChange}
                       isLoading={isLoading}
                     />
                   </div>
