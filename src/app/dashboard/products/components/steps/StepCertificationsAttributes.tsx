@@ -1326,13 +1326,13 @@ export function StepCertificationsAttributes({
                         exit={{ opacity: 0, x: 20 }}
                         className="flex items-center justify-between p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 transition-all"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
                           <div className="w-10 h-10 rounded-lg bg-origen-crema flex items-center justify-center shrink-0">
                             <Tag className="w-5 h-5 text-origen-pradera" />
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-sm font-medium text-origen-bosque">{attr.name}</p>
+                              <p className="text-sm font-medium text-origen-bosque truncate">{attr.name}</p>
                               <Badge variant="leaf" size="xs" className="bg-origen-pradera/10">{attr.type}</Badge>
                               {!attr.visible && (
                                 <Badge variant="leaf" size="xs" className="bg-surface flex items-center gap-1">

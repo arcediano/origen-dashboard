@@ -373,16 +373,20 @@ export function StepPricing({
 
         {/* Sección de ofertas por cantidad */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Gift className="w-4 h-4 text-origen-pradera" />
-              <h3 className="text-sm font-semibold text-origen-bosque">Ofertas por cantidad</h3>
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Título + badge — flex-1 para que no comprima el botón */}
+            <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <div className="flex items-center gap-2 shrink-0">
+                <Gift className="w-4 h-4 text-origen-pradera" />
+                <h3 className="text-sm font-semibold text-origen-bosque">Ofertas por cantidad</h3>
+              </div>
               {tiers.length > 0 && (
-                <Badge variant="leaf" size="sm" className="ml-2">
+                <Badge variant="leaf" size="sm">
                   {tiers.length} {tiers.length === 1 ? 'activa' : 'activas'}
                 </Badge>
               )}
             </div>
+            {/* Botón siempre visible, nunca comprimido */}
             <button
               onClick={() => {
                 resetForm();
@@ -391,14 +395,14 @@ export function StepPricing({
               }}
               disabled={!hasBasePrice}
               className={cn(
-                "inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border-2 transition-all text-xs font-medium",
+                "shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-lg border-2 transition-all text-xs font-medium min-h-[36px]",
                 hasBasePrice
                   ? "border-origen-pradera/30 hover:border-origen-pradera hover:bg-origen-pradera/5 text-origen-bosque bg-surface-alt"
                   : "border-border bg-surface text-text-subtle cursor-not-allowed"
               )}
             >
-              <Plus className="w-3 h-3" />
-              {showTierForm ? 'Cancelar' : 'Nueva oferta'}
+              <Plus className="w-3 h-3 shrink-0" />
+              <span>{showTierForm ? 'Cancelar' : 'Nueva oferta'}</span>
             </button>
           </div>
 
@@ -706,7 +710,7 @@ export function StepPricing({
                                 <button
                                   onClick={() => handleMoveTierUp(tier.id)}
                                   disabled={index === 0}
-                                  className="p-1.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  className="p-2.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                   title="Subir"
                                 >
                                   <ChevronUp className="w-3.5 h-3.5" />
@@ -714,7 +718,7 @@ export function StepPricing({
                                 <button
                                   onClick={() => handleMoveTierDown(tier.id)}
                                   disabled={index === tiers.length - 1}
-                                  className="p-1.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  className="p-2.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                   title="Bajar"
                                 >
                                   <ChevronDown className="w-3.5 h-3.5" />
@@ -722,14 +726,14 @@ export function StepPricing({
                               </div>
                               <button
                                 onClick={() => handleEditTier(tier)}
-                                className="p-2 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
+                                className="p-2.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
                                 title="Editar"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteTier(tier.id)}
-                                className="p-2 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
+                                className="p-2.5 rounded-md text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
                                 title="Eliminar"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -741,15 +745,15 @@ export function StepPricing({
                           <div className="mt-3 grid grid-cols-3 gap-2">
                             <div className="p-2 bg-surface rounded-lg">
                               <p className="text-[10px] text-muted-foreground">Normal</p>
-                              <p className="text-sm font-medium">{basePrice.toFixed(2)} €</p>
+                              <p className="text-xs sm:text-sm font-medium tabular-nums">{basePrice.toFixed(2)} €</p>
                             </div>
                             <div className="p-2 bg-green-50 rounded-lg border border-green-200">
                               <p className="text-[10px] text-muted-foreground">Oferta</p>
-                              <p className="text-sm font-bold text-green-700">{offerPrice.toFixed(2)} €</p>
+                              <p className="text-xs sm:text-sm font-bold text-green-700 tabular-nums">{offerPrice.toFixed(2)} €</p>
                             </div>
                             <div className="p-2 bg-amber-50 rounded-lg">
                               <p className="text-[10px] text-muted-foreground">Ahorro</p>
-                              <p className="text-sm font-bold text-amber-700">{savings.toFixed(2)} €</p>
+                              <p className="text-xs sm:text-sm font-bold text-amber-700 tabular-nums">{savings.toFixed(2)} €</p>
                             </div>
                           </div>
 
