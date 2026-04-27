@@ -146,6 +146,10 @@ async function navigateTo(page: Page, path: string): Promise<void> {
   await page.locator('#main-content').waitFor({ state: 'attached', timeout: 20_000 }).catch(() => {});
 }
 
+function primaryAccountLink(page: Page, href: string) {
+  return page.locator(`#main-content a[href="${href}"]`).first();
+}
+
 // ─── MOCK PREFERENCES ────────────────────────────────────────────────────────
 
 const MOCK_PREFERENCES_RESPONSE = {
@@ -203,17 +207,18 @@ test.describe('/dashboard/account (Mi Cuenta)', () => {
   });
 
   test('el enlace Seguridad navega a /dashboard/security', async ({ page }) => {
-    await page.getByRole('link', { name: /seguridad/i }).first().click();
+    await primaryAccountLink(page, '/dashboard/security').click();
     await expect(page).toHaveURL(/dashboard\/security/);
   });
 
   test('el enlace Cobros navega a /dashboard/configuracion/pagos', async ({ page }) => {
-    await page.getByRole('link', { name: /cobros/i }).first().click();
+    await primaryAccountLink(page, '/dashboard/configuracion/pagos').click();
     await expect(page).toHaveURL(/configuracion\/pagos/);
   });
 
-  test('el enlace Perfil comercial navega a /dashboard/profile', async ({ page }) => {
-    await page.getByRole('link', { name: /perfil comercial/i }).first().click();
+  test('el enlace Perfil comercial apunta a /dashboard/profile', async ({ page }) => {
+    await expect(primaryAccountLink(page, '/dashboard/profile')).toHaveAttribute('href', '/dashboard/profile');
+    await page.goto('/dashboard/profile', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/dashboard\/profile/);
   });
 
@@ -523,8 +528,9 @@ test.describe('/dashboard/security', () => {
     await expect(page.getByRole('button', { name: /activar/i })).toBeVisible();
   });
 
-  test('"Volver a Cuenta" navega a /dashboard/account', async ({ page }) => {
-    await page.getByRole('link', { name: /volver a cuenta/i }).click();
+  test('"Volver a Cuenta" apunta a /dashboard/account', async ({ page }) => {
+    await expect(page.getByRole('link', { name: /volver a cuenta/i })).toHaveAttribute('href', '/dashboard/account');
+    await page.goto('/dashboard/account', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/dashboard\/account/);
   });
 

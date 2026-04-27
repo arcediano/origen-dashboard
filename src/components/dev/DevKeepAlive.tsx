@@ -29,6 +29,7 @@ export function DevKeepAlive() {
     SERVICE_NAMES.map(name => ({ name, status: 'pending', lastPing: null }))
   );
   const [minimized, setMinimized] = useState(false);
+  const isAutomatedBrowser = typeof navigator !== 'undefined' && navigator.webdriver;
 
   const pingAll = useCallback(async () => {
     const controller = new AbortController();
@@ -60,6 +61,10 @@ export function DevKeepAlive() {
 
   const allOk = services.every(s => s.status === 'ok');
   const anyError = services.some(s => s.status === 'error');
+
+  if (isAutomatedBrowser) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-4 right-4 z-[9000] font-mono text-xs select-none">

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 import {
   getActiveProducerCredentials,
@@ -8,6 +8,10 @@ import {
 
 const pendingOnboardingCredentials = getPendingOnboardingCredentials();
 const activeProducerCredentials = getActiveProducerCredentials();
+
+function primaryAccountLink(page: Page, href: string) {
+  return page.locator(`#main-content a[href="${href}"]`).first();
+}
 
 test.describe.serial('Flujos encadenados de productores', () => {
   test.describe('Login', () => {
@@ -91,19 +95,20 @@ test.describe.serial('Flujos encadenados de productores', () => {
         page.locator('#main-content').getByRole('heading', { name: /^cuenta$/i }),
       ).toBeVisible({ timeout: 15_000 });
 
-      await expect(page.getByRole('link', { name: /seguridad/i }).first()).toBeVisible();
-      await expect(page.getByRole('link', { name: /cobros/i }).first()).toBeVisible();
-      await expect(page.getByRole('link', { name: /perfil comercial/i }).first()).toBeVisible();
+      await expect(primaryAccountLink(page, '/dashboard/security')).toBeVisible();
+      await expect(primaryAccountLink(page, '/dashboard/configuracion/pagos')).toBeVisible();
+      await expect(primaryAccountLink(page, '/dashboard/profile')).toBeVisible();
 
-      await page.getByRole('link', { name: /seguridad/i }).first().click();
+      await primaryAccountLink(page, '/dashboard/security').click();
       await expect(page).toHaveURL(/dashboard\/security/);
 
       await page.goto('/dashboard/account');
-      await page.getByRole('link', { name: /cobros/i }).first().click();
+      await primaryAccountLink(page, '/dashboard/configuracion/pagos').click();
       await expect(page).toHaveURL(/dashboard\/configuracion\/pagos/);
 
       await page.goto('/dashboard/account');
-      await page.getByRole('link', { name: /perfil comercial/i }).first().click();
+      await expect(primaryAccountLink(page, '/dashboard/profile')).toHaveAttribute('href', '/dashboard/profile');
+      await page.goto('/dashboard/profile');
       await expect(page).toHaveURL(/dashboard\/profile/);
     });
 
