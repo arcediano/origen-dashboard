@@ -9,10 +9,10 @@ export default function AccountPage() {
   const accountSections = [
     {
       title: 'Seguridad',
-      description: 'Cambia tu contrasena y activa verificacion en dos pasos.',
+      description: 'Cambia tu contraseña y activa verificación en dos pasos.',
       href: '/dashboard/security',
       icon: KeyRound,
-      meta: 'Proteccion',
+      meta: 'Protección',
     },
     {
       title: 'Cobros',
@@ -34,11 +34,11 @@ export default function AccountPage() {
     <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
       <PageHeader
         title="Cuenta"
-        description="Gestiona en un unico lugar tu seguridad, cobros y preferencias"
+        description="Gestiona en un único lugar tu seguridad, cobros y preferencias"
         badgeIcon={Settings2}
         badgeText="Cuenta"
         tooltip="Cuenta"
-        tooltipDetailed="Este espacio concentra tareas personales y de configuracion, sin duplicar notificaciones."
+        tooltipDetailed="Este espacio concentra tareas personales y de configuración, sin duplicar notificaciones."
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 space-y-6">
@@ -49,7 +49,7 @@ export default function AccountPage() {
             </div>
             <div>
               <p className="text-sm font-semibold text-origen-bosque leading-tight">Una sola entrada para toda tu cuenta</p>
-              <p className="mt-1 text-xs text-text-subtle sm:text-sm">Aqui se concentran tareas personales y configuracion. Notificaciones se gestionan desde la campana.</p>
+              <p className="mt-1 text-xs text-text-subtle sm:text-sm">Aquí se concentran tareas personales y configuración. Notificaciones se gestionan desde la campana.</p>
             </div>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function AccountPage() {
               <Link href="/dashboard/security" className="flex items-center justify-between rounded-xl border border-border-subtle p-4 transition-colors hover:bg-surface-alt">
                 <div>
                   <p className="text-sm font-medium text-origen-bosque">Revisar seguridad</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Contrasena, 2FA y proteccion de acceso.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Contraseña, 2FA y protección de acceso.</p>
                 </div>
                 <KeyRound className="h-4 w-4 text-text-subtle" />
               </Link>

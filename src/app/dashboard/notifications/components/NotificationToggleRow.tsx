@@ -31,6 +31,8 @@ export interface NotificationToggleRowProps {
   email?:      NotificationChannel;
   /** Canal push — si se omite, no se renderiza */
   push?:       NotificationChannel;
+  /** Si true, muestra "Siempre activo" en lugar de los toggles */
+  alwaysActive?: boolean;
   /** Si true, añade separador inferior */
   divider?:    boolean;
   className?:  string;
@@ -44,6 +46,7 @@ export function NotificationToggleRow({
   description,
   email,
   push,
+  alwaysActive = false,
   divider = true,
   className,
 }: NotificationToggleRowProps) {
@@ -69,7 +72,13 @@ export function NotificationToggleRow({
       </div>
 
       {/* ── Canales (fila 2 — debajo del texto, nunca en la misma línea) ── */}
-      {(email ?? push) && (
+      {alwaysActive ? (
+        <div className="mt-3 pl-11">
+          <span className="inline-flex items-center rounded-full bg-origen-pastel px-2.5 py-0.5 text-xs font-medium text-origen-pino">
+            Siempre activo
+          </span>
+        </div>
+      ) : (email ?? push) && (
         <div className="mt-3 pl-11 flex items-center gap-5">
           {email && (
             <label className="flex items-center gap-2 cursor-pointer select-none">

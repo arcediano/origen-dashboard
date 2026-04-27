@@ -75,4 +75,61 @@ test.describe.serial('Flujos encadenados de productores', () => {
       await expect(page.getByText(/paso 2 de 8|paso 2 de 7/i)).toBeVisible();
     });
   });
+
+  test.describe('Mi cuenta y configuración (real)', () => {
+    test('despues del login activo permite entrar en Mi Cuenta y navegar a Seguridad/Cobros/Perfil comercial', async ({ page }) => {
+      test.skip(
+        !activeProducerCredentials,
+        'Requiere E2E_ACTIVE_PRODUCER_EMAIL y E2E_ACTIVE_PRODUCER_PASSWORD o E2E_TEST_EMAIL y E2E_TEST_PASSWORD.',
+      );
+
+      await loginAsProducer(page, activeProducerCredentials!);
+      await page.goto('/dashboard/account');
+
+      await expect(page).toHaveURL(/dashboard\/account/, { timeout: 15_000 });
+      await expect(
+        page.locator('#main-content').getByRole('heading', { name: /^cuenta$/i }),
+      ).toBeVisible({ timeout: 15_000 });
+
+      await expect(page.getByRole('link', { name: /seguridad/i }).first()).toBeVisible();
+      await expect(page.getByRole('link', { name: /cobros/i }).first()).toBeVisible();
+      await expect(page.getByRole('link', { name: /perfil comercial/i }).first()).toBeVisible();
+
+      await page.getByRole('link', { name: /seguridad/i }).first().click();
+      await expect(page).toHaveURL(/dashboard\/security/);
+
+      await page.goto('/dashboard/account');
+      await page.getByRole('link', { name: /cobros/i }).first().click();
+      await expect(page).toHaveURL(/dashboard\/configuracion\/pagos/);
+
+      await page.goto('/dashboard/account');
+      await page.getByRole('link', { name: /perfil comercial/i }).first().click();
+      await expect(page).toHaveURL(/dashboard\/profile/);
+    });
+
+    test('despues del login activo permite abrir Configuración y verificar que existen preferencias interactivas', async ({ page }) => {
+      test.skip(
+        !activeProducerCredentials,
+        'Requiere E2E_ACTIVE_PRODUCER_EMAIL y E2E_ACTIVE_PRODUCER_PASSWORD o E2E_TEST_EMAIL y E2E_TEST_PASSWORD.',
+      );
+
+      await loginAsProducer(page, activeProducerCredentials!);
+      await page.goto('/dashboard/configuracion');
+
+      await expect(page).toHaveURL(/dashboard\/configuracion/, { timeout: 15_000 });
+      await expect(
+        page.locator('#main-content').getByRole('heading', { name: /configuraciones/i }),
+      ).toBeVisible({ timeout: 15_000 });
+
+      await expect(page.getByText(/pedidos/i).first()).toBeVisible({ timeout: 15_000 });
+
+      const emailSwitches = page.locator('button[aria-label*="email para"]');
+      const switchCount = await emailSwitches.count();
+
+      // El backend puede devolver grupos variables por cuenta, pero debe existir al menos
+      // un control interactivo de notificaciones para validar la configuración real.
+      expect(switchCount).toBeGreaterThan(0);
+      await expect(emailSwitches.first()).toBeEnabled();
+    });
+  });
 });

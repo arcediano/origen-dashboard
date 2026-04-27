@@ -177,7 +177,7 @@ export default function SecurityPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {saveError && (
-                <Alert className="border-red-200 bg-red-50 text-red-900">
+                <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
                   <AlertTriangle className="w-4 h-4" />
                   <AlertDescription>{saveError}</AlertDescription>
                 </Alert>
@@ -297,12 +297,12 @@ export default function SecurityPage() {
                   <p className="text-sm font-medium text-origen-bosque">Nivel actual</p>
                   <p className="mt-1 text-xs text-muted-foreground">Protección básica activa. Mejora tu cuenta habilitando 2FA y revisando accesos recientes.</p>
                 </div>
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <div className="rounded-xl border border-feedback-warning/30 bg-feedback-warning-subtle p-4">
                   <div className="flex items-start gap-3">
-                    <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-600" />
+                    <AlertTriangle className="mt-0.5 h-4 w-4 text-feedback-warning" />
                     <div>
-                      <p className="text-sm font-medium text-amber-900">Siguiente acción recomendada</p>
-                      <p className="mt-1 text-xs text-amber-800">Activa la verificación en dos pasos antes de publicar más productos o cambiar datos bancarios.</p>
+                      <p className="text-sm font-medium text-origen-bosque">Siguiente acción recomendada</p>
+                      <p className="mt-1 text-xs text-text-subtle">Activa la verificación en dos pasos antes de publicar más productos o cambiar datos bancarios.</p>
                     </div>
                   </div>
                 </div>
@@ -331,9 +331,9 @@ export default function SecurityPage() {
                     {auditLog.map((entry, idx) => (
                       <li key={idx} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
                         {entry.ok ? (
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-green-600 flex-shrink-0" aria-hidden="true" />
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-feedback-success flex-shrink-0" aria-hidden="true" />
                         ) : (
-                          <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500 flex-shrink-0" aria-hidden="true" />
+                          <AlertTriangle className="mt-0.5 h-4 w-4 text-feedback-warning flex-shrink-0" aria-hidden="true" />
                         )}
                         <div className="min-w-0">
                           <p className="text-xs font-medium text-origen-bosque">{entry.label}</p>

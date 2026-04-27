@@ -1,151 +1,26 @@
 /**
  * @component NotificationsPreferencesPanel
  * @description Panel de configuración de canales (email / push) por tipo de evento.
- *              Layout mobile-first: texto en su propio bloque, toggles en fila separada.
+ *              24 eventos en 6 grupos colapsables. Layout mobile-first.
  *              Actualizaciones optimistas — se confirman o revierten con la respuesta del API.
+ *              Eventos transaccionales/seguridad marcados como "Siempre activo".
  *
- * US-DASH-2404 — Sprint 24
+ * US-34.2 — Sprint 34
  * Tokens Origen v3.0.
  */
 
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  Bell,
-  Megaphone,
-  Package,
-  Settings,
-  ShoppingCart,
-  UserCheck,
-} from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
 import { NotificationToggleRow } from './NotificationToggleRow';
 import {
   fetchNotificationPreferences,
   updateNotificationPreference,
 } from '@/lib/api/notifications';
+import { NOTIFICATION_GROUPS } from '@/lib/notifications/preferences-config';
 import type { NotificationPreference } from '@/types/notification';
-
-// ─── GRUPOS DE EVENTOS ────────────────────────────────────────────────────────
-
-interface EventMeta {
-  eventType:   string;
-  title:       string;
-  description: string;
-  icon:        React.ElementType;
-}
-
-interface EventGroup {
-  id:     string;
-  label:  string;
-  icon:   React.ElementType;
-  events: EventMeta[];
-}
-
-const EVENT_GROUPS: EventGroup[] = [
-  {
-    id:    'orders',
-    label: 'Pedidos',
-    icon:  ShoppingCart,
-    events: [
-      {
-        eventType:   'NEW_ORDER',
-        title:       'Nuevo pedido recibido',
-        description: 'Aviso inmediato cuando un cliente completa un pedido.',
-        icon:        ShoppingCart,
-      },
-      {
-        eventType:   'ORDER_STATUS_CHANGED',
-        title:       'Cambio de estado de pedido',
-        description: 'Transiciones de estado: preparando, enviado, entregado.',
-        icon:        ShoppingCart,
-      },
-      {
-        eventType:   'ORDER_CANCELLED',
-        title:       'Pedido cancelado',
-        description: 'Alerta cuando un pedido es cancelado por el cliente o el sistema.',
-        icon:        ShoppingCart,
-      },
-    ],
-  },
-  {
-    id:    'products',
-    label: 'Productos',
-    icon:  Package,
-    events: [
-      {
-        eventType:   'PRODUCT_LOW_STOCK',
-        title:       'Stock bajo',
-        description: 'Aviso cuando el inventario cae por debajo del umbral configurado.',
-        icon:        Package,
-      },
-      {
-        eventType:   'PRODUCT_APPROVED',
-        title:       'Producto aprobado',
-        description: 'Tu producto ha pasado la revisión y está publicado en el catálogo.',
-        icon:        Package,
-      },
-      {
-        eventType:   'PRODUCT_REJECTED',
-        title:       'Producto rechazado',
-        description: 'Notificación con motivo cuando un producto no supera la revisión.',
-        icon:        Package,
-      },
-    ],
-  },
-  {
-    id:    'account',
-    label: 'Cuenta',
-    icon:  UserCheck,
-    events: [
-      {
-        eventType:   'ACCOUNT_VERIFIED',
-        title:       'Cuenta verificada',
-        description: 'Confirmación cuando la verificación de identidad se completa.',
-        icon:        UserCheck,
-      },
-      {
-        eventType:   'CERTIFICATION_PENDING',
-        title:       'Certificación pendiente',
-        description: 'Recordatorio para completar documentos de certificación.',
-        icon:        UserCheck,
-      },
-    ],
-  },
-  {
-    id:    'system',
-    label: 'Sistema',
-    icon:  Settings,
-    events: [
-      {
-        eventType:   'SYSTEM_MAINTENANCE',
-        title:       'Mantenimiento programado',
-        description: 'Aviso previo a interrupciones planificadas del servicio.',
-        icon:        Settings,
-      },
-      {
-        eventType:   'SYSTEM_ALERT',
-        title:       'Alerta del sistema',
-        description: 'Incidencias críticas que pueden afectar tus operaciones.',
-        icon:        Settings,
-      },
-    ],
-  },
-  {
-    id:    'marketing',
-    label: 'Marketing',
-    icon:  Megaphone,
-    events: [
-      {
-        eventType:   'PROMOTION_CREATED',
-        title:       'Nueva promoción disponible',
-        description: 'Aviso cuando se publican ofertas o campañas activas para tu tienda.',
-        icon:        Megaphone,
-      },
-    ],
-  },
-];
 
 // ─── ESTADO LOCAL ─────────────────────────────────────────────────────────────
 
@@ -220,8 +95,8 @@ export function NotificationsPreferencesPanel() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
+      <div className="space-y-4" aria-busy="true" aria-label="Cargando preferencias...">
+        {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i} className="rounded-2xl border border-border-subtle animate-pulse">
             <CardContent className="p-4">
               <div className="h-4 bg-surface-alt rounded w-1/3 mb-4" />
@@ -238,7 +113,7 @@ export function NotificationsPreferencesPanel() {
 
   if (loadError) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <div className="rounded-2xl border border-feedback-danger/30 bg-feedback-danger-subtle p-4 text-sm text-feedback-danger">
         {loadError}
       </div>
     );
@@ -254,7 +129,7 @@ export function NotificationsPreferencesPanel() {
         </p>
       </div>
 
-      {EVENT_GROUPS.map((group) => {
+      {NOTIFICATION_GROUPS.map((group) => {
         const GroupIcon = group.icon;
         return (
           <Card
@@ -270,6 +145,19 @@ export function NotificationsPreferencesPanel() {
             <CardContent className="p-0">
               <div className="divide-y divide-border-subtle px-4 sm:px-6">
                 {group.events.map((event, idx) => {
+                  if (event.alwaysActive) {
+                    return (
+                      <NotificationToggleRow
+                        key={event.eventType}
+                        icon={event.icon}
+                        title={event.title}
+                        description={event.description}
+                        alwaysActive
+                        divider={idx < group.events.length - 1}
+                      />
+                    );
+                  }
+
                   const state = channels.get(event.eventType) ?? { email: false, push: false };
                   const emailKey = `${event.eventType}:email`;
                   const pushKey  = `${event.eventType}:push`;
@@ -304,7 +192,7 @@ export function NotificationsPreferencesPanel() {
       <div className="flex items-start gap-2 rounded-[16px] border border-origen-pradera/20 bg-origen-pastel/40 px-4 py-3">
         <Bell className="w-3.5 h-3.5 text-origen-pradera mt-0.5 flex-shrink-0" aria-hidden="true" />
         <p className="text-xs text-text-subtle">
-          Los eventos de seguridad (cambio de contraseña, accesos no reconocidos) siempre se
+          Los eventos de seguridad (cambio de contraseña, cuenta suspendida) siempre se
           envían por email independientemente de esta configuración.
         </p>
       </div>

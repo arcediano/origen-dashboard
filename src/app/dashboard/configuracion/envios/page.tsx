@@ -24,7 +24,7 @@ export default function EnviosPage() {
         tooltipDetailed="Configura cómo entregas tus productos y qué zonas mantienes activas para la venta."
         actions={
           <div className="hidden lg:block">
-            <Button onClick={() => setIsSaving(true)} disabled={isSaving}>
+            <Button onClick={() => { setIsSaving(true); setTimeout(() => setIsSaving(false), 1500); }} disabled={isSaving}>
               <span className="inline-flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 <span>{isSaving ? 'Guardando...' : 'Guardar cambios'}</span>
@@ -60,8 +60,8 @@ export default function EnviosPage() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Truck className="w-5 h-5 text-blue-600" />
+                <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
+                  <Truck className="w-5 h-5 text-origen-pradera" />
                 </div>
                 <div>
                   <h3 className="font-medium text-origen-bosque">Envío estándar</h3>
@@ -94,8 +94,8 @@ export default function EnviosPage() {
 
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                  <Store className="w-5 h-5 text-green-600" />
+                <div className="w-10 h-10 rounded-lg bg-feedback-success/10 flex items-center justify-center">
+                  <Store className="w-5 h-5 text-feedback-success" />
                 </div>
                 <div>
                   <h3 className="font-medium text-origen-bosque">Recogida en local</h3>
@@ -131,7 +131,7 @@ export default function EnviosPage() {
         </Card>
 
         <div className="lg:hidden">
-          <Button onClick={() => setIsSaving(true)} disabled={isSaving} className="w-full">
+          <Button onClick={() => { setIsSaving(true); setTimeout(() => setIsSaving(false), 1500); }} disabled={isSaving} className="w-full">
             <span className="inline-flex items-center gap-2">
               <Save className="w-4 h-4" />
               <span>{isSaving ? 'Guardando...' : 'Guardar cambios'}</span>

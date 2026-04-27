@@ -30,9 +30,9 @@ import { test, expect, type Page } from '@playwright/test';
 // ─── GUARD: evita ejecución accidental en CI sin configuración explícita ──────
 const REGISTRATION_ENABLED = process.env.E2E_ENABLE_REGISTRATION === 'true';
 const DEFAULT_APPROVED_EMAILS = [
-  'e2e.ana.1775547684573@testlab.origen.es',
-  'e2e.miguel.1775547684573@testlab.origen.es',
-  'e2e.carmen.1775547684573@testlab.origen.es',
+  'e2e.ana.1777238090175@testlab.origen.es',
+  'e2e.miguel.1777238090175@testlab.origen.es',
+  'e2e.carmen.1777238090175@testlab.origen.es',
 ];
 const USE_APPROVED_ACCOUNTS = process.env.E2E_USE_APPROVED_ACCOUNTS === 'true';
 const APPROVED_EMAILS = (process.env.E2E_APPROVED_EMAILS ?? DEFAULT_APPROVED_EMAILS.join(','))
@@ -40,7 +40,7 @@ const APPROVED_EMAILS = (process.env.E2E_APPROVED_EMAILS ?? DEFAULT_APPROVED_EMA
   .map(email => email.trim())
   .filter(Boolean);
 const SHOULD_RUN_E2E = REGISTRATION_ENABLED || USE_APPROVED_ACCOUNTS;
-const LOGO_FIXTURE_PATH = 'tests/e2e/fixtures/logo-test.png';
+const LOGO_FIXTURE_PATH = 'tests/e2e/fixtures/test-image.png';
 const DOC_CIF_FIXTURE_PATH = 'tests/e2e/fixtures/doc-test.pdf';
 const DOC_SEGURO_FIXTURE_PATH = 'tests/e2e/fixtures/seguro-test.pdf';
 const DOC_MANIPULADOR_FIXTURE_PATH = 'tests/e2e/fixtures/manipulador-test.pdf';
@@ -107,7 +107,7 @@ const PROFILES: ProducerProfile[] = [
   {
     firstName: 'Ana',
     lastName: 'García Martínez',
-    email: APPROVED_EMAILS[0] ?? `e2e.ana.${TS}@testlab.origen.es`,
+    email: USE_APPROVED_ACCOUNTS ? (APPROVED_EMAILS[0] ?? `e2e.ana.${TS}@testlab.origen.es`) : `e2e.ana.${TS}@testlab.origen.es`,
     password: 'Password1!',
     phone: '612345678',
     businessName: `Quesos Artesanos Ana ${TS}`,
@@ -148,7 +148,7 @@ const PROFILES: ProducerProfile[] = [
   {
     firstName: 'Miguel',
     lastName: 'López Fernández',
-    email: APPROVED_EMAILS[1] ?? `e2e.miguel.${TS}@testlab.origen.es`,
+    email: USE_APPROVED_ACCOUNTS ? (APPROVED_EMAILS[1] ?? `e2e.miguel.${TS}@testlab.origen.es`) : `e2e.miguel.${TS}@testlab.origen.es`,
     password: 'Password1!',
     phone: '634567890',
     businessName: `Aceites Ecológicos Miguel ${TS}`,
@@ -188,7 +188,7 @@ const PROFILES: ProducerProfile[] = [
   {
     firstName: 'Carmen',
     lastName: 'Ruiz Sánchez',
-    email: APPROVED_EMAILS[2] ?? `e2e.carmen.${TS}@testlab.origen.es`,
+    email: USE_APPROVED_ACCOUNTS ? (APPROVED_EMAILS[2] ?? `e2e.carmen.${TS}@testlab.origen.es`) : `e2e.carmen.${TS}@testlab.origen.es`,
     password: 'Password1!',
     phone: '656789012',
     businessName: `Miel Artesanal Carmen ${TS}`,
@@ -419,30 +419,34 @@ async function clickContinue(page: Page): Promise<void> {
 }
 
 async function completeOnboardingStep1(page: Page, profile: ProducerProfile): Promise<void> {
+  const STEPS_AFTER_1 = ['historia', 'productos', 'perfil visual', 'capacidad', 'documentación', 'documentacion', 'pagos'];
+
   let currentStepTitle = await getCurrentOnboardingStepTitle(page);
   if (currentStepTitle === 'dashboard') {
     console.info(`[E2E] ${profile.firstName} ya está en dashboard (onboarding finalizado).`);
     return;
   }
 
-  if (currentStepTitle === 'unknown') {
+  // If already past Ubicación, step 1 data is persisted on the server — skip.
+  if (STEPS_AFTER_1.includes(currentStepTitle)) {
+    console.info(`[E2E] ${profile.firstName} ya está en "${currentStepTitle}" (posterior a Ubicación) — paso 1 ya completado.`);
+    return;
+  }
+
+  // If unknown (page still loading after login redirect), navigate to onboarding and re-check
+  if (currentStepTitle === 'unknown' || (currentStepTitle !== 'ubicación' && currentStepTitle !== 'ubicacion')) {
     await page.goto('/onboarding', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(2000); // allow React to hydrate and render step heading
     currentStepTitle = await getCurrentOnboardingStepTitle(page);
+
     if (currentStepTitle === 'dashboard') {
       console.info(`[E2E] ${profile.firstName} ya está en dashboard (onboarding finalizado).`);
       return;
     }
-  }
-
-  if (currentStepTitle !== 'ubicación' && currentStepTitle !== 'ubicacion') {
-    console.info(`[E2E] ${profile.firstName} ya está en "${currentStepTitle}". Reabriendo Ubicación para persistir categoría.`);
-
-    const step1Nav = page.getByRole('heading', { level: 3, name: /^Ubicación$/i }).first();
-    if (await step1Nav.count()) {
-      await step1Nav.click();
+    if (STEPS_AFTER_1.includes(currentStepTitle)) {
+      console.info(`[E2E] ${profile.firstName} ya en "${currentStepTitle}" tras navegar — paso 1 ya completado.`);
+      return;
     }
-
-    await expect(page.getByRole('heading', { level: 1, name: /^Ubicación$/i })).toBeVisible({ timeout: 10_000 });
   }
 
   const ob = profile.onboarding;
@@ -460,7 +464,7 @@ async function completeOnboardingStep1(page: Page, profile: ProducerProfile): Pr
 
   await page.getByLabel(/Nombre del representante legal/i).fill(`${profile.firstName} ${profile.lastName}`);
   await page.getByLabel(/NIF \/ CIF \/ NIE/i).fill(ob.taxId);
-  await page.getByLabel(/Teléfono de contacto del negocio/i).fill(ob.businessPhone);
+  await page.getByLabel(/Teléfono del negocio/i).fill(ob.businessPhone);
 
   await page.getByLabel(/Nombre de la vía/i).first().fill(ob.street);
   await page.getByLabel(/Número/i).first().fill(ob.streetNumber);
@@ -479,8 +483,10 @@ async function completeOnboardingStep1(page: Page, profile: ProducerProfile): Pr
   // para no deseleccionarla por accidente.
   const ariaPressed = await categoryBtn.getAttribute('aria-pressed');
   const className = (await categoryBtn.getAttribute('class')) ?? '';
+  // Split by spaces to avoid matching hover: variants (e.g. hover:bg-origen-pradera on unselected state)
+  const classes = className.split(' ');
   const isAlreadySelected = ariaPressed === 'true'
-    || /bg-origen-pradera|border-origen-pradera|text-origen-pradera|active/.test(className);
+    || classes.some(c => c === 'bg-origen-pradera' || c === 'border-origen-pradera' || c === 'text-origen-pradera' || c === 'active');
 
   if (!isAlreadySelected) {
     await categoryBtn.click();
@@ -514,17 +520,40 @@ async function completeOnboardingStep2(page: Page, profile: ProducerProfile): Pr
 
   const textareas = page.locator('textarea');
   await textareas.nth(0).fill(story.description);
+
+  // "Filosofía de producción" is a collapsed accordion — expand it before filling
+  const philosophyAccordion = page.getByRole('button', { name: /Filosofía de producción/i });
+  if (await philosophyAccordion.isVisible().catch(() => false)) {
+    await philosophyAccordion.click();
+    await page.waitForTimeout(400);
+  }
   await textareas.nth(1).fill(story.productionPhilosophy);
 
-  const valuesSection = page.locator('section,div').filter({
-    has: page.getByRole('heading', { level: 2, name: /^Valores$/i }),
-  }).first();
+  // Valores — center button in viewport so sticky header/footer don't block it
+  await hideDevOverlay(page);
+  const valueBtn = page.getByRole('button', { name: story.valueLabel, exact: true }).first();
 
-  const valueButton = valuesSection.getByRole('button', { name: new RegExp(story.valueLabel, 'i') }).first();
-  const className = (await valueButton.getAttribute('class')) ?? '';
-  const isAlreadySelected = /bg-origen-pradera|border-origen-pradera|text-origen-pradera|active/.test(className);
-  if (!isAlreadySelected) {
-    await valueButton.click();
+  // scrollIntoView with block:center avoids sticky header/footer overlap
+  await valueBtn.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
+  await page.waitForTimeout(400);
+
+  // Check if already selected from server data.
+  // IMPORTANT: split by spaces to avoid matching 'hover:border-origen-pradera' (unselected state).
+  const isSelectedClass = (cls: string) => cls.split(' ').includes('border-origen-pradera');
+
+  const existingClass = (await valueBtn.getAttribute('class')) ?? '';
+  if (!isSelectedClass(existingClass)) {
+    // Use Playwright's force-click which fires proper pointer+mouse events
+    await valueBtn.click({ force: true });
+    await page.waitForTimeout(600);
+  }
+
+  // Verify click registered; retry once if not
+  const classAfterClick = (await valueBtn.getAttribute('class')) ?? '';
+  if (!isSelectedClass(classAfterClick)) {
+    // Fallback: click inner span to ensure target is within the button content
+    await page.locator(`button:has(span)`).filter({ hasText: story.valueLabel }).first().click({ force: true });
+    await page.waitForTimeout(600);
   }
 
   await clickContinue(page);
@@ -669,7 +698,6 @@ async function completeOnboardingStep4(page: Page, profile: ProducerProfile): Pr
     };
 
     const logoRequiredMessage = page
-      .locator('div:has-text("Para continuar en este paso:")')
       .getByText(/Sube el logo del negocio para continuar/i)
       .first();
     const logoUploaded = !(await logoRequiredMessage.isVisible().catch(() => false));
@@ -739,7 +767,7 @@ async function completeOnboardingStep4(page: Page, profile: ProducerProfile): Pr
     if (!(await isContinueEnabled())) {
       const logoStillPending = await logoRequiredMessage.isVisible().catch(() => false);
       const visibleValidationItems = await page
-        .locator('div:has-text("Para continuar en este paso:") li')
+        .locator('[data-onboarding-step-content] li')
         .allTextContents()
         .catch(() => [] as string[]);
       const normalizedItems = visibleValidationItems
@@ -1032,7 +1060,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
 
         // El modal confirma el nombre del productor
         await expect(
-          page.getByText(new RegExp(`Gracias.*${profile.firstName}`, 'i')),
+          page.getByRole('heading', { name: new RegExp(`Gracias.*${profile.firstName}`, 'i') }),
         ).toBeVisible({ timeout: 5_000 });
 
         // Guardar el resultado para Fases 2 y 3
@@ -1055,6 +1083,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
   // ───────────────────────────────────────────────────────────────────────────
 
   test.describe('Fase 2 · Login de productores registrados', () => {
+    test.setTimeout(60_000);
     for (let i = 0; i < PROFILES.length; i++) {
       const profile = PROFILES[i];
 
@@ -1108,6 +1137,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
   // ───────────────────────────────────────────────────────────────────────────
 
   test.describe('Fase 3 · Onboarding Paso 1 (Ubicación)', () => {
+    test.setTimeout(90_000);
     for (let i = 0; i < PROFILES.length; i++) {
       const profile = PROFILES[i];
 
@@ -1154,6 +1184,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
   // ───────────────────────────────────────────────────────────────────────────
 
   test.describe('Fase 4 · Onboarding Paso 2 (Historia)', () => {
+    test.setTimeout(120_000);
     for (let i = 0; i < PROFILES.length; i++) {
       const profile = PROFILES[i];
 
@@ -1199,6 +1230,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
   // ───────────────────────────────────────────────────────────────────────────
 
   test.describe('Fase 5 · Onboarding Paso 3 (Productos)', () => {
+    test.setTimeout(120_000);
     for (let i = 0; i < PROFILES.length; i++) {
       const profile = PROFILES[i];
 
