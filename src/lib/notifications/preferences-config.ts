@@ -198,33 +198,19 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
         description: 'Tu perfil de productor ha sido verificado y ya puedes vender.',
         icon:        Briefcase,
       },
-      {
-        eventType:   'CERTIFICATION_PENDING',
-        title:       'Certificación pendiente',
-        description: 'Recordatorio para completar los documentos de certificación.',
-        icon:        UserCheck,
-      },
+      // CERTIFICATION_PENDING no está disponible en el backend desplegado aún.
+      // Habilitar cuando se añada la migración de base de datos correspondiente.
     ],
   },
 
-  // ── Sistema (3) ────────────────────────────────────────────────────────────
+  // ── Sistema (1 alwaysActive) ──────────────────────────────────────────────
   {
     id:    'system',
     label: 'Sistema',
     icon:  Settings,
     events: [
-      {
-        eventType:   'SYSTEM_MAINTENANCE',
-        title:       'Mantenimiento programado',
-        description: 'Aviso previo a interrupciones planificadas del servicio.',
-        icon:        Settings,
-      },
-      {
-        eventType:   'SYSTEM_ALERT',
-        title:       'Alerta del sistema',
-        description: 'Incidencias críticas que pueden afectar tus operaciones.',
-        icon:        Settings,
-      },
+      // SYSTEM_MAINTENANCE y SYSTEM_ALERT no están disponibles en el backend desplegado aún.
+      // Habilitar cuando se añada la migración de base de datos correspondiente.
       {
         eventType:   'WELCOME',
         title:       'Bienvenida',
@@ -235,20 +221,9 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
     ],
   },
 
-  // ── Marketing (1) ─────────────────────────────────────────────────────────
-  {
-    id:    'marketing',
-    label: 'Marketing',
-    icon:  Megaphone,
-    events: [
-      {
-        eventType:   'PROMOTION_CREATED',
-        title:       'Nueva promoción disponible',
-        description: 'Aviso cuando se publican ofertas o campañas activas para tu tienda.',
-        icon:        Megaphone,
-      },
-    ],
-  },
+  // ── Marketing (pendiente despliegue) ──────────────────────────────────────
+  // PROMOTION_CREATED no está disponible en el backend desplegado aún.
+  // Habilitar cuando se añada la migración de base de datos correspondiente.
 ];
 
 // ─── Legacy compatibility (Sprint 24 tests) ─────────────────────────────────

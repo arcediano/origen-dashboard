@@ -388,19 +388,32 @@ function mapBackendPreference(raw: BackendPreference, userId: number): Notificat
 
 /**
  * Obtiene las preferencias de notificación del usuario autenticado.
+ * Compatible con el shape antiguo `{ data: [...] }` y el nuevo `{ userId, preferences: [...] }`.
  */
 export async function fetchNotificationPreferences(): Promise<
   ApiResponse<NotificationPreference[]>
 > {
   try {
-    const res = await gatewayClient.get<{ userId: number; preferences: BackendPreference[] }>(
+    const res = await gatewayClient.get<
+      { userId: number; preferences: BackendPreference[] } | { data: BackendPreference[] }
+    >(
       '/notifications/preferences',
       { fetchOptions: { cache: 'no-store' } },
     );
-    const userId = res?.userId ?? 0;
-    const prefs = (res?.preferences ?? []).map((p) =>
-      mapBackendPreference(p, userId),
-    );
+
+    let userId = 0;
+    let rawPrefs: BackendPreference[];
+
+    if (res && 'preferences' in res && Array.isArray(res.preferences)) {
+      userId = (res as { userId: number; preferences: BackendPreference[] }).userId ?? 0;
+      rawPrefs = (res as { userId: number; preferences: BackendPreference[] }).preferences;
+    } else if (res && 'data' in res && Array.isArray((res as { data: BackendPreference[] }).data)) {
+      rawPrefs = (res as { data: BackendPreference[] }).data;
+    } else {
+      rawPrefs = [];
+    }
+
+    const prefs = rawPrefs.map((p) => mapBackendPreference(p, userId));
     logNotificationApiEvent('info', 'preferences_loaded', { count: prefs.length });
     return { data: prefs, status: 200 };
   } catch (err) {
