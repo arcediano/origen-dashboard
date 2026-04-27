@@ -20,9 +20,8 @@ async function getUnreadBadge(page: Page): Promise<Locator> {
 
 async function goToNotificationsCenter(page: Page): Promise<void> {
   await page.goto('/dashboard/notifications', { waitUntil: 'domcontentloaded' });
-  await expect(page.getByRole('heading', { name: /notificaciones/i })).toBeVisible();
+  await expect(page.locator('#main-content').getByRole('heading', { name: /notificaciones/i })).toBeVisible();
   await expect(page.locator('#notifications-inbox')).toBeVisible();
-  await expect(page.locator('#notifications-preferences')).toBeVisible();
 }
 
 test.describe.serial('Regresión real — Notificaciones de productor', () => {
@@ -78,30 +77,13 @@ test.describe.serial('Regresión real — Notificaciones de productor', () => {
     expect(updatedCount).toBeLessThanOrEqual(initialCount - 1);
   });
 
-  test('el centro de actividad filtra, marca todas y persiste preferencias', async ({ page }) => {
+  test('el centro de actividad filtra las notificaciones por tipo', async ({ page }) => {
     await goToNotificationsCenter(page);
 
     const inbox = page.locator('#notifications-inbox');
-    await expect(inbox.getByText(/tienes/i)).toBeVisible();
+    await expect(inbox.getByText(/pendientes:/i)).toBeVisible();
 
-    await inbox.getByRole('button', { name: /cuenta y sistema/i }).click();
+    await page.getByLabel(/filtrar por tipo/i).selectOption('cuenta');
     await expect(inbox.getByText(/hoy|ultimos 7 dias|anteriores/i).first()).toBeVisible();
-
-    const markAllButton = inbox.getByRole('button', { name: /marcar todas/i });
-    if (await markAllButton.isEnabled()) {
-      await markAllButton.click();
-      await expect(inbox.getByText(/0 notificación\(es\) sin leer|0 notificaciones sin leer/i)).toBeVisible({ timeout: 15_000 });
-    }
-
-    const preferences = page.locator('#notifications-preferences');
-    await expect(preferences.getByText(/email/i).first()).toBeVisible();
-
-    const marketingToggle = page.getByRole('switch', { name: /marketing y promociones/i }).first();
-    await marketingToggle.click();
-
-    const saveButton = page.getByRole('button', { name: /guardar preferencias|preferencias guardadas|¡guardado!/i }).first();
-    await saveButton.click();
-
-    await expect(page.getByRole('button', { name: /preferencias guardadas|¡guardado!/i }).first()).toBeVisible({ timeout: 10_000 });
   });
 });

@@ -7,7 +7,7 @@
  * para no romper NotificationBell ni NotificationItem.
  */
 
-import { gatewayClient } from './client';
+import { GatewayError, gatewayClient } from './client';
 import type {
   Notification,
   NotificationCategory,
@@ -305,6 +305,61 @@ export interface NotificationPreferencePayload {
   frequency?: NotificationFrequency;
 }
 
+function resolveSinglePayloadEntry(payload: NotificationPreferencePayload): [keyof NotificationPreferencePayload, NotificationPreferencePayload[keyof NotificationPreferencePayload]] | null {
+  for (const key of ['email', 'push', 'inApp', 'frequency'] as const) {
+    if (payload[key] !== undefined) {
+      return [key, payload[key]];
+    }
+  }
+  return null;
+}
+
+async function attemptLegacyPreferenceUpsert(
+  eventType: string,
+  payload: NotificationPreferencePayload,
+): Promise<NotificationPreference | null> {
+  const attempts: Array<{ method: 'patch' | 'put'; endpoint: string; body: unknown }> = [
+    { method: 'patch', endpoint: '/notifications/preferences', body: { eventType, ...payload } },
+    { method: 'patch', endpoint: '/notifications/preferences', body: { preferences: [{ eventType, ...payload }] } },
+    { method: 'put', endpoint: `/notifications/preferences/${encodeURIComponent(eventType)}`, body: payload },
+    { method: 'put', endpoint: '/notifications/preferences', body: { preferences: [{ eventType, ...payload }] } },
+    { method: 'put', endpoint: '/notifications/preferences', body: [{ eventType, ...payload }] },
+    { method: 'put', endpoint: '/notifications/preferences', body: { eventType, ...payload } },
+  ];
+
+  const targetEntry = resolveSinglePayloadEntry(payload);
+
+  for (const attempt of attempts) {
+    try {
+      if (attempt.method === 'patch') {
+        await gatewayClient.patch(attempt.endpoint, attempt.body);
+      } else {
+        await gatewayClient.put(attempt.endpoint, attempt.body);
+      }
+
+      const refreshed = await fetchNotificationPreferences();
+      const updated = refreshed.data?.find((pref) => pref.eventType === eventType);
+
+      if (!updated) {
+        continue;
+      }
+
+      if (!targetEntry) {
+        return updated;
+      }
+
+      const [key, value] = targetEntry;
+      if (updated[key] === value) {
+        return updated;
+      }
+    } catch {
+      // Continue with the next legacy shape.
+    }
+  }
+
+  return null;
+}
+
 interface BackendPreference {
   eventType:   string;
   inApp:       boolean;
@@ -340,6 +395,7 @@ export async function fetchNotificationPreferences(): Promise<
   try {
     const res = await gatewayClient.get<{ userId: number; preferences: BackendPreference[] }>(
       '/notifications/preferences',
+      { fetchOptions: { cache: 'no-store' } },
     );
     const userId = res?.userId ?? 0;
     const prefs = (res?.preferences ?? []).map((p) =>
@@ -374,6 +430,14 @@ export async function updateNotificationPreference(
     logNotificationApiEvent('info', 'preference_updated', { eventType });
     return { data: pref, status: 200 };
   } catch (err) {
+    if (err instanceof GatewayError && err.status === 404) {
+      const updated = await attemptLegacyPreferenceUpsert(eventType, payload);
+      if (updated) {
+        logNotificationApiEvent('warn', 'preference_update_patch_404_fallback_put', { eventType });
+        return { data: updated, status: 200 };
+      }
+    }
+
     console.error('[notifications] updateNotificationPreference', err);
     return { error: 'Error al actualizar preferencia', status: 500 };
   }

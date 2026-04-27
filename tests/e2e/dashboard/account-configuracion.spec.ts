@@ -334,15 +334,10 @@ test.describe('/dashboard/configuracion (preferencias de notificación)', () => 
     });
 
     await navigateTo(page, '/dashboard/configuracion');
-    await page.waitForSelector('[role="switch"]', { timeout: 10_000 });
-
-    // El primer switch activo en la página (NEW_ORDER email=true → click → false)
-    const switches = page.getByRole('switch');
-    const count = await switches.count();
-    expect(count).toBeGreaterThan(0);
-
-    // Encontrar el switch de email del primer evento configurable
-    await switches.first().click();
+    const emailToggle = page.getByLabel('Activar email para Nuevo pedido recibido').first();
+    await expect(emailToggle).toHaveAttribute('aria-pressed', 'true');
+    await emailToggle.click();
+    await expect(emailToggle).toHaveAttribute('aria-pressed', 'false');
 
     expect(patchCalled).toBe(true);
     expect(patchBody).toBeTruthy();
@@ -360,17 +355,15 @@ test.describe('/dashboard/configuracion (preferencias de notificación)', () => 
     });
 
     await navigateTo(page, '/dashboard/configuracion');
-    await page.waitForSelector('[role="switch"]', { timeout: 10_000 });
+    const firstToggle = page.locator('button[aria-label*="email para"], button[aria-label*="push para"]').first();
+    await expect(firstToggle).toBeVisible();
+    const initialPressed = await firstToggle.getAttribute('aria-pressed');
 
-    const firstSwitch = page.getByRole('switch').first();
-    const initialChecked = await firstSwitch.isChecked();
-
-    await firstSwitch.click();
+    await firstToggle.click();
     await page.waitForTimeout(500);
 
     // Tras el error 500 se revierte al estado anterior
-    const afterChecked = await firstSwitch.isChecked();
-    expect(afterChecked).toBe(initialChecked);
+    await expect(firstToggle).toHaveAttribute('aria-pressed', initialPressed ?? 'false');
     expect(callCount).toBeGreaterThan(0);
   });
 

@@ -20,6 +20,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { getActiveProducerCredentials, loginAsProducer } from '../helpers/auth';
 
 const credentials = getActiveProducerCredentials();
+type ToggleSnapshot = { label: string; pressed: boolean };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -30,6 +31,73 @@ async function navigateTo(page: Page, path: string): Promise<void> {
 
 function primaryAccountLink(page: Page, href: string) {
   return page.locator(`#main-content a[href="${href}"]`).first();
+}
+
+async function waitForNotificationToggles(page: Page) {
+  await expect(page).toHaveURL(/dashboard\/configuracion/, { timeout: 30_000 });
+  await expect(
+    page.locator('#main-content').getByRole('heading', { name: /configuraciones/i }),
+  ).toBeVisible({ timeout: 30_000 });
+
+  await page.waitForSelector('button[aria-label*="email para"], button[aria-label*="push para"]', {
+    timeout: 30_000,
+  });
+  return page.locator('button[aria-label*="email para"], button[aria-label*="push para"]');
+}
+
+async function captureToggleSnapshots(page: Page): Promise<ToggleSnapshot[]> {
+  const toggles = await waitForNotificationToggles(page);
+  const count = await toggles.count();
+  const snapshots: ToggleSnapshot[] = [];
+
+  for (let index = 0; index < count; index += 1) {
+    const toggle = toggles.nth(index);
+    const label = await toggle.getAttribute('aria-label');
+    snapshots.push({
+      label: label ?? `toggle-${index}`,
+      pressed: (await toggle.getAttribute('aria-pressed')) === 'true',
+    });
+  }
+
+  return snapshots;
+}
+
+function toggleByLabel(page: Page, label: string) {
+  return page.getByRole('button', { name: label, exact: true }).first();
+}
+
+async function persistToggleState(page: Page, label: string, nextPressed: boolean) {
+  const toggle = toggleByLabel(page, label);
+  await expect(toggle).toHaveAttribute('aria-pressed', nextPressed ? 'false' : 'true');
+
+  const [patchResponse] = await Promise.all([
+    page.waitForResponse((response) => (
+      response.request().method() === 'PATCH'
+      && response.url().includes('/api/v1/notifications/preferences/')
+    )),
+    toggle.click(),
+  ]);
+
+  if (patchResponse.status() === 404) {
+    await page.waitForResponse((response) => (
+      (response.request().method() === 'PUT' || response.request().method() === 'PATCH')
+      && response.url().includes('/api/v1/notifications/preferences')
+      && response.status() < 500
+    ), { timeout: 15_000 }).catch(() => null);
+  }
+
+  // El toggle se deshabilita mientras la actualización (y fallback) está en curso.
+  await expect(toggle).toBeEnabled({ timeout: 15_000 });
+  await expect(toggle).toHaveAttribute('aria-pressed', nextPressed ? 'true' : 'false');
+}
+
+async function expectSnapshots(page: Page, expected: ToggleSnapshot[]) {
+  for (const snapshot of expected) {
+    await expect(toggleByLabel(page, snapshot.label)).toHaveAttribute(
+      'aria-pressed',
+      snapshot.pressed ? 'true' : 'false',
+    );
+  }
 }
 
 function makeMockProducerProfile(overrides: Record<string, unknown> = {}) {
@@ -153,26 +221,31 @@ test.describe('/dashboard/configuracion (preferencias de notificación)', () => 
     ).toBeVisible({ timeout: 15_000 });
   });
 
-  test('los switches de notificación son interactivos y cambian de estado', async ({ page }) => {
+  test('persiste en real todas las opciones interactivas y restaura el estado original', async ({ page }) => {
+    test.setTimeout(240_000);
+
     await navigateTo(page, '/dashboard/configuracion');
-    // Los toggles se renderizan como botones con aria-label "Activar/Desactivar email para X"
-    await page.waitForSelector('button[aria-label*="email para"]', { timeout: 15_000 });
+    const initialSnapshots = await captureToggleSnapshots(page);
+    expect(initialSnapshots.length, 'Debe haber al menos una preferencia interactiva').toBeGreaterThan(0);
 
-    const toggles = page.locator('button[aria-label*="email para"]');
-    const count = await toggles.count();
-    expect(count, 'Debe haber al menos un toggle de notificación').toBeGreaterThan(0);
+    for (const snapshot of initialSnapshots) {
+      await persistToggleState(page, snapshot.label, !snapshot.pressed);
+    }
 
-    // Capturar estado inicial del primero
-    const firstToggle = toggles.first();
-    expect(await firstToggle.isEnabled()).toBe(true);
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
-    // Hacer click y verificar que la UI responde (no crashea)
-    await firstToggle.click();
-    await page.waitForTimeout(600);
+    const persistedSnapshots = initialSnapshots.map((snapshot) => ({
+      ...snapshot,
+      pressed: !snapshot.pressed,
+    }));
+    await expectSnapshots(page, persistedSnapshots);
 
-    // Restaurar: hacer click de nuevo
-    await firstToggle.click();
-    await page.waitForTimeout(300);
+    for (const snapshot of initialSnapshots) {
+      await persistToggleState(page, snapshot.label, snapshot.pressed);
+    }
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expectSnapshots(page, initialSnapshots);
   });
 
   test('actualización optimista se revierte si el servidor falla (mock 500)', async ({ page }) => {
