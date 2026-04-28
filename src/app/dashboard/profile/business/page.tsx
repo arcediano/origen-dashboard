@@ -137,7 +137,22 @@ function mapTeamSizeFromApi(value?: string | null): string {
   return '';
 }
 
+function resolveVisualUrl(url?: string | null, key?: string | null): string | null {
+  if (url && /^https?:\/\//i.test(url)) return url;
+  if (key && /^https?:\/\//i.test(key)) return key;
+
+  const cdnBase = process.env.NEXT_PUBLIC_CDN_BASE_URL;
+  if (!cdnBase || !key) return url ?? null;
+
+  const normalizedBase = cdnBase.endsWith('/') ? cdnBase.slice(0, -1) : cdnBase;
+  const normalizedKey = key.startsWith('/') ? key.slice(1) : key;
+  return `${normalizedBase}/${normalizedKey}`;
+}
+
 function mapProfileToForm(data: ProducerProfileData): BusinessFormState {
+  const logoUrl = resolveVisualUrl(data.visual?.logoUrl, data.visual?.logoKey);
+  const bannerUrl = resolveVisualUrl(data.visual?.bannerUrl, data.visual?.bannerKey);
+
   return {
     businessName: data.story?.businessName ?? data.fiscal?.businessName ?? '',
     legalName: data.fiscal?.legalName ?? '',
@@ -160,8 +175,8 @@ function mapProfileToForm(data: ProducerProfileData): BusinessFormState {
     city: data.location?.city ?? '',
     province: data.location?.province ?? '',
     postalCode: data.location?.postalCode ?? '',
-    logo: data.visual?.logoUrl ?? null,
-    banner: data.visual?.bannerUrl ?? null,
+    logo: logoUrl,
+    banner: bannerUrl,
     logoKey: data.visual?.logoKey ?? null,
     bannerKey: data.visual?.bannerKey ?? null,
   };
@@ -540,7 +555,7 @@ export default function BusinessInfoPage() {
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
-        <ProfileSectionNav className="mt-3" />
+        <ProfileSectionNav className="mt-3 hidden lg:flex" />
 
         <div className="mt-6">
           {loadError && (
@@ -580,7 +595,7 @@ export default function BusinessInfoPage() {
 
           <div className="mb-6">
             <Card className="overflow-hidden border border-border shadow-sm">
-              <div className="h-32 sm:h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
+              <div className="h-40 sm:h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
                 {form.banner ? (
                   <img src={form.banner} alt="Banner" className="w-full h-full object-cover" />
                 ) : (
@@ -593,7 +608,7 @@ export default function BusinessInfoPage() {
                     type="button"
                     disabled={isUploadingVisual}
                     onClick={() => bannerInputRef.current?.click()}
-                    className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-surface-alt shadow-lg flex items-center justify-center text-origen-bosque hover:text-origen-pradera transition-colors disabled:opacity-50"
+                    className="absolute bottom-3 right-3 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-alt shadow-lg flex items-center justify-center text-origen-bosque hover:text-origen-pradera transition-colors disabled:opacity-50"
                     aria-label="Cambiar banner"
                   >
                     <Camera className="w-5 h-5" />
@@ -609,18 +624,29 @@ export default function BusinessInfoPage() {
                 />
               </div>
 
-              <CardContent className="relative px-6 pb-6">
-                <div className="flex items-end gap-6 -mt-16 mb-4">
-                  <div className="relative group">
-                    <div className="w-28 h-28 rounded-xl bg-surface-alt shadow-xl border-4 border-white flex items-center justify-center overflow-hidden">
+              <CardContent className="relative px-4 sm:px-6 pb-5 sm:pb-6">
+                <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 -mt-12 sm:-mt-16 mb-3 sm:mb-4">
+                  <div className="relative">
+                    <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl bg-surface-alt shadow-xl border-4 border-white flex items-center justify-center overflow-hidden">
                       {form.logo ? (
-                        <img src={form.logo} alt={form.businessName} className="w-full h-full object-cover" />
+                        <img src={form.logo} alt={form.businessName || 'Logo de negocio'} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-                          <span className="text-3xl font-bold text-origen-pradera/50">{producerInitial}</span>
+                          <span className="text-2xl sm:text-3xl font-bold text-origen-pradera/50">{producerInitial}</span>
                         </div>
                       )}
                     </div>
+                    {isEditing && (
+                      <button
+                        type="button"
+                        aria-label="Cambiar logo"
+                        disabled={isUploadingVisual}
+                        onClick={() => logoInputRef.current?.click()}
+                        className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-surface-alt border border-border shadow-md flex items-center justify-center text-origen-bosque hover:text-origen-pradera disabled:opacity-50"
+                      >
+                        <Camera className="w-4 h-4" />
+                      </button>
+                    )}
                     {isEditing && (
                       <div
                         role="button"
@@ -628,7 +654,7 @@ export default function BusinessInfoPage() {
                         aria-label="Cambiar logo"
                         onClick={() => logoInputRef.current?.click()}
                         onKeyDown={(e) => e.key === 'Enter' && logoInputRef.current?.click()}
-                        className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                        className="absolute inset-0 hidden sm:flex bg-black/40 rounded-xl opacity-0 hover:opacity-100 transition-opacity items-center justify-center cursor-pointer"
                       >
                         <Camera className="w-8 h-8 text-white" />
                       </div>
@@ -643,33 +669,37 @@ export default function BusinessInfoPage() {
                     />
                   </div>
 
-                  <div className="flex-1 pb-2">
-                    <h2 className="text-2xl font-bold text-origen-bosque">{form.businessName || 'Perfil comercial'}</h2>
-                    <p className="text-sm text-muted-foreground">{form.tagline || 'Agrega un tagline para contar que hace unico tu negocio'}</p>
+                  <div className="flex-1 pb-1 sm:pb-2 min-w-0">
+                    <h2 className="text-xl sm:text-2xl font-bold leading-tight text-origen-bosque break-words">
+                      {form.businessName || 'Perfil comercial'}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1 leading-relaxed break-words">
+                      {form.tagline || 'Agrega un tagline para contar que hace unico tu negocio'}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <div className="mb-8 flex justify-end">
+          <div className="mb-8 flex flex-col sm:flex-row sm:justify-end gap-3">
             {!isEditing ? (
-              <Button onClick={() => setIsEditing(true)} size="md" disabled={isLoading}>
-                <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
+              <Button onClick={() => setIsEditing(true)} size="md" disabled={isLoading} className="w-full sm:w-auto">
+                <span className="flex items-center justify-center gap-2">
                   <Edit className="w-4 h-4" />
                   Editar informacion del negocio
                 </span>
               </Button>
             ) : (
-              <div className="flex gap-3">
-                <Button variant="outline" size="md" onClick={handleCancel}>
-                  <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <Button variant="outline" size="md" onClick={handleCancel} className="w-full sm:w-auto">
+                  <span className="flex items-center justify-center gap-2">
                     <X className="w-4 h-4" />
                     Cancelar
                   </span>
                 </Button>
-                <Button size="md" onClick={handleSave} disabled={isSaving || isLoading}>
-                  <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
+                <Button size="md" onClick={handleSave} disabled={isSaving || isLoading} className="w-full sm:w-auto">
+                  <span className="flex items-center justify-center gap-2">
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     Guardar cambios
                   </span>
@@ -712,7 +742,7 @@ export default function BusinessInfoPage() {
 
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Building2 className="w-5 h-5 text-origen-pradera" />
                       Identidad del negocio
@@ -769,7 +799,7 @@ export default function BusinessInfoPage() {
 
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Phone className="w-5 h-5 text-origen-pradera" />
                       Contacto y presencia web
@@ -801,7 +831,7 @@ export default function BusinessInfoPage() {
 
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <MapPin className="w-5 h-5 text-origen-pradera" />
                       Direccion productiva
@@ -860,7 +890,7 @@ export default function BusinessInfoPage() {
 
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <FileText className="w-5 h-5 text-origen-pradera" />
                       Historia y valores
@@ -909,7 +939,7 @@ export default function BusinessInfoPage() {
 
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Tags className="w-5 h-5 text-origen-pradera" />
                       Categorias
