@@ -33,6 +33,7 @@ import {
   Label,
 } from '@arcediano/ux-library';
 import { Textarea } from '@arcediano/ux-library';
+import { motion } from 'framer-motion';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
 import { getProvinciaFromCP } from '@/constants/cp-provincias';
@@ -166,14 +167,138 @@ function mapProfileToForm(data: ProducerProfileData): BusinessFormState {
   };
 }
 
+// ──────────────────────────────────────────────────────────────────────────
+// Cálculo de completitud por secciones
+// ──────────────────────────────────────────────────────────────────────────
+
+type SectionCompleteness = {
+  [key: string]: {
+    isComplete: boolean;
+    filledFields: number;
+    totalFields: number;
+    percent: number;
+  };
+};
+
+function calculateSectionCompleteness(form: BusinessFormState): SectionCompleteness {
+  return {
+    identity: {
+      isComplete: Boolean(form.businessName && form.legalName && form.taxId && form.entityType),
+      filledFields: [form.businessName, form.legalName, form.taxId, form.entityType].filter(Boolean).length,
+      totalFields: 4,
+      percent: 0, // se calcula abajo
+    },
+    contact: {
+      isComplete: Boolean(form.phone || form.website || form.instagram),
+      filledFields: [form.phone, form.website, form.instagram].filter(Boolean).length,
+      totalFields: 3,
+      percent: 0,
+    },
+    location: {
+      isComplete: Boolean(form.street && form.city && form.province && form.postalCode),
+      filledFields: [form.street, form.city, form.province, form.postalCode].filter(Boolean).length,
+      totalFields: 4,
+      percent: 0,
+    },
+    story: {
+      isComplete: Boolean(form.description && form.tagline && form.values.length > 0),
+      filledFields: [form.description, form.tagline, form.values.length > 0 ? 'true' : ''].filter(Boolean).length,
+      totalFields: 3,
+      percent: 0,
+    },
+    categories: {
+      isComplete: form.categories.length > 0,
+      filledFields: form.categories.length,
+      totalFields: 1,
+      percent: 0,
+    },
+    visual: {
+      isComplete: Boolean(form.logo && form.banner),
+      filledFields: [form.logo, form.banner].filter(Boolean).length,
+      totalFields: 2,
+      percent: 0,
+    },
+  } as const;
+}
+
 function BusinessPageSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
-      <div className="h-48 bg-surface rounded-xl" />
-      <div className="h-64 bg-surface rounded-xl" />
-      <div className="h-48 bg-surface rounded-xl" />
-      <div className="h-32 bg-surface rounded-xl" />
+    <div className="space-y-6">
+      {/* Header skeleton */}
+      <div className="mb-6 animate-pulse">
+        <div className="h-32 sm:h-48 bg-surface rounded-t-xl" />
+        <div className="bg-surface rounded-b-xl px-6 pb-6 pt-20">
+          <div className="flex items-end gap-6 -mt-16 mb-4">
+            <div className="w-28 h-28 rounded-xl bg-surface-alt" />
+            <div className="flex-1 space-y-2">
+              <div className="h-6 w-48 bg-surface-alt rounded" />
+              <div className="h-4 w-72 bg-surface-alt rounded" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Button skeleton */}
+      <div className="flex justify-end">
+        <div className="h-10 w-40 bg-surface rounded-xl animate-pulse" />
+      </div>
+
+      {/* Section skeletons */}
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="animate-pulse">
+          <div className="rounded-xl border border-border bg-surface overflow-hidden">
+            <div className="px-6 py-4 border-b border-border-subtle">
+              <div className="flex items-center justify-between gap-3">
+                <div className="h-6 w-40 bg-surface-alt rounded" />
+                <div className="h-5 w-20 bg-surface-alt rounded" />
+              </div>
+            </div>
+            <div className="px-6 py-6 space-y-4">
+              {[...Array(2)].map((_, j) => (
+                <div key={j} className="space-y-2">
+                  <div className="h-4 w-24 bg-surface-alt rounded" />
+                  <div className="h-10 bg-surface-alt rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Helper para mostrar badge de completitud
+// ──────────────────────────────────────────────────────────────────────────
+
+interface SectionStatusBadgeProps {
+  isComplete: boolean;
+  percent: number;
+}
+
+function SectionStatusBadge({ isComplete, percent }: SectionStatusBadgeProps) {
+  if (isComplete) {
+    return (
+      <Badge variant="success" size="xs" className="gap-1">
+        <CheckCircle className="w-3 h-3" />
+        Completo
+      </Badge>
+    );
+  }
+  
+  if (percent >= 50) {
+    return (
+      <Badge variant="warning" size="xs">
+        {percent}% completado
+      </Badge>
+    );
+  }
+  
+  return (
+    <Badge variant="outline" size="xs">
+      {percent}% completado
+    </Badge>
   );
 }
 
@@ -197,6 +322,41 @@ export default function BusinessInfoPage() {
     if (!form.businessName) return 'P';
     return form.businessName.charAt(0).toUpperCase();
   }, [form.businessName]);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Cálculos de completitud por sección (se memorizan para evitar recálculos)
+  // ──────────────────────────────────────────────────────────────────────────
+  
+  const sectionCompleteness = useMemo(() => {
+    const completeness = calculateSectionCompleteness(form);
+    
+    // Calcular porcentaje para cada sección
+    Object.keys(completeness).forEach((key) => {
+      completeness[key as keyof SectionCompleteness].percent =
+        completeness[key as keyof SectionCompleteness].totalFields > 0
+          ? Math.round((completeness[key as keyof SectionCompleteness].filledFields / completeness[key as keyof SectionCompleteness].totalFields) * 100)
+          : 0;
+    });
+
+    return completeness;
+  }, [
+    form.businessName, form.legalName, form.taxId, form.entityType,
+    form.phone, form.website, form.instagram,
+    form.street, form.city, form.province, form.postalCode,
+    form.description, form.tagline, form.values.length,
+    form.categories.length,
+    form.logo, form.banner,
+  ]);
+
+  // Completitud general
+  const overallCompleteness = useMemo(() => {
+    const sections = Object.values(sectionCompleteness);
+    const totalPercent = sections.length > 0
+      ? Math.round(sections.reduce((sum, s) => sum + s.percent, 0) / sections.length)
+      : 0;
+    const completedSections = sections.filter(s => s.isComplete).length;
+    return { totalPercent, completedSections, totalSections: sections.length };
+  }, [sectionCompleteness]);
 
   useEffect(() => {
     let mounted = true;
@@ -521,13 +681,47 @@ export default function BusinessInfoPage() {
           )}
 
           {!isLoading && (
-            <div className="space-y-6">
+            <motion.div 
+              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Progress indicator */}
+              <Card className="border-origen-pradera/20 bg-gradient-to-r from-origen-pradera/5 to-transparent">
+                <CardContent className="pt-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-origen-bosque">Completitud del perfil comercial</span>
+                      <span className="text-lg font-bold text-origen-pradera">{overallCompleteness.totalPercent}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-border rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-origen-pradera rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${overallCompleteness.totalPercent}%` }}
+                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                      />
+                    </div>
+                    <p className="text-xs text-text-subtle">
+                      {overallCompleteness.completedSections} de {overallCompleteness.totalSections} secciones completadas
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Building2 className="w-5 h-5 text-origen-pradera" />
-                    Identidad del negocio
-                  </CardTitle>
+                  <div className="flex items-center justify-between gap-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Building2 className="w-5 h-5 text-origen-pradera" />
+                      Identidad del negocio
+                    </CardTitle>
+                    <SectionStatusBadge 
+                      isComplete={sectionCompleteness.identity.isComplete}
+                      percent={sectionCompleteness.identity.percent}
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -575,10 +769,16 @@ export default function BusinessInfoPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Phone className="w-5 h-5 text-origen-pradera" />
-                    Contacto y presencia web
-                  </CardTitle>
+                  <div className="flex items-center justify-between gap-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Phone className="w-5 h-5 text-origen-pradera" />
+                      Contacto y presencia web
+                    </CardTitle>
+                    <SectionStatusBadge 
+                      isComplete={sectionCompleteness.contact.isComplete}
+                      percent={sectionCompleteness.contact.percent}
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -601,10 +801,16 @@ export default function BusinessInfoPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <MapPin className="w-5 h-5 text-origen-pradera" />
-                    Direccion productiva
-                  </CardTitle>
+                  <div className="flex items-center justify-between gap-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <MapPin className="w-5 h-5 text-origen-pradera" />
+                      Direccion productiva
+                    </CardTitle>
+                    <SectionStatusBadge 
+                      isComplete={sectionCompleteness.location.isComplete}
+                      percent={sectionCompleteness.location.percent}
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -654,10 +860,16 @@ export default function BusinessInfoPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <FileText className="w-5 h-5 text-origen-pradera" />
-                    Historia y valores
-                  </CardTitle>
+                  <div className="flex items-center justify-between gap-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <FileText className="w-5 h-5 text-origen-pradera" />
+                      Historia y valores
+                    </CardTitle>
+                    <SectionStatusBadge 
+                      isComplete={sectionCompleteness.story.isComplete}
+                      percent={sectionCompleteness.story.percent}
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
@@ -697,10 +909,16 @@ export default function BusinessInfoPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Tags className="w-5 h-5 text-origen-pradera" />
-                    Categorias
-                  </CardTitle>
+                  <div className="flex items-center justify-between gap-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Tags className="w-5 h-5 text-origen-pradera" />
+                      Categorias
+                    </CardTitle>
+                    <SectionStatusBadge 
+                      isComplete={sectionCompleteness.categories.isComplete}
+                      percent={sectionCompleteness.categories.percent}
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -743,7 +961,7 @@ export default function BusinessInfoPage() {
                   )}
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
