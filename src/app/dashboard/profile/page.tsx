@@ -29,8 +29,93 @@ const itemVariants = {
   }
 };
 
+function ProfilePageSkeleton() {
+  return (
+    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema animate-pulse">
+      <div className="border-b border-border-subtle bg-white/80">
+        <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+          <div className="h-5 w-24 rounded-full bg-origen-pradera/15" />
+          <div className="mt-4 h-9 w-64 rounded-xl bg-origen-bosque/10 sm:w-80" />
+          <div className="mt-3 h-4 w-full max-w-2xl rounded-xl bg-origen-bosque/10" />
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 pb-6 sm:px-6 sm:pb-8 lg:px-8 lg:pb-10">
+        <div className="mt-4 mb-5 lg:hidden rounded-2xl border border-border-subtle bg-surface p-4 sm:mt-6 sm:mb-8">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-origen-pradera/10" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-40 rounded-xl bg-origen-bosque/10" />
+              <div className="h-2 w-full rounded-full bg-origen-bosque/10" />
+              <div className="h-3 w-32 rounded-xl bg-origen-bosque/10" />
+            </div>
+          </div>
+        </div>
+
+        <Card className="hidden lg:block mt-6 border-origen-pradera/20 bg-gradient-to-r from-origen-crema/30 to-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-origen-pradera/10" />
+                <div className="space-y-2">
+                  <div className="h-5 w-48 rounded-xl bg-origen-bosque/10" />
+                  <div className="h-4 w-64 rounded-xl bg-origen-bosque/10" />
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="h-2 w-32 rounded-full bg-origen-bosque/10" />
+                <div className="h-4 w-12 rounded-xl bg-origen-bosque/10" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="lg:hidden rounded-2xl border border-border-subtle overflow-hidden bg-surface divide-y divide-border-subtle">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="flex items-center gap-3 px-4 py-4">
+              <div className="h-10 w-10 rounded-xl bg-origen-pradera/10" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-40 rounded-xl bg-origen-bosque/10" />
+                <div className="h-3 w-48 rounded-xl bg-origen-bosque/10" />
+              </div>
+              <div className="h-6 w-20 rounded-full bg-origen-bosque/10" />
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden lg:grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Card key={index} className="flex flex-col w-full">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="h-6 w-40 rounded-xl bg-origen-bosque/10" />
+                  <div className="h-6 w-20 rounded-full bg-origen-bosque/10" />
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                <div className="space-y-2">
+                  <div className="h-4 w-full rounded-xl bg-origen-bosque/10" />
+                  <div className="h-4 w-5/6 rounded-xl bg-origen-bosque/10" />
+                </div>
+                <div className="flex-1" />
+                <div className="mt-4 flex justify-end">
+                  <div className="h-9 w-28 rounded-xl bg-origen-bosque/10" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProfilePage() {
-  const { producer } = useProducerProfile();
+  const { producer, isLoading } = useProducerProfile();
+
+  if (isLoading) {
+    return <ProfilePageSkeleton />;
+  }
 
   const completion = producer?.profileCompletenessPercent ?? 0;
   const totalTrackedItems = producer?.profileCompletenessMeta.totalSteps ?? 0;
