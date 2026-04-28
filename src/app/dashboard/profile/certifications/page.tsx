@@ -220,16 +220,16 @@ export default function CertificationsPage() {
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
-      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
-        <PageHeader
-          title="Certificaciones y documentos"
-          description="Sube y gestiona tus certificados de calidad y la documentación obligatoria para acreditar tu tienda"
-          badgeIcon={FileBadge}
-          badgeText="Certificaciones"
-          showBackButton={true}
-          onBack={() => router.back()}
-        />
+      <PageHeader
+        title="Certificaciones y documentos"
+        description="Sube y gestiona tus certificados de calidad y la documentación obligatoria para acreditar tu tienda"
+        badgeIcon={FileBadge}
+        badgeText="Certificaciones"
+        showBackButton={true}
+        onBack={() => router.back()}
+      />
 
+      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
         <ProfileSectionNav className="mt-3" />
 
         <div className="mt-6 space-y-6">

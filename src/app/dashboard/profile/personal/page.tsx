@@ -288,16 +288,16 @@ export default function PersonalInfoPage() {
       <div className="fixed top-0 right-0 w-64 h-64 bg-origen-pradera/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
       <div className="fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
-        <PageHeader
-          title="Datos personales"
-          description="Actualiza tu nombre, datos de contacto, dirección y foto de perfil de tu cuenta de productor"
-          badgeIcon={User}
-          badgeText="Datos personales"
-          showBackButton={true}
-          onBack={() => router.back()}
-        />
+      <PageHeader
+        title="Datos personales"
+        description="Actualiza tu nombre, datos de contacto, dirección y foto de perfil de tu cuenta de productor"
+        badgeIcon={User}
+        badgeText="Datos personales"
+        showBackButton={true}
+        onBack={() => router.back()}
+      />
 
+      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
         <ProfileSectionNav className="mt-3" />
 
         <div className="mt-6">
