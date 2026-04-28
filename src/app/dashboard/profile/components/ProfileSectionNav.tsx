@@ -18,7 +18,10 @@ export function ProfileSectionNav({ className }: ProfileSectionNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Secciones de perfil comercial" className={cn('flex flex-nowrap overflow-x-auto gap-2 scrollbar-none pb-1', className)}>
+    <nav
+      aria-label="Secciones de perfil comercial"
+      className={cn('grid grid-cols-3 gap-2 sm:flex sm:flex-nowrap sm:overflow-x-auto sm:scrollbar-none sm:pb-1', className)}
+    >
       {PROFILE_NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href;
 
@@ -27,7 +30,7 @@ export function ProfileSectionNav({ className }: ProfileSectionNavProps) {
             key={item.href}
             href={item.href}
             className={cn(
-              'rounded-xl border px-3 py-2 text-sm font-medium transition-colors',
+              'rounded-xl border px-2.5 py-2 text-center text-[12px] leading-tight font-semibold transition-colors sm:px-3 sm:text-sm',
               isActive
                 ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
                 : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'

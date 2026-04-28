@@ -295,7 +295,7 @@ interface SectionStatusBadgeProps {
 function SectionStatusBadge({ isComplete, percent }: SectionStatusBadgeProps) {
   if (isComplete) {
     return (
-      <Badge variant="success" size="xs" className="gap-1">
+      <Badge variant="success" size="xs" className="w-fit self-start sm:self-auto gap-1">
         <CheckCircle className="w-3 h-3" />
         Completo
       </Badge>
@@ -304,14 +304,14 @@ function SectionStatusBadge({ isComplete, percent }: SectionStatusBadgeProps) {
   
   if (percent >= 50) {
     return (
-      <Badge variant="warning" size="xs">
+      <Badge variant="warning" size="xs" className="w-fit self-start sm:self-auto">
         {percent}% completado
       </Badge>
     );
   }
   
   return (
-    <Badge variant="outline" size="xs">
+    <Badge variant="outline" size="xs" className="w-fit self-start sm:self-auto">
       {percent}% completado
     </Badge>
   );
@@ -555,7 +555,7 @@ export default function BusinessInfoPage() {
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
-        <ProfileSectionNav className="mt-3 hidden lg:flex" />
+        <ProfileSectionNav className="mt-3" />
 
         <div className="mt-6">
           {loadError && (
@@ -595,7 +595,7 @@ export default function BusinessInfoPage() {
 
           <div className="mb-6">
             <Card className="overflow-hidden border border-border shadow-sm">
-              <div className="h-40 sm:h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
+              <div className="h-44 sm:h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
                 {form.banner ? (
                   <img src={form.banner} alt="Banner" className="w-full h-full object-cover" />
                 ) : (
@@ -625,7 +625,7 @@ export default function BusinessInfoPage() {
               </div>
 
               <CardContent className="relative px-4 sm:px-6 pb-5 sm:pb-6">
-                <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 -mt-12 sm:-mt-16 mb-3 sm:mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 -mt-10 sm:-mt-16 mb-3 sm:mb-4">
                   <div className="relative">
                     <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl bg-surface-alt shadow-xl border-4 border-white flex items-center justify-center overflow-hidden">
                       {form.logo ? (
