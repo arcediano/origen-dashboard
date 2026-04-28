@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   FileBadge,
   Shield,
@@ -15,7 +14,6 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
 import { Button, Badge } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
@@ -116,8 +114,6 @@ function resolveDocumentUrl(documentRef: string | null, explicitUrl: string | nu
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function CertificationsPage() {
-  const router = useRouter();
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [certifications, setCertifications] = useState<CertItem[]>([]);
@@ -125,6 +121,29 @@ export default function CertificationsPage() {
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
   const [savingFor, setSavingFor] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  const handleOpenDocument = useCallback((documentRef: string | null, explicitUrl: string | null, download = false) => {
+    const actionUrl = resolveDocumentUrl(documentRef, explicitUrl);
+
+    if (!actionUrl) {
+      setSaveError('No se pudo resolver la URL del documento. Contacta con soporte si el problema persiste.');
+      return;
+    }
+
+    if (download) {
+      const link = document.createElement('a');
+      link.href = actionUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.download = '';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    window.open(actionUrl, '_blank', 'noopener,noreferrer');
+  }, []);
 
   // ── Carga de datos ──────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -135,12 +154,12 @@ export default function CertificationsPage() {
 
       // Certifications
       const certs: CertItem[] = (res.data.certifications ?? []).map((c) => ({
+        status: (c.documentDocId || c.documentKey || c.documentUrl) ? (c.status as DocStatus) : null,
         certificationId: c.certificationId,
         name: c.name,
         issuingBody: c.issuingBody,
         documentRef: c.documentKey ?? c.documentDocId ?? null,
         documentUrl: c.documentUrl ?? null,
-        status: c.documentDocId ? (c.status as DocStatus) : null,
         verifiedAt: c.verifiedAt ?? null,
         rejectedReason: c.rejectedReason ?? null,
       }));
@@ -245,13 +264,9 @@ export default function CertificationsPage() {
       <PageHeader
         title="Certificaciones y documentos"
         description="Sube y gestiona tus certificados de calidad y la documentación obligatoria para acreditar tu tienda"
-        showBackButton={true}
-        onBack={() => router.back()}
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
-        <ProfileSectionNav className="mt-3" />
-
         <div className="mt-6 space-y-6">
           {/* Error global de carga */}
           {error && (
@@ -306,8 +321,7 @@ export default function CertificationsPage() {
                     // Permite validar el contenido del archivo aunque siga pendiente o rechazado.
                     // Si no hay URL explícita, intenta resolverla desde la clave/document id + CDN.
                     (() => {
-                      const certFileUrl = resolveDocumentUrl(cert.documentRef, cert.documentUrl);
-                      const hasUploadedDocument = cert.status !== null;
+                      const hasUploadedDocument = Boolean(cert.documentRef || cert.documentUrl || cert.status !== null);
 
                       return (
                     <div
@@ -360,8 +374,7 @@ export default function CertificationsPage() {
                                 variant="ghost"
                                 size="icon-sm"
                                 aria-label="Ver documento"
-                                disabled={!certFileUrl}
-                                onClick={() => certFileUrl && window.open(certFileUrl, '_blank', 'noopener,noreferrer')}
+                                onClick={() => handleOpenDocument(cert.documentRef, cert.documentUrl, false)}
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
@@ -369,8 +382,7 @@ export default function CertificationsPage() {
                                 variant="ghost"
                                 size="icon-sm"
                                 aria-label="Descargar documento"
-                                disabled={!certFileUrl}
-                                onClick={() => certFileUrl && window.open(certFileUrl, '_blank', 'noopener,noreferrer')}
+                                onClick={() => handleOpenDocument(cert.documentRef, cert.documentUrl, true)}
                               >
                                 <Download className="w-4 h-4" />
                               </Button>
@@ -438,8 +450,7 @@ export default function CertificationsPage() {
                 <div className="space-y-4">
                   {legalDocs.map((doc) => (
                     (() => {
-                      const docFileUrl = resolveDocumentUrl(doc.documentRef, doc.documentUrl);
-                      const hasUploadedDocument = doc.status !== null;
+                      const hasUploadedDocument = Boolean(doc.documentRef || doc.documentUrl || doc.status !== null);
 
                       return (
                     <div key={doc.type} className="border border-border rounded-xl p-4">
@@ -489,8 +500,7 @@ export default function CertificationsPage() {
                                 variant="ghost"
                                 size="icon-sm"
                                 aria-label="Ver documento"
-                                disabled={!docFileUrl}
-                                onClick={() => docFileUrl && window.open(docFileUrl, '_blank', 'noopener,noreferrer')}
+                                onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, false)}
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
@@ -498,8 +508,7 @@ export default function CertificationsPage() {
                                 variant="ghost"
                                 size="icon-sm"
                                 aria-label="Descargar documento"
-                                disabled={!docFileUrl}
-                                onClick={() => docFileUrl && window.open(docFileUrl, '_blank', 'noopener,noreferrer')}
+                                onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, true)}
                               >
                                 <Download className="w-4 h-4" />
                               </Button>
