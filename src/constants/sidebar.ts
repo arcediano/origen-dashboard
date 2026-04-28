@@ -155,34 +155,35 @@ const ANALYTICS_ITEMS: MenuItem[] = [
   },
 ];
 
-const BUSINESS_ITEMS: MenuItem[] = [
-  {
-    id: 'perfil-comercial',
-    label: 'Perfil comercial',
-    icon: User,
-    href: '/dashboard/profile',
-    matchPaths: ['/dashboard/profile', '/dashboard/profile/personal*', '/dashboard/profile/business*', '/dashboard/profile/certifications*', '/dashboard/business*'],
-  },
-  {
-    id: 'envios',
-    label: 'Logistica',
-    icon: Truck,
-    href: '/dashboard/configuracion/envios',
-    matchPaths: ['/dashboard/configuracion/envios*'],
-  },
-  {
-    id: 'cobros',
-    label: 'Cobros',
-    icon: CreditCard,
-    href: '/dashboard/configuracion/pagos',
-    matchPaths: ['/dashboard/configuracion/pagos*'],
-  },
-];
+// @deprecated Sección "Negocio" removida del sidebar (consolidada en header avatar menu "Mi cuenta").
+// Mantener como referencia para futuras features si es necesario reintroducir navegación de negocio.
+// const BUSINESS_ITEMS: MenuItem[] = [
+//   {
+//     id: 'perfil-comercial',
+//     label: 'Perfil comercial',
+//     icon: User,
+//     href: '/dashboard/profile',
+//     matchPaths: ['/dashboard/profile', '/dashboard/profile/personal*', '/dashboard/profile/business*', '/dashboard/profile/certifications*', '/dashboard/business*'],
+//   },
+//   {
+//     id: 'envios',
+//     label: 'Logistica',
+//     icon: Truck,
+//     href: '/dashboard/configuracion/envios',
+//     matchPaths: ['/dashboard/configuracion/envios*'],
+//   },
+//   {
+//     id: 'cobros',
+//     label: 'Cobros',
+//     icon: CreditCard,
+//     href: '/dashboard/configuracion/pagos',
+//     matchPaths: ['/dashboard/configuracion/pagos*'],
+//   },
+// ];
 
 export const DASHBOARD_NAV_SECTIONS: NavigationSection[] = [
   { id: 'general', label: 'General', items: GENERAL_ITEMS },
   { id: 'operacion', label: 'Operacion', items: OPERATIONS_ITEMS },
-  { id: 'negocio', label: 'Negocio', items: BUSINESS_ITEMS },
   { id: 'rendimiento', label: 'Rendimiento', items: ANALYTICS_ITEMS },
 ];
 
