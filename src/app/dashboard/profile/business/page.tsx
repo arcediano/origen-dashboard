@@ -7,15 +7,16 @@ import {
   FileText,
   Save,
   MapPin,
-  Globe,
   Phone,
   CheckCircle,
+  Loader2,
   Plus,
   X,
-  Award,
   Edit,
   Camera,
   Image as ImageIcon,
+  Building2,
+  Tags,
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
@@ -32,86 +33,148 @@ import {
   Label,
 } from '@arcediano/ux-library';
 import { Textarea } from '@arcediano/ux-library';
-import { loadOnboardingData, loadProducerProfile, saveStep1, saveStep2, saveStep3, type OnboardingData } from '@/lib/api/onboarding';
+import { PROVINCIAS_ESPANA } from '@/constants/provinces';
+import { PRODUCER_CATEGORIES } from '@/constants/categories';
+import { getProvinciaFromCP } from '@/constants/cp-provincias';
+import {
+  getProducerProfile,
+  updateProducerProfile,
+  type ProducerProfileData,
+  type UpdateProducerProfilePayload,
+} from '@/lib/api/producers';
 import { uploadFile } from '@/lib/api/media';
 
 type BusinessFormState = {
   businessName: string;
   legalName: string;
   taxId: string;
+  entityType: string;
+  legalRepresentativeName: string;
   foundedYear: string;
   teamSize: string;
   description: string;
+  tagline: string;
+  productionPhilosophy: string;
+  values: string[];
   categories: string[];
   phone: string;
   website: string;
-  address: string;
+  instagram: string;
+  street: string;
+  streetNumber: string;
+  streetComplement: string;
   city: string;
   province: string;
   postalCode: string;
-  country: string;
-  socialMedia: {
-    instagram: string;
-  };
   logo: string | null;
   banner: string | null;
+  logoKey: string | null;
+  bannerKey: string | null;
 };
 
 const EMPTY_FORM: BusinessFormState = {
   businessName: '',
   legalName: '',
   taxId: '',
+  entityType: '',
+  legalRepresentativeName: '',
   foundedYear: '',
   teamSize: '',
   description: '',
+  tagline: '',
+  productionPhilosophy: '',
+  values: [],
   categories: [],
   phone: '',
   website: '',
-  address: '',
+  instagram: '',
+  street: '',
+  streetNumber: '',
+  streetComplement: '',
   city: '',
   province: '',
   postalCode: '',
-  country: 'Espana',
-  socialMedia: {
-    instagram: '',
-  },
   logo: null,
   banner: null,
+  logoKey: null,
+  bannerKey: null,
 };
 
+const TEAM_SIZE_OPTIONS = [
+  { value: 'ONE_TWO', label: '1-2 personas' },
+  { value: 'THREE_FIVE', label: '3-5 personas' },
+  { value: 'SIX_TEN', label: '6-10 personas' },
+  { value: 'ELEVEN_PLUS', label: '11 o mas personas' },
+] as const;
+
+const ENTITY_TYPE_OPTIONS = [
+  { value: 'autonomo', label: 'Autonomo' },
+  { value: 'sl', label: 'SL' },
+  { value: 'sa', label: 'SA' },
+  { value: 'cooperativa', label: 'Cooperativa' },
+  { value: 'comunidad_bienes', label: 'Comunidad de bienes' },
+  { value: 'asociacion', label: 'Asociacion' },
+  { value: 'otro', label: 'Otro' },
+] as const;
+
+const CORE_VALUES = [
+  { id: 'sostenibilidad', label: 'Sostenibilidad' },
+  { id: 'calidad', label: 'Calidad' },
+  { id: 'tradicion', label: 'Tradicion' },
+  { id: 'innovacion', label: 'Innovacion' },
+  { id: 'local', label: 'Local' },
+  { id: 'artesanal', label: 'Artesanal' },
+  { id: 'ecologico', label: 'Ecologico' },
+  { id: 'familiar', label: 'Familiar' },
+];
+
 function mapTeamSizeFromApi(value?: string | null): string {
-  if (value === 'ONE_TWO' || value === '1-2') return '1-2';
-  if (value === 'THREE_FIVE' || value === '3-5') return '3-5';
-  if (value === 'SIX_TEN' || value === '6-10') return '6-10';
-  if (value === 'ELEVEN_PLUS' || value === '11+') return '11+';
+  if (value === 'ONE_TWO' || value === '1-2') return 'ONE_TWO';
+  if (value === 'THREE_FIVE' || value === '3-5') return 'THREE_FIVE';
+  if (value === 'SIX_TEN' || value === '6-10') return 'SIX_TEN';
+  if (value === 'ELEVEN_PLUS' || value === '11+') return 'ELEVEN_PLUS';
   return '';
 }
 
-function splitStreet(fullAddress: string, fallbackStreet?: string, fallbackNumber?: string) {
-  const clean = fullAddress.trim();
-  if (!clean) {
-    return {
-      street: fallbackStreet ?? '',
-      streetNumber: fallbackNumber ?? 'S/N',
-    };
-  }
-
-  const parts = clean.split(/\s+/);
-  const maybeNumber = parts[parts.length - 1] ?? '';
-  const looksNumber = /\d/.test(maybeNumber);
-
-  if (!looksNumber) {
-    return {
-      street: clean,
-      streetNumber: fallbackNumber ?? 'S/N',
-    };
-  }
-
-  parts.pop();
+function mapProfileToForm(data: ProducerProfileData): BusinessFormState {
   return {
-    street: parts.join(' ') || fallbackStreet || clean,
-    streetNumber: maybeNumber,
+    businessName: data.story?.businessName ?? data.fiscal?.businessName ?? '',
+    legalName: data.fiscal?.legalName ?? '',
+    taxId: data.fiscal?.taxId ?? '',
+    entityType: data.fiscal?.entityType ?? '',
+    legalRepresentativeName: data.fiscal?.legalRepresentativeName ?? '',
+    foundedYear: data.location?.foundedYear ? String(data.location.foundedYear) : '',
+    teamSize: mapTeamSizeFromApi(data.location?.teamSize),
+    description: data.story?.description ?? '',
+    tagline: data.story?.tagline ?? '',
+    productionPhilosophy: data.story?.productionPhilosophy ?? '',
+    values: data.story?.values ?? [],
+    categories: data.fiscal?.categories ?? [],
+    phone: data.fiscal?.businessPhone ?? '',
+    website: data.story?.website ?? '',
+    instagram: data.story?.instagramHandle ?? '',
+    street: data.location?.street ?? '',
+    streetNumber: data.location?.streetNumber ?? '',
+    streetComplement: data.location?.streetComplement ?? '',
+    city: data.location?.city ?? '',
+    province: data.location?.province ?? '',
+    postalCode: data.location?.postalCode ?? '',
+    logo: data.visual?.logoUrl ?? null,
+    banner: data.visual?.bannerUrl ?? null,
+    logoKey: data.visual?.logoKey ?? null,
+    bannerKey: data.visual?.bannerKey ?? null,
   };
+}
+
+function BusinessPageSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="h-48 bg-surface rounded-xl" />
+      <div className="h-64 bg-surface rounded-xl" />
+      <div className="h-48 bg-surface rounded-xl" />
+      <div className="h-32 bg-surface rounded-xl" />
+    </div>
+  );
 }
 
 export default function BusinessInfoPage() {
@@ -125,10 +188,7 @@ export default function BusinessInfoPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
-  const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
   const [newCategory, setNewCategory] = useState('');
-  const [logoKey, setLogoKey] = useState<string | null>(null);
-  const [bannerKey, setBannerKey] = useState<string | null>(null);
   const [isUploadingVisual, setIsUploadingVisual] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -146,37 +206,14 @@ export default function BusinessInfoPage() {
       setLoadError(null);
 
       try {
-        const response = await loadProducerProfile();
+        const response = await getProducerProfile();
         if (!response?.data) {
-          throw new Error('No hay datos de onboarding para el perfil comercial.');
+          throw new Error('No hay datos de perfil para el negocio.');
         }
 
-        const data = response.data;
-
-        const mapped: BusinessFormState = {
-          businessName: data.story?.businessName ?? data.fiscal?.businessName ?? '',
-          legalName: data.fiscal?.legalName ?? '',
-          taxId: data.fiscal?.taxId ?? '',
-          foundedYear: data.location?.foundedYear ? String(data.location.foundedYear) : '',
-          teamSize: mapTeamSizeFromApi(data.location?.teamSize),
-          description: data.story?.description ?? '',
-          categories: data.fiscal?.categories ?? [],
-          phone: data.fiscal?.businessPhone ?? '',
-          website: data.story?.website ?? '',
-          address: [data.location?.street, data.location?.streetNumber].filter(Boolean).join(' ').trim(),
-          city: data.location?.city ?? '',
-          province: data.location?.province ?? '',
-          postalCode: data.location?.postalCode ?? '',
-          country: 'Espana',
-          socialMedia: {
-            instagram: data.story?.instagramHandle ?? '',
-          },
-          logo: null,
-          banner: null,
-        };
+        const mapped = mapProfileToForm(response.data);
 
         if (!mounted) return;
-        setOnboardingData(data);
         setForm(mapped);
         setInitialForm(mapped);
       } catch (error) {
@@ -194,16 +231,18 @@ export default function BusinessInfoPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!saveSuccess) return undefined;
+    const t = setTimeout(() => setSaveSuccess(null), 3000);
+    return () => clearTimeout(t);
+  }, [saveSuccess]);
+
   const validateForm = () => {
     const nextErrors: Record<string, string> = {};
-
-    if (!form.businessName.trim()) nextErrors.businessName = 'El nombre del negocio es obligatorio';
-    if (!form.taxId.trim()) nextErrors.taxId = 'El CIF/NIF es obligatorio';
-    if (!form.phone.trim()) nextErrors.phone = 'El telefono es obligatorio';
     if (form.website.trim() && !/^https?:\/\//i.test(form.website.trim())) {
       nextErrors.website = 'Incluye URL valida (http:// o https://)';
     }
-    if (form.description.trim().length < 50) {
+    if (form.description.trim() && form.description.trim().length < 50) {
       nextErrors.description = 'La descripcion debe tener al menos 50 caracteres';
     }
 
@@ -229,6 +268,15 @@ export default function BusinessInfoPage() {
     }));
   };
 
+  const handleToggleValue = (valueId: string) => {
+    setForm((prev) => ({
+      ...prev,
+      values: prev.values.includes(valueId)
+        ? prev.values.filter((item) => item !== valueId)
+        : [...prev.values, valueId],
+    }));
+  };
+
   const handleLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -236,8 +284,7 @@ export default function BusinessInfoPage() {
     setSaveError(null);
     try {
       const { key, url } = await uploadFile(file, 'visual/logo');
-      setLogoKey(key);
-      setForm((prev) => ({ ...prev, logo: url ?? URL.createObjectURL(file) }));
+      setForm((prev) => ({ ...prev, logo: url ?? URL.createObjectURL(file), logoKey: key }));
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Error al subir el logo.');
     } finally {
@@ -253,8 +300,7 @@ export default function BusinessInfoPage() {
     setSaveError(null);
     try {
       const { key, url } = await uploadFile(file, 'visual/banner');
-      setBannerKey(key);
-      setForm((prev) => ({ ...prev, banner: url ?? URL.createObjectURL(file) }));
+      setForm((prev) => ({ ...prev, banner: url ?? URL.createObjectURL(file), bannerKey: key }));
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Error al subir el banner.');
     } finally {
@@ -268,64 +314,36 @@ export default function BusinessInfoPage() {
     setErrors({});
     setSaveError(null);
     setSaveSuccess(null);
-    setLogoKey(null);
-    setBannerKey(null);
     setIsEditing(false);
   };
 
   const handleSave = async () => {
     if (!validateForm()) return;
-    if (!onboardingData) {
-      setSaveError('No se pudo cargar la base de onboarding para guardar.');
-      return;
-    }
 
-    const streetData = splitStreet(
-      form.address,
-      onboardingData.location?.street,
-      onboardingData.location?.streetNumber,
-    );
-
-    const step1Payload: Parameters<typeof saveStep1>[0] = {
-      entityType: onboardingData.fiscal?.entityType as Parameters<typeof saveStep1>[0]['entityType'],
-      legalRepresentativeName: onboardingData.fiscal?.legalRepresentativeName ?? '',
-      businessPhone: form.phone.replace(/\s+/g, ''),
-      taxId: form.taxId.trim(),
-      street: streetData.street,
-      streetNumber: streetData.streetNumber,
-      streetComplement: onboardingData.location?.streetComplement ?? '',
-      city: form.city.trim(),
-      province: form.province.trim(),
-      postalCode: form.postalCode.trim(),
-      billingAddressSameAsProduction: !onboardingData.fiscal?.billingAddress,
-      billingAddress: onboardingData.fiscal?.billingAddress
-        ? {
-            street: onboardingData.fiscal.billingAddress.street ?? '',
-            streetNumber: onboardingData.fiscal.billingAddress.streetNumber ?? '',
-            streetComplement: onboardingData.fiscal.billingAddress.streetComplement ?? '',
-            city: onboardingData.fiscal.billingAddress.city ?? '',
-            province: onboardingData.fiscal.billingAddress.province ?? '',
-            postalCode: onboardingData.fiscal.billingAddress.postalCode ?? '',
-          }
-        : undefined,
-      categories: form.categories,
+    const payload: UpdateProducerProfilePayload = {
+      businessName: form.businessName.trim() || undefined,
+      legalName: form.legalName.trim() || undefined,
+      taxId: form.taxId.trim() || undefined,
+      entityType: form.entityType || undefined,
+      legalRepresentativeName: form.legalRepresentativeName.trim() || undefined,
+      businessPhone: form.phone.trim() || undefined,
+      street: form.street.trim() || undefined,
+      streetNumber: form.streetNumber.trim() || undefined,
+      streetComplement: form.streetComplement.trim() || undefined,
+      city: form.city.trim() || undefined,
+      province: form.province || undefined,
+      postalCode: form.postalCode.trim() || undefined,
       foundedYear: form.foundedYear ? Number(form.foundedYear) : undefined,
-      teamSize: form.teamSize as Parameters<typeof saveStep1>[0]['teamSize'],
-      locationImages: [],
-    };
-
-    const step2Payload: Parameters<typeof saveStep2>[0] = {
-      businessName: form.businessName.trim(),
-      tagline: onboardingData.story?.tagline ?? '',
-      description: form.description.trim(),
-      productionPhilosophy: onboardingData.story?.productionPhilosophy ?? '',
-      values: onboardingData.story?.values?.length
-        ? onboardingData.story.values
-        : ['Calidad', 'Origen local'],
-      website: form.website.trim(),
-      instagramHandle: form.socialMedia.instagram.trim(),
-      certifications: [],
-      photos: [],
+      teamSize: form.teamSize || undefined,
+      tagline: form.tagline.trim() || undefined,
+      description: form.description.trim() || undefined,
+      productionPhilosophy: form.productionPhilosophy.trim() || undefined,
+      values: form.values.length > 0 ? form.values : undefined,
+      website: form.website.trim() || undefined,
+      instagramHandle: form.instagram.trim() || undefined,
+      categories: form.categories.length > 0 ? form.categories : undefined,
+      ...(form.logoKey && { logoKey: form.logoKey }),
+      ...(form.bannerKey && { bannerKey: form.bannerKey }),
     };
 
     setIsSaving(true);
@@ -333,18 +351,11 @@ export default function BusinessInfoPage() {
     setSaveSuccess(null);
 
     try {
-      const saves: Promise<unknown>[] = [
-        saveStep1(step1Payload, []),
-        saveStep2(step2Payload, []),
-      ];
-      if (logoKey || bannerKey) {
-        saves.push(saveStep3({ ...(logoKey && { logoKey }), ...(bannerKey && { bannerKey }) }));
-      }
-      await Promise.all(saves);
+      const response = await updateProducerProfile(payload);
+      const updated = response?.data ? mapProfileToForm(response.data) : form;
 
-      setLogoKey(null);
-      setBannerKey(null);
-      setInitialForm(form);
+      setForm(updated);
+      setInitialForm(updated);
       setIsEditing(false);
       setSaveSuccess('Perfil comercial sincronizado con API real.');
     } catch (error) {
@@ -361,8 +372,8 @@ export default function BusinessInfoPage() {
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
         <PageHeader
-          title="Información del negocio"
-          description="Gestiona los datos oficiales de tu empresa, contacto, dirección fiscal, categorías y redes sociales"
+          title="Mi negocio"
+          description="Gestiona identidad legal, presencia comercial, historia de marca y ubicación productiva"
           badgeIcon={Store}
           badgeText="Negocio"
           showBackButton={true}
@@ -385,11 +396,27 @@ export default function BusinessInfoPage() {
           )}
 
           {saveSuccess && (
-            <Alert className="mb-6 bg-green-50 border-green-200">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-              <AlertDescription className="text-green-800">{saveSuccess}</AlertDescription>
+            <Alert className="mb-6 border-origen-pradera/30 bg-origen-pastel/40">
+              <CheckCircle className="w-4 h-4 text-origen-pradera" />
+              <AlertDescription className="text-origen-bosque">{saveSuccess}</AlertDescription>
             </Alert>
           )}
+
+          {isLoading ? (
+            <BusinessPageSkeleton />
+          ) : (
+            <>
+              {!loadError &&
+                !form.businessName &&
+                !form.taxId &&
+                !form.description &&
+                form.categories.length === 0 && (
+                  <Alert className="mb-6 border-origen-pradera/30 bg-origen-pastel/30">
+                    <AlertDescription className="text-origen-bosque">
+                      Aun no hay datos de negocio cargados. Empieza por completar nombre, historia y ubicacion.
+                    </AlertDescription>
+                  </Alert>
+                )}
 
           <div className="mb-6">
             <Card className="overflow-hidden border border-border shadow-sm">
@@ -458,7 +485,7 @@ export default function BusinessInfoPage() {
 
                   <div className="flex-1 pb-2">
                     <h2 className="text-2xl font-bold text-origen-bosque">{form.businessName || 'Perfil comercial'}</h2>
-                    <p className="text-sm text-muted-foreground">CIF: {form.taxId || 'Pendiente'}</p>
+                    <p className="text-sm text-muted-foreground">{form.tagline || 'Agrega un tagline para contar que hace unico tu negocio'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -467,314 +494,257 @@ export default function BusinessInfoPage() {
 
           <div className="mb-8 flex justify-end">
             {!isEditing ? (
-              <Button onClick={() => setIsEditing(true)} size="lg" disabled={isLoading}>
-                <span className="flex items-center gap-2">
+              <Button onClick={() => setIsEditing(true)} size="md" disabled={isLoading}>
+                <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
                   <Edit className="w-4 h-4" />
                   Editar informacion del negocio
                 </span>
               </Button>
             ) : (
               <div className="flex gap-3">
-                <Button variant="outline" size="lg" onClick={handleCancel}>
-                  <span className="flex items-center gap-2">
+                <Button variant="outline" size="md" onClick={handleCancel}>
+                  <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
                     <X className="w-4 h-4" />
                     Cancelar
                   </span>
                 </Button>
-                <Button size="lg" onClick={handleSave} disabled={isSaving || isLoading}>
-                  <span className="flex items-center gap-2">
-                    {isSaving ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Guardando...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        Guardar cambios
-                      </>
-                    )}
+                <Button size="md" onClick={handleSave} disabled={isSaving || isLoading}>
+                  <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
+                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    Guardar cambios
                   </span>
                 </Button>
               </div>
             )}
           </div>
+            </>
+          )}
 
-          <div className="mb-8">
-            <Alert className="bg-green-50 border-green-200">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                Tu negocio ha sido verificado. La informacion fiscal se sincroniza con producers-service.
-              </AlertDescription>
-            </Alert>
-          </div>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Store className="w-5 h-5 text-origen-pradera" />
-                  Datos principales
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="businessName" className="after:content-['*'] after:ml-0.5 after:text-red-500">
-                      Nombre comercial
-                    </Label>
-                    <Input
-                      id="businessName"
-                      value={form.businessName}
-                      onChange={(e) => setForm({ ...form, businessName: e.target.value })}
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                    />
-                    {errors.businessName && <p className="text-xs text-feedback-danger">{errors.businessName}</p>}
+          {!isLoading && (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Building2 className="w-5 h-5 text-origen-pradera" />
+                    Identidad del negocio
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="businessName">Nombre comercial</Label>
+                      <Input id="businessName" value={form.businessName} onChange={(e) => setForm({ ...form, businessName: e.target.value })} disabled={!isEditing} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="legalName">Razon social</Label>
+                      <Input id="legalName" value={form.legalName} onChange={(e) => setForm({ ...form, legalName: e.target.value })} disabled={!isEditing} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="taxId">CIF / NIF</Label>
+                      <Input id="taxId" value={form.taxId} onChange={(e) => setForm({ ...form, taxId: e.target.value.toUpperCase() })} disabled={!isEditing} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="entityType">Tipo de entidad</Label>
+                      <select id="entityType" value={form.entityType} onChange={(e) => setForm({ ...form, entityType: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
+                        <option value="">Selecciona una opcion</option>
+                        {ENTITY_TYPE_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="legalRepresentativeName">Representante legal</Label>
+                      <Input id="legalRepresentativeName" value={form.legalRepresentativeName} onChange={(e) => setForm({ ...form, legalRepresentativeName: e.target.value })} disabled={!isEditing} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="foundedYear">Ano de fundacion</Label>
+                      <Input id="foundedYear" value={form.foundedYear} onChange={(e) => setForm({ ...form, foundedYear: e.target.value.replace(/\D/g, '').slice(0, 4) })} disabled={!isEditing} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="teamSize">Tamano del equipo</Label>
+                      <select id="teamSize" value={form.teamSize} onChange={(e) => setForm({ ...form, teamSize: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
+                        <option value="">Selecciona una opcion</option>
+                        {TEAM_SIZE_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
+                </CardContent>
+              </Card>
 
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="legalName">Razon social (si es diferente)</Label>
-                    <Input
-                      id="legalName"
-                      value={form.legalName}
-                      onChange={(e) => setForm({ ...form, legalName: e.target.value })}
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                    />
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Phone className="w-5 h-5 text-origen-pradera" />
+                    Contacto y presencia web
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="businessPhone">Telefono</Label>
+                      <Input id="businessPhone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} disabled={!isEditing} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="website">Sitio web</Label>
+                      <Input id="website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} disabled={!isEditing} placeholder="https://..." />
+                      {errors.website && <p className="text-xs text-feedback-danger">{errors.website}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="instagram">Instagram</Label>
+                      <Input id="instagram" value={form.instagram} onChange={(e) => setForm({ ...form, instagram: e.target.value.replace(/^@/, '') })} disabled={!isEditing} placeholder="@usuario" />
+                    </div>
                   </div>
+                </CardContent>
+              </Card>
 
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <MapPin className="w-5 h-5 text-origen-pradera" />
+                    Direccion productiva
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="street">Calle</Label>
+                      <Input id="street" value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} disabled={!isEditing} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="streetNumber">Numero</Label>
+                      <Input id="streetNumber" value={form.streetNumber} onChange={(e) => setForm({ ...form, streetNumber: e.target.value })} disabled={!isEditing} />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="streetComplement">Complemento</Label>
+                      <Input id="streetComplement" value={form.streetComplement} onChange={(e) => setForm({ ...form, streetComplement: e.target.value })} disabled={!isEditing} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="city">Ciudad</Label>
+                      <Input id="city" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} disabled={!isEditing} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="province">Provincia</Label>
+                      <select id="province" value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
+                        <option value="">Selecciona una provincia</option>
+                        {PROVINCIAS_ESPANA.map((province) => (
+                          <option key={province} value={province}>{province}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="postalCode">Codigo postal</Label>
+                      <Input
+                        id="postalCode"
+                        value={form.postalCode}
+                        onBlur={() => {
+                          if (form.postalCode.length === 5 && !form.province) {
+                            const suggested = getProvinciaFromCP(form.postalCode);
+                            if (suggested) setForm((prev) => ({ ...prev, province: suggested }));
+                          }
+                        }}
+                        onChange={(e) => setForm({ ...form, postalCode: e.target.value.replace(/\D/g, '').slice(0, 5) })}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <FileText className="w-5 h-5 text-origen-pradera" />
+                    Historia y valores
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="taxId" className="after:content-['*'] after:ml-0.5 after:text-red-500">
-                      CIF / NIF
-                    </Label>
-                    <Input
-                      id="taxId"
-                      value={form.taxId}
-                      onChange={(e) => setForm({ ...form, taxId: e.target.value.toUpperCase() })}
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                    />
-                    {errors.taxId && <p className="text-xs text-feedback-danger">{errors.taxId}</p>}
+                    <Label htmlFor="tagline">Tagline</Label>
+                    <Input id="tagline" value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} disabled={!isEditing} />
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="foundedYear">Ano de fundacion</Label>
-                    <Input
-                      id="foundedYear"
-                      value={form.foundedYear}
-                      onChange={(e) => setForm({ ...form, foundedYear: e.target.value })}
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                      placeholder="Ej: 1985"
-                    />
+                    <Label htmlFor="businessDescription">Descripcion</Label>
+                    <Textarea id="businessDescription" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} disabled={!isEditing} rows={5} />
+                    {errors.description && <p className="text-xs text-feedback-danger">{errors.description}</p>}
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="teamSize">Tamano del equipo</Label>
-                    <Input
-                      id="teamSize"
-                      value={form.teamSize}
-                      onChange={(e) => setForm({ ...form, teamSize: e.target.value })}
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                      placeholder="1-2, 3-5, 6-10, 11+"
-                    />
+                    <Label htmlFor="productionPhilosophy">Filosofia de produccion</Label>
+                    <Textarea id="productionPhilosophy" value={form.productionPhilosophy} onChange={(e) => setForm({ ...form, productionPhilosophy: e.target.value })} disabled={!isEditing} rows={4} />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Award className="w-5 h-5 text-origen-pradera" />
-                  Categorias
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {form.categories.map((cat) => (
-                    <Badge key={cat} variant="leaf" size="md" className="px-3 py-1.5">
-                      {cat}
-                      {isEditing && (
-                        <button className="ml-2 hover:text-red-500" onClick={() => handleRemoveCategory(cat)}>
-                          <X className="w-3 h-3" />
-                        </button>
-                      )}
-                    </Badge>
-                  ))}
-                </div>
-
-                {isEditing && (
-                  <div className="flex gap-2">
-                    <Input
-                      value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value)}
-                      placeholder="Nueva categoria"
-                    />
-                    <Button variant="outline" size="sm" onClick={handleAddCategory}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Anadir
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Phone className="w-5 h-5 text-origen-pradera" />
-                  Contacto
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="businessPhone" className="after:content-['*'] after:ml-0.5 after:text-red-500">
-                      Telefono
-                    </Label>
-                    <Input
-                      id="businessPhone"
-                      value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                    />
-                    {errors.phone && <p className="text-xs text-feedback-danger">{errors.phone}</p>}
+                    <Label>Valores</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {CORE_VALUES.map((value) => {
+                        const selected = form.values.includes(value.id);
+                        return (
+                          <button
+                            key={value.id}
+                            type="button"
+                            disabled={!isEditing}
+                            onClick={() => handleToggleValue(value.id)}
+                            className={selected ? 'rounded-full border border-origen-pradera bg-origen-pradera/10 px-3 py-1.5 text-sm text-origen-bosque' : 'rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-sm text-text-subtle'}
+                          >
+                            {value.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Tags className="w-5 h-5 text-origen-pradera" />
+                    Categorias
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {form.categories.map((cat) => (
+                      <Badge key={cat} variant="leaf" size="md" className="px-3 py-1.5">
+                        {cat}
+                        {isEditing && (
+                          <button className="ml-2 hover:text-red-500" onClick={() => handleRemoveCategory(cat)}>
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </Badge>
+                    ))}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="website">Sitio web</Label>
-                    <Input
-                      id="website"
-                      value={form.website}
-                      onChange={(e) => setForm({ ...form, website: e.target.value })}
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                      placeholder="https://..."
-                    />
-                    {errors.website && <p className="text-xs text-feedback-danger">{errors.website}</p>}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <MapPin className="w-5 h-5 text-origen-pradera" />
-                  Direccion
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="businessAddress">Direccion</Label>
-                    <Input
-                      id="businessAddress"
-                      value={form.address}
-                      onChange={(e) => setForm({ ...form, address: e.target.value })}
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="businessCity">Ciudad</Label>
-                    <Input
-                      id="businessCity"
-                      value={form.city}
-                      onChange={(e) => setForm({ ...form, city: e.target.value })}
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="businessPostalCode">Codigo postal</Label>
-                    <Input
-                      id="businessPostalCode"
-                      value={form.postalCode}
-                      onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="businessProvince">Provincia</Label>
-                    <Input
-                      id="businessProvince"
-                      value={form.province}
-                      onChange={(e) => setForm({ ...form, province: e.target.value })}
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="businessCountry">Pais</Label>
-                    <Input id="businessCountry" value={form.country} disabled={true} className="bg-surface" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Globe className="w-5 h-5 text-origen-pradera" />
-                  Redes sociales
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="instagram">Instagram</Label>
-                    <Input
-                      id="instagram"
-                      value={form.socialMedia.instagram}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          socialMedia: { ...form.socialMedia, instagram: e.target.value },
-                        })
-                      }
-                      disabled={!isEditing}
-                      className={!isEditing ? 'bg-surface' : ''}
-                      placeholder="@usuario"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <FileText className="w-5 h-5 text-origen-pradera" />
-                  Descripcion del negocio
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Label htmlFor="businessDescription">Descripcion</Label>
-                  <Textarea
-                    id="businessDescription"
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    disabled={!isEditing}
-                    rows={6}
-                    className={!isEditing ? 'bg-surface' : ''}
-                  />
-                  <p className="text-xs text-muted-foreground text-right">{form.description.length}/5000</p>
-                  {errors.description && <p className="text-xs text-feedback-danger">{errors.description}</p>}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  {isEditing && (
+                    <>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {PRODUCER_CATEGORIES.map((category) => (
+                          <button
+                            key={category.id}
+                            type="button"
+                            onClick={() => !form.categories.includes(category.id) && setForm((prev) => ({ ...prev, categories: [...prev.categories, category.id] }))}
+                            className="rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-sm text-origen-bosque"
+                          >
+                            {category.name}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="Nueva categoria" />
+                        <Button variant="outline" size="md" onClick={handleAddCategory}>
+                          <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
+                            <Plus className="w-4 h-4" />
+                            Anadir
+                          </span>
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
 
@@ -783,9 +753,17 @@ export default function BusinessInfoPage() {
         <div className="fixed left-0 right-0 bottom-[calc(88px+env(safe-area-inset-bottom))] lg:hidden z-30 px-4 sm:px-6">
           <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={handleCancel}>Cancelar</Button>
-              <Button className="flex-1" onClick={handleSave} disabled={isSaving}>
-                {isSaving ? 'Guardando...' : 'Guardar cambios'}
+              <Button variant="outline" size="md" className="flex-1" onClick={handleCancel}>
+                <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
+                  <X className="w-4 h-4" />
+                  Cancelar
+                </span>
+              </Button>
+              <Button size="md" className="flex-1" onClick={handleSave} disabled={isSaving || isUploadingVisual}>
+                <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Guardar cambios
+                </span>
               </Button>
             </div>
           </div>

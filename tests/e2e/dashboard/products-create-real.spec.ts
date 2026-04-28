@@ -87,6 +87,7 @@ async function clickNext(page: Page): Promise<void> {
   const nextButton = page.getByRole('button', { name: /^(Siguiente|Completa este paso)$/i }).first();
   await expect(nextButton).toBeVisible({ timeout: 10_000 });
   await expect(nextButton).toBeEnabled({ timeout: 10_000 });
+  await nextButton.scrollIntoViewIfNeeded();
   await nextButton.click({ force: true });
 }
 
@@ -183,21 +184,29 @@ async function openProductForEdit(page: Page, productName: string): Promise<void
 }
 
 async function openCertificationsStep(page: Page): Promise<void> {
-  const directButton = page.getByRole('button', { name: /Certificaciones/i }).last();
-  const canJumpDirectly = await directButton.isVisible({ timeout: 3_000 }).catch(() => false)
-    && await directButton.isEnabled().catch(() => false);
+  const certificationsHeading = page.getByRole('heading', { name: /Certificaciones y atributos/i }).first();
+  if (await certificationsHeading.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    return;
+  }
+
+  const stepButton = page.getByRole('button', { name: /^Ir al paso Certificaciones$/i }).first();
+  const canJumpDirectly = await stepButton.isVisible({ timeout: 3_000 }).catch(() => false)
+    && await stepButton.isEnabled().catch(() => false);
 
   if (canJumpDirectly) {
-    await directButton.click();
+    await stepButton.click();
+    await expect(certificationsHeading).toBeVisible({ timeout: 15_000 });
     return;
   }
 
   for (let index = 0; index < 6; index += 1) {
-    if (await page.getByRole('heading', { name: /Certificaciones y atributos/i }).first().isVisible().catch(() => false)) {
+    if (await certificationsHeading.isVisible().catch(() => false)) {
       return;
     }
     await clickNext(page);
   }
+
+  await expect(certificationsHeading).toBeVisible({ timeout: 15_000 });
 }
 
 test.describe.serial('Dashboard - Productos reales create/edit', () => {

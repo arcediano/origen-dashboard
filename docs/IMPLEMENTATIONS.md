@@ -4,6 +4,36 @@ Historial de todas las implementaciones significativas en el proyecto `origen-da
 
 ---
 
+## Sprint 34 — Rediseño Mi Negocio con API real (Abril 2026)
+
+**Fecha**: 2026-04-28  
+**Agentes**: @desarrollador-codigo, @auditor-seguridad, @analista-pruebas, @documentador-tecnico
+
+### Archivos afectados
+
+| Archivo | Cambio |
+|---------|--------|
+| `src/app/dashboard/profile/business/page.tsx` | Reimplementación completa de "Mi Negocio" con UX responsive, skeleton de carga, cards por sección, select de `teamSize` y `entityType`, campos de dirección separados, valores de marca, visual logo/banner con preview y barra sticky móvil. |
+| `src/lib/api/producers.ts` | Nuevos contratos `getProducerProfile()` y `updateProducerProfile()` (`GET/PATCH /producers/profile`) para desacoplar edición de negocio del flujo de onboarding. |
+
+### Resultado funcional
+
+- Edición de perfil comercial en un único guardado (`PATCH /producers/profile`), sin depender de `saveStep1/2/3`.
+- Precarga de datos existentes del productor en todos los campos de negocio.
+- Persistencia de cambios validada al navegar fuera y volver.
+- Botones con icono+texto estabilizados en móvil (`whitespace-nowrap`, `flex-nowrap`) para evitar saltos de línea.
+
+### Gates de calidad
+
+| Gate | Estado |
+|------|--------|
+| Compilación (`tsc --noEmit`) | ✅ Sin errores en `origen-dashboard` |
+| E2E real | ✅ `tests/e2e/dashboard/account-security-payments-business-real.spec.ts` — **7/7 PASS** |
+| Seguridad | ✅ APROBADO para producción tras reauditoría |
+| Documentación | ✅ Este archivo + `docs/business-profile/especificacion-tecnica-mi-negocio.md` |
+
+---
+
 ## Sprint 24–25 — Cuenta del Productor + Notificaciones (Abril 2026)
 
 ### Conectividad de páginas de perfil y pagos a APIs reales

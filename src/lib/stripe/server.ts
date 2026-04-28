@@ -145,39 +145,4 @@ export async function checkAccountStatus(accountId: string) {
   }
 }
 
-/**
- * Crea un Payment Intent con comisión automática para la plataforma
- * @param amount Monto total en céntimos
- * @param sellerStripeAccountId ID de cuenta Stripe del vendedor
- * @param orderId ID del pedido
- * @returns Payment Intent creado
- */
-export async function createPaymentIntent(
-  amount: number,
-  sellerStripeAccountId: string,
-  orderId: string
-) {
-  try {
-    const platformFee = calculatePlatformFee(amount);
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: 'eur',
-      application_fee_amount: platformFee,
-      transfer_data: {
-        destination: sellerStripeAccountId,
-      },
-      metadata: {
-        orderId,
-        platformFee: platformFee.toString(),
-      },
-    });
-
-    return paymentIntent;
-  } catch (error) {
-    console.error('Error creating payment intent:', error);
-    throw error;
-  }
-}
-
 export { stripe };
