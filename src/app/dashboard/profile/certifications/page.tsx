@@ -33,6 +33,8 @@ interface CertItem {
   certificationId: string;
   name: string;
   issuingBody: string;
+  documentRef: string | null;
+  documentUrl: string | null;
   status: DocStatus | null; // null = no doc subido aún
   verifiedAt: string | null;
   rejectedReason: string | null;
@@ -42,6 +44,8 @@ interface LegalDocItem {
   type: DocType;
   label: string;
   description: string;
+  documentRef: string | null;
+  documentUrl: string | null;
   status: DocStatus | null;
   verifiedAt: string | null;
   rejectedReason: string | null;
@@ -97,6 +101,18 @@ function formatDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
+function resolveDocumentUrl(documentRef: string | null, explicitUrl: string | null): string | null {
+  if (explicitUrl && /^https?:\/\//i.test(explicitUrl)) return explicitUrl;
+  if (documentRef && /^https?:\/\//i.test(documentRef)) return documentRef;
+
+  const cdnBase = process.env.NEXT_PUBLIC_CDN_BASE_URL;
+  if (!cdnBase || !documentRef) return null;
+
+  const normalizedBase = cdnBase.endsWith('/') ? cdnBase.slice(0, -1) : cdnBase;
+  const normalizedRef = documentRef.startsWith('/') ? documentRef.slice(1) : documentRef;
+  return `${normalizedBase}/${normalizedRef}`;
+}
+
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function CertificationsPage() {
@@ -122,6 +138,8 @@ export default function CertificationsPage() {
         certificationId: c.certificationId,
         name: c.name,
         issuingBody: c.issuingBody,
+        documentRef: c.documentKey ?? c.documentDocId ?? null,
+        documentUrl: c.documentUrl ?? null,
         status: c.documentDocId ? (c.status as DocStatus) : null,
         verifiedAt: c.verifiedAt ?? null,
         rejectedReason: c.rejectedReason ?? null,
@@ -135,6 +153,8 @@ export default function CertificationsPage() {
           type,
           label: meta.label,
           description: meta.description,
+          documentRef: null,
+          documentUrl: null,
           status: null,
           verifiedAt: null,
           rejectedReason: null,
@@ -143,6 +163,8 @@ export default function CertificationsPage() {
       for (const d of res.data.documents ?? []) {
         const existing = docMap.get(d.type as DocType);
         if (existing) {
+          existing.documentRef = d.documentKey ?? d.docServiceId ?? null;
+          existing.documentUrl = d.documentUrl ?? null;
           existing.status = d.status as DocStatus;
           existing.verifiedAt = d.verifiedAt ?? null;
           existing.rejectedReason = d.rejectedReason ?? null;
@@ -223,8 +245,6 @@ export default function CertificationsPage() {
       <PageHeader
         title="Certificaciones y documentos"
         description="Sube y gestiona tus certificados de calidad y la documentación obligatoria para acreditar tu tienda"
-        badgeIcon={FileBadge}
-        badgeText="Certificaciones"
         showBackButton={true}
         onBack={() => router.back()}
       />
@@ -283,6 +303,13 @@ export default function CertificationsPage() {
               <CardContent>
                 <div className="space-y-4">
                   {certifications.map((cert) => (
+                    // Permite validar el contenido del archivo aunque siga pendiente o rechazado.
+                    // Si no hay URL explícita, intenta resolverla desde la clave/document id + CDN.
+                    (() => {
+                      const certFileUrl = resolveDocumentUrl(cert.documentRef, cert.documentUrl);
+                      const hasUploadedDocument = cert.status !== null;
+
+                      return (
                     <div
                       key={cert.certificationId}
                       className="border border-border rounded-xl p-4 hover:border-origen-pradera transition-all"
@@ -325,7 +352,43 @@ export default function CertificationsPage() {
                             </div>
                           )}
 
-                          {(cert.status === null || cert.status === 'REJECTED') && (
+                          {hasUploadedDocument && (
+                            <div className="mt-3 flex flex-wrap items-center gap-2 p-2 bg-surface rounded-lg">
+                              <FileBadge className="w-4 h-4 text-text-subtle" />
+                              <span className="text-sm text-muted-foreground flex-1">Documento subido</span>
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label="Ver documento"
+                                disabled={!certFileUrl}
+                                onClick={() => certFileUrl && window.open(certFileUrl, '_blank', 'noopener,noreferrer')}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label="Descargar documento"
+                                disabled={!certFileUrl}
+                                onClick={() => certFileUrl && window.open(certFileUrl, '_blank', 'noopener,noreferrer')}
+                              >
+                                <Download className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={savingFor === cert.certificationId}
+                                onClick={() => setUploadingFor(cert.certificationId)}
+                              >
+                                <span className="flex items-center gap-2">
+                                  <Upload className="w-3.5 h-3.5" />
+                                  {savingFor === cert.certificationId ? 'Guardando…' : 'Editar documento'}
+                                </span>
+                              </Button>
+                            </div>
+                          )}
+
+                          {(uploadingFor === cert.certificationId || cert.status === null) && (
                             <div className="mt-3">
                               {uploadingFor === cert.certificationId ? (
                                 <FileUpload
@@ -354,6 +417,8 @@ export default function CertificationsPage() {
                         </div>
                       </div>
                     </div>
+                      );
+                    })()
                   ))}
                 </div>
               </CardContent>
@@ -372,6 +437,11 @@ export default function CertificationsPage() {
               <CardContent>
                 <div className="space-y-4">
                   {legalDocs.map((doc) => (
+                    (() => {
+                      const docFileUrl = resolveDocumentUrl(doc.documentRef, doc.documentUrl);
+                      const hasUploadedDocument = doc.status !== null;
+
+                      return (
                     <div key={doc.type} className="border border-border rounded-xl p-4">
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
                         <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
@@ -411,20 +481,43 @@ export default function CertificationsPage() {
                             </div>
                           )}
 
-                          {doc.status === 'VERIFIED' && (
+                          {hasUploadedDocument && (
                             <div className="mt-3 flex items-center gap-2 p-2 bg-surface rounded-lg">
                               <FileBadge className="w-4 h-4 text-text-subtle" />
                               <span className="text-sm text-muted-foreground flex-1">Documento subido</span>
-                              <Button variant="ghost" size="icon-sm" aria-label="Ver documento">
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label="Ver documento"
+                                disabled={!docFileUrl}
+                                onClick={() => docFileUrl && window.open(docFileUrl, '_blank', 'noopener,noreferrer')}
+                              >
                                 <Eye className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="icon-sm" aria-label="Descargar documento">
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label="Descargar documento"
+                                disabled={!docFileUrl}
+                                onClick={() => docFileUrl && window.open(docFileUrl, '_blank', 'noopener,noreferrer')}
+                              >
                                 <Download className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={savingFor === doc.type}
+                                onClick={() => setUploadingFor(doc.type)}
+                              >
+                                <span className="flex items-center gap-2">
+                                  <Upload className="w-3.5 h-3.5" />
+                                  {savingFor === doc.type ? 'Guardando…' : 'Editar documento'}
+                                </span>
                               </Button>
                             </div>
                           )}
 
-                          {(doc.status === null || doc.status === 'REJECTED') && (
+                          {(uploadingFor === doc.type || doc.status === null) && (
                             <div className="mt-3">
                               {uploadingFor === doc.type ? (
                                 <FileUpload
@@ -453,6 +546,8 @@ export default function CertificationsPage() {
                         </div>
                       </div>
                     </div>
+                      );
+                    })()
                   ))}
                 </div>
               </CardContent>

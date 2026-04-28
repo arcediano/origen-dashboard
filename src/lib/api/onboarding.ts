@@ -68,6 +68,8 @@ export interface OnboardingData {
     name: string;
     issuingBody: string;
     documentDocId?: string | null;
+    documentKey?: string | null;
+    documentUrl?: string | null;
     status: 'PENDING' | 'VERIFIED' | 'REJECTED';
     verifiedAt?: string | null;
     rejectedReason?: string | null;
@@ -75,6 +77,8 @@ export interface OnboardingData {
   documents?: Array<{
     type: 'CIF' | 'SEGURO_RC' | 'MANIPULADOR_ALIMENTOS';
     docServiceId: string;
+    documentKey?: string | null;
+    documentUrl?: string | null;
     status: 'PENDING' | 'VERIFIED' | 'REJECTED';
     verifiedAt?: string | null;
     rejectedReason?: string | null;
