@@ -13,7 +13,7 @@
  *   todayOrders=0 (ninguno es de hoy), todayRevenue=0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { server } from '../../mocks/server';
 import {
@@ -31,6 +31,10 @@ vi.mock('next/navigation', () => ({
 
 describe('useDashboardStats', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
     vi.clearAllMocks();
   });
 

@@ -125,4 +125,76 @@ export const preferencesHandlers = [
     const updated = { ...base, ...body, updatedAt: new Date().toISOString() };
     return HttpResponse.json({ success: true, data: { ...updated, userId: 42 } });
   }),
+
+  // Legacy PATCH /notifications/preferences handlers (fallback attempts)
+  http.patch(`${BASE}/notifications/preferences`, async ({ request }) => {
+    const body = await request.json() as Record<string, unknown>;
+    // Handle { eventType, email/push/inApp, ... } format
+    if (typeof body.eventType === 'string') {
+      const base = mockPreferences.find((p) => p.eventType === body.eventType);
+      if (base) {
+        const updated = { ...base, ...body, updatedAt: new Date().toISOString() };
+        return HttpResponse.json({ success: true, data: { ...updated, userId: 42 } });
+      }
+    }
+    // Handle { preferences: [...] } format
+    if (Array.isArray(body.preferences) && body.preferences.length > 0) {
+      const first = body.preferences[0] as Record<string, unknown>;
+      if (typeof first.eventType === 'string') {
+        const base = mockPreferences.find((p) => p.eventType === first.eventType);
+        if (base) {
+          const updated = { ...base, ...first, updatedAt: new Date().toISOString() };
+          return HttpResponse.json({ success: true, data: { ...updated, userId: 42 } });
+        }
+      }
+    }
+    return HttpResponse.json({ message: 'Invalid payload' }, { status: 400 });
+  }),
+
+  // Legacy PUT /notifications/preferences handlers (fallback attempts)
+  http.put(`${BASE}/notifications/preferences/:eventType`, async ({ params, request }) => {
+    const eventType = decodeURIComponent(params['eventType'] as string);
+    const body = await request.json() as Record<string, unknown>;
+    const base = mockPreferences.find((p) => p.eventType === eventType);
+    if (!base) {
+      return HttpResponse.json({ message: 'Not found' }, { status: 404 });
+    }
+    const updated = { ...base, ...body, updatedAt: new Date().toISOString() };
+    return HttpResponse.json({ success: true, data: { ...updated, userId: 42 } });
+  }),
+
+  http.put(`${BASE}/notifications/preferences`, async ({ request }) => {
+    const body = await request.json() as Record<string, unknown>;
+    // Handle array format [{ eventType, ... }]
+    if (Array.isArray(body) && body.length > 0) {
+      const first = body[0] as Record<string, unknown>;
+      if (typeof first.eventType === 'string') {
+        const base = mockPreferences.find((p) => p.eventType === first.eventType);
+        if (base) {
+          const updated = { ...base, ...first, updatedAt: new Date().toISOString() };
+          return HttpResponse.json({ success: true, data: { ...updated, userId: 42 } });
+        }
+      }
+    }
+    // Handle { eventType, ... } direct format
+    if (typeof body.eventType === 'string') {
+      const base = mockPreferences.find((p) => p.eventType === body.eventType);
+      if (base) {
+        const updated = { ...base, ...body, updatedAt: new Date().toISOString() };
+        return HttpResponse.json({ success: true, data: { ...updated, userId: 42 } });
+      }
+    }
+    // Handle { preferences: [...] } format
+    if (Array.isArray(body.preferences) && body.preferences.length > 0) {
+      const first = body.preferences[0] as Record<string, unknown>;
+      if (typeof first.eventType === 'string') {
+        const base = mockPreferences.find((p) => p.eventType === first.eventType);
+        if (base) {
+          const updated = { ...base, ...first, updatedAt: new Date().toISOString() };
+          return HttpResponse.json({ success: true, data: { ...updated, userId: 42 } });
+        }
+      }
+    }
+    return HttpResponse.json({ message: 'Invalid payload' }, { status: 400 });
+  }),
 ];
