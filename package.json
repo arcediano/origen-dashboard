@@ -23,7 +23,10 @@
     "test:e2e:notifications": "playwright test tests/e2e/dashboard/notifications-regression.spec.ts",
     "test:e2e:regression": "playwright test tests/e2e/dashboard/producer-complete-flow.spec.ts tests/e2e/dashboard/notifications-regression.spec.ts",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:headed": "playwright test --headed"
+    "test:e2e:headed": "playwright test --headed",
+    "gate:typecheck": "npm run type-check",
+    "gate:test": "npm run test:integration",
+    "gate:ci": "npm run gate:typecheck && npm run gate:test"
   },
   "dependencies": {
     "@arcediano/ux-library": "^0.2.16",
