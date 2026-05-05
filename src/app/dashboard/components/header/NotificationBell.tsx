@@ -1,6 +1,7 @@
 /**
  * @component NotificationBell
- * @description Campana de notificaciones con badge y desplegable
+ * @description Campana de notificaciones con badge y desplegable.
+ * Polling inteligente: cada 30 s en background, pausa si la pestaña está oculta.
  */
 
 'use client';
@@ -15,6 +16,9 @@ import { NotificationItem } from './NotificationItem';
 import { fetchUnreadNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '@/lib/api/notifications';
 import type { Notification } from '@/types/notification';
 
+/** Intervalo de polling cuando la pestaña está visible (ms) */
+const POLL_INTERVAL_MS = 30_000;
+
 interface NotificationBellProps {
   initialNotifications?: Notification[];
 }
@@ -26,16 +30,66 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
   const [hasLoaded, setHasLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [hasNew, setHasNew] = useState(false);
   
   const buttonContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const prevCountRef = useRef<number>(initialNotifications.length);
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Cargar notificaciones solo una vez
+  // Cargar notificaciones solo una vez al montar
   useEffect(() => {
     if (!hasLoaded && !initialNotifications.length) {
       loadNotifications();
     }
   }, [hasLoaded, initialNotifications]);
+
+  // ─── Polling inteligente ─────────────────────────────────────────────────
+
+  const silentPoll = useCallback(async () => {
+    if (document.visibilityState !== 'visible') return;
+    try {
+      const response = await fetchUnreadNotifications();
+      if (response.data) {
+        const incoming = response.data;
+        setNotifications(incoming);
+        if (incoming.length > prevCountRef.current) {
+          setHasNew(true);
+        }
+        prevCountRef.current = incoming.length;
+      }
+    } catch {
+      // polling silencioso — no mostrar error
+    }
+  }, []);
+
+  useEffect(() => {
+    function startPolling() {
+      pollTimerRef.current = setInterval(() => void silentPoll(), POLL_INTERVAL_MS);
+    }
+    function stopPolling() {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
+    }
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') {
+        void silentPoll();
+        startPolling();
+      } else {
+        stopPolling();
+      }
+    }
+
+    startPolling();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      stopPolling();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [silentPoll]);
 
   const loadNotifications = useCallback(async () => {
     setIsLoading(true);
@@ -130,6 +184,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
     e.stopPropagation();
     e.preventDefault();
     setIsOpen(prev => !prev);
+    setHasNew(false);
   }, []);
 
   const close = useCallback(() => {
@@ -178,6 +233,9 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
               aria-label={`${unreadCount} notificaciones sin leer`}
             >
               {unreadCount > 9 ? '9+' : unreadCount}
+              {hasNew && (
+                <span className="absolute inset-0 rounded-full animate-ping bg-feedback-danger opacity-60" aria-hidden />
+              )}
             </span>
           )}
         </Button>
