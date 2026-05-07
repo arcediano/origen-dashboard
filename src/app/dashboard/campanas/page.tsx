@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp } from 'lucide-react';
 import { SoftStatCard } from '@/components/shared/SoftStatCard';
+import { FilterSelect } from '@/components/ui/FilterSelect';
 import {
   createCampaign,
   deleteCampaign,
@@ -89,28 +90,27 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
           <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
             Tipo
           </label>
-          <select
+          <FilterSelect
             value={form.type}
-            onChange={(e) => set('type', e.target.value as CampaignType)}
-            className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque outline-none focus:border-origen-hoja focus:ring-2 focus:ring-origen-hoja/20"
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => set('type', e.target.value as CampaignType)}
+            className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque"
           >
             <option value="CPD">CPD — Coste por día</option>
             <option value="CPC">CPC — Coste por clic</option>
-          </select>
+          </FilterSelect>
         </div>
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
             Placement
           </label>
-          <select
+          <FilterSelect
             value={form.placement ?? ''}
-            onChange={(e) => set('placement', e.target.value)}
-            required
-            className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque outline-none focus:border-origen-hoja focus:ring-2 focus:ring-origen-hoja/20"
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => set('placement', e.target.value)}
+            className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque"
           >
             <option value="">Seleccionar...</option>
             {PLACEMENTS.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
+          </FilterSelect>
         </div>
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
