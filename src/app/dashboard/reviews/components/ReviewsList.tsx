@@ -13,6 +13,7 @@ import { Card } from '@arcediano/ux-library';
 import { Badge, Button } from '@arcediano/ux-library';
 import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
 import { Textarea } from '@arcediano/ux-library';
+import { FilterSelect } from '@/components/ui/FilterSelect';
 import { 
   Star, 
   ThumbsUp, 
@@ -267,7 +268,7 @@ export function ReviewsList({
               <p className="text-xs text-muted-foreground mb-3">
                 ¿Por qué quieres reportar esta reseña?
               </p>
-              <select
+              <FilterSelect
                 value={flagReason}
                 onChange={(e) => setFlagReason(e.target.value)}
                 className="w-full p-2 text-sm border border-border rounded-lg mb-3"
@@ -278,7 +279,7 @@ export function ReviewsList({
                 <option value="fake">Reseña falsa</option>
                 <option value="offensive">Lenguaje ofensivo</option>
                 <option value="other">Otro</option>
-              </select>
+              </FilterSelect>
               <div className="flex justify-end gap-2">
                 <Button
                   size="sm"

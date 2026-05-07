@@ -37,6 +37,7 @@ import { motion } from 'framer-motion';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
 import { getProvinciaFromCP } from '@/constants/cp-provincias';
+import { FilterSelect } from '@/components/ui/FilterSelect';
 import {
   getProducerProfile,
   updateProducerProfile,
@@ -769,12 +770,12 @@ export default function BusinessInfoPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="entityType">Tipo de entidad</Label>
-                      <select id="entityType" value={form.entityType} onChange={(e) => setForm({ ...form, entityType: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
+                      <FilterSelect id="entityType" value={form.entityType} onChange={(e) => setForm({ ...form, entityType: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
                         <option value="">Selecciona una opcion</option>
                         {ENTITY_TYPE_OPTIONS.map((option) => (
                           <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
-                      </select>
+                      </FilterSelect>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="legalRepresentativeName">Representante legal</Label>
@@ -786,12 +787,12 @@ export default function BusinessInfoPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="teamSize">Tamano del equipo</Label>
-                      <select id="teamSize" value={form.teamSize} onChange={(e) => setForm({ ...form, teamSize: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
+                      <FilterSelect id="teamSize" value={form.teamSize} onChange={(e) => setForm({ ...form, teamSize: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
                         <option value="">Selecciona una opcion</option>
                         {TEAM_SIZE_OPTIONS.map((option) => (
                           <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
-                      </select>
+                      </FilterSelect>
                     </div>
                   </div>
                 </CardContent>
@@ -862,12 +863,12 @@ export default function BusinessInfoPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="province">Provincia</Label>
-                      <select id="province" value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
+                      <FilterSelect id="province" value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
                         <option value="">Selecciona una provincia</option>
                         {PROVINCIAS_ESPANA.map((province) => (
                           <option key={province} value={province}>{province}</option>
                         ))}
-                      </select>
+                      </FilterSelect>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="postalCode">Codigo postal</Label>

@@ -12,6 +12,7 @@ import { Bell, Search, SlidersHorizontal, X } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, DateRangeInput } from '@arcediano/ux-library';
 import { FilterBottomSheet } from '@/components/shared/mobile';
+import { FilterSelect } from '@/components/ui/FilterSelect';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
 
 import { fetchNotifications, markNotificationAsRead } from '@/lib/api/notifications';
@@ -207,7 +208,7 @@ export default function NotificationsPage() {
               </div>
 
               <div className="hidden lg:grid lg:grid-cols-3 lg:gap-3">
-                <select
+                <FilterSelect
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value as NotificationTypeFilter)}
                   className="h-10 rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm text-origen-bosque focus:outline-none focus:ring-1 focus:ring-origen-pradera/30"
@@ -217,9 +218,9 @@ export default function NotificationsPage() {
                   <option value="operativas">Operativas</option>
                   <option value="cuenta">Cuenta y sistema</option>
                   <option value="marketing">Marketing</option>
-                </select>
+                </FilterSelect>
 
-                <select
+                <FilterSelect
                   value={readFilter}
                   onChange={(e) => setReadFilter(e.target.value as ReadFilter)}
                   className="h-10 rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm text-origen-bosque focus:outline-none focus:ring-1 focus:ring-origen-pradera/30"
@@ -228,7 +229,7 @@ export default function NotificationsPage() {
                   <option value="all">Leidas y no leidas</option>
                   <option value="unread">Solo no leidas</option>
                   <option value="read">Solo leidas</option>
-                </select>
+                </FilterSelect>
 
                 <DateRangeInput
                   labelFrom="Desde"
