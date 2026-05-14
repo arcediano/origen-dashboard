@@ -119,8 +119,8 @@ function DashboardContentWrapper({
   if (!mounted) return null;
   if (!isAuthenticated || !isProducer) return null;
 
-  return (
-      <div className="min-h-screen bg-gradient-to-br from-surface via-surface-alt to-surface">
+    return (
+      <div className="min-h-screen bg-transparent">
       {/* Sidebar — solo desktop */}
       <DashboardSidebar
         isMobileOpen={isMobileMenuOpen}
@@ -128,7 +128,7 @@ function DashboardContentWrapper({
       />
 
       {/* Header desktop */}
-      <div className="hidden lg:ml-72 lg:block">
+      <div className="hidden lg:ml-72 lg:block px-4 pt-3 sm:px-6 lg:px-8">
         <DashboardHeader onMenuClick={() => setIsMobileMenuOpen(true)} />
       </div>
 
@@ -143,7 +143,8 @@ function DashboardContentWrapper({
           // Desktop: desplazar por sidebar
           !isMobile && "lg:ml-72",
           // Mobile: espacio para header fijo (56px) y barra flotante (72px + safe-area + margen)
-          isMobile && "pt-14 pb-[calc(88px+env(safe-area-inset-bottom))]"
+          isMobile && "pt-14 pb-[calc(88px+env(safe-area-inset-bottom))]",
+          !isMobile && "lg:px-4 lg:pb-6",
         )}
       >
         <MobilePageTransition>

@@ -67,10 +67,14 @@ export function DashboardHeader({
       <header className={cn(
         'sticky top-0 z-30 transition-all duration-300',
         isScrolled
-          ? 'bg-surface-alt/95 backdrop-blur-xl border-b border-border shadow-sm'
-          : 'bg-surface-alt/85 backdrop-blur-md border-b border-border-subtle'
+          ? 'bg-transparent'
+          : 'bg-transparent'
       )} aria-label="Cabecera del dashboard">
-      <div className="mx-auto flex min-h-[76px] max-w-[1600px] items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
+      <div className={cn(
+        'mx-auto flex min-h-[76px] max-w-[1600px] items-center justify-between gap-5 rounded-2xl px-4 sm:px-6 lg:px-8',
+        'border border-border-subtle bg-white/82 shadow-subtle backdrop-blur-xl',
+        isScrolled && 'shadow-origen'
+      )}>
         <div className="flex min-w-0 flex-1 items-center gap-4">
           <div className="min-w-0 flex-1 py-5">
             <div className="min-w-0 overflow-hidden">

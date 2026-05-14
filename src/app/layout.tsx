@@ -4,14 +4,14 @@
  */
 
 import type { Metadata } from "next";
-import { Inter, Lora } from "next/font/google";
+import { Manrope, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 // ⚠️ TEMPORAL: eliminar cuando se use plan de pago en Render o UptimeRobot externo
 import { DevKeepAlive } from "@/components/dev/DevKeepAlive";
 import { Providers } from "@/components/providers/Providers";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const lora = Lora({ subsets: ["latin"], variable: "--font-serif", weight: ["400", "600", "700"] });
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans", weight: ["400", "500", "600", "700", "800"] });
+const cormorant = Cormorant_Garamond({ subsets: ["latin"], variable: "--font-serif", weight: ["400", "500", "600", "700"] });
 
 export const metadata: Metadata = {
   title: "Origen - Panel de Vendedores",
@@ -31,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${inter.variable} ${lora.variable} font-sans`}>
+      <body className={`${manrope.variable} ${cormorant.variable} font-sans`}>
         <Providers>
           {children}
           {/* ⚠️ TEMPORAL — keep-alive para Render free tier. Eliminar al pasar a plan de pago. */}

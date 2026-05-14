@@ -26,7 +26,9 @@
     "test:e2e:headed": "playwright test --headed",
     "gate:typecheck": "npm run type-check",
     "gate:test": "npm run test:integration",
-    "gate:ci": "npm run gate:typecheck && npm run gate:test"
+    "gate:audit": "npm audit --audit-level=high",
+    "gate:ci": "npm run gate:typecheck && npm run gate:test",
+    "gate:ci:full": "npm run gate:ci && npm run gate:audit"
   },
   "dependencies": {
     "@arcediano/ux-library": "^0.2.16",
