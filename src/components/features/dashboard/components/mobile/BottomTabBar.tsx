@@ -49,9 +49,9 @@ export function BottomTabBar() {
       {/* ── Floating island ── */}
       <div className={cn(
         'relative flex items-center w-full max-w-[360px]',
-        'bg-surface-alt/96 backdrop-blur-2xl',
+        'bg-surface-alt',
         'rounded-[28px]',
-        'border border-white/60',
+        'border border-border-subtle',
         'shadow-[0_10px_40px_rgba(27,67,50,0.18),0_2px_8px_rgba(27,67,50,0.1),inset_0_1px_0_rgba(255,255,255,0.8)]',
         'h-[62px]',
       )}>
