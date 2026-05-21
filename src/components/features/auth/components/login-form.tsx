@@ -160,8 +160,11 @@ export function SimpleLogin() {
     // ── Paso 2: cargar perfil ────────────────────────────────────────────────
     try {
       const loggedUser = await setUserFromLogin(trimmedEmail);
+      const hasProducerMembership =
+        (loggedUser?.roles?.includes('PRODUCER') ?? false) ||
+        loggedUser?.role === 'PRODUCER';
 
-      if (!loggedUser || loggedUser.role !== 'PRODUCER') {
+      if (!loggedUser || !hasProducerMembership) {
         clearUser();
         setErrors({ general: 'Tu cuenta no tiene acceso al panel de productores.' });
         return;

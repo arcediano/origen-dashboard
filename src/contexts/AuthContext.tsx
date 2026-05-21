@@ -234,7 +234,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     error,
     isAuthenticated: !!user,
-    isProducer: user?.role === 'PRODUCER',
+    isProducer: user ? ((user.roles?.includes('PRODUCER') ?? false) || user.role === 'PRODUCER') : false,
     refreshUser,
     setUserFromLogin,
     setUser,

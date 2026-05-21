@@ -22,6 +22,8 @@ export interface AuthUser {
   firstName: string;
   lastName: string;
   role: UserRole;
+  activeRole?: UserRole;
+  roles?: UserRole[];
   producerCode: string | null;
   onboardingCompleted: boolean;
   createdAt: string;
@@ -37,6 +39,10 @@ export interface ChangePasswordPayload {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+export interface SetActiveRolePayload {
+  role: UserRole;
 }
 
 export interface LoginResponse {
@@ -141,6 +147,14 @@ export async function updateCurrentUser(payload: UpdateCurrentUserPayload): Prom
  */
 export async function changePassword(payload: ChangePasswordPayload): Promise<void> {
   await gatewayClient.patch('/auth/change-password', payload);
+}
+
+/**
+ * Cambia el rol activo de la sesión actual.
+ */
+export async function setActiveRole(payload: SetActiveRolePayload): Promise<AuthUser> {
+  const response = await gatewayClient.patch<{ success: boolean; data: AuthUser }>('/auth/active-role', payload);
+  return response.data;
 }
 
 /**
