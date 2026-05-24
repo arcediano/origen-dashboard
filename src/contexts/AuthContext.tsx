@@ -10,7 +10,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AuthUser } from '@/lib/api/auth';
-import { getCurrentUser, logoutUser } from '@/lib/api/auth';
+import { getCurrentUser, logoutUser, setActiveRole } from '@/lib/api/auth';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { useSessionVisibilityGuard } from '@/hooks/useSessionVisibilityGuard';
 
@@ -60,7 +60,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // en cada recarga, incluso con sesión válida.
       // Si no hay token, getCurrentUser() lanzará un GatewayError 401 de forma natural.
       const userData = await getCurrentUser();
-      setUser(userData);
+
+      const hasProducerMembership =
+        (userData.roles?.includes('PRODUCER') ?? false) ||
+        userData.role === 'PRODUCER';
+
+      if (hasProducerMembership && userData.role !== 'PRODUCER') {
+        try {
+          const switchedUser = await setActiveRole({ role: 'PRODUCER' });
+          setUser(switchedUser);
+        } catch {
+          // Si no se puede cambiar el rol activo, mantenemos el perfil cargado
+          // y dejamos que las pantallas protegidas apliquen su control habitual.
+          setUser(userData);
+        }
+      } else {
+        setUser(userData);
+      }
       if (process.env.NODE_ENV !== 'production') {
         console.log('[AuthContext] Usuario cargado:', userData);
       }
@@ -101,17 +117,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
     for (let i = 0; i < maxRetries; i++) {
       try {
         const userData = await getCurrentUser();
-        setUser(userData);
+
+        const hasProducerMembership =
+          (userData.roles?.includes('PRODUCER') ?? false) ||
+          userData.role === 'PRODUCER';
+
+        const effectiveUser =
+          hasProducerMembership && userData.role !== 'PRODUCER'
+            ? await setActiveRole({ role: 'PRODUCER' }).catch(() => userData)
+            : userData;
+
+        setUser(effectiveUser);
         if (process.env.NODE_ENV !== 'production') {
           console.log('[AuthContext] Usuario establecido tras login:', {
-            id: userData.id,
-            email: userData.email,
-            role: userData.role,
+            id: effectiveUser.id,
+            email: effectiveUser.email,
+            role: effectiveUser.role,
           });
         }
         setIsLoading(false);
         setHasTriedLoad(true);
-        return userData; // ✅ Devolver el usuario al caller
+        return effectiveUser; // ✅ Devolver el usuario al caller
       } catch (err) {
         if (process.env.NODE_ENV !== 'production') {
           console.warn(`[AuthContext] Intento ${i + 1}/${maxRetries} fallido:`, err);
