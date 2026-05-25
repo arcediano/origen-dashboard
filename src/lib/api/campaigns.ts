@@ -1,7 +1,7 @@
 /**
  * @file campaigns.ts
  * @description API client para gestión de campañas publicitarias del productor.
- * Endpoints: GET/POST /campaigns — seller campaigns CRUD
+ * Endpoints: GET/POST /ads/campaigns — seller campaigns CRUD
  */
 
 import { gatewayClient, GatewayError } from './client';
@@ -94,7 +94,7 @@ export async function fetchMyCampaigns(
     if (params.status) qs.set('status', params.status);
     const suffix = qs.toString();
     const result = await gatewayClient.get<{ success: boolean; data: CampaignList }>(
-      `/campaigns/seller${suffix ? `?${suffix}` : ''}`,
+      `/ads/campaigns/seller${suffix ? `?${suffix}` : ''}`,
     );
     return { data: result.data, status: 200 };
   } catch (err) {
@@ -108,7 +108,7 @@ export async function createCampaign(
 ): Promise<ApiResponse<Campaign>> {
   try {
     const result = await gatewayClient.post<{ success: boolean; data: Campaign }>(
-      '/campaigns',
+      '/ads/campaigns',
       payload,
     );
     return { data: result.data, status: 201 };
@@ -121,7 +121,7 @@ export async function createCampaign(
 export async function fetchCampaignMetrics(id: string): Promise<ApiResponse<CampaignMetrics>> {
   try {
     const result = await gatewayClient.get<{ success: boolean; data: CampaignMetrics }>(
-      `/campaigns/${id}/metrics`,
+      `/ads/campaigns/${id}/metrics`,
     );
     return { data: result.data, status: 200 };
   } catch (err) {
@@ -132,7 +132,7 @@ export async function fetchCampaignMetrics(id: string): Promise<ApiResponse<Camp
 
 export async function deleteCampaign(id: string): Promise<ApiResponse<void>> {
   try {
-    await gatewayClient.delete(`/campaigns/${id}`);
+    await gatewayClient.delete(`/ads/campaigns/${id}`);
     return { status: 204 };
   } catch (err) {
     const message = err instanceof GatewayError ? err.message : 'Error al eliminar campaña';
