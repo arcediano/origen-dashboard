@@ -100,14 +100,6 @@ export interface EnhancedStep4CapacityProps {
 // CONSTANTES
 // ============================================================================
 
-// Rutas predefinidas de Origen (simulado)
-const ORIGEN_ROUTES = [
-  { id: 'route-north', name: 'Ruta Norte', provinces: ['cantabria', 'asturias', 'galicia'] },
-  { id: 'route-east', name: 'Ruta Este', provinces: ['barcelona', 'girona', 'tarragona', 'lleida'] },
-  { id: 'route-south', name: 'Ruta Sur', provinces: ['sevilla', 'cadiz', 'cordoba', 'granada', 'malaga'] },
-  { id: 'route-center', name: 'Ruta Centro', provinces: ['madrid', 'toledo', 'guadalajara', 'cuenca'] }
-];
-
 // Opciones de envío predeterminadas para productores fuera de ruta
 const DEFAULT_DELIVERY_OPTIONS: DeliveryOption[] = [
   { 
@@ -524,18 +516,8 @@ export function EnhancedStep4Capacity({
     handleInputChange('deliveryOptions', data.deliveryOptions.filter(opt => opt.id !== optionId));
   };
 
-  // Sincronizar isInOriginRoute con la provincia del productor
-  // IMPORTANTE: no pre-inyectar métodos de envío por defecto — el productor configura los suyos
-  React.useEffect(() => {
-    if (!producerLocation?.province) return;
-    const isInRoute = ORIGEN_ROUTES.some(route =>
-      route.provinces.includes(producerLocation.province.toLowerCase())
-    );
-    if (isInRoute !== data.isInOriginRoute) {
-      handleInputChange('isInOriginRoute', isInRoute);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [producerLocation?.province]);
+  // IMPORTANTE: la detección de cobertura la resuelve el backend por código postal.
+  // No aplicar heurísticas locales por provincia para evitar inconsistencias.
 
   // ========================================================================
   // RENDER
