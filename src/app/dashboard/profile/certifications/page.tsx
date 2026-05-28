@@ -12,19 +12,28 @@ import {
   Download,
   Eye,
   AlertCircle,
+  AlertTriangle,
+  CalendarClock,
+  RefreshCw,
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
 import { Button, Badge } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
+import { ConfirmDialog } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 import { loadOnboardingData, saveCertificationDocuments } from '@/lib/api/onboarding';
 import { uploadFile } from '@/lib/api/media';
+import { 
+  type DocStatus,
+  countDocumentStates,
+  hasDocumentReference,
+  isExpiringSoon,
+  shouldConfirmReplacement,
+  EXPIRING_SOON_DAYS,
+} from './certification-utils';
 
-// ─── Tipos locales ────────────────────────────────────────────────────────────
-
-type DocStatus = 'VERIFIED' | 'PENDING' | 'REJECTED';
 type DocType = 'CIF' | 'SEGURO_RC' | 'MANIPULADOR_ALIMENTOS';
 
 interface CertItem {
@@ -35,6 +44,7 @@ interface CertItem {
   documentUrl: string | null;
   status: DocStatus | null; // null = no doc subido aún
   verifiedAt: string | null;
+  expiresAt: string | null;
   rejectedReason: string | null;
 }
 
@@ -46,6 +56,7 @@ interface LegalDocItem {
   documentUrl: string | null;
   status: DocStatus | null;
   verifiedAt: string | null;
+  expiresAt: string | null;
   rejectedReason: string | null;
 }
 
@@ -67,9 +78,16 @@ const DOC_META: Record<DocType, { label: string; description: string; category: 
   },
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function getStatusBadge(status: DocStatus | null) {
+function getStatusBadge(status: DocStatus | null, expiresAt: string | null = null) {
+  if (status === 'VERIFIED' && isExpiringSoon(expiresAt)) {
+    const days = daysUntilExpiry(expiresAt);
+    return (
+      <Badge variant="warning" size="sm" className="flex items-center gap-1 w-fit">
+        <CalendarClock className="w-3 h-3" />
+        Caduca en {days} día{days !== 1 ? 's' : ''}
+      </Badge>
+    );
+  }
   if (status === 'VERIFIED') {
     return (
       <Badge variant="success" size="sm" className="flex items-center gap-1 w-fit">
@@ -88,6 +106,13 @@ function getStatusBadge(status: DocStatus | null) {
     return (
       <Badge variant="danger" size="sm" className="flex items-center gap-1 w-fit">
         <AlertCircle className="w-3 h-3" /> Rechazado
+      </Badge>
+    );
+  }
+  if (status === 'EXPIRED') {
+    return (
+      <Badge variant="danger" size="sm" className="flex items-center gap-1 w-fit">
+        <AlertTriangle className="w-3 h-3" /> Caducado
       </Badge>
     );
   }
@@ -122,6 +147,13 @@ export default function CertificationsPage() {
   const [savingFor, setSavingFor] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  // Confirmación de reemplazo de documento verificado
+  const [confirmReplace, setConfirmReplace] = useState<{
+    id: string;
+    label: string;
+    kind: 'cert' | 'doc';
+  } | null>(null);
+
   const handleOpenDocument = useCallback((documentRef: string | null, explicitUrl: string | null, download = false) => {
     const actionUrl = resolveDocumentUrl(documentRef, explicitUrl);
 
@@ -145,6 +177,24 @@ export default function CertificationsPage() {
     window.open(actionUrl, '_blank', 'noopener,noreferrer');
   }, []);
 
+  // ── Solicitar reemplazo — con aviso si el doc está verificado ────────────────
+  const requestReplace = useCallback(
+    (id: string, label: string, kind: 'cert' | 'doc', status: DocStatus | null) => {
+      if (shouldConfirmReplacement(status)) {
+        setConfirmReplace({ id, label, kind });
+      } else {
+        setUploadingFor(id);
+      }
+    },
+    [],
+  );
+
+  const handleConfirmReplace = useCallback(() => {
+    if (!confirmReplace) return;
+    setUploadingFor(confirmReplace.id);
+    setConfirmReplace(null);
+  }, [confirmReplace]);
+
   // ── Carga de datos ──────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -154,13 +204,14 @@ export default function CertificationsPage() {
 
       // Certifications
       const certs: CertItem[] = (res.data.certifications ?? []).map((c) => ({
-        status: (c.documentDocId || c.documentKey || c.documentUrl) ? (c.status as DocStatus) : null,
+        status: c.status as DocStatus,
         certificationId: c.certificationId,
         name: c.name,
         issuingBody: c.issuingBody,
         documentRef: c.documentKey ?? c.documentDocId ?? null,
         documentUrl: c.documentUrl ?? null,
         verifiedAt: c.verifiedAt ?? null,
+        expiresAt: c.expiresAt ?? null,
         rejectedReason: c.rejectedReason ?? null,
       }));
 
@@ -176,6 +227,7 @@ export default function CertificationsPage() {
           documentUrl: null,
           status: null,
           verifiedAt: null,
+          expiresAt: null,
           rejectedReason: null,
         });
       }
@@ -186,6 +238,7 @@ export default function CertificationsPage() {
           existing.documentUrl = d.documentUrl ?? null;
           existing.status = d.status as DocStatus;
           existing.verifiedAt = d.verifiedAt ?? null;
+          existing.expiresAt = d.expiresAt ?? null;
           existing.rejectedReason = d.rejectedReason ?? null;
         }
       }
@@ -251,8 +304,14 @@ export default function CertificationsPage() {
   };
 
   // ── Stats ───────────────────────────────────────────────────────────────────
-  const verifiedCerts = certifications.filter(c => c.status === 'VERIFIED').length;
-  const verifiedDocs = legalDocs.filter(d => d.status === 'VERIFIED').length;
+  const certificationStats = countDocumentStates(certifications);
+  const legalDocStats = countDocumentStates(legalDocs);
+  const verifiedCerts = certificationStats.verified;
+  const verifiedDocs = legalDocStats.verified;
+  const pendingCount = certificationStats.pending + legalDocStats.pending;
+  const rejectedCount = certificationStats.rejected + legalDocStats.rejected;
+  const expiredCount = certificationStats.expired + legalDocStats.expired;
+  const expiringSoonCount = certificationStats.expiringSoon + legalDocStats.expiringSoon;
   const totalItems = certifications.length + legalDocs.length;
   const overallProgress = totalItems > 0
     ? Math.round(((verifiedCerts + verifiedDocs) / totalItems) * 100)
@@ -260,6 +319,7 @@ export default function CertificationsPage() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
       <PageHeader
         title="Certificaciones y documentos"
@@ -281,6 +341,28 @@ export default function CertificationsPage() {
             <Alert variant="error">
               <AlertCircle className="w-4 h-4" />
               <AlertDescription>{saveError}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Aviso global — documentos caducados */}
+          {!loading && !error && expiredCount > 0 && (
+            <Alert variant="error">
+              <AlertTriangle className="w-4 h-4" />
+              <AlertDescription>
+                <strong>{expiredCount} documento{expiredCount > 1 ? 's' : ''} caducado{expiredCount > 1 ? 's' : ''}.</strong>{' '}
+                Tus productos no serán visibles hasta que renueves la documentación y sea verificada.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Aviso global — próximos a caducar */}
+          {!loading && !error && expiringSoonCount > 0 && expiredCount === 0 && (
+            <Alert variant="warning">
+              <CalendarClock className="w-4 h-4" />
+              <AlertDescription>
+                <strong>{expiringSoonCount} documento{expiringSoonCount > 1 ? 's' : ''}</strong> caduca{expiringSoonCount === 1 ? '' : 'n'} en menos de {EXPIRING_SOON_DAYS} días.
+                Renuévalos con antelación para evitar interrupciones.
+              </AlertDescription>
             </Alert>
           )}
 
@@ -306,6 +388,39 @@ export default function CertificationsPage() {
             </Card>
           )}
 
+          {!loading && !error && (
+            <Card className="border-border-subtle">
+              <CardContent className="p-6">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h3 className="font-semibold text-origen-bosque">Resumen documental</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Revisa que esta validado, que sigue en revision y que necesita renovacion.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:min-w-[36rem]">
+                    <div className="rounded-xl border border-border-subtle bg-surface px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-wide text-text-subtle">Validados</p>
+                      <p className="mt-1 text-xl font-semibold text-origen-bosque">{verifiedCerts + verifiedDocs}</p>
+                    </div>
+                    <div className="rounded-xl border border-border-subtle bg-surface px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-wide text-text-subtle">En revisión</p>
+                      <p className="mt-1 text-xl font-semibold text-origen-bosque">{pendingCount}</p>
+                    </div>
+                    <div className="rounded-xl border border-border-subtle bg-surface px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-wide text-text-subtle">Caducados</p>
+                      <p className="mt-1 text-xl font-semibold text-origen-bosque">{expiredCount}</p>
+                    </div>
+                    <div className="rounded-xl border border-border-subtle bg-surface px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-wide text-text-subtle">Rechazados</p>
+                      <p className="mt-1 text-xl font-semibold text-origen-bosque">{rejectedCount}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Certificaciones */}
           {!loading && !error && certifications.length > 0 && (
             <Card>
@@ -318,11 +433,10 @@ export default function CertificationsPage() {
               <CardContent>
                 <div className="space-y-4">
                   {certifications.map((cert) => (
-                    // Permite validar el contenido del archivo aunque siga pendiente o rechazado.
-                    // Si no hay URL explícita, intenta resolverla desde la clave/document id + CDN.
                     (() => {
-                      const hasUploadedDocument = Boolean(cert.documentRef || cert.documentUrl || cert.status !== null);
-
+                      const hasUploadedDocument = hasDocumentReference(cert.documentRef, cert.documentUrl);
+                      const showUploadZone = uploadingFor === cert.certificationId;
+                      const showUploadButton = !hasUploadedDocument && !showUploadZone;
                       return (
                     <div
                       key={cert.certificationId}
@@ -338,14 +452,32 @@ export default function CertificationsPage() {
                               <h3 className="font-semibold text-origen-bosque">{cert.name}</h3>
                               <p className="text-sm text-muted-foreground">{cert.issuingBody}</p>
                             </div>
-                            {getStatusBadge(cert.status)}
+                            {getStatusBadge(cert.status, cert.expiresAt)}
                           </div>
 
                           {cert.status === 'VERIFIED' && cert.verifiedAt && (
                             <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
-                              Verificada el {formatDate(cert.verifiedAt)}
+                              Verificada el {formatDate(cert.verifiedAt)}{cert.expiresAt && !isExpiringSoon(cert.expiresAt) && (<> · Válida hasta {formatDate(cert.expiresAt)}</>)}
                             </p>
+                          )}
+
+                          {cert.status === 'VERIFIED' && isExpiringSoon(cert.expiresAt) && (
+                            <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                              <p className="text-xs text-amber-700 flex items-center gap-2">
+                                <CalendarClock className="w-3.5 h-3.5" />
+                                Este certificado caduca el {formatDate(cert.expiresAt)}. Renuévalo antes de esa fecha.
+                              </p>
+                            </div>
+                          )}
+
+                          {cert.status === 'EXPIRED' && (
+                            <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                              <p className="text-xs text-red-700 flex items-center gap-2">
+                                <AlertTriangle className="w-3.5 h-3.5" />
+                                Este certificado caducó el {formatDate(cert.expiresAt)}. Tus productos no serán visibles hasta que lo renueves y sea verificado.
+                              </p>
+                            </div>
                           )}
 
                           {cert.status === 'PENDING' && (
@@ -366,7 +498,7 @@ export default function CertificationsPage() {
                             </div>
                           )}
 
-                          {hasUploadedDocument && (
+                          {hasUploadedDocument && !showUploadZone && (
                             <div className="mt-3 flex flex-wrap items-center gap-2 p-2 bg-surface rounded-lg">
                               <FileBadge className="w-4 h-4 text-text-subtle" />
                               <span className="text-sm text-muted-foreground flex-1">Documento subido</span>
@@ -390,40 +522,42 @@ export default function CertificationsPage() {
                                 variant="outline"
                                 size="sm"
                                 disabled={savingFor === cert.certificationId}
-                                onClick={() => setUploadingFor(cert.certificationId)}
+                                onClick={() => requestReplace(cert.certificationId, cert.name, 'cert', cert.status)}
                               >
                                 <span className="flex items-center gap-2">
-                                  <Upload className="w-3.5 h-3.5" />
-                                  {savingFor === cert.certificationId ? 'Guardando…' : 'Editar documento'}
+                                  <RefreshCw className="w-3.5 h-3.5" />
+                                  {savingFor === cert.certificationId ? 'Guardando…' : 'Reemplazar'}
                                 </span>
                               </Button>
                             </div>
                           )}
 
-                          {(uploadingFor === cert.certificationId || cert.status === null) && (
+                          {showUploadZone && (
                             <div className="mt-3">
-                              {uploadingFor === cert.certificationId ? (
-                                <FileUpload
-                                  value={[]}
-                                  onChange={(files) => handleCertUpload(cert.certificationId, files)}
-                                  helperText="Sube el certificado en PDF, JPG o PNG (máx 5MB)"
-                                  accept=".pdf,.jpg,.jpeg,.png"
-                                  multiple={false}
-                                  maxSize={5}
-                                />
-                              ) : (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  disabled={savingFor === cert.certificationId}
-                                  onClick={() => setUploadingFor(cert.certificationId)}
-                                >
-                                  <span className="flex items-center gap-2">
-                                    <Upload className="w-3.5 h-3.5" />
-                                    {savingFor === cert.certificationId ? 'Guardando…' : 'Subir certificado'}
-                                  </span>
-                                </Button>
-                              )}
+                              <FileUpload
+                                value={[]}
+                                onChange={(files) => handleCertUpload(cert.certificationId, files)}
+                                helperText="Sube el certificado en PDF, JPG o PNG (máx 5MB)"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                multiple={false}
+                                maxSize={5}
+                              />
+                            </div>
+                          )}
+
+                          {showUploadButton && (
+                            <div className="mt-3">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={savingFor === cert.certificationId}
+                                onClick={() => setUploadingFor(cert.certificationId)}
+                              >
+                                <span className="flex items-center gap-2">
+                                  <Upload className="w-3.5 h-3.5" />
+                                  {savingFor === cert.certificationId ? 'Guardando…' : 'Subir certificado'}
+                                </span>
+                              </Button>
                             </div>
                           )}
                         </div>
@@ -450,8 +584,9 @@ export default function CertificationsPage() {
                 <div className="space-y-4">
                   {legalDocs.map((doc) => (
                     (() => {
-                      const hasUploadedDocument = Boolean(doc.documentRef || doc.documentUrl || doc.status !== null);
-
+                      const hasUploadedDocument = hasDocumentReference(doc.documentRef, doc.documentUrl);
+                      const showUploadZone = uploadingFor === doc.type;
+                      const showUploadButton = !hasUploadedDocument && !showUploadZone;
                       return (
                     <div key={doc.type} className="border border-border rounded-xl p-4">
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
@@ -464,14 +599,32 @@ export default function CertificationsPage() {
                               <h3 className="font-semibold text-origen-bosque">{doc.label}</h3>
                               <p className="text-sm text-muted-foreground">{doc.description}</p>
                             </div>
-                            {getStatusBadge(doc.status)}
+                            {getStatusBadge(doc.status, doc.expiresAt)}
                           </div>
 
                           {doc.status === 'VERIFIED' && doc.verifiedAt && (
                             <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
-                              Verificado el {formatDate(doc.verifiedAt)}
+                              Verificado el {formatDate(doc.verifiedAt)}{doc.expiresAt && !isExpiringSoon(doc.expiresAt) && (<> · Válido hasta {formatDate(doc.expiresAt)}</>)}
                             </p>
+                          )}
+
+                          {doc.status === 'VERIFIED' && isExpiringSoon(doc.expiresAt) && (
+                            <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                              <p className="text-xs text-amber-700 flex items-center gap-2">
+                                <CalendarClock className="w-3.5 h-3.5" />
+                                Este documento caduca el {formatDate(doc.expiresAt)}. Renuévalo antes de esa fecha.
+                              </p>
+                            </div>
+                          )}
+
+                          {doc.status === 'EXPIRED' && (
+                            <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                              <p className="text-xs text-red-700 flex items-center gap-2">
+                                <AlertTriangle className="w-3.5 h-3.5" />
+                                Este documento caducó el {formatDate(doc.expiresAt)}. Tus productos no serán visibles hasta que lo renueves y sea verificado.
+                              </p>
+                            </div>
                           )}
 
                           {doc.status === 'PENDING' && (
@@ -492,7 +645,7 @@ export default function CertificationsPage() {
                             </div>
                           )}
 
-                          {hasUploadedDocument && (
+                          {hasUploadedDocument && !showUploadZone && (
                             <div className="mt-3 flex items-center gap-2 p-2 bg-surface rounded-lg">
                               <FileBadge className="w-4 h-4 text-text-subtle" />
                               <span className="text-sm text-muted-foreground flex-1">Documento subido</span>
@@ -516,40 +669,42 @@ export default function CertificationsPage() {
                                 variant="outline"
                                 size="sm"
                                 disabled={savingFor === doc.type}
-                                onClick={() => setUploadingFor(doc.type)}
+                                onClick={() => requestReplace(doc.type, doc.label, 'doc', doc.status)}
                               >
                                 <span className="flex items-center gap-2">
-                                  <Upload className="w-3.5 h-3.5" />
-                                  {savingFor === doc.type ? 'Guardando…' : 'Editar documento'}
+                                  <RefreshCw className="w-3.5 h-3.5" />
+                                  {savingFor === doc.type ? 'Guardando…' : 'Reemplazar'}
                                 </span>
                               </Button>
                             </div>
                           )}
 
-                          {(uploadingFor === doc.type || doc.status === null) && (
+                          {showUploadZone && (
                             <div className="mt-3">
-                              {uploadingFor === doc.type ? (
-                                <FileUpload
-                                  value={[]}
-                                  onChange={(files) => handleLegalDocUpload(doc.type, files)}
-                                  helperText="Sube el documento en PDF, JPG o PNG (máx 5MB)"
-                                  accept=".pdf,.jpg,.jpeg,.png"
-                                  multiple={false}
-                                  maxSize={5}
-                                />
-                              ) : (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  disabled={savingFor === doc.type}
-                                  onClick={() => setUploadingFor(doc.type)}
-                                >
-                                  <span className="flex items-center gap-2">
-                                    <Upload className="w-3.5 h-3.5" />
-                                    {savingFor === doc.type ? 'Guardando…' : 'Subir documento'}
-                                  </span>
-                                </Button>
-                              )}
+                              <FileUpload
+                                value={[]}
+                                onChange={(files) => handleLegalDocUpload(doc.type, files)}
+                                helperText="Sube el documento en PDF, JPG o PNG (máx 5MB)"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                multiple={false}
+                                maxSize={5}
+                              />
+                            </div>
+                          )}
+
+                          {showUploadButton && (
+                            <div className="mt-3">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={savingFor === doc.type}
+                                onClick={() => setUploadingFor(doc.type)}
+                              >
+                                <span className="flex items-center gap-2">
+                                  <Upload className="w-3.5 h-3.5" />
+                                  {savingFor === doc.type ? 'Guardando…' : 'Subir documento'}
+                                </span>
+                              </Button>
                             </div>
                           )}
                         </div>
@@ -582,6 +737,24 @@ export default function CertificationsPage() {
         </div>
       </div>
     </div>
+
+      {/* ── Dialog de confirmación de reemplazo ──────────────────────────────── */}
+      <ConfirmDialog
+        open={confirmReplace !== null}
+        onOpenChange={(open) => { if (!open) setConfirmReplace(null); }}
+        title="¿Reemplazar documento verificado?"
+        description={confirmReplace?.label}
+        icon={<AlertTriangle className="w-5 h-5" />}
+        body="Al subir un nuevo documento, tus productos dejarán de ser visibles en la plataforma mientras el equipo de Origen revisa y verifica el nuevo archivo. El cambio deja al productor en PENDING_VERIFICATION y la verificación suele tardar entre 24 y 48 horas."
+        highlightLabel="Impacto"
+        highlightValue="Productos ocultos hasta nueva verificación"
+        confirmLabel="Sí, reemplazar documento"
+        confirmVariant="danger"
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmReplace}
+        onCancel={() => setConfirmReplace(null)}
+      />
+    </>
   );
 }
 

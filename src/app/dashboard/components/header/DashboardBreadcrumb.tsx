@@ -6,13 +6,17 @@ import { usePathname } from 'next/navigation';
 import { ChevronRight, Home } from 'lucide-react';
 import { getDashboardBreadcrumbs } from '@/constants/sidebar';
 
-export function DashboardBreadcrumb() {
+interface DashboardBreadcrumbProps {
+  fallback?: React.ReactNode;
+}
+
+export function DashboardBreadcrumb({ fallback }: DashboardBreadcrumbProps) {
   const pathname = usePathname();
 
   const breadcrumbs = getDashboardBreadcrumbs(pathname);
 
   if (breadcrumbs.length <= 1) {
-    return null;
+    return fallback ? <>{fallback}</> : null;
   }
 
   return (

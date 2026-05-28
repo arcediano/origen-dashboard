@@ -70,8 +70,9 @@ export interface OnboardingData {
     documentDocId?: string | null;
     documentKey?: string | null;
     documentUrl?: string | null;
-    status: 'PENDING' | 'VERIFIED' | 'REJECTED';
+    status: 'PENDING' | 'VERIFIED' | 'REJECTED' | 'EXPIRED';
     verifiedAt?: string | null;
+    expiresAt?: string | null;
     rejectedReason?: string | null;
   }> | null;
   documents?: Array<{
@@ -79,8 +80,9 @@ export interface OnboardingData {
     docServiceId: string;
     documentKey?: string | null;
     documentUrl?: string | null;
-    status: 'PENDING' | 'VERIFIED' | 'REJECTED';
+    status: 'PENDING' | 'VERIFIED' | 'REJECTED' | 'EXPIRED';
     verifiedAt?: string | null;
+    expiresAt?: string | null;
     rejectedReason?: string | null;
   }> | null;
 }

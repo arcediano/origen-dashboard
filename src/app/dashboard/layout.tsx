@@ -128,7 +128,7 @@ function DashboardContentWrapper({
       />
 
       {/* Header desktop */}
-      <div className="hidden lg:ml-72 lg:block px-4 pt-3 sm:px-6 lg:px-8">
+      <div className="hidden lg:ml-72 lg:block">
         <DashboardHeader onMenuClick={() => setIsMobileMenuOpen(true)} />
       </div>
 

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { NotificationBell } from './NotificationBell';
 import { UserMenu } from './UserMenu';
 import { DashboardBreadcrumb } from './DashboardBreadcrumb';
+import { getDashboardPageTitle } from '@/constants/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface DashboardHeaderProps {
@@ -29,10 +30,8 @@ export function DashboardHeader({
   const { user } = useAuth();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -51,6 +50,8 @@ export function DashboardHeader({
     return userInitials;
   }, [user?.firstName, user?.lastName, userInitials]);
 
+  const pageTitle = getDashboardPageTitle(pathname);
+
   const handleLogout = () => {
     // La lógica de logout (API call + redirect) está en UserMenu
   };
@@ -64,35 +65,35 @@ export function DashboardHeader({
       >
         Saltar al contenido principal
       </a>
-      <header className={cn(
-        'sticky top-0 z-30 transition-all duration-300',
-        isScrolled
-          ? 'bg-transparent'
-          : 'bg-transparent'
-      )} aria-label="Cabecera del dashboard">
-      <div className={cn(
-        'mx-auto flex min-h-[76px] max-w-[1600px] items-center justify-between gap-5 rounded-2xl px-4 sm:px-6 lg:px-8',
-        'border border-border-subtle bg-white/82 shadow-subtle backdrop-blur-xl',
-        isScrolled && 'shadow-origen'
-      )}>
-        <div className="flex min-w-0 flex-1 items-center gap-4">
-          <div className="min-w-0 flex-1 py-5">
-            <div className="min-w-0 overflow-hidden">
-              <DashboardBreadcrumb />
-            </div>
+      <header
+        className={cn(
+          'sticky top-0 z-30 transition-all duration-300',
+          'border-b border-border-subtle bg-surface-alt/95 backdrop-blur-xl',
+          isScrolled && 'shadow-sm'
+        )}
+        aria-label="Cabecera del dashboard"
+      >
+        <div className="flex h-16 items-center justify-between gap-5 px-6 lg:px-8">
+          <div className="min-w-0 flex-1">
+            <DashboardBreadcrumb
+              fallback={
+                <span className="text-base font-semibold text-origen-bosque">{pageTitle}</span>
+              }
+            />
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <NotificationBell />
+            <UserMenu
+              userName={resolvedName}
+              userEmail={resolvedEmail}
+              userInitials={resolvedInitials}
+              userAvatar={userAvatar}
+              onLogout={handleLogout}
+            />
           </div>
         </div>
-
-        <div className="flex items-center gap-2.5 py-4">
-          <NotificationBell />
-          <UserMenu
-            userName={resolvedName}
-            userEmail={resolvedEmail}
-            userInitials={resolvedInitials}
-            userAvatar={userAvatar}
-            onLogout={handleLogout}
-          />
-        </div>
-      </div>
-    </header>    </>  );
+      </header>
+    </>
+  );
 }

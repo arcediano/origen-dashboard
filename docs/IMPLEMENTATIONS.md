@@ -1,5 +1,35 @@
 # Registro de Implementaciones - origen-dashboard
 
+## [IMPL-004] Certificaciones del perfil comercial con estados, descarga y reemplazo con aviso de visibilidad
+
+**Fecha**: 2026-05-28  
+**Sprint**: N/A  
+**Historia de Usuario**: Perfil comercial / certificaciones  
+**Proyecto(s) afectado(s)**: origen-dashboard, origen-master-microservices  
+**Agentes involucrados**: @desarrollador-codigo
+
+### Resumen
+
+Se reforzo la pantalla `/dashboard/profile/certifications` para que muestre con mayor claridad el estado de cada certificado y documento legal, permitiendo abrirlos, descargarlos y reemplazarlos con un aviso explicito cuando el archivo actual ya estaba verificado. El cambio de visibilidad publica del productor no se implemento de nuevo en backend porque ya existe en `origen-master-microservices`: al reemplazar un documento verificado, el flujo de onboarding lo lleva a `PENDING_VERIFICATION` y deja `profilePubliclyReady` en `false`.
+
+### Cambios realizados
+
+| Archivo | Tipo | Descripcion |
+|---------|------|-------------|
+| src/app/dashboard/profile/certifications/page.tsx | Modificado | Se agrego un resumen documental con conteos de validados, en revision, caducados y rechazados, y se aclaro el impacto del reemplazo sobre la visibilidad del productor. |
+| src/app/dashboard/profile/certifications/certification-utils.ts | Nuevo | Helper compartido para estados documentales, deteccion de reemplazo y ventana de caducidad. |
+| tests/unit/certification-utils.test.ts | Nuevo | Cobertura unitaria del helper compartido para estados y referencias de documento. |
+
+### Validaciones realizadas
+
+1. `get_errors` sin errores en el archivo modificado.
+2. `get_errors` sin errores a nivel de `origen-dashboard`.
+3. No se ejecutaron suites `vitest` o `playwright` en esta sesion.
+
+### Referencias
+
+- Flujo backend ya existente: `origen-master-microservices/src/modules/producers/producers/producers.service.ts`
+
 ## [IMPL-003] Hotfix P1 en alta de producto por categorias/subcategorias no cargadas
 
 **Fecha**: 2026-05-27  
