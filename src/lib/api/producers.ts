@@ -41,6 +41,12 @@ export interface ProfileViewStats {
   total: number;
 }
 
+export interface ProfileViewChartPoint {
+  label: string;
+  currentPeriod: number;
+  previousPeriod: number;
+}
+
 export interface ProducerProfileVisual {
   logoUrl: string | null;
   bannerUrl: string | null;
@@ -145,6 +151,30 @@ export async function fetchProfileViewStats(): Promise<ApiResponse<ProfileViewSt
     console.error('[producers] fetchProfileViewStats error');
     const message =
       err instanceof GatewayError ? err.message : 'Error al cargar visitas al perfil';
+    return {
+      error: message,
+      status: err instanceof GatewayError ? err.status : 500,
+    };
+  }
+}
+
+/**
+ * Obtiene la serie temporal de visitas al perfil del productor para la gráfica del dashboard.
+ * Compara el período actual con el anterior de la misma duración.
+ * GET /api/v1/producers/me/profile-views/chart?period=7d|6m|1y
+ */
+export async function fetchProfileViewChart(
+  period: '7d' | '6m' | '1y',
+): Promise<ApiResponse<ProfileViewChartPoint[]>> {
+  try {
+    const data = await gatewayClient.get<ProfileViewChartPoint[]>(
+      `/producers/me/profile-views/chart?period=${period}`,
+    );
+    return { data, status: 200 };
+  } catch (err) {
+    console.error('[producers] fetchProfileViewChart error');
+    const message =
+      err instanceof GatewayError ? err.message : 'Error al cargar serie de visitas';
     return {
       error: message,
       status: err instanceof GatewayError ? err.status : 500,
