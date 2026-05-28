@@ -38,6 +38,13 @@ function makeBackendOrder(overrides: {
     estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    invoice: {
+      id: `inv-${overrides.id}`,
+      invoiceNumber: `INV-${overrides.orderNumber}`,
+      status: overrides.status === 'pending' ? 'draft' : 'issued',
+      issuedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      hasPdf: overrides.status !== 'pending',
+    },
     items: [
       {
         id: 'item-01',
@@ -103,6 +110,22 @@ export const ordersHandlers = [
 
     const body = (await request.json()) as { status?: string };
     return HttpResponse.json({ ...found, status: body.status ?? found.status });
+  }),
+
+  // GET /orders/seller/:id/invoice — descarga de factura
+  http.get(`${BASE}/orders/seller/:id/invoice`, ({ params }) => {
+    const { id } = params as { id: string };
+    const found = mockSellerOrders.find((o) => o.id === id);
+
+    if (!found) {
+      return HttpResponse.json({ message: 'Factura no encontrada' }, { status: 404 });
+    }
+
+    return HttpResponse.json({
+      invoice: found.invoice,
+      downloadUrl: found.invoice?.hasPdf ? 'https://signed.example.com/invoice.pdf' : null,
+      expiresIn: 120,
+    });
   }),
 ];
 

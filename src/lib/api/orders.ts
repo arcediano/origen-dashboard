@@ -60,7 +60,26 @@ interface BackendOrder {
   estimatedDelivery?: string;
   createdAt: string;
   updatedAt: string;
+  invoice?: {
+    id: string;
+    invoiceNumber: string;
+    status: 'draft' | 'issued' | 'cancelled';
+    issuedAt?: string;
+    hasPdf: boolean;
+  };
   items: BackendOrderItem[];
+}
+
+interface BackendInvoiceDownloadResponse {
+  invoice: {
+    id: string;
+    invoiceNumber: string;
+    status: 'draft' | 'issued' | 'cancelled';
+    issuedAt?: string;
+    hasPdf: boolean;
+  };
+  downloadUrl: string | null;
+  expiresIn: number;
 }
 
 interface BackendSellerListResponse {
@@ -109,6 +128,8 @@ function mapShippingStatus(orderStatus: string): Order['shipping']['status'] {
 }
 
 function mapOrderStatus(raw: string): OrderStatus {
+  if (raw === 'confirmed') return 'processing';
+
   const valid: OrderStatus[] = [
     'pending',
     'processing',
@@ -151,7 +172,7 @@ function mapBackendOrder(o: BackendOrder): Order {
 
     payment: {
       method: mapPaymentMethod(o.paymentMethod),
-      status: status === 'pending' ? 'pending' : 'paid',
+      status: status === 'pending' ? 'pending' : status === 'refunded' ? 'refunded' : 'paid',
       amount: o.total,
     },
 
@@ -175,6 +196,16 @@ function mapBackendOrder(o: BackendOrder): Order {
 
     // El backend no expone timeline para el vendedor
     timeline: [],
+
+    invoice: o.invoice
+      ? {
+          id: o.invoice.id,
+          invoiceNumber: o.invoice.invoiceNumber,
+          status: o.invoice.status,
+          issuedAt: o.invoice.issuedAt ? new Date(o.invoice.issuedAt) : undefined,
+          hasPdf: o.invoice.hasPdf,
+        }
+      : undefined,
 
     createdAt: new Date(o.createdAt),
     updatedAt: new Date(o.updatedAt),
@@ -334,6 +365,31 @@ export async function fetchOrders(params?: {
  */
 export async function fetchOrderById(id: string): Promise<ApiResponse<Order>> {
   return fetchSellerOrderById(id);
+}
+
+/**
+ * Obtiene URL de descarga prefirmada de la factura de un pedido del productor.
+ * GET /api/v1/orders/seller/:id/invoice
+ */
+export async function fetchSellerOrderInvoice(
+  id: string,
+): Promise<ApiResponse<BackendInvoiceDownloadResponse>> {
+  try {
+    const res = await gatewayClient.get<BackendInvoiceDownloadResponse>(`/orders/seller/${id}/invoice`);
+    return { data: res, status: 200 };
+  } catch (err) {
+    console.error('[orders] fetchSellerOrderInvoice', err);
+    if (err instanceof GatewayError) {
+      if (err.status === 404) {
+        return { error: 'Factura no disponible para este pedido', status: 404 };
+      }
+      if (err.status === 403) {
+        return { error: 'Acceso denegado a la factura', status: 403 };
+      }
+      return { error: err.message, status: err.status };
+    }
+    return { error: 'Error al obtener la factura del pedido', status: 500 };
+  }
 }
 
 /**

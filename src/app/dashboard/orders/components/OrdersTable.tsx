@@ -142,6 +142,21 @@ export function OrdersTable({
       }
     },
     {
+      key: 'factura',
+      header: 'Factura',
+      accessor: (item) => {
+        if (!item.invoice) {
+          return <span className="text-xs text-text-disabled">Sin factura</span>;
+        }
+
+        if (!item.invoice.hasPdf) {
+          return <Badge variant="warning" size="sm">Borrador</Badge>;
+        }
+
+        return <Badge variant="success" size="sm">Lista</Badge>;
+      },
+    },
+    {
       key: 'acciones',
       header: '',
       accessor: (item) => (

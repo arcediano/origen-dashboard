@@ -17,6 +17,7 @@ import {
   Banknote,
   Eye,
   Truck,
+  FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@arcediano/ux-library';
@@ -156,6 +157,12 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
           {order.total.toFixed(2)} €
         </span>
         <PaymentBadge status={order.payment.status} />
+        {order.invoice?.hasPdf && (
+          <span className="inline-flex items-center gap-1 text-[10px] text-origen-pradera font-medium">
+            <FileText className="w-2.5 h-2.5" />
+            Factura
+          </span>
+        )}
       </div>
     </motion.button>
     </SwipeableRow>

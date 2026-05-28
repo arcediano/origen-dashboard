@@ -80,6 +80,14 @@ export interface OrderTimeline {
   metadata?: Record<string, any>;
 }
 
+export interface OrderInvoice {
+  id: string;
+  invoiceNumber: string;
+  status: 'draft' | 'issued' | 'cancelled';
+  issuedAt?: Date;
+  hasPdf: boolean;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -101,6 +109,7 @@ export interface Order {
   
   timeline: OrderTimeline[];
   notes?: string;
+  invoice?: OrderInvoice;
   
   createdAt: Date;
   updatedAt: Date;

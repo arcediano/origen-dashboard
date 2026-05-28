@@ -1,5 +1,66 @@
 # Registro de Implementaciones - origen-dashboard
 
+## [IMPL-006] Follow-up pedidos dashboard: cobertura API de descarga de factura
+
+**Fecha**: 2026-05-28  
+**Sprint**: N/A  
+**Historia de Usuario**: Pedido/facturacion seller dashboard  
+**Proyecto(s) afectado(s)**: origen-dashboard  
+**Agentes involucrados**: @desarrollador-codigo, @analista-pruebas
+
+### Resumen
+
+Se extendió la cobertura de tests de la API de pedidos para incluir el endpoint de descarga de factura seller y escenarios de error/permisos.
+
+### Cambios realizados
+
+| Archivo | Tipo | Descripcion |
+|---------|------|-------------|
+| tests/mocks/handlers/orders.handlers.ts | Modificado | Nuevo handler MSW `GET /orders/seller/:id/invoice` y fixture backend con `invoice` opcional. |
+| tests/unit/api/orders.api.test.ts | Modificado | Nueva suite `fetchSellerOrderInvoice` con casos 200, 403, 404 y factura sin PDF. |
+
+### Validaciones realizadas
+
+1. Diagnósticos TypeScript sin errores en tests modificados.
+2. Diagnósticos sin errores a nivel de proyecto (`origen-dashboard`).
+
+### Referencias
+
+- Cliente API: src/lib/api/orders.ts
+
+## [IMPL-005] Dashboard pedidos: contrato seller estable + visualizacion/descarga de factura
+
+**Fecha**: 2026-05-28  
+**Sprint**: N/A  
+**Historia de Usuario**: Pedido/facturacion seller dashboard  
+**Proyecto(s) afectado(s)**: origen-dashboard  
+**Agentes involucrados**: @desarrollador-codigo
+
+### Resumen
+
+Se actualizo la capa API y UI de pedidos para tolerar estado backend `confirmed`, mapear `invoice` opcional y habilitar descarga de factura desde el detalle por URL prefirmada. Tambien se agregaron indicadores de factura en lista desktop/movil.
+
+### Cambios realizados
+
+| Archivo | Tipo | Descripcion |
+|---------|------|-------------|
+| src/types/order.ts | Modificado | Nuevo tipo `OrderInvoice` y propiedad opcional `invoice` en `Order`. |
+| src/lib/api/orders.ts | Modificado | Mapeo de `invoice`, normalizacion de estado `confirmed` y nuevo cliente `fetchSellerOrderInvoice`. |
+| src/app/dashboard/orders/[id]/page.tsx | Modificado | Bloque de factura en tarjeta de pago + accion de descarga con manejo de errores. |
+| src/app/dashboard/orders/components/OrdersTable.tsx | Modificado | Columna de estado de factura (`Sin factura`, `Borrador`, `Lista`). |
+| src/app/dashboard/orders/components/OrderCard.tsx | Modificado | Indicador compacto de factura en tarjeta movil cuando hay PDF. |
+
+### Validaciones realizadas
+
+1. Revision de contrato UI para no romper render si `invoice` es ausente.
+2. Integracion de descarga segura solo cuando `hasPdf=true`.
+3. Validacion de compilacion TypeScript pendiente de ejecucion de `tsc --noEmit` en esta sesion.
+
+### Referencias
+
+- ADR: ../origen-master-microservices/docs/adr/ADR-013-order-invoices-and-seller-orders-stability.md
+- Actividad multiagente: ../../_workspace/docs/actividades/2026-05-28_00-00_implementacion-invoice-por-pedido-dashboard-estabilidad_desarrollador-codigo-analista-pruebas-auditor-seguridad-documentador-tecnico.md
+
 ## [IMPL-004] Certificaciones del perfil comercial con estados, descarga y reemplazo con aviso de visibilidad
 
 **Fecha**: 2026-05-28  

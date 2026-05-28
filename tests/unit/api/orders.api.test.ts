@@ -14,6 +14,7 @@ import {
   fetchSellerOrderById,
   fetchOrders,
   fetchOrderById,
+  fetchSellerOrderInvoice,
   updateOrderStatus,
   fetchOrderStats,
 } from '@/lib/api/orders';
@@ -227,6 +228,42 @@ describe('fetchOrderById', () => {
   });
 });
 
+// ── fetchSellerOrderInvoice ──────────────────────────────────────────────────
+
+describe('fetchSellerOrderInvoice', () => {
+  it('devuelve invoice y downloadUrl cuando existe PDF', async () => {
+    const result = await fetchSellerOrderInvoice('ord-sel-002');
+    expect(result.status).toBe(200);
+    expect(result.data?.invoice).toBeDefined();
+    expect(result.data?.downloadUrl).toBeDefined();
+  });
+
+  it('devuelve 404 cuando no existe factura', async () => {
+    const result = await fetchSellerOrderInvoice('no-existe');
+    expect(result.status).toBe(404);
+    expect(result.error).toBe('Factura no disponible para este pedido');
+  });
+
+  it('mapea 403 como acceso denegado', async () => {
+    server.use(
+      http.get(`${BASE}/orders/seller/:id/invoice`, () =>
+        HttpResponse.json({ message: 'Forbidden' }, { status: 403 }),
+      ),
+    );
+
+    const result = await fetchSellerOrderInvoice('ord-sel-001');
+    expect(result.status).toBe(403);
+    expect(result.error).toBe('Acceso denegado a la factura');
+  });
+
+  it('devuelve downloadUrl null cuando la factura no tiene PDF', async () => {
+    const result = await fetchSellerOrderInvoice('ord-sel-001');
+    expect(result.status).toBe(200);
+    expect(result.data?.invoice.hasPdf).toBe(false);
+    expect(result.data?.downloadUrl).toBeNull();
+  });
+});
+
 // ── updateOrderStatus ─────────────────────────────────────────────────────────
 
 describe('updateOrderStatus', () => {
@@ -251,6 +288,30 @@ describe('updateOrderStatus', () => {
     const result = await updateOrderStatus('ord-sel-001', 'shipped');
     expect(result.error).toBeDefined();
     expect(result.status).toBeGreaterThanOrEqual(500);
+  });
+
+  it('mapea 400 cuando la transición de estado es inválida', async () => {
+    server.use(
+      http.patch(`${BASE}/orders/seller/:id/status`, () =>
+        HttpResponse.json({ message: 'Transición inválida' }, { status: 400 }),
+      ),
+    );
+
+    const result = await updateOrderStatus('ord-sel-001', 'delivered');
+    expect(result.status).toBe(400);
+    expect(result.error).toBeDefined();
+  });
+
+  it('mapea 403 cuando el seller no puede modificar el pedido', async () => {
+    server.use(
+      http.patch(`${BASE}/orders/seller/:id/status`, () =>
+        HttpResponse.json({ message: 'Forbidden' }, { status: 403 }),
+      ),
+    );
+
+    const result = await updateOrderStatus('ord-sel-001', 'processing');
+    expect(result.status).toBe(403);
+    expect(result.error).toBeDefined();
   });
 });
 

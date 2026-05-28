@@ -11,7 +11,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info } from 'lucide-react';
+import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText } from 'lucide-react';
 
 // Componentes UI
 import {
@@ -25,7 +25,7 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 
 // Hooks y API
-import { fetchOrderById, updateOrderStatus } from '@/lib/api/orders';
+import { fetchOrderById, fetchSellerOrderInvoice, updateOrderStatus } from '@/lib/api/orders';
 import type { Order } from '@/types/order';
 
 const statusConfig: Record<Order['status'], {
@@ -230,6 +230,8 @@ export default function OrderDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
+  const [invoiceError, setInvoiceError] = useState<string | null>(null);
   const [showStatusSheet, setShowStatusSheet] = useState(false);
   const [showCancelSheet, setShowCancelSheet]   = useState(false);
 
@@ -270,6 +272,32 @@ export default function OrderDetailPage() {
       console.error('Error actualizando estado:', err);
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleDownloadInvoice = async () => {
+    if (!order) return;
+
+    setDownloadingInvoice(true);
+    setInvoiceError(null);
+
+    try {
+      const response = await fetchSellerOrderInvoice(order.id);
+      if (response.error || !response.data) {
+        setInvoiceError(response.error ?? 'No se pudo obtener la factura');
+        return;
+      }
+
+      if (!response.data.downloadUrl) {
+        setInvoiceError('La factura aún no tiene PDF disponible');
+        return;
+      }
+
+      window.open(response.data.downloadUrl, '_blank', 'noopener,noreferrer');
+    } catch {
+      setInvoiceError('Error al descargar la factura');
+    } finally {
+      setDownloadingInvoice(false);
     }
   };
 
@@ -416,6 +444,33 @@ export default function OrderDetailPage() {
                   <p className="text-xs text-text-subtle mt-2">
                     {format(order.payment.paidAt, 'dd MMM yyyy', { locale: es })}
                   </p>
+                )}
+                {order.invoice && (
+                  <div className="mt-3 pt-3 border-t border-border-subtle space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FileText className="w-4 h-4 text-origen-pradera shrink-0" />
+                        <span className="text-xs text-text-subtle truncate">Factura {order.invoice.invoiceNumber}</span>
+                      </div>
+                      <Badge variant={order.invoice.status === 'issued' ? 'success' : 'warning'} size="xs">
+                        {order.invoice.status === 'issued' ? 'Emitida' : 'Borrador'}
+                      </Badge>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start"
+                      leftIcon={<ExternalLink className="w-3.5 h-3.5" />}
+                      onClick={handleDownloadInvoice}
+                      loading={downloadingInvoice}
+                      disabled={!order.invoice.hasPdf || downloadingInvoice}
+                    >
+                      {order.invoice.hasPdf ? 'Descargar factura' : 'Factura sin PDF'}
+                    </Button>
+                    {invoiceError && (
+                      <p className="text-xs text-feedback-danger">{invoiceError}</p>
+                    )}
+                  </div>
                 )}
               </motion.div>
 
