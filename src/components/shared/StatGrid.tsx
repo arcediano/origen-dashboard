@@ -14,9 +14,9 @@
 'use client';
 
 import React from 'react';
-import { StatCard } from '@arcediano/ux-library';
+import { StatCard } from '@/components/shared/StatCard';
 import { cn } from '@/lib/utils';
-import type { StatCardProps } from '@arcediano/ux-library';
+import type { StatCardProps } from '@/components/shared/StatCard';
 
 // ─── Extensión de variantes ───────────────────────────────────────────────────
 // Mapea variantes adicionales a las clases Tailwind del proyecto hasta que
