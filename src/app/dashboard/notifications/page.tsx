@@ -149,7 +149,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
+    <div className="w-full">
       <PageHeader
         title="Notificaciones"
         description="Bandeja de actividad y configuración de alertas"

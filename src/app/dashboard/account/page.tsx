@@ -31,7 +31,7 @@ export default function AccountPage() {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
+    <div className="w-full">
       <PageHeader
         title="Cuenta"
         description="Gestiona en un único lugar tu seguridad, cobros y preferencias"

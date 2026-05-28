@@ -2,9 +2,8 @@
  * @file StatGrid.tsx
  * @description Grid de KPIs reutilizable para origen-dashboard.
  *
- * Wrapper local que usa StatCard de @arcediano/ux-library e incorpora soporte
- * completo para los colores del design system (incluido mandarina y feedback-danger)
- * mientras la UXLibrary v0.2.17+ esté disponible.
+ * Wrapper local que usa StatCard (local) y soporta todas las variantes
+ * del design system incluyendo mandarina y danger.
  *
  * @migration Cuando @arcediano/ux-library >= 0.2.17 esté instalado, reemplazar
  * este componente por el import directo:
@@ -18,35 +17,13 @@ import { StatCard } from '@/components/shared/StatCard';
 import { cn } from '@/lib/utils';
 import type { StatCardProps } from '@/components/shared/StatCard';
 
-// ─── Extensión de variantes ───────────────────────────────────────────────────
-// Mapea variantes adicionales a las clases Tailwind del proyecto hasta que
-// sean soportadas nativamente en la UXLibrary.
-
-type ExtendedVariant = NonNullable<StatCardProps['variant']> | 'mandarina' | 'danger';
-
-interface VariantOverride {
-  cardClass: string;
-  iconClass: string;
-}
-
-const extendedVariantOverrides: Partial<Record<ExtendedVariant, VariantOverride>> = {
-  mandarina: {
-    cardClass: 'from-origen-mandarina/10 to-transparent border-origen-mandarina/20',
-    iconClass:  'text-origen-mandarina',
-  },
-  danger: {
-    cardClass: 'from-feedback-danger/5 to-transparent border-feedback-danger/10',
-    iconClass:  'text-feedback-danger',
-  },
-};
-
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface StatGridItem {
   label: string;
   value: string | number;
   icon: React.ReactNode;
-  variant?: ExtendedVariant;
+  variant?: StatCardProps['variant'];
   trend?: StatCardProps['trend'];
   subtitle?: string;
 }
@@ -85,32 +62,18 @@ export function StatGrid({
         className={cn('grid gap-3 sm:gap-4', colsMap[columns])}
         aria-busy={loading || undefined}
       >
-        {items.map(({ variant, icon, ...item }, i) => {
-          const override = variant ? extendedVariantOverrides[variant] : undefined;
-          const resolvedVariant =
-            override ? 'neutral' : (variant as StatCardProps['variant']) ?? 'neutral';
-          const resolvedIcon = override
-            ? React.isValidElement(icon)
-              ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
-                  className: cn(
-                    (icon as React.ReactElement<{ className?: string }>).props?.className,
-                    override.iconClass,
-                  ),
-                })
-              : icon
-            : icon;
-
-          return (
-            <StatCard
-              key={i}
-              {...item}
-              icon={resolvedIcon}
-              variant={resolvedVariant}
-              className={override?.cardClass}
-              loading={loading}
-            />
-          );
-        })}
+        {items.map((item, i) => (
+          <StatCard
+            key={i}
+            label={item.label}
+            value={item.value}
+            icon={item.icon}
+            variant={item.variant ?? 'neutral'}
+            trend={item.trend}
+            subtitle={item.subtitle}
+            loading={loading}
+          />
+        ))}
       </div>
     </div>
   );

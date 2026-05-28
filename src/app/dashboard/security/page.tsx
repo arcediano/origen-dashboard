@@ -144,7 +144,7 @@ export default function SecurityPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
+    <div className="w-full">
       <PageHeader
         title="Seguridad"
         description="Protege tu acceso con contraseña segura, verificación en dos pasos y alertas de riesgo"
