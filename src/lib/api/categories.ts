@@ -42,6 +42,10 @@ export interface CategoryTree extends CategoryOption {
   children: CategoryOption[];
 }
 
+interface WrappedPayload<T> {
+  data?: T;
+}
+
 // ─── FUNCIONES ────────────────────────────────────────────────────────────────
 
 /**
@@ -52,9 +56,10 @@ export interface CategoryTree extends CategoryOption {
  */
 export async function fetchCategories(): Promise<CategoryOption[]> {
   try {
-    const categories = await gatewayClient.get<ApiCategory[]>('/categories');
+    const raw = await gatewayClient.get<ApiCategory[] | WrappedPayload<ApiCategory[]>>('/categories');
+    const categories = unwrapArray(raw);
     return categories
-      .filter(c => c.isActive)
+      .filter(isActiveCategory)
       .map(toOption);
   } catch (error) {
     console.error('[categories] Error en fetchCategories:', error);
@@ -70,18 +75,35 @@ export async function fetchCategories(): Promise<CategoryOption[]> {
  */
 export async function fetchCategoriesTree(): Promise<CategoryTree[]> {
   try {
-    const tree = await gatewayClient.get<ApiCategory[]>('/categories/tree');
-    return tree
-      .filter(c => c.isActive)
-      .map(c => ({
-        ...toOption(c),
-        children: (c.children ?? [])
-          .filter(sub => sub.isActive)
-          .map(toOption),
-      }));
+    const rawTree = await gatewayClient.get<ApiCategory[] | WrappedPayload<ApiCategory[]>>('/categories/tree');
+    const tree = unwrapArray(rawTree);
+    if (tree.length > 0) {
+      return tree
+        .filter(isActiveCategory)
+        .map(c => ({
+          ...toOption(c),
+          children: (c.children ?? [])
+            .filter(isActiveCategory)
+            .map(toOption),
+        }));
+    }
+
+    // Fallback operativo: si /tree falla o devuelve vacío, construir el árbol
+    // desde la lista plana para no bloquear creación de producto.
+    const flat = await fetchCategories();
+    return buildTreeFromFlat(flat);
   } catch (error) {
-    console.error('[categories] Error en fetchCategoriesTree:', error);
-    return [];
+    if (error instanceof GatewayError) {
+      console.error(
+        `[categories] Error en fetchCategoriesTree (${error.status}). Intentando fallback /categories`,
+        error,
+      );
+    } else {
+      console.error('[categories] Error en fetchCategoriesTree. Intentando fallback /categories:', error);
+    }
+
+    const flat = await fetchCategories();
+    return buildTreeFromFlat(flat);
   }
 }
 
@@ -95,4 +117,35 @@ function toOption(c: ApiCategory): CategoryOption {
     parentId: c.parentId,
     icon:     c.icon,
   };
+}
+
+function unwrapArray(
+  payload: ApiCategory[] | WrappedPayload<ApiCategory[]>,
+): ApiCategory[] {
+  if (Array.isArray(payload)) return payload;
+  if (payload && Array.isArray(payload.data)) return payload.data;
+  return [];
+}
+
+function isActiveCategory(c: ApiCategory): boolean {
+  return c.isActive !== false;
+}
+
+function buildTreeFromFlat(categories: CategoryOption[]): CategoryTree[] {
+  const byId = new Map<string, CategoryTree>();
+
+  for (const category of categories) {
+    byId.set(category.id, { ...category, children: [] });
+  }
+
+  const roots: CategoryTree[] = [];
+  for (const category of byId.values()) {
+    if (category.parentId && byId.has(category.parentId)) {
+      byId.get(category.parentId)?.children.push(category);
+      continue;
+    }
+    roots.push(category);
+  }
+
+  return roots;
 }

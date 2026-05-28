@@ -67,13 +67,24 @@ export function StepBasic({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [categories, setCategories] = useState<CategoryTree[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
   const allTouched = { ...localTouched, ...touched };
 
   useEffect(() => {
     fetchCategoriesTree()
-      .then(setCategories)
-      .catch(() => setCategories([]))
+      .then((loadedCategories) => {
+        setCategories(loadedCategories);
+        if (loadedCategories.length === 0) {
+          setCategoriesError('No hay categorias activas disponibles. Revisa el seed de categorias o la conectividad con el gateway.');
+          return;
+        }
+        setCategoriesError(null);
+      })
+      .catch(() => {
+        setCategories([]);
+        setCategoriesError('No se pudieron cargar las categorias. Intenta recargar la pagina.');
+      })
       .finally(() => setCategoriesLoading(false));
   }, []);
 
@@ -220,6 +231,13 @@ export function StepBasic({
               );
             })()}
           </div>
+
+          {!categoriesLoading && categoriesError && (
+            <Badge variant="warning" size="sm" className="inline-flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              {categoriesError}
+            </Badge>
+          )}
 
           {/* Descripción corta */}
           <Textarea
