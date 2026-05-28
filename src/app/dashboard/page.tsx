@@ -145,8 +145,8 @@ export default function ProducerDashboard() {
   if (!mounted) return null;
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
-      {/* Header integrado en el gradiente */}
+    <div className="w-full">
+      {/* Header */}
       <div className="bg-transparent">
         <div className="container mx-auto px-4 py-3 sm:px-6 sm:py-4 lg:py-6">
           <WelcomeHeader userName={userName} showViewStoreButton={false} />

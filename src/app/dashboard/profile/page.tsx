@@ -31,7 +31,7 @@ const itemVariants = {
 
 function ProfilePageSkeleton() {
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema animate-pulse">
+    <div className="w-full animate-pulse">
       <div className="border-b border-border-subtle bg-white/80">
         <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="h-5 w-24 rounded-full bg-origen-pradera/15" />
@@ -127,8 +127,7 @@ export default function ProfilePage() {
   const certificationsPending = pendingItems > 0 ? pendingItems : 0;
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
-      {/* Cabecera de página */}
+    <div className="w-full">
       <PageHeader
         title="Perfil comercial"
         description="Gestiona la identidad de tu negocio, datos personales y certificaciones"

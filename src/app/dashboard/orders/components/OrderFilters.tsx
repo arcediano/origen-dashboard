@@ -12,6 +12,7 @@ import React from 'react';
 import { Search, X, SlidersHorizontal, Euro, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FilterBottomSheet } from '@/components/shared/mobile';
+import { ActiveFilterChips, type ActiveFilterChip } from '@/components/shared/ActiveFilterChips';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
@@ -70,8 +71,37 @@ export function OrderFilters({
 
   const formatDate = (date?: Date) => date ? date.toISOString().split('T')[0] : '';
 
+  // Chips de filtros activos: visibles en móvil (fuera del sheet) y en desktop
+  const activeChips: ActiveFilterChip[] = [
+    ...(filters.status ? [{
+      id: 'status',
+      label: STATUS_OPTIONS.find(o => o.value === filters.status)?.label ?? filters.status,
+      onRemove: () => set('status', ''),
+    }] : []),
+    ...(filters.dateFrom ? [{
+      id: 'dateFrom',
+      label: `Desde: ${formatDate(filters.dateFrom)}`,
+      onRemove: () => set('dateFrom', undefined),
+    }] : []),
+    ...(filters.dateTo ? [{
+      id: 'dateTo',
+      label: `Hasta: ${formatDate(filters.dateTo)}`,
+      onRemove: () => set('dateTo', undefined),
+    }] : []),
+    ...(filters.minAmount !== undefined ? [{
+      id: 'minAmount',
+      label: `Mín: ${filters.minAmount}€`,
+      onRemove: () => set('minAmount', undefined),
+    }] : []),
+    ...(filters.maxAmount !== undefined ? [{
+      id: 'maxAmount',
+      label: `Máx: ${filters.maxAmount}€`,
+      onRemove: () => set('maxAmount', undefined),
+    }] : []),
+  ];
+
   return (
-    <div className={cn('space-y-0', className)}>
+    <div className={cn('space-y-2', className)}>
 
       {/* ── Barra de búsqueda + botón filtros ─────────────────────────── */}
       <div className="flex items-center gap-2">
@@ -115,7 +145,8 @@ export function OrderFilters({
           )}
         </button>
       </div>
-
+      {/* ── Chips de filtros activos — móvil y desktop ────────────────────────────────── */}
+      <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
       {/* ── Bottom sheet de filtros — solo móvil ──────────────────────── */}
       <FilterBottomSheet
         isOpen={panelOpen}

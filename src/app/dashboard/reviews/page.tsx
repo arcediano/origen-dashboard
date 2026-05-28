@@ -6,7 +6,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, type Variants } from 'framer-motion';
+import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { MessageSquare } from 'lucide-react';
 
 // Componentes UI
@@ -54,7 +54,21 @@ const itemVariants: Variants = {
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
-export default function ReviewsPage() {  const [reviews, setReviews] = useState<Review[]>([]);
+export default function ReviewsPage() {
+  const prefersReducedMotion = useReducedMotion() ?? false;
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: prefersReducedMotion
+        ? { duration: 0.01 }
+        : { type: 'spring', stiffness: 300, damping: 25 },
+    },
+  };
+
+  const [reviews, setReviews] = useState<Review[]>([]);;
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp } from 'lucide-react';
+import { Euro, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp } from 'lucide-react';
 import { SoftStatCard } from '@/components/shared/SoftStatCard';
 import { FilterSelect } from '@/components/ui/FilterSelect';
+import { Button, DateInput, Input, Label } from '@arcediano/ux-library';
 import {
   createCampaign,
   deleteCampaign,
@@ -26,12 +27,12 @@ const STATUS_LABEL: Record<CampaignStatus, string> = {
 };
 
 const STATUS_COLOR: Record<CampaignStatus, string> = {
-  DRAFT: 'bg-gray-100 text-gray-600',
-  PENDING_REVIEW: 'bg-amber-100 text-amber-700',
-  ACTIVE: 'bg-green-100 text-green-700',
-  PAUSED: 'bg-blue-100 text-blue-700',
-  ENDED: 'bg-gray-100 text-gray-500',
-  REJECTED: 'bg-red-100 text-red-700',
+  DRAFT:          'bg-surface text-text-subtle',
+  PENDING_REVIEW: 'bg-origen-mandarina/15 text-origen-mandarina',
+  ACTIVE:         'bg-origen-hoja/20 text-origen-pino',
+  PAUSED:         'bg-surface text-text-secondary',
+  ENDED:          'bg-surface-alt text-text-subtle',
+  REJECTED:       'bg-feedback-danger-subtle text-feedback-danger-text',
 };
 
 function formatMoney(value: number): string {
@@ -87,9 +88,7 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
-            Tipo
-          </label>
+          <Label className="mb-1.5 block text-xs font-medium text-text-subtle">Tipo</Label>
           <FilterSelect
             value={form.type}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => set('type', e.target.value as CampaignType)}
@@ -100,9 +99,7 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
           </FilterSelect>
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
-            Placement
-          </label>
+          <Label className="mb-1.5 block text-xs font-medium text-text-subtle">Placement</Label>
           <FilterSelect
             value={form.placement ?? ''}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => set('placement', e.target.value)}
@@ -113,99 +110,81 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
           </FilterSelect>
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
-            Slug del producto
-          </label>
-          <input
+          <Input
+            label="Slug del producto"
             value={form.productSlug ?? ''}
             onChange={(e) => set('productSlug', e.target.value)}
             required
             placeholder="mi-producto-artesano"
-            className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque outline-none focus:border-origen-hoja focus:ring-2 focus:ring-origen-hoja/20"
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
-            Titular (opcional)
-          </label>
-          <input
+          <Input
+            label="Titular (opcional)"
             value={form.headline ?? ''}
             onChange={(e) => set('headline', e.target.value)}
             maxLength={80}
             placeholder="El mejor queso curado"
-            className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque outline-none focus:border-origen-hoja focus:ring-2 focus:ring-origen-hoja/20"
           />
         </div>
 
         {isCpd ? (
           <>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
-                Precio/día (€)
-              </label>
-              <input
+              <Input
                 type="number"
+                label="Precio/día (€)"
                 min={0}
                 step="0.01"
                 value={form.pricePerDay ?? ''}
                 onChange={(e) => set('pricePerDay', Number(e.target.value))}
                 required
-                className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque outline-none focus:border-origen-hoja focus:ring-2 focus:ring-origen-hoja/20"
+                leftIcon={<Euro />}
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
-                Fecha inicio
-              </label>
-              <input
-                type="date"
+              <Label className="mb-1.5 block text-xs font-medium text-text-subtle">Fecha inicio</Label>
+              <DateInput
                 value={form.startsAt ? form.startsAt.slice(0, 10) : ''}
                 onChange={(e) => set('startsAt', e.target.value)}
                 required
-                className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque outline-none focus:border-origen-hoja focus:ring-2 focus:ring-origen-hoja/20"
+                aria-label="Fecha de inicio de la campaña"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
-                Fecha fin
-              </label>
-              <input
-                type="date"
+              <Label className="mb-1.5 block text-xs font-medium text-text-subtle">Fecha fin</Label>
+              <DateInput
                 value={form.endsAt ? form.endsAt.slice(0, 10) : ''}
                 onChange={(e) => set('endsAt', e.target.value)}
                 required
-                className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque outline-none focus:border-origen-hoja focus:ring-2 focus:ring-origen-hoja/20"
+                aria-label="Fecha de fin de la campaña"
               />
             </div>
           </>
         ) : (
           <>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
-                Puja CPC (€)
-              </label>
-              <input
+              <Input
                 type="number"
+                label="Puja CPC (€)"
                 min={0.01}
                 step="0.01"
                 value={form.cpcBid ?? ''}
                 onChange={(e) => set('cpcBid', Number(e.target.value))}
                 required
-                className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque outline-none focus:border-origen-hoja focus:ring-2 focus:ring-origen-hoja/20"
+                leftIcon={<Euro />}
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-text-subtle mb-1">
-                Presupuesto diario (€)
-              </label>
-              <input
+              <Input
                 type="number"
+                label="Presupuesto diario (€)"
                 min={1}
                 step="0.01"
                 value={form.dailyBudget ?? ''}
                 onChange={(e) => set('dailyBudget', Number(e.target.value))}
                 required
-                className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque outline-none focus:border-origen-hoja focus:ring-2 focus:ring-origen-hoja/20"
+                leftIcon={<Euro />}
               />
             </div>
           </>
@@ -213,20 +192,12 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
       </div>
 
       <div className="flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-xl border border-border-subtle px-4 py-2 text-sm text-text-subtle hover:bg-surface"
-        >
+        <Button variant="ghost" type="button" onClick={onCancel}>
           Cancelar
-        </button>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-xl bg-origen-bosque px-4 py-2 text-sm font-semibold text-white hover:bg-origen-pino disabled:opacity-50"
-        >
+        </Button>
+        <Button variant="primary" type="submit" disabled={submitting}>
           {submitting ? 'Enviando...' : 'Enviar a revisión'}
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -418,9 +389,9 @@ export default function CampanasPage() {
           label="En revisión"
           value={pending}
           icon={PauseCircle}
-          bg="from-amber-400/10 to-transparent"
-          border="border-amber-200/50"
-          iconColor="text-amber-500"
+          bg="from-origen-mandarina/10 to-transparent"
+          border="border-origen-mandarina/25"
+          iconColor="text-origen-mandarina"
         />
         <SoftStatCard
           label="Presupuesto total"

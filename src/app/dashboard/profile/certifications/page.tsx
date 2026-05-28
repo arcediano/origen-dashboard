@@ -320,7 +320,7 @@ export default function CertificationsPage() {
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <>
-    <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
+    <div className="w-full">
       <PageHeader
         title="Certificaciones y documentos"
         description="Sube y gestiona tus certificados de calidad y la documentación obligatoria para acreditar tu tienda"

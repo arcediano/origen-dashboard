@@ -14,7 +14,7 @@ export default function EnviosPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
+    <div className="w-full">
       <PageHeader
         title="Logística"
         description="Organiza métodos de entrega, zonas activas y la experiencia de envío para tus clientes"

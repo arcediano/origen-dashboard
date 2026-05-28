@@ -12,7 +12,7 @@ import { NotificationsPreferencesPanel } from '@/app/dashboard/notifications/com
 export default function ConfiguracionPage() {
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema">
+    <div className="w-full">
       <PageHeader
         title="Configuraciones"
         description="Define como quieres recibir tus avisos por canal"

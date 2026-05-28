@@ -542,7 +542,7 @@ export default function BusinessInfoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
+    <div className="w-full">
       <div className="fixed top-0 right-0 w-64 h-64 bg-origen-pradera/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
       <div className="fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 

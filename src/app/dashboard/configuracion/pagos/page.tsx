@@ -82,7 +82,7 @@ export default function PagosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema">
+    <div className="w-full">
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
         <PageHeader
           title="Cobros"

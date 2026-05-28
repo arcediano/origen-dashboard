@@ -12,6 +12,7 @@ import React from 'react';
 import { Search, X, SlidersHorizontal, CheckCircle, ThumbsUp, ImageIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FilterBottomSheet, type FilterSection, type ToggleOption } from '@/components/shared/mobile';
+import { ActiveFilterChips, type ActiveFilterChip } from '@/components/shared/ActiveFilterChips';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
@@ -90,6 +91,39 @@ export function ReviewFilters({
   const set = (key: keyof ReviewFiltersType, value: any) =>
     onFilterChange({ [key]: value || undefined } as ReviewFiltersType);
 
+  // Chips de filtros activos: visibles en móvil (fuera del sheet) y en desktop
+  const activeChips: ActiveFilterChip[] = [
+    ...(filters.status ? [{
+      id: 'status',
+      label: STATUS_OPTIONS.find(o => o.value === filters.status)?.label ?? filters.status,
+      onRemove: () => set('status', ''),
+    }] : []),
+    ...(filters.type ? [{
+      id: 'type',
+      label: TYPE_OPTIONS.find(o => o.value === filters.type)?.label ?? filters.type,
+      onRemove: () => set('type', ''),
+    }] : []),
+    ...(filters.rating ? [{
+      id: 'rating',
+      label: `★ ${filters.rating}`,
+      onRemove: () => onFilterChange({ ...filters, rating: undefined }),
+    }] : []),
+    ...(filters.verifiedOnly ? [{
+      id: 'verifiedOnly',
+      label: 'Verificadas',
+      onRemove: () => onFilterChange({ ...filters, verifiedOnly: undefined }),
+    }] : []),
+    ...(filters.hasResponse ? [{
+      id: 'hasResponse',
+      label: 'Con respuesta',
+      onRemove: () => onFilterChange({ ...filters, hasResponse: undefined }),
+    }] : []),
+    ...(filters.hasImages ? [{
+      id: 'hasImages',
+      label: 'Con imágenes',
+      onRemove: () => onFilterChange({ ...filters, hasImages: undefined }),
+    }] : []),
+  ];
   // ── Secciones del bottom sheet ───────────────────────────────────────────────
 
   const sheetSections: FilterSection[] = [
@@ -192,7 +226,8 @@ export function ReviewFilters({
           )}
         </button>
       </div>
-
+      {/* ── Chips de filtros activos — móvil y desktop ────────────────────────────────── */}
+      <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
       {/* ── Filtros desktop: Select + pill toggles booleanos ──────────── */}
       <div className="hidden lg:flex items-center gap-2 pt-1">
 

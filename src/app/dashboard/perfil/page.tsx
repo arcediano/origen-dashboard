@@ -63,7 +63,7 @@ export default function PerfilPage() {
   ] as const;
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-origen-crema pb-[calc(88px+env(safe-area-inset-bottom))]">
+    <div className="w-full pb-[calc(88px+env(safe-area-inset-bottom))]">
 
       {/* ── Page title ── */}
       <div className="px-4 pt-6 pb-2 sm:px-6">

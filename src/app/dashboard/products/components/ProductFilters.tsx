@@ -12,6 +12,7 @@ import React from 'react';
 import { Search, X, SlidersHorizontal, Grid3x3, List, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FilterBottomSheet } from '@/components/shared/mobile';
+import { ActiveFilterChips, type ActiveFilterChip } from '@/components/shared/ActiveFilterChips';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
@@ -96,6 +97,30 @@ export function ProductFilters({
   const activeCount = [selectedCategory, selectedStatus, selectedStock, sortBy].filter(Boolean).length;
   const hasAnyFilter = Boolean(searchQuery) || activeCount > 0;
 
+  // Chips de filtros activos: visibles en móvil (fuera del sheet) y en desktop
+  const activeChips: ActiveFilterChip[] = [
+    ...(selectedCategory ? [{
+      id: 'category',
+      label: categories.find(c => c.value === selectedCategory)?.label ?? selectedCategory,
+      onRemove: () => onCategoryChange(''),
+    }] : []),
+    ...(selectedStatus ? [{
+      id: 'status',
+      label: STATUS_OPTIONS.find(o => o.value === selectedStatus)?.label ?? selectedStatus,
+      onRemove: () => onStatusChange(''),
+    }] : []),
+    ...(selectedStock ? [{
+      id: 'stock',
+      label: STOCK_OPTIONS.find(o => o.value === selectedStock)?.label ?? selectedStock,
+      onRemove: () => onStockChange(''),
+    }] : []),
+    ...(sortBy ? [{
+      id: 'sort',
+      label: SORT_OPTIONS.find(o => o.value === sortBy)?.label ?? sortBy,
+      onRemove: () => onSortChange(''),
+    }] : []),
+  ];
+
   return (
     <div className={cn('space-y-2', className)}>
 
@@ -160,7 +185,8 @@ export function ProductFilters({
           </button>
         </div>
       </div>
-
+      {/* ── Chips de filtros activos — móvil y desktop ────────────────────────────────── */}
+      <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
       {/* ── Filtros desktop: Select por grupo ─────────────────────────── */}
       <div className="hidden lg:flex items-center gap-2 pt-1">
 

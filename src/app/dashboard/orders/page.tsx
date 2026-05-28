@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, type Variants } from 'framer-motion';
+import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { ShoppingBag } from 'lucide-react';
 
 // Componentes UI
@@ -42,26 +42,25 @@ const containerVariants: Variants = {
   }
 };
 
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { 
-      type: "spring",
-      stiffness: 300, 
-      damping: 25
-    }
-  }
-};
-
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
 export default function OrdersPage() {
   const router = useRouter();
-  
+  const prefersReducedMotion = useReducedMotion() ?? false;
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: prefersReducedMotion
+        ? { duration: 0.01 }
+        : { type: 'spring', stiffness: 300, damping: 25 },
+    },
+  };
+
   // Estados
   const [orders, setOrders] = useState<Order[]>([]);
   const [stats, setStats] = useState<any>(null);
