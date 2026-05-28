@@ -19,6 +19,7 @@ import { OrderStats } from './components/OrderStats';
 import { OrderFilters } from './components/OrderFilters';
 import { OrdersTable } from './components/OrdersTable';
 import { OrderCard, OrderCardSkeleton } from './components/OrderCard';
+import { MobileCardList } from '@/components/shared/MobileCardList';
 import { Pagination } from '@arcediano/ux-library';
 
 // Hooks y API
@@ -197,18 +198,19 @@ export default function OrdersPage() {
           ) : (
             <>
               {/* Móvil: lista de tarjetas */}
-              <div className="block lg:hidden rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden">
-                {isLoading
-                  ? Array.from({ length: 5 }).map((_, i) => <OrderCardSkeleton key={i} />)
-                  : orders.map((order) => (
-                      <OrderCard
-                        key={order.id}
-                        order={order}
-                        onPress={handleViewDetails}
-                      />
-                    ))
-                }
-              </div>
+              <MobileCardList
+                className="block lg:hidden"
+                isLoading={isLoading}
+                renderSkeleton={() => <OrderCardSkeleton />}
+              >
+                {orders.map((order) => (
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    onPress={handleViewDetails}
+                  />
+                ))}
+              </MobileCardList>
 
               {/* Desktop: tabla */}
               <div className="hidden lg:block">

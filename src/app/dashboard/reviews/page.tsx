@@ -17,6 +17,7 @@ import { ReviewStats } from './components/ReviewStats';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
 import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
+import { MobileCardList } from '@/components/shared/MobileCardList';
 import { Pagination } from '@arcediano/ux-library';
 
 // Hooks y API
@@ -179,19 +180,20 @@ export default function ReviewsPage() {  const [reviews, setReviews] = useState<
 
         {/* Lista de reseñas */}
         <motion.div variants={itemVariants}>
-          <div className="block lg:hidden rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden shadow-subtle mb-4">
-            {isLoading
-              ? Array.from({ length: 5 }).map((_, i) => <ReviewCardSkeleton key={i} />)
-              : reviews.map((review) => (
-                  <ReviewCard
-                    key={review.id}
-                    review={review}
-                    onRespond={handleRespond}
-                    onFlag={(id) => handleFlag(id)}
-                  />
-                ))
-            }
-          </div>
+          <MobileCardList
+            className="block lg:hidden mb-4"
+            isLoading={isLoading}
+            renderSkeleton={() => <ReviewCardSkeleton />}
+          >
+            {reviews.map((review) => (
+              <ReviewCard
+                key={review.id}
+                review={review}
+                onRespond={handleRespond}
+                onFlag={(id) => handleFlag(id)}
+              />
+            ))}
+          </MobileCardList>
 
           <div className="hidden lg:block">
             <ReviewsList
