@@ -30,7 +30,7 @@ import {
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
 import { OrganicScoreBadge } from '@/components/shared/products/OrganicScoreBadge';
-import { fetchProductViewChartById, type ProductViewChartPoint } from '@/lib/api/products';
+import { fetchProductViewChartById, fetchProductViewCount, type ProductViewChartPoint } from '@/lib/api/products';
 
 // ============================================================================
 // TIPOS
@@ -53,8 +53,17 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
     ? ((product.comparePrice - product.basePrice) / product.comparePrice * 100).toFixed(0)
     : null;
 
-  const conversionRate = product.views && product.views > 0 && product.sales && product.sales > 0
-    ? ((product.sales / product.views) * 100).toFixed(1)
+  // Visitas últimos 7 días desde product_view_events (cargado async)
+  const [viewCount, setViewCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchProductViewCount(product.id, '7d').then((res) => {
+      if (!res.error && res.data) setViewCount(res.data.count);
+    });
+  }, [product.id]);
+
+  const conversionRate = viewCount !== null && viewCount > 0 && product.sales && product.sales > 0
+    ? ((product.sales / viewCount) * 100).toFixed(1)
     : null;
 
   const revenuePerSale = product.revenue && product.revenue > 0 && product.sales && product.sales > 0
@@ -130,10 +139,12 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         <div className="p-4 bg-gradient-to-br from-origen-crema/20 to-transparent rounded-xl border border-border-subtle">
           <div className="flex items-center gap-2 mb-2">
             <Eye className="w-5 h-5 text-origen-bosque" />
-            <span className="text-xs font-medium text-muted-foreground">Vistas</span>
+            <span className="text-xs font-medium text-muted-foreground">Vistas (7 días)</span>
           </div>
-          <p className="text-2xl font-bold text-origen-bosque">{product.views || 0}</p>
-          <p className="mt-2 text-xs text-muted-foreground">Visitas capturadas por catálogo</p>
+          <p className="text-2xl font-bold text-origen-bosque">
+            {viewCount === null ? '—' : viewCount}
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">Visitantes únicos últimos 7 días</p>
         </div>
 
         {/* Conversión */}

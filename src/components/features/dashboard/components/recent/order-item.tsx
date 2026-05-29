@@ -69,7 +69,7 @@ export function OrderItem({
   const config = statusConfig[status];
 
   return (
-    <Link href={`/dashboard/pedidos/${id}`} className="block group relative">
+    <Link href={`/dashboard/orders/${id}`} className="block group relative">
       {/* EFECTO EXACTO DE BENEFITSSECTION */}
       <div className={cn(
         "absolute inset-0 rounded-2xl transition-transform duration-300",

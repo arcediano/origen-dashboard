@@ -644,6 +644,25 @@ export async function fetchProductViewChartById(
   }
 }
 
+/**
+ * Visitas únicas a un producto en un período dado (7d | 30d | 1y).
+ * Ruta backend: GET /products/:id/views/count?period=7d|30d|1y
+ * Usado para la KPI card de vistas en el expandable de la tabla de productos.
+ */
+export async function fetchProductViewCount(
+  productId: string,
+  period: '7d' | '30d' | '1y' = '7d',
+): Promise<ApiResponse<{ count: number }>> {
+  try {
+    const data = await gatewayClient.get<{ count: number }>(
+      `/products/${productId}/views/count?period=${period}`,
+    );
+    return { data, status: 200 };
+  } catch (error) {
+    return handleError(error, 'fetchProductViewCount');
+  }
+}
+
 // ─── CREACIÓN Y EDICIÓN ───────────────────────────────────────────────────────
 
 /**

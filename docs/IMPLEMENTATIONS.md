@@ -1,5 +1,48 @@
 # Registro de Implementaciones - origen-dashboard
 
+## [IMPL-007] KPI card de visitas con período real desde product_view_events
+
+**Fecha**: 2026-05-29  
+**Sprint**: N/A  
+**Historia de Usuario**: Analytics de visitas — dashboard de productor  
+**Proyecto(s) afectado(s)**: `origen-dashboard`  
+**Agentes involucrados**: @desarrollador-codigo, @documentador-tecnico
+
+### Resumen
+
+Se reemplazó el contador acumulado `product.views` en la KPI card del expandable de productos por un valor calculado desde `product_view_events` filtrado por los últimos 7 días. La tasa de conversión se recalcula sobre ese mismo valor. Se añadió la función `fetchProductViewCount` al cliente de API.
+
+### Problema previo
+
+- La KPI card "Vistas" mostraba `product.views`: un contador total histórico sin granularidad temporal, inútil para analizar rendimiento reciente.
+- `conversionRate` = `sales / product.views` era engañoso: comparaba ventas recientes contra acumulado histórico.
+
+### Cambios realizados
+
+| Archivo | Tipo | Descripción |
+|---------|------|-------------|
+| `src/lib/api/products.ts` | Modificado | Nueva función `fetchProductViewCount(productId, period)` → `GET /products/:id/views/count?period=`. |
+| `src/app/dashboard/products/components/ProductExpandableDetails.tsx` | Modificado | Estado `viewCount` cargado async desde API. KPI card muestra `—` mientras carga y el count real de 7d tras respuesta. `conversionRate` calculado sobre `viewCount`. Label del card actualizado a "Vistas (7 días)". |
+
+### Comportamiento tras el cambio
+
+| Métrica | Antes | Después |
+|---|---|---|
+| KPI "Vistas" | `product.views` total histórico | Visitantes únicos últimos 7 días |
+| Tasa de conversión | `sales / views` (histórico) | `sales / viewCount7d` |
+| Carga inicial | Sincrónica (dato del listing) | Asíncrona (fetch propio con `useEffect`) |
+
+### Validaciones realizadas
+
+1. `get_errors` en `ProductExpandableDetails.tsx` → 0 errores TypeScript.
+2. `get_errors` en `src/lib/api/products.ts` → 0 errores TypeScript.
+
+### Referencias
+
+- Documentación funcional: `../../documentacion-funcional/control-visitas-perfil-productos/README.md`
+
+---
+
 ## [IMPL-006] Follow-up pedidos dashboard: cobertura API de descarga de factura
 
 **Fecha**: 2026-05-28  
