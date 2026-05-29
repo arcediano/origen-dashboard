@@ -57,7 +57,10 @@ const FALLBACK_DATA: Record<ChartPeriod, ProfileViewChartPoint[]> = {
   ],
 };
 
+type VisitType = 'profile' | 'products';
+
 export function VisitsChart({ period = '6m', type = 'profile' }: VisitsChartProps) {
+  const [activeType, setActiveType] = useState<VisitType>(type);
   const [chartData, setChartData] = useState<ProfileViewChartPoint[]>(FALLBACK_DATA[period]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -65,8 +68,8 @@ export function VisitsChart({ period = '6m', type = 'profile' }: VisitsChartProp
     let active = true;
     setIsLoading(true);
 
-    const fetch = type === 'products' ? fetchProductViewChart : fetchProfileViewChart;
-    fetch(period).then((res) => {
+    const fetcher = activeType === 'products' ? fetchProductViewChart : fetchProfileViewChart;
+    fetcher(period).then((res) => {
       if (!active) return;
       if (!res.error && res.data && res.data.length > 0) {
         setChartData(res.data);
@@ -79,23 +82,44 @@ export function VisitsChart({ period = '6m', type = 'profile' }: VisitsChartProp
     return () => {
       active = false;
     };
-  }, [period, type]);
+  }, [period, activeType]);
 
-  const entityLabel = type === 'products' ? 'Visitas a productos' : 'Visitas al perfil';
-  const title =
+  const periodLabel =
     period === '7d'
-      ? `${entityLabel}: últimos 7 días vs 7 anteriores`
+      ? 'últimos 7 días vs 7 anteriores'
       : period === '6m'
-        ? `${entityLabel}: últimos 6 meses vs 6 anteriores`
-        : `${entityLabel}: último año vs año anterior`;
+        ? 'últimos 6 meses vs 6 anteriores'
+        : 'último año vs año anterior';
 
   return (
     <section
       className={`rounded-[24px] border border-border-subtle bg-surface-alt p-4 shadow-sm sm:p-5 overflow-hidden transition-opacity${isLoading ? ' opacity-60' : ''}`}
       data-testid="visits-chart"
     >
-      <div className="mb-3">
-        <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">{title}</h3>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          Visitas · {periodLabel}
+        </h3>
+        <div className="inline-flex rounded-lg border border-border-subtle bg-surface p-0.5">
+          {([
+            { value: 'profile' as VisitType, label: 'Perfil' },
+            { value: 'products' as VisitType, label: 'Productos' },
+          ]).map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setActiveType(tab.value)}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                activeType === tab.value
+                  ? 'bg-origen-bosque text-white'
+                  : 'text-text-subtle hover:text-origen-bosque'
+              }`}
+              aria-pressed={activeType === tab.value}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="h-52 w-full">
         <ResponsiveContainer width="100%" height="100%">
