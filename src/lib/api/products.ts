@@ -626,6 +626,24 @@ export async function fetchProductViewChart(
   }
 }
 
+/**
+ * Serie temporal de visitas a un producto concreto del productor autenticado.
+ * Ruta backend: GET /products/producer/my-products/:id/views/chart?period=7d|6m|1y
+ */
+export async function fetchProductViewChartById(
+  productId: string,
+  period: '7d' | '6m' | '1y',
+): Promise<ApiResponse<ProductViewChartPoint[]>> {
+  try {
+    const data = await gatewayClient.get<ProductViewChartPoint[]>(
+      `/products/producer/my-products/${productId}/views/chart?period=${period}`,
+    );
+    return { data, status: 200 };
+  } catch (error) {
+    return handleError(error, 'fetchProductViewChartById');
+  }
+}
+
 // ─── CREACIÓN Y EDICIÓN ───────────────────────────────────────────────────────
 
 /**

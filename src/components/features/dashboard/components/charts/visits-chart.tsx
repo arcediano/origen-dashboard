@@ -13,76 +13,29 @@ import {
   YAxis,
 } from 'recharts';
 import { fetchProfileViewChart, type ProfileViewChartPoint } from '@/lib/api/producers';
-import { fetchProductViewChart } from '@/lib/api/products';
 
 type ChartPeriod = '7d' | '6m' | '1y';
 
 interface VisitsChartProps {
   period?: ChartPeriod;
-  /** 'profile' = visitas al perfil del productor (default). 'products' = visitas a sus productos. */
-  type?: 'profile' | 'products';
 }
 
-const FALLBACK_DATA: Record<ChartPeriod, ProfileViewChartPoint[]> = {
-  '7d': [
-    { label: 'Lun', currentPeriod: 120, previousPeriod: 105 },
-    { label: 'Mar', currentPeriod: 180, previousPeriod: 150 },
-    { label: 'Mié', currentPeriod: 165, previousPeriod: 172 },
-    { label: 'Jue', currentPeriod: 260, previousPeriod: 215 },
-    { label: 'Vie', currentPeriod: 310, previousPeriod: 265 },
-    { label: 'Sáb', currentPeriod: 280, previousPeriod: 240 },
-    { label: 'Dom', currentPeriod: 220, previousPeriod: 210 },
-  ],
-  '6m': [
-    { label: 'Nov', currentPeriod: 5760, previousPeriod: 5290 },
-    { label: 'Dic', currentPeriod: 5910, previousPeriod: 5480 },
-    { label: 'Ene', currentPeriod: 5620, previousPeriod: 5210 },
-    { label: 'Feb', currentPeriod: 6040, previousPeriod: 5570 },
-    { label: 'Mar', currentPeriod: 6290, previousPeriod: 5820 },
-    { label: 'Abr', currentPeriod: 6150, previousPeriod: 5690 },
-  ],
-  '1y': [
-    { label: 'May', currentPeriod: 4820, previousPeriod: 4390 },
-    { label: 'Jun', currentPeriod: 4950, previousPeriod: 4520 },
-    { label: 'Jul', currentPeriod: 5070, previousPeriod: 4680 },
-    { label: 'Ago', currentPeriod: 4930, previousPeriod: 4510 },
-    { label: 'Sep', currentPeriod: 5210, previousPeriod: 4760 },
-    { label: 'Oct', currentPeriod: 5380, previousPeriod: 4890 },
-    { label: 'Nov', currentPeriod: 5760, previousPeriod: 5290 },
-    { label: 'Dic', currentPeriod: 5910, previousPeriod: 5480 },
-    { label: 'Ene', currentPeriod: 5620, previousPeriod: 5210 },
-    { label: 'Feb', currentPeriod: 6040, previousPeriod: 5570 },
-    { label: 'Mar', currentPeriod: 6290, previousPeriod: 5820 },
-    { label: 'Abr', currentPeriod: 6150, previousPeriod: 5690 },
-  ],
-};
-
-type VisitType = 'profile' | 'products';
-
-export function VisitsChart({ period = '6m', type = 'profile' }: VisitsChartProps) {
-  const [activeType, setActiveType] = useState<VisitType>(type);
-  const [chartData, setChartData] = useState<ProfileViewChartPoint[]>(FALLBACK_DATA[period]);
-  const [isLoading, setIsLoading] = useState(false);
+export function VisitsChart({ period = '6m' }: VisitsChartProps) {
+  const [chartData, setChartData] = useState<ProfileViewChartPoint[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
     setIsLoading(true);
 
-    const fetcher = activeType === 'products' ? fetchProductViewChart : fetchProfileViewChart;
-    fetcher(period).then((res) => {
+    fetchProfileViewChart(period).then((res) => {
       if (!active) return;
-      if (!res.error && res.data && res.data.length > 0) {
-        setChartData(res.data);
-      } else {
-        setChartData(FALLBACK_DATA[period]);
-      }
+      setChartData(!res.error && res.data && res.data.length > 0 ? res.data : []);
       setIsLoading(false);
     });
 
-    return () => {
-      active = false;
-    };
-  }, [period, activeType]);
+    return () => { active = false; };
+  }, [period]);
 
   const periodLabel =
     period === '7d'
@@ -93,54 +46,52 @@ export function VisitsChart({ period = '6m', type = 'profile' }: VisitsChartProp
 
   return (
     <section
-      className={`rounded-[24px] border border-border-subtle bg-surface-alt p-4 shadow-sm sm:p-5 overflow-hidden transition-opacity${isLoading ? ' opacity-60' : ''}`}
+      className="rounded-[24px] border border-border-subtle bg-surface-alt p-4 shadow-sm sm:p-5 overflow-hidden"
       data-testid="visits-chart"
     >
-      <div className="mb-3 flex items-center justify-between gap-2">
+      <div className="mb-3">
         <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-          Visitas · {periodLabel}
+          Visitas al perfil · {periodLabel}
         </h3>
-        <div className="inline-flex rounded-lg border border-border-subtle bg-surface p-0.5">
-          {([
-            { value: 'profile' as VisitType, label: 'Perfil' },
-            { value: 'products' as VisitType, label: 'Productos' },
-          ]).map((tab) => (
-            <button
-              key={tab.value}
-              type="button"
-              onClick={() => setActiveType(tab.value)}
-              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                activeType === tab.value
-                  ? 'bg-origen-bosque text-white'
-                  : 'text-text-subtle hover:text-origen-bosque'
-              }`}
-              aria-pressed={activeType === tab.value}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
       </div>
       <div className="h-52 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border-subtle))" />
-            <XAxis dataKey="label" tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} width={36} />
-            <Tooltip formatter={(value: number, name: string) => [`${value}`, name]} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="currentPeriod" name="Periodo actual" fill="hsl(var(--hoja))" radius={[6, 6, 0, 0]} />
-            <Line
-              type="monotone"
-              dataKey="previousPeriod"
-              name="Periodo anterior"
-              stroke="hsl(var(--pino))"
-              strokeWidth={2}
-              dot={{ r: 2 }}
-              activeDot={{ r: 4 }}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
+        {isLoading ? (
+          <div className="h-full w-full flex flex-col justify-end px-1 pb-1 animate-pulse">
+            <div className="flex items-end gap-1.5 h-full">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 rounded-t-md bg-border-subtle"
+                  style={{ height: `${25 + ((i * 17) % 60)}%` }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : chartData.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-text-subtle">
+            <span className="text-sm">Sin visitas en este período</span>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={chartData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border-subtle))" />
+              <XAxis dataKey="label" tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} width={36} />
+              <Tooltip formatter={(value: number, name: string) => [`${value}`, name]} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Bar dataKey="currentPeriod" name="Periodo actual" fill="hsl(var(--hoja))" radius={[6, 6, 0, 0]} />
+              <Line
+                type="monotone"
+                dataKey="previousPeriod"
+                name="Periodo anterior"
+                stroke="hsl(var(--pino))"
+                strokeWidth={2}
+                dot={{ r: 2 }}
+                activeDot={{ r: 4 }}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </section>
   );

@@ -26,39 +26,7 @@ interface SalesPoint {
   previousPeriod: number;
 }
 
-const FALLBACK_DATA: Record<ChartPeriod, SalesPoint[]> = {
-  '7d': [
-    { day: 'Lun', currentPeriod: 180, previousPeriod: 155 },
-    { day: 'Mar', currentPeriod: 240, previousPeriod: 205 },
-    { day: 'Mié', currentPeriod: 210, previousPeriod: 225 },
-    { day: 'Jue', currentPeriod: 320, previousPeriod: 270 },
-    { day: 'Vie', currentPeriod: 360, previousPeriod: 315 },
-    { day: 'Sáb', currentPeriod: 410, previousPeriod: 350 },
-    { day: 'Dom', currentPeriod: 290, previousPeriod: 265 },
-  ],
-  '6m': [
-    { day: 'Nov', currentPeriod: 3980, previousPeriod: 3520 },
-    { day: 'Dic', currentPeriod: 4210, previousPeriod: 3890 },
-    { day: 'Ene', currentPeriod: 4090, previousPeriod: 3780 },
-    { day: 'Feb', currentPeriod: 4350, previousPeriod: 4010 },
-    { day: 'Mar', currentPeriod: 4680, previousPeriod: 4290 },
-    { day: 'Abr', currentPeriod: 4520, previousPeriod: 4170 },
-  ],
-  '1y': [
-    { day: 'May', currentPeriod: 3210, previousPeriod: 2960 },
-    { day: 'Jun', currentPeriod: 3380, previousPeriod: 3070 },
-    { day: 'Jul', currentPeriod: 3470, previousPeriod: 3190 },
-    { day: 'Ago', currentPeriod: 3340, previousPeriod: 3050 },
-    { day: 'Sep', currentPeriod: 3520, previousPeriod: 3210 },
-    { day: 'Oct', currentPeriod: 3690, previousPeriod: 3380 },
-    { day: 'Nov', currentPeriod: 3980, previousPeriod: 3520 },
-    { day: 'Dic', currentPeriod: 4210, previousPeriod: 3890 },
-    { day: 'Ene', currentPeriod: 4090, previousPeriod: 3780 },
-    { day: 'Feb', currentPeriod: 4350, previousPeriod: 4010 },
-    { day: 'Mar', currentPeriod: 4680, previousPeriod: 4290 },
-    { day: 'Abr', currentPeriod: 4520, previousPeriod: 4170 },
-  ],
-};
+
 
 const PERIOD_SIZE: Record<ChartPeriod, number> = { '7d': 7, '6m': 6, '1y': 12 };
 
@@ -185,8 +153,8 @@ function buildSeriesFromOrders(period: ChartPeriod, orders: Array<{ createdAt: D
 }
 
 export function SalesChart({ period = '6m' }: SalesChartProps) {
-  const [series, setSeries] = useState<SalesPoint[]>(FALLBACK_DATA[period]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [series, setSeries] = useState<SalesPoint[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -196,7 +164,7 @@ export function SalesChart({ period = '6m' }: SalesChartProps) {
       try {
         const response = await fetchSellerOrders({ page: 1, limit: 500 });
         if (!active || response.error || !response.data) {
-          if (active) setSeries(FALLBACK_DATA[period]);
+          if (active) setSeries([]);
           return;
         }
 
@@ -209,8 +177,7 @@ export function SalesChart({ period = '6m' }: SalesChartProps) {
           })),
         );
 
-        const hasData = computed.some((item) => item.currentPeriod > 0 || item.previousPeriod > 0);
-        setSeries(hasData ? computed : FALLBACK_DATA[period]);
+        if (active) setSeries(computed);
       } finally {
         if (active) setIsLoading(false);
       }
@@ -235,25 +202,43 @@ export function SalesChart({ period = '6m' }: SalesChartProps) {
         {isLoading && <span className="text-[11px] text-text-subtle">Actualizando...</span>}
       </div>
       <div className="h-52 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={series} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border-subtle))" />
-            <XAxis dataKey="day" tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} width={36} />
-            <Tooltip formatter={(value: number, name: string) => [`${value}€`, name]} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="currentPeriod" name="Periodo actual" fill="hsl(var(--pradera))" radius={[6, 6, 0, 0]} />
-            <Line
-              type="monotone"
-              dataKey="previousPeriod"
-              name="Periodo anterior"
-              stroke="hsl(var(--bosque))"
-              strokeWidth={2}
-              dot={{ r: 2 }}
-              activeDot={{ r: 4 }}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
+        {isLoading ? (
+          <div className="h-full w-full flex flex-col justify-end gap-2 px-1 pb-1 animate-pulse">
+            <div className="flex items-end gap-1.5 h-full">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 rounded-t-md bg-border-subtle"
+                  style={{ height: `${30 + ((i * 13) % 55)}%` }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : series.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center gap-2 text-text-subtle">
+            <span className="text-sm">Sin ventas en este período</span>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={series} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border-subtle))" />
+              <XAxis dataKey="day" tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} width={36} />
+              <Tooltip formatter={(value: number, name: string) => [`${value}€`, name]} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Bar dataKey="currentPeriod" name="Periodo actual" fill="hsl(var(--pradera))" radius={[6, 6, 0, 0]} />
+              <Line
+                type="monotone"
+                dataKey="previousPeriod"
+                name="Periodo anterior"
+                stroke="hsl(var(--bosque))"
+                strokeWidth={2}
+                dot={{ r: 2 }}
+                activeDot={{ r: 4 }}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </section>
   );

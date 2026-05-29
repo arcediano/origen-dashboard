@@ -5,7 +5,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   TrendingUp,
   DollarSign,
@@ -14,12 +14,23 @@ import {
   Star,
   Calendar,
   Package,
-  Clock,
   Sparkles
 } from 'lucide-react';
+import {
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Legend,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
 import { OrganicScoreBadge } from '@/components/shared/products/OrganicScoreBadge';
+import { fetchProductViewChartById, type ProductViewChartPoint } from '@/lib/api/products';
 
 // ============================================================================
 // TIPOS
@@ -49,6 +60,22 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
   const revenuePerSale = product.revenue && product.revenue > 0 && product.sales && product.sales > 0
     ? (product.revenue / product.sales).toFixed(2)
     : null;
+
+  // Gráfica de visitas por producto
+  const [viewChartData, setViewChartData] = useState<ProductViewChartPoint[]>([]);
+  const [viewChartPeriod, setViewChartPeriod] = useState<'7d' | '6m' | '1y'>('7d');
+  const [viewChartLoading, setViewChartLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setViewChartLoading(true);
+    fetchProductViewChartById(product.id, viewChartPeriod).then((res) => {
+      if (!active) return;
+      setViewChartData(!res.error && res.data && res.data.length > 0 ? res.data : []);
+      setViewChartLoading(false);
+    });
+    return () => { active = false; };
+  }, [product.id, viewChartPeriod]);
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -120,15 +147,71 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         </div>
       </div>
 
-      {/* Estado de analítica */}
+      {/* Gráfica de visitas por producto */}
       <div className="p-5 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
           <h5 className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-origen-pradera" />
-            Analítica disponible
+            <Eye className="w-4 h-4 text-origen-pradera" />
+            Visitas a este producto
           </h5>
+          <div className="inline-flex rounded-lg border border-border-subtle bg-surface p-0.5">
+            {(['7d', '6m', '1y'] as const).map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setViewChartPeriod(p)}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                  viewChartPeriod === p
+                    ? 'bg-origen-bosque text-white'
+                    : 'text-text-subtle hover:text-origen-bosque'
+                }`}
+                aria-pressed={viewChartPeriod === p}
+              >
+                {p === '7d' ? '7D' : p === '6m' ? '6M' : '1A'}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="h-40 w-full">
+          {viewChartLoading ? (
+            <div className="h-full flex flex-col justify-end px-1 pb-1 animate-pulse">
+              <div className="flex items-end gap-1.5 h-full">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t-md bg-border-subtle"
+                    style={{ height: `${20 + ((i * 13) % 60)}%` }}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : viewChartData.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-text-subtle">
+              <span className="text-sm">Sin visitas registradas en este período</span>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={viewChartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border-subtle))" />
+                <XAxis dataKey="label" tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 11 }} axisLine={false} tickLine={false} width={32} />
+                <Tooltip formatter={(value: number, name: string) => [`${value}`, name]} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Bar dataKey="currentPeriod" name="Periodo actual" fill="hsl(var(--hoja))" radius={[4, 4, 0, 0]} />
+                <Line
+                  type="monotone"
+                  dataKey="previousPeriod"
+                  name="Periodo anterior"
+                  stroke="hsl(var(--pino))"
+                  strokeWidth={2}
+                  dot={{ r: 2 }}
+                  activeDot={{ r: 3 }}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
           <div className="rounded-xl border border-border/60 bg-surface p-4">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Último pedido</p>
             <p className="mt-2 text-sm font-semibold text-origen-bosque">
@@ -138,11 +221,6 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
           <div className="rounded-xl border border-border/60 bg-surface p-4">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Ingreso medio por venta</p>
             <p className="mt-2 text-sm font-semibold text-origen-bosque">{revenuePerSale ? `${revenuePerSale}€` : 'Sin datos suficientes'}</p>
-          </div>
-          <div className="rounded-xl border border-border/60 bg-surface p-4">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Serie histórica</p>
-            <p className="mt-2 text-sm font-semibold text-origen-bosque">Pendiente de instrumentación</p>
-            <p className="mt-1 text-xs text-muted-foreground">No se muestran tendencias simuladas.</p>
           </div>
         </div>
       </div>
