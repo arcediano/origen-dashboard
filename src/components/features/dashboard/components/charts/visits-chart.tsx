@@ -13,11 +13,14 @@ import {
   YAxis,
 } from 'recharts';
 import { fetchProfileViewChart, type ProfileViewChartPoint } from '@/lib/api/producers';
+import { fetchProductViewChart } from '@/lib/api/products';
 
 type ChartPeriod = '7d' | '6m' | '1y';
 
 interface VisitsChartProps {
   period?: ChartPeriod;
+  /** 'profile' = visitas al perfil del productor (default). 'products' = visitas a sus productos. */
+  type?: 'profile' | 'products';
 }
 
 const FALLBACK_DATA: Record<ChartPeriod, ProfileViewChartPoint[]> = {
@@ -54,7 +57,7 @@ const FALLBACK_DATA: Record<ChartPeriod, ProfileViewChartPoint[]> = {
   ],
 };
 
-export function VisitsChart({ period = '6m' }: VisitsChartProps) {
+export function VisitsChart({ period = '6m', type = 'profile' }: VisitsChartProps) {
   const [chartData, setChartData] = useState<ProfileViewChartPoint[]>(FALLBACK_DATA[period]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -62,7 +65,8 @@ export function VisitsChart({ period = '6m' }: VisitsChartProps) {
     let active = true;
     setIsLoading(true);
 
-    fetchProfileViewChart(period).then((res) => {
+    const fetch = type === 'products' ? fetchProductViewChart : fetchProfileViewChart;
+    fetch(period).then((res) => {
       if (!active) return;
       if (!res.error && res.data && res.data.length > 0) {
         setChartData(res.data);
@@ -75,14 +79,15 @@ export function VisitsChart({ period = '6m' }: VisitsChartProps) {
     return () => {
       active = false;
     };
-  }, [period]);
+  }, [period, type]);
 
+  const entityLabel = type === 'products' ? 'Visitas a productos' : 'Visitas al perfil';
   const title =
     period === '7d'
-      ? 'Visitas: últimos 7 días vs 7 anteriores'
+      ? `${entityLabel}: últimos 7 días vs 7 anteriores`
       : period === '6m'
-        ? 'Visitas: últimos 6 meses vs 6 anteriores'
-        : 'Visitas: último año vs año anterior';
+        ? `${entityLabel}: últimos 6 meses vs 6 anteriores`
+        : `${entityLabel}: último año vs año anterior`;
 
   return (
     <section
