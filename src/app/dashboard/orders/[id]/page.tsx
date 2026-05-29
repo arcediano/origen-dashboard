@@ -10,8 +10,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
-import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown } from 'lucide-react';
 
 // Componentes UI
 import {
@@ -118,106 +118,62 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ============================================================================
-// SUB-COMPONENTE: TARJETA DE ESTADO (desktop sidebar)
-// ============================================================================
-
-function OrderStatusCard({
-  order,
-  onUpdateStatus,
-  isUpdating,
-  onCancelRequest,
-}: {
-  order: Order;
-  onUpdateStatus: (status: Order['status']) => Promise<void>;
-  isUpdating: boolean;
-  onCancelRequest: () => void;
-}) {
-  const status     = statusConfig[order.status];
-  const isTerminal = ['delivered', 'cancelled', 'refunded'].includes(order.status);
-  const canCancel  = ['pending', 'processing', 'shipped'].includes(order.status);
-
-  const next: { label: string; next: Order['status']; icon: React.ElementType } | null =
-    order.status === 'pending'    ? { label: 'Marcar como procesando', next: 'processing', icon: Package     } :
-    order.status === 'processing' ? { label: 'Marcar como enviado',    next: 'shipped',    icon: Truck       } :
-    order.status === 'shipped'    ? { label: 'Marcar como entregado',  next: 'delivered',  icon: CheckCircle } :
-    null;
-
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+  if (value === null || value === undefined || value === '') return null;
   return (
-    <div className="rounded-[28px] border border-border-subtle bg-surface overflow-hidden">
-      {/* Band de color semántico */}
-      <div className={cn('px-5 py-3 flex items-center justify-between', status.bandBg)}>
-        <div className="flex items-center gap-2">
-          <status.icon className={cn('w-4 h-4', status.color)} />
-          <span className={cn('text-sm font-semibold', status.color)}>{status.label}</span>
-        </div>
-        <span className="text-xs text-text-subtle tabular-nums">
-          {format(order.createdAt, 'dd MMM yyyy', { locale: es })}
-        </span>
-      </div>
-
-      <div className="p-4 sm:p-5 space-y-3">
-        {/* Total */}
-        <div className="flex items-end justify-between pt-0.5">
-          <span className="text-xs text-text-subtle">Total del pedido</span>
-          <span className={cn('text-2xl font-extrabold tabular-nums leading-none', status.color)}>
-            {order.total.toFixed(2)}€
-          </span>
-        </div>
-
-        {/* Pago inline */}
-        <div className="flex items-center justify-between py-2 border-t border-border-subtle">
-          <div className="flex items-center gap-1.5">
-            <CreditCard className="w-3.5 h-3.5 text-text-subtle shrink-0" />
-            <span className="text-xs text-text-subtle capitalize">{order.payment.method}</span>
-          </div>
-          <Badge variant={order.payment.status === 'paid' ? 'success' : 'warning'} size="xs">
-            {order.payment.status === 'paid' ? 'Pagado' : 'Pendiente'}
-          </Badge>
-        </div>
-
-        {/* Acciones disponibles */}
-        {!isTerminal && (
-          <div className="space-y-2 border-t border-border-subtle pt-3">
-            <SectionLabel>Actualizar estado</SectionLabel>
-            {next && (
-              <Button
-                variant="primary"
-                size="sm"
-                leftIcon={<next.icon className="w-4 h-4" />}
-                onClick={() => onUpdateStatus(next.next)}
-                loading={isUpdating}
-                loadingText="Actualizando..."
-                className="w-full justify-start"
-              >
-                {next.label}
-              </Button>
-            )}
-            {canCancel && (
-              <Button
-                variant="ghost"
-                size="sm"
-                leftIcon={<XCircle className="w-4 h-4 text-feedback-danger" />}
-                onClick={onCancelRequest}
-                disabled={isUpdating}
-                className="w-full justify-start text-feedback-danger hover:bg-red-50"
-              >
-                Cancelar pedido
-              </Button>
-            )}
-          </div>
-        )}
-
-        {isTerminal && (
-          <p className="text-[11px] text-text-subtle border-t border-border-subtle pt-3 flex items-center gap-1.5">
-            <Info className="w-3 h-3 shrink-0" />
-            {order.status === 'delivered' ? 'Pedido completado correctamente.' :
-             order.status === 'cancelled' ? 'Este pedido fue cancelado.' :
-             'Este pedido fue reembolsado.'}
-          </p>
-        )}
-      </div>
+    <div className="flex justify-between items-start gap-4 py-2.5 border-b border-border-subtle last:border-0">
+      <span className="text-xs text-text-subtle shrink-0">{label}</span>
+      <span className="text-xs font-semibold text-origen-bosque text-right">{value}</span>
     </div>
+  );
+}
+
+function SectionAccordion({
+  title, icon: Icon, defaultOpen = false, children, index = 0,
+}: {
+  title: string;
+  icon: React.ElementType;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+  index?: number;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <motion.div
+      custom={index}
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      className="rounded-[28px] border border-border bg-surface-alt shadow-subtle overflow-hidden"
+    >
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-surface-alt/50 transition-colors"
+        aria-expanded={open}
+      >
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-origen-pradera/15 to-origen-hoja/15 flex items-center justify-center shrink-0">
+          <Icon className="w-4 h-4 text-origen-pradera" />
+        </div>
+        <span className="flex-1 text-sm font-semibold text-origen-bosque">{title}</span>
+        <ChevronDown className={cn('w-4 h-4 text-text-subtle transition-transform duration-200', open && 'rotate-180')} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: 'easeInOut' }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div className="px-5 pb-5 pt-1 border-t border-border-subtle">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
@@ -326,6 +282,7 @@ export default function OrderDetailPage() {
     order.status === 'shipped'    ? { label: 'Marcar como entregado',  next: 'delivered',  icon: CheckCircle } :
     null;
 
+  const isTerminal = !canUpdate;
   const handleRefresh = async () => { await loadOrder(); };
 
   return (
@@ -341,6 +298,22 @@ export default function OrderDetailPage() {
           tooltipDetailed="Información completa del pedido, productos y seguimiento."
           showBackButton
           onBack={() => router.back()}
+          actions={
+            order.invoice?.hasPdf ? (
+              <div className="hidden lg:flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  leftIcon={<FileText className="w-4 h-4" />}
+                  onClick={handleDownloadInvoice}
+                  loading={downloadingInvoice}
+                  disabled={downloadingInvoice}
+                >
+                  Descargar factura
+                </Button>
+              </div>
+            ) : undefined
+          }
         />
 
         <motion.div
@@ -354,62 +327,98 @@ export default function OrderDetailPage() {
         >
           <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6">
 
-            {/* ══ SIDEBAR ══ En móvil aparece primero */}
-            <div className="lg:col-span-5 lg:order-2 flex flex-col gap-4 mb-4 lg:mb-0">
+            {/* ══ SIDEBAR ══ Izquierda en desktop, primero en móvil */}
+            <div className="lg:col-span-5 flex flex-col gap-4 mb-4 lg:mb-0">
 
-              {/* ── Hero card de estado (móvil prominente) ── */}
-
-              {/* Mobile hero — borde y fondo de color semántico */}
-              <motion.div
-                custom={0}
-                variants={cardVariants}
-                className={cn(
-                  'lg:hidden rounded-[28px] border overflow-hidden',
-                  status.heroBg, status.heroBorder,
-                )}
-              >
-                <div className="px-5 py-5">
-                  {/* Estado + fecha */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
+              {/* ── Hero card del pedido — siempre visible (mobile + desktop) ── */}
+              <motion.div custom={0} variants={cardVariants}>
+                <div className="rounded-[28px] border border-origen-pradera/25 bg-gradient-to-br from-origen-crema via-surface-alt to-surface p-4 sm:p-5 shadow-sm">
+                  {/* Icono de estado + número + badge */}
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-origen-pradera/15 to-origen-hoja/15 flex items-center justify-center shrink-0">
                       <status.icon className={cn('w-5 h-5', status.color)} />
-                      <span className={cn('text-base font-bold', status.color)}>{status.label}</span>
                     </div>
-                    <span className="text-xs text-text-subtle">
-                      {format(order.createdAt, 'dd MMM yyyy', { locale: es })}
-                    </span>
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <div className="mb-1.5">
+                        <Badge variant={status.variant} size="sm">{status.label}</Badge>
+                      </div>
+                      <p className="text-xs text-text-subtle uppercase tracking-widest font-semibold mb-0.5">Pedido</p>
+                      <h1 className="text-base font-bold text-origen-bosque leading-snug">{order.orderNumber}</h1>
+                      <p className="text-xs text-text-subtle mt-0.5">
+                        {format(order.createdAt, "dd 'de' MMMM 'de' yyyy", { locale: es })}
+                      </p>
+                    </div>
                   </div>
-                  {/* Número de pedido */}
-                  <p className="text-xs font-semibold text-text-subtle uppercase tracking-widest mb-0.5">Pedido</p>
-                  <p className="text-xl font-bold text-origen-bosque">{order.orderNumber}</p>
-                  {/* Total destacado */}
-                  <div className="mt-3 pt-3 border-t border-border-subtle flex items-end justify-between">
-                    <span className="text-xs text-text-subtle">Total</span>
-                    <span className={cn('text-3xl font-extrabold tabular-nums leading-none', status.color)}>
-                      {order.total.toFixed(2)}€
-                    </span>
+                  {/* Total + método de pago */}
+                  <div className="flex items-end justify-between pt-3 border-t border-border-subtle">
+                    <div>
+                      <p className="text-[10px] font-semibold text-text-subtle uppercase tracking-wider leading-none mb-1">Total</p>
+                      <p className={cn('text-2xl font-extrabold tabular-nums leading-none', status.color)}>
+                        {order.total.toFixed(2)}€
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-3.5 h-3.5 text-text-subtle shrink-0" />
+                      <span className="text-xs text-text-subtle capitalize">{order.payment.method}</span>
+                      <Badge variant={order.payment.status === 'paid' ? 'success' : 'warning'} size="xs">
+                        {order.payment.status === 'paid' ? 'Pagado' : 'Pendiente'}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
               </motion.div>
 
-              {/* Desktop status card */}
-              <motion.div custom={0} variants={cardVariants} className="hidden lg:block">
-                <OrderStatusCard
-                  order={order}
-                  onUpdateStatus={handleUpdateStatus}
-                  isUpdating={updating}
-                  onCancelRequest={() => setShowCancelSheet(true)}
-                />
-              </motion.div>
+              {/* ── Gestión del pedido ── */}
+              {!isTerminal ? (
+                <motion.div custom={1} variants={cardVariants}>
+                  <div className="rounded-[28px] border border-border bg-surface-alt shadow-subtle p-4 sm:p-5 space-y-2">
+                    <SectionLabel>Gestión del pedido</SectionLabel>
+                    {nextAction && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        leftIcon={<nextAction.icon className="w-4 h-4" />}
+                        onClick={() => handleUpdateStatus(nextAction.next)}
+                        loading={updating}
+                        loadingText="Actualizando..."
+                        className="w-full justify-start"
+                      >
+                        {nextAction.label}
+                      </Button>
+                    )}
+                    {canCancel && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        leftIcon={<XCircle className="w-4 h-4 text-feedback-danger" />}
+                        onClick={() => setShowCancelSheet(true)}
+                        disabled={updating}
+                        className="w-full justify-start text-feedback-danger hover:bg-feedback-danger-subtle"
+                      >
+                        Cancelar pedido
+                      </Button>
+                    )}
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div custom={1} variants={cardVariants}>
+                  <div className="rounded-[28px] border border-border bg-surface-alt shadow-subtle p-4">
+                    <p className="text-xs text-text-subtle flex items-center gap-2">
+                      <Info className="w-3.5 h-3.5 shrink-0" />
+                      {order.status === 'delivered' ? 'Pedido completado correctamente.' :
+                       order.status === 'cancelled' ? 'Este pedido fue cancelado.' :
+                       'Este pedido fue reembolsado.'}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
 
-              {/* ── Cliente ── */}
-              <motion.div custom={1} variants={cardVariants} className="rounded-[28px] border border-border-subtle bg-surface p-4 sm:p-5">
-                <SectionLabel>Cliente</SectionLabel>
-                {/* Avatar de iniciales */}
+              {/* ── Cliente ── (acordeón) */}
+              <SectionAccordion title="Cliente" icon={Mail} defaultOpen index={2}>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-origen-pastel flex items-center justify-center flex-shrink-0">
                     <span className="text-sm font-bold text-origen-bosque">
-                      {order.customerName.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                      {order.customerName.split(' ').map((n: string) => n[0]).slice(0, 2).join('')}
                     </span>
                   </div>
                   <p className="text-sm font-semibold text-origen-bosque leading-tight">{order.customerName}</p>
@@ -426,25 +435,21 @@ export default function OrderDetailPage() {
                     </a>
                   )}
                 </div>
-              </motion.div>
+              </SectionAccordion>
 
-              {/* ── Pago ── */}
-              <motion.div custom={2} variants={cardVariants} className="rounded-[28px] border border-border-subtle bg-surface p-4 sm:p-5">
-                <SectionLabel>Pago</SectionLabel>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-origen-pradera" />
-                    <span className="text-sm capitalize">{order.payment.method}</span>
-                  </div>
-                  <Badge variant={order.payment.status === 'paid' ? 'success' : 'warning'} size="xs">
-                    {order.payment.status === 'paid' ? 'Pagado' : 'Pendiente'}
-                  </Badge>
+              {/* ── Pago y factura ── (acordeón) */}
+              <SectionAccordion title="Pago y factura" icon={CreditCard} index={3}>
+                <div>
+                  <InfoRow label="Método" value={<span className="capitalize">{order.payment.method}</span>} />
+                  <InfoRow label="Estado" value={
+                    <Badge variant={order.payment.status === 'paid' ? 'success' : 'warning'} size="xs">
+                      {order.payment.status === 'paid' ? 'Pagado' : 'Pendiente'}
+                    </Badge>
+                  } />
+                  {order.payment.paidAt && (
+                    <InfoRow label="Fecha de pago" value={format(order.payment.paidAt, 'dd MMM yyyy', { locale: es })} />
+                  )}
                 </div>
-                {order.payment.paidAt && (
-                  <p className="text-xs text-text-subtle mt-2">
-                    {format(order.payment.paidAt, 'dd MMM yyyy', { locale: es })}
-                  </p>
-                )}
                 {order.invoice && (
                   <div className="mt-3 pt-3 border-t border-border-subtle space-y-2">
                     <div className="flex items-center justify-between gap-2">
@@ -472,12 +477,11 @@ export default function OrderDetailPage() {
                     )}
                   </div>
                 )}
-              </motion.div>
+              </SectionAccordion>
 
-              {/* ── Envío ── */}
-              <motion.div custom={3} variants={cardVariants} className="rounded-[28px] border border-border-subtle bg-surface p-4 sm:p-5">
-                <SectionLabel>Dirección de envío</SectionLabel>
-                <div className="flex items-start gap-2">
+              {/* ── Envío ── (acordeón) */}
+              <SectionAccordion title="Dirección de envío" icon={MapPin} defaultOpen index={4}>
+                <div className="flex items-start gap-2 mb-3">
                   <MapPin className="w-4 h-4 text-origen-pradera mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-origen-bosque">{order.shipping.address.fullName}</p>
@@ -491,10 +495,11 @@ export default function OrderDetailPage() {
                   </div>
                 </div>
                 {order.shipping.trackingNumber && (
-                  <div className="mt-3 pt-3 border-t border-border-subtle">
-                    <p className="text-xs text-text-subtle mb-1">
-                      Nº seguimiento: <span className="font-mono text-origen-bosque">{order.shipping.trackingNumber}</span>
-                    </p>
+                  <div className="pt-3 border-t border-border-subtle space-y-1.5">
+                    <InfoRow
+                      label="Nº seguimiento"
+                      value={<span className="font-mono">{order.shipping.trackingNumber}</span>}
+                    />
                     {order.shipping.trackingUrl && (
                       <a
                         href={order.shipping.trackingUrl}
@@ -507,14 +512,14 @@ export default function OrderDetailPage() {
                     )}
                   </div>
                 )}
-              </motion.div>
+              </SectionAccordion>
             </div>
 
-            {/* ══ CONTENIDO PRINCIPAL ══ En móvil aparece segundo */}
-            <div className="lg:col-span-7 lg:order-1 flex flex-col gap-4">
+            {/* ══ CONTENIDO PRINCIPAL ══ Derecha en desktop, segundo en móvil */}
+            <div className="lg:col-span-7 flex flex-col gap-4">
 
-              {/* ── Productos ── */}
-              <motion.div custom={1} variants={cardVariants} className="rounded-[28px] border border-border-subtle bg-surface overflow-hidden">
+              {/* ── Artículos del pedido ── */}
+              <motion.div custom={1} variants={cardVariants} className="rounded-[28px] border border-border bg-surface-alt shadow-subtle overflow-hidden">
                 <div className="px-5 py-3.5 border-b border-border-subtle flex items-center gap-2">
                   <Package className="w-4 h-4 text-origen-pradera" />
                   <span className="text-sm font-semibold text-origen-bosque">Artículos del pedido</span>
@@ -564,13 +569,8 @@ export default function OrderDetailPage() {
                 </div>
               </motion.div>
 
-              {/* ── Línea de tiempo — siempre visible en móvil ── */}
-              <motion.div custom={2} variants={cardVariants} className="rounded-[28px] border border-border-subtle bg-surface p-4 sm:p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Clock className="w-3.5 h-3.5 text-origen-pradera" />
-                  <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider">Historial del pedido</p>
-                </div>
-
+              {/* ── Historial del pedido ── (acordeón) */}
+              <SectionAccordion title="Historial del pedido" icon={Clock} index={2}>
                 <div>
                   {order.timeline.map((event, index) => (
                     <div key={event.id} className="flex items-start gap-3">
@@ -602,7 +602,7 @@ export default function OrderDetailPage() {
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </SectionAccordion>
 
             </div>
           </div>

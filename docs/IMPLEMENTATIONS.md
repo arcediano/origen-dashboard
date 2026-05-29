@@ -225,3 +225,36 @@ Se documento el incidente P1 donde origen-dashboard recibia 500 al consumir `POS
 
 - Actividad: ../../_workspace/docs/actividades/2026-05-22_12-10_postmortem-p1-auth-register_documentador-tecnico.md
 - Runbook: ./runbooks/2026-05-22-origen-dashboard-auth-register-500-postmortem.md
+
+---
+
+## [IMPL-008] Rediseño UX de detalle de pedido alineado con patrón canónico de producto
+
+**Fecha**: 2025-07-22
+**Sprint**: N/A
+**Historia de Usuario**: Rediseño dashboard — coherencia visual entre pantallas de detalle
+**Proyecto(s) afectado(s)**: `origen-dashboard`
+**Agentes involucrados**: @diseñador-ux, @documentador-tecnico
+
+### Cambios realizados
+
+| Archivo | Tipo | Descripción |
+|---------|------|-------------|
+| `src/app/dashboard/orders/[id]/page.tsx` | Modificado | Rediseño completo: hero card unificado (siempre visible, gradiente producto), layout columnas sin `lg:order-*`, sub-componentes `InfoRow` y `SectionAccordion`, eliminación de `OrderStatusCard`, secciones migradas a acordeón, card de gestión inline, botón "Descargar factura" en PageHeader actions |
+
+### Tests
+
+| Archivo de test | Suite | Estado |
+|----------------|-------|--------|
+| N/A | Validación TypeScript | ✅ Sin errores (`get_errors` limpio) |
+
+### Decisiones tomadas
+
+- `OrderStatusCard` eliminado e integrado directamente en hero card + card de gestión inline para evitar duplicidad visual.
+- Tokens `text-amber-700` y `text-red-700` en `statusConfig` no sustituidos: requieren definir `text-origen-mandarina` y `text-feedback-danger` en `origen-UXLibrary` antes de poder referenciarlos.
+- Sub-componentes `InfoRow` y `SectionAccordion` reproducidos idénticos a `products/[id]` por no estar extraídos aún en la UX Library.
+
+### Referencias
+
+- Actividad: ../../_workspace/docs/actividades/2025-07-22_10-30_redesign-order-detail_disenador-ux.md
+- Referencia canónica: `src/app/dashboard/products/[id]/page.tsx`
