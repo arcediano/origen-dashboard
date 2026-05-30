@@ -898,8 +898,7 @@ export default function ProductoDetallePage() {
               label: 'Eliminar',
               leftIcon: <Trash2 className="w-4 h-4" />,
               onClick: () => setShowDeleteDialog(true),
-              disabled: isDeleting,
-              className: 'text-feedback-danger hover:text-feedback-danger',
+              disabled: isDeleting,              variant: 'ghost' as const,              className: 'text-feedback-danger hover:text-feedback-danger',
             },
           ]}
         />

@@ -290,14 +290,16 @@ export default function EditProductPage() {
             label: 'Anterior',
             onClick: handlePrev,
             disabled: isFirstStep,
+            variant: 'secondary' as const,
             leftIcon: <ChevronLeft className="w-4 h-4" />,
-          },
-          {
+          }},
+          {{
             id: 'save',
             label: isSaving ? 'Guardando...' : 'Guardar',
             onClick: handleSave,
             disabled: isSaving,
             loading: isSaving,
+            variant: 'secondary' as const,
             leftIcon: isSaving
               ? <RefreshCw className="w-4 h-4 animate-spin" />
               : <Save className="w-4 h-4" />,

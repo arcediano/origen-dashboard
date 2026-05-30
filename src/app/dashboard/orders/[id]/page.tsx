@@ -627,8 +627,7 @@ export default function OrderDetailPage() {
                 label: 'Cancelar pedido',
                 leftIcon: <XCircle className="w-4 h-4" />,
                 onClick: () => setShowCancelSheet(true),
-                disabled: updating,
-                className: 'text-feedback-danger',
+                disabled: updating,                variant: 'ghost' as const,                className: 'text-feedback-danger',
               }] : []}
             />
           </>
