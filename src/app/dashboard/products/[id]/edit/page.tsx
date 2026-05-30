@@ -292,8 +292,8 @@ export default function EditProductPage() {
             disabled: isFirstStep,
             variant: 'secondary' as const,
             leftIcon: <ChevronLeft className="w-4 h-4" />,
-          }},
-          {{
+          },
+          {
             id: 'save',
             label: isSaving ? 'Guardando...' : 'Guardar',
             onClick: handleSave,
