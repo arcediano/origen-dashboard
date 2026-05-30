@@ -14,6 +14,7 @@ import { Badge, ActionBar } from '@arcediano/ux-library';
 import { PageHeader } from '../../../components/PageHeader';
 import { PageLoader } from '@/components/shared/loading/page-loader';
 import { PageError } from '@/components/shared/error/page-error';
+import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 
 import {
   CreateProductProgress,
@@ -271,8 +272,8 @@ export default function EditProductPage() {
         </div>
       )}
 
-      {/* ── ActionBar móvil — navegación entre pasos con pulgar ── */}
-      <ActionBar
+      {/* ── ActionBar móvil — navegación entre pasos con pulgar ── */}      {/* Oculta el BottomTabBar global mientras el ActionBar está activo */}
+      <HideBottomTabBar />      <ActionBar
         primaryAction={{
           id: 'primary',
           label: isLastStep ? 'Publicar' : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),

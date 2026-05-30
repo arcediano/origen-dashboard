@@ -17,6 +17,7 @@ export function BottomTabBar() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [actionBarOpen, setActionBarOpen] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -29,13 +30,22 @@ export function BottomTabBar() {
     return () => window.removeEventListener('filter-sheet:toggle', handler);
   }, []);
 
+  // Esconder la barra cuando una página tiene su propia barra de acciones contextual
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setActionBarOpen((e as CustomEvent<{ open: boolean }>).detail.open);
+    };
+    window.addEventListener('page-action-bar:toggle', handler);
+    return () => window.removeEventListener('page-action-bar:toggle', handler);
+  }, []);
+
   if (!mounted) return null;
 
   const isActive = (tab: (typeof MOBILE_ROOT_TABS)[number]) => matchesNavigationItem(pathname, { matchPaths: tab.matchPaths });
 
   return (
     <AnimatePresence>
-    {!filterOpen && (
+    {!filterOpen && !actionBarOpen && (
     <motion.nav
       key="bottom-tab-bar"
       initial={{ y: 100, opacity: 0 }}

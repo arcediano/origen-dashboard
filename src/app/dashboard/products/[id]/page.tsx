@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useHideBottomTabBar } from '@/hooks/useHideBottomTabBar';
 
 import {
   Button, Badge, StatusBadge,
@@ -511,6 +512,9 @@ export default function ProductoDetallePage() {
   const router = useRouter();
   const params = useParams();
   const productId = params.id as string;
+
+  // Oculta el BottomTabBar global — esta página siempre tiene ActionBar móvil
+  useHideBottomTabBar();
 
   const [product, setProduct]           = useState<Product | null>(null);
   const [isLoading, setIsLoading]       = useState(true);

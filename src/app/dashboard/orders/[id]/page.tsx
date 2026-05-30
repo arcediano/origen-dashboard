@@ -23,6 +23,7 @@ import { PageLoader } from '@/components/shared';
 import { PageError } from '@/components/shared';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
+import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 
 // Hooks y API
 import { fetchOrderById, fetchSellerOrderInvoice, updateOrderStatus } from '@/lib/api/orders';
@@ -610,23 +611,27 @@ export default function OrderDetailPage() {
 
         {/* ── ActionBar móvil ── */}
         {nextAction && (
-          <ActionBar
-            primaryAction={{
-              id: 'advance-status',
-              label: nextAction.label,
-              leftIcon: <nextAction.icon className="w-4 h-4" />,
-              onClick: () => setShowStatusSheet(true),
-              disabled: updating,
-            }}
-            secondaryActions={canCancel ? [{
-              id: 'cancel-order',
-              label: 'Cancelar pedido',
-              leftIcon: <XCircle className="w-4 h-4" />,
-              onClick: () => setShowCancelSheet(true),
-              disabled: updating,
-              className: 'text-feedback-danger',
-            }] : []}
-          />
+          <>
+            {/* Oculta el BottomTabBar mientras hay acciones de estado disponibles */}
+            <HideBottomTabBar />
+            <ActionBar
+              primaryAction={{
+                id: 'advance-status',
+                label: nextAction.label,
+                leftIcon: <nextAction.icon className="w-4 h-4" />,
+                onClick: () => setShowStatusSheet(true),
+                disabled: updating,
+              }}
+              secondaryActions={canCancel ? [{
+                id: 'cancel-order',
+                label: 'Cancelar pedido',
+                leftIcon: <XCircle className="w-4 h-4" />,
+                onClick: () => setShowCancelSheet(true),
+                disabled: updating,
+                className: 'text-feedback-danger',
+              }] : []}
+            />
+          </>
         )}
 
         {/* ── Sheet de confirmación de estado (móvil) ── */}
