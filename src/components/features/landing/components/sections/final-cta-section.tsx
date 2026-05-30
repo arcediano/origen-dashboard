@@ -88,8 +88,8 @@ export function FinalCTASection() {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="border-origen-bosque/50 text-origen-bosque hover:bg-origen-pastel hover:border-origen-bosque px-6 py-3 text-sm md:text-base"
+                  variant="secondary"
+                  className="px-6 py-3 text-sm md:text-base"
                 >
                   Ver preguntas frecuentes
                 </Button>

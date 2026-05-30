@@ -49,7 +49,7 @@ export function PageError({
             <div className="mt-4 flex justify-center">
               <Button
                 onClick={onRetry}
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 className="gap-2"
               >

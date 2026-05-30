@@ -74,7 +74,7 @@ export function StatsCard({
                   <div className={cn(
                     "flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
                     trend.isPositive 
-                      ? "bg-green-50 text-green-700 border border-green-200" 
+                      ? "bg-origen-pastel text-origen-bosque border border-origen-pradera/30" 
                       : "bg-feedback-danger-subtle text-red-700 border border-red-200"
                   )}>
                     {trend.isPositive ? (

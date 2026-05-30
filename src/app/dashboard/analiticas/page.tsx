@@ -160,33 +160,33 @@ export default async function AnalyticasPage() {
             label="Entregados"
             value={sales.delivered}
             icon={CheckCircle2}
-            bg="from-green-50 to-transparent"
-            border="border-green-100"
-            iconColor="text-green-600"
+            bg="from-origen-pastel/30 to-transparent"
+            border="border-origen-hoja/20"
+            iconColor="text-origen-hoja"
           />
           <SoftStatCard
             label="En proceso"
             value={sales.processing + sales.shipped}
             icon={Package}
-            bg="from-blue-50 to-transparent"
-            border="border-blue-100"
-            iconColor="text-blue-500"
+            bg="from-origen-pradera/10 to-transparent"
+            border="border-origen-pradera/20"
+            iconColor="text-origen-pradera"
           />
           <SoftStatCard
             label="Pendientes"
             value={sales.pending}
             icon={Clock3}
-            bg="from-amber-50 to-transparent"
-            border="border-amber-100"
-            iconColor="text-amber-500"
+            bg="from-origen-mandarina/10 to-transparent"
+            border="border-origen-mandarina/20"
+            iconColor="text-origen-mandarina"
           />
           <SoftStatCard
             label="Cancelados"
             value={sales.cancelled + sales.refunded}
             icon={ShoppingBag}
-            bg="from-red-50 to-transparent"
-            border="border-red-100"
-            iconColor="text-red-400"
+            bg="from-feedback-danger-subtle to-transparent"
+            border="border-feedback-danger/20"
+            iconColor="text-feedback-danger"
           />
         </div>
       </section>

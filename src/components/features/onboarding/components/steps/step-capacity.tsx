@@ -690,9 +690,9 @@ export function EnhancedStep4Capacity({
             </div>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               onClick={handleAddCustomDeliveryOption}
-              className="w-full justify-center border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10 sm:w-auto"
+              className="w-full justify-center sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-1.5 inline-block" />
               Añadir método

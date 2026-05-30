@@ -302,7 +302,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
               <ShoppingBag className="w-4 h-4 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">Esta es la vista que verán los compradores</span>
             </div>
-            <Button variant="outline" size="sm" onClick={onClose}>
+            <Button variant="ghost" size="sm" onClick={onClose}>
               Cerrar vista previa
             </Button>
           </div>

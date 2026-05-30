@@ -27,17 +27,17 @@ const STATUS_CONFIG: Record<
   pending: {
     label: 'Pendiente',
     icon: Clock,
-    chip: 'bg-amber-50 text-amber-700 border-amber-200',
+    chip: 'bg-origen-mandarina/10 text-origen-bosque border-origen-mandarina/30',
   },
   processing: {
     label: 'Procesando',
     icon: Package,
-    chip: 'bg-blue-50 text-blue-700 border-blue-200',
+    chip: 'bg-origen-pradera/10 text-origen-pino border-origen-pradera/30',
   },
   shipped: {
     label: 'Enviado',
     icon: Truck,
-    chip: 'bg-purple-50 text-purple-700 border-purple-200',
+    chip: 'bg-origen-hoja/10 text-origen-hoja border-origen-hoja/30',
   },
   delivered: {
     label: 'Entregado',

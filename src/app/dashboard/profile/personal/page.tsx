@@ -362,7 +362,7 @@ export default function PersonalInfoPage() {
 
                         <div className="flex gap-2 flex-shrink-0">
                           {!isEditing ? (
-                            <Button onClick={() => setIsEditing(true)} size="sm" variant="outline" className="border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10" disabled={isLoading}>
+                            <Button onClick={() => setIsEditing(true)} size="sm" variant="secondary" disabled={isLoading}>
                               <span className="flex items-center gap-1">
                                 <Edit className="w-3.5 h-3.5" />
                                 Editar
@@ -589,7 +589,7 @@ export default function PersonalInfoPage() {
         <div className="fixed left-0 right-0 bottom-[calc(88px+env(safe-area-inset-bottom))] lg:hidden z-30 px-4 sm:px-6">
           <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={handleCancel}>Cancelar</Button>
+              <Button variant="ghost" className="flex-1" onClick={handleCancel}>Cancelar</Button>
               <Button className="flex-1" onClick={handleSave} disabled={isSaving}>
                 {isSaving ? 'Guardando...' : 'Guardar cambios'}
               </Button>

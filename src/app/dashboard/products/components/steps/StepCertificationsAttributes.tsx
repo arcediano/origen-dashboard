@@ -737,7 +737,7 @@ export function StepCertificationsAttributes({
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button
                     className="w-full sm:flex-1"
-                    variant="outline"
+                    variant="secondary"
                     onClick={openCatalogPanel}
                     leftIcon={<Search className="w-4 h-4" />}
                   >
@@ -1195,7 +1195,7 @@ export function StepCertificationsAttributes({
               <div className="flex justify-end">
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="secondary"
                   onClick={() => {
                     if (showAttrForm) {
                       resetAttrForm();

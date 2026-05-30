@@ -272,7 +272,7 @@ export default function SecurityPage() {
                   <h4 className="font-medium text-origen-bosque">Verificación en dos pasos</h4>
                   <p className="text-sm text-muted-foreground">Añade una capa extra de seguridad a tu cuenta.</p>
                 </div>
-                <Button variant="outline">Activar</Button>
+                <Button variant="secondary">Activar</Button>
               </div>
 
               <Alert>

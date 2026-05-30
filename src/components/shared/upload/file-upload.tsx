@@ -352,11 +352,10 @@ export function FileUpload({
           {/* Botón de subida */}
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled}
-            className="border-origen-pradera text-origen-bosque hover:bg-origen-pastel/50"
           >
             {buttonText}
           </Button>

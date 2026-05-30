@@ -962,7 +962,7 @@ export default function ProductoDetallePage() {
 
             <DialogFooter className="flex-col-reverse sm:flex-row gap-2 px-6 py-4">
               <Button
-                variant="outline"
+                variant="ghost"
                 className="flex-1"
                 onClick={() => setShowDeleteDialog(false)}
                 disabled={isDeleting}

@@ -65,9 +65,9 @@ export function WelcomeHeader({
       {showViewStoreButton && (
         <div className="hidden sm:block">
           <Button
-            variant="outline"
+            variant="secondary"
             size="lg"
-            className="border-origen-pradera text-origen-pradera hover:bg-origen-pradera/10 h-auto py-3 px-6"
+            className="h-auto py-3 px-6"
           >
             <span className="flex items-center gap-2">
               <Eye className="w-4 h-4" />

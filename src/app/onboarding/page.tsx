@@ -1009,7 +1009,7 @@ export default function OnboardingPage() {
                         <span className={cn(
                           "absolute -bottom-2 -right-2 text-[10px] font-medium px-1.5 py-0.5 rounded-full shadow-sm",
                           isCompleted 
-                            ? "bg-green-100 text-green-700 border border-green-200" 
+                            ? "bg-origen-pastel text-origen-bosque border border-origen-pradera/30" 
                             : "bg-surface-alt text-muted-foreground border border-border"
                         )}>
                           {step.time}
@@ -1043,7 +1043,7 @@ export default function OnboardingPage() {
                             </span>
                           )}
                           {isCompleted && (
-                            <span className="text-[10px] font-medium text-green-600 flex items-center gap-1">
+                            <span className="text-[10px] font-medium text-origen-hoja flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
                               Listo
                             </span>
@@ -1131,7 +1131,7 @@ export default function OnboardingPage() {
             </AnimatePresence>
 
             {currentStep === 6 && formData.step6.acceptTerms && !formData.step6.stripeConnected && (
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-800">
+              <div className="mt-4 p-3 bg-origen-pradera/10 border border-origen-pradera/30 rounded-xl text-sm text-origen-bosque">
                 Puedes finalizar el onboarding sin Stripe ahora, pero no podrás publicar productos hasta conectarlo desde tu dashboard.
               </div>
             )}
@@ -1168,10 +1168,10 @@ export default function OnboardingPage() {
               <div className="flex items-center gap-3">
                 {currentStep > 0 && (
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     onClick={handleBack}
                     disabled={isSubmitting}
-                    className="h-10 px-4 border-border text-origen-bosque hover:bg-origen-crema/50 hover:border-origen-pradera"
+                    className="h-10 px-4"
                   >
                     Anterior
                   </Button>
@@ -1179,10 +1179,10 @@ export default function OnboardingPage() {
 
                 {currentStep >= 1 && currentStep < totalSteps - 1 && (
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     onClick={handleSkipOnboarding}
                     disabled={isSubmitting}
-                    className="h-10 px-4 border-border text-muted-foreground hover:bg-surface hover:border-border text-xs"
+                    className="h-10 px-4 text-muted-foreground text-xs"
                   >
                     Completar más tarde
                   </Button>

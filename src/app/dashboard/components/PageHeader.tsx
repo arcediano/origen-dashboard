@@ -52,10 +52,10 @@ export function PageHeader({
             {showBackButton && (
               <button
                 onClick={handleBack}
-                className="mt-0.5 hidden h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface-alt text-text-subtle transition-colors hover:border-origen-pradera hover:bg-origen-pradera/5 hover:text-origen-pradera lg:inline-flex"
+                className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-surface-alt text-text-subtle transition-colors hover:border-origen-pradera hover:bg-origen-pradera/5 hover:text-origen-pradera lg:h-10 lg:w-10"
                 aria-label="Volver"
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-4 w-4 lg:h-5 lg:w-5" />
               </button>
             )}
 

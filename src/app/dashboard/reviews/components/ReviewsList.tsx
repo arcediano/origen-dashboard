@@ -283,7 +283,7 @@ export function ReviewsList({
               <div className="flex justify-end gap-2">
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => {
                     setShowFlagDialog(null);
                     setFlagReason('');
@@ -344,7 +344,7 @@ export function ReviewsList({
             <div className="flex items-center gap-2">
               {!review.response && respondingTo !== review.id && (
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   onClick={() => setRespondingTo(review.id)}
                 >

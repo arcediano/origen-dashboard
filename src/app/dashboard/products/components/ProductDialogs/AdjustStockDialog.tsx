@@ -177,7 +177,7 @@ export function AdjustStockDialog({
 
       <div className="flex justify-end gap-2 px-6 pb-6">
         <Button
-          variant="outline"
+          variant="ghost"
           onClick={() => onOpenChange(false)}
           disabled={isLoading}
         >

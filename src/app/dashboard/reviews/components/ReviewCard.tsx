@@ -52,7 +52,7 @@ function StarRow({ rating }: { rating: number }) {
           key={s}
           className={cn(
             'w-3 h-3',
-            s <= rating ? 'fill-feedback-warning text-feedback-warning' : 'text-gray-200',
+            s <= rating ? 'fill-feedback-warning text-feedback-warning' : 'text-border',
           )}
         />
       ))}

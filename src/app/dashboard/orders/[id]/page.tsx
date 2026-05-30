@@ -42,7 +42,7 @@ const statusConfig: Record<Order['status'], {
     variant: 'warning',
     label: 'Pendiente',
     icon: Clock,
-    color: 'text-amber-700',
+    color: 'text-origen-bosque',
     bandBg: 'bg-origen-mandarina/10',
     heroBg: 'bg-gradient-to-br from-origen-mandarina/20 to-origen-mandarina/8',
     heroBorder: 'border-origen-mandarina/30',
@@ -538,7 +538,7 @@ export default function OrderDetailPage() {
                         <p className="text-sm font-medium text-origen-bosque leading-tight truncate">{item.productName}</p>
                         <p className="text-xs text-text-subtle mt-0.5">
                           {item.quantity} × {item.unitPrice.toFixed(2)}€
-                          {item.discount && <span className="text-green-600 ml-1.5">−{item.discount}%</span>}
+                          {item.discount && <span className="text-origen-hoja ml-1.5">−{item.discount}%</span>}
                         </p>
                       </div>
                       {/* Precio */}

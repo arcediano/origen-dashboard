@@ -693,7 +693,7 @@ export default function BusinessInfoPage() {
               </Button>
             ) : (
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <Button variant="outline" size="md" onClick={handleCancel} className="w-full sm:w-auto">
+                <Button variant="ghost" size="md" onClick={handleCancel} className="w-full sm:w-auto">
                   <span className="flex items-center justify-center gap-2">
                     <X className="w-4 h-4" />
                     Cancelar
@@ -981,7 +981,7 @@ export default function BusinessInfoPage() {
                       </div>
                       <div className="flex gap-2">
                         <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="Nueva categoria" />
-                        <Button variant="outline" size="md" onClick={handleAddCategory}>
+                        <Button variant="secondary" size="md" onClick={handleAddCategory}>
                           <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
                             <Plus className="w-4 h-4" />
                             Anadir
@@ -1002,7 +1002,7 @@ export default function BusinessInfoPage() {
         <div className="fixed left-0 right-0 bottom-[calc(88px+env(safe-area-inset-bottom))] lg:hidden z-30 px-4 sm:px-6">
           <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
             <div className="flex gap-2">
-              <Button variant="outline" size="md" className="flex-1" onClick={handleCancel}>
+              <Button variant="ghost" size="md" className="flex-1" onClick={handleCancel}>
                 <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
                   <X className="w-4 h-4" />
                   Cancelar

@@ -250,7 +250,7 @@ export default function ProfilePage() {
               <div className="flex-1" />
               <div className="flex justify-end mt-4">
                 <Link href="/dashboard/profile/personal">
-                  <Button variant="outline" size="sm">
+                  <Button variant="secondary" size="sm">
                     <span className="flex items-center gap-1">
                       Ver detalles
                       <ChevronRight className="w-4 h-4" />
@@ -281,7 +281,7 @@ export default function ProfilePage() {
               <div className="flex-1" />
               <div className="flex justify-end mt-4">
                 <Link href="/dashboard/profile/business">
-                  <Button variant="outline" size="sm">
+                  <Button variant="secondary" size="sm">
                     <span className="flex items-center gap-1">
                       Ver detalles
                       <ChevronRight className="w-4 h-4" />
@@ -314,7 +314,7 @@ export default function ProfilePage() {
               <div className="flex-1" />
               <div className="flex justify-end mt-4">
                 <Link href="/dashboard/profile/certifications">
-                  <Button variant="outline" size="sm">
+                  <Button variant="secondary" size="sm">
                     <span className="flex items-center gap-1">
                       Ver detalles
                       <ChevronRight className="w-4 h-4" />

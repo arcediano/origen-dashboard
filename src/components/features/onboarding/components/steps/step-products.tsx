@@ -768,9 +768,9 @@ export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete
         <Button
           type="button"
           onClick={handleAdd}
-          variant="outline"
+          variant="secondary"
           leftIcon={<Plus className="w-4 h-4" />}
-          className="w-full h-12 border-dashed border-origen-pradera/40 text-origen-bosque hover:bg-origen-crema/30 hover:border-origen-pradera"
+          className="w-full h-12 border border-dashed border-origen-pradera/60 hover:border-origen-pradera"
         >
           Añadir producto {data.products.length > 0 ? `(${data.products.length}/${MAX_PRODUCTS})` : ''}
         </Button>

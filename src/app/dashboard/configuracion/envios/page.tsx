@@ -50,7 +50,7 @@ export default function EnviosPage() {
         <Card className="rounded-2xl border border-border-subtle shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between gap-4">
             <CardTitle className="text-lg text-origen-bosque">Opciones de envío</CardTitle>
-            <Button variant="outline" size="sm">
+            <Button variant="secondary" size="sm">
               <span className="inline-flex items-center gap-2">
                 <Plus className="w-4 h-4" />
                 <span>Añadir método</span>
@@ -120,7 +120,7 @@ export default function EnviosPage() {
             {['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Bilbao', 'Toledo'].map((city) => (
               <Badge key={city} variant="leaf" size="sm">{city}</Badge>
             ))}
-            <Button variant="outline" size="sm">
+            <Button variant="secondary" size="sm">
               <span className="inline-flex items-center gap-1">
                 <Plus className="w-3 h-3" />
                 <span>Añadir provincia</span>

@@ -148,13 +148,13 @@ export function DashboardFooter({
                 <motion.div 
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full ring-2 ring-white"
+                  className="absolute -top-1 -right-1 w-2 h-2 bg-origen-pradera rounded-full ring-2 ring-white"
                 />
               </div>
               <div className="text-left">
                 <div className="flex items-baseline gap-1">
                   <p className="text-sm font-bold text-origen-bosque">{metrics.growth}</p>
-                  <span className="text-[10px] text-green-600 font-medium">↑</span>
+                  <span className="text-[10px] text-origen-hoja font-medium">↑</span>
                 </div>
                 <p className="text-[10px] text-muted-foreground">crecimiento mensual</p>
               </div>

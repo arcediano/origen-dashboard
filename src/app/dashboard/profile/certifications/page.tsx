@@ -519,7 +519,7 @@ export default function CertificationsPage() {
                                 <Download className="w-4 h-4" />
                               </Button>
                               <Button
-                                variant="outline"
+                                variant="secondary"
                                 size="sm"
                                 disabled={savingFor === cert.certificationId}
                                 onClick={() => requestReplace(cert.certificationId, cert.name, 'cert', cert.status)}
@@ -548,7 +548,7 @@ export default function CertificationsPage() {
                           {showUploadButton && (
                             <div className="mt-3">
                               <Button
-                                variant="outline"
+                                variant="secondary"
                                 size="sm"
                                 disabled={savingFor === cert.certificationId}
                                 onClick={() => setUploadingFor(cert.certificationId)}
@@ -666,7 +666,7 @@ export default function CertificationsPage() {
                                 <Download className="w-4 h-4" />
                               </Button>
                               <Button
-                                variant="outline"
+                                variant="secondary"
                                 size="sm"
                                 disabled={savingFor === doc.type}
                                 onClick={() => requestReplace(doc.type, doc.label, 'doc', doc.status)}
@@ -695,7 +695,7 @@ export default function CertificationsPage() {
                           {showUploadButton && (
                             <div className="mt-3">
                               <Button
-                                variant="outline"
+                                variant="secondary"
                                 size="sm"
                                 disabled={savingFor === doc.type}
                                 onClick={() => setUploadingFor(doc.type)}
