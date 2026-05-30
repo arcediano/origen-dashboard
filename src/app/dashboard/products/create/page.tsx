@@ -115,8 +115,8 @@ export default function CreateProductPage() {
           animate="visible"
           className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-6"
         >
-          {/* padding inferior móvil compensa la barra de navegación sticky de 2 filas */}
-          <div className="lg:col-span-2 space-y-6 pb-14 sm:pb-0">
+          {/* padding inferior móvil — iguala la altura de CreateProductNavigation (137px − 24px outer pb) */}
+          <div className="lg:col-span-2 space-y-6 pb-[calc(113px+env(safe-area-inset-bottom,0px))] sm:pb-0">
             <ProductFormSteps
               activeTab={activeTab}
               formData={formData}

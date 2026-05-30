@@ -40,6 +40,7 @@ function DashboardContentWrapper({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [actionBarOpen, setActionBarOpen] = useState(false);
 
   const { isAuthenticated, isProducer, isLoading: authLoading, user } = useAuth();
 
@@ -104,6 +105,14 @@ function DashboardContentWrapper({
     return () => window.removeEventListener('resize', checkMobile);
   }, [isAuthenticated, isProducer]);
 
+  // Cuando una página activa su propia ActionBar, el layout cede la reserva del BottomTabBar
+  useEffect(() => {
+    const handler = (e: Event) =>
+      setActionBarOpen((e as CustomEvent<{ open: boolean }>).detail.open);
+    window.addEventListener('page-action-bar:toggle', handler);
+    return () => window.removeEventListener('page-action-bar:toggle', handler);
+  }, []);
+
   // Mostrar spinner mientras se valida la autenticación
   if (authLoading) {
     return (
@@ -142,8 +151,9 @@ function DashboardContentWrapper({
           "transition-all duration-300",
           // Desktop: desplazar por sidebar
           !isMobile && "lg:ml-72",
-          // Mobile: espacio para header fijo (56px) y barra flotante (72px + safe-area + margen)
-          isMobile && "pt-14 pb-[calc(88px+env(safe-area-inset-bottom))]",
+        // Mobile: pt para header fijo (56px); pb para BottomTabBar solo cuando no hay ActionBar propia
+        isMobile && "pt-14",
+        isMobile && !actionBarOpen && "pb-[calc(88px+env(safe-area-inset-bottom))]",
           !isMobile && "lg:px-4 lg:pb-6",
         )}
       >

@@ -193,7 +193,7 @@ export default function EditProductPage() {
           animate="visible"
           className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-6"
         >
-          <div className="lg:col-span-2 space-y-6 pb-14 sm:pb-0">
+          <div className="lg:col-span-2 space-y-6 pb-[calc(100px+env(safe-area-inset-bottom,0px))] sm:pb-0">
             <ProductFormSteps
               activeTab={activeTab}
               formData={formData}
@@ -245,7 +245,7 @@ export default function EditProductPage() {
 
       {/* ── Panel de errores móvil — aparece sobre el ActionBar ── */}
       {showMobileErrors && currentStepErrors.length > 0 && (
-        <div className="sm:hidden fixed bottom-[calc(80px+env(safe-area-inset-bottom))] left-0 right-0 z-50 mx-4 mb-2">
+        <div className="sm:hidden fixed bottom-[calc(128px+env(safe-area-inset-bottom))] left-0 right-0 z-50 mx-4">
           <div className="rounded-2xl border border-red-200 bg-red-50 shadow-lg p-4">
             <div className="flex items-start justify-between gap-2 mb-2">
               <div className="flex items-center gap-2">
