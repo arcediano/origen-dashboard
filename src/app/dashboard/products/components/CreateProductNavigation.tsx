@@ -130,7 +130,7 @@ export function CreateProductNavigation({
       ══════════════════════════════════════════════════════════ */}
       <nav
         aria-label="Navegación de pasos"
-        className="sm:hidden fixed bottom-0 inset-x-0 z-40 w-full border-t border-border bg-background/95 backdrop-blur-sm px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
+        className="sm:hidden fixed bottom-0 inset-x-0 z-40 w-full border-t border-border bg-background/95 backdrop-blur-sm shadow-[0_-4px_20px_rgba(27,67,50,0.08)] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
       >
         {/* Panel de errores — flota encima de la barra */}
         {showStepErrors && hasErrors && (
@@ -204,7 +204,7 @@ export function CreateProductNavigation({
         ) : (
           <Button
             type="button"
-            variant={isCurrentStepBlocked ? 'outline' : 'primary'}
+            variant={isCurrentStepBlocked ? 'secondary' : 'primary'}
             onClick={handleNext}
             rightIcon={isCurrentStepBlocked
               ? <AlertCircle className="w-4 h-4 text-amber-500" aria-hidden="true" />
@@ -212,7 +212,7 @@ export function CreateProductNavigation({
             }
             className={cn(
               'w-full h-12',
-              isCurrentStepBlocked && 'border-amber-300 text-amber-700 hover:bg-amber-50',
+              isCurrentStepBlocked && 'bg-amber-50 border border-amber-300 text-amber-700 hover:bg-amber-100',
             )}
           >
             {isCurrentStepBlocked ? 'Completa este paso' : 'Siguiente'}
@@ -286,7 +286,7 @@ export function CreateProductNavigation({
         <div className="flex flex-row items-center justify-between gap-3">
           {/* Botón anterior */}
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={handlePrevious}
             disabled={isFirstStep}
             leftIcon={<ChevronLeft className="w-4 h-4" aria-hidden="true" />}
@@ -297,7 +297,7 @@ export function CreateProductNavigation({
           {/* Acciones centrales y CTA */}
           <div className="flex items-center gap-3">
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={onSave}
               disabled={isSaving}
               leftIcon={isSaving ? <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Save className="w-4 h-4" aria-hidden="true" />}
