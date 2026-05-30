@@ -700,7 +700,7 @@ export default function ProductoDetallePage() {
           }
         />
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-[calc(152px+env(safe-area-inset-bottom))] lg:pb-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10">
           <div>
 
             {/* ── Banner borrador — visible hasta que el producto esté activo ── */}

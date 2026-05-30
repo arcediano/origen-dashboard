@@ -323,7 +323,7 @@ export default function OrderDetailPage() {
           variants={containerVariants}
           className={cn(
             'container mx-auto px-4 sm:px-6 lg:px-8 pt-4 lg:pb-10',
-            nextAction ? 'pb-[calc(152px+env(safe-area-inset-bottom))]' : 'pb-6'
+            nextAction ? 'pb-10' : 'pb-6'
           )}
         >
           <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6">

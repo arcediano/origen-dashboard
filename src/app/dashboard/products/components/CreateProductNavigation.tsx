@@ -125,20 +125,20 @@ export function CreateProductNavigation({
   return (
     <>
       {/* ══════════════════════════════════════════════════════════
-          MOBILE: Isla flotante compacta (62 px) — mismo estilo que BottomTabBar
-          Oculto en sm+ donde se muestra la versión desktop de abajo
+          MOBILE: Barra sticky full-width con texto en todos los botones
+          Sigue el mismo patrón que ActionBar de @arcediano/ux-library
       ══════════════════════════════════════════════════════════ */}
-      <div
-        className="sm:hidden fixed bottom-0 inset-x-0 z-40 flex justify-center items-end px-4"
-        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 10px)' }}
+      <nav
+        aria-label="Navegación de pasos"
+        className="sm:hidden fixed bottom-0 inset-x-0 z-40 w-full border-t border-border bg-background/95 backdrop-blur-sm px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
       >
-        {/* Panel de errores — flota encima de la isla */}
+        {/* Panel de errores — flota encima de la barra */}
         {showStepErrors && hasErrors && (
           <div
             id="step-errors-panel"
             role="alert"
             aria-live="polite"
-            className="absolute bottom-full mb-2 left-4 right-4 rounded-2xl border border-feedback-danger/30 bg-feedback-danger-subtle px-4 py-3 shadow-lg"
+            className="mb-3 rounded-2xl border border-feedback-danger/30 bg-feedback-danger-subtle px-4 py-3"
           >
             <div className="flex items-start gap-2 mb-1.5">
               <XCircle className="w-3.5 h-3.5 text-feedback-danger shrink-0 mt-0.5" aria-hidden="true" />
@@ -157,116 +157,98 @@ export function CreateProductNavigation({
           </div>
         )}
 
-        {/* Isla flotante */}
-        <div className={cn(
-          'relative flex items-center w-full max-w-[360px] h-[62px] px-3 gap-2',
-          'bg-background/95 backdrop-blur-sm',
-          'rounded-[28px]',
-          'border border-border-subtle',
-          'shadow-[0_10px_40px_rgba(27,67,50,0.18),0_2px_8px_rgba(27,67,50,0.1),inset_0_1px_0_rgba(255,255,255,0.8)]',
-        )}>
+        {/* Indicador de progreso */}
+        <div
+          className="flex items-center justify-center gap-[5px] mb-2"
+          role="progressbar"
+          aria-valuenow={currentIndex + 1}
+          aria-valuemin={1}
+          aria-valuemax={FORM_STEPS.length}
+          aria-label={`Paso ${currentIndex + 1} de ${FORM_STEPS.length}`}
+        >
+          {FORM_STEPS.map((step, i) => (
+            <div
+              key={step.id}
+              className={cn(
+                'rounded-full transition-all duration-300',
+                i === currentIndex
+                  ? 'w-4 h-[5px] bg-origen-bosque'
+                  : completedTabs[step.id]
+                    ? 'w-[5px] h-[5px] bg-origen-pradera/60'
+                    : 'w-[5px] h-[5px] border border-border-subtle bg-transparent',
+              )}
+            />
+          ))}
+          <span className="ml-1.5 text-[10px] font-semibold text-text-subtle leading-none">
+            {currentIndex + 1}/{FORM_STEPS.length}
+          </span>
+        </div>
 
-          {/* ← Anterior */}
-          <button
+        {/* CTA principal — Siguiente o Publicar (full-width) */}
+        {isLastStep ? (
+          <Button
             type="button"
+            variant="primary"
+            onClick={onPublish}
+            disabled={isPublishing || !canPublish}
+            leftIcon={isPublishing
+              ? <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
+              : <Send className="w-4 h-4" aria-hidden="true" />
+            }
+            className={cn('w-full h-12', (isPublishing || !canPublish) && 'opacity-50')}
+            aria-disabled={isPublishing || !canPublish}
+            title={!canPublish ? 'Completa todos los pasos' : undefined}
+          >
+            {getPublishButtonText()}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant={isCurrentStepBlocked ? 'outline' : 'primary'}
+            onClick={handleNext}
+            rightIcon={isCurrentStepBlocked
+              ? <AlertCircle className="w-4 h-4 text-amber-500" aria-hidden="true" />
+              : <ChevronRight className="w-4 h-4" aria-hidden="true" />
+            }
+            className={cn(
+              'w-full h-12',
+              isCurrentStepBlocked && 'border-amber-300 text-amber-700 hover:bg-amber-50',
+            )}
+          >
+            {isCurrentStepBlocked ? 'Completa este paso' : 'Siguiente'}
+          </Button>
+        )}
+
+        {/* Fila secundaria: Anterior + Guardar */}
+        <div className="flex items-center gap-2 mt-2">
+          <Button
+            type="button"
+            variant="ghost"
             onClick={handlePrevious}
             disabled={isFirstStep}
-            aria-label="Paso anterior"
+            leftIcon={<ChevronLeft className="w-4 h-4" aria-hidden="true" />}
+            className={cn('flex-1 h-11', isFirstStep && 'opacity-40')}
             aria-disabled={isFirstStep}
-            className={cn(
-              'w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0',
-              'text-text-subtle hover:bg-origen-bosque/8 transition-colors',
-              isFirstStep && 'opacity-30 pointer-events-none',
-            )}
           >
-            <ChevronLeft className="w-5 h-5" aria-hidden="true" />
-          </button>
+            Anterior
+          </Button>
 
-          {/* Dots de progreso + etiqueta de paso */}
-          <div className="flex-1 flex flex-col items-center gap-1 min-w-0">
-            <div className="flex items-center gap-[5px]" role="progressbar" aria-valuenow={currentIndex + 1} aria-valuemin={1} aria-valuemax={FORM_STEPS.length} aria-label={`Paso ${currentIndex + 1} de ${FORM_STEPS.length}`}>
-              {FORM_STEPS.map((step, i) => (
-                <div
-                  key={step.id}
-                  className={cn(
-                    'rounded-full transition-all duration-300',
-                    i === currentIndex
-                      ? 'w-4 h-[6px] bg-origen-bosque'
-                      : completedTabs[step.id]
-                        ? 'w-[6px] h-[6px] bg-origen-pradera/60'
-                        : 'w-[6px] h-[6px] border border-border-subtle bg-transparent',
-                  )}
-                />
-              ))}
-            </div>
-            <span className="text-[10px] font-semibold text-text-subtle leading-none">
-              Paso {currentIndex + 1}/{FORM_STEPS.length}
-            </span>
-          </div>
-
-          {/* 💾 Guardar borrador */}
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={onSave}
             disabled={isSaving}
-            aria-label={isSaving ? 'Guardando...' : 'Guardar borrador'}
-            aria-disabled={isSaving}
-            className={cn(
-              'w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0',
-              'text-text-subtle hover:bg-origen-bosque/8 transition-colors',
-              isSaving && 'opacity-70 pointer-events-none',
-            )}
-          >
-            {isSaving
+            leftIcon={isSaving
               ? <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
               : <Save className="w-4 h-4" aria-hidden="true" />
             }
-          </button>
-
-          {/* CTA principal — Siguiente o Publicar */}
-          {isLastStep ? (
-            <button
-              type="button"
-              onClick={onPublish}
-              disabled={isPublishing || !canPublish}
-              aria-label={getPublishButtonText()}
-              aria-disabled={isPublishing || !canPublish}
-              title={!canPublish ? 'Completa todos los pasos' : undefined}
-              className={cn(
-                'h-11 px-4 rounded-2xl flex items-center gap-1.5 flex-shrink-0',
-                'bg-gradient-to-br from-origen-bosque via-origen-pino to-origen-hoja',
-                'text-white text-[11px] font-bold',
-                'shadow-[0_4px_14px_rgba(27,67,50,0.35)]',
-                (isPublishing || !canPublish) && 'opacity-50 pointer-events-none',
-              )}
-            >
-              {isPublishing
-                ? <RefreshCw className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
-                : <Send className="w-3.5 h-3.5" aria-hidden="true" />
-              }
-              {isPublishing ? 'Publicando' : 'Publicar'}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleNext}
-              aria-label={isCurrentStepBlocked ? 'Completa este paso para continuar' : 'Siguiente paso'}
-              className={cn(
-                'h-11 px-4 rounded-2xl flex items-center gap-1.5 flex-shrink-0 text-[11px] font-bold transition-colors',
-                isCurrentStepBlocked
-                  ? 'bg-amber-50 border border-amber-200 text-amber-700'
-                  : 'bg-gradient-to-br from-origen-bosque via-origen-pino to-origen-hoja text-white shadow-[0_4px_14px_rgba(27,67,50,0.35)]',
-              )}
-            >
-              {isCurrentStepBlocked
-                ? <AlertCircle className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
-                : <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
-              }
-              {isCurrentStepBlocked ? 'Pendiente' : 'Siguiente'}
-            </button>
-          )}
+            className="flex-1 h-11"
+            aria-disabled={isSaving}
+          >
+            {isSaving ? 'Guardando...' : 'Guardar'}
+          </Button>
         </div>
-      </div>
+      </nav>
 
       {/* ══════════════════════════════════════════════════════════
           DESKTOP (sm+): Botonera horizontal — igual que antes
