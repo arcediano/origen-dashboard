@@ -223,7 +223,7 @@ export function CreateProductNavigation({
         <div className="flex items-center gap-2 mt-2">
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={handlePrevious}
             disabled={isFirstStep}
             leftIcon={<ChevronLeft className="w-4 h-4" aria-hidden="true" />}
@@ -235,7 +235,7 @@ export function CreateProductNavigation({
 
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={onSave}
             disabled={isSaving}
             leftIcon={isSaving

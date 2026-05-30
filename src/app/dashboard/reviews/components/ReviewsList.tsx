@@ -69,7 +69,7 @@ export function ReviewsList({
             key={star}
             className={cn(
               'w-4 h-4',
-              star <= rating ? 'fill-amber-400 text-amber-400' : 'text-border'
+              star <= rating ? 'fill-feedback-warning text-feedback-warning' : 'text-border'
             )}
           />
         ))}
@@ -176,7 +176,7 @@ export function ReviewsList({
           {review.content.length > 200 && (
             <button
               onClick={() => setExpandedId(expandedId === review.id ? null : review.id)}
-              className="text-xs text-origen-pradera hover:text-origen-hoja mb-3"
+              className="inline-flex items-center gap-1 text-xs font-medium text-origen-pradera hover:text-origen-hoja transition-colors mb-3"
             >
               {expandedId === review.id ? 'Ver menos' : 'Ver más'}
             </button>
@@ -222,7 +222,8 @@ export function ReviewsList({
                     setRespondingTo(null);
                     setResponseText('');
                   }}
-                  className="text-text-subtle hover:text-muted-foreground"
+                  className="h-7 w-7 rounded-lg flex items-center justify-center text-text-subtle hover:bg-surface hover:text-origen-bosque transition-colors"
+                  aria-label="Cerrar formulario"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -238,13 +239,9 @@ export function ReviewsList({
                   size="sm"
                   onClick={() => handleSubmitResponse(review.id)}
                   disabled={!responseText.trim()}
+                  leftIcon={<Send className="w-4 h-4" />}
                 >
-                  <span>
-                    <span className="flex items-center gap-2">
-                      <Send className="w-4 h-4" />
-                      Enviar respuesta
-                    </span>
-                  </span>
+                  Enviar respuesta
                 </Button>
               </div>
             </div>
@@ -254,13 +251,14 @@ export function ReviewsList({
           {showFlagDialog === review.id && (
             <div className="mt-4 p-4 bg-feedback-danger-subtle/50 rounded-lg border border-red-200">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-red-600">Reportar reseña</span>
+                <span className="text-sm font-medium text-feedback-danger">Reportar reseña</span>
                 <button
                   onClick={() => {
                     setShowFlagDialog(null);
                     setFlagReason('');
                   }}
-                  className="text-red-400 hover:text-red-600"
+                  className="h-7 w-7 rounded-lg flex items-center justify-center text-text-subtle hover:bg-feedback-danger-subtle hover:text-feedback-danger transition-colors"
+                  aria-label="Cerrar"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -300,13 +298,9 @@ export function ReviewsList({
                   variant="destructive"
                   onClick={() => handleSubmitFlag(review.id)}
                   disabled={!flagReason}
+                  leftIcon={<Flag className="w-4 h-4" />}
                 >
-                  <span>
-                    <span className="flex items-center gap-2">
-                      <Flag className="w-4 h-4" />
-                      Reportar
-                    </span>
-                  </span>
+                  Reportar
                 </Button>
               </div>
             </div>
@@ -347,28 +341,20 @@ export function ReviewsList({
                   variant="secondary"
                   size="sm"
                   onClick={() => setRespondingTo(review.id)}
+                  leftIcon={<MessageSquare className="w-4 h-4" />}
                 >
-                  <span>
-                    <span className="flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4" />
-                      Responder
-                    </span>
-                  </span>
+                  Responder
                 </Button>
               )}
               {showFlagDialog !== review.id && (
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => setShowFlagDialog(review.id)}
-                  className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                  leftIcon={<Flag className="w-4 h-4 text-feedback-danger" />}
+                  className="text-feedback-danger hover:bg-feedback-danger-subtle"
                 >
-                  <span>
-                    <span className="flex items-center gap-2">
-                      <Flag className="w-4 h-4" />
-                      Reportar
-                    </span>
-                  </span>
+                  Reportar
                 </Button>
               )}
             </div>
