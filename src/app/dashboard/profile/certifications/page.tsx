@@ -127,13 +127,7 @@ function formatDate(iso: string | null): string {
 function resolveDocumentUrl(documentRef: string | null, explicitUrl: string | null): string | null {
   if (explicitUrl && /^https?:\/\//i.test(explicitUrl)) return explicitUrl;
   if (documentRef && /^https?:\/\//i.test(documentRef)) return documentRef;
-
-  const cdnBase = process.env.NEXT_PUBLIC_CDN_BASE_URL;
-  if (!cdnBase || !documentRef) return null;
-
-  const normalizedBase = cdnBase.endsWith('/') ? cdnBase.slice(0, -1) : cdnBase;
-  const normalizedRef = documentRef.startsWith('/') ? documentRef.slice(1) : documentRef;
-  return `${normalizedBase}/${normalizedRef}`;
+  return null;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -146,6 +140,7 @@ export default function CertificationsPage() {
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
   const [savingFor, setSavingFor] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [openingDoc, setOpeningDoc] = useState<string | null>(null);
 
   // Confirmación de reemplazo de documento verificado
   const [confirmReplace, setConfirmReplace] = useState<{
@@ -154,13 +149,34 @@ export default function CertificationsPage() {
     kind: 'cert' | 'doc';
   } | null>(null);
 
-  const handleOpenDocument = useCallback((documentRef: string | null, explicitUrl: string | null, download = false) => {
-    const actionUrl = resolveDocumentUrl(documentRef, explicitUrl);
+  const handleOpenDocument = useCallback(async (documentRef: string | null, explicitUrl: string | null, download = false) => {
+    setSaveError(null);
+    let actionUrl = resolveDocumentUrl(documentRef, explicitUrl);
 
+    // Ruta lenta: clave S3 privada → obtener URL prefirmada del servidor
     if (!actionUrl) {
-      setSaveError('No se pudo resolver la URL del documento. Contacta con soporte si el problema persiste.');
-      return;
+      if (!documentRef) {
+        setSaveError('No se encontró la referencia del documento.');
+        return;
+      }
+      setOpeningDoc(documentRef);
+      try {
+        const res = await fetch(`/api/document-download?key=${encodeURIComponent(documentRef)}`);
+        const data = await res.json();
+        if (!res.ok || !data.downloadUrl) {
+          setSaveError(data.message ?? 'No se pudo obtener la URL del documento.');
+          return;
+        }
+        actionUrl = data.downloadUrl;
+      } catch {
+        setSaveError('Error al intentar abrir el documento. Inténtalo de nuevo.');
+        return;
+      } finally {
+        setOpeningDoc(null);
+      }
     }
+
+    if (!actionUrl) return;
 
     if (download) {
       const link = document.createElement('a');
@@ -506,17 +522,27 @@ export default function CertificationsPage() {
                                 variant="ghost"
                                 size="icon-sm"
                                 aria-label="Ver documento"
+                                disabled={openingDoc === cert.documentRef}
                                 onClick={() => handleOpenDocument(cert.documentRef, cert.documentUrl, false)}
                               >
-                                <Eye className="w-4 h-4" />
+                                {openingDoc === cert.documentRef ? (
+                                  <span className="w-4 h-4 animate-spin inline-block border-2 border-current border-t-transparent rounded-full" />
+                                ) : (
+                                  <Eye className="w-4 h-4" />
+                                )}
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
                                 aria-label="Descargar documento"
+                                disabled={openingDoc === cert.documentRef}
                                 onClick={() => handleOpenDocument(cert.documentRef, cert.documentUrl, true)}
                               >
-                                <Download className="w-4 h-4" />
+                                {openingDoc === cert.documentRef ? (
+                                  <span className="w-4 h-4 animate-spin inline-block border-2 border-current border-t-transparent rounded-full" />
+                                ) : (
+                                  <Download className="w-4 h-4" />
+                                )}
                               </Button>
                               <Button
                                 variant="secondary"
@@ -653,17 +679,27 @@ export default function CertificationsPage() {
                                 variant="ghost"
                                 size="icon-sm"
                                 aria-label="Ver documento"
+                                disabled={openingDoc === doc.documentRef}
                                 onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, false)}
                               >
-                                <Eye className="w-4 h-4" />
+                                {openingDoc === doc.documentRef ? (
+                                  <span className="w-4 h-4 animate-spin inline-block border-2 border-current border-t-transparent rounded-full" />
+                                ) : (
+                                  <Eye className="w-4 h-4" />
+                                )}
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
                                 aria-label="Descargar documento"
+                                disabled={openingDoc === doc.documentRef}
                                 onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, true)}
                               >
-                                <Download className="w-4 h-4" />
+                                {openingDoc === doc.documentRef ? (
+                                  <span className="w-4 h-4 animate-spin inline-block border-2 border-current border-t-transparent rounded-full" />
+                                ) : (
+                                  <Download className="w-4 h-4" />
+                                )}
                               </Button>
                               <Button
                                 variant="secondary"
