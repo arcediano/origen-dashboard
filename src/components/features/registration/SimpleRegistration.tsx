@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-import { Button, Input } from '@arcediano/ux-library';
+import { Button, Input, Spinner, PasswordStrengthIndicator } from '@arcediano/ux-library';
 import { Textarea } from '@arcediano/ux-library';
 import {
   Select,
@@ -16,7 +16,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@arcediano/ux-library';
-import { LoadingSpinner } from '@/components/shared';
+import { Spinner } from '@arcediano/ux-library';
 
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
@@ -50,7 +50,6 @@ import { CustomCheckbox } from './components/CustomCheckbox';
 import { BusinessTypeSelector } from './components/BusinessTypeSelector';
 import { CategoryCard } from './components/CategoryCard';
 import { FormSection } from './components/FormSection';
-import { PasswordStrengthIndicator } from './components/PasswordStrengthIndicator';
 import { CheckCircle2 } from 'lucide-react';
 
 // Hooks
@@ -258,7 +257,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               <div className="p-8 flex flex-col items-center text-center gap-4">
                 <div className="relative w-16 h-16 flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full bg-origen-hoja/10 animate-ping" />
-                  <LoadingSpinner size="xl" variant="secondary" />
+                  <Spinner size="xl" variant="secondary" />
                 </div>
                 <div>
                   <p className="text-base font-bold text-origen-bosque">
@@ -486,18 +485,15 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   {...register('postalCode')}
                 />
                 <div>
-                  <label className="text-sm font-medium text-origen-bosque mb-2 inline-flex items-center gap-1">
-                    Provincia
-                    <span className="text-red-500">*</span>
-                  </label>
                   <input type="hidden" {...register('province')} />
                   <Select
                     value={formValues.province}
                     onValueChange={(value) => setValue('province', value, { shouldValidate: true })}
                     placeholder="Selecciona provincia"
+                    label="Provincia"
+                    required
                     error={shouldShowFieldError('province') ? errors.province?.message : undefined}
                     disabled={isProvinceAutoFilled}
-                    required
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -560,8 +556,8 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   error={shouldShowFieldError('whyOrigin') ? errors.whyOrigin?.message : undefined}
                   maxLength={300}
                   showCharCount
+                  resizable
                   {...register('whyOrigin')}
-                  className="min-h-[120px] md:min-h-[140px] resize-y"
                 />
                 {textareaValid && (
                   <div className="flex items-center gap-2 text-sm text-origen-hoja bg-origen-crema/50 p-3 rounded-lg border border-origen-hoja/30">
@@ -604,8 +600,9 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 type="submit"
                 size="lg"
                 variant="primary"
+                fullWidth
                 disabled={!isFormValid}
-                className="w-full md:w-auto md:min-w-[280px] text-white disabled:text-white/90"
+                className="md:w-auto md:min-w-[280px] disabled:text-white/90"
               >
                 {isFormValid ? (
                   <motion.span

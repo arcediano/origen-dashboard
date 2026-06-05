@@ -2,7 +2,7 @@
 'use client';
 
 import { Star, ShieldCheck } from 'lucide-react';
-import { MobileCardSlider } from '../mobile-card-slider';
+import { MobileScrollSlider as MobileCardSlider } from '@arcediano/ux-library';
 
 export function TestimonialsSection() {
   const testimonials = [

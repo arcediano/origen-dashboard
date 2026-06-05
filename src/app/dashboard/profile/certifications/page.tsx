@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library'
 import { Button, Badge } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
-import { ConfirmDialog } from '@arcediano/ux-library';
+import { ConfirmDialog, DateInput } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 import { loadOnboardingData, updateProducerDocument, updateProducerCertification } from '@/lib/api/onboarding';
 import { uploadFile } from '@/lib/api/media';
@@ -133,16 +133,16 @@ function resolveDocumentUrl(documentRef: string | null, explicitUrl: string | nu
 
 function getCardTone(status: DocStatus | null, expiresAt: string | null = null): string {
   if (status === 'EXPIRED' || status === 'REJECTED') {
-    return 'border-red-200 bg-red-50/60';
+    return 'border-feedback-danger/30 bg-feedback-danger-subtle';
   }
   if (status === 'VERIFIED' && isExpiringSoon(expiresAt)) {
-    return 'border-amber-200 bg-amber-50/60';
+    return 'border-amber-200 bg-feedback-warning-subtle';
   }
   if (status === 'VERIFIED') {
-    return 'border-green-200 bg-green-50/50';
+    return 'border-feedback-success/30 bg-feedback-success-subtle';
   }
   if (status === 'PENDING') {
-    return 'border-amber-200 bg-amber-50/40';
+    return 'border-amber-200 bg-feedback-warning-subtle';
   }
   return 'border-border-subtle bg-surface';
 }
@@ -570,15 +570,16 @@ export default function CertificationsPage() {
                   </div>
                   <div>
                     <div className="flex flex-wrap gap-2">
-                      {verifiedCerts + verifiedDocs > 0 && <Badge variant="success">✅ {verifiedCerts + verifiedDocs} verificados</Badge>}
-                      {pendingCount > 0 && <Badge variant="warning">⏳ {pendingCount} en revisión</Badge>}
-                      {rejectedCount > 0 && <Badge variant="danger">❌ {rejectedCount} rechazados</Badge>}
-                      {expiredCount > 0 && <Badge variant="danger">⚠️ {expiredCount} caducados</Badge>}
-                      {expiringSoonCount > 0 && <Badge variant="warning">🔔 {expiringSoonCount} próximos a caducar</Badge>}
+                      {verifiedCerts + verifiedDocs > 0 && <Badge variant="success"><CheckCircle className="w-3 h-3 mr-1" />{verifiedCerts + verifiedDocs} verificados</Badge>}
+                      {pendingCount > 0 && <Badge variant="warning"><Clock className="w-3 h-3 mr-1" />{pendingCount} en revisión</Badge>}
+                      {rejectedCount > 0 && <Badge variant="danger"><AlertCircle className="w-3 h-3 mr-1" />{rejectedCount} rechazados</Badge>}
+                      {expiredCount > 0 && <Badge variant="danger"><AlertTriangle className="w-3 h-3 mr-1" />{expiredCount} caducados</Badge>}
+                      {expiringSoonCount > 0 && <Badge variant="warning"><CalendarClock className="w-3 h-3 mr-1" />{expiringSoonCount} próximos a caducar</Badge>}
                     </div>
                   </div>
                   {overallProgress === 100 && expiredCount === 0 && rejectedCount === 0 && (
-                    <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                    <div className="rounded-xl border border-feedback-success/30 bg-feedback-success-subtle px-4 py-3 text-sm text-origen-hoja flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 shrink-0" />
                       Toda la documentación está en orden.
                     </div>
                   )}
@@ -659,7 +660,7 @@ export default function CertificationsPage() {
                                   fichero real — evita mostrar "Verificado" con "Subir documento" */}
                               <div role="status">{getStatusBadge(hasUploadedDocument ? doc.status : null, doc.expiresAt)}</div>
                               {doc.expiresAt && (
-                                <p className={`text-xs ${doc.status === 'EXPIRED' ? 'text-red-700' : isExpiringSoon(doc.expiresAt) ? 'text-amber-700' : 'text-muted-foreground'}`}>
+                                <p className={`text-xs ${doc.status === 'EXPIRED' ? 'text-feedback-danger-text' : isExpiringSoon(doc.expiresAt) ? 'text-amber-700' : 'text-muted-foreground'}`}>
                                   Caduca el {formatDate(doc.expiresAt)}
                                 </p>
                               )}
@@ -668,28 +669,28 @@ export default function CertificationsPage() {
                         </div>
                         <div className="flex-1 flex flex-col gap-3">
                           {hasUploadedDocument && doc.status === 'VERIFIED' && doc.verifiedAt && (
-                            <p className="text-xs text-green-700 flex items-center gap-1">
+                            <p className="text-xs text-origen-hoja flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
                               Verificado el {formatDate(doc.verifiedAt)}
                             </p>
                           )}
 
                           {doc.status === 'REJECTED' && (
-                            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+                            <div className="rounded-xl border border-feedback-danger/30 bg-feedback-danger-subtle px-3 py-2 text-xs text-feedback-danger-text flex items-start gap-2">
                               <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                               <span>{doc.rejectedReason ?? 'Documento rechazado. Sube una nueva versión.'}</span>
                             </div>
                           )}
 
                           {doc.status === 'EXPIRED' && (
-                            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+                            <div className="rounded-xl border border-feedback-danger/30 bg-feedback-danger-subtle px-3 py-2 text-xs text-feedback-danger-text flex items-start gap-2">
                               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                               <span>Este documento caducó el {formatDate(doc.expiresAt)}. Renuévalo para recuperar visibilidad.</span>
                             </div>
                           )}
 
                           {doc.status === 'PENDING' && (
-                            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 flex items-start gap-2">
+                            <div className="rounded-xl border border-amber-200 bg-feedback-warning-subtle px-3 py-2 text-xs text-amber-700 flex items-start gap-2">
                               <Clock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                               <span>Documento en revisión. Te avisaremos cuando esté verificado.</span>
                             </div>
@@ -720,16 +721,12 @@ export default function CertificationsPage() {
                           {showUploadZone && (
                             <div className="rounded-2xl border border-dashed border-origen-pradera/40 bg-origen-pradera/5 p-4 space-y-3">
                               <div>
-                                <label className="block text-sm font-medium text-origen-bosque mb-1" htmlFor={`expires-${doc.type}`}>
-                                  Fecha de caducidad del documento <span className="text-red-500">*</span>
-                                </label>
-                                <input
+                                <DateInput
                                   id={`expires-${doc.type}`}
-                                  type="date"
+                                  label="Fecha de caducidad del documento"
                                   min={today}
                                   value={expiresAtInputs[doc.type] ?? ''}
                                   onChange={(e) => setExpiresAtInputs((prev) => ({ ...prev, [doc.type]: e.target.value }))}
-                                  className="w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-origen-pradera"
                                   required
                                 />
                               </div>
@@ -819,7 +816,7 @@ export default function CertificationsPage() {
                                   fichero real — evita mostrar "Verificado" con "Subir certificado" */}
                               <div role="status">{getStatusBadge(hasUploadedDocument ? cert.status : null, cert.expiresAt)}</div>
                               {cert.expiresAt && (
-                                <p className={`text-xs ${cert.status === 'EXPIRED' ? 'text-red-700' : isExpiringSoon(cert.expiresAt) ? 'text-amber-700' : 'text-muted-foreground'}`}>
+                                <p className={`text-xs ${cert.status === 'EXPIRED' ? 'text-feedback-danger-text' : isExpiringSoon(cert.expiresAt) ? 'text-amber-700' : 'text-muted-foreground'}`}>
                                   Caduca el {formatDate(cert.expiresAt)}
                                 </p>
                               )}
@@ -829,28 +826,28 @@ export default function CertificationsPage() {
 
                         <div className="flex-1 flex flex-col gap-3">
                           {hasUploadedDocument && cert.status === 'VERIFIED' && cert.verifiedAt && (
-                            <p className="text-xs text-green-700 flex items-center gap-1">
+                            <p className="text-xs text-origen-hoja flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
                               Verificada el {formatDate(cert.verifiedAt)}
                             </p>
                           )}
 
                           {cert.status === 'REJECTED' && (
-                            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+                            <div className="rounded-xl border border-feedback-danger/30 bg-feedback-danger-subtle px-3 py-2 text-xs text-feedback-danger-text flex items-start gap-2">
                               <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                               <span>{cert.rejectedReason ?? 'Certificado rechazado. Por favor sube una nueva versión del documento.'}</span>
                             </div>
                           )}
 
                           {cert.status === 'EXPIRED' && (
-                            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+                            <div className="rounded-xl border border-feedback-danger/30 bg-feedback-danger-subtle px-3 py-2 text-xs text-feedback-danger-text flex items-start gap-2">
                               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                               <span>Este certificado caducó el {formatDate(cert.expiresAt)}. Renuévalo antes de volver a usarlo.</span>
                             </div>
                           )}
 
                           {cert.status === 'PENDING' && (
-                            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 flex items-start gap-2">
+                            <div className="rounded-xl border border-amber-200 bg-feedback-warning-subtle px-3 py-2 text-xs text-amber-700 flex items-start gap-2">
                               <Clock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                               <span>Tu certificado está siendo revisado. Te notificaremos cuando esté verificado.</span>
                             </div>
@@ -881,16 +878,13 @@ export default function CertificationsPage() {
                           {showUploadZone && (
                             <div className="rounded-2xl border border-dashed border-origen-pradera/40 bg-origen-pradera/5 p-4 space-y-3">
                               <div>
-                                <label className="block text-sm font-medium text-origen-bosque mb-1" htmlFor={`expires-cert-${cert.certificationId}`}>
-                                  Fecha de caducidad (opcional)
-                                </label>
-                                <input
+                                <DateInput
                                   id={`expires-cert-${cert.certificationId}`}
-                                  type="date"
+                                  label="Fecha de caducidad"
+                                  helperText="Opcional"
                                   min={today}
                                   value={expiresAtCertInputs[cert.certificationId] ?? ''}
                                   onChange={(e) => setExpiresAtCertInputs((prev) => ({ ...prev, [cert.certificationId]: e.target.value }))}
-                                  className="w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-origen-pradera"
                                 />
                               </div>
                               <FileUpload

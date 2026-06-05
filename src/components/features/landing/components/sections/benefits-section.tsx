@@ -2,7 +2,7 @@
 'use client';
 
 import { Users, Shield, Truck, Target, Package, Award, CheckCircle } from 'lucide-react';
-import { MobileCardSlider } from '../mobile-card-slider';
+import { MobileScrollSlider as MobileCardSlider } from '@arcediano/ux-library';
 
 export function BenefitsSection() {
   const benefits = [

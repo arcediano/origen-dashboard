@@ -9,7 +9,8 @@
  */
 
 import { SimpleRegistration } from '@/components/features/registration/SimpleRegistration';
-import { AuthFooter } from '@/components/features/auth/components/auth-footer';
+import { AuthFooter } from '@arcediano/ux-library';
+import Link from 'next/link';
 import { HeroSection } from '@/components/features/landing/components/sections/hero-section';
 import { BenefitsSection } from '@/components/features/landing/components/sections/benefits-section';
 import { ProcessSection } from '@/components/features/landing/components/sections/process-section';
@@ -60,7 +61,7 @@ export default function RegisterPage() {
       <FinalCTASection />
 
       {/* Footer compartido */}
-      <AuthFooter variant="register" showLegalNote />
+      <AuthFooter variant="register" showLegalNote linkComponent={Link} />
     </div>
   );
 }

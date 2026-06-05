@@ -3,7 +3,7 @@
 
 import { Button } from '@arcediano/ux-library';
 import { ArrowRight, CheckCircle, FileText, Users, Settings, Package } from 'lucide-react';
-import { MobileCardSlider } from '../mobile-card-slider';
+import { MobileScrollSlider as MobileCardSlider } from '@arcediano/ux-library';
 
 export function ProcessSection() {
   const steps = [
