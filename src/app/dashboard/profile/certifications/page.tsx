@@ -473,7 +473,6 @@ export default function CertificationsPage() {
           {/* Error global de carga */}
           {error && (
             <Alert variant="error">
-              <AlertCircle className="w-4 h-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -481,7 +480,6 @@ export default function CertificationsPage() {
           {/* Error al guardar */}
           {saveError && (
             <Alert variant="error">
-              <AlertCircle className="w-4 h-4" />
               <AlertDescription>{saveError}</AlertDescription>
             </Alert>
           )}
@@ -489,7 +487,6 @@ export default function CertificationsPage() {
           {/* Aviso global — documentos críticos */}
           {!loading && !error && expiredCount > 0 && (
             <Alert variant="error">
-              <AlertTriangle className="w-4 h-4" />
               <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <span>
                   <strong>⚠️ Tienes {expiredCount} documento{expiredCount > 1 ? 's' : ''} caducado{expiredCount > 1 ? 's' : ''}.</strong>{' '}
@@ -510,7 +507,6 @@ export default function CertificationsPage() {
 
           {!loading && !error && rejectedCount > 0 && (
             <Alert variant="error">
-              <AlertCircle className="w-4 h-4" />
               <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <span>
                   <strong>{rejectedCount} documento{rejectedCount > 1 ? 's' : ''} ha{rejectedCount > 1 ? 'n' : ''} sido rechazado{rejectedCount > 1 ? 's' : ''}.</strong>{' '}
@@ -531,7 +527,6 @@ export default function CertificationsPage() {
 
           {!loading && !error && expiringSoonCount > 0 && expiredCount === 0 && (
             <Alert variant="warning">
-              <CalendarClock className="w-4 h-4" />
               <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <span>
                   Tienes <strong>{expiringSoonCount} documento{expiringSoonCount > 1 ? 's' : ''}</strong> que caduca{expiringSoonCount === 1 ? '' : 'n'} en menos de {EXPIRING_SOON_DAYS} días. Renuévalos ahora para evitar interrupciones.
@@ -703,17 +698,19 @@ export default function CertificationsPage() {
                                 size="sm"
                                 aria-label={`Ver documento ${doc.label}`}
                                 disabled={openingDoc === doc.documentRef}
+                                leftIcon={<Eye className="w-4 h-4" />}
                                 onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, false)}
                               >
-                                <Eye className="w-4 h-4 mr-2" />Ver
+                                Ver
                               </Button>
                               <Button
                                 variant="secondary"
                                 size="sm"
                                 disabled={savingFor === doc.type}
+                                leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
                                 onClick={() => requestReplace(doc.type, doc.label, 'doc', doc.status)}
                               >
-                                <RefreshCw className="w-3.5 h-3.5 mr-2" />Reemplazar
+                                Reemplazar
                               </Button>
                             </div>
                           )}
@@ -755,9 +752,10 @@ export default function CertificationsPage() {
                                 variant="secondary"
                                 size="sm"
                                 disabled={savingFor === doc.type}
+                                leftIcon={<Upload className="w-3.5 h-3.5" />}
                                 onClick={() => setUploadingFor(doc.type)}
                               >
-                                <Upload className="w-3.5 h-3.5 mr-2" />Subir documento
+                                Subir documento
                               </Button>
                             </div>
                           )}
@@ -860,17 +858,19 @@ export default function CertificationsPage() {
                                 size="sm"
                                 aria-label={`Ver documento ${cert.name}`}
                                 disabled={openingDoc === cert.documentRef}
+                                leftIcon={<Eye className="w-4 h-4" />}
                                 onClick={() => handleOpenDocument(cert.documentRef, cert.documentUrl, false)}
                               >
-                                <Eye className="w-4 h-4 mr-2" />Ver
+                                Ver
                               </Button>
                               <Button
                                 variant="secondary"
                                 size="sm"
                                 disabled={savingFor === cert.certificationId}
+                                leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
                                 onClick={() => requestReplace(cert.certificationId, cert.name, 'cert', cert.status)}
                               >
-                                <RefreshCw className="w-3.5 h-3.5 mr-2" />Reemplazar
+                                Reemplazar
                               </Button>
                             </div>
                           )}
@@ -912,9 +912,10 @@ export default function CertificationsPage() {
                                 variant="secondary"
                                 size="sm"
                                 disabled={savingFor === cert.certificationId}
+                                leftIcon={<Upload className="w-3.5 h-3.5" />}
                                 onClick={() => setUploadingFor(cert.certificationId)}
                               >
-                                <Upload className="w-3.5 h-3.5 mr-2" />Subir certificado
+                                Subir certificado
                               </Button>
                             </div>
                           )}
