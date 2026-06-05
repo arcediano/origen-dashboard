@@ -320,9 +320,13 @@ export default function CertificationsPage() {
             s3CheckItems.map(async (item) => {
               try {
                 const r = await fetch(`/api/document-download?key=${encodeURIComponent(item.key)}`);
-                return { item, exists: r.ok };
+                // Solo se considera inexistente si el servidor devuelve explícitamente 404.
+                // Errores de auth (401), del servidor (5xx) o de red se tratan como
+                // "no podemos determinarlo" → mantenemos la referencia para no ocultar
+                // botones de documentos que sí existen.
+                return { item, exists: r.status !== 404 };
               } catch {
-                return { item, exists: true }; // en caso de error de red, asumir que existe
+                return { item, exists: true }; // error de red → asumir que existe
               }
             }),
           );
