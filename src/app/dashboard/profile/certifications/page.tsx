@@ -727,7 +727,7 @@ export default function CertificationsPage() {
                                 <span className="text-xs text-muted-foreground">
                                   {savingFor === doc.type ? 'Subiendo documento…' : 'Arrastra o haz clic para seleccionar'}
                                 </span>
-                                <Button variant="ghost" size="sm" onClick={() => setUploadingFor(null)}>
+                                <Button variant="outline" size="sm" onClick={() => setUploadingFor(null)}>
                                   Cancelar
                                 </Button>
                               </div>
@@ -887,7 +887,7 @@ export default function CertificationsPage() {
                                 <span className="text-xs text-muted-foreground">
                                   {savingFor === cert.certificationId ? 'Subiendo certificado…' : 'Arrastra o haz clic para seleccionar'}
                                 </span>
-                                <Button variant="ghost" size="sm" onClick={() => setUploadingFor(null)}>
+                                <Button variant="outline" size="sm" onClick={() => setUploadingFor(null)}>
                                   Cancelar
                                 </Button>
                               </div>
