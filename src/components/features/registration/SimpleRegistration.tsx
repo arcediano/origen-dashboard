@@ -16,7 +16,6 @@ import {
   SelectContent,
   SelectItem,
 } from '@arcediano/ux-library';
-import { Spinner } from '@arcediano/ux-library';
 
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
