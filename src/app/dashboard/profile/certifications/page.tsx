@@ -296,6 +296,63 @@ export default function CertificationsPage() {
         }
       }
 
+      // Verificar existencia en S3 de todas las referencias privadas en paralelo.
+      // Se hace antes del primer render para que los botones Ver/Descargar solo
+      // aparezcan si el fichero realmente existe en almacenamiento.
+      const s3CheckItems: Array<{ key: string; kind: 'cert'; certId: string } | { key: string; kind: 'doc'; type: DocType }> = [];
+
+      for (const cert of certs) {
+        if (cert.documentRef && isValidDocumentRef(cert.documentRef) && !/^https?:\/\//i.test(cert.documentRef)) {
+          s3CheckItems.push({ key: cert.documentRef, kind: 'cert', certId: cert.certificationId });
+        }
+      }
+      for (const [type, doc] of docMap.entries()) {
+        if (doc.documentRef && isValidDocumentRef(doc.documentRef) && !/^https?:\/\//i.test(doc.documentRef)) {
+          s3CheckItems.push({ key: doc.documentRef, kind: 'doc', type });
+        }
+      }
+
+      if (s3CheckItems.length > 0) {
+        const checkResults = await Promise.all(
+          s3CheckItems.map(async (item) => {
+            try {
+              const r = await fetch(`/api/document-download?key=${encodeURIComponent(item.key)}`);
+              return { item, exists: r.ok };
+            } catch {
+              return { item, exists: false };
+            }
+          }),
+        );
+
+        const missingCertIds = new Set<string>();
+        const missingDocTypes = new Set<DocType>();
+
+        for (const { item, exists } of checkResults) {
+          if (!exists) {
+            if (item.kind === 'cert') missingCertIds.add(item.certId);
+            else missingDocTypes.add(item.type);
+          }
+        }
+
+        if (missingCertIds.size > 0) {
+          for (const cert of certs) {
+            if (missingCertIds.has(cert.certificationId)) {
+              cert.documentRef = null;
+              cert.documentUrl = null;
+            }
+          }
+        }
+        if (missingDocTypes.size > 0) {
+          for (const type of missingDocTypes) {
+            const doc = docMap.get(type);
+            if (doc) {
+              doc.documentRef = null;
+              doc.documentUrl = null;
+            }
+          }
+        }
+      }
+
       setCertifications(certs);
       setLegalDocs(Array.from(docMap.values()));
     } catch {
