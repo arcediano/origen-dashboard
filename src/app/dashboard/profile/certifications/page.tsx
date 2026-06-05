@@ -185,7 +185,23 @@ export default function CertificationsPage() {
         const res = await fetch(`/api/document-download?key=${encodeURIComponent(documentRef)}`);
         const data = await res.json();
         if (!res.ok || !data.downloadUrl) {
-          setSaveError(data.message ?? 'No se pudo obtener la URL del documento.');
+          // El fichero ya no existe en S3 — limpiar la referencia del estado para
+          // que el UI muestre "Subir documento" en lugar de los botones Ver/Descargar.
+          if (res.status === 404) {
+            setSaveError('El documento ya no está disponible en el servidor. Por favor, súbelo de nuevo.');
+            setCertifications((prev) =>
+              prev.map((c) =>
+                c.documentRef === documentRef ? { ...c, documentRef: null, documentUrl: null } : c,
+              ),
+            );
+            setLegalDocs((prev) =>
+              prev.map((d) =>
+                d.documentRef === documentRef ? { ...d, documentRef: null, documentUrl: null } : d,
+              ),
+            );
+          } else {
+            setSaveError(data.message ?? 'No se pudo obtener la URL del documento.');
+          }
           return;
         }
         actionUrl = data.downloadUrl;
