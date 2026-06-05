@@ -345,6 +345,10 @@ export default function CertificationsPage() {
             if (missingCertIds.has(cert.certificationId)) {
               cert.documentRef = null;
               cert.documentUrl = null;
+              // El fichero no existe en S3: el estado de BD es inconsistente.
+              // Resetear al estado "sin documento" para que el UI sea coherente.
+              cert.status = null;
+              cert.verifiedAt = null;
             }
           }
           for (const type of missingDocTypes) {
@@ -352,6 +356,9 @@ export default function CertificationsPage() {
             if (doc) {
               doc.documentRef = null;
               doc.documentUrl = null;
+              // Ídem: limpiar estado de BD inconsistente.
+              doc.status = null;
+              doc.verifiedAt = null;
             }
           }
         }
