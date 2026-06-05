@@ -131,20 +131,8 @@ function resolveDocumentUrl(documentRef: string | null, explicitUrl: string | nu
   return null;
 }
 
-function getCardTone(status: DocStatus | null, expiresAt: string | null = null): string {
-  if (status === 'EXPIRED' || status === 'REJECTED') {
-    return 'border-feedback-danger/30 bg-feedback-danger-subtle';
-  }
-  if (status === 'VERIFIED' && isExpiringSoon(expiresAt)) {
-    return 'border-amber-200 bg-feedback-warning-subtle';
-  }
-  if (status === 'VERIFIED') {
-    return 'border-feedback-success/30 bg-feedback-success-subtle';
-  }
-  if (status === 'PENDING') {
-    return 'border-amber-200 bg-feedback-warning-subtle';
-  }
-  return 'border-border-subtle bg-surface';
+function getCardTone(): string {
+  return 'border-border-subtle bg-surface-alt';
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -638,7 +626,7 @@ export default function CertificationsPage() {
                       return (
                     <div
                       key={doc.type}
-                      className={`rounded-2xl border p-4 transition-all ${getCardTone(doc.status, doc.expiresAt)}`}
+                      className={`rounded-2xl border p-4 transition-all ${getCardTone()}`}
                     >
                       <div className="flex flex-col gap-4 h-full">
                         <div className="flex items-start gap-4">
@@ -704,7 +692,7 @@ export default function CertificationsPage() {
                                 Ver
                               </Button>
                               <Button
-                                variant="secondary"
+                                variant="outline"
                                 size="sm"
                                 disabled={savingFor === doc.type}
                                 leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
@@ -749,7 +737,7 @@ export default function CertificationsPage() {
                           {showUploadButton && (
                             <div className="mt-auto">
                               <Button
-                                variant="secondary"
+                                variant="outline"
                                 size="sm"
                                 disabled={savingFor === doc.type}
                                 leftIcon={<Upload className="w-3.5 h-3.5" />}
@@ -797,7 +785,7 @@ export default function CertificationsPage() {
                       return (
                     <div
                       key={cert.certificationId}
-                      className={`rounded-2xl border p-4 transition-all ${getCardTone(cert.status, cert.expiresAt)}`}
+                      className={`rounded-2xl border p-4 transition-all ${getCardTone()}`}
                     >
                       <div className="flex flex-col gap-4 h-full">
                         <div className="flex items-start gap-4">
@@ -864,7 +852,7 @@ export default function CertificationsPage() {
                                 Ver
                               </Button>
                               <Button
-                                variant="secondary"
+                                variant="outline"
                                 size="sm"
                                 disabled={savingFor === cert.certificationId}
                                 leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
@@ -909,7 +897,7 @@ export default function CertificationsPage() {
                           {showUploadButton && (
                             <div className="mt-auto">
                               <Button
-                                variant="secondary"
+                                variant="outline"
                                 size="sm"
                                 disabled={savingFor === cert.certificationId}
                                 leftIcon={<Upload className="w-3.5 h-3.5" />}
@@ -940,7 +928,6 @@ export default function CertificationsPage() {
           )}
 
           <Alert className="mt-6">
-            <Shield className="w-4 h-4" />
             <AlertDescription>
               Los documentos verificados aparecen con un sello de confianza en tu perfil público,
               lo que aumenta la credibilidad con los compradores.
