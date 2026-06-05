@@ -30,6 +30,7 @@ import {
   countDocumentStates,
   hasDocumentReference,
   isExpiringSoon,
+  isValidDocumentRef,
   shouldConfirmReplacement,
   daysUntilExpiry,
   EXPIRING_SOON_DAYS,
@@ -299,50 +300,49 @@ export default function CertificationsPage() {
       // Verificar existencia en S3 de todas las referencias privadas en paralelo.
       // Se hace antes del primer render para que los botones Ver/Descargar solo
       // aparezcan si el fichero realmente existe en almacenamiento.
-      const s3CheckItems: Array<{ key: string; kind: 'cert'; certId: string } | { key: string; kind: 'doc'; type: DocType }> = [];
+      // El bloque está aislado para que fallos de red no impidan cargar la página.
+      try {
+        const s3CheckItems: Array<{ key: string; kind: 'cert'; certId: string } | { key: string; kind: 'doc'; type: DocType }> = [];
 
-      for (const cert of certs) {
-        if (cert.documentRef && isValidDocumentRef(cert.documentRef) && !/^https?:\/\//i.test(cert.documentRef)) {
-          s3CheckItems.push({ key: cert.documentRef, kind: 'cert', certId: cert.certificationId });
+        for (const cert of certs) {
+          if (cert.documentRef && isValidDocumentRef(cert.documentRef) && !/^https?:\/\//i.test(cert.documentRef)) {
+            s3CheckItems.push({ key: cert.documentRef, kind: 'cert', certId: cert.certificationId });
+          }
         }
-      }
-      for (const [type, doc] of docMap.entries()) {
-        if (doc.documentRef && isValidDocumentRef(doc.documentRef) && !/^https?:\/\//i.test(doc.documentRef)) {
-          s3CheckItems.push({ key: doc.documentRef, kind: 'doc', type });
-        }
-      }
-
-      if (s3CheckItems.length > 0) {
-        const checkResults = await Promise.all(
-          s3CheckItems.map(async (item) => {
-            try {
-              const r = await fetch(`/api/document-download?key=${encodeURIComponent(item.key)}`);
-              return { item, exists: r.ok };
-            } catch {
-              return { item, exists: false };
-            }
-          }),
-        );
-
-        const missingCertIds = new Set<string>();
-        const missingDocTypes = new Set<DocType>();
-
-        for (const { item, exists } of checkResults) {
-          if (!exists) {
-            if (item.kind === 'cert') missingCertIds.add(item.certId);
-            else missingDocTypes.add(item.type);
+        for (const [type, doc] of docMap.entries()) {
+          if (doc.documentRef && isValidDocumentRef(doc.documentRef) && !/^https?:\/\//i.test(doc.documentRef)) {
+            s3CheckItems.push({ key: doc.documentRef, kind: 'doc', type });
           }
         }
 
-        if (missingCertIds.size > 0) {
+        if (s3CheckItems.length > 0) {
+          const checkResults = await Promise.all(
+            s3CheckItems.map(async (item) => {
+              try {
+                const r = await fetch(`/api/document-download?key=${encodeURIComponent(item.key)}`);
+                return { item, exists: r.ok };
+              } catch {
+                return { item, exists: true }; // en caso de error de red, asumir que existe
+              }
+            }),
+          );
+
+          const missingCertIds = new Set<string>();
+          const missingDocTypes = new Set<DocType>();
+
+          for (const { item, exists } of checkResults) {
+            if (!exists) {
+              if (item.kind === 'cert') missingCertIds.add(item.certId);
+              else missingDocTypes.add(item.type);
+            }
+          }
+
           for (const cert of certs) {
             if (missingCertIds.has(cert.certificationId)) {
               cert.documentRef = null;
               cert.documentUrl = null;
             }
           }
-        }
-        if (missingDocTypes.size > 0) {
           for (const type of missingDocTypes) {
             const doc = docMap.get(type);
             if (doc) {
@@ -351,6 +351,9 @@ export default function CertificationsPage() {
             }
           }
         }
+      } catch {
+        // Si la comprobación S3 falla completamente, se muestran los datos tal cual
+        // y el usuario descubrirá el estado real al intentar abrir el documento.
       }
 
       setCertifications(certs);
