@@ -54,9 +54,10 @@ const nextConfig = {
       __dirname,
       "../origen-UXLibrary/src/compat/dashboard/atoms",
     );
-    // En monorepo local apunta al fuente vivo; en CI usa el paquete npm instalado.
+    // En monorepo local apunta al fuente vivo; en CI/Vercel usa el paquete npm instalado.
+    const isCI = process.env.VERCEL === "1" || process.env.CI === "true";
     const uxLibLocal = path.join(__dirname, "../origen-UXLibrary/src/index.ts");
-    if (fs.existsSync(uxLibLocal)) {
+    if (!isCI && fs.existsSync(uxLibLocal)) {
       config.resolve.alias["@arcediano/ux-library"] = uxLibLocal;
     }
     return config;
