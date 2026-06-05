@@ -9,7 +9,6 @@ import {
   CheckCircle,
   Clock,
   Upload,
-  Download,
   Eye,
   AlertCircle,
   AlertTriangle,
@@ -656,7 +655,9 @@ export default function CertificationsPage() {
                                 <h3 className="font-semibold text-origen-bosque">{doc.label}</h3>
                                 <p className="text-sm text-muted-foreground">{doc.description}</p>
                               </div>
-                              <div role="status">{getStatusBadge(doc.status, doc.expiresAt)}</div>
+                              {/* El badge y la fecha de verificación solo se muestran si hay
+                                  fichero real — evita mostrar "Verificado" con "Subir documento" */}
+                              <div role="status">{getStatusBadge(hasUploadedDocument ? doc.status : null, doc.expiresAt)}</div>
                               {doc.expiresAt && (
                                 <p className={`text-xs ${doc.status === 'EXPIRED' ? 'text-red-700' : isExpiringSoon(doc.expiresAt) ? 'text-amber-700' : 'text-muted-foreground'}`}>
                                   Caduca el {formatDate(doc.expiresAt)}
@@ -666,7 +667,7 @@ export default function CertificationsPage() {
                           </div>
                         </div>
                         <div className="flex-1 flex flex-col gap-3">
-                          {doc.status === 'VERIFIED' && doc.verifiedAt && (
+                          {hasUploadedDocument && doc.status === 'VERIFIED' && doc.verifiedAt && (
                             <p className="text-xs text-green-700 flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
                               Verificado el {formatDate(doc.verifiedAt)}
@@ -704,15 +705,6 @@ export default function CertificationsPage() {
                                 onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, false)}
                               >
                                 <Eye className="w-4 h-4 mr-2" />Ver
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                aria-label={`Descargar documento ${doc.label}`}
-                                disabled={openingDoc === doc.documentRef}
-                                onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, true)}
-                              >
-                                <Download className="w-4 h-4 mr-2" />Descargar
                               </Button>
                               <Button
                                 variant="secondary"
@@ -823,7 +815,9 @@ export default function CertificationsPage() {
                                 <h3 className="font-semibold text-origen-bosque">{cert.name}</h3>
                                 <p className="text-sm text-muted-foreground">{cert.issuingBody}</p>
                               </div>
-                              <div role="status">{getStatusBadge(cert.status, cert.expiresAt)}</div>
+                              {/* El badge y la fecha de verificación solo se muestran si hay
+                                  fichero real — evita mostrar "Verificado" con "Subir certificado" */}
+                              <div role="status">{getStatusBadge(hasUploadedDocument ? cert.status : null, cert.expiresAt)}</div>
                               {cert.expiresAt && (
                                 <p className={`text-xs ${cert.status === 'EXPIRED' ? 'text-red-700' : isExpiringSoon(cert.expiresAt) ? 'text-amber-700' : 'text-muted-foreground'}`}>
                                   Caduca el {formatDate(cert.expiresAt)}
@@ -834,7 +828,7 @@ export default function CertificationsPage() {
                         </div>
 
                         <div className="flex-1 flex flex-col gap-3">
-                          {cert.status === 'VERIFIED' && cert.verifiedAt && (
+                          {hasUploadedDocument && cert.status === 'VERIFIED' && cert.verifiedAt && (
                             <p className="text-xs text-green-700 flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
                               Verificada el {formatDate(cert.verifiedAt)}
@@ -872,15 +866,6 @@ export default function CertificationsPage() {
                                 onClick={() => handleOpenDocument(cert.documentRef, cert.documentUrl, false)}
                               >
                                 <Eye className="w-4 h-4 mr-2" />Ver
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                aria-label={`Descargar documento ${cert.name}`}
-                                disabled={openingDoc === cert.documentRef}
-                                onClick={() => handleOpenDocument(cert.documentRef, cert.documentUrl, true)}
-                              >
-                                <Download className="w-4 h-4 mr-2" />Descargar
                               </Button>
                               <Button
                                 variant="secondary"
