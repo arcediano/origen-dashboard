@@ -48,6 +48,11 @@ export interface EnhancedStep5DocumentsData {
   seguroRC?: UploadedFile;
   manipuladorAlimentos?: UploadedFile;
   
+  // Fechas de caducidad para documentos legales
+  cifExpiresAt?: string;
+  seguroRcExpiresAt?: string;
+  manipuladorAlimentosExpiresAt?: string;
+
   // Certificaciones seleccionadas en paso 2
   certifications: CertificationDocument[];
   
@@ -235,8 +240,27 @@ export function EnhancedStep5Documents({
                 </Button>
               </div>
             ) : (
-              <FileUpload value={[]} onChange={(files) => handleDocumentUpload('cif', files)}
-                helperText="PDF, JPG o PNG · Máx. 5 MB" accept=".pdf,.jpg,.jpeg,.png" multiple={false} maxSize={5} />
+              <>
+                <div className="mb-3">
+                  <label
+                    htmlFor="cifExpiresAt"
+                    className="block text-sm font-medium text-origen-bosque mb-1"
+                  >
+                    Fecha de caducidad <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="cifExpiresAt"
+                    type="date"
+                    min={new Date().toISOString().split('T')[0]}
+                    value={data.cifExpiresAt ?? ''}
+                    onChange={(e) => handleInputChange('cifExpiresAt', e.target.value || undefined)}
+                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-origen-pradera"
+                    required
+                  />
+                </div>
+                <FileUpload value={[]} onChange={(files) => handleDocumentUpload('cif', files)}
+                  helperText="PDF, JPG o PNG · Máx. 5 MB" accept=".pdf,.jpg,.jpeg,.png" multiple={false} maxSize={5} />
+              </>
             )}
           </div>
 
@@ -273,8 +297,27 @@ export function EnhancedStep5Documents({
                 </Button>
               </div>
             ) : (
-              <FileUpload value={[]} onChange={(files) => handleDocumentUpload('seguroRC', files)}
-                helperText="PDF, JPG o PNG · Máx. 5 MB" accept=".pdf,.jpg,.jpeg,.png" multiple={false} maxSize={5} />
+              <>
+                <div className="mb-3">
+                  <label
+                    htmlFor="seguroRcExpiresAt"
+                    className="block text-sm font-medium text-origen-bosque mb-1"
+                  >
+                    Fecha de caducidad <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="seguroRcExpiresAt"
+                    type="date"
+                    min={new Date().toISOString().split('T')[0]}
+                    value={data.seguroRcExpiresAt ?? ''}
+                    onChange={(e) => handleInputChange('seguroRcExpiresAt', e.target.value || undefined)}
+                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-origen-pradera"
+                    required
+                  />
+                </div>
+                <FileUpload value={[]} onChange={(files) => handleDocumentUpload('seguroRC', files)}
+                  helperText="PDF, JPG o PNG · Máx. 5 MB" accept=".pdf,.jpg,.jpeg,.png" multiple={false} maxSize={5} />
+              </>
             )}
           </div>
 
@@ -311,8 +354,27 @@ export function EnhancedStep5Documents({
                 </Button>
               </div>
             ) : (
-              <FileUpload value={[]} onChange={(files) => handleDocumentUpload('manipuladorAlimentos', files)}
-                helperText="PDF, JPG o PNG · Máx. 5 MB" accept=".pdf,.jpg,.jpeg,.png" multiple={false} maxSize={5} />
+              <>
+                <div className="mb-3">
+                  <label
+                    htmlFor="manipuladorAlimentosExpiresAt"
+                    className="block text-sm font-medium text-origen-bosque mb-1"
+                  >
+                    Fecha de caducidad <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="manipuladorAlimentosExpiresAt"
+                    type="date"
+                    min={new Date().toISOString().split('T')[0]}
+                    value={data.manipuladorAlimentosExpiresAt ?? ''}
+                    onChange={(e) => handleInputChange('manipuladorAlimentosExpiresAt', e.target.value || undefined)}
+                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-origen-pradera"
+                    required
+                  />
+                </div>
+                <FileUpload value={[]} onChange={(files) => handleDocumentUpload('manipuladorAlimentos', files)}
+                  helperText="PDF, JPG o PNG · Máx. 5 MB" accept=".pdf,.jpg,.jpeg,.png" multiple={false} maxSize={5} />
+              </>
             )}
           </div>
         </div>

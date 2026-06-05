@@ -214,13 +214,16 @@ export async function saveStep5(
     cifKey?: string;
     seguroRcKey?: string;
     manipuladorAlimentosKey?: string;
-    certificationDocumentKeys: Array<{ certificationId: string; documentKey: string }>;
+    certificationDocumentKeys: Array<{ certificationId: string; documentKey: string; expiresAt?: string }>;
   },
 ): Promise<StepSaveResponse> {
   return gatewayClient.post('/producers/onboarding/step/5', {
     cifKey: keys.cifKey,
+    cifExpiresAt: data.cifExpiresAt,
     seguroRcKey: keys.seguroRcKey,
+    seguroRcExpiresAt: data.seguroRcExpiresAt,
     manipuladorAlimentosKey: keys.manipuladorAlimentosKey,
+    manipuladorAlimentosExpiresAt: data.manipuladorAlimentosExpiresAt,
     certificationDocuments: keys.certificationDocumentKeys,
   });
 }
@@ -296,4 +299,36 @@ export async function loadOnboardingData(): Promise<OnboardingDataResponse> {
 
 export async function loadProducerProfile(): Promise<OnboardingDataResponse> {
   return gatewayClient.get('/producers/profile');
+}
+
+// ─── Gestión de documentos post-onboarding ─────────────────────────────────────
+
+/**
+ * Reemplaza o sube un documento legal desde el dashboard post-onboarding.
+ * Usa el nuevo endpoint PATCH /producers/me/documents/:type (Sprint 2 backend).
+ */
+export async function updateProducerDocument(
+  type: 'CIF' | 'SEGURO_RC' | 'MANIPULADOR_ALIMENTOS',
+  documentKey: string,
+  expiresAt?: string,
+): Promise<{ success: boolean }> {
+  return gatewayClient.patch(`/producers/me/documents/${type}`, {
+    documentKey,
+    expiresAt: expiresAt ?? null,
+  });
+}
+
+/**
+ * Reemplaza el documento de una certificación desde el dashboard post-onboarding.
+ * Usa el nuevo endpoint PATCH /producers/me/certifications/:certificationId (Sprint 2 backend).
+ */
+export async function updateProducerCertification(
+  certificationId: string,
+  documentKey: string,
+  expiresAt?: string,
+): Promise<{ success: boolean }> {
+  return gatewayClient.patch(`/producers/me/certifications/${certificationId}`, {
+    documentKey,
+    expiresAt: expiresAt ?? null,
+  });
 }

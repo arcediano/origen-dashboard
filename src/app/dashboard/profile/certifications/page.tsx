@@ -23,7 +23,7 @@ import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
 import { ConfirmDialog } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
-import { loadOnboardingData, saveCertificationDocuments } from '@/lib/api/onboarding';
+import { loadOnboardingData, updateProducerDocument, updateProducerCertification } from '@/lib/api/onboarding';
 import { uploadFile } from '@/lib/api/media';
 import { 
   type DocStatus,
@@ -31,6 +31,7 @@ import {
   hasDocumentReference,
   isExpiringSoon,
   shouldConfirmReplacement,
+  daysUntilExpiry,
   EXPIRING_SOON_DAYS,
 } from './certification-utils';
 
@@ -130,6 +131,22 @@ function resolveDocumentUrl(documentRef: string | null, explicitUrl: string | nu
   return null;
 }
 
+function getCardTone(status: DocStatus | null, expiresAt: string | null = null): string {
+  if (status === 'EXPIRED' || status === 'REJECTED') {
+    return 'border-red-200 bg-red-50/60';
+  }
+  if (status === 'VERIFIED' && isExpiringSoon(expiresAt)) {
+    return 'border-amber-200 bg-amber-50/60';
+  }
+  if (status === 'VERIFIED') {
+    return 'border-green-200 bg-green-50/50';
+  }
+  if (status === 'PENDING') {
+    return 'border-amber-200 bg-amber-50/40';
+  }
+  return 'border-border-subtle bg-surface';
+}
+
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function CertificationsPage() {
@@ -141,6 +158,10 @@ export default function CertificationsPage() {
   const [savingFor, setSavingFor] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [openingDoc, setOpeningDoc] = useState<string | null>(null);
+
+  // Fechas de caducidad para nuevos uploads
+  const [expiresAtInputs, setExpiresAtInputs] = useState<Partial<Record<DocType, string>>>({});
+  const [expiresAtCertInputs, setExpiresAtCertInputs] = useState<Record<string, string>>({});
 
   // Confirmación de reemplazo de documento verificado
   const [confirmReplace, setConfirmReplace] = useState<{
@@ -283,11 +304,12 @@ export default function CertificationsPage() {
     setUploadingFor(null);
     try {
       const { key } = await uploadFile(nativeFile, DOC_META[type].category);
-      await saveCertificationDocuments({
-        ...(type === 'CIF' && { cifKey: key }),
-        ...(type === 'SEGURO_RC' && { seguroRcKey: key }),
-        ...(type === 'MANIPULADOR_ALIMENTOS' && { manipuladorAlimentosKey: key }),
-        certificationDocuments: [],
+      await updateProducerDocument(type, key, expiresAtInputs[type] ?? undefined);
+      // Limpiar la fecha de caducidad después de subir
+      setExpiresAtInputs((prev) => {
+        const next = { ...prev };
+        delete next[type];
+        return next;
       });
       await fetchData();
     } catch (err) {
@@ -308,8 +330,16 @@ export default function CertificationsPage() {
     setUploadingFor(null);
     try {
       const { key } = await uploadFile(nativeFile, `documents/certifications/${certificationId}`);
-      await saveCertificationDocuments({
-        certificationDocuments: [{ certificationId, documentKey: key }],
+      await updateProducerCertification(
+        certificationId,
+        key,
+        expiresAtCertInputs[certificationId] ?? undefined,
+      );
+      // Limpiar la fecha de caducidad después de subir
+      setExpiresAtCertInputs((prev) => {
+        const next = { ...prev };
+        delete next[certificationId];
+        return next;
       });
       await fetchData();
     } catch (err) {
@@ -332,6 +362,16 @@ export default function CertificationsPage() {
   const overallProgress = totalItems > 0
     ? Math.round(((verifiedCerts + verifiedDocs) / totalItems) * 100)
     : 0;
+  const today = new Date().toISOString().split('T')[0];
+  const firstExpiredTarget = legalDocs.find((doc) => doc.status === 'EXPIRED')?.type
+    ?? certifications.find((cert) => cert.status === 'EXPIRED')?.certificationId
+    ?? null;
+  const firstRejectedTarget = legalDocs.find((doc) => doc.status === 'REJECTED')?.type
+    ?? certifications.find((cert) => cert.status === 'REJECTED')?.certificationId
+    ?? null;
+  const firstExpiringTarget = legalDocs.find((doc) => doc.status === 'VERIFIED' && isExpiringSoon(doc.expiresAt))?.type
+    ?? certifications.find((cert) => cert.status === 'VERIFIED' && isExpiringSoon(cert.expiresAt))?.certificationId
+    ?? null;
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -360,24 +400,65 @@ export default function CertificationsPage() {
             </Alert>
           )}
 
-          {/* Aviso global — documentos caducados */}
+          {/* Aviso global — documentos críticos */}
           {!loading && !error && expiredCount > 0 && (
             <Alert variant="error">
               <AlertTriangle className="w-4 h-4" />
-              <AlertDescription>
-                <strong>{expiredCount} documento{expiredCount > 1 ? 's' : ''} caducado{expiredCount > 1 ? 's' : ''}.</strong>{' '}
-                Tus productos no serán visibles hasta que renueves la documentación y sea verificada.
+              <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <span>
+                  <strong>⚠️ Tienes {expiredCount} documento{expiredCount > 1 ? 's' : ''} caducado{expiredCount > 1 ? 's' : ''}.</strong>{' '}
+                  Tu perfil y productos están ocultos en la plataforma hasta que renueves y sean verificados.
+                </span>
+                {firstExpiredTarget && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setUploadingFor(firstExpiredTarget)}
+                  >
+                    Ir al documento
+                  </Button>
+                )}
               </AlertDescription>
             </Alert>
           )}
 
-          {/* Aviso global — próximos a caducar */}
+          {!loading && !error && rejectedCount > 0 && (
+            <Alert variant="error">
+              <AlertCircle className="w-4 h-4" />
+              <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <span>
+                  <strong>{rejectedCount} documento{rejectedCount > 1 ? 's' : ''} ha{rejectedCount > 1 ? 'n' : ''} sido rechazado{rejectedCount > 1 ? 's' : ''}.</strong>{' '}
+                  Revisa el motivo y sube el documento correcto.
+                </span>
+                {firstRejectedTarget && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setUploadingFor(firstRejectedTarget)}
+                  >
+                    Revisar
+                  </Button>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {!loading && !error && expiringSoonCount > 0 && expiredCount === 0 && (
             <Alert variant="warning">
               <CalendarClock className="w-4 h-4" />
-              <AlertDescription>
-                <strong>{expiringSoonCount} documento{expiringSoonCount > 1 ? 's' : ''}</strong> caduca{expiringSoonCount === 1 ? '' : 'n'} en menos de {EXPIRING_SOON_DAYS} días.
-                Renuévalos con antelación para evitar interrupciones.
+              <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <span>
+                  Tienes <strong>{expiringSoonCount} documento{expiringSoonCount > 1 ? 's' : ''}</strong> que caduca{expiringSoonCount === 1 ? '' : 'n'} en menos de {EXPIRING_SOON_DAYS} días. Renuévalos ahora para evitar interrupciones.
+                </span>
+                {firstExpiringTarget && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setUploadingFor(firstExpiringTarget)}
+                  >
+                    Renovar ahora
+                  </Button>
+                )}
               </AlertDescription>
             </Alert>
           )}
@@ -386,19 +467,35 @@ export default function CertificationsPage() {
           {!loading && !error && (
             <Card className="border-origen-pradera/20">
               <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="font-semibold text-origen-bosque">Estado de verificación</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {verifiedCerts + verifiedDocs} de {totalItems} elementos verificados
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-full sm:w-48">
-                      <Progress value={overallProgress} className="h-2.5" />
+                <div className="flex flex-col gap-5">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="font-semibold text-origen-bosque">Estado de verificación</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {verifiedCerts + verifiedDocs} de {totalItems} elementos verificados
+                      </p>
                     </div>
-                    <span className="text-lg font-bold text-origen-pradera">{overallProgress}%</span>
+                    <div className="flex items-center gap-4">
+                      <div className="w-full sm:w-48">
+                        <Progress value={overallProgress} className="h-2.5" />
+                      </div>
+                      <span className="text-lg font-bold text-origen-pradera">{overallProgress}%</span>
+                    </div>
                   </div>
+                  <div>
+                    <div className="flex flex-wrap gap-2">
+                      {verifiedCerts + verifiedDocs > 0 && <Badge variant="success">✅ {verifiedCerts + verifiedDocs} verificados</Badge>}
+                      {pendingCount > 0 && <Badge variant="warning">⏳ {pendingCount} en revisión</Badge>}
+                      {rejectedCount > 0 && <Badge variant="danger">❌ {rejectedCount} rechazados</Badge>}
+                      {expiredCount > 0 && <Badge variant="danger">⚠️ {expiredCount} caducados</Badge>}
+                      {expiringSoonCount > 0 && <Badge variant="warning">🔔 {expiringSoonCount} próximos a caducar</Badge>}
+                    </div>
+                  </div>
+                  {overallProgress === 100 && expiredCount === 0 && rejectedCount === 0 && (
+                    <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                      Toda la documentación está en orden.
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -437,152 +534,154 @@ export default function CertificationsPage() {
             </Card>
           )}
 
-          {/* Certificaciones */}
-          {!loading && !error && certifications.length > 0 && (
+          {/* Documentación legal obligatoria */}
+          {!loading && !error && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Award className="w-5 h-5 text-origen-pradera" />
-                  Certificaciones
+                  <Shield className="w-5 h-5 text-origen-pradera" />
+                  Documentación legal obligatoria
                 </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Estos 3 documentos son necesarios para operar en la plataforma.
+                </p>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {certifications.map((cert) => (
+                <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+                  {legalDocs.map((doc) => (
                     (() => {
-                      const hasUploadedDocument = hasDocumentReference(cert.documentRef, cert.documentUrl);
-                      const showUploadZone = uploadingFor === cert.certificationId;
+                      const hasUploadedDocument = hasDocumentReference(doc.documentRef, doc.documentUrl);
+                      const showUploadZone = uploadingFor === doc.type;
                       const showUploadButton = !hasUploadedDocument && !showUploadZone;
                       return (
                     <div
-                      key={cert.certificationId}
-                      className="border border-border rounded-xl p-4 hover:border-origen-pradera transition-all"
+                      key={doc.type}
+                      className={`rounded-2xl border p-4 transition-all ${getCardTone(doc.status, doc.expiresAt)}`}
                     >
-                      <div className="flex flex-col md:flex-row md:items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-                          <Award className="w-6 h-6 text-origen-pradera" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                            <div>
-                              <h3 className="font-semibold text-origen-bosque">{cert.name}</h3>
-                              <p className="text-sm text-muted-foreground">{cert.issuingBody}</p>
-                            </div>
-                            {getStatusBadge(cert.status, cert.expiresAt)}
+                      <div className="flex flex-col gap-4 h-full">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                            <FileBadge className="w-6 h-6 text-origen-pradera" />
                           </div>
-
-                          {cert.status === 'VERIFIED' && cert.verifiedAt && (
-                            <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col gap-2">
+                              <div>
+                                <h3 className="font-semibold text-origen-bosque">{doc.label}</h3>
+                                <p className="text-sm text-muted-foreground">{doc.description}</p>
+                              </div>
+                              <div role="status">{getStatusBadge(doc.status, doc.expiresAt)}</div>
+                              {doc.expiresAt && (
+                                <p className={`text-xs ${doc.status === 'EXPIRED' ? 'text-red-700' : isExpiringSoon(doc.expiresAt) ? 'text-amber-700' : 'text-muted-foreground'}`}>
+                                  Caduca el {formatDate(doc.expiresAt)}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex-1 flex flex-col gap-3">
+                          {doc.status === 'VERIFIED' && doc.verifiedAt && (
+                            <p className="text-xs text-green-700 flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
-                              Verificada el {formatDate(cert.verifiedAt)}{cert.expiresAt && !isExpiringSoon(cert.expiresAt) && (<> · Válida hasta {formatDate(cert.expiresAt)}</>)}
+                              Verificado el {formatDate(doc.verifiedAt)}
                             </p>
                           )}
 
-                          {cert.status === 'VERIFIED' && isExpiringSoon(cert.expiresAt) && (
-                            <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                              <p className="text-xs text-amber-700 flex items-center gap-2">
-                                <CalendarClock className="w-3.5 h-3.5" />
-                                Este certificado caduca el {formatDate(cert.expiresAt)}. Renuévalo antes de esa fecha.
-                              </p>
+                          {doc.status === 'REJECTED' && (
+                            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+                              <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                              <span>{doc.rejectedReason ?? 'Documento rechazado. Sube una nueva versión.'}</span>
                             </div>
                           )}
 
-                          {cert.status === 'EXPIRED' && (
-                            <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
-                              <p className="text-xs text-red-700 flex items-center gap-2">
-                                <AlertTriangle className="w-3.5 h-3.5" />
-                                Este certificado caducó el {formatDate(cert.expiresAt)}. Tus productos no serán visibles hasta que lo renueves y sea verificado.
-                              </p>
+                          {doc.status === 'EXPIRED' && (
+                            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+                              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                              <span>Este documento caducó el {formatDate(doc.expiresAt)}. Renuévalo para recuperar visibilidad.</span>
                             </div>
                           )}
 
-                          {cert.status === 'PENDING' && (
-                            <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                              <p className="text-xs text-amber-700 flex items-center gap-2">
-                                <Clock className="w-3.5 h-3.5" />
-                                Tu certificado está siendo revisado. Te notificaremos cuando esté verificado.
-                              </p>
-                            </div>
-                          )}
-
-                          {cert.status === 'REJECTED' && (
-                            <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
-                              <p className="text-xs text-red-700 flex items-center gap-2">
-                                <AlertCircle className="w-3.5 h-3.5" />
-                                {cert.rejectedReason ?? 'Certificado rechazado. Por favor sube una nueva versión del documento.'}
-                              </p>
+                          {doc.status === 'PENDING' && (
+                            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 flex items-start gap-2">
+                              <Clock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                              <span>Documento en revisión. Te avisaremos cuando esté verificado.</span>
                             </div>
                           )}
 
                           {hasUploadedDocument && !showUploadZone && (
-                            <div className="mt-3 flex flex-wrap items-center gap-2 p-2 bg-surface rounded-lg">
-                              <FileBadge className="w-4 h-4 text-text-subtle" />
-                              <span className="text-sm text-muted-foreground flex-1">Documento subido</span>
+                            <div className="mt-auto flex flex-wrap gap-2">
                               <Button
                                 variant="ghost"
-                                size="icon-sm"
-                                aria-label="Ver documento"
-                                disabled={openingDoc === cert.documentRef}
-                                onClick={() => handleOpenDocument(cert.documentRef, cert.documentUrl, false)}
+                                size="sm"
+                                aria-label={`Ver documento ${doc.label}`}
+                                disabled={openingDoc === doc.documentRef}
+                                onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, false)}
                               >
-                                {openingDoc === cert.documentRef ? (
-                                  <span className="w-4 h-4 animate-spin inline-block border-2 border-current border-t-transparent rounded-full" />
-                                ) : (
-                                  <Eye className="w-4 h-4" />
-                                )}
+                                <Eye className="w-4 h-4 mr-2" />Ver
                               </Button>
                               <Button
                                 variant="ghost"
-                                size="icon-sm"
-                                aria-label="Descargar documento"
-                                disabled={openingDoc === cert.documentRef}
-                                onClick={() => handleOpenDocument(cert.documentRef, cert.documentUrl, true)}
+                                size="sm"
+                                aria-label={`Descargar documento ${doc.label}`}
+                                disabled={openingDoc === doc.documentRef}
+                                onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, true)}
                               >
-                                {openingDoc === cert.documentRef ? (
-                                  <span className="w-4 h-4 animate-spin inline-block border-2 border-current border-t-transparent rounded-full" />
-                                ) : (
-                                  <Download className="w-4 h-4" />
-                                )}
+                                <Download className="w-4 h-4 mr-2" />Descargar
                               </Button>
                               <Button
                                 variant="secondary"
                                 size="sm"
-                                disabled={savingFor === cert.certificationId}
-                                onClick={() => requestReplace(cert.certificationId, cert.name, 'cert', cert.status)}
+                                disabled={savingFor === doc.type}
+                                onClick={() => requestReplace(doc.type, doc.label, 'doc', doc.status)}
                               >
-                                <span className="flex items-center gap-2">
-                                  <RefreshCw className="w-3.5 h-3.5" />
-                                  {savingFor === cert.certificationId ? 'Guardando…' : 'Reemplazar'}
-                                </span>
+                                <RefreshCw className="w-3.5 h-3.5 mr-2" />Reemplazar
                               </Button>
                             </div>
                           )}
 
                           {showUploadZone && (
-                            <div className="mt-3">
+                            <div className="rounded-2xl border border-dashed border-origen-pradera/40 bg-origen-pradera/5 p-4 space-y-3">
+                              <div>
+                                <label className="block text-sm font-medium text-origen-bosque mb-1" htmlFor={`expires-${doc.type}`}>
+                                  Fecha de caducidad del documento <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                  id={`expires-${doc.type}`}
+                                  type="date"
+                                  min={today}
+                                  value={expiresAtInputs[doc.type] ?? ''}
+                                  onChange={(e) => setExpiresAtInputs((prev) => ({ ...prev, [doc.type]: e.target.value }))}
+                                  className="w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-origen-pradera"
+                                  required
+                                />
+                              </div>
                               <FileUpload
                                 value={[]}
-                                onChange={(files) => handleCertUpload(cert.certificationId, files)}
-                                helperText="Sube el certificado en PDF, JPG o PNG (máx 5MB)"
+                                onChange={(files) => handleLegalDocUpload(doc.type, files)}
+                                helperText="Arrastra o haz clic para seleccionar. PDF, JPG o PNG · Máx 5MB"
                                 accept=".pdf,.jpg,.jpeg,.png"
                                 multiple={false}
                                 maxSize={5}
                               />
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="text-xs text-muted-foreground">
+                                  {savingFor === doc.type ? 'Subiendo documento…' : 'Arrastra o haz clic para seleccionar'}
+                                </span>
+                                <Button variant="ghost" size="sm" onClick={() => setUploadingFor(null)}>
+                                  Cancelar
+                                </Button>
+                              </div>
                             </div>
                           )}
 
                           {showUploadButton && (
-                            <div className="mt-3">
+                            <div className="mt-auto">
                               <Button
                                 variant="secondary"
                                 size="sm"
-                                disabled={savingFor === cert.certificationId}
-                                onClick={() => setUploadingFor(cert.certificationId)}
+                                disabled={savingFor === doc.type}
+                                onClick={() => setUploadingFor(doc.type)}
                               >
-                                <span className="flex items-center gap-2">
-                                  <Upload className="w-3.5 h-3.5" />
-                                  {savingFor === cert.certificationId ? 'Guardando…' : 'Subir certificado'}
-                                </span>
+                                <Upload className="w-3.5 h-3.5 mr-2" />Subir documento
                               </Button>
                             </div>
                           )}
@@ -597,149 +696,159 @@ export default function CertificationsPage() {
             </Card>
           )}
 
-          {/* Documentos obligatorios */}
+          {/* Certificaciones */}
           {!loading && !error && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Shield className="w-5 h-5 text-origen-pradera" />
-                  Documentos obligatorios
+                  <Award className="w-5 h-5 text-origen-pradera" />
+                  Certificaciones de calidad
                 </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Certificados de calidad que avalan tus productos.
+                </p>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {legalDocs.map((doc) => (
+                {certifications.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-border-subtle bg-surface p-6 text-sm text-muted-foreground">
+                    Aún no has declarado certificaciones de calidad en tu perfil.
+                  </div>
+                ) : (
+                <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                  {certifications.map((cert) => (
                     (() => {
-                      const hasUploadedDocument = hasDocumentReference(doc.documentRef, doc.documentUrl);
-                      const showUploadZone = uploadingFor === doc.type;
+                      const hasUploadedDocument = hasDocumentReference(cert.documentRef, cert.documentUrl);
+                      const showUploadZone = uploadingFor === cert.certificationId;
                       const showUploadButton = !hasUploadedDocument && !showUploadZone;
                       return (
-                    <div key={doc.type} className="border border-border rounded-xl p-4">
-                      <div className="flex flex-col md:flex-row md:items-start gap-4">
-                        <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-                          <FileBadge className="w-5 h-5 text-origen-pradera" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                            <div>
-                              <h3 className="font-semibold text-origen-bosque">{doc.label}</h3>
-                              <p className="text-sm text-muted-foreground">{doc.description}</p>
-                            </div>
-                            {getStatusBadge(doc.status, doc.expiresAt)}
+                    <div
+                      key={cert.certificationId}
+                      className={`rounded-2xl border p-4 transition-all ${getCardTone(cert.status, cert.expiresAt)}`}
+                    >
+                      <div className="flex flex-col gap-4 h-full">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                            <Award className="w-6 h-6 text-origen-pradera" />
                           </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col gap-2">
+                              <div>
+                                <h3 className="font-semibold text-origen-bosque">{cert.name}</h3>
+                                <p className="text-sm text-muted-foreground">{cert.issuingBody}</p>
+                              </div>
+                              <div role="status">{getStatusBadge(cert.status, cert.expiresAt)}</div>
+                              {cert.expiresAt && (
+                                <p className={`text-xs ${cert.status === 'EXPIRED' ? 'text-red-700' : isExpiringSoon(cert.expiresAt) ? 'text-amber-700' : 'text-muted-foreground'}`}>
+                                  Caduca el {formatDate(cert.expiresAt)}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
 
-                          {doc.status === 'VERIFIED' && doc.verifiedAt && (
-                            <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                        <div className="flex-1 flex flex-col gap-3">
+                          {cert.status === 'VERIFIED' && cert.verifiedAt && (
+                            <p className="text-xs text-green-700 flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
-                              Verificado el {formatDate(doc.verifiedAt)}{doc.expiresAt && !isExpiringSoon(doc.expiresAt) && (<> · Válido hasta {formatDate(doc.expiresAt)}</>)}
+                              Verificada el {formatDate(cert.verifiedAt)}
                             </p>
                           )}
 
-                          {doc.status === 'VERIFIED' && isExpiringSoon(doc.expiresAt) && (
-                            <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                              <p className="text-xs text-amber-700 flex items-center gap-2">
-                                <CalendarClock className="w-3.5 h-3.5" />
-                                Este documento caduca el {formatDate(doc.expiresAt)}. Renuévalo antes de esa fecha.
-                              </p>
+                          {cert.status === 'REJECTED' && (
+                            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+                              <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                              <span>{cert.rejectedReason ?? 'Certificado rechazado. Por favor sube una nueva versión del documento.'}</span>
                             </div>
                           )}
 
-                          {doc.status === 'EXPIRED' && (
-                            <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
-                              <p className="text-xs text-red-700 flex items-center gap-2">
-                                <AlertTriangle className="w-3.5 h-3.5" />
-                                Este documento caducó el {formatDate(doc.expiresAt)}. Tus productos no serán visibles hasta que lo renueves y sea verificado.
-                              </p>
+                          {cert.status === 'EXPIRED' && (
+                            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+                              <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                              <span>Este certificado caducó el {formatDate(cert.expiresAt)}. Renuévalo antes de volver a usarlo.</span>
                             </div>
                           )}
 
-                          {doc.status === 'PENDING' && (
-                            <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                              <p className="text-xs text-amber-700 flex items-center gap-2">
-                                <Clock className="w-3.5 h-3.5" />
-                                Documento en revisión. Te avisaremos cuando esté verificado.
-                              </p>
-                            </div>
-                          )}
-
-                          {doc.status === 'REJECTED' && (
-                            <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
-                              <p className="text-xs text-red-700 flex items-center gap-2">
-                                <AlertCircle className="w-3.5 h-3.5" />
-                                {doc.rejectedReason ?? 'Documento rechazado. Sube una nueva versión.'}
-                              </p>
+                          {cert.status === 'PENDING' && (
+                            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 flex items-start gap-2">
+                              <Clock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                              <span>Tu certificado está siendo revisado. Te notificaremos cuando esté verificado.</span>
                             </div>
                           )}
 
                           {hasUploadedDocument && !showUploadZone && (
-                            <div className="mt-3 flex items-center gap-2 p-2 bg-surface rounded-lg">
-                              <FileBadge className="w-4 h-4 text-text-subtle" />
-                              <span className="text-sm text-muted-foreground flex-1">Documento subido</span>
+                            <div className="mt-auto flex flex-wrap gap-2">
                               <Button
                                 variant="ghost"
-                                size="icon-sm"
-                                aria-label="Ver documento"
-                                disabled={openingDoc === doc.documentRef}
-                                onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, false)}
+                                size="sm"
+                                aria-label={`Ver documento ${cert.name}`}
+                                disabled={openingDoc === cert.documentRef}
+                                onClick={() => handleOpenDocument(cert.documentRef, cert.documentUrl, false)}
                               >
-                                {openingDoc === doc.documentRef ? (
-                                  <span className="w-4 h-4 animate-spin inline-block border-2 border-current border-t-transparent rounded-full" />
-                                ) : (
-                                  <Eye className="w-4 h-4" />
-                                )}
+                                <Eye className="w-4 h-4 mr-2" />Ver
                               </Button>
                               <Button
                                 variant="ghost"
-                                size="icon-sm"
-                                aria-label="Descargar documento"
-                                disabled={openingDoc === doc.documentRef}
-                                onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, true)}
+                                size="sm"
+                                aria-label={`Descargar documento ${cert.name}`}
+                                disabled={openingDoc === cert.documentRef}
+                                onClick={() => handleOpenDocument(cert.documentRef, cert.documentUrl, true)}
                               >
-                                {openingDoc === doc.documentRef ? (
-                                  <span className="w-4 h-4 animate-spin inline-block border-2 border-current border-t-transparent rounded-full" />
-                                ) : (
-                                  <Download className="w-4 h-4" />
-                                )}
+                                <Download className="w-4 h-4 mr-2" />Descargar
                               </Button>
                               <Button
                                 variant="secondary"
                                 size="sm"
-                                disabled={savingFor === doc.type}
-                                onClick={() => requestReplace(doc.type, doc.label, 'doc', doc.status)}
+                                disabled={savingFor === cert.certificationId}
+                                onClick={() => requestReplace(cert.certificationId, cert.name, 'cert', cert.status)}
                               >
-                                <span className="flex items-center gap-2">
-                                  <RefreshCw className="w-3.5 h-3.5" />
-                                  {savingFor === doc.type ? 'Guardando…' : 'Reemplazar'}
-                                </span>
+                                <RefreshCw className="w-3.5 h-3.5 mr-2" />Reemplazar
                               </Button>
                             </div>
                           )}
 
                           {showUploadZone && (
-                            <div className="mt-3">
+                            <div className="rounded-2xl border border-dashed border-origen-pradera/40 bg-origen-pradera/5 p-4 space-y-3">
+                              <div>
+                                <label className="block text-sm font-medium text-origen-bosque mb-1" htmlFor={`expires-cert-${cert.certificationId}`}>
+                                  Fecha de caducidad (opcional)
+                                </label>
+                                <input
+                                  id={`expires-cert-${cert.certificationId}`}
+                                  type="date"
+                                  min={today}
+                                  value={expiresAtCertInputs[cert.certificationId] ?? ''}
+                                  onChange={(e) => setExpiresAtCertInputs((prev) => ({ ...prev, [cert.certificationId]: e.target.value }))}
+                                  className="w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-origen-pradera"
+                                />
+                              </div>
                               <FileUpload
                                 value={[]}
-                                onChange={(files) => handleLegalDocUpload(doc.type, files)}
-                                helperText="Sube el documento en PDF, JPG o PNG (máx 5MB)"
+                                onChange={(files) => handleCertUpload(cert.certificationId, files)}
+                                helperText="Arrastra o haz clic para seleccionar. PDF, JPG o PNG (máx 5MB)"
                                 accept=".pdf,.jpg,.jpeg,.png"
                                 multiple={false}
                                 maxSize={5}
                               />
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="text-xs text-muted-foreground">
+                                  {savingFor === cert.certificationId ? 'Subiendo certificado…' : 'Arrastra o haz clic para seleccionar'}
+                                </span>
+                                <Button variant="ghost" size="sm" onClick={() => setUploadingFor(null)}>
+                                  Cancelar
+                                </Button>
+                              </div>
                             </div>
                           )}
 
                           {showUploadButton && (
-                            <div className="mt-3">
+                            <div className="mt-auto">
                               <Button
                                 variant="secondary"
                                 size="sm"
-                                disabled={savingFor === doc.type}
-                                onClick={() => setUploadingFor(doc.type)}
+                                disabled={savingFor === cert.certificationId}
+                                onClick={() => setUploadingFor(cert.certificationId)}
                               >
-                                <span className="flex items-center gap-2">
-                                  <Upload className="w-3.5 h-3.5" />
-                                  {savingFor === doc.type ? 'Guardando…' : 'Subir documento'}
-                                </span>
+                                <Upload className="w-3.5 h-3.5 mr-2" />Subir certificado
                               </Button>
                             </div>
                           )}
@@ -749,7 +858,7 @@ export default function CertificationsPage() {
                       );
                     })()
                   ))}
-                </div>
+                </div>)}
               </CardContent>
             </Card>
           )}
