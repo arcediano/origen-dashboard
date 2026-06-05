@@ -682,7 +682,7 @@ export default function CertificationsPage() {
                           {hasUploadedDocument && !showUploadZone && (
                             <div className="mt-auto flex flex-wrap gap-2">
                               <Button
-                                variant="ghost"
+                                variant="outline"
                                 size="sm"
                                 aria-label={`Ver documento ${doc.label}`}
                                 disabled={openingDoc === doc.documentRef}
@@ -842,7 +842,7 @@ export default function CertificationsPage() {
                           {hasUploadedDocument && !showUploadZone && (
                             <div className="mt-auto flex flex-wrap gap-2">
                               <Button
-                                variant="ghost"
+                                variant="outline"
                                 size="sm"
                                 aria-label={`Ver documento ${cert.name}`}
                                 disabled={openingDoc === cert.documentRef}
