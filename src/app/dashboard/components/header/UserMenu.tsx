@@ -9,8 +9,9 @@ import { cn } from '@/lib/utils';
 import { logoutUser } from '@/lib/api/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
 import { Badge } from '@arcediano/ux-library';
-import { User, LogOut, ChevronRight, HelpCircle, Settings2 } from 'lucide-react';
+import { User, LogOut, ChevronRight, HelpCircle, Settings2, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { ProducerReadinessReport } from '@/lib/api/onboarding';
 
 interface UserMenuProps {
   userName: string;
@@ -19,6 +20,8 @@ interface UserMenuProps {
   userAvatar?: string;
   userType?: 'producer' | 'customer';
   onLogout?: () => void;
+  /** Informe de requisitos del productor — opcional, solo para role=PRODUCER */
+  readinessReport?: ProducerReadinessReport | null;
 }
 
 export function UserMenu({
@@ -28,6 +31,7 @@ export function UserMenu({
   userAvatar,
   userType = 'producer',
   onLogout,
+  readinessReport,
 }: UserMenuProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -188,6 +192,53 @@ export function UserMenu({
                 </div>
               </div>
             </div>
+
+            {/* ── Visibilidad en marketplace (solo productores) ── */}
+            {userType === 'producer' && readinessReport && (
+              <div className="px-4 py-3 border-b border-border-subtle bg-surface">
+                <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-2">
+                  Visibilidad en marketplace
+                </p>
+                {readinessReport.canSubmitProducts ? (
+                  <div className="flex items-center gap-2 text-feedback-success-text">
+                    <Eye className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="text-xs font-medium">Visible — productos publicados</span>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2 text-feedback-danger-text">
+                      <EyeOff className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="text-xs font-medium">Perfil oculto — productos no visibles</span>
+                    </div>
+                    {readinessReport.blockers.filter((b) => !b.startsWith('STATUS_NOT_ACTIVE')).slice(0, 2).map((blocker) => (
+                      <p key={blocker} className="text-[11px] text-text-muted pl-5">
+                        · {blocker.replace(/_/g, ' ').toLowerCase()}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                {/* Documentos próximos a vencer */}
+                {(() => {
+                  const now = Date.now();
+                  const in30 = now + 30 * 24 * 60 * 60 * 1000;
+                  const docs = readinessReport.documentChecks;
+                  // Warnings shown only if we have expiry data in the readiness
+                  // (documentChecks only contains status strings, not dates — show warning when EXPIRING_SOON is possible)
+                  const expiring = Object.entries(docs).filter(([, status]) => status === 'VERIFIED');
+                  return expiring.length > 0 && !readinessReport.canSubmitProducts ? null : null;
+                })()}
+                {readinessReport.blockers.some((b) => b.startsWith('DOCUMENT_EXPIRED') || b.startsWith('DOCUMENT_MISSING') || b.startsWith('DOCUMENT_REJECTED')) && (
+                  <Link
+                    href="/dashboard/profile/certifications"
+                    onClick={closeMenu}
+                    className="mt-2 flex items-center gap-1.5 text-[11px] text-origen-pradera hover:underline"
+                  >
+                    <AlertTriangle className="w-3 h-3" />
+                    Revisar documentos requeridos →
+                  </Link>
+                )}
+              </div>
+            )}
 
             <div className="py-2">
               <Link href="/dashboard/account" onClick={closeMenu} role="menuitem">

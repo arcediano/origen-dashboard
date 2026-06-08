@@ -1,7 +1,7 @@
 // 📁 /src/app/dashboard/components/header/DashboardHeader.tsx
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { NotificationBell } from './NotificationBell';
@@ -9,6 +9,7 @@ import { UserMenu } from './UserMenu';
 import { DashboardBreadcrumb } from './DashboardBreadcrumb';
 import { getDashboardPageTitle } from '@/constants/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
+import { getMyReadiness, type ProducerReadinessReport } from '@/lib/api/onboarding';
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -28,12 +29,21 @@ export function DashboardHeader({
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const { user } = useAuth();
+  const [readiness, setReadiness] = useState<ProducerReadinessReport | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Fetch readiness silently — errors are non-blocking
+  useEffect(() => {
+    if (user?.role !== 'PRODUCER') return;
+    getMyReadiness()
+      .then(setReadiness)
+      .catch(() => { /* silent — UserMenu works without readiness */ });
+  }, [user?.role]);
 
   const resolvedName = useMemo(() => {
     if (user?.firstName || user?.lastName) {
@@ -90,6 +100,7 @@ export function DashboardHeader({
               userInitials={resolvedInitials}
               userAvatar={userAvatar}
               onLogout={handleLogout}
+              readinessReport={readiness}
             />
           </div>
         </div>

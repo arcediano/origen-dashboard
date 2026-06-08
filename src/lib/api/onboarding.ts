@@ -336,3 +336,36 @@ export async function updateProducerCertification(
     expiresAt: expiresAt ?? null,
   });
 }
+
+// ─── Readiness (ADR-007) ──────────────────────────────────────────────────────
+
+export interface ProducerReadinessReport {
+  canSubmitProducts: boolean;
+  producerStatus: string;
+  profileChecks: {
+    taxId:           { passed: boolean; blocker?: string };
+    businessName:    { passed: boolean; blocker?: string };
+    entityType:      { passed: boolean; blocker?: string };
+    categories:      { passed: boolean; blocker?: string };
+    location:        { passed: boolean; blocker?: string };
+    storyName:       { passed: boolean; blocker?: string };
+    description:     { passed: boolean; blocker?: string };
+    logo:            { passed: boolean; blocker?: string };
+    deliveryOption:  { passed: boolean; blocker?: string };
+    stripeConnected: { passed: boolean; blocker?: string };
+  };
+  documentChecks: {
+    CIF:                   string;
+    SEGURO_RC:             string;
+    MANIPULADOR_ALIMENTOS: string;
+  };
+  blockers: string[];
+}
+
+/**
+ * Obtiene el informe completo de requisitos mínimos de perfil del productor.
+ * Usado por el UserMenu para mostrar el estado de visibilidad en el marketplace.
+ */
+export async function getMyReadiness(): Promise<ProducerReadinessReport> {
+  return gatewayClient.get<ProducerReadinessReport>('/producers/me/readiness');
+}
