@@ -437,12 +437,6 @@ export default function CertificationsPage() {
     ? Math.round(((verifiedCerts + verifiedDocs) / totalItems) * 100)
     : 0;
   const today = new Date().toISOString().split('T')[0];
-  const firstExpiredTarget = legalDocs.find((doc) => doc.status === 'EXPIRED')?.type
-    ?? certifications.find((cert) => cert.status === 'EXPIRED')?.certificationId
-    ?? null;
-  const firstRejectedTarget = legalDocs.find((doc) => doc.status === 'REJECTED')?.type
-    ?? certifications.find((cert) => cert.status === 'REJECTED')?.certificationId
-    ?? null;
   const firstExpiringTarget = legalDocs.find((doc) => doc.status === 'VERIFIED' && isExpiringSoon(doc.expiresAt))?.type
     ?? certifications.find((cert) => cert.status === 'VERIFIED' && isExpiringSoon(cert.expiresAt))?.certificationId
     ?? null;
@@ -475,40 +469,18 @@ export default function CertificationsPage() {
           {/* Aviso global — documentos críticos */}
           {!loading && !error && expiredCount > 0 && (
             <Alert variant="error">
-              <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <span>
-                  <strong>⚠️ Tienes {expiredCount} documento{expiredCount > 1 ? 's' : ''} caducado{expiredCount > 1 ? 's' : ''}.</strong>{' '}
-                  Tu perfil y productos están ocultos en la plataforma hasta que renueves y sean verificados.
-                </span>
-                {firstExpiredTarget && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setUploadingFor(firstExpiredTarget)}
-                  >
-                    Ir al documento
-                  </Button>
-                )}
+              <AlertDescription>
+                <strong>Tienes {expiredCount} documento{expiredCount > 1 ? 's' : ''} caducado{expiredCount > 1 ? 's' : ''}.</strong>{' '}
+                Tu perfil y productos están ocultos en la plataforma hasta que renueves y sean verificados.
               </AlertDescription>
             </Alert>
           )}
 
           {!loading && !error && rejectedCount > 0 && (
             <Alert variant="error">
-              <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <span>
-                  <strong>{rejectedCount} documento{rejectedCount > 1 ? 's' : ''} ha{rejectedCount > 1 ? 'n' : ''} sido rechazado{rejectedCount > 1 ? 's' : ''}.</strong>{' '}
-                  Revisa el motivo y sube el documento correcto.
-                </span>
-                {firstRejectedTarget && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setUploadingFor(firstRejectedTarget)}
-                  >
-                    Revisar
-                  </Button>
-                )}
+              <AlertDescription>
+                <strong>{rejectedCount} documento{rejectedCount > 1 ? 's' : ''} ha{rejectedCount > 1 ? 'n' : ''} sido rechazado{rejectedCount > 1 ? 's' : ''}.</strong>{' '}
+                Revisa el motivo y sube el documento correcto.
               </AlertDescription>
             </Alert>
           )}
