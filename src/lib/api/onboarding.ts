@@ -73,7 +73,9 @@ export interface OnboardingData {
     status: 'PENDING' | 'VERIFIED' | 'REJECTED' | 'EXPIRED';
     verifiedAt?: string | null;
     expiresAt?: string | null;
-    rejectedReason?: string | null;
+    pendingDocumentDocId?: string | null; // ADR-009
+    pendingDocumentKey?: string | null; // ADR-009
+    pendingExpiresAt?: string | null; // ADR-009
   }> | null;
   documents?: Array<{
     type: 'CIF' | 'SEGURO_RC' | 'MANIPULADOR_ALIMENTOS';
@@ -83,7 +85,9 @@ export interface OnboardingData {
     status: 'PENDING' | 'VERIFIED' | 'REJECTED' | 'EXPIRED';
     verifiedAt?: string | null;
     expiresAt?: string | null;
-    rejectedReason?: string | null;
+    pendingDocServiceId?: string | null; // ADR-009
+    pendingDocumentKey?: string | null; // ADR-009
+    pendingExpiresAt?: string | null; // ADR-009
   }> | null;
 }
 

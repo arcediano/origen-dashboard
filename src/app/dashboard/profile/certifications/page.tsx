@@ -46,7 +46,8 @@ interface CertItem {
   status: DocStatus | null; // null = no doc subido aún
   verifiedAt: string | null;
   expiresAt: string | null;
-  rejectedReason: string | null;
+  pendingDocumentRef: string | null; // ADR-009: renovación graciosa pendiente
+  pendingExpiresAt: string | null;
 }
 
 interface LegalDocItem {
@@ -58,7 +59,8 @@ interface LegalDocItem {
   status: DocStatus | null;
   verifiedAt: string | null;
   expiresAt: string | null;
-  rejectedReason: string | null;
+  pendingDocumentRef?: string | null; // ADR-009
+  pendingExpiresAt?: string | null;
 }
 
 const DOC_META: Record<DocType, { label: string; description: string; category: string }> = {
@@ -253,7 +255,8 @@ export default function CertificationsPage() {
         documentUrl: c.documentUrl ?? null,
         verifiedAt: c.verifiedAt ?? null,
         expiresAt: c.expiresAt ?? null,
-        rejectedReason: c.rejectedReason ?? null,
+        pendingDocumentRef: c.pendingDocumentKey ?? c.pendingDocumentDocId ?? null, // ADR-009
+        pendingExpiresAt: c.pendingExpiresAt ?? null,
       }));
 
       // Documentos legales obligatorios: construct from known types + merge API data
@@ -269,7 +272,6 @@ export default function CertificationsPage() {
           status: null,
           verifiedAt: null,
           expiresAt: null,
-          rejectedReason: null,
         });
       }
       for (const d of res.data.documents ?? []) {
@@ -280,7 +282,8 @@ export default function CertificationsPage() {
           existing.status = d.status as DocStatus;
           existing.verifiedAt = d.verifiedAt ?? null;
           existing.expiresAt = d.expiresAt ?? null;
-          existing.rejectedReason = d.rejectedReason ?? null;
+          existing.pendingDocumentRef = d.pendingDocumentKey ?? d.pendingDocServiceId ?? null; // ADR-009
+          existing.pendingExpiresAt = d.pendingExpiresAt ?? null;
         }
       }
 
@@ -631,7 +634,14 @@ export default function CertificationsPage() {
                           {doc.status === 'REJECTED' && (
                             <div className="rounded-xl border border-feedback-danger/30 bg-feedback-danger-subtle px-3 py-2 text-xs text-feedback-danger-text flex items-start gap-2">
                               <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                              <span>{doc.rejectedReason ?? 'Documento rechazado. Sube una nueva versión.'}</span>
+                              <span>Documento rechazado. Sube una nueva versión.</span>
+                            </div>
+                          )}
+
+                          {doc.pendingDocumentRef && (
+                            <div className="rounded-xl border border-amber-200 bg-feedback-warning-subtle px-3 py-2 text-xs text-amber-700 flex items-start gap-2">
+                              <Clock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                              <span>Renovación pendiente de revisión. El documento actual permanece activo.</span>
                             </div>
                           )}
 
@@ -695,8 +705,8 @@ export default function CertificationsPage() {
                                   <FileUpload
                                     value={[]}
                                     onChange={(files) => handleLegalDocUpload(doc.type, files)}
-                                    helperText="Arrastra o haz clic para seleccionar. PDF, JPG o PNG · Máx 5MB"
-                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    helperText="Arrastra o haz clic para seleccionar. Sólo PDF · Máx 5MB"
+                                    accept=".pdf"
                                     multiple={false}
                                     maxSize={5}
                                   />
@@ -800,7 +810,14 @@ export default function CertificationsPage() {
                           {cert.status === 'REJECTED' && (
                             <div className="rounded-xl border border-feedback-danger/30 bg-feedback-danger-subtle px-3 py-2 text-xs text-feedback-danger-text flex items-start gap-2">
                               <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                              <span>{cert.rejectedReason ?? 'Certificado rechazado. Por favor sube una nueva versión del documento.'}</span>
+                              <span>Certificado rechazado. Por favor sube una nueva versión del documento.</span>
+                            </div>
+                          )}
+
+                          {cert.pendingDocumentRef && (
+                            <div className="rounded-xl border border-amber-200 bg-feedback-warning-subtle px-3 py-2 text-xs text-amber-700 flex items-start gap-2">
+                              <Clock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                              <span>Renovación pendiente de revisión. El certificado actual permanece activo.</span>
                             </div>
                           )}
 
@@ -864,8 +881,8 @@ export default function CertificationsPage() {
                                   <FileUpload
                                     value={[]}
                                     onChange={(files) => handleCertUpload(cert.certificationId, files)}
-                                    helperText="Arrastra o haz clic para seleccionar. PDF, JPG o PNG (máx 5MB)"
-                                    accept=".pdf,.jpg,.jpeg,.png"
+                                      helperText="Arrastra o haz clic para seleccionar. Sólo PDF · Máx 5MB"
+                                      accept=".pdf"
                                     multiple={false}
                                     maxSize={5}
                                   />
