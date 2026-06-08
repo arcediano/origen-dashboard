@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library'
 import { Button, Badge } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
-import { ConfirmDialog, DateInput } from '@arcediano/ux-library';
+import { ConfirmDialog, DateInput, Spinner } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 import { loadOnboardingData, updateProducerDocument, updateProducerCertification } from '@/lib/api/onboarding';
 import { uploadFile } from '@/lib/api/media';
@@ -373,6 +373,12 @@ export default function CertificationsPage() {
     const nativeFile = (files[0] as unknown as { file?: File }).file;
     if (!nativeFile) return;
 
+    // Validar que la fecha de caducidad está presente (requerida)
+    if (!expiresAtInputs[type]) {
+      setSaveError('Debes indicar la fecha de caducidad del documento antes de subirlo.');
+      return;
+    }
+
     setSavingFor(type);
     setSaveError(null);
     setUploadingFor(null);
@@ -398,6 +404,12 @@ export default function CertificationsPage() {
     if (files.length === 0) return;
     const nativeFile = (files[0] as unknown as { file?: File }).file;
     if (!nativeFile) return;
+
+    // Validar que la fecha de caducidad está presente (requerida)
+    if (!expiresAtCertInputs[certificationId]) {
+      setSaveError('Debes indicar la fecha de caducidad del certificado antes de subirlo.');
+      return;
+    }
 
     setSavingFor(certificationId);
     setSaveError(null);
@@ -437,9 +449,6 @@ export default function CertificationsPage() {
     ? Math.round(((verifiedCerts + verifiedDocs) / totalItems) * 100)
     : 0;
   const today = new Date().toISOString().split('T')[0];
-  const firstExpiringTarget = legalDocs.find((doc) => doc.status === 'VERIFIED' && isExpiringSoon(doc.expiresAt))?.type
-    ?? certifications.find((cert) => cert.status === 'VERIFIED' && isExpiringSoon(cert.expiresAt))?.certificationId
-    ?? null;
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -487,19 +496,8 @@ export default function CertificationsPage() {
 
           {!loading && !error && expiringSoonCount > 0 && expiredCount === 0 && (
             <Alert variant="warning">
-              <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <span>
-                  Tienes <strong>{expiringSoonCount} documento{expiringSoonCount > 1 ? 's' : ''}</strong> que caduca{expiringSoonCount === 1 ? '' : 'n'} en menos de {EXPIRING_SOON_DAYS} días. Renuévalos ahora para evitar interrupciones.
-                </span>
-                {firstExpiringTarget && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setUploadingFor(firstExpiringTarget)}
-                  >
-                    Renovar ahora
-                  </Button>
-                )}
+              <AlertDescription>
+                Tienes <strong>{expiringSoonCount} documento{expiringSoonCount > 1 ? 's' : ''}</strong> que caduca{expiringSoonCount === 1 ? '' : 'n'} en menos de {EXPIRING_SOON_DAYS} días. Renuévalos ahora para evitar interrupciones.
               </AlertDescription>
             </Alert>
           )}
@@ -687,22 +685,31 @@ export default function CertificationsPage() {
                                   required
                                 />
                               </div>
-                              <FileUpload
-                                value={[]}
-                                onChange={(files) => handleLegalDocUpload(doc.type, files)}
-                                helperText="Arrastra o haz clic para seleccionar. PDF, JPG o PNG · Máx 5MB"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                multiple={false}
-                                maxSize={5}
-                              />
-                              <div className="flex items-center justify-between gap-3">
-                                <span className="text-xs text-muted-foreground">
-                                  {savingFor === doc.type ? 'Subiendo documento…' : 'Arrastra o haz clic para seleccionar'}
-                                </span>
-                                <Button variant="outline" size="sm" onClick={() => setUploadingFor(null)}>
-                                  Cancelar
-                                </Button>
-                              </div>
+                              {savingFor === doc.type ? (
+                                <div className="flex flex-col items-center justify-center gap-2 py-6">
+                                  <Spinner size="sm" variant="primary" />
+                                  <span className="text-xs text-muted-foreground">Subiendo documento…</span>
+                                </div>
+                              ) : (
+                                <>
+                                  <FileUpload
+                                    value={[]}
+                                    onChange={(files) => handleLegalDocUpload(doc.type, files)}
+                                    helperText="Arrastra o haz clic para seleccionar. PDF, JPG o PNG · Máx 5MB"
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    multiple={false}
+                                    maxSize={5}
+                                  />
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span className="text-xs text-muted-foreground">
+                                      Arrastra o haz clic para seleccionar
+                                    </span>
+                                    <Button variant="outline" size="sm" onClick={() => setUploadingFor(null)}>
+                                      Cancelar
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
                             </div>
                           )}
 
@@ -841,28 +848,37 @@ export default function CertificationsPage() {
                                 <DateInput
                                   id={`expires-cert-${cert.certificationId}`}
                                   label="Fecha de caducidad"
-                                  helperText="Opcional"
                                   min={today}
                                   value={expiresAtCertInputs[cert.certificationId] ?? ''}
                                   onChange={(e) => setExpiresAtCertInputs((prev) => ({ ...prev, [cert.certificationId]: e.target.value }))}
+                                  required
                                 />
                               </div>
-                              <FileUpload
-                                value={[]}
-                                onChange={(files) => handleCertUpload(cert.certificationId, files)}
-                                helperText="Arrastra o haz clic para seleccionar. PDF, JPG o PNG (máx 5MB)"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                multiple={false}
-                                maxSize={5}
-                              />
-                              <div className="flex items-center justify-between gap-3">
-                                <span className="text-xs text-muted-foreground">
-                                  {savingFor === cert.certificationId ? 'Subiendo certificado…' : 'Arrastra o haz clic para seleccionar'}
-                                </span>
-                                <Button variant="outline" size="sm" onClick={() => setUploadingFor(null)}>
-                                  Cancelar
-                                </Button>
-                              </div>
+                              {savingFor === cert.certificationId ? (
+                                <div className="flex flex-col items-center justify-center gap-2 py-6">
+                                  <Spinner size="sm" variant="primary" />
+                                  <span className="text-xs text-muted-foreground">Subiendo certificado…</span>
+                                </div>
+                              ) : (
+                                <>
+                                  <FileUpload
+                                    value={[]}
+                                    onChange={(files) => handleCertUpload(cert.certificationId, files)}
+                                    helperText="Arrastra o haz clic para seleccionar. PDF, JPG o PNG (máx 5MB)"
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    multiple={false}
+                                    maxSize={5}
+                                  />
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span className="text-xs text-muted-foreground">
+                                      Arrastra o haz clic para seleccionar
+                                    </span>
+                                    <Button variant="outline" size="sm" onClick={() => setUploadingFor(null)}>
+                                      Cancelar
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
                             </div>
                           )}
 
