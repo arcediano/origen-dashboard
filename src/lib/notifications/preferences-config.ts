@@ -5,6 +5,7 @@
  */
 
 import {
+  Award,
   Bell,
   Briefcase,
   Megaphone,
@@ -44,6 +45,7 @@ export const ALWAYS_ACTIVE_EVENTS = new Set([
   'ACCOUNT_SUSPENDED',
   'PASSWORD_CHANGED',
   'WELCOME',
+  'DOCUMENT_EXPIRED',
 ]);
 
 // ─── Groups (6 groups, 24 events total) ───────────────────────────────────────
@@ -200,6 +202,40 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
       },
       // CERTIFICATION_PENDING no está disponible en el backend desplegado aún.
       // Habilitar cuando se añada la migración de base de datos correspondiente.
+    ],
+  },
+
+  // ── Documentos y Certificaciones (4) ───────────────────────────────────────
+  {
+    id:    'documents',
+    label: 'Documentos y Certificaciones',
+    icon:  Award,
+    events: [
+      {
+        eventType:   'DOCUMENT_APPROVED',
+        title:       'Documento aprobado',
+        description: 'Tu documento o renovación ha sido aprobado por el equipo de Origen.',
+        icon:        Award,
+      },
+      {
+        eventType:   'DOCUMENT_REJECTED',
+        title:       'Documento rechazado',
+        description: 'Tu documento fue rechazado. Puedes enviar una nueva versión.',
+        icon:        Award,
+      },
+      {
+        eventType:   'DOCUMENT_EXPIRING_SOON',
+        title:       'Documento próximo a vencer',
+        description: 'Tu documento vencerá en menos de 30 días. Renuévalo para mantener tu perfil activo.',
+        icon:        Award,
+      },
+      {
+        eventType:   'DOCUMENT_EXPIRED',
+        title:       'Documento caducado',
+        description: 'Tu perfil ha sido ocultado del marketplace. Renueva tu documento inmediatamente.',
+        icon:        Award,
+        alwaysActive: true,
+      },
     ],
   },
 
