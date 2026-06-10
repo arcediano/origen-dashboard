@@ -1,7 +1,8 @@
 /**
  * @component ScrollChipFilter
- * @description Chips de filtro con scroll horizontal — aspecto nativo mobile-first.
- *              Tokens Origen v3.0: bosque/pradera/pastel.
+ * @description Wrapper shell sobre ScrollChipFilter de @arcediano/ux-library.
+ *              Preserva la API publica original (chips/value/onChange, count, icon: ElementType)
+ *              para compatibilidad con 7 consumidores actuales.
  *
  * Uso:
  *   <ScrollChipFilter
@@ -9,12 +10,18 @@
  *     value={activeFilter}
  *     onChange={setActiveFilter}
  *   />
+ *
+ * Nota: el componente internamente delega en ScrollChipFilter de @arcediano/ux-library.
+ *       El feedback tactil "whileTap" (Framer Motion) se ha removido, ya que
+ *       ScrollChipFilter de libreria no soporta esta micro-interaccion.
+ *       Si se detecta perdida perceptible del feedback tactil, se debe revisar
+ *       y considerar anadir esa animacion a la libreria.
  */
 
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { ScrollChipFilter as UXScrollChipFilter, type ScrollChipItem } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
@@ -43,9 +50,10 @@ export interface ScrollChipFilterProps {
 /**
  * Fila horizontal scrollable de chips de filtro.
  * - En móvil: scrollable con sangrado hasta el borde de pantalla
- * - Chip activo: fondo bosque + texto blanco
- * - Chip inactivo: fondo pastel + texto pino
- * - Badge de conteo si `count > 0`
+ * - Chip activo: fondo bosque + texto blanco (estilos de libreria)
+ * - Chip inactivo: fondo pastel + texto pino (estilos de libreria)
+ * - Badge de conteo si `count > 0` (concatenado al label, ya que libreria
+ *   no tiene badge de contador separado)
  */
 export function ScrollChipFilter({
   chips,
@@ -53,50 +61,48 @@ export function ScrollChipFilter({
   onChange,
   className,
 }: ScrollChipFilterProps) {
+  // Detectar si el primer chip es "Todos" (value === '')
+  const firstChipIsAll = chips.length > 0 && chips[0].value === '';
+  const hasAll = firstChipIsAll;
+  const allLabel = firstChipIsAll ? chips[0].label : undefined;
+
+  // Mapear chips: ChipItem[] -> ScrollChipItem[]
+  // Si hasAll, excluir el primer chip de "items"
+  const items: ScrollChipItem[] = (hasAll ? chips.slice(1) : chips).map((chip) => {
+    let label = chip.label;
+    // Si hay count, concatenarlo al label (libreria no tiene badge separado)
+    if (chip.count !== undefined && chip.count > 0) {
+      label = `${chip.label} ${chip.count > 999 ? '999+' : chip.count}`;
+    }
+
+    return {
+      id: chip.value,
+      label,
+      icon: chip.icon ? <chip.icon className="h-3 w-3 flex-shrink-0" /> : undefined,
+    };
+  });
+
+  // Adaptador de onChange: ScrollChipFilter de libreria emite (string | string[]),
+  // pero como "multiple" es false (fijo), siempre sera string.
+  // Type guard explicito para seguridad.
+  const handleValueChange = (newValue: string | string[] | undefined) => {
+    // Como multiple es false y value nunca sera array, usamos type guard
+    const stringValue = typeof newValue === 'string' ? newValue : '';
+    onChange(stringValue);
+  };
+
   return (
-    <div
+    <UXScrollChipFilter
+      items={items}
+      value={value}
+      multiple={false}
+      hasAll={hasAll}
+      allLabel={allLabel}
+      onValueChange={handleValueChange}
       className={cn(
-        'flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 lg:mx-0 lg:px-0 lg:flex-wrap',
-        'scrollbar-none',
+        '-mx-4 px-4 lg:mx-0 lg:px-0', // Sangrado a borde de pantalla actual
         className,
       )}
-    >
-      {chips.map((chip) => {
-        const isActive = value === chip.value;
-        const Icon = chip.icon;
-
-        return (
-          <motion.button
-            key={chip.value}
-            type="button"
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onChange(chip.value)}
-            className={cn(
-              'flex-shrink-0 inline-flex items-center gap-1.5',
-              'rounded-full border px-3 py-1.5 text-xs font-medium',
-              'transition-all duration-150 cursor-pointer select-none',
-              isActive
-                ? 'bg-origen-bosque border-origen-bosque text-white'
-                : 'bg-origen-pastel border-origen-pradera/30 text-origen-pino hover:border-origen-pradera/60',
-            )}
-          >
-            {Icon && <Icon className="h-3 w-3 flex-shrink-0" />}
-            {chip.label}
-            {chip.count !== undefined && chip.count > 0 && (
-              <span
-                className={cn(
-                  'inline-flex items-center justify-center',
-                  'min-w-[18px] h-[18px] px-1 rounded-full',
-                  'text-[10px] font-bold leading-none',
-                  isActive ? 'bg-white/25 text-white' : 'bg-origen-pradera/20 text-origen-pino',
-                )}
-              >
-                {chip.count > 999 ? '999+' : chip.count}
-              </span>
-            )}
-          </motion.button>
-        );
-      })}
-    </div>
+    />
   );
 }
