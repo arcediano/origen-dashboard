@@ -2,7 +2,7 @@
 'use client';
 
 import { Star, ShieldCheck } from 'lucide-react';
-import { MobileScrollSlider as MobileCardSlider } from '@arcediano/ux-library';
+import { MobileScrollSlider } from '@arcediano/ux-library';
 
 export function TestimonialsSection() {
   const testimonials = [
@@ -83,11 +83,11 @@ export function TestimonialsSection() {
 
         {/* Móvil: slider */}
         <div className="md:hidden">
-          <MobileCardSlider cardWidthClass="w-[83vw]">
+          <MobileScrollSlider cardWidthClass="w-[83vw]">
             {testimonials.map((testimonial, index) => (
               <TestimonialCard key={index} testimonial={testimonial} />
             ))}
-          </MobileCardSlider>
+          </MobileScrollSlider>
         </div>
 
         {/* Desktop: grid 3 columnas */}

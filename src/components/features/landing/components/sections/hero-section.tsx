@@ -13,7 +13,7 @@
 
 'use client';
 
-import { Button } from '@arcediano/ux-library';
+import { Button, StatHighlightCard } from '@arcediano/ux-library';
 import { ArrowRight, Sparkles, TrendingUp, Clock, ShieldCheck, Globe, Leaf, CheckCircle, User, MapPin, Package, Store } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -50,28 +50,28 @@ export function HeroSection() {
       label: 'Comisión',
       icon: TrendingUp,
       sublabel: 'Solo al vender',
-      color: 'from-origen-hoja/95 to-origen-hoja/80'
+      gradient: 'hoja' as const
     },
     {
       value: '24-48h',
       label: 'Aprobación',
       icon: Clock,
       sublabel: 'Rápido',
-      color: 'from-origen-hoja/95 to-origen-hoja/80'
+      gradient: 'hoja' as const
     },
     {
       value: '0€',
       label: 'Sin cuota',
       icon: ShieldCheck,
       sublabel: 'Costes fijos',
-      color: 'from-origen-hoja/95 to-origen-pino/80'
+      gradient: 'bosque' as const
     },
     {
       value: 'España',
       label: 'Cobertura',
       icon: Globe,
       sublabel: 'Nacional',
-      color: 'from-origen-hoja/95 to-origen-pino/80'
+      gradient: 'bosque' as const
     },
   ];
 
@@ -182,26 +182,14 @@ export function HeroSection() {
                   {stats.map((stat, index) => {
                     const Icon = stat.icon;
                     return (
-                      <div key={index} className="group">
-                        <div className="bg-surface-alt/20 backdrop-blur-md rounded-xl p-3 md:p-4 border border-white/30 group-hover:border-origen-hoja transition-all duration-300 h-full hover:shadow-lg hover:scale-[1.02]">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                              <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-xl md:text-2xl font-bold text-white mb-0.5 drop-shadow-sm">
-                                {stat.value}
-                              </div>
-                              <div className="text-sm font-medium text-white/90">
-                                {stat.label}
-                              </div>
-                              <div className="text-xs text-white/75">
-                                {stat.sublabel}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <StatHighlightCard
+                        key={index}
+                        icon={<Icon className="w-5 h-5 md:w-6 md:h-6" />}
+                        value={stat.value}
+                        label={stat.label}
+                        sublabel={stat.sublabel}
+                        gradient={stat.gradient}
+                      />
                     );
                   })}
                 </div>

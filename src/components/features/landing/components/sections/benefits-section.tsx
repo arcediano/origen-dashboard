@@ -2,7 +2,7 @@
 'use client';
 
 import { Users, Shield, Truck, Target, Package, Award, CheckCircle } from 'lucide-react';
-import { MobileScrollSlider as MobileCardSlider } from '@arcediano/ux-library';
+import { MobileScrollSlider } from '@arcediano/ux-library';
 
 export function BenefitsSection() {
   const benefits = [
@@ -95,11 +95,11 @@ export function BenefitsSection() {
 
         {/* Móvil: slider deslizable */}
         <div className="md:hidden">
-          <MobileCardSlider cardWidthClass="w-[80vw]">
+          <MobileScrollSlider cardWidthClass="w-[80vw]">
             {benefits.map((benefit, index) => (
               <BenefitCard key={index} benefit={benefit} />
             ))}
-          </MobileCardSlider>
+          </MobileScrollSlider>
         </div>
 
         {/* Desktop: grid */}

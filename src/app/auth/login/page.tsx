@@ -9,7 +9,7 @@
  */
 
 import { SimpleLogin } from '@/components/features/auth/components/login-form';
-import { AuthFooter } from '@/components/features/auth/components/auth-footer';
+import { AuthFooter } from '@arcediano/ux-library';
 import Link from 'next/link';
 import {
   Shield,
@@ -174,7 +174,7 @@ export default function LoginPage() {
       {/* ================================================================
           FOOTER - Componente compartido
       ================================================================ */}
-      <AuthFooter variant="login" />
+      <AuthFooter variant="login" linkComponent={Link} />
     </div>
   );
 }

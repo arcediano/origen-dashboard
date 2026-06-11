@@ -6,7 +6,7 @@
  */
 
 import { SimpleForgotPassword } from '@/components/features/auth/components/forgot-password-form';
-import { AuthFooter } from '@/components/features/auth/components/auth-footer';
+import { AuthFooter } from '@arcediano/ux-library';
 import Link from 'next/link';
 import {
   Shield,
@@ -155,7 +155,7 @@ export default function RecuperarPage() {
         </div>
       </main>
 
-      <AuthFooter variant="forgot" />
+      <AuthFooter variant="forgot" linkComponent={Link} />
     </div>
   );
 }

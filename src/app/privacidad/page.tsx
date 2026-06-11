@@ -3,7 +3,7 @@
  * @version 2.0.0 - Rediseño con Manual de Marca v3.0 "Bosque Profundo"
  */
 
-import { AuthFooter } from '@/components/features/auth/components/auth-footer';
+import { AuthFooter } from '@arcediano/ux-library';
 import Link from 'next/link';
 import { Store, ArrowRight, Shield, CheckCircle, ArrowLeft } from 'lucide-react';
 
@@ -169,7 +169,7 @@ export default function PrivacyPolicyPage() {
         </div>
       </main>
 
-      <AuthFooter variant="login" />
+      <AuthFooter variant="info" linkComponent={Link} />
     </div>
   );
 }

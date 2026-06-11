@@ -4,7 +4,7 @@
  * @version 2.0.0 - Rediseño con Manual de Marca v3.0 "Bosque Profundo"
  */
 
-import { AuthFooter } from '@/components/features/auth/components/auth-footer';
+import { AuthFooter } from '@arcediano/ux-library';
 import { ContactForm } from '@/components/features/contact/ContactForm';
 import Link from 'next/link';
 import {
@@ -216,7 +216,7 @@ export default function ContactPage() {
       {/* ================================================================
           FOOTER
       ================================================================ */}
-      <AuthFooter variant="login" />
+      <AuthFooter variant="info" linkComponent={Link} />
     </div>
   );
 }

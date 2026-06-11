@@ -3,7 +3,7 @@
 
 import { Button } from '@arcediano/ux-library';
 import { ArrowRight, CheckCircle, FileText, Users, Settings, Package } from 'lucide-react';
-import { MobileScrollSlider as MobileCardSlider } from '@arcediano/ux-library';
+import { MobileScrollSlider } from '@arcediano/ux-library';
 
 export function ProcessSection() {
   const steps = [
@@ -88,11 +88,11 @@ export function ProcessSection() {
 
         {/* Móvil: slider */}
         <div className="md:hidden">
-          <MobileCardSlider cardWidthClass="w-[75vw]">
+          <MobileScrollSlider cardWidthClass="w-[75vw]">
             {steps.map((step, index) => (
               <StepCard key={index} step={step} index={index} />
             ))}
-          </MobileCardSlider>
+          </MobileScrollSlider>
         </div>
 
         {/* Desktop: grid 4 columnas */}
