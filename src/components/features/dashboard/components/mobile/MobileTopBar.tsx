@@ -2,6 +2,7 @@
  * @component MobileTopBar
  * @description Header nativo para móvil — solo logo en tabs raíz, back+título en sub-páginas.
  * Patrón profesional: la sección activa NO aparece en el header, sino en el contenido de la página.
+ * Migrado a UXMobileTopBar shell con center y trailing.
  */
 
 'use client';
@@ -10,6 +11,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MobileTopBar as UXMobileTopBar } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import { Bell, ChevronLeft, Leaf, Sparkles } from 'lucide-react';
 import { getDashboardPageTitle, isRootMobileTab } from '@/constants/sidebar';
@@ -107,7 +109,7 @@ export function MobileTopBar() {
 
   return (
     <>
-    <header
+    <UXMobileTopBar
       className={cn(
         'lg:hidden fixed top-0 inset-x-0 z-40',
         'transition-all duration-300',
@@ -115,11 +117,7 @@ export function MobileTopBar() {
           ? 'bg-surface-alt/94 backdrop-blur-xl shadow-sm border-b border-border-subtle'
           : 'bg-transparent',
       )}
-      style={{ paddingTop: 'env(safe-area-inset-top)' }}
-    >
-      <div className="flex items-center h-14 px-4">
-
-        {/* Zona izquierda — logo O botón atrás */}
+      center={
         <AnimatePresence mode="wait" initial={false}>
           {isRoot ? (
             /* ── TABS RAÍZ: marca compacta estilo app ── */
@@ -129,7 +127,7 @@ export function MobileTopBar() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="flex items-center gap-2 flex-1"
+              className="flex items-center gap-2"
             >
               <div className="w-7 h-7 rounded-[10px] flex items-center justify-center bg-gradient-to-br from-origen-bosque to-origen-pino shadow-sm flex-shrink-0">
                 <Leaf className="w-3.5 h-3.5 text-white" />
@@ -151,7 +149,7 @@ export function MobileTopBar() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="flex items-center gap-2 flex-1 min-w-0"
+              className="flex items-center gap-2 min-w-0"
             >
               <motion.button
                 whileTap={{ scale: 0.82 }}
@@ -176,9 +174,9 @@ export function MobileTopBar() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Zona derecha — campana de notificaciones */}
-        <div className="flex items-center gap-1.5 flex-shrink-0">
+      }
+      trailing={
+        <div className="flex items-center gap-1.5">
           <motion.button
             whileTap={{ scale: 0.82 }}
             onClick={() => { void openNotifications(); }}
@@ -200,9 +198,8 @@ export function MobileTopBar() {
             )}
           </motion.button>
         </div>
-
-      </div>
-    </header>
+      }
+    />
 
     {/* Panel de notificaciones */}
     <AnimatePresence>
