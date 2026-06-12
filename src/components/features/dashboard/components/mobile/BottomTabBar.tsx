@@ -1,7 +1,7 @@
 /**
  * @component BottomTabBar
- * @description Barra de navegación inferior — floating island con FAB central elevado.
- * Migrado a UXMobileBottomNav shell con variant="island" y central: true.
+ * @description Barra de navegación inferior — ancho completo (edge-to-edge) con FAB central elevado.
+ * Usa UXMobileBottomNav con variant="default" y central: true.
  */
 
 'use client';
@@ -75,16 +75,15 @@ export function BottomTabBar() {
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
       transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-      className="lg:hidden fixed bottom-0 inset-x-0 z-50 flex justify-center items-end px-4"
+      className="lg:hidden fixed bottom-0 inset-x-0 z-50 flex items-end"
       style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 10px)' }}
     >
       <UXMobileBottomNav
         items={items}
         activeId={activeId}
         onValueChange={handleValueChange}
-        variant="island"
+        variant="default"
         fixed={false}
-        className="w-full max-w-[360px]"
       />
     </motion.div>
     )}
