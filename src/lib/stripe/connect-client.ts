@@ -155,3 +155,62 @@ export async function startStripeOnboarding(options: StartStripeOnboardingOption
   cacheOnboardingLink(json.data.onboardingUrl, source, json.data.accountId);
   window.location.href = json.data.onboardingUrl;
 }
+
+/**
+ * Abre el Stripe Dashboard para una cuenta Connect.
+ * Si la cuenta aún no ha completado el onboarding (details_submitted=false),
+ * realiza un fallback a startStripeOnboarding con source='account_payments'.
+ *
+ * @param stripeAccountId ID de la cuenta de Stripe
+ */
+export async function openStripeDashboard(stripeAccountId: string): Promise<void> {
+  if (!stripeAccountId) {
+    throw new Error('stripeAccountId es requerido');
+  }
+
+  try {
+    const res = await fetch('/api/stripe/connect/dashboard-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stripeAccountId }),
+    });
+
+    const json = await res.json() as {
+      success: boolean;
+      data?: {
+        dashboardUrl?: string;
+        requiresOnboarding?: boolean;
+      };
+      error?: string;
+    };
+
+    if (!json.success) {
+      throw new Error(json.error ?? 'Error al abrir el panel de Stripe');
+    }
+
+    // Si la cuenta requiere onboarding, hacer fallback
+    if (json.data?.requiresOnboarding) {
+      await startStripeOnboarding({
+        stripeAccountId,
+        source: 'account_payments',
+      });
+      return;
+    }
+
+    // Abrir el dashboard
+    if (json.data?.dashboardUrl) {
+      if (!isTrustedStripeUrl(json.data.dashboardUrl)) {
+        throw new Error('URL de Stripe no válida');
+      }
+      window.location.href = json.data.dashboardUrl;
+      return;
+    }
+
+    throw new Error('No se recibió URL válida del servidor');
+  } catch (error) {
+    console.error('Error opening Stripe dashboard:', error);
+    throw error instanceof Error
+      ? error
+      : new Error('Error inesperado al abrir el panel de Stripe');
+  }
+}

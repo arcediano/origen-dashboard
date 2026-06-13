@@ -165,3 +165,76 @@ export async function setActiveRole(payload: SetActiveRolePayload): Promise<Auth
 export async function requestPasswordReset(email: string): Promise<void> {
   await gatewayClient.post('/auth/forgot-password', { email });
 }
+
+// ─── TWO-FACTOR AUTHENTICATION (2FA) ──────────────────────────────────────────
+
+export interface TwoFactorSetupResponse {
+  secret: string;
+  qrCodeUrl: string;
+  otpauthUrl: string;
+}
+
+export interface TwoFactorEnableResponse {
+  recoveryCodes: string[];
+}
+
+export interface TwoFactorStatusResponse {
+  enabled: boolean;
+}
+
+/**
+ * Obtiene el estado de 2FA del usuario autenticado.
+ * Devuelve { enabled: boolean }.
+ */
+export async function getTwoFactorStatus(): Promise<TwoFactorStatusResponse> {
+  const response = await gatewayClient.get<{ success: boolean; data: TwoFactorStatusResponse }>('/auth/2fa/status');
+  return response.data;
+}
+
+/**
+ * Inicia el setup de 2FA: genera un secreto TOTP y QR.
+ * Devuelve { secret, qrCodeUrl, otpauthUrl }.
+ */
+export async function setupTwoFactor(): Promise<TwoFactorSetupResponse> {
+  const response = await gatewayClient.post<{ success: boolean; data: TwoFactorSetupResponse }>('/auth/2fa/setup', {});
+  return response.data;
+}
+
+/**
+ * Habilita 2FA con verificación de código TOTP.
+ * Body: { secret, code } donde code es de 6 dígitos.
+ * Devuelve { recoveryCodes: string[] }.
+ */
+export async function enableTwoFactor(secret: string, code: string): Promise<TwoFactorEnableResponse> {
+  const response = await gatewayClient.post<{ success: boolean; data: TwoFactorEnableResponse }>('/auth/2fa/enable', {
+    secret,
+    code,
+  });
+  return response.data;
+}
+
+/**
+ * Deshabilita 2FA con verificación (código TOTP o contraseña actual).
+ * Body: { totpCode?: string; password?: string } — al menos uno obligatorio.
+ */
+export async function disableTwoFactor(verification: string): Promise<void> {
+  // Intentar como código TOTP primero (6 dígitos)
+  if (/^\d{6}$/.test(verification)) {
+    await gatewayClient.post('/auth/2fa/disable', { totpCode: verification });
+  } else {
+    // Si no es TOTP, asumir que es contraseña
+    await gatewayClient.post('/auth/2fa/disable', { password: verification });
+  }
+}
+
+/**
+ * Verifica el código 2FA durante el login.
+ * Body: { challengeToken, code } donde code es de 6 dígitos o un código de recuperación.
+ * Devuelve los tokens de login (igual que un loginUser exitoso).
+ */
+export async function verifyTwoFactor(challengeToken: string, code: string): Promise<LoginResponse> {
+  return gatewayClient.post<LoginResponse>('/auth/login/verify-2fa', {
+    challengeToken,
+    code,
+  });
+}

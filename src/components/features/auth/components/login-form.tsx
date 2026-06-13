@@ -15,7 +15,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { loginUser } from '@/lib/api/auth';
+import { loginUser, verifyTwoFactor } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -31,6 +31,7 @@ import {
   Shield,
   Store,
   Clock,
+  Smartphone,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -97,6 +98,13 @@ export function SimpleLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // 2FA State
+  const [requiresTwoFactor, setRequiresTwoFactor] = useState(false);
+  const [challengeToken, setChallengeToken] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [useRecoveryCode, setUseRecoveryCode] = useState(false);
+  const [recoveryCode, setRecoveryCode] = useState('');
+
   // ── Validación ──────────────────────────────────────────────────────────────
 
   const validateForm = (): boolean => {
@@ -144,7 +152,20 @@ export function SimpleLogin() {
 
     // ── Paso 1: autenticar ───────────────────────────────────────────────────
     try {
-      await loginUser({ email: trimmedEmail, password: trimmedPassword, rememberMe });
+      const loginResponse = await loginUser({ email: trimmedEmail, password: trimmedPassword, rememberMe });
+
+      // Verificar si la respuesta indica 2FA requerido
+      const responseData = loginResponse as any;
+      if (responseData.requiresTwoFactor && responseData.challengeToken) {
+        // Guardar el challengeToken y mostrar formulario 2FA
+        setChallengeToken(responseData.challengeToken);
+        setRequiresTwoFactor(true);
+        setTwoFactorCode('');
+        setRecoveryCode('');
+        setUseRecoveryCode(false);
+        setIsLoading(false);
+        return;
+      }
     } catch (err) {
       if (err instanceof GatewayError && err.status === 401) {
         setErrors({ general: 'Credenciales incorrectas. Revisa tu email y contraseña.' });
@@ -178,6 +199,69 @@ export function SimpleLogin() {
     }
   };
 
+  // ── Submit 2FA ───────────────────────────────────────────────────────────────
+
+  const handleVerify2FA = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const code = useRecoveryCode ? recoveryCode.trim() : twoFactorCode;
+
+    if (!code) {
+      setErrors({ twoFactor: useRecoveryCode ? 'El código de recuperación es requerido' : 'El código de 6 dígitos es requerido' });
+      return;
+    }
+
+    if (!useRecoveryCode && !/^\d{6}$/.test(code)) {
+      setErrors({ twoFactor: 'El código debe tener exactamente 6 dígitos' });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await verifyTwoFactor(challengeToken, code);
+    } catch (err) {
+      if (err instanceof GatewayError && err.status === 401) {
+        setErrors({ twoFactor: 'Código incorrecto o expirado. Intenta de nuevo.' });
+      } else {
+        setErrors({ twoFactor: 'Error al verificar el código. Inténtalo de nuevo.' });
+      }
+      setIsLoading(false);
+      return;
+    }
+
+    // ── Cargar perfil después de 2FA exitoso ─────────────────────────────────
+    try {
+      const loggedUser = await setUserFromLogin(email);
+      const hasProducerMembership =
+        (loggedUser?.roles?.includes('PRODUCER') ?? false) ||
+        loggedUser?.role === 'PRODUCER';
+
+      if (!loggedUser || !hasProducerMembership) {
+        clearUser();
+        setErrors({ twoFactor: 'Tu cuenta no tiene acceso al panel de productores.' });
+        setIsLoading(false);
+        return;
+      }
+
+      router.push(loggedUser.onboardingCompleted ? '/dashboard' : '/onboarding');
+    } catch (err) {
+      setErrors({ twoFactor: 'Verificación exitosa, pero no se pudo cargar tu perfil. Inténtalo de nuevo.' });
+      setIsLoading(false);
+    }
+  };
+
+  // ── Volver al formulario de login ────────────────────────────────────────────
+
+  const handleBackToLogin = () => {
+    setRequiresTwoFactor(false);
+    setChallengeToken('');
+    setTwoFactorCode('');
+    setRecoveryCode('');
+    setUseRecoveryCode(false);
+    setErrors({});
+  };
+
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
@@ -186,23 +270,36 @@ export function SimpleLogin() {
 
         {/* Header */}
         <div className="text-center mb-6 md:mb-8">
-          <div className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 rounded-2xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
-            <Store className="w-7 h-7 md:w-8 md:h-8 text-white" />
+          <div className={cn(
+            "w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 rounded-2xl flex items-center justify-center shadow-md",
+            requiresTwoFactor
+              ? 'bg-gradient-to-br from-origen-pradera to-origen-hoja'
+              : 'bg-gradient-to-br from-origen-bosque to-origen-pino'
+          )}>
+            {requiresTwoFactor ? (
+              <Smartphone className="w-7 h-7 md:w-8 md:h-8 text-white" />
+            ) : (
+              <Store className="w-7 h-7 md:w-8 md:h-8 text-white" />
+            )}
           </div>
           <h2 className="text-xl md:text-2xl font-bold text-origen-bosque mb-1">
-            Acceso productores
+            {requiresTwoFactor ? 'Verifica tu identidad' : 'Acceso productores'}
           </h2>
-          <p className="text-xs md:text-sm text-muted-foreground">Gestiona tu tienda y ventas</p>
+          <p className="text-xs md:text-sm text-muted-foreground">
+            {requiresTwoFactor ? 'Ingresa el código de 6 dígitos de tu aplicación de autenticación' : 'Gestiona tu tienda y ventas'}
+          </p>
         </div>
 
         {/* Banner sesión expirada */}
-        <Suspense fallback={null}>
-          <SessionBanner />
-        </Suspense>
+        {!requiresTwoFactor && (
+          <Suspense fallback={null}>
+            <SessionBanner />
+          </Suspense>
+        )}
 
-        {/* Error general */}
+        {/* Error general o 2FA */}
         <AnimatePresence>
-          {errors.general && (
+          {(errors.general || errors.twoFactor) && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -210,99 +307,221 @@ export function SimpleLogin() {
               className="mb-5 md:mb-6 p-3 bg-feedback-danger-subtle border border-red-200 rounded-lg flex items-start gap-2 text-red-600"
             >
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <span className="text-xs">{errors.general}</span>
+              <span className="text-xs">{errors.general || errors.twoFactor}</span>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
-
-          {/* Email */}
-          <Input
-            type="email"
-            label="Correo electrónico"
-            placeholder="nombre@productor.es"
-            autoComplete="email"
-            autoCorrect="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            inputMode="email"
-            required
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (errors.email) setErrors({ ...errors, email: '' });
-            }}
-            leftIcon={<Mail />}
-            error={errors.email}
-            inputSize="lg"
-          />
-
-          {/* Contraseña */}
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              {/* El label lo pinta el componente Input con la prop `label` */}
-              <span /> {/* spacer para alinear el enlace a la derecha */}
-              <Link
-                href="/auth/forgot-password"
-                className="text-[10px] md:text-xs text-origen-pradera hover:text-origen-bosque transition-colors"
-              >
-                ¿Olvidaste?
-              </Link>
-            </div>
+        {!requiresTwoFactor ? (
+          // ────────────────────────────────────────────────────────────────────
+          // FORMULARIO DE LOGIN NORMAL
+          // ────────────────────────────────────────────────────────────────────
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
+            {/* Email */}
             <Input
-              type="password"
-              label="Contraseña"
-              placeholder="••••••••"
-              autoComplete="current-password"
+              type="email"
+              label="Correo electrónico"
+              placeholder="nombre@productor.es"
+              autoComplete="email"
               autoCorrect="off"
               autoCapitalize="none"
               spellCheck={false}
+              inputMode="email"
               required
-              value={password}
+              value={email}
               onChange={(e) => {
-                setPassword(e.target.value);
-                if (errors.password) setErrors({ ...errors, password: '' });
+                setEmail(e.target.value);
+                if (errors.email) setErrors({ ...errors, email: '' });
               }}
-              leftIcon={<Lock />}
-              error={errors.password}
+              leftIcon={<Mail />}
+              error={errors.email}
               inputSize="lg"
             />
-          </div>
 
-          {/* Recordar sesión */}
-          <CheckboxWithLabel
-            checked={rememberMe}
-            onCheckedChange={(v) => setRememberMe(v === true)}
-            label="Recordar mi sesión"
-            size="sm"
-          />
+            {/* Contraseña */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                {/* El label lo pinta el componente Input con la prop `label` */}
+                <span /> {/* spacer para alinear el enlace a la derecha */}
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-[10px] md:text-xs text-origen-pradera hover:text-origen-bosque transition-colors"
+                >
+                  ¿Olvidaste?
+                </Link>
+              </div>
+              <Input
+                type="password"
+                label="Contraseña"
+                placeholder="••••••••"
+                autoComplete="current-password"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                required
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) setErrors({ ...errors, password: '' });
+                }}
+                leftIcon={<Lock />}
+                error={errors.password}
+                inputSize="lg"
+              />
+            </div>
 
-          {/* Separador + submit */}
-          <div className="border-t border-origen-crema/40 pt-4 space-y-4">
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              loading={isLoading}
-              loadingText="Iniciando sesión..."
-              className="w-full sm:w-full text-white disabled:text-white/90"
-              leftIcon={<LogIn className="w-4 h-4" />}
-            >
-              Acceder al panel
-            </Button>
+            {/* Recordar sesión */}
+            <CheckboxWithLabel
+              checked={rememberMe}
+              onCheckedChange={(v) => setRememberMe(v === true)}
+              label="Recordar mi sesión"
+              size="sm"
+            />
 
-            <p className="text-center text-[11px] md:text-xs text-muted-foreground">
-              ¿No tienes cuenta?{' '}
-              <Link
-                href="/auth/register"
-                className="text-origen-pradera hover:text-origen-bosque font-medium"
+            {/* Separador + submit */}
+            <div className="border-t border-origen-crema/40 pt-4 space-y-4">
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                loading={isLoading}
+                loadingText="Iniciando sesión..."
+                className="w-full sm:w-full text-white disabled:text-white/90"
+                leftIcon={<LogIn className="w-4 h-4" />}
               >
-                Regístrate como productor
-              </Link>
-            </p>
-          </div>
-        </form>
+                Acceder al panel
+              </Button>
+
+              <p className="text-center text-[11px] md:text-xs text-muted-foreground">
+                ¿No tienes cuenta?{' '}
+                <Link
+                  href="/auth/register"
+                  className="text-origen-pradera hover:text-origen-bosque font-medium"
+                >
+                  Regístrate como productor
+                </Link>
+              </p>
+            </div>
+          </form>
+        ) : (
+          // ────────────────────────────────────────────────────────────────────
+          // FORMULARIO DE VERIFICACIÓN 2FA
+          // ────────────────────────────────────────────────────────────────────
+          <form onSubmit={handleVerify2FA} className="space-y-4 md:space-y-5">
+            {!useRecoveryCode ? (
+              <>
+                {/* Código TOTP */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-origen-bosque">
+                    Código de 6 dígitos
+                  </label>
+                  <div className="flex gap-2 justify-center">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <Input
+                        key={i}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={twoFactorCode[i] || ''}
+                        onChange={(e) => {
+                          const newCode = twoFactorCode.split('');
+                          newCode[i] = e.target.value.slice(-1);
+                          const code = newCode.join('').slice(0, 6);
+                          setTwoFactorCode(code);
+                          // Auto-focus next input
+                          if (e.target.value && i < 5) {
+                            const nextInput = document.querySelector(
+                              `input[data-2fa-digit="${i + 1}"]`
+                            ) as HTMLInputElement;
+                            nextInput?.focus();
+                          }
+                        }}
+                        className="!w-10 h-10 text-center"
+                        disabled={isLoading}
+                        data-2fa-digit={i}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Toggle a código de recuperación */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUseRecoveryCode(true);
+                      setTwoFactorCode('');
+                      setErrors({});
+                    }}
+                    className="text-xs text-origen-pradera hover:text-origen-bosque transition-colors underline"
+                  >
+                    Usar código de recuperación
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Input de código de recuperación */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-origen-bosque">
+                    Código de recuperación
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Ej: ABCD-EFGH-IJKL"
+                    value={recoveryCode}
+                    onChange={(e) => {
+                      setRecoveryCode(e.target.value);
+                      if (errors.twoFactor) setErrors({ ...errors, twoFactor: '' });
+                    }}
+                    disabled={isLoading}
+                    inputSize="lg"
+                  />
+                </div>
+
+                {/* Toggle volver a código TOTP */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUseRecoveryCode(false);
+                      setRecoveryCode('');
+                      setErrors({});
+                    }}
+                    className="text-xs text-origen-pradera hover:text-origen-bosque transition-colors underline"
+                  >
+                    Usar código TOTP
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Separador + submit */}
+            <div className="border-t border-origen-crema/40 pt-4 space-y-4">
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                loading={isLoading}
+                loadingText="Verificando..."
+                className="w-full sm:w-full text-white disabled:text-white/90"
+              >
+                Verificar
+              </Button>
+
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                onClick={handleBackToLogin}
+                disabled={isLoading}
+                className="w-full sm:w-full"
+              >
+                Volver atrás
+              </Button>
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Trust badges */}

@@ -8,6 +8,7 @@
  * @created Marzo 2026
  */
 
+import { Suspense } from 'react';
 import { SimpleLogin } from '@/components/features/auth/components/login-form';
 import { AuthFooter } from '@arcediano/ux-library';
 import Link from 'next/link';
@@ -23,6 +24,7 @@ import {
   Globe,
   ChevronRight
 } from 'lucide-react';
+import { LoginContent } from '@/components/features/auth/components/login-content';
 
 export default function LoginPage() {
   return (
@@ -150,7 +152,9 @@ export default function LoginPage() {
             ============================================================ */}
             <div className="lg:col-span-6">
               <div className="lg:pl-8 xl:pl-12">
-                <SimpleLogin />
+                <Suspense fallback={<SimpleLogin />}>
+                  <LoginContent />
+                </Suspense>
 
                 {/* Ayuda */}
                 <div className="mt-8 text-center">

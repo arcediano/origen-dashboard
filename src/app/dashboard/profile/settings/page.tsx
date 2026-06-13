@@ -1,6 +1,6 @@
 ﻿/**
  * @deprecated Ruta legacy -- redirigida a rutas canonicas segun ADR-001.
- * Seguridad: /dashboard/security
+ * Seguridad: /dashboard/account/security
  * Notificaciones: /dashboard/notifications
  * Cuenta: /dashboard/account
  */
@@ -13,7 +13,7 @@ export default async function SettingsPage({
 }) {
   const { tab } = await searchParams;
   if (tab === 'security' || tab === 'password' || tab === '2fa') {
-    redirect('/dashboard/security');
+    redirect('/dashboard/account/security');
   }
   if (tab === 'notifications') {
     redirect('/dashboard/notifications');

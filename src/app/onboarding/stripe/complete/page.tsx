@@ -19,6 +19,7 @@
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, XCircle } from 'lucide-react';
+import { Button } from '@arcediano/ux-library';
 import { saveStep6 } from '@/lib/api/onboarding';
 import { Spinner } from '@/components/shared';
 
@@ -27,7 +28,7 @@ import { Spinner } from '@/components/shared';
 type VerificationState = 'verifying' | 'success' | 'incomplete' | 'error';
 
 function resolveReturnPath(source: string | null): string {
-  return source === 'account_payments' ? '/dashboard/configuracion/pagos' : '/onboarding';
+  return source === 'account_payments' ? '/dashboard/account/payments' : '/onboarding';
 }
 
 // ─── Contenido principal (usa useSearchParams) ────────────────────────────────
@@ -122,12 +123,21 @@ function StripeCompleteContent() {
           <p className="text-sm text-muted-foreground mb-4">
             No completaste todos los pasos en Stripe. Puedes retomarlo cuando quieras.
           </p>
-          <button
-            onClick={() => router.push(returnPath)}
-            className="w-full h-11 bg-origen-bosque text-white rounded-xl text-sm font-medium hover:bg-origen-pino transition-colors"
-          >
-            Volver
-          </button>
+          <div className="flex flex-col gap-2">
+            <Button
+              onClick={() => router.push(returnPath)}
+              className="w-full"
+            >
+              Volver
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => router.push(returnPath)}
+              className="w-full"
+            >
+              Volver a Mi cuenta
+            </Button>
+          </div>
         </>
       )}
 
@@ -136,12 +146,21 @@ function StripeCompleteContent() {
           <XCircle className="w-14 h-14 text-feedback-danger mx-auto" />
           <h1 className="text-xl font-bold text-origen-bosque">Error de conexión</h1>
           <p className="text-sm text-muted-foreground mb-4">{errorMessage}</p>
-          <button
-            onClick={() => router.push(returnPath)}
-            className="w-full h-11 bg-origen-bosque text-white rounded-xl text-sm font-medium hover:bg-origen-pino transition-colors"
-          >
-            Volver
-          </button>
+          <div className="flex flex-col gap-2">
+            <Button
+              onClick={() => router.push(returnPath)}
+              className="w-full"
+            >
+              Volver
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => router.push(returnPath)}
+              className="w-full"
+            >
+              Volver a Mi cuenta
+            </Button>
+          </div>
         </>
       )}
 

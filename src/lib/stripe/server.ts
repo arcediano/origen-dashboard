@@ -145,4 +145,38 @@ export async function checkAccountStatus(accountId: string) {
   }
 }
 
+/**
+ * Crea un login link para el Stripe Dashboard de una cuenta Connect.
+ * Se utiliza para permitir que el productor edite su cuenta directamente en Stripe.
+ *
+ * Si la cuenta tiene details_submitted=false, devuelve un flag requiresOnboarding=true
+ * para que el frontend caiga al flujo startStripeOnboarding.
+ *
+ * @param accountId ID de la cuenta de Stripe
+ * @returns { dashboardUrl: string } o { requiresOnboarding: true }
+ */
+export async function createDashboardLink(accountId: string) {
+  try {
+    // Primero, verifica el estado de la cuenta
+    const account = await stripe.accounts.retrieve(accountId);
+
+    // Si la cuenta aún no tiene detalles completados, retorna flag para onboarding
+    if (!account.details_submitted) {
+      return {
+        requiresOnboarding: true,
+      };
+    }
+
+    // Crear login link para el dashboard
+    const loginLink = await stripe.accounts.createLoginLink(accountId);
+
+    return {
+      dashboardUrl: loginLink.url,
+    };
+  } catch (error) {
+    console.error('Error creating dashboard link:', error);
+    throw error;
+  }
+}
+
 export { stripe };

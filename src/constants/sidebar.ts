@@ -74,8 +74,8 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/profile/certifications': 'Certificaciones',
   '/dashboard/profile/settings': 'Ajustes de perfil',
   '/dashboard/account': 'Cuenta',
+  '/dashboard/account/security': 'Seguridad',
   '/dashboard/notifications': 'Notificaciones',
-  '/dashboard/security': 'Seguridad',
   '/dashboard/configuracion': 'Configuraciones',
   '/dashboard/configuracion/envios': 'Envios',
   '/dashboard/configuracion/pagos': 'Cobros',
@@ -228,7 +228,6 @@ export const MOBILE_ROOT_TABS: RootTabItem[] = [
       '/dashboard/perfil*',
       '/dashboard/account*',
       '/dashboard/configuracion*',
-      '/dashboard/security*',
       '/dashboard/profile/settings*',
     ],
   },
@@ -274,7 +273,7 @@ export function isRootMobileTab(pathname: string): boolean {
 }
 
 const CRUMB_LOGICAL_PARENT: Record<string, DashboardBreadcrumbItem> = {
-  '/dashboard/security': { href: '/dashboard/account', label: 'Cuenta' },
+  '/dashboard/account/security': { href: '/dashboard/account', label: 'Cuenta' },
   '/dashboard/notifications': { href: '/dashboard/account', label: 'Cuenta' },
   '/dashboard/profile': { href: '/dashboard/account', label: 'Cuenta' },
 };

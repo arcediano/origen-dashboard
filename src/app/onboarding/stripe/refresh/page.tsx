@@ -19,10 +19,11 @@
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { RefreshCw } from 'lucide-react';
+import { Button } from '@arcediano/ux-library';
 import { Spinner } from '@/components/shared';
 
 function resolveReturnPath(source: string | null): string {
-  return source === 'account_payments' ? '/dashboard/configuracion/pagos' : '/onboarding';
+  return source === 'account_payments' ? '/dashboard/account/payments' : '/onboarding';
 }
 
 // ─── Contenido principal (usa useSearchParams) ────────────────────────────────
@@ -72,12 +73,21 @@ function StripeRefreshContent() {
         <p className="text-sm text-muted-foreground mb-4">
           No pudimos renovar el enlace de Stripe. Vuelve al onboarding e inténtalo de nuevo.
         </p>
-        <button
-          onClick={() => router.push(returnPath)}
-          className="w-full h-11 bg-origen-bosque text-white rounded-xl text-sm font-medium hover:bg-origen-pino transition-colors"
-        >
-          Volver
-        </button>
+        <div className="flex flex-col gap-2">
+          <Button
+            onClick={() => router.push(returnPath)}
+            className="w-full"
+          >
+            Volver
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => router.push(returnPath)}
+            className="w-full"
+          >
+            Volver a Mi cuenta
+          </Button>
+        </div>
       </div>
     );
   }
@@ -89,6 +99,13 @@ function StripeRefreshContent() {
       <p className="text-sm text-muted-foreground">
         El enlace anterior expiró. Generando uno nuevo, serás redirigido automáticamente.
       </p>
+      <Button
+        variant="ghost"
+        onClick={() => router.push(returnPath)}
+        className="w-full"
+      >
+        Volver a Mi cuenta
+      </Button>
     </div>
   );
 }

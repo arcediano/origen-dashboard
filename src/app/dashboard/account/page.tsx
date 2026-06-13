@@ -10,7 +10,7 @@ export default function AccountPage() {
     {
       title: 'Seguridad',
       description: 'Cambia tu contraseña y activa verificación en dos pasos.',
-      href: '/dashboard/security',
+      href: '/dashboard/account/security',
       icon: KeyRound,
       meta: 'Protección',
     },
@@ -92,7 +92,7 @@ export default function AccountPage() {
                 </div>
                 <ChevronRight className="h-4 w-4 text-text-subtle" />
               </Link>
-              <Link href="/dashboard/security" className="flex items-center justify-between rounded-xl border border-border-subtle p-4 transition-colors hover:bg-surface-alt">
+              <Link href="/dashboard/account/security" className="flex items-center justify-between rounded-xl border border-border-subtle p-4 transition-colors hover:bg-surface-alt">
                 <div>
                   <p className="text-sm font-medium text-origen-bosque">Revisar seguridad</p>
                   <p className="mt-1 text-xs text-muted-foreground">Contraseña, 2FA y protección de acceso.</p>
