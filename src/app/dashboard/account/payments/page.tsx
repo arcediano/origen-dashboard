@@ -124,6 +124,7 @@ export default function PaymentsPage() {
           tooltip="Cobros"
           tooltipDetailed="Conecta y gestiona tu cuenta de Stripe para recibir pagos, revisar verificaciones y evitar bloqueos."
           showBackButton
+          onBack={() => router.push('/dashboard/account')}
         />
         {loadError && (
           <Alert className="mb-5 border-feedback-danger/30 bg-feedback-danger/10">
@@ -311,13 +312,31 @@ export default function PaymentsPage() {
                   />
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="rounded-xl border border-border-subtle bg-surface-alt p-4">
-                    <p className="text-sm font-medium text-origen-bosque">{paymentStage === 'empty' ? 'Inicia tu cuenta Stripe' : paymentStage === 'pending' ? 'Completa la verificacion pendiente' : 'Mantén tus datos al dia'}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{paymentStage === 'empty' ? 'Sin cuenta activa no podrás recibir liquidaciones.' : paymentStage === 'pending' ? 'Finaliza el alta para habilitar cobros.' : 'Actualiza datos fiscales o bancarios cuando cambien.'}</p>
+                  <div className="flex items-start justify-between gap-3 rounded-xl border border-border-subtle bg-surface-alt p-4">
+                    <div>
+                      <p className="text-sm font-medium text-origen-bosque">{paymentStage === 'empty' ? 'Inicia tu cuenta Stripe' : paymentStage === 'pending' ? 'Completa la verificacion pendiente' : 'Mantén tus datos al dia'}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{paymentStage === 'empty' ? 'Sin cuenta activa no podrás recibir liquidaciones.' : paymentStage === 'pending' ? 'Finaliza el alta para habilitar cobros.' : 'Actualiza datos fiscales o bancarios cuando cambien.'}</p>
+                    </div>
+                    <Badge
+                      variant={paymentStage === 'empty' ? 'neutral' : paymentStage === 'pending' ? 'warning' : 'success'}
+                      size="xs"
+                      className="shrink-0"
+                    >
+                      {paymentStage === 'empty' ? 'Pendiente' : paymentStage === 'pending' ? 'En progreso' : 'Hecho'}
+                    </Badge>
                   </div>
-                  <div className="rounded-xl border border-border-subtle bg-surface-alt p-4">
-                    <p className="text-sm font-medium text-origen-bosque">Documentacion y verificacion</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Ten a mano documentación fiscal y bancaria para evitar pausas de pago.</p>
+                  <div className="flex items-start justify-between gap-3 rounded-xl border border-border-subtle bg-surface-alt p-4">
+                    <div>
+                      <p className="text-sm font-medium text-origen-bosque">Documentacion y verificacion</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Ten a mano documentación fiscal y bancaria para evitar pausas de pago.</p>
+                    </div>
+                    <Badge
+                      variant={paymentStage === 'connected' ? 'success' : 'neutral'}
+                      size="xs"
+                      className="shrink-0"
+                    >
+                      {paymentStage === 'connected' ? 'Hecho' : 'Pendiente'}
+                    </Badge>
                   </div>
                   <div className="rounded-xl border border-border-subtle bg-surface-alt p-4">
                     <p className="text-sm font-medium text-origen-bosque">Acceso directo y seguro</p>

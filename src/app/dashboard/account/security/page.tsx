@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle2, ChevronRight, Clock, Key, Lock, Shield, Smartphone, Check, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Alert, AlertDescription, Badge, EmptyState } from '@arcediano/ux-library';
+import { Alert, AlertDescription, Badge, EmptyState, CardIconHeader } from '@arcediano/ux-library';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Separator, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@arcediano/ux-library';
 import { changePassword, getTwoFactorStatus, setupTwoFactor, enableTwoFactor, disableTwoFactor, getSecurityActivity, type SecurityActivity } from '@/lib/api/auth';
 import { logoutUser } from '@/lib/api/auth';
@@ -359,19 +359,19 @@ export default function SecurityPage() {
         badgeText="Seguridad"
         tooltip="Seguridad"
         tooltipDetailed="Gestiona el acceso a tu cuenta, activa doble verificación y revisa alertas relacionadas con la seguridad."
+        showBackButton
+        onBack={() => router.push('/dashboard/account')}
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
-        <div className="mb-5 rounded-[28px] border border-origen-pradera/25 bg-gradient-to-br from-origen-crema via-surface-alt to-surface p-4 shadow-sm sm:p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex-shrink-0">
-              <Shield className="h-5 w-5 text-origen-pradera" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-origen-bosque leading-tight">Protege tu cuenta</p>
-              <p className="mt-1 text-xs text-text-subtle sm:text-sm">Mantén seguro el acceso a tu panel y activa barreras extra antes de modificar datos sensibles.</p>
-            </div>
-          </div>
+        <div className="mb-5">
+          <Card variant="section" padding="md">
+            <CardIconHeader
+              icon={<Shield className="h-5 w-5 text-origen-pradera" />}
+              title="Protege tu cuenta"
+              description="Mantén seguro el acceso a tu panel y activa barreras extra antes de modificar datos sensibles."
+            />
+          </Card>
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
@@ -403,7 +403,7 @@ export default function SecurityPage() {
                   Cambiar contraseña
                 </h3>
 
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-2">
                     <Label>Contraseña actual</Label>
                     <Input
@@ -728,19 +728,59 @@ export default function SecurityPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-xl border border-border-subtle bg-surface-alt p-4">
-                  <p className="text-sm font-medium text-origen-bosque">Nivel actual</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Protección básica activa. Mejora tu cuenta habilitando 2FA y revisando accesos recientes.</p>
-                </div>
-                <div className="rounded-xl border border-feedback-warning/30 bg-feedback-warning-subtle p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="mt-0.5 h-4 w-4 text-feedback-warning" />
-                    <div>
-                      <p className="text-sm font-medium text-origen-bosque">Siguiente acción recomendada</p>
-                      <p className="mt-1 text-xs text-text-subtle">Activa la verificación en dos pasos antes de publicar más productos o cambiar datos bancarios.</p>
-                    </div>
-                  </div>
-                </div>
+                <Alert
+                  trailing={
+                    <Badge
+                      variant={twoFa.enabled ? 'success' : 'neutral'}
+                      size="sm"
+                      className="shrink-0"
+                    >
+                      {twoFa.enabled ? 'Protección reforzada' : 'Protección básica'}
+                    </Badge>
+                  }
+                >
+                  <AlertDescription>
+                    {twoFa.enabled
+                      ? 'Protección reforzada activa. Tu cuenta tiene doble verificación habilitada.'
+                      : 'Protección básica activa. Mejora tu cuenta habilitando 2FA y revisando accesos recientes.'}
+                  </AlertDescription>
+                </Alert>
+                {!twoFa.enabled && (
+                  <Alert
+                    variant="warning"
+                    trailing={
+                      <Badge
+                        variant="warning"
+                        size="sm"
+                        className="shrink-0"
+                      >
+                        Pendiente
+                      </Badge>
+                    }
+                  >
+                    <AlertDescription>
+                      Activa la verificación en dos pasos antes de publicar más productos o cambiar datos bancarios.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {twoFa.enabled && (
+                  <Alert
+                    variant="success"
+                    trailing={
+                      <Badge
+                        variant="success"
+                        size="sm"
+                        className="shrink-0"
+                      >
+                        Completo
+                      </Badge>
+                    }
+                  >
+                    <AlertDescription>
+                      La verificación en dos pasos está activada y proporciona protección adicional a tu cuenta.
+                    </AlertDescription>
+                  </Alert>
+                )}
               </CardContent>
             </Card>
 
@@ -772,12 +812,11 @@ export default function SecurityPage() {
                     <AlertDescription>{auditError}</AlertDescription>
                   </Alert>
                 ) : auditLog.length === 0 ? (
-                  <div className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-alt p-4">
-                    <Lock className="mt-0.5 h-4 w-4 text-text-subtle flex-shrink-0" aria-hidden="true" />
-                    <p className="text-xs text-text-subtle">
-                      Ninguna acción de seguridad registrada. Los cambios de contraseña y de 2FA quedarán registrados aquí.
-                    </p>
-                  </div>
+                  <EmptyState
+                    icon={<Lock className="h-8 w-8 text-origen-pino" />}
+                    title="Sin actividad registrada"
+                    description="Los cambios de contraseña y de verificación en dos pasos quedarán registrados aquí."
+                  />
                 ) : (
                   <ul className="divide-y divide-border-subtle" aria-label="Historial de actividad de seguridad">
                     {auditLog.map((entry) => (

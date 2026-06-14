@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ChevronRight, CreditCard, HelpCircle, KeyRound, MonitorCog, Settings2, Store } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
+import { Card, CardContent, CardHeader, CardTitle, CardIconHeader } from '@arcediano/ux-library';
 
 export default function AccountPage() {
   const accountSections = [
@@ -42,17 +42,13 @@ export default function AccountPage() {
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 space-y-6">
-        <div className="rounded-[28px] border border-origen-pradera/25 bg-gradient-to-br from-origen-crema via-surface-alt to-surface p-4 shadow-sm sm:p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex-shrink-0">
-              <MonitorCog className="h-5 w-5 text-origen-pradera" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-origen-bosque leading-tight">Una sola entrada para toda tu cuenta</p>
-              <p className="mt-1 text-xs text-text-subtle sm:text-sm">Aquí se concentran tareas personales y configuración. Notificaciones se gestionan desde la campana.</p>
-            </div>
-          </div>
-        </div>
+        <Card variant="section" padding="md">
+          <CardIconHeader
+            icon={<MonitorCog className="h-5 w-5 text-origen-pradera" />}
+            title="Una sola entrada para toda tu cuenta"
+            description="Aquí se concentran tareas personales y configuración. Notificaciones se gestionan desde la campana."
+          />
+        </Card>
 
         <Card className="rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
           {accountSections.map((section, index) => {
