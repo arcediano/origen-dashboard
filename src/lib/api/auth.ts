@@ -187,8 +187,7 @@ export interface TwoFactorStatusResponse {
  * Devuelve { enabled: boolean }.
  */
 export async function getTwoFactorStatus(): Promise<TwoFactorStatusResponse> {
-  const response = await gatewayClient.get<{ success: boolean; data: TwoFactorStatusResponse }>('/auth/2fa/status');
-  return response.data;
+  return gatewayClient.get<TwoFactorStatusResponse>('/auth/2fa/status');
 }
 
 /**
@@ -196,8 +195,7 @@ export async function getTwoFactorStatus(): Promise<TwoFactorStatusResponse> {
  * Devuelve { secret, qrCodeUrl, otpauthUrl }.
  */
 export async function setupTwoFactor(): Promise<TwoFactorSetupResponse> {
-  const response = await gatewayClient.post<{ success: boolean; data: TwoFactorSetupResponse }>('/auth/2fa/setup', {});
-  return response.data;
+  return gatewayClient.post<TwoFactorSetupResponse>('/auth/2fa/setup', {});
 }
 
 /**
@@ -206,11 +204,10 @@ export async function setupTwoFactor(): Promise<TwoFactorSetupResponse> {
  * Devuelve { recoveryCodes: string[] }.
  */
 export async function enableTwoFactor(secret: string, code: string): Promise<TwoFactorEnableResponse> {
-  const response = await gatewayClient.post<{ success: boolean; data: TwoFactorEnableResponse }>('/auth/2fa/enable', {
+  return gatewayClient.post<TwoFactorEnableResponse>('/auth/2fa/enable', {
     secret,
     code,
   });
-  return response.data;
 }
 
 /**
@@ -255,6 +252,5 @@ export interface SecurityActivity {
  * Devuelve una lista de auditoría filtrada por acciones relevantes de seguridad.
  */
 export async function getSecurityActivity(): Promise<SecurityActivity[]> {
-  const response = await gatewayClient.get<{ success: boolean; data: SecurityActivity[] }>('/auth/security/activity');
-  return response.data;
+  return gatewayClient.get<SecurityActivity[]>('/auth/security/activity');
 }
