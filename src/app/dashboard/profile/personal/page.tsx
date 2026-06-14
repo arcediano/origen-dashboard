@@ -293,8 +293,10 @@ export default function PersonalInfoPage() {
         description="Actualiza tu nombre, datos de contacto, dirección y foto de perfil de tu cuenta de productor"
         badgeIcon={User}
         badgeText="Datos personales"
+        tooltip="Datos personales"
+        tooltipDetailed="Actualiza tus datos de contacto, dirección y foto de perfil personal, distintos de la información comercial de tu negocio."
         showBackButton={true}
-        onBack={() => router.back()}
+        onBack={() => router.push('/dashboard/profile')}
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">

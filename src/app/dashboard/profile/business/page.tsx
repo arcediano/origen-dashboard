@@ -551,8 +551,10 @@ export default function BusinessInfoPage() {
         description="Gestiona identidad legal, presencia comercial, historia de marca y ubicación productiva"
         badgeIcon={Store}
         badgeText="Negocio"
+        tooltip="Negocio"
+        tooltipDetailed="Edita la identidad legal, comercial y de marca de tu negocio, visible en tu tienda y documentos."
         showBackButton={true}
-        onBack={() => router.back()}
+        onBack={() => router.push('/dashboard/profile')}
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
