@@ -6,9 +6,9 @@ import { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle2, ChevronRight, Clock, Key, Lock, Shield, Smartphone, Check, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Alert, AlertDescription, Badge } from '@arcediano/ux-library';
+import { Alert, AlertDescription, Badge, EmptyState } from '@arcediano/ux-library';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Separator, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@arcediano/ux-library';
-import { changePassword, getTwoFactorStatus, setupTwoFactor, enableTwoFactor, disableTwoFactor } from '@/lib/api/auth';
+import { changePassword, getTwoFactorStatus, setupTwoFactor, enableTwoFactor, disableTwoFactor, getSecurityActivity, type SecurityActivity } from '@/lib/api/auth';
 import { logoutUser } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
 
@@ -132,12 +132,24 @@ export default function SecurityPage() {
     error: null,
   });
 
-  // Historial de auditoría local (sesión actual)
-  const [auditLog, setAuditLog] = useState<SecurityAuditEntry[]>([]);
+  // Historial de auditoría del backend
+  const [auditLog, setAuditLog] = useState<SecurityActivity[]>([]);
+  const [auditLoading, setAuditLoading] = useState(true);
+  const [auditError, setAuditError] = useState<string | null>(null);
 
-  const addAuditEntry = (kind: SecurityEventKind) => {
-    const entry = logSecurityEvent(kind);
-    setAuditLog((prev) => [entry, ...prev].slice(0, 5));
+  // Mapa de acciones a etiquetas legibles
+  const AUDIT_LABELS: Record<string, string> = {
+    PASSWORD_CHANGED: 'Contraseña actualizada',
+    '2FA_ENABLED': 'Verificación en dos pasos activada',
+    '2FA_DISABLED': 'Verificación en dos pasos desactivada',
+    '2FA_RECOVERY_CODE_USED': 'Código de recuperación usado',
+    LOGIN: 'Inicio de sesión',
+  };
+
+  // Determina si la acción fue exitosa
+  const isAuditActionSuccess = (action: string): boolean => {
+    // Acciones de "éxito" conocidas
+    return !action.endsWith('_FAILED') && !action.endsWith('_USED');
   };
 
   const passwordErrors = getPasswordFieldErrors(password);
@@ -162,6 +174,24 @@ export default function SecurityPage() {
       }
     };
     load2FAStatus();
+  }, []);
+
+  // Load security activity from backend on mount
+  useEffect(() => {
+    const loadSecurityActivity = async () => {
+      setAuditLoading(true);
+      setAuditError(null);
+      try {
+        const activity = await getSecurityActivity();
+        setAuditLog(activity);
+      } catch (error) {
+        setAuditError('No se pudo cargar el historial de actividad');
+        setAuditLog([]);
+      } finally {
+        setAuditLoading(false);
+      }
+    };
+    loadSecurityActivity();
   }, []);
 
   // ─── 2FA HANDLERS ─────────────────────────────────────────────────────────
@@ -210,7 +240,7 @@ export default function SecurityPage() {
         recoveryCodesShown: response.recoveryCodes,
         error: null,
       }));
-      addAuditEntry('2FA_ENABLED');
+      // El historial se cargará desde el backend en la próxima recarga de la página
     } catch (error) {
       setTwoFa((prev) => ({
         ...prev,
@@ -261,7 +291,6 @@ export default function SecurityPage() {
       setTwoFa((prev) => ({ ...prev, isLoading: true, error: null }));
       await disableTwoFactor(twoFa.disableVerification);
       setSaveSuccess('Verificación en dos pasos desactivada correctamente');
-      addAuditEntry('2FA_DISABLED');
       setTimeout(() => {
         handleClose2FAFlow();
         setSaveSuccess(null);
@@ -304,7 +333,6 @@ export default function SecurityPage() {
       setPassword({ current: '', new: '', confirm: '' });
       setDidAttemptSubmit(false);
       setSaveSuccess('Contraseña actualizada correctamente. Por seguridad, vuelve a iniciar sesión.');
-      addAuditEntry('PASSWORD_CHANGED');
 
       // D6: Tras éxito, logout y redirección a login con parámetro
       setTimeout(async () => {
@@ -312,7 +340,6 @@ export default function SecurityPage() {
         router.push('/auth/login?reason=password-changed');
       }, 2000);
     } catch (error) {
-      addAuditEntry('PASSWORD_CHANGE_FAILED');
       if (error instanceof GatewayError) {
         setSaveError(error.message || 'No se pudo actualizar la contraseña.');
       } else {
@@ -717,7 +744,7 @@ export default function SecurityPage() {
               </CardContent>
             </Card>
 
-            {/* ── Historial de auditoría (sesión actual) ── */}
+            {/* ── Historial de auditoría real (backend) ── */}
             <Card className="rounded-2xl border border-border-subtle shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -726,27 +753,46 @@ export default function SecurityPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {auditLog.length === 0 ? (
+                {auditLoading ? (
+                  // Skeleton loading state
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, idx) => (
+                      <div key={idx} className="flex items-start gap-3 py-3 animate-pulse">
+                        <div className="h-4 w-4 rounded-full bg-surface-alt flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="h-3 w-1/2 rounded bg-surface-alt" />
+                          <div className="h-2 w-1/3 rounded bg-surface-alt mt-2" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : auditError ? (
+                  <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
+                    <AlertTriangle className="w-4 h-4" />
+                    <AlertDescription>{auditError}</AlertDescription>
+                  </Alert>
+                ) : auditLog.length === 0 ? (
                   <div className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-alt p-4">
                     <Lock className="mt-0.5 h-4 w-4 text-text-subtle flex-shrink-0" aria-hidden="true" />
                     <p className="text-xs text-text-subtle">
-                      Ninguna acción de seguridad realizada en esta sesión. Los cambios
-                      de contraseña y de 2FA quedarán registrados aquí.
+                      Ninguna acción de seguridad registrada. Los cambios de contraseña y de 2FA quedarán registrados aquí.
                     </p>
                   </div>
                 ) : (
                   <ul className="divide-y divide-border-subtle" aria-label="Historial de actividad de seguridad">
-                    {auditLog.map((entry, idx) => (
-                      <li key={idx} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-                        {entry.ok ? (
+                    {auditLog.map((entry) => (
+                      <li key={`${entry.id}-${entry.createdAt}`} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+                        {isAuditActionSuccess(entry.action) ? (
                           <CheckCircle2 className="mt-0.5 h-4 w-4 text-feedback-success flex-shrink-0" aria-hidden="true" />
                         ) : (
                           <AlertTriangle className="mt-0.5 h-4 w-4 text-feedback-warning flex-shrink-0" aria-hidden="true" />
                         )}
                         <div className="min-w-0">
-                          <p className="text-xs font-medium text-origen-bosque">{entry.label}</p>
+                          <p className="text-xs font-medium text-origen-bosque">
+                            {AUDIT_LABELS[entry.action] ?? entry.action}
+                          </p>
                           <p className="text-[11px] text-text-subtle mt-0.5">
-                            {entry.timestamp.toLocaleTimeString('es-ES', {
+                            {new Date(entry.createdAt).toLocaleTimeString('es-ES', {
                               hour: '2-digit',
                               minute: '2-digit',
                               second: '2-digit',

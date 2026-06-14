@@ -75,6 +75,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/profile/settings': 'Ajustes de perfil',
   '/dashboard/account': 'Cuenta',
   '/dashboard/account/security': 'Seguridad',
+  '/dashboard/account/payments': 'Cobros',
   '/dashboard/notifications': 'Notificaciones',
   '/dashboard/configuracion': 'Configuraciones',
   '/dashboard/configuracion/envios': 'Envios',
@@ -274,6 +275,7 @@ export function isRootMobileTab(pathname: string): boolean {
 
 const CRUMB_LOGICAL_PARENT: Record<string, DashboardBreadcrumbItem> = {
   '/dashboard/account/security': { href: '/dashboard/account', label: 'Cuenta' },
+  '/dashboard/account/payments': { href: '/dashboard/account', label: 'Cuenta' },
   '/dashboard/notifications': { href: '/dashboard/account', label: 'Cuenta' },
   '/dashboard/profile': { href: '/dashboard/account', label: 'Cuenta' },
 };
@@ -283,7 +285,7 @@ const CRUMB_HREF_OVERRIDE: Record<string, string> = {};
 export function getDashboardBreadcrumbs(pathname: string): DashboardBreadcrumbItem[] {
   const segments = pathname.split('/').filter(Boolean);
   const breadcrumbs: DashboardBreadcrumbItem[] = [{ href: '/dashboard', label: 'Inicio' }];
-  const isPaymentsPath = pathname.startsWith('/dashboard/configuracion/pagos');
+  const isPaymentsPath = pathname.startsWith('/dashboard/configuracion/pagos') || pathname.startsWith('/dashboard/account/payments');
 
   let accumulated = '';
   for (let index = 1; index < segments.length; index += 1) {

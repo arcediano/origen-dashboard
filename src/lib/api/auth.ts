@@ -238,3 +238,23 @@ export async function verifyTwoFactor(challengeToken: string, code: string): Pro
     code,
   });
 }
+
+// ─── SECURITY ACTIVITY AUDIT ─────────────────────────────────────────────────────
+
+export interface SecurityActivity {
+  id: number;
+  userId: number;
+  action: string;
+  createdAt: string;
+  ipAddress?: string;
+  userAgent?: string;
+}
+
+/**
+ * Obtiene el historial de actividad de seguridad del usuario autenticado.
+ * Devuelve una lista de auditoría filtrada por acciones relevantes de seguridad.
+ */
+export async function getSecurityActivity(): Promise<SecurityActivity[]> {
+  const response = await gatewayClient.get<{ success: boolean; data: SecurityActivity[] }>('/auth/security/activity');
+  return response.data;
+}

@@ -48,7 +48,7 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     title: 'Cobros',
     description: 'Revisa Stripe, pagos y bloqueos',
     icon: CreditCard,
-    href: '/dashboard/configuracion/pagos',
+    href: '/dashboard/account/payments',
     gradient: 'from-origen-pino to-origen-bosque',
   },
 ];

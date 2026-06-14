@@ -100,7 +100,7 @@ export function MobileTopBar() {
   const subTitle = getDashboardPageTitle(pathname);
 
   const handleBackNavigation = () => {
-    if (pathname.startsWith('/dashboard/configuracion/pagos')) {
+    if (pathname.startsWith('/dashboard/configuracion/pagos') || pathname.startsWith('/dashboard/account/payments')) {
       router.push('/dashboard/account');
       return;
     }

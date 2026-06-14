@@ -17,7 +17,7 @@ export default function AccountPage() {
     {
       title: 'Cobros',
       description: 'Revisa Stripe, verificacion y estado de tus cobros.',
-      href: '/dashboard/configuracion/pagos',
+      href: '/dashboard/account/payments',
       icon: CreditCard,
       meta: 'Pagos',
     },

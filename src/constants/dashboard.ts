@@ -99,7 +99,7 @@
 //     href: '/dashboard/configuracion',
 //     submenu: [
 //       { id: 'envios', label: 'Envíos', href: '/dashboard/configuracion/envios' },
-//       { id: 'pagos', label: 'Pagos', href: '/dashboard/configuracion/pagos' },
+//       { id: 'pagos', label: 'Pagos', href: '/dashboard/account/payments' },
 //       { id: 'notificaciones', label: 'Notificaciones', href: '/dashboard/configuracion/notificaciones' },
 //       { id: 'privacidad', label: 'Privacidad', href: '/dashboard/configuracion/privacidad' }
 //     ]
