@@ -261,18 +261,21 @@ export default function PaymentsPage() {
                     {
                       label: 'Stripe',
                       value: paymentStage === 'connected' ? 'Operativo' : paymentStage === 'pending' ? 'Pendiente' : 'No configurado',
+                      valueClassName: 'text-base sm:text-lg',
                       subtitle: paymentStage === 'connected' ? 'Puedes seguir cobrando y editar datos cuando lo necesites.' : paymentStage === 'pending' ? 'La cuenta existe pero aún no terminó la verificación.' : 'Todavía no has iniciado el alta en Stripe.',
                       variant: getStatVariant(),
                     },
                     {
                       label: 'Cuenta',
                       value: stripeAccountId ?? 'Se generará al iniciar el alta',
+                      valueClassName: 'text-base sm:text-lg',
                       subtitle: 'Identificador técnico de Stripe asociado a tu perfil comercial.',
                       variant: getStatVariant(),
                     },
                     {
                       label: 'Verificación',
                       value: acceptedTermsAt ? new Date(acceptedTermsAt).toLocaleDateString('es-ES') : 'Pendiente',
+                      valueClassName: 'text-base sm:text-lg',
                       subtitle: 'Fecha registrada de aceptación de términos para el alta de cobros.',
                       variant: getStatVariant(),
                     },
