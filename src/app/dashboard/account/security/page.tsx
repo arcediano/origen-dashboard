@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AlertTriangle, Key, Shield, Smartphone, Check, Copy } from 'lucide-react';
+import { AlertTriangle, Key, Shield, Smartphone, Check, Copy, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Alert, AlertDescription, Badge, CardIconHeader } from '@arcediano/ux-library';
@@ -183,6 +183,8 @@ export default function SecurityPage() {
       step: 'idle',
       setupData: {},
       verifyCode: '',
+      disableVerification: '',
+      isLoading: false,
       error: null,
     }));
     // Reload 2FA status
@@ -472,15 +474,25 @@ export default function SecurityPage() {
                   </div>
                 ) : (
                   // 2FA Disabled State
-                  <Dialog open={twoFaDialog} onOpenChange={setTwoFaDialog}>
-                    <DialogTrigger asChild>
-                      <Button
-                        onClick={handleStart2FASetup}
-                        disabled={twoFa.isLoading}
-                      >
-                        {twoFa.isLoading ? 'Cargando...' : 'Activar'}
-                      </Button>
-                    </DialogTrigger>
+                  <div className="rounded-xl border border-border-subtle bg-surface-alt p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                      <div className="flex items-center gap-3">
+                        <Badge variant="neutral" icon={<X className="w-3 h-3" />}>
+                          Desactivado
+                        </Badge>
+                        <p className="text-sm text-text-subtle">
+                          Añade una capa extra de seguridad a tu cuenta con una app de autenticación.
+                        </p>
+                      </div>
+                      <Dialog open={twoFaDialog} onOpenChange={setTwoFaDialog}>
+                        <DialogTrigger asChild>
+                          <Button
+                            onClick={handleStart2FASetup}
+                            disabled={twoFa.isLoading}
+                          >
+                            {twoFa.isLoading ? 'Cargando...' : 'Activar'}
+                          </Button>
+                        </DialogTrigger>
 
                     {/* Setup QR Step */}
                     {twoFa.step === 'setup-qr' && (
@@ -632,6 +644,8 @@ export default function SecurityPage() {
                       </DialogContent>
                     )}
                   </Dialog>
+                    </div>
+                  </div>
                 )}
 
                 <Alert>
