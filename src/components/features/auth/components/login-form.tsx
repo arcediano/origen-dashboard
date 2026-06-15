@@ -154,9 +154,9 @@ export function SimpleLogin() {
     try {
       const loginResponse = await loginUser({ email: trimmedEmail, password: trimmedPassword, rememberMe });
 
-      // Verificar si la respuesta indica 2FA requerido
-      const responseData = loginResponse as any;
-      if (responseData.requiresTwoFactor && responseData.challengeToken) {
+      // Verificar si la respuesta indica 2FA requerido (viene en loginResponse.data)
+      const responseData = loginResponse.data as any;
+      if (responseData?.requiresTwoFactor && responseData?.challengeToken) {
         // Guardar el challengeToken y mostrar formulario 2FA
         setChallengeToken(responseData.challengeToken);
         setRequiresTwoFactor(true);
