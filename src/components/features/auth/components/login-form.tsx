@@ -415,31 +415,32 @@ export function SimpleLogin() {
                   <label className="block text-sm font-medium text-origen-bosque">
                     Código de 6 dígitos
                   </label>
-                  <div className="flex gap-2 justify-center">
+                  <div className="flex gap-1.5 sm:gap-2">
                     {Array.from({ length: 6 }).map((_, i) => (
-                      <Input
-                        key={i}
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={1}
-                        value={twoFactorCode[i] || ''}
-                        onChange={(e) => {
-                          const newCode = twoFactorCode.split('');
-                          newCode[i] = e.target.value.slice(-1);
-                          const code = newCode.join('').slice(0, 6);
-                          setTwoFactorCode(code);
-                          // Auto-focus next input
-                          if (e.target.value && i < 5) {
-                            const nextInput = document.querySelector(
-                              `input[data-2fa-digit="${i + 1}"]`
-                            ) as HTMLInputElement;
-                            nextInput?.focus();
-                          }
-                        }}
-                        className="!w-12 h-12 !px-0 text-center text-lg font-semibold"
-                        disabled={isLoading}
-                        data-2fa-digit={i}
-                      />
+                      <div key={i} className="min-w-0 flex-1">
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={twoFactorCode[i] || ''}
+                          onChange={(e) => {
+                            const newCode = twoFactorCode.split('');
+                            newCode[i] = e.target.value.slice(-1);
+                            const code = newCode.join('').slice(0, 6);
+                            setTwoFactorCode(code);
+                            // Auto-focus next input
+                            if (e.target.value && i < 5) {
+                              const nextInput = document.querySelector(
+                                `input[data-2fa-digit="${i + 1}"]`
+                              ) as HTMLInputElement;
+                              nextInput?.focus();
+                            }
+                          }}
+                          className="!w-full !px-0 h-12 text-center text-lg font-semibold"
+                          disabled={isLoading}
+                          data-2fa-digit={i}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
