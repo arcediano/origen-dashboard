@@ -6,7 +6,7 @@ import { AlertTriangle, Key, Shield, Smartphone, Check, Copy } from 'lucide-reac
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Alert, AlertDescription, Badge, CardIconHeader } from '@arcediano/ux-library';
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Separator, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@arcediano/ux-library';
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@arcediano/ux-library';
 import { changePassword, getTwoFactorStatus, setupTwoFactor, enableTwoFactor, disableTwoFactor } from '@/lib/api/auth';
 import { logoutUser } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
@@ -301,33 +301,29 @@ export default function SecurityPage() {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
-          <Card className="rounded-2xl border border-border-subtle shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-origen-pradera" />
-                Acceso y autenticación
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {saveError && (
-                <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
-                  <AlertTriangle className="w-4 h-4" />
-                  <AlertDescription>{saveError}</AlertDescription>
-                </Alert>
-              )}
-
-              {saveSuccess && (
-                <Alert>
-                  <Shield className="w-4 h-4" />
-                  <AlertDescription>{saveSuccess}</AlertDescription>
-                </Alert>
-              )}
-
-              <div className="space-y-4">
-                <h3 className="font-medium flex items-center gap-2 text-origen-bosque">
-                  <Key className="w-4 h-4 text-origen-pradera" />
+          <div className="space-y-6">
+            {/* Card A: Cambiar contraseña */}
+            <Card className="rounded-2xl border border-border-subtle shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="w-5 h-5 text-origen-pradera" />
                   Cambiar contraseña
-                </h3>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {saveError && (
+                  <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
+                    <AlertTriangle className="w-4 h-4" />
+                    <AlertDescription>{saveError}</AlertDescription>
+                  </Alert>
+                )}
+
+                {saveSuccess && (
+                  <Alert>
+                    <Shield className="w-4 h-4" />
+                    <AlertDescription>{saveSuccess}</AlertDescription>
+                  </Alert>
+                )}
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-2">
@@ -366,7 +362,7 @@ export default function SecurityPage() {
                       {showPasswords.next ? 'Ocultar' : 'Mostrar'}
                     </button>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 md:col-span-2 lg:col-span-1">
                     <Label>Confirmar contraseña</Label>
                     <Input
                       aria-label="Confirmar contraseña"
@@ -384,7 +380,7 @@ export default function SecurityPage() {
                       {showPasswords.confirm ? 'Ocultar' : 'Mostrar'}
                     </button>
                   </div>
-                  <div className="lg:col-start-3 flex items-end">
+                  <div className="md:col-span-2 lg:col-span-1 lg:col-start-3 flex items-end">
                     <Button
                       data-testid="change-password-submit"
                       onClick={handleChangePassword}
@@ -395,22 +391,22 @@ export default function SecurityPage() {
                     </Button>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-              </div>
-
-              <Separator className="my-4" />
-
-              {/* 2FA Section */}
-              <div className="space-y-4">
-                <h3 className="font-medium flex items-center gap-2 text-origen-bosque">
-                  <Smartphone className="w-4 h-4 text-origen-pradera" />
+            {/* Card B: Verificación en dos pasos */}
+            <Card className="rounded-2xl border border-border-subtle shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Smartphone className="w-5 h-5 text-origen-pradera" />
                   Verificación en dos pasos
-                </h3>
-
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 {twoFa.enabled ? (
                   // 2FA Enabled State
                   <div className="rounded-xl border border-border-subtle bg-surface-alt p-4">
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                       <div className="flex items-center gap-3">
                         <Badge variant="success" icon={<Check className="w-3 h-3" />}>
                           Activado
@@ -433,14 +429,14 @@ export default function SecurityPage() {
                               </DialogDescription>
                             </DialogHeader>
 
-                            {twoFa.error && (
-                              <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
-                                <AlertTriangle className="w-4 h-4" />
-                                <AlertDescription>{twoFa.error}</AlertDescription>
-                              </Alert>
-                            )}
+                            <div className="px-6 py-4 space-y-4">
+                              {twoFa.error && (
+                                <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
+                                  <AlertTriangle className="w-4 h-4" />
+                                  <AlertDescription>{twoFa.error}</AlertDescription>
+                                </Alert>
+                              )}
 
-                            <div className="space-y-4">
                               <div className="space-y-2">
                                 <Label>Código TOTP o contraseña</Label>
                                 <Input
@@ -496,14 +492,14 @@ export default function SecurityPage() {
                           </DialogDescription>
                         </DialogHeader>
 
-                        {twoFa.error && (
-                          <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
-                            <AlertTriangle className="w-4 h-4" />
-                            <AlertDescription>{twoFa.error}</AlertDescription>
-                          </Alert>
-                        )}
+                        <div className="px-6 py-4 space-y-4">
+                          {twoFa.error && (
+                            <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
+                              <AlertTriangle className="w-4 h-4" />
+                              <AlertDescription>{twoFa.error}</AlertDescription>
+                            </Alert>
+                          )}
 
-                        <div className="space-y-4">
                           {/* QR Code */}
                           {twoFa.setupData.qrCodeUrl && (
                             <div className="flex justify-center">
@@ -541,9 +537,9 @@ export default function SecurityPage() {
                           {/* TOTP Code Input */}
                           <div className="space-y-2">
                             <Label>Ingresa el código de 6 dígitos para confirmar</Label>
-                            <div className="flex gap-2">
+                            <div className="flex justify-center gap-1 sm:gap-2">
                               {Array.from({ length: 6 }).map((_, i) => (
-                                <Input
+                                <input
                                   key={i}
                                   type="text"
                                   inputMode="numeric"
@@ -562,9 +558,10 @@ export default function SecurityPage() {
                                       nextInput?.focus();
                                     }
                                   }}
-                                  className="w-10 h-10 text-center"
+                                  className="w-9 h-11 sm:w-12 sm:h-14 text-center text-xl font-semibold tabular-nums rounded-xl border-2 border-border-subtle bg-surface text-origen-bosque transition-colors focus:outline-none focus:border-origen-pradera focus:ring-2 focus:ring-origen-pradera/30 disabled:opacity-50 disabled:cursor-not-allowed"
                                   disabled={twoFa.isLoading}
                                   data-2fa-digit={i}
+                                  aria-label={`Dígito ${i + 1} de 6`}
                                 />
                               ))}
                             </div>
@@ -599,30 +596,32 @@ export default function SecurityPage() {
                           </DialogDescription>
                         </DialogHeader>
 
-                        <Alert className="border-feedback-warning/30 bg-feedback-warning-subtle text-feedback-warning">
-                          <AlertTriangle className="w-4 h-4" />
-                          <AlertDescription>
-                            No podremos mostrar estos códigos de nuevo. Guarda una copia en un lugar seguro.
-                          </AlertDescription>
-                        </Alert>
+                        <div className="px-6 py-4 space-y-4">
+                          <Alert className="border-feedback-warning/30 bg-feedback-warning-subtle text-feedback-warning">
+                            <AlertTriangle className="w-4 h-4" />
+                            <AlertDescription>
+                              No podremos mostrar estos códigos de nuevo. Guarda una copia en un lugar seguro.
+                            </AlertDescription>
+                          </Alert>
 
-                        <div className="space-y-2 rounded-lg bg-surface-alt p-4">
-                          {twoFa.recoveryCodesShown?.map((code, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center justify-between rounded bg-surface px-3 py-2"
-                            >
-                              <code className="text-sm font-mono text-origen-bosque">{code}</code>
-                              <button
-                                type="button"
-                                onClick={() => copyToClipboard(code)}
-                                className="p-1.5 hover:bg-surface-alt rounded transition-colors"
-                                aria-label={`Copiar código ${code}`}
+                          <div className="space-y-2 rounded-lg bg-surface-alt p-4">
+                            {twoFa.recoveryCodesShown?.map((code, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between rounded bg-surface px-3 py-2"
                               >
-                                <Copy className="w-3 h-3 text-text-subtle" />
-                              </button>
-                            </div>
-                          ))}
+                                <code className="text-sm font-mono text-origen-bosque">{code}</code>
+                                <button
+                                  type="button"
+                                  onClick={() => copyToClipboard(code)}
+                                  className="p-1.5 hover:bg-surface-alt rounded transition-colors"
+                                  aria-label={`Copiar código ${code}`}
+                                >
+                                  <Copy className="w-3 h-3 text-text-subtle" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
                         </div>
 
                         <DialogFooter>
@@ -634,16 +633,16 @@ export default function SecurityPage() {
                     )}
                   </Dialog>
                 )}
-              </div>
 
-              <Alert>
-                <Shield className="w-4 h-4" />
-                <AlertDescription>
-                  Recomendamos usar una contraseña única y activar la verificación en dos pasos antes de actualizar datos bancarios o fiscales.
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
+                <Alert>
+                  <Shield className="w-4 h-4" />
+                  <AlertDescription>
+                    Recomendamos usar una contraseña única y activar la verificación en dos pasos antes de actualizar datos bancarios o fiscales.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+          </div>
 
           <div className="space-y-6 xl:self-start">
             <Card className="rounded-2xl border border-border-subtle shadow-sm">

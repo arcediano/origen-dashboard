@@ -30,7 +30,7 @@ export function ProfileSectionNav({ className }: ProfileSectionNavProps) {
             key={item.href}
             href={item.href}
             className={cn(
-              'rounded-xl border px-2.5 py-2 text-center text-[12px] leading-tight font-semibold transition-colors sm:px-3 sm:text-sm',
+              'rounded-xl border px-2.5 py-2 text-center text-[12px] leading-tight font-semibold transition-colors flex items-center justify-center min-h-[44px] sm:px-3 sm:text-sm',
               isActive
                 ? 'border-origen-pradera bg-origen-pradera/10 text-origen-bosque'
                 : 'border-border-subtle bg-surface text-text-subtle hover:border-origen-pradera/40 hover:text-origen-bosque'

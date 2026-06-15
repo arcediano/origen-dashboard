@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   FileBadge,
   Shield,
@@ -140,6 +141,7 @@ function getCardTone(): string {
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function CertificationsPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [certifications, setCertifications] = useState<CertItem[]>([]);
@@ -458,8 +460,14 @@ export default function CertificationsPage() {
     <>
     <div className="w-full">
       <PageHeader
-        title="Certificaciones y documentos"
+        title="Certificaciones"
         description="Sube y gestiona tus certificados de calidad y la documentación obligatoria para acreditar tu tienda"
+        badgeIcon={FileBadge}
+        badgeText="Certificaciones"
+        tooltip="Certificaciones"
+        tooltipDetailed="Gestiona tus certificaciones de calidad, sellos ecológicos y documentos legales obligatorios para tu tienda."
+        showBackButton={true}
+        onBack={() => router.push('/dashboard/profile')}
       />
 
       <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
