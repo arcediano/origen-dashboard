@@ -180,12 +180,21 @@ export async function openStripeDashboard(stripeAccountId: string): Promise<void
       data?: {
         dashboardUrl?: string;
         requiresOnboarding?: boolean;
+        restricted?: boolean;
+        disabledReason?: string;
       };
       error?: string;
     };
 
     if (!json.success) {
       throw new Error(json.error ?? 'Error al abrir el panel de Stripe');
+    }
+
+    // Si la cuenta está restringida, mostrar error específico
+    if (json.data?.restricted) {
+      throw new Error(
+        'Tu cuenta de Stripe está restringida. Contacta con soporte para más información.'
+      );
     }
 
     // Si la cuenta requiere onboarding, hacer fallback

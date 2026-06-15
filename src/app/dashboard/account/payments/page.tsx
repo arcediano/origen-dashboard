@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, StatGrid, StatCard } from '@arcediano/ux-library';
@@ -16,9 +16,19 @@ import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCh
 import { loadProducerProfile } from '@/lib/api/onboarding';
 import { startStripeOnboarding, openStripeDashboard } from '@/lib/stripe/connect-client';
 
+interface StripeStatusResponse {
+  success: boolean;
+  data?: {
+    chargesEnabled?: boolean;
+    detailsSubmitted?: boolean;
+  };
+  error?: string;
+}
+
 export default function PaymentsPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isOpeningStripe, setIsOpeningStripe] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
@@ -27,39 +37,94 @@ export default function PaymentsPage() {
   const [website, setWebsite] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // Extraer loadPaymentState a useCallback para reutilizar en múltiples efectos
+  const loadPaymentState = useCallback(async () => {
+    try {
+      const response = await loadProducerProfile();
+      const story = response?.data?.story;
+      const fiscal = response?.data?.fiscal;
+      const payment = response?.data?.payment;
+
+      setIsConnected(!!payment?.stripeConnected);
+      setStripeAccountId(payment?.stripeAccountId ?? null);
+      setAcceptedTermsAt(payment?.acceptedTermsAt ?? null);
+      setBusinessName(story?.businessName ?? fiscal?.businessName ?? null);
+      setWebsite(story?.website ?? null);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Error al cargar estado de cobros');
+    }
+  }, []);
+
+  // Efecto de montaje inicial
   useEffect(() => {
     let mounted = true;
 
-    const loadPaymentState = async () => {
+    const initialize = async () => {
       setIsLoading(true);
       setLoadError(null);
-      try {
-        const response = await loadProducerProfile();
-        const story = response?.data?.story;
-        const fiscal = response?.data?.fiscal;
-        const payment = response?.data?.payment;
-
-        if (!mounted) return;
-
-        setIsConnected(!!payment?.stripeConnected);
-        setStripeAccountId(payment?.stripeAccountId ?? null);
-        setAcceptedTermsAt(payment?.acceptedTermsAt ?? null);
-        setBusinessName(story?.businessName ?? fiscal?.businessName ?? null);
-        setWebsite(story?.website ?? null);
-      } catch (error) {
-        if (!mounted) return;
-        setLoadError(error instanceof Error ? error.message : 'Error al cargar estado de cobros');
-      } finally {
-        if (mounted) setIsLoading(false);
-      }
+      await loadPaymentState();
+      if (mounted) setIsLoading(false);
     };
 
-    void loadPaymentState();
+    void initialize();
 
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [loadPaymentState]);
+
+  // Efecto para refresco automático al volver de Stripe
+  useEffect(() => {
+    let mounted = true;
+
+    const handleVisibilityChange = async () => {
+      // Solo actuar si la pestaña es visible y existe una cuenta Stripe asociada
+      if (document.visibilityState === 'visible' && stripeAccountId) {
+        if (!mounted) return;
+
+        setIsRefreshing(true);
+
+        try {
+          // Recargar el perfil del productor
+          await loadPaymentState();
+
+          // Adicionalmente, verificar el estado actual de la cuenta en Stripe
+          const statusRes = await fetch(
+            `/api/stripe/status?accountId=${encodeURIComponent(stripeAccountId)}`
+          );
+
+          if (!mounted) return;
+
+          if (statusRes.ok) {
+            const json = await statusRes.json() as StripeStatusResponse;
+            if (json.success && json.data?.chargesEnabled !== undefined) {
+              // Reflejar el nuevo estado de forma optimista
+              setIsConnected(json.data.chargesEnabled);
+            }
+          } else {
+            // Si el endpoint falla, degradar silenciosamente (no mostrar error)
+            console.warn('No se pudo refrescar el estado de Stripe:', statusRes.statusText);
+          }
+        } catch (error) {
+          // Degradar silenciosamente en caso de error en el refresco en segundo plano
+          console.warn(
+            'Error refrescando estado de Stripe:',
+            error instanceof Error ? error.message : String(error)
+          );
+        } finally {
+          if (mounted) setIsRefreshing(false);
+        }
+      }
+    };
+
+    // Registrar listener de visibilidad
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      mounted = false;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [stripeAccountId, loadPaymentState]);
 
   const paymentStage = isConnected
     ? 'connected'
@@ -111,6 +176,14 @@ export default function PaymentsPage() {
       return 'Puedes editar tus datos de cobro cuando lo necesites. El acceso es seguro y siempre se genera con un enlace actualizado.';
     }
     return 'El botón te lleva directamente al onboarding real de Stripe. El acceso es seguro y siempre se genera con un enlace actualizado.';
+  };
+
+  // Microcopy adicional para el caso "cambiar cuenta bancaria"
+  const getBankAccountHelpText = () => {
+    if (paymentStage === 'connected') {
+      return 'Si necesitas cambiar tu cuenta bancaria o actualizar datos de pago, pulsa "Modificar cuenta en Stripe" para acceder de forma segura a tu cuenta existente y realizar los cambios. Tu historial de cobros y configuración permanecerán intactos.';
+    }
+    return null;
   };
 
   return (
@@ -203,7 +276,7 @@ export default function PaymentsPage() {
               </div>
 
               <div className="flex w-full flex-col gap-3 lg:w-auto lg:min-w-[300px]">
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 items-center">
                   <Badge
                     variant={paymentStage === 'connected' ? 'success' : paymentStage === 'pending' ? 'warning' : 'neutral'}
                     size="sm"
@@ -216,6 +289,11 @@ export default function PaymentsPage() {
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-xs font-medium text-text-subtle">
                       <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
                       Terminos aceptados
+                    </span>
+                  )}
+                  {isRefreshing && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-origen-pradera" aria-hidden="true" />
                     </span>
                   )}
                 </div>
@@ -301,6 +379,12 @@ export default function PaymentsPage() {
                     {getAlertContent()}
                   </AlertDescription>
                 </Alert>
+                {/* Texto adicional para explicar el cambio de cuenta bancaria */}
+                {getBankAccountHelpText() && (
+                  <p className="text-small text-text-subtle leading-relaxed mt-4">
+                    {getBankAccountHelpText()}
+                  </p>
+                )}
               </CardContent>
             </Card>
 

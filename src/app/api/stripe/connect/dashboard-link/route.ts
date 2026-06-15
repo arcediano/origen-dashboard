@@ -13,6 +13,7 @@
  * Respuesta:
  *   - success=true, data: { dashboardUrl: string }
  *   - success=true, data: { requiresOnboarding: true } (si details_submitted=false)
+ *   - success=true, data: { restricted: true, disabledReason: string } (si cuenta restringida)
  */
 
 import { NextRequest, NextResponse } from 'next/server';

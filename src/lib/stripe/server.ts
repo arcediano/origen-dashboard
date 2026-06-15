@@ -26,7 +26,7 @@ function getStripe(): Stripe {
       throw new Error('STRIPE_SECRET_KEY is not defined');
     }
     _stripe = new Stripe(STRIPE_CONFIG.secretKey, {
-      apiVersion: '2025-02-24.acacia',
+      apiVersion: '2026-05-27.dahlia',
       typescript: true,
     });
   }
@@ -152,8 +152,12 @@ export async function checkAccountStatus(accountId: string) {
  * Si la cuenta tiene details_submitted=false, devuelve un flag requiresOnboarding=true
  * para que el frontend caiga al flujo startStripeOnboarding.
  *
+ * Si la cuenta tiene requirements.disabled_reason !== null (cuenta restringida),
+ * intenta crear el login link pero devuelve { restricted: true, disabledReason: ... }
+ * en caso de que la restricción sea demasiado severa.
+ *
  * @param accountId ID de la cuenta de Stripe
- * @returns { dashboardUrl: string } o { requiresOnboarding: true }
+ * @returns { dashboardUrl: string } | { requiresOnboarding: true } | { restricted: true, disabledReason: string }
  */
 export async function createDashboardLink(accountId: string) {
   try {
@@ -167,12 +171,27 @@ export async function createDashboardLink(accountId: string) {
       };
     }
 
-    // Crear login link para el dashboard
-    const loginLink = await stripe.accounts.createLoginLink(accountId);
+    // Verificar si la cuenta está restringida
+    const disabledReason = account.requirements?.disabled_reason ?? null;
 
-    return {
-      dashboardUrl: loginLink.url,
-    };
+    // Intentar crear login link
+    try {
+      const loginLink = await stripe.accounts.createLoginLink(accountId);
+
+      return {
+        dashboardUrl: loginLink.url,
+      };
+    } catch (loginLinkError) {
+      // Si createLoginLink falla y la cuenta tiene disabled_reason, reportar la restricción
+      if (disabledReason) {
+        return {
+          restricted: true,
+          disabledReason,
+        };
+      }
+      // Si no hay disabled_reason pero falla, relanzar el error
+      throw loginLinkError;
+    }
   } catch (error) {
     console.error('Error creating dashboard link:', error);
     throw error;
