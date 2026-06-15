@@ -436,7 +436,7 @@ export function SimpleLogin() {
                             nextInput?.focus();
                           }
                         }}
-                        className="!w-10 h-10 text-center"
+                        className="!w-12 h-12 !px-0 text-center text-lg font-semibold"
                         disabled={isLoading}
                         data-2fa-digit={i}
                       />
