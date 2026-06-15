@@ -74,16 +74,15 @@ function StripeCompleteContent() {
         return;
       }
 
-      // 2. Actualizar el paso 6 en BD como conectado
-      // Si viene desde "Mi cuenta > Cobros" (modificación), la cuenta ya está conectada
-      // y no hay que re-disparar el workflow de revisión
-      if (source !== 'account_payments') {
-        await saveStep6({
-          stripeConnected: true,
-          stripeAccountId: acctId,
-          acceptTerms: true,
-        });
-      }
+      // 2. Actualizar el paso 6 en BD como conectado.
+      // saveStep6 es un upsert idempotente: si la cuenta ya estaba conectada
+      // (caso "modificar cuenta" desde Mi cuenta > Cobros) simplemente
+      // confirma el mismo estado sin efectos secundarios adicionales.
+      await saveStep6({
+        stripeConnected: true,
+        stripeAccountId: acctId,
+        acceptTerms: true,
+      });
 
       setState('success');
 
