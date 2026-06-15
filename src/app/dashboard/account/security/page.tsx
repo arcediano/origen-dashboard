@@ -1,53 +1,17 @@
 // 📁 /src/app/dashboard/account/security/page.tsx
 'use client';
 
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle2, ChevronRight, Clock, Key, Lock, Shield, Smartphone, Check, Copy } from 'lucide-react';
+import { AlertTriangle, Key, Shield, Smartphone, Check, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Alert, AlertDescription, Badge, EmptyState, CardIconHeader } from '@arcediano/ux-library';
+import { Alert, AlertDescription, Badge, CardIconHeader } from '@arcediano/ux-library';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Separator, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@arcediano/ux-library';
-import { changePassword, getTwoFactorStatus, setupTwoFactor, enableTwoFactor, disableTwoFactor, getSecurityActivity, type SecurityActivity } from '@/lib/api/auth';
+import { changePassword, getTwoFactorStatus, setupTwoFactor, enableTwoFactor, disableTwoFactor } from '@/lib/api/auth';
 import { logoutUser } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
 
 // ─── TIPOS INTERNOS ───────────────────────────────────────────────────────────
-
-type SecurityEventKind =
-  | 'PASSWORD_CHANGED'
-  | 'PASSWORD_CHANGE_FAILED'
-  | '2FA_ENABLED'
-  | '2FA_DISABLED';
-
-interface SecurityAuditEntry {
-  kind:      SecurityEventKind;
-  label:     string;
-  timestamp: Date;
-  ok:        boolean;
-}
-
-function logSecurityEvent(
-  kind: SecurityEventKind,
-  meta: Record<string, unknown> = {},
-): SecurityAuditEntry {
-  const entry: SecurityAuditEntry = {
-    kind,
-    label: SECURITY_LABELS[kind] ?? kind,
-    timestamp: new Date(),
-    ok: !kind.endsWith('_FAILED'),
-  };
-  // Estrucutra observable compatible con herramientas de APM
-  console.info('[security-audit]', { event: kind, ok: entry.ok, ts: entry.timestamp.toISOString(), ...meta });
-  return entry;
-}
-
-const SECURITY_LABELS: Record<SecurityEventKind, string> = {
-  PASSWORD_CHANGED:       'Contraseña actualizada',
-  PASSWORD_CHANGE_FAILED: 'Intento fallido de cambio de contraseña',
-  '2FA_ENABLED':          'Verificación en dos pasos activada',
-  '2FA_DISABLED':         'Verificación en dos pasos desactivada',
-};
 
 type PasswordFieldErrors = {
   current?: string;
@@ -132,26 +96,6 @@ export default function SecurityPage() {
     error: null,
   });
 
-  // Historial de auditoría del backend
-  const [auditLog, setAuditLog] = useState<SecurityActivity[]>([]);
-  const [auditLoading, setAuditLoading] = useState(true);
-  const [auditError, setAuditError] = useState<string | null>(null);
-
-  // Mapa de acciones a etiquetas legibles
-  const AUDIT_LABELS: Record<string, string> = {
-    PASSWORD_CHANGED: 'Contraseña actualizada',
-    '2FA_ENABLED': 'Verificación en dos pasos activada',
-    '2FA_DISABLED': 'Verificación en dos pasos desactivada',
-    '2FA_RECOVERY_CODE_USED': 'Código de recuperación usado',
-    LOGIN: 'Inicio de sesión',
-  };
-
-  // Determina si la acción fue exitosa
-  const isAuditActionSuccess = (action: string): boolean => {
-    // Acciones de "éxito" conocidas
-    return !action.endsWith('_FAILED') && !action.endsWith('_USED');
-  };
-
   const passwordErrors = getPasswordFieldErrors(password);
   const hasPasswordErrors = Boolean(passwordErrors.current || passwordErrors.new || passwordErrors.confirm);
 
@@ -174,24 +118,6 @@ export default function SecurityPage() {
       }
     };
     load2FAStatus();
-  }, []);
-
-  // Load security activity from backend on mount
-  useEffect(() => {
-    const loadSecurityActivity = async () => {
-      setAuditLoading(true);
-      setAuditError(null);
-      try {
-        const activity = await getSecurityActivity();
-        setAuditLog(activity);
-      } catch (error) {
-        setAuditError('No se pudo cargar el historial de actividad');
-        setAuditLog([]);
-      } finally {
-        setAuditLoading(false);
-      }
-    };
-    loadSecurityActivity();
   }, []);
 
   // ─── 2FA HANDLERS ─────────────────────────────────────────────────────────
@@ -719,7 +645,7 @@ export default function SecurityPage() {
             </CardContent>
           </Card>
 
-          <div className="space-y-6">
+          <div className="space-y-6 xl:self-start">
             <Card className="rounded-2xl border border-border-subtle shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -784,79 +710,6 @@ export default function SecurityPage() {
               </CardContent>
             </Card>
 
-            {/* ── Historial de auditoría real (backend) ── */}
-            <Card className="rounded-2xl border border-border-subtle shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-origen-pradera" />
-                  Actividad reciente
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {auditLoading ? (
-                  // Skeleton loading state
-                  <div className="space-y-3">
-                    {Array.from({ length: 3 }).map((_, idx) => (
-                      <div key={idx} className="flex items-start gap-3 py-3 animate-pulse">
-                        <div className="h-4 w-4 rounded-full bg-surface-alt flex-shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <div className="h-3 w-1/2 rounded bg-surface-alt" />
-                          <div className="h-2 w-1/3 rounded bg-surface-alt mt-2" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : auditError ? (
-                  <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
-                    <AlertTriangle className="w-4 h-4" />
-                    <AlertDescription>{auditError}</AlertDescription>
-                  </Alert>
-                ) : auditLog.length === 0 ? (
-                  <EmptyState
-                    icon={<Lock className="h-8 w-8 text-origen-pino" />}
-                    title="Sin actividad registrada"
-                    description="Los cambios de contraseña y de verificación en dos pasos quedarán registrados aquí."
-                  />
-                ) : (
-                  <ul className="divide-y divide-border-subtle" aria-label="Historial de actividad de seguridad">
-                    {auditLog.map((entry) => (
-                      <li key={`${entry.id}-${entry.createdAt}`} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-                        {isAuditActionSuccess(entry.action) ? (
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-feedback-success flex-shrink-0" aria-hidden="true" />
-                        ) : (
-                          <AlertTriangle className="mt-0.5 h-4 w-4 text-feedback-warning flex-shrink-0" aria-hidden="true" />
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-xs font-medium text-origen-bosque">
-                            {AUDIT_LABELS[entry.action] ?? entry.action}
-                          </p>
-                          <p className="text-[11px] text-text-subtle mt-0.5">
-                            {new Date(entry.createdAt).toLocaleTimeString('es-ES', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                              second: '2-digit',
-                            })}
-                          </p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
-
-            <Link href="/dashboard/account" className="block rounded-2xl border border-border-subtle bg-surface p-4 shadow-sm transition-colors hover:bg-surface-alt">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-origen-pradera/10">
-                  <Key className="h-4 w-4 text-origen-pradera" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-origen-bosque">Volver a Cuenta</p>
-                  <p className="text-xs text-muted-foreground">Gestiona notificaciones, preferencias y ayuda desde un único lugar.</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-text-subtle" />
-              </div>
-            </Link>
           </div>
         </div>
       </div>
