@@ -188,7 +188,7 @@ export default function PaymentsPage() {
                   title="Panel de cobros y liquidación"
                   size="md"
                 />
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-origen-bosque sm:text-3xl">
+                <h2 className="mt-3 text-h2 text-origen-bosque">
                   {isLoading
                     ? 'Verificando estado de cobros...'
                     : paymentStage === 'connected'
@@ -197,7 +197,7 @@ export default function PaymentsPage() {
                         ? 'Te queda un paso para activar los cobros'
                         : 'Conecta Stripe para empezar a cobrar'}
                 </h2>
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-text-subtle sm:text-base">
+                <p className="mt-2 max-w-xl text-small leading-relaxed text-text-subtle">
                   Revisa estado, verificación y acceso directo a Stripe para activar o actualizar tus datos de cobro.
                 </p>
               </div>
@@ -249,7 +249,7 @@ export default function PaymentsPage() {
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <CardTitle className="flex items-center gap-2 text-h3">
                   <Landmark className="h-5 w-5 text-origen-pradera" aria-hidden="true" />
                   Estado de la cuenta de cobro
                 </CardTitle>
