@@ -1,6 +1,16 @@
 /**
  * @component ReviewsList
- * @description Lista de reseñas con diseño de tarjetas
+ * @description Lista de reseñas en desktop — Cards enriquecidas con acento
+ * de sentimiento (positivo / neutro / negativo) basado en la valoración.
+ *
+ * Paleta "Bosque Comercial" v5.5. Cada Card muestra:
+ *   - Cabecera: avatar, nombre, estrella prominente, badge de estado, fecha
+ *   - Subtítulo: nombre del producto/productor (como Badge leaf enlazable)
+ *   - Cuerpo: texto colapsable a 3 líneas
+ *   - Respuesta del productor con separación visual clara
+ *   - Footer: votos útil/no útil + acciones (Responder, Reportar)
+ *
+ * isLoading=true muestra N filas skeleton en lugar del overlay Spinner.
  */
 
 'use client';
@@ -12,11 +22,11 @@ import { cn } from '@/lib/utils';
 import { Card } from '@arcediano/ux-library';
 import { Badge, Button } from '@arcediano/ux-library';
 import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
+import { StarRating } from '@arcediano/ux-library';
 import { Textarea } from '@arcediano/ux-library';
-import { FilterSelect } from '@/components/ui/FilterSelect';
-import { 
-  Star, 
-  ThumbsUp, 
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@arcediano/ux-library';
+import {
+  ThumbsUp,
   ThumbsDown,
   MessageSquare,
   CheckCircle,
@@ -25,57 +35,144 @@ import {
   Image as ImageIcon,
   Flag,
   Send,
-  X
+  X,
+  MessageCircle,
 } from 'lucide-react';
 import type { Review } from '@/types/review';
 
-interface ReviewsListProps {
+// ─── TIPOS ─────────────────────────────────────────────────────────────────────
+
+export interface ReviewsListProps {
   reviews: Review[];
   onRespond?: (reviewId: string, response: string) => void;
   onFlag?: (reviewId: string, reason?: string) => void;
   onHelpful?: (reviewId: string, helpful: boolean) => void;
   className?: string;
+  /** Cuando true muestra filas skeleton en lugar de las reseñas */
+  isLoading?: boolean;
+  /** Nº de filas skeleton a mostrar (por defecto 5) */
+  skeletonCount?: number;
 }
+
+// ─── HELPERS DE SENTIMIENTO ───────────────────────────────────────────────────
+
+/** Clases de acento sutil según la valoración — izquierda de la card */
+function sentimentAccent(rating: number): string {
+  if (rating >= 4) return 'border-l-4 border-l-green-400/70';
+  if (rating === 3) return 'border-l-4 border-l-border-subtle';
+  return 'border-l-4 border-l-red-300/70';
+}
+
+/** Fondo ultra sutil de la card según sentimiento */
+function sentimentBg(rating: number): string {
+  if (rating >= 4) return 'bg-green-50/30';
+  if (rating === 3) return '';
+  return 'bg-red-50/20';
+}
+
+// ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
+
+const STATUS_CONFIG: Record<
+  Review['status'],
+  { variant: 'success' | 'warning' | 'danger' | 'neutral'; icon: React.ElementType; label: string }
+> = {
+  approved: { variant: 'success', icon: CheckCircle, label: 'Aprobada' },
+  pending:  { variant: 'warning', icon: Clock,       label: 'Pendiente' },
+  rejected: { variant: 'danger',  icon: AlertCircle, label: 'Rechazada' },
+  flagged:  { variant: 'danger',  icon: AlertCircle, label: 'Reportada' },
+};
+
+// ─── SKELETON ─────────────────────────────────────────────────────────────────
+
+function ReviewsListSkeleton({ count = 5 }: { count?: number }) {
+  return (
+    <div className="space-y-3" aria-busy aria-label="Cargando reseñas">
+      {Array.from({ length: count }).map((_, i) => (
+        <div
+          key={i}
+          className="animate-pulse rounded-xl border border-border-subtle bg-surface-alt p-4 sm:p-5"
+        >
+          {/* Cabecera */}
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-origen-pastel/60 flex-shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="h-4 bg-origen-pastel rounded-lg w-1/4" />
+                <div className="h-5 bg-origen-pastel/60 rounded-full w-20" />
+              </div>
+              <div className="h-3 bg-origen-pastel/60 rounded-lg w-2/5" />
+            </div>
+          </div>
+          {/* Badge producto */}
+          <div className="h-5 bg-origen-pastel/40 rounded-full w-1/3 mb-3" />
+          {/* Rating + título */}
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex gap-0.5">
+              {[1,2,3,4,5].map(s => <div key={s} className="w-4 h-4 rounded bg-origen-pastel/60" />)}
+            </div>
+            <div className="h-4 bg-origen-pastel rounded-lg w-1/3" />
+          </div>
+          {/* Texto */}
+          <div className="space-y-1.5 mb-4">
+            <div className="h-3 bg-origen-pastel/40 rounded-lg w-full" />
+            <div className="h-3 bg-origen-pastel/40 rounded-lg w-5/6" />
+            <div className="h-3 bg-origen-pastel/40 rounded-lg w-4/6" />
+          </div>
+          {/* Footer */}
+          <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
+            <div className="flex gap-3">
+              <div className="h-7 bg-origen-pastel/40 rounded-lg w-14" />
+              <div className="h-7 bg-origen-pastel/40 rounded-lg w-14" />
+            </div>
+            <div className="flex gap-2">
+              <div className="h-7 bg-origen-pastel/40 rounded-lg w-24" />
+              <div className="h-7 bg-origen-pastel/40 rounded-lg w-20" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 
 export function ReviewsList({
   reviews,
   onRespond,
   onFlag,
   onHelpful,
-  className
+  className,
+  isLoading = false,
+  skeletonCount = 5,
 }: ReviewsListProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [respondingTo, setRespondingTo] = useState<string | null>(null);
-  const [responseText, setResponseText] = useState('');
+  const [expandedId, setExpandedId]       = useState<string | null>(null);
+  const [respondingTo, setRespondingTo]   = useState<string | null>(null);
+  const [responseText, setResponseText]   = useState('');
   const [showFlagDialog, setShowFlagDialog] = useState<string | null>(null);
-  const [flagReason, setFlagReason] = useState('');
+  const [flagReason, setFlagReason]       = useState('');
 
-  const getStatusBadge = (status: Review['status']) => {
-    const config = {
-      pending: { variant: 'warning' as const, icon: Clock, label: 'Pendiente' },
-      approved: { variant: 'success' as const, icon: CheckCircle, label: 'Aprobada' },
-      rejected: { variant: 'danger' as const, icon: AlertCircle, label: 'Rechazada' },
-      flagged: { variant: 'danger' as const, icon: AlertCircle, label: 'Reportada' }
-    };
-    const { variant, icon: Icon, label } = config[status];
-    return <Badge variant={variant} icon={<Icon className="w-3 h-3" />}>{label}</Badge>;
-  };
+  // ── Estado de carga — skeleton ────────────────────────────────────────────
+  if (isLoading) {
+    return <ReviewsListSkeleton count={skeletonCount} />;
+  }
 
-  const renderStars = (rating: number) => {
+  // ── Estado vacío ──────────────────────────────────────────────────────────
+  if (reviews.length === 0) {
     return (
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={cn(
-              'w-4 h-4',
-              star <= rating ? 'fill-feedback-warning text-feedback-warning' : 'text-border'
-            )}
-          />
-        ))}
-      </div>
+      <Card className="py-10 sm:py-14 text-center bg-surface-alt border border-border-subtle">
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 rounded-full bg-origen-pastel flex items-center justify-center mb-3">
+            <MessageSquare className="w-6 h-6 text-origen-pradera" />
+          </div>
+          <h3 className="text-base font-semibold text-origen-bosque mb-1">No hay reseñas</h3>
+          <p className="text-sm text-text-subtle">
+            No se encontraron reseñas con los filtros seleccionados.
+          </p>
+        </div>
+      </Card>
     );
-  };
+  }
 
   const handleSubmitResponse = (reviewId: string) => {
     if (responseText.trim() && onRespond) {
@@ -93,275 +190,270 @@ export function ReviewsList({
     }
   };
 
-  if (reviews.length === 0) {
-    return (
-      <Card className="py-8 sm:p-12 text-center">
-        <div className="flex flex-col items-center">
-          <MessageSquare className="w-8 h-8 sm:w-12 sm:h-12 text-text-disabled mb-3 sm:mb-4" />
-          <h3 className="text-lg font-semibold text-origen-bosque mb-2">
-            No hay reseñas
-          </h3>
-          <p className="text-sm text-text-subtle">
-            No se encontraron reseñas con los filtros seleccionados.
-          </p>
-        </div>
-      </Card>
-    );
-  }
-
   return (
-    <div className={cn('space-y-4', className)}>
-      {reviews.map((review) => (
-        <Card key={review.id} variant="elevated" className="p-4 sm:p-5">
-          {/* Cabecera */}
-          <div className="flex items-start justify-between mb-3 sm:mb-4">
-            <div className="flex items-start gap-3">
-              {/* Avatar */}
-              <Avatar className="w-10 h-10">
-                <AvatarImage src={review.authorAvatar} alt={review.authorName} />
-                <AvatarFallback className="bg-origen-crema text-origen-bosque text-sm font-medium">
-                  {review.authorName.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+    <div className={cn('space-y-3', className)}>
+      {reviews.map((review) => {
+        const statusCfg = STATUS_CONFIG[review.status] ?? STATUS_CONFIG.pending;
+        const StatusIcon = statusCfg.icon;
+        const isExpanded = expandedId === review.id;
 
-              {/* Info autor */}
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium text-origen-bosque">
-                    {review.authorName}
-                  </span>
-                  {review.verifiedPurchase && (
-                    <Badge variant="success" size="xs" className="gap-1">
-                      <CheckCircle className="w-3 h-3" />
-                      Compra verificada
-                    </Badge>
+        return (
+          <Card
+            key={review.id}
+            className={cn(
+              'overflow-hidden transition-shadow hover:shadow-md',
+              sentimentAccent(review.rating),
+              sentimentBg(review.rating),
+            )}
+          >
+            <div className="p-4 sm:p-5">
+              {/* ── Cabecera: avatar + autor + meta ── */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <Avatar className="w-9 h-9 flex-shrink-0">
+                    <AvatarImage src={review.authorAvatar} alt={review.authorName} />
+                    <AvatarFallback className="bg-origen-pastel text-origen-bosque text-sm font-semibold">
+                      {review.authorName.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-semibold text-origen-bosque truncate">
+                        {review.authorName}
+                      </span>
+                      {review.verifiedPurchase && (
+                        <Badge variant="success" size="xs" icon={<CheckCircle className="w-3 h-3" />}>
+                          Compra verificada
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-text-subtle mt-0.5">
+                      <span>{review.type === 'product' ? 'Reseña de producto' : 'Reseña de productor'}</span>
+                      <span aria-hidden>·</span>
+                      <time dateTime={review.createdAt.toISOString()}>
+                        {formatDistanceToNow(review.createdAt, { locale: es, addSuffix: true })}
+                      </time>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Badge estado — esquina superior derecha */}
+                <div className="flex-shrink-0">
+                  <Badge variant={statusCfg.variant} size="sm" icon={<StatusIcon className="w-3 h-3" />}>
+                    {statusCfg.label}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* ── Producto / productor enlazable ── */}
+              <div className="mb-3">
+                <Badge variant="leaf" size="sm">
+                  {review.type === 'product' ? 'Producto:' : 'Productor:'}{' '}
+                  <span className="font-semibold">{review.targetName}</span>
+                </Badge>
+              </div>
+
+              {/* ── Rating prominente + título ── */}
+              <div className="flex items-center gap-2.5 mb-2">
+                <StarRating value={review.rating} readOnly size="sm" />
+                <span className="text-sm font-semibold text-origen-bosque leading-snug">
+                  {review.title}
+                </span>
+              </div>
+
+              {/* ── Contenido colapsable ── */}
+              <p className={cn(
+                'text-sm text-text-subtle leading-relaxed mb-2',
+                !isExpanded && review.content.length > 200 && 'line-clamp-3',
+              )}>
+                {review.content}
+              </p>
+              {review.content.length > 200 && (
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(isExpanded ? null : review.id)}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-origen-pradera hover:text-origen-hoja transition-colors mb-2"
+                  aria-expanded={isExpanded}
+                >
+                  {isExpanded ? 'Ver menos' : 'Ver más'}
+                </button>
+              )}
+
+              {/* ── Imágenes adjuntas ── */}
+              {review.images && review.images.length > 0 && (
+                <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
+                  {review.images.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className="w-16 h-16 rounded-lg bg-origen-crema/50 border border-border-subtle flex items-center justify-center overflow-hidden flex-shrink-0"
+                      aria-label={`Imagen ${idx + 1} de la reseña`}
+                    >
+                      <ImageIcon className="w-5 h-5 text-text-subtle" aria-hidden />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ── Respuesta del productor ── */}
+              {review.response && (
+                <div className="mt-3 p-3 bg-origen-nube border border-origen-pradera/15 rounded-xl">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="w-5 h-5 rounded-full bg-origen-pastel flex items-center justify-center flex-shrink-0">
+                      <MessageCircle className="w-3 h-3 text-origen-pino" aria-hidden />
+                    </div>
+                    <span className="text-xs font-semibold text-origen-bosque">
+                      {review.response.authorName}
+                    </span>
+                    <span className="text-[10px] text-text-subtle">
+                      {formatDistanceToNow(review.response.createdAt, { locale: es, addSuffix: true })}
+                    </span>
+                  </div>
+                  <p className="text-xs text-text-subtle leading-relaxed pl-7">
+                    {review.response.content}
+                  </p>
+                </div>
+              )}
+
+              {/* ── Formulario de respuesta inline ── */}
+              {respondingTo === review.id && (
+                <div className="mt-3 p-3.5 bg-origen-crema/40 rounded-xl border border-origen-pradera/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-origen-bosque">Responder a esta reseña</span>
+                    <button
+                      type="button"
+                      onClick={() => { setRespondingTo(null); setResponseText(''); }}
+                      className="h-6 w-6 rounded-lg flex items-center justify-center text-text-subtle hover:bg-surface hover:text-origen-bosque transition-colors"
+                      aria-label="Cerrar formulario de respuesta"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <Textarea
+                    value={responseText}
+                    onChange={(e) => setResponseText(e.target.value)}
+                    placeholder="Escribe tu respuesta pública..."
+                    className="min-h-[80px] mb-3 text-sm"
+                  />
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      onClick={() => handleSubmitResponse(review.id)}
+                      disabled={!responseText.trim()}
+                      leftIcon={<Send className="w-4 h-4" />}
+                    >
+                      Enviar respuesta
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Diálogo de reporte inline ── */}
+              {showFlagDialog === review.id && (
+                <div className="mt-3 p-3.5 bg-red-50/50 rounded-xl border border-red-200/80">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-red-700">Reportar reseña</span>
+                    <button
+                      type="button"
+                      onClick={() => { setShowFlagDialog(null); setFlagReason(''); }}
+                      className="h-6 w-6 rounded-lg flex items-center justify-center text-text-subtle hover:bg-red-100 transition-colors"
+                      aria-label="Cerrar diálogo de reporte"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-text-subtle mb-3">¿Por qué quieres reportar esta reseña?</p>
+                  <Select value={flagReason} onValueChange={setFlagReason}>
+                    <SelectTrigger className="mb-3 text-sm">
+                      <SelectValue placeholder="Selecciona un motivo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="inappropriate">Contenido inapropiado</SelectItem>
+                      <SelectItem value="spam">Spam</SelectItem>
+                      <SelectItem value="fake">Reseña falsa</SelectItem>
+                      <SelectItem value="offensive">Lenguaje ofensivo</SelectItem>
+                      <SelectItem value="other">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => { setShowFlagDialog(null); setFlagReason(''); }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleSubmitFlag(review.id)}
+                      disabled={!flagReason}
+                      leftIcon={<Flag className="w-4 h-4" />}
+                    >
+                      Reportar
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Footer: votos + acciones ── */}
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-border-subtle">
+                {/* Votos útil / no útil */}
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onHelpful?.(review.id, true)}
+                    aria-label={`Marcar como útil (${review.helpful} votos)`}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <ThumbsUp className="w-3.5 h-3.5" />
+                      <span className="text-xs">{review.helpful}</span>
+                    </span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onHelpful?.(review.id, false)}
+                    aria-label={`Marcar como no útil (${review.notHelpful} votos)`}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <ThumbsDown className="w-3.5 h-3.5" />
+                      <span className="text-xs">{review.notHelpful}</span>
+                    </span>
+                  </Button>
+                </div>
+
+                {/* Acciones contextuales */}
+                <div className="flex items-center gap-2">
+                  {!review.response && respondingTo !== review.id && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setRespondingTo(review.id)}
+                      leftIcon={<MessageSquare className="w-4 h-4" />}
+                    >
+                      Responder
+                    </Button>
+                  )}
+                  {showFlagDialog !== review.id && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowFlagDialog(review.id)}
+                      leftIcon={<Flag className="w-3.5 h-3.5" />}
+                      className="text-feedback-danger hover:bg-feedback-danger-subtle"
+                      aria-label="Reportar esta reseña"
+                    >
+                      Reportar
+                    </Button>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-text-subtle mt-1">
-                  <span>Reseña de {review.type === 'product' ? 'producto' : 'productor'}</span>
-                  <span>·</span>
-                  <span>{formatDistanceToNow(review.createdAt, { locale: es, addSuffix: true })}</span>
-                </div>
               </div>
             </div>
-
-            {/* Estado */}
-            <div className="flex items-center gap-2">
-              {getStatusBadge(review.status)}
-            </div>
-          </div>
-
-          {/* Target (producto/productor) */}
-          <div className="mb-3">
-            <Badge variant="leaf" size="sm">
-              {review.type === 'product' ? 'Producto:' : 'Productor:'} {review.targetName}
-            </Badge>
-          </div>
-
-          {/* Rating y título */}
-          <div className="flex items-center gap-3 mb-2">
-            {renderStars(review.rating)}
-            <span className="font-semibold text-origen-bosque">{review.title}</span>
-          </div>
-
-          {/* Contenido */}
-          <p className={cn(
-            'text-sm text-text-subtle mb-3',
-            expandedId !== review.id && 'line-clamp-3'
-          )}>
-            {review.content}
-          </p>
-
-          {/* Botón ver más */}
-          {review.content.length > 200 && (
-            <button
-              onClick={() => setExpandedId(expandedId === review.id ? null : review.id)}
-              className="inline-flex items-center gap-1 text-xs font-medium text-origen-pradera hover:text-origen-hoja transition-colors mb-3"
-            >
-              {expandedId === review.id ? 'Ver menos' : 'Ver más'}
-            </button>
-          )}
-
-          {/* Imágenes */}
-          {review.images && review.images.length > 0 && (
-            <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
-              {review.images.map((img, idx) => (
-                <div
-                  key={idx}
-                  className="w-16 h-16 rounded-lg bg-origen-crema flex items-center justify-center overflow-hidden flex-shrink-0"
-                >
-                  <ImageIcon className="w-6 h-6 text-text-subtle" />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Respuesta existente */}
-          {review.response && (
-            <div className="mt-3 pl-4 border-l-2 border-origen-pradera/30">
-              <div className="flex items-center gap-2 mb-1">
-                <MessageSquare className="w-3 h-3 text-origen-pradera" />
-                <span className="text-xs font-medium text-origen-bosque">
-                  {review.response.authorName}
-                </span>
-                <span className="text-[10px] text-text-subtle">
-                  {formatDistanceToNow(review.response.createdAt, { locale: es, addSuffix: true })}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">{review.response.content}</p>
-            </div>
-          )}
-
-          {/* Formulario de respuesta */}
-          {respondingTo === review.id && (
-            <div className="mt-4 p-4 bg-origen-crema/30 rounded-lg border border-origen-pradera/20">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-origen-bosque">Responder a esta reseña</span>
-                <button
-                  onClick={() => {
-                    setRespondingTo(null);
-                    setResponseText('');
-                  }}
-                  className="h-7 w-7 rounded-lg flex items-center justify-center text-text-subtle hover:bg-surface hover:text-origen-bosque transition-colors"
-                  aria-label="Cerrar formulario"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <Textarea
-                value={responseText}
-                onChange={(e) => setResponseText(e.target.value)}
-                placeholder="Escribe tu respuesta..."
-                className="min-h-[80px] mb-3"
-              />
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  onClick={() => handleSubmitResponse(review.id)}
-                  disabled={!responseText.trim()}
-                  leftIcon={<Send className="w-4 h-4" />}
-                >
-                  Enviar respuesta
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Diálogo de reporte */}
-          {showFlagDialog === review.id && (
-            <div className="mt-4 p-4 bg-feedback-danger-subtle/50 rounded-lg border border-red-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-feedback-danger">Reportar reseña</span>
-                <button
-                  onClick={() => {
-                    setShowFlagDialog(null);
-                    setFlagReason('');
-                  }}
-                  className="h-7 w-7 rounded-lg flex items-center justify-center text-text-subtle hover:bg-feedback-danger-subtle hover:text-feedback-danger transition-colors"
-                  aria-label="Cerrar"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <p className="text-xs text-muted-foreground mb-3">
-                ¿Por qué quieres reportar esta reseña?
-              </p>
-              <FilterSelect
-                value={flagReason}
-                onChange={(e) => setFlagReason(e.target.value)}
-                className="w-full p-2 text-sm border border-border rounded-lg mb-3"
-              >
-                <option value="">Selecciona un motivo</option>
-                <option value="inappropriate">Contenido inapropiado</option>
-                <option value="spam">Spam</option>
-                <option value="fake">Reseña falsa</option>
-                <option value="offensive">Lenguaje ofensivo</option>
-                <option value="other">Otro</option>
-              </FilterSelect>
-              <div className="flex justify-end gap-2">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setShowFlagDialog(null);
-                    setFlagReason('');
-                  }}
-                >
-                  <span>
-                    <span className="flex items-center gap-2">
-                      Cancelar
-                    </span>
-                  </span>
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => handleSubmitFlag(review.id)}
-                  disabled={!flagReason}
-                  leftIcon={<Flag className="w-4 h-4" />}
-                >
-                  Reportar
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Footer con acciones - CON ESTRUCTURA CORREGIDA */}
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-border-subtle">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onHelpful?.(review.id, true)}
-              >
-                <span>
-                  <span className="flex items-center gap-1.5">
-                    <ThumbsUp className="w-3.5 h-3.5" />
-                    <span>{review.helpful}</span>
-                  </span>
-                </span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onHelpful?.(review.id, false)}
-              >
-                <span>
-                  <span className="flex items-center gap-1.5">
-                    <ThumbsDown className="w-3.5 h-3.5" />
-                    <span>{review.notHelpful}</span>
-                  </span>
-                </span>
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {!review.response && respondingTo !== review.id && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setRespondingTo(review.id)}
-                  leftIcon={<MessageSquare className="w-4 h-4" />}
-                >
-                  Responder
-                </Button>
-              )}
-              {showFlagDialog !== review.id && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowFlagDialog(review.id)}
-                  leftIcon={<Flag className="w-4 h-4 text-feedback-danger" />}
-                  className="text-feedback-danger hover:bg-feedback-danger-subtle"
-                >
-                  Reportar
-                </Button>
-              )}
-            </div>
-          </div>
-        </Card>
-      ))}
+          </Card>
+        );
+      })}
     </div>
   );
 }
-

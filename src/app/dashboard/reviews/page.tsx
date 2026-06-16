@@ -1,6 +1,13 @@
 /**
  * @page ReviewsPage
- * @description Panel principal de gestión de reseñas
+ * @description Panel principal de gestión de reseñas — "Bosque Comercial" v5.5.
+ *
+ * Estado de carga unificado con Productos y Pedidos:
+ *   - Carga inicial: PageLoader (pantalla completa)
+ *   - Recarga por filtros/paginación (isTableLoading):
+ *       · Móvil: MobileCardList con renderSkeleton (ReviewCardSkeleton)
+ *       · Desktop: ReviewsList con isLoading=true (ReviewsListSkeleton inline)
+ *   No se usa overlay con Spinner en ningún caso.
  */
 
 'use client';
@@ -18,7 +25,7 @@ import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
 import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
 import { MobileCardList } from '@/components/shared/MobileCardList';
-import { Pagination, Spinner } from '@arcediano/ux-library';
+import { Pagination } from '@arcediano/ux-library';
 
 // Hooks y API
 import { fetchReviews, addReviewResponse, flagReview, markReviewHelpful } from '@/lib/api/reviews';
@@ -36,18 +43,9 @@ const containerVariants: Variants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.05,
-      delayChildren: 0.1
-    }
-  }
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: 'spring', stiffness: 300, damping: 25 }
-  }
+      delayChildren: 0.1,
+    },
+  },
 };
 
 // ============================================================================
@@ -68,15 +66,15 @@ export default function ReviewsPage() {
     },
   };
 
-  const [reviews, setReviews] = useState<Review[]>([]);;
-  const [stats, setStats] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [reviews, setReviews]             = useState<Review[]>([]);
+  const [stats, setStats]                 = useState<any>(null);
+  const [isLoading, setIsLoading]         = useState(true);
   const [isTableLoading, setIsTableLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<ReviewFiltersType>({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalReviews, setTotalReviews] = useState(0);
+  const [error, setError]                 = useState<string | null>(null);
+  const [filters, setFilters]             = useState<ReviewFiltersType>({});
+  const [currentPage, setCurrentPage]     = useState(1);
+  const [totalPages, setTotalPages]       = useState(1);
+  const [totalReviews, setTotalReviews]   = useState(0);
 
   const isFirstLoad = React.useRef(true);
 
@@ -87,6 +85,7 @@ export default function ReviewsPage() {
       return;
     }
     loadReviews(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, currentPage]);
 
   const loadReviews = async (isInitialLoad = false) => {
@@ -144,17 +143,21 @@ export default function ReviewsPage() {
       toast({ title: 'Error', description: res.error, variant: 'error' });
       return;
     }
-    setReviews(prev =>
-      prev.map(r =>
+    setReviews((prev) =>
+      prev.map((r) =>
         r.id === reviewId
-          ? { ...r, helpful: helpful ? r.helpful + 1 : r.helpful, notHelpful: !helpful ? r.notHelpful + 1 : r.notHelpful }
-          : r
-      )
+          ? {
+              ...r,
+              helpful:    helpful  ? r.helpful    + 1 : r.helpful,
+              notHelpful: !helpful ? r.notHelpful + 1 : r.notHelpful,
+            }
+          : r,
+      ),
     );
   };
 
   const handleFilterChange = (newFilters: ReviewFiltersType) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters((prev) => ({ ...prev, ...newFilters }));
     setCurrentPage(1);
   };
 
@@ -163,6 +166,7 @@ export default function ReviewsPage() {
     setCurrentPage(1);
   };
 
+  // ── Carga inicial: PageLoader de pantalla completa ────────────────────────
   if (isLoading && !reviews.length) return <PageLoader message="Cargando reseñas..." />;
 
   if (error) return <PageError title="Error al cargar" message={error} onRetry={loadReviews} />;
@@ -171,84 +175,83 @@ export default function ReviewsPage() {
 
   return (
     <MobilePullRefresh onRefresh={handleRefresh}>
-    <>
-      {/* Cabecera */}
-      <PageHeader
-        title="Gestión de reseñas"
-        description={`${totalReviews} reseñas en total`}
-        badgeIcon={MessageSquare}
-        badgeText="Reseñas"
-        tooltip="Reseñas"
-        tooltipDetailed="Gestiona las reseñas de productos y productores, responde a tus clientes y reporta contenido inapropiado."
-      />
+      <>
+        {/* Cabecera */}
+        <PageHeader
+          title="Reseñas"
+          description="Gestiona, responde y modera las valoraciones de tus productos y productores"
+          badgeIcon={MessageSquare}
+          badgeText="Reseñas"
+          tooltip="Reseñas"
+          tooltipDetailed="Gestiona las reseñas de productos y productores, responde a tus clientes y reporta contenido inapropiado."
+        />
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8"
-      >
-        {/* Estadísticas */}
-        {stats && (
-          <motion.div variants={itemVariants}>
-            <ReviewStats stats={stats} />
-          </motion.div>
-        )}
-
-        {/* Filtros */}
-        <motion.div variants={itemVariants}>
-          <ReviewFilters
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onClearFilters={handleClearFilters}
-            totalReviews={totalReviews}
-          />
-        </motion.div>
-
-        {/* Lista de reseñas */}
-        <motion.div variants={itemVariants}>
-          <MobileCardList
-            className="block lg:hidden mb-4"
-            isLoading={isTableLoading}
-            renderSkeleton={() => <ReviewCardSkeleton />}
-          >
-            {reviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-                onRespond={handleRespond}
-                onFlag={(id) => handleFlag(id)}
-              />
-            ))}
-          </MobileCardList>
-
-          <div className="hidden lg:block relative">
-            {isTableLoading && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 rounded-xl">
-                <Spinner size="lg" variant="primary" label="Actualizando reseñas..." />
-              </div>
-            )}
-            <ReviewsList
-              reviews={reviews}
-              onRespond={handleRespond}
-              onFlag={handleFlag}
-              onHelpful={handleHelpful}
-            />
-          </div>
-
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              className="mt-6"
-            />
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8"
+        >
+          {/* Estadísticas */}
+          {stats && (
+            <motion.div variants={itemVariants}>
+              <ReviewStats stats={stats} />
+            </motion.div>
           )}
+
+          {/* Filtros */}
+          <motion.div variants={itemVariants}>
+            <ReviewFilters
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClearFilters={handleClearFilters}
+              totalReviews={totalReviews}
+            />
+          </motion.div>
+
+          {/* Lista de reseñas */}
+          <motion.div variants={itemVariants}>
+            {/* ── Móvil (< lg): MobileCardList con skeleton ── */}
+            <MobileCardList
+              className="block lg:hidden mb-4"
+              isLoading={isTableLoading}
+              renderSkeleton={() => <ReviewCardSkeleton />}
+              skeletonCount={5}
+            >
+              {reviews.map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  onRespond={handleRespond}
+                  onFlag={(id) => handleFlag(id)}
+                />
+              ))}
+            </MobileCardList>
+
+            {/* ── Desktop (≥ lg): ReviewsList con isLoading skeleton ── */}
+            <div className="hidden lg:block">
+              <ReviewsList
+                reviews={reviews}
+                onRespond={handleRespond}
+                onFlag={handleFlag}
+                onHelpful={handleHelpful}
+                isLoading={isTableLoading}
+                skeletonCount={5}
+              />
+            </div>
+
+            {/* Paginación */}
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                className="mt-6"
+              />
+            )}
+          </motion.div>
         </motion.div>
-      </motion.div>
-    </>
+      </>
     </MobilePullRefresh>
   );
 }
-
-
