@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle, ThumbsUp, ImageIcon, ChevronDown, X } from 'lucide-react';
+import { CheckCircle, ThumbsUp, ImageIcon, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   FilterToolbar,
@@ -18,7 +18,7 @@ import {
   type ToggleOption,
   ActiveFilterChips,
   type ActiveFilterChip,
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  ToggleGroup, ToggleGroupItem, StarRating,
 } from '@arcediano/ux-library';
 import { Button } from '@arcediano/ux-library';
 import type { ReviewFilters as ReviewFiltersType, ReviewType, ReviewStatus } from '@/types/review';
@@ -58,8 +58,6 @@ export interface ReviewFiltersProps {
   className?: string;
 }
 
-// Clases del trigger de Select adaptadas al filtro
-const triggerCls = 'h-9 py-0 sm:py-0 px-3 sm:px-3 text-sm bg-surface-alt border-border w-auto';
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
@@ -212,74 +210,112 @@ export function ReviewFilters({
       />
 
       {/* ── Filtros desktop: Select + pill toggles booleanos ──────────── */}
-      <div className="hidden lg:flex items-center gap-2 pt-1">
+      <div className="hidden lg:flex items-center gap-2 pt-1 flex-wrap">
 
         {/* Estado */}
-        <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as ReviewStatus || undefined)} className="w-auto">
-          <SelectTrigger className={triggerCls}>
-            <SelectValue className="text-sm">
-              {filters.status
-                ? STATUS_OPTIONS.find(o => o.value === filters.status)?.label
-                : <span className="text-text-disabled">Estado</span>}
-            </SelectValue>
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <ToggleGroup
+          type="single"
+          variant="pill"
+          size="sm"
+          value={filters.status ?? ''}
+          onValueChange={(v) => {
+            const val = typeof v === 'string' ? v : '';
+            set('status', val as ReviewStatus || undefined);
+          }}
+          className="flex-shrink-0"
+        >
+          <ToggleGroupItem value="" aria-label="Todas las reseñas">Todas</ToggleGroupItem>
+          <ToggleGroupItem value="pending" aria-label="Pendientes">Pendientes</ToggleGroupItem>
+          <ToggleGroupItem value="approved" aria-label="Aprobadas">Aprobadas</ToggleGroupItem>
+          <ToggleGroupItem value="rejected" aria-label="Rechazadas">Rechazadas</ToggleGroupItem>
+          <ToggleGroupItem value="flagged" aria-label="Reportadas">Reportadas</ToggleGroupItem>
+        </ToggleGroup>
 
         {/* Tipo */}
-        <Select value={filters.type ?? ''} onValueChange={(v) => set('type', v as ReviewType || undefined)} className="w-auto">
-          <SelectTrigger className={triggerCls}>
-            <SelectValue className="text-sm">
-              {filters.type
-                ? TYPE_OPTIONS.find(o => o.value === filters.type)?.label
-                : <span className="text-text-disabled">Tipo</span>}
-            </SelectValue>
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
-          </SelectTrigger>
-          <SelectContent>
-            {TYPE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <ToggleGroup
+          type="single"
+          variant="pill"
+          size="sm"
+          value={filters.type ?? ''}
+          onValueChange={(v) => {
+            const val = typeof v === 'string' ? v : '';
+            set('type', val as ReviewType || undefined);
+          }}
+          className="flex-shrink-0"
+        >
+          <ToggleGroupItem value="" aria-label="Todos los tipos">Todos</ToggleGroupItem>
+          <ToggleGroupItem value="product" aria-label="Productos">Productos</ToggleGroupItem>
+          <ToggleGroupItem value="producer" aria-label="Productores">Productores</ToggleGroupItem>
+        </ToggleGroup>
 
         {/* Valoración */}
-        <Select
-          value={filters.rating ? String(filters.rating) : ''}
-          onValueChange={(v) => onFilterChange({ ...filters, rating: v ? Number(v) as any : undefined })}
-          className="w-auto"
-        >
-          <SelectTrigger className={triggerCls}>
-            <SelectValue className="text-sm">
-              {filters.rating
-                ? RATING_OPTIONS.find(o => o.value === String(filters.rating))?.label
-                : <span className="text-text-disabled">Valoración</span>}
-            </SelectValue>
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
-          </SelectTrigger>
-          <SelectContent>
-            {RATING_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-xs text-text-subtle whitespace-nowrap">Valoración:</span>
+          <StarRating
+            value={filters.rating ?? 0}
+            size="sm"
+            label="Filtrar por valoración"
+            onChange={(star) => {
+              const next = filters.rating === star ? undefined : star;
+              onFilterChange({ ...filters, rating: next as any });
+            }}
+          />
+          {filters.rating !== undefined && (
+            <button
+              type="button"
+              className="text-xs text-text-subtle hover:text-origen-bosque transition-colors"
+              aria-label="Quitar filtro de valoración"
+              onClick={() => onFilterChange({ ...filters, rating: undefined })}
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
 
         <div className="w-px h-4 bg-border-subtle mx-1" />
 
-        {/* Booleanos — pill toggles (on/off, sin valor placeholder → no se usan Select) */}
-        <button onClick={() => onFilterChange({ ...filters, verifiedOnly: !filters.verifiedOnly })}
-          className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
-            filters.verifiedOnly ? 'bg-origen-bosque border-origen-bosque text-white' : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50')}
-        ><CheckCircle className="w-3 h-3" />Verificadas</button>
+        {/* Booleanos — ToggleGroupItem pill */}
+        <ToggleGroup
+          type="single"
+          variant="pill"
+          size="sm"
+          value={filters.verifiedOnly ? 'on' : ''}
+          onValueChange={(v) => {
+            const active = typeof v === 'string' && v === 'on';
+            onFilterChange({ ...filters, verifiedOnly: active || undefined });
+          }}
+          className="flex-shrink-0"
+        >
+          <ToggleGroupItem value="on" aria-label="Verificadas">Verificadas</ToggleGroupItem>
+        </ToggleGroup>
 
-        <button onClick={() => onFilterChange({ ...filters, hasResponse: !filters.hasResponse })}
-          className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
-            filters.hasResponse ? 'bg-origen-bosque border-origen-bosque text-white' : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50')}
-        ><ThumbsUp className="w-3 h-3" />Con respuesta</button>
+        <ToggleGroup
+          type="single"
+          variant="pill"
+          size="sm"
+          value={filters.hasResponse ? 'on' : ''}
+          onValueChange={(v) => {
+            const active = typeof v === 'string' && v === 'on';
+            onFilterChange({ ...filters, hasResponse: active || undefined });
+          }}
+          className="flex-shrink-0"
+        >
+          <ToggleGroupItem value="on" aria-label="Con respuesta">Con respuesta</ToggleGroupItem>
+        </ToggleGroup>
 
-        <button onClick={() => onFilterChange({ ...filters, hasImages: !filters.hasImages })}
-          className={cn('inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap',
-            filters.hasImages ? 'bg-origen-bosque border-origen-bosque text-white' : 'bg-surface-alt border-border text-origen-bosque hover:border-origen-pradera/50')}
-        ><ImageIcon className="w-3 h-3" />Con imágenes</button>
+        <ToggleGroup
+          type="single"
+          variant="pill"
+          size="sm"
+          value={filters.hasImages ? 'on' : ''}
+          onValueChange={(v) => {
+            const active = typeof v === 'string' && v === 'on';
+            onFilterChange({ ...filters, hasImages: active || undefined });
+          }}
+          className="flex-shrink-0"
+        >
+          <ToggleGroupItem value="on" aria-label="Con imágenes">Con imágenes</ToggleGroupItem>
+        </ToggleGroup>
 
         {hasAnyFilter && (
           <Button variant="ghost" size="sm" onClick={onClearFilters} leftIcon={<X className="w-3 h-3" />}>

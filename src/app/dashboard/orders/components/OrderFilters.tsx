@@ -9,14 +9,14 @@
 'use client';
 
 import React from 'react';
-import { Euro, ChevronDown, X } from 'lucide-react';
+import { Euro, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   FilterToolbar,
   FilterSheet,
   ActiveFilterChips,
   type ActiveFilterChip,
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  ToggleGroup, ToggleGroupItem,
 } from '@arcediano/ux-library';
 import { Input, Button, DateInput } from '@arcediano/ux-library';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
@@ -37,7 +37,6 @@ const STATUS_OPTIONS = [
   { value: 'cancelled',  label: 'Cancelados' },
 ];
 
-const triggerCls = 'h-9 py-0 sm:py-0 px-3 sm:px-3 text-sm bg-surface-alt border-border w-auto';
 
 export function OrderFilters({
   filters,
@@ -161,20 +160,24 @@ export function OrderFilters({
       {/* ── Filtros desktop: estado + fechas + importe ────────────────── */}
       <div className="hidden lg:flex flex-wrap items-center gap-2 pt-2">
 
-        <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as OrderStatus || undefined)} className="w-auto">
-          <SelectTrigger className={triggerCls}>
-            <SelectValue className="text-sm">
-              {filters.status
-                ? STATUS_OPTIONS.find(o => o.value === filters.status)?.label
-                : <span className="text-text-disabled">Todos los estados</span>}
-            </SelectValue>
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todos los estados</SelectItem>
-            {STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <ToggleGroup
+          type="single"
+          variant="pill"
+          size="sm"
+          value={filters.status ?? ''}
+          onValueChange={(v) => {
+            const val = typeof v === 'string' ? v : '';
+            set('status', val as OrderStatus || undefined);
+          }}
+          className="flex-shrink-0"
+        >
+          <ToggleGroupItem value="" aria-label="Todos los estados">Todos</ToggleGroupItem>
+          <ToggleGroupItem value="pending" aria-label="Pendientes">Pendientes</ToggleGroupItem>
+          <ToggleGroupItem value="processing" aria-label="Procesando">Procesando</ToggleGroupItem>
+          <ToggleGroupItem value="shipped" aria-label="Enviados">Enviados</ToggleGroupItem>
+          <ToggleGroupItem value="delivered" aria-label="Entregados">Entregados</ToggleGroupItem>
+          <ToggleGroupItem value="cancelled" aria-label="Cancelados">Cancelados</ToggleGroupItem>
+        </ToggleGroup>
 
         <div className="w-px h-4 bg-border-subtle mx-1" />
 

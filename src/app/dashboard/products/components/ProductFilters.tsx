@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { Grid3x3, List, ChevronDown, X } from 'lucide-react';
+import { Grid3x3, List, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   FilterToolbar,
@@ -17,6 +17,7 @@ import {
   ActiveFilterChips,
   type ActiveFilterChip,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  ToggleGroup, ToggleGroupItem,
 } from '@arcediano/ux-library';
 import { Button } from '@arcediano/ux-library';
 
@@ -213,15 +214,14 @@ export function ProductFilters({
       />
 
       {/* ── Filtros desktop: Select por grupo ─────────────────────────── */}
-      <div className="hidden lg:flex items-center gap-2 pt-1">
+      <div className="hidden lg:flex items-center gap-2 pt-1 flex-wrap">
 
         {/* Categoría */}
         <Select value={selectedCategory} onValueChange={onCategoryChange} className="w-auto">
-          <SelectTrigger className={triggerCls}>
+          <SelectTrigger className={cn(triggerCls, 'min-w-[160px]')}>
             <SelectValue className="text-sm">
               {selectedCategory || <span className="text-text-disabled">Todas las categorías</span>}
             </SelectValue>
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">Todas las categorías</SelectItem>
@@ -232,46 +232,44 @@ export function ProductFilters({
         </Select>
 
         {/* Estado */}
-        <Select value={selectedStatus} onValueChange={onStatusChange} className="w-auto">
-          <SelectTrigger className={triggerCls}>
-            <SelectValue className="text-sm">
-              {selectedStatus
-                ? STATUS_OPTIONS.find(o => o.value === selectedStatus)?.label
-                : <span className="text-text-disabled">Todos los estados</span>}
-            </SelectValue>
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todos los estados</SelectItem>
-            {STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <ToggleGroup
+          type="single"
+          variant="pill"
+          size="sm"
+          value={selectedStatus}
+          onValueChange={(v) => onStatusChange(typeof v === 'string' ? v : '')}
+          className="flex-shrink-0"
+        >
+          <ToggleGroupItem value="" aria-label="Todos los estados">Todos</ToggleGroupItem>
+          <ToggleGroupItem value="active" aria-label="Activos">Activos</ToggleGroupItem>
+          <ToggleGroupItem value="draft" aria-label="Borradores">Borradores</ToggleGroupItem>
+          <ToggleGroupItem value="out_of_stock" aria-label="Sin stock">Sin stock</ToggleGroupItem>
+          <ToggleGroupItem value="inactive" aria-label="Inactivos">Inactivos</ToggleGroupItem>
+        </ToggleGroup>
 
         {/* Stock */}
-        <Select value={selectedStock} onValueChange={onStockChange} className="w-auto">
-          <SelectTrigger className={triggerCls}>
-            <SelectValue className="text-sm">
-              {selectedStock
-                ? STOCK_OPTIONS.find(o => o.value === selectedStock)?.label
-                : <span className="text-text-disabled">Todo el stock</span>}
-            </SelectValue>
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todo el stock</SelectItem>
-            {STOCK_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <ToggleGroup
+          type="single"
+          variant="pill"
+          size="sm"
+          value={selectedStock}
+          onValueChange={(v) => onStockChange(typeof v === 'string' ? v : '')}
+          className="flex-shrink-0"
+        >
+          <ToggleGroupItem value="" aria-label="Todo el stock">Todo</ToggleGroupItem>
+          <ToggleGroupItem value="disponible" aria-label="Con stock">Con stock</ToggleGroupItem>
+          <ToggleGroupItem value="bajo" aria-label="Stock bajo">Stock bajo</ToggleGroupItem>
+          <ToggleGroupItem value="agotado" aria-label="Agotados">Agotados</ToggleGroupItem>
+        </ToggleGroup>
 
         {/* Ordenar */}
         <Select value={sortBy} onValueChange={onSortChange} className="w-auto">
-          <SelectTrigger className={triggerCls}>
+          <SelectTrigger className={cn(triggerCls, 'min-w-[148px]')}>
             <SelectValue className="text-sm">
               {sortBy
                 ? SORT_OPTIONS.find(o => o.value === sortBy)?.label
                 : <span className="text-text-disabled">Ordenar por</span>}
             </SelectValue>
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle ml-2" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">Ordenar por</SelectItem>
