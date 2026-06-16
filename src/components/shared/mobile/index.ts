@@ -1,9 +1,6 @@
 export { ScrollChipFilter } from './ScrollChipFilter';
 export type { ChipItem } from './ScrollChipFilter';
 
-export { FilterPanel } from './FilterPanel';
-export type { FilterPanelProps } from './FilterPanel';
-
 export { MobileStatCard } from './MobileStatCard';
 export type { StatCardAccent, MobileStatCardProps } from './MobileStatCard';
 
