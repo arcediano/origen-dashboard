@@ -32,11 +32,9 @@ import {
   Flag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage, Badge, Button } from '@arcediano/ux-library';
-import { StarRating } from '@arcediano/ux-library';
+import { Avatar, AvatarFallback, AvatarImage, Badge, Button, SwipeableRow, StarRating } from '@arcediano/ux-library';
 import type { Review } from '@/types/review';
 import { ReviewResponseSheet } from './ReviewResponseSheet';
-import { SwipeableRow } from '@/components/shared/mobile';
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 

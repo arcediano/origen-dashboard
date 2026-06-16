@@ -20,10 +20,9 @@ import {
   FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Badge } from '@arcediano/ux-library';
+import { Badge, SwipeableRow } from '@arcediano/ux-library';
 import type { Order, PaymentStatus } from '@/types/order';
 import { OrderStatusChip } from './OrderStatusChip';
-import { SwipeableRow } from '@/components/shared/mobile';
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────
 

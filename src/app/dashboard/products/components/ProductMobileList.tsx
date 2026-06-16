@@ -25,8 +25,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
-import { SwipeableRow } from '@/components/shared/mobile';
-import { ProductImage } from '@arcediano/ux-library';
+import { SwipeableRow, ProductImage } from '@arcediano/ux-library';
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
