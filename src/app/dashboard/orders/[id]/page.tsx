@@ -19,9 +19,9 @@ import {
   ActionBar,
   Sheet, SheetContent, SheetHeader, SheetTitle,
   MobilePullRefresh,
+  PageLoader,
+  PageError,
 } from '@arcediano/ux-library';
-import { PageLoader } from '@/components/shared';
-import { PageError } from '@/components/shared';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 

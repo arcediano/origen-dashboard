@@ -10,10 +10,8 @@ import { useParams } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
 import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 
-import { Badge, ActionBar } from '@arcediano/ux-library';
+import { Badge, ActionBar, PageLoader, PageError } from '@arcediano/ux-library';
 import { PageHeader } from '../../../components/PageHeader';
-import { PageLoader } from '@/components/shared/loading/page-loader';
-import { PageError } from '@/components/shared/error/page-error';
 import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 
 import {

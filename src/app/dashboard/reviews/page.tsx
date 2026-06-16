@@ -17,14 +17,12 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { MessageSquare } from 'lucide-react';
 
 // Componentes UI
-import { PageLoader } from '@/components/shared';
-import { PageError } from '@/components/shared';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ReviewHeader } from './components/ReviewHeader';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
 import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
-import { MobileCardList, Pagination, MobilePullRefresh, toast } from '@arcediano/ux-library';
+import { MobileCardList, Pagination, MobilePullRefresh, toast, PageLoader, PageError } from '@arcediano/ux-library';
 
 // Hooks y API
 import { fetchReviews, addReviewResponse, flagReview, markReviewHelpful } from '@/lib/api/reviews';

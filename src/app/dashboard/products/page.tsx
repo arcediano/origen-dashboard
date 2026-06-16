@@ -11,9 +11,7 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { Package, Plus, RefreshCw } from 'lucide-react';
 
 // Componentes UI
-import { Button, toast, Card, Pagination, MobilePullRefresh } from '@arcediano/ux-library';
-import { PageLoader } from '@/components/shared/loading/page-loader';
-import { PageError } from '@/components/shared/error/page-error';
+import { Button, toast, Card, Pagination, MobilePullRefresh, PageLoader, PageError } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProductStats, ProductFilters, ProductTable, ProductCard, ProductMobileList } from './components';
 import { AdjustStockDialog } from './components/ProductDialogs/AdjustStockDialog';

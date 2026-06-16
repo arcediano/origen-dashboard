@@ -20,11 +20,11 @@ import {
   toast,
   ProductImage as ProductImg,
   MobilePullRefresh,
+  PageLoader,
+  PageError,
 } from '@arcediano/ux-library';
 
 import { PageHeader } from '../../components/PageHeader';
-import { PageLoader } from '@/components/shared/loading/page-loader';
-import { PageError } from '@/components/shared/error/page-error';
 
 import {
   Package, Trash2, DollarSign, Tag, CheckCircle,
