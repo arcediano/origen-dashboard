@@ -1,6 +1,7 @@
 /**
  * @file stats-grid.tsx
- * @description Grid de tarjetas de estadísticas
+ * @description Grid de tarjetas de estadísticas del dashboard principal.
+ * Usa StatCard / StatGrid de @arcediano/ux-library (diseño unificado).
  */
 
 'use client';
@@ -8,7 +9,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Eye, ShoppingBag, DollarSign, Star, Loader2, ChevronRight } from 'lucide-react';
-import { StatsCard } from './stats-card';
+import { StatCard, StatGrid } from '@arcediano/ux-library';
+import type { StatGridItem } from '@arcediano/ux-library';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { DashboardStats } from '../../types';
 
@@ -28,54 +30,56 @@ const DEFAULT_STATS: DashboardStats = {
   rating: { average: 0, total: 0 },
 };
 
-export function StatsGrid({ 
-  stats, 
-  isLoading = false, 
-  className, 
+export function StatsGrid({
+  stats,
+  isLoading = false,
+  className,
   collapsible = false,
-  defaultCollapsed = false 
+  defaultCollapsed = false
 }: StatsGridProps) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const displayStats = stats || DEFAULT_STATS;
-  
+
   // Mostrar mensaje si no hay datos
-  const isEmpty = !isLoading && stats && 
-    stats.profileViews.today === 0 && 
-    stats.orders.today === 0 && 
+  const isEmpty = !isLoading && stats &&
+    stats.profileViews.today === 0 &&
+    stats.orders.today === 0 &&
     stats.revenue.today === 0;
 
-  const statsConfig = [
+  const statsItems: StatGridItem[] = [
     {
-      key: 'profileViews',
       label: 'Visitas hoy',
       value: displayStats.profileViews.today,
-      icon: Eye,
-      gradient: 'from-origen-pradera to-origen-hoja',
-      trend: displayStats.profileViews.trend,
+      icon: <Eye />,
+      variant: 'pradera',
+      trend: displayStats.profileViews.trend
+        ? { value: displayStats.profileViews.trend.value, isPositive: displayStats.profileViews.trend.isPositive }
+        : undefined,
     },
     {
-      key: 'orders',
       label: 'Pedidos hoy',
       value: displayStats.orders.today,
-      icon: ShoppingBag,
-      gradient: 'from-origen-pradera to-origen-hoja',
-      trend: displayStats.orders.trend,
+      icon: <ShoppingBag />,
+      variant: 'pradera',
+      trend: displayStats.orders.trend
+        ? { value: displayStats.orders.trend.value, isPositive: displayStats.orders.trend.isPositive }
+        : undefined,
     },
     {
-      key: 'revenue',
       label: 'Ingresos hoy',
       value: `${displayStats.revenue.today}€`,
-      icon: DollarSign,
-      gradient: 'from-origen-hoja to-origen-pino',
-      trend: displayStats.revenue.trend,
+      icon: <DollarSign />,
+      variant: 'hoja',
+      trend: displayStats.revenue.trend
+        ? { value: displayStats.revenue.trend.value, isPositive: displayStats.revenue.trend.isPositive }
+        : undefined,
     },
     {
-      key: 'rating',
       label: 'Valoración',
       value: displayStats.rating.average.toFixed(1),
-      sublabel: `${displayStats.rating.total} reseñas`,
-      icon: Star,
-      gradient: 'from-origen-pino to-origen-bosque',
+      subtitle: `${displayStats.rating.total} reseñas`,
+      icon: <Star />,
+      variant: 'bosque',
     },
   ];
 
@@ -85,7 +89,7 @@ export function StatsGrid({
       className={`${className || ''}`}
     >
       {collapsible && (
-        <button 
+        <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="flex items-center gap-2 mb-4 text-origen-mandarina hover:text-origen-mandarina/80 transition-colors"
         >
@@ -100,27 +104,15 @@ export function StatsGrid({
           <p className="text-sm mt-2">Los datos aparecerán cuando tengas visitas o pedidos</p>
         </div>
       ) : !isCollapsed && (
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-      {isLoading ? (
-        // Estado de carga - Spinner centrado
-        <div className="col-span-full flex items-center justify-center py-8">
-          <Loader2 className="w-8 h-8 text-origen-pradera animate-spin" />
-        </div>
-      ) : (
-        // Estadísticas normales
-        statsConfig.map((stat) => (
-          <StatsCard
-            key={stat.key}
-            label={stat.label}
-            value={stat.value}
-            sublabel={stat.sublabel}
-            trend={stat.trend}
-            icon={stat.icon}
-            gradient={isEmpty ? 'from-origen-pastel to-origen-crema' : stat.gradient}
-          />
-        ))
-        )}
-      </div>
+        isLoading ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            <div className="col-span-full flex items-center justify-center py-8">
+              <Loader2 className="w-8 h-8 text-origen-pradera animate-spin" />
+            </div>
+          </div>
+        ) : (
+          <StatGrid items={statsItems} columns={4} />
+        )
       )}
     </motion.div>
   );

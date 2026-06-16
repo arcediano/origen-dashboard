@@ -19,7 +19,7 @@ export { WelcomeHeader } from './components/header';
 export { ProducerCard } from './components/profile';
 
 // Stats
-export { StatsCard, StatsGrid } from './components/stats';
+export { StatsGrid } from './components/stats';
 
 // Quick Actions
 export { QuickActionCard, QuickActionsGrid } from './components/quick-actions';

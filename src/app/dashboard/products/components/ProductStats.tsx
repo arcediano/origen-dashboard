@@ -14,8 +14,8 @@
 
 import { Package, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { StatGrid } from '@/components/shared/StatGrid';
-import type { StatGridItem } from '@/components/shared/StatGrid';
+import { StatGrid } from '@arcediano/ux-library';
+import type { StatGridItem } from '@arcediano/ux-library';
 
 export interface ProductStatsProps {
   total: number;
@@ -33,12 +33,11 @@ export function ProductStats({
   className,
 }: ProductStatsProps) {
   const items: StatGridItem[] = [
-    { label: 'Total productos', value: total,      icon: <Package />,        variant: 'pradera' },
-    { label: 'Activos',         value: active,     icon: <CheckCircle />,    variant: 'hoja' },
+    { label: 'Total productos', value: total,      icon: <Package />,        variant: 'pradera'   },
+    { label: 'Activos',         value: active,     icon: <CheckCircle />,    variant: 'hoja'      },
     { label: 'Stock bajo',      value: lowStock,   icon: <AlertTriangle />,  variant: 'mandarina' },
-    { label: 'Agotados',        value: outOfStock, icon: <XCircle />,        variant: 'danger' },
+    { label: 'Agotados',        value: outOfStock, icon: <XCircle />,        variant: 'danger'    },
   ];
 
   return <StatGrid items={items} columns={4} className={cn(className)} />;
 }
-
