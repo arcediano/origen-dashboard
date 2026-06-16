@@ -97,8 +97,8 @@ export default function ReviewsPage() {
       } else if (response.data) {
         setReviews(response.data.reviews);
         setStats(response.data.stats);
-        setTotalPages(Math.ceil(response.data.stats.total / 10));
-        setTotalReviews(response.data.stats.total);
+        setTotalPages(Math.ceil(response.data.meta.total / 10));
+        setTotalReviews(response.data.meta.total);
       }
     } catch {
       setError('Error al cargar las reseñas');

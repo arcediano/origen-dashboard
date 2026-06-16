@@ -253,13 +253,17 @@ export function ReviewsList({
               {/* ── Imágenes adjuntas ── */}
               {review.images && review.images.length > 0 && (
                 <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
-                  {review.images.map((img, idx) => (
+                  {review.images.map((imgSrc, idx) => (
                     <div
                       key={idx}
                       className="w-16 h-16 rounded-lg bg-origen-crema/50 border border-border-subtle flex items-center justify-center overflow-hidden flex-shrink-0"
                       aria-label={`Imagen ${idx + 1} de la reseña`}
                     >
-                      <ImageIcon className="w-5 h-5 text-text-subtle" aria-hidden />
+                      {imgSrc.startsWith('http') ? (
+                        <img src={imgSrc} alt={`Imagen ${idx + 1}`} className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon className="w-5 h-5 text-text-subtle" aria-hidden />
+                      )}
                     </div>
                   ))}
                 </div>

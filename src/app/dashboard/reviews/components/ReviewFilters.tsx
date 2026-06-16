@@ -32,7 +32,7 @@ import {
   type ActiveFilterChip,
   type FilterSection,
 } from '@arcediano/ux-library';
-import type { ReviewFilters as ReviewFiltersType, ReviewType, ReviewStatus } from '@/types/review';
+import type { ReviewFilters as ReviewFiltersType, ReviewStatus } from '@/types/review';
 
 // ─── Opciones ─────────────────────────────────────────────────────────────────
 
@@ -42,12 +42,6 @@ const STATUS_OPTIONS = [
   { label: 'Aprobadas',  value: 'approved' },
   { label: 'Rechazadas', value: 'rejected' },
   { label: 'Reportadas', value: 'flagged' },
-];
-
-const TYPE_OPTIONS = [
-  { label: 'Todos',       value: '' },
-  { label: 'Productos',   value: 'product' },
-  { label: 'Productores', value: 'producer' },
 ];
 
 const RATING_OPTIONS = [
@@ -94,11 +88,6 @@ export function ReviewFilters({
       label: STATUS_OPTIONS.find(o => o.value === filters.status)?.label ?? filters.status,
       onRemove: () => set('status', ''),
     }] : []),
-    ...(filters.type ? [{
-      id: 'type',
-      label: TYPE_OPTIONS.find(o => o.value === filters.type)?.label ?? filters.type,
-      onRemove: () => set('type', ''),
-    }] : []),
     ...(filters.rating ? [{
       id: 'rating',
       label: `★ ${filters.rating}`,
@@ -123,7 +112,6 @@ export function ReviewFilters({
 
   const activeCount = [
     filters.status,
-    filters.type,
     filters.rating,
     filters.verifiedOnly,
     filters.hasResponse,
@@ -138,12 +126,6 @@ export function ReviewFilters({
       options: STATUS_OPTIONS,
       value: filters.status ?? '',
       onChange: (v) => set('status', v as ReviewStatus),
-    },
-    {
-      type: 'chips', id: 'type', title: 'Tipo de reseña',
-      options: TYPE_OPTIONS,
-      value: filters.type ?? '',
-      onChange: (v) => set('type', v as ReviewType),
     },
     {
       type: 'chips', id: 'rating', title: 'Valoración',
@@ -209,18 +191,6 @@ export function ReviewFilters({
           </SelectTrigger>
           <SelectContent>
             {STATUS_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Tipo — min-w calibrado a "Productores" */}
-        <Select value={filters.type ?? ''} onValueChange={(v) => set('type', v as ReviewType)} className="w-auto">
-          <SelectTrigger className="min-w-[125px] max-w-[145px] h-10" tone="subtle">
-            <SelectValue placeholder="Tipo" />
-          </SelectTrigger>
-          <SelectContent>
-            {TYPE_OPTIONS.map((o) => (
               <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
             ))}
           </SelectContent>

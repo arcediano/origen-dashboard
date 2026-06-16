@@ -70,13 +70,13 @@ export interface ReviewStats {
 
 export interface ReviewsResponse {
   reviews: Review[];
+  meta: { total: number; page: number; limit: number };
   stats: ReviewStats;
   hasMore: boolean;
   nextCursor?: string;
 }
 
 export interface ReviewFilters {
-  type?: ReviewType;
   status?: ReviewStatus;
   rating?: ReviewRating;
   search?: string;

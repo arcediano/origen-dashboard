@@ -91,7 +91,7 @@ function mapApiReview(api: ApiReview): Review {
     id: api.id,
     type: api.productId ? 'product' : 'producer',
     targetId: api.productId ?? api.producerId ?? '',
-    targetName: api.product?.name ?? api.productId ?? '',
+    targetName: api.product?.name ?? api.productId ?? '(productor)',
     authorId: api.authorId,
     authorName: api.authorName,
     authorAvatar: avatarUrl,
@@ -104,7 +104,9 @@ function mapApiReview(api: ApiReview): Review {
     verifiedPurchase: api.verifiedPurchase,
     createdAt: new Date(api.createdAt),
     updatedAt: new Date(api.updatedAt),
-    images: api.imageIds?.length ? api.imageIds : undefined,
+    images: api.imageIds?.length
+      ? api.imageIds.map((id: string) => `${cdnBase}/${id}`)
+      : undefined,
     response: api.response
       ? {
           id: api.response.id,
@@ -143,38 +145,28 @@ export async function fetchReviews(params?: {
   try {
     const { page = 1, limit = 10, filters } = params ?? {};
 
-    const result = await gatewayClient.get<ApiProducerReviewsResponse>('/reviews/mine', {
+    const result = await gatewayClient.get<any>('/reviews/mine', {
       params: {
         page,
         limit,
         status: filters?.status?.toUpperCase(),
         rating: filters?.rating,
         search: filters?.search,
+        verifiedOnly: filters?.verifiedOnly ? 'true' : undefined,
+        hasResponse: filters?.hasResponse ? 'true' : undefined,
+        hasImages: filters?.hasImages ? 'true' : undefined,
+        dateFrom: filters?.dateFrom ? filters.dateFrom.toISOString() : undefined,
+        dateTo: filters?.dateTo ? filters.dateTo.toISOString() : undefined,
       },
     });
 
     const reviews = result.data.map(mapApiReview);
-
-    // Apply client-side filters not supported by the endpoint
-    const filtered = reviews.filter((r) => {
-      if (filters?.verifiedOnly && !r.verifiedPurchase) return false;
-      if (filters?.hasResponse && !r.response) return false;
-      if (filters?.hasImages && (!r.images || r.images.length === 0)) return false;
-      if (filters?.dateFrom && r.createdAt < filters.dateFrom) return false;
-      if (filters?.dateTo && r.createdAt > filters.dateTo) return false;
-      return true;
-    });
-
     const stats = result.stats;
-    const byRating: ReviewStats['byRating'] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    for (const r of filtered) {
-      const rating = r.rating as keyof typeof byRating;
-      byRating[rating] = (byRating[rating] ?? 0) + 1;
-    }
 
     return {
       data: {
-        reviews: filtered,
+        reviews,
+        meta: result.meta,
         stats: {
           total: stats.total,
           pending: stats.pending,
@@ -182,9 +174,9 @@ export async function fetchReviews(params?: {
           rejected: stats.rejected,
           flagged: stats.flagged,
           averageRating: stats.averageRating,
-          byRating,
-          helpful: filtered.reduce((s, r) => s + r.helpful, 0),
-          notHelpful: filtered.reduce((s, r) => s + r.notHelpful, 0),
+          byRating: stats.byRating,
+          helpful: stats.helpful ?? 0,
+          notHelpful: stats.notHelpful ?? 0,
         },
         hasMore: result.hasMore,
       },
@@ -197,32 +189,6 @@ export async function fetchReviews(params?: {
   }
 }
 
-/** Alias: reseñas con status pending */
-export async function fetchPendingReviews(params?: {
-  page?: number;
-  limit?: number;
-}): Promise<ApiResponse<ReviewsResponse>> {
-  return fetchReviews({ ...params, filters: { status: 'pending' } });
-}
-
-/** Reseñas por tipo — el productor solo tiene producto reviews */
-export async function fetchReviewsByType(
-  type: 'product' | 'producer',
-  _targetId?: string,
-  params?: { page?: number; limit?: number },
-): Promise<ApiResponse<ReviewsResponse>> {
-  return fetchReviews({ ...params, filters: { type } });
-}
-
-/** Aprueba una reseña (acción de admin — no disponible para el productor) */
-export async function approveReview(_id: string): Promise<ApiResponse<Review>> {
-  return { error: 'Solo el administrador puede aprobar reseñas', status: 403 };
-}
-
-/** Rechaza una reseña (acción de admin) */
-export async function rejectReview(_id: string, _reason?: string): Promise<ApiResponse<Review>> {
-  return { error: 'Solo el administrador puede rechazar reseñas', status: 403 };
-}
 
 /** Añade una respuesta del productor a una reseña */
 export async function addReviewResponse(
@@ -257,9 +223,9 @@ export async function flagReview(
 }
 
 /** Marca una reseña como útil/no útil */
-export async function markReviewHelpful(id: string, _helpful: boolean): Promise<ApiResponse<Review>> {
+export async function markReviewHelpful(id: string, isHelpful: boolean): Promise<ApiResponse<Review>> {
   try {
-    await gatewayClient.post(`/reviews/${id}/helpful`);
+    await gatewayClient.post(`/reviews/${id}/helpful`, { isHelpful });
     return { data: undefined as unknown as Review, status: 200 };
   } catch (error) {
     const msg = error instanceof GatewayError ? error.message : 'Error al marcar reseña';
@@ -267,31 +233,3 @@ export async function markReviewHelpful(id: string, _helpful: boolean): Promise<
   }
 }
 
-/** Elimina una reseña (acción de admin — no disponible para el productor) */
-export async function deleteReview(_id: string): Promise<ApiResponse<null>> {
-  return { error: 'Solo el administrador puede eliminar reseñas', status: 403 };
-}
-
-/** Obtiene solo las estadísticas de reseñas del productor */
-export async function fetchReviewStats(): Promise<ApiResponse<ReviewStats>> {
-  try {
-    const result = await gatewayClient.get<ApiProducerReviewsResponse>('/reviews/mine', {
-      params: { page: 1, limit: 1 },
-    });
-
-    const byRating: ReviewStats['byRating'] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-
-    return {
-      data: {
-        ...result.stats,
-        byRating,
-        helpful: 0,
-        notHelpful: 0,
-      },
-      status: 200,
-    };
-  } catch (error) {
-    const msg = error instanceof GatewayError ? error.message : 'Error al obtener estadísticas';
-    return { error: msg, status: error instanceof GatewayError ? error.status : 500 };
-  }
-}
