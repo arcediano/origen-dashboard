@@ -20,12 +20,12 @@ import { MessageSquare } from 'lucide-react';
 import { PageLoader } from '@/components/shared';
 import { PageError } from '@/components/shared';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { ReviewKPIs } from './components/ReviewKPIs';
+import { ReviewHeader } from './components/ReviewHeader';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
 import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
 import { MobileCardList } from '@/components/shared/MobileCardList';
-import { Pagination, ReviewSummary } from '@arcediano/ux-library';
+import { Pagination } from '@arcediano/ux-library';
 
 // Hooks y API
 import { fetchReviews, addReviewResponse, flagReview, markReviewHelpful } from '@/lib/api/reviews';
@@ -173,13 +173,6 @@ export default function ReviewsPage() {
 
   const handleRefresh = async () => { await loadReviews(); };
 
-  const breakdown = stats
-    ? [5, 4, 3, 2, 1].map((s) => ({
-        stars: s,
-        count: stats.byRating[s as keyof typeof stats.byRating] ?? 0,
-      }))
-    : [];
-
   return (
     <MobilePullRefresh onRefresh={handleRefresh}>
       <>
@@ -199,30 +192,16 @@ export default function ReviewsPage() {
           animate="visible"
           className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8"
         >
-          {/* KPIs de cabecera */}
+          {/* Cabecera: ReviewSummary (desktop) + 4 KPIs 2×2 */}
           {stats && (
             <motion.div variants={itemVariants}>
-              <ReviewKPIs stats={stats} />
+              <ReviewHeader stats={stats} />
             </motion.div>
           )}
 
-          {/* Contenido principal: sidebar + lista */}
-          <motion.div variants={itemVariants} className="flex flex-col lg:flex-row lg:items-start lg:gap-6">
-
-            {/* Sidebar izquierdo: ReviewSummary — solo desktop */}
-            {stats && (
-              <div className="hidden lg:block lg:w-[280px] lg:flex-shrink-0 lg:sticky lg:top-6">
-                <ReviewSummary
-                  average={stats.averageRating}
-                  total={stats.total}
-                  breakdown={breakdown}
-                  className="bg-surface-alt border border-border-subtle rounded-xl p-4"
-                />
-              </div>
-            )}
-
-            {/* Columna derecha: filtros + lista */}
-            <div className="flex-1 min-w-0 space-y-5 sm:space-y-6">
+          {/* Contenido principal: filtros + lista */}
+          <motion.div variants={itemVariants}>
+            <div className="space-y-5 sm:space-y-6">
 
               <ReviewFilters
                 filters={filters}

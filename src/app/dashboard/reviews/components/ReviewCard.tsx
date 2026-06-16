@@ -6,10 +6,9 @@
  *   Línea 1: avatar + nombre + estrellas + badge de estado (todo en una fila)
  *   Línea 2: nombre del producto (texto secundario con acento de marca)
  *   Línea 3: extracto del texto (2 líneas, truncado)
- *   Línea 4: fecha + acento de tipo
+ *   Línea 4: fecha + acción
  *   Separador visual entre celdas (border-b)
  *
- * Acento de sentimiento: franja izquierda de 3px codificada por rating.
  * Swipe actions: Responder + Reportar.
  * ReviewResponseSheet para responder (bottom sheet).
  *
@@ -50,13 +49,6 @@ const STATUS_CONFIG: Record<
   rejected: { label: 'Rechazada',  icon: XCircle,      cls: 'bg-red-50 text-red-700 border-red-300' },
   flagged:  { label: 'Reportada',  icon: AlertCircle,  cls: 'bg-red-50 text-red-700 border-red-300' },
 };
-
-/** Franja de sentimiento izquierda — 3px codificada por rating */
-function sentimentStripe(rating: number): string {
-  if (rating >= 4) return 'border-l-[3px] border-l-green-400/80';
-  if (rating === 3) return 'border-l-[3px] border-l-border-subtle';
-  return 'border-l-[3px] border-l-red-300/80';
-}
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -149,7 +141,7 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
     <>
       <SwipeableRow
         actions={swipeActions}
-        className={cn('border-b border-border-subtle last:border-0', sentimentStripe(review.rating))}
+        className="border-b border-border-subtle last:border-0"
       >
         <motion.div
           whileTap={{ scale: 0.99 }}

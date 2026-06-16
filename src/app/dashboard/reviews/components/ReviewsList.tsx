@@ -1,7 +1,6 @@
 /**
  * @component ReviewsList
- * @description Lista de reseñas en desktop — Cards enriquecidas con acento
- * de sentimiento (positivo / neutro / negativo) basado en la valoración.
+ * @description Lista de reseñas en desktop — Cards estándar de la librería.
  *
  * Paleta "Bosque Comercial" v5.5. Cada Card muestra:
  *   - Cabecera: avatar, nombre, estrella prominente, badge de estado, fecha
@@ -52,15 +51,6 @@ export interface ReviewsListProps {
   isLoading?: boolean;
   /** Nº de filas skeleton a mostrar (por defecto 5) */
   skeletonCount?: number;
-}
-
-// ─── HELPERS DE SENTIMIENTO ───────────────────────────────────────────────────
-
-/** Clases de acento sutil según la valoración — izquierda de la card */
-function sentimentAccent(rating: number): string {
-  if (rating >= 4) return 'border-l-4 border-l-green-400/70';
-  if (rating === 3) return 'border-l-4 border-l-border-subtle';
-  return 'border-l-4 border-l-red-300/70';
 }
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
@@ -193,10 +183,7 @@ export function ReviewsList({
         return (
           <Card
             key={review.id}
-            className={cn(
-              'overflow-hidden transition-shadow hover:shadow-md',
-              sentimentAccent(review.rating),
-            )}
+            className="overflow-hidden transition-shadow hover:shadow-md"
           >
             <div className="p-4 sm:p-5">
               {/* ── Cabecera: avatar + autor + meta ── */}
