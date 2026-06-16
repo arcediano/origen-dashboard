@@ -37,14 +37,14 @@ export function ReviewHeader({ stats, className }: ReviewHeaderProps) {
   }));
 
   return (
-    <div className={`flex flex-col lg:flex-row lg:items-start lg:gap-6 ${className ?? ''}`}>
+    <div className={`flex flex-col lg:flex-row lg:items-stretch lg:gap-6 ${className ?? ''}`}>
       {/* ReviewSummary — solo desktop, ocupa 50% */}
-      <div className="hidden lg:block lg:w-1/2">
+      <div className="hidden lg:flex lg:w-1/2 lg:flex-col">
         <ReviewSummary
           average={stats.averageRating}
           total={stats.total}
           breakdown={breakdown}
-          className="bg-surface-alt border border-border-subtle rounded-xl p-4"
+          className="h-full bg-surface-alt border border-border-subtle rounded-xl p-4"
         />
       </div>
 
