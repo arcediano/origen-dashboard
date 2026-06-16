@@ -9,7 +9,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { Sheet, SheetContent } from '@arcediano/ux-library';
+import { Sheet, SheetContent, Textarea, Button } from '@arcediano/ux-library';
 import { Send, MessageSquare, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -88,21 +88,18 @@ export function ReviewResponseSheet({
 
         {/* Textarea */}
         <div className="px-4 pt-4">
-          <textarea
+          <Textarea
             ref={textareaRef}
             value={text}
             onChange={(e) => setText(e.target.value.slice(0, MAX_CHARS))}
             placeholder="Escribe tu respuesta pública..."
             rows={4}
-            className={cn(
-              'w-full resize-none rounded-xl border border-border bg-surface-alt px-3 py-2.5',
-              'text-sm text-origen-bosque placeholder:text-text-subtle',
-              'focus:outline-none focus:ring-1 focus:ring-origen-pino/30 focus:border-origen-pino',
-            )}
+            maxLength={MAX_CHARS}
+            className="mb-3"
           />
 
           {/* Contador */}
-          <div className="flex justify-end mt-1.5 mb-4">
+          <div className="flex justify-end mb-4">
             <span className={cn(
               'text-[11px]',
               text.length >= MAX_CHARS * 0.9 ? 'text-amber-500' : 'text-text-subtle',
@@ -112,20 +109,15 @@ export function ReviewResponseSheet({
           </div>
 
           {/* Botón enviar */}
-          <button
+          <Button
+            size="lg"
+            className="w-full"
             onClick={handleSubmit}
             disabled={!text.trim()}
-            className={cn(
-              'w-full flex items-center justify-center gap-2 rounded-xl py-3',
-              'text-sm font-semibold transition-colors',
-              text.trim()
-                ? 'bg-origen-bosque text-white active:bg-origen-pino'
-                : 'bg-surface-alt text-text-disabled cursor-not-allowed',
-            )}
+            leftIcon={<Send className="w-4 h-4" />}
           >
-            <Send className="w-4 h-4" />
             Publicar respuesta
-          </button>
+          </Button>
         </div>
       </SheetContent>
     </Sheet>

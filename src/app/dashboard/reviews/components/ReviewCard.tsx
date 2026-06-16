@@ -32,7 +32,7 @@ import {
   Flag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
+import { Avatar, AvatarFallback, AvatarImage, Badge, Button } from '@arcediano/ux-library';
 import { StarRating } from '@arcediano/ux-library';
 import type { Review } from '@/types/review';
 import { ReviewResponseSheet } from './ReviewResponseSheet';
@@ -42,31 +42,13 @@ import { SwipeableRow } from '@/components/shared/mobile';
 
 const STATUS_CONFIG: Record<
   Review['status'],
-  { label: string; icon: React.ElementType; cls: string }
+  { label: string; variant: 'warning' | 'success' | 'danger' | 'neutral' }
 > = {
-  pending:  { label: 'Pendiente',  icon: Clock,        cls: 'bg-amber-50 text-amber-700 border-amber-300' },
-  approved: { label: 'Aprobada',   icon: CheckCircle2, cls: 'bg-green-50 text-green-700 border-green-300' },
-  rejected: { label: 'Rechazada',  icon: XCircle,      cls: 'bg-red-50 text-red-700 border-red-300' },
-  flagged:  { label: 'Reportada',  icon: AlertCircle,  cls: 'bg-red-50 text-red-700 border-red-300' },
+  pending:  { label: 'Pendiente',  variant: 'warning' },
+  approved: { label: 'Aprobada',   variant: 'success' },
+  rejected: { label: 'Rechazada',  variant: 'danger' },
+  flagged:  { label: 'Reportada',  variant: 'danger' },
 };
-
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-
-function StatusChip({ status }: { status: Review['status'] }) {
-  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
-  const Icon = cfg.icon;
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border flex-shrink-0',
-        cfg.cls,
-      )}
-    >
-      <Icon className="w-3 h-3 flex-shrink-0" aria-hidden />
-      {cfg.label}
-    </span>
-  );
-}
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────
 
@@ -161,7 +143,9 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
               <span className="text-sm font-semibold text-origen-bosque truncate">
                 {review.authorName}
               </span>
-              <StatusChip status={review.status} />
+              <Badge variant={STATUS_CONFIG[review.status]?.variant || 'neutral'} size="xs" className="flex-shrink-0">
+                {STATUS_CONFIG[review.status]?.label || 'Pendiente'}
+              </Badge>
             </div>
           </div>
 
@@ -221,14 +205,14 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
                 {timeAgo}
               </time>
               {!review.response && (
-                <button
-                  type="button"
+                <Button
+                  size="sm"
+                  variant="secondary"
                   onClick={() => setSheetOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-origen-pastel text-origen-bosque text-xs font-medium active:scale-95 transition-transform"
+                  leftIcon={<MessageSquare className="w-3.5 h-3.5" />}
                 >
-                  <MessageSquare className="w-3.5 h-3.5" aria-hidden />
                   Responder
-                </button>
+                </Button>
               )}
             </div>
           </div>

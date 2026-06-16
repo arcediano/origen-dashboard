@@ -24,8 +24,7 @@ import { ReviewHeader } from './components/ReviewHeader';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
 import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
-import { MobileCardList } from '@/components/shared/MobileCardList';
-import { Pagination } from '@arcediano/ux-library';
+import { MobileCardList, Pagination } from '@arcediano/ux-library';
 
 // Hooks y API
 import { fetchReviews, addReviewResponse, flagReview, markReviewHelpful } from '@/lib/api/reviews';

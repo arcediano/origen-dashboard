@@ -18,11 +18,7 @@ import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Card } from '@arcediano/ux-library';
-import { Badge, Button } from '@arcediano/ux-library';
-import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
-import { StarRating } from '@arcediano/ux-library';
-import { Textarea } from '@arcediano/ux-library';
+import { Card, Badge, Button, Avatar, AvatarFallback, AvatarImage, StarRating, Textarea, EmptyState } from '@arcediano/ux-library';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@arcediano/ux-library';
 import {
   ThumbsUp,
@@ -143,17 +139,12 @@ export function ReviewsList({
   // ── Estado vacío ──────────────────────────────────────────────────────────
   if (reviews.length === 0) {
     return (
-      <Card className="py-10 sm:py-14 text-center bg-surface-alt border border-border-subtle">
-        <div className="flex flex-col items-center">
-          <div className="w-12 h-12 rounded-full bg-origen-pastel flex items-center justify-center mb-3">
-            <MessageSquare className="w-6 h-6 text-origen-pradera" />
-          </div>
-          <h3 className="text-base font-semibold text-origen-bosque mb-1">No hay reseñas</h3>
-          <p className="text-sm text-text-subtle">
-            No se encontraron reseñas con los filtros seleccionados.
-          </p>
-        </div>
-      </Card>
+      <EmptyState
+        size="sm"
+        icon={<MessageSquare className="w-6 h-6" />}
+        title="No hay reseñas"
+        description="No se encontraron reseñas con los filtros seleccionados."
+      />
     );
   }
 
@@ -329,13 +320,13 @@ export function ReviewsList({
 
               {/* ── Diálogo de reporte inline ── */}
               {showFlagDialog === review.id && (
-                <div className="mt-3 p-3.5 bg-red-50/50 rounded-xl border border-red-200/80">
+                <div className="mt-3 p-3.5 bg-surface-alt rounded-xl border border-border-subtle">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-red-700">Reportar reseña</span>
+                    <span className="text-sm font-medium text-origen-cereza">Reportar reseña</span>
                     <button
                       type="button"
                       onClick={() => { setShowFlagDialog(null); setFlagReason(''); }}
-                      className="h-6 w-6 rounded-lg flex items-center justify-center text-text-subtle hover:bg-red-100 transition-colors"
+                      className="h-6 w-6 rounded-lg flex items-center justify-center text-text-subtle hover:bg-surface-alt transition-colors"
                       aria-label="Cerrar diálogo de reporte"
                     >
                       <X className="w-4 h-4" />

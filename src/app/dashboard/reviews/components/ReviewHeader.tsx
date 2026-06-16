@@ -13,9 +13,7 @@
 
 import React from 'react';
 import { MessageSquare, CheckCircle, ThumbsUp, Star } from 'lucide-react';
-import { ReviewSummary } from '@arcediano/ux-library';
-import { StatGrid } from '@/components/shared/StatGrid';
-import type { StatGridItem } from '@/components/shared/StatGrid';
+import { ReviewSummary, StatGrid, type StatGridItem } from '@arcediano/ux-library';
 import type { ReviewStats } from '@/types/review';
 
 interface ReviewHeaderProps {
