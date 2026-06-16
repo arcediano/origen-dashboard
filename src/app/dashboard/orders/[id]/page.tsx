@@ -18,11 +18,11 @@ import {
   Button, Badge,
   ActionBar,
   Sheet, SheetContent, SheetHeader, SheetTitle,
+  MobilePullRefresh,
 } from '@arcediano/ux-library';
 import { PageLoader } from '@/components/shared';
 import { PageError } from '@/components/shared';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 
 // Hooks y API

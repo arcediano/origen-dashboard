@@ -19,12 +19,12 @@ import {
   ActionBar,
   toast,
   ProductImage as ProductImg,
+  MobilePullRefresh,
 } from '@arcediano/ux-library';
 
 import { PageHeader } from '../../components/PageHeader';
 import { PageLoader } from '@/components/shared/loading/page-loader';
 import { PageError } from '@/components/shared/error/page-error';
-import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 
 import {
   Package, Trash2, DollarSign, Tag, CheckCircle,

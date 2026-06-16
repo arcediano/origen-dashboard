@@ -11,12 +11,10 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { Package, Plus, RefreshCw } from 'lucide-react';
 
 // Componentes UI
-import { Button, toast } from '@arcediano/ux-library';
+import { Button, toast, Card, Pagination, MobilePullRefresh } from '@arcediano/ux-library';
 import { PageLoader } from '@/components/shared/loading/page-loader';
 import { PageError } from '@/components/shared/error/page-error';
-import { Card } from '@arcediano/ux-library'
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Pagination } from '@arcediano/ux-library';
 import { ProductStats, ProductFilters, ProductTable, ProductCard, ProductMobileList } from './components';
 import { AdjustStockDialog } from './components/ProductDialogs/AdjustStockDialog';
 import { DeleteProductDialog } from './components/ProductDialogs/DeleteProductDialog';
@@ -25,7 +23,6 @@ import { DeleteProductDialog } from './components/ProductDialogs/DeleteProductDi
 import { useProductFilters } from '@/hooks/useProductFilters';
 import { fetchProductFacets, fetchProducts, fetchProductStats, updateProductStatus } from '@/lib/api/products';
 import { type Product } from '@/types/product';
-import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 
 // ============================================================================
 // ANIMACIONES

@@ -24,13 +24,11 @@ import { ReviewHeader } from './components/ReviewHeader';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
 import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
-import { MobileCardList, Pagination } from '@arcediano/ux-library';
+import { MobileCardList, Pagination, MobilePullRefresh, toast } from '@arcediano/ux-library';
 
 // Hooks y API
 import { fetchReviews, addReviewResponse, flagReview, markReviewHelpful } from '@/lib/api/reviews';
 import type { Review, ReviewFilters as ReviewFiltersType } from '@/types/review';
-import { toast } from '@arcediano/ux-library';
-import { MobilePullRefresh } from '@/components/features/dashboard/components/mobile';
 
 // ============================================================================
 // ANIMACIONES
