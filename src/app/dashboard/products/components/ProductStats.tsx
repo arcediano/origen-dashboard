@@ -1,11 +1,18 @@
 /**
  * @file ProductStats.tsx
  * @description Estadísticas de productos — 4 KPIs en grid 2×2 (móvil) / 1×4 (desktop).
+ *
+ * Patrón visual unificado con OrderStats y ReviewStats:
+ *   - Móvil: 2 columnas
+ *   - Tablet (≥sm): 2 columnas
+ *   - Desktop (≥lg): 4 columnas en una fila
+ *
+ * Paleta "Bosque Comercial" v5.5.
  */
 
 'use client';
 
-import { Package, CheckCircle, AlertCircle } from 'lucide-react';
+import { Package, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StatGrid } from '@/components/shared/StatGrid';
 import type { StatGridItem } from '@/components/shared/StatGrid';
@@ -26,10 +33,10 @@ export function ProductStats({
   className,
 }: ProductStatsProps) {
   const items: StatGridItem[] = [
-    { label: 'Total productos', value: total,      icon: <Package />,      variant: 'pradera' },
-    { label: 'Activos',         value: active,     icon: <CheckCircle />,  variant: 'hoja' },
-    { label: 'Stock bajo',      value: lowStock,   icon: <AlertCircle />,  variant: 'mandarina' },
-    { label: 'Agotados',        value: outOfStock, icon: <AlertCircle />,  variant: 'danger' },
+    { label: 'Total productos', value: total,      icon: <Package />,        variant: 'pradera' },
+    { label: 'Activos',         value: active,     icon: <CheckCircle />,    variant: 'hoja' },
+    { label: 'Stock bajo',      value: lowStock,   icon: <AlertTriangle />,  variant: 'mandarina' },
+    { label: 'Agotados',        value: outOfStock, icon: <XCircle />,        variant: 'danger' },
   ];
 
   return <StatGrid items={items} columns={4} className={cn(className)} />;

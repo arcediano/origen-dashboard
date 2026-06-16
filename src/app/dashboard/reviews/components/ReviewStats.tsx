@@ -5,10 +5,10 @@
  * @description Bloque de estadísticas de la pantalla de reseñas.
  *
  * Layout:
- *   - Mobile: grid 2×2 con StatGrid (4 KPIs compactos) + ReviewSummary
- *     con desglose de estrellas en formato vertical debajo
- *   - Desktop (≥lg): fila combinada — ReviewSummary a la izquierda (ancho
- *     fijo ~280px) + StatGrid a la derecha ocupando el resto
+ *   - Móvil: grid 2×2 con 4 KPIs compactos (StatGrid). ReviewSummary
+ *     oculto en móvil — solo visible en desktop (≥lg).
+ *   - Desktop (≥lg): fila combinada — ReviewSummary a la izquierda
+ *     (ancho fijo 280px) + StatGrid a la derecha ocupando el resto.
  *
  * Paleta "Bosque Comercial" v5.5.
  */
@@ -16,8 +16,9 @@
 import React from 'react';
 import { MessageSquare, CheckCircle, ThumbsUp, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { StatGrid, ReviewSummary } from '@arcediano/ux-library';
-import type { StatGridItem } from '@arcediano/ux-library';
+import { StatGrid } from '@/components/shared/StatGrid';
+import { ReviewSummary } from '@arcediano/ux-library';
+import type { StatGridItem } from '@/components/shared/StatGrid';
 import type { ReviewStats as ReviewStatsType } from '@/types/review';
 
 interface ReviewStatsProps {
@@ -41,8 +42,7 @@ export function ReviewStats({ stats, className }: ReviewStatsProps) {
     },
     {
       label:   'Respondidas',
-      // respondidas = aprobadas + rechazadas + reportadas − pending (las que
-      // ya tienen alguna acción tomada). Se aproxima como total - pending.
+      // respondidas = total - pending (las que ya tienen alguna acción tomada)
       value:   stats.total - stats.pending,
       icon:    <CheckCircle />,
       variant: 'hoja',
@@ -62,9 +62,10 @@ export function ReviewStats({ stats, className }: ReviewStatsProps) {
   }));
 
   return (
-    <div className={cn('space-y-4 lg:space-y-0 lg:flex lg:items-start lg:gap-6', className)}>
-      {/* ── ReviewSummary: rating medio + barras de desglose ── */}
-      <div className="lg:w-[280px] lg:flex-shrink-0">
+    <div className={cn('flex flex-col lg:flex-row lg:items-start lg:gap-6', className)}>
+      {/* ── ReviewSummary: rating medio + barras de desglose ──
+          Oculto en móvil — solo visible en desktop (≥lg).            */}
+      <div className="hidden lg:block lg:w-[280px] lg:flex-shrink-0">
         <ReviewSummary
           average={stats.averageRating}
           total={stats.total}
@@ -73,9 +74,9 @@ export function ReviewStats({ stats, className }: ReviewStatsProps) {
         />
       </div>
 
-      {/* ── StatGrid: 4 KPIs compactos ── */}
-      <div className="flex-1">
-        <StatGrid items={kpis} columns={4} className="h-full" />
+      {/* ── StatGrid: 4 KPIs compactos — visible en todos los breakpoints ── */}
+      <div className="flex-1 min-w-0">
+        <StatGrid items={kpis} columns={4} />
       </div>
     </div>
   );
