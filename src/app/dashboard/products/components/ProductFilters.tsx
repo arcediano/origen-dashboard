@@ -1,18 +1,14 @@
 /**
  * @file ProductFilters.tsx
- * @description Filtros de productos — patrón canónico "Bosque Comercial" v5.4.
+ * @description Filtros de productos — patrón "Bosque Comercial" v5.5.
  *
- * Barra de una sola línea: búsqueda + botón "Filtros" (con badge de filtros
- * activos). Al pulsar "Filtros" se abre `FilterPanel`:
- * - Móvil/tablet (<lg): bottom sheet a pantalla completa.
- * - Escritorio (≥lg): popover anclado al botón "Filtros".
+ * Desktop (≥lg): controles de filtro siempre visibles en línea —
+ * búsqueda + Selects (categoría, estado, stock, ordenar) + toggle vista.
  *
- * Los filtros activos aparecen como chips en una zona visualmente diferenciada
- * debajo de la barra — nunca como controles inline en la barra.
+ * Móvil/tablet (<lg): `FilterToolbar` con botón "Filtros" (badge contador)
+ * + `FilterPanel` (bottom sheet).
  *
- * No hay bloque `hidden lg:flex` de controles inline — todos los filtros van
- * dentro del panel, resolviendo los problemas históricos de overflow y
- * cardinalidad.
+ * Los filtros activos aparecen como chips bajo la barra en ambos breakpoints.
  */
 
 'use client';
@@ -24,6 +20,13 @@ import {
   FilterToolbar,
   FilterPanel,
   ActiveFilterChips,
+  SearchInput,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  useIsMobile,
   type ActiveFilterChip,
   type FilterSection,
 } from '@arcediano/ux-library';
@@ -99,9 +102,11 @@ export function ProductFilters({
   categories = DEFAULT_CATEGORIES,
   className,
 }: ProductFiltersProps) {
+  const isMobile = useIsMobile(1024);
   const [panelOpen, setPanelOpen] = React.useState(false);
   const filtersButtonRef = React.useRef<HTMLButtonElement>(null);
 
+  // ── Chips de filtros activos ─────────────────────────────────────────────────
   const activeChips: ActiveFilterChip[] = [
     ...(selectedCategory ? [{
       id: 'category',
@@ -127,6 +132,7 @@ export function ProductFilters({
 
   const activeCount = activeChips.length;
 
+  // ── Secciones del panel móvil ────────────────────────────────────────────────
   const sections: FilterSection[] = [
     {
       type: 'chips', id: 'category', title: 'Categoría',
@@ -161,28 +167,24 @@ export function ProductFilters({
       type: 'chips', id: 'sort', title: 'Ordenar por',
       options: [
         { label: 'Por defecto', value: '' },
-        { label: 'Más recientes', value: 'newest' },
-        { label: 'Más antiguos', value: 'oldest' },
-        { label: 'Nombre A-Z', value: 'name-asc' },
-        { label: 'Nombre Z-A', value: 'name-desc' },
-        { label: 'Precio ↑', value: 'price-asc' },
-        { label: 'Precio ↓', value: 'price-desc' },
-        { label: 'Stock ↑', value: 'stock-asc' },
-        { label: 'Stock ↓', value: 'stock-desc' },
-        { label: 'Más vendidos', value: 'sales-desc' },
+        ...SORT_OPTIONS,
       ],
       value: sortBy,
       onChange: onSortChange,
     },
   ];
 
-  // Toggle de vista grid/lista — control de visualización, no de filtrado.
-  // Va en el slot actions de FilterToolbar, no en el panel.
+  // ── Toggle de vista (desktop y móvil, siempre a la derecha) ─────────────────
   const viewModeToggle = (
-    <div className="hidden lg:flex items-center gap-0.5 border border-border rounded-xl p-0.5 bg-surface-alt h-10">
+    <div className="flex items-center gap-0.5 border border-border rounded-xl p-0.5 bg-surface-alt h-10 flex-shrink-0">
       <button
         onClick={() => onViewModeChange('list')}
-        className={cn('p-2 rounded-lg transition-colors', viewMode === 'list' ? 'bg-surface shadow-sm text-origen-bosque' : 'text-text-subtle hover:text-origen-bosque')}
+        className={cn(
+          'p-2 rounded-lg transition-colors',
+          viewMode === 'list'
+            ? 'bg-surface shadow-sm text-origen-bosque'
+            : 'text-text-subtle hover:text-origen-bosque',
+        )}
         aria-label="Vista tabla"
         aria-pressed={viewMode === 'list'}
       >
@@ -190,7 +192,12 @@ export function ProductFilters({
       </button>
       <button
         onClick={() => onViewModeChange('grid')}
-        className={cn('p-2 rounded-lg transition-colors', viewMode === 'grid' ? 'bg-surface shadow-sm text-origen-bosque' : 'text-text-subtle hover:text-origen-bosque')}
+        className={cn(
+          'p-2 rounded-lg transition-colors',
+          viewMode === 'grid'
+            ? 'bg-surface shadow-sm text-origen-bosque'
+            : 'text-text-subtle hover:text-origen-bosque',
+        )}
         aria-label="Vista cuadrícula"
         aria-pressed={viewMode === 'grid'}
       >
@@ -202,19 +209,89 @@ export function ProductFilters({
   return (
     <div className={cn('space-y-2', className)}>
 
-      {/* ── Barra de una sola línea: búsqueda + botón Filtros + toggle vista ──────── */}
-      <FilterToolbar
-        searchValue={searchQuery}
-        onSearchChange={onSearchChange}
-        searchPlaceholder="Buscar por nombre o SKU..."
-        searchAriaLabel="Buscar productos"
-        activeFilterCount={activeCount}
-        onOpenFilters={() => setPanelOpen(true)}
-        filtersButtonRef={filtersButtonRef}
-        actions={viewModeToggle}
-      />
+      {/* ── Desktop (≥lg): controles inline siempre visibles ─────────────────── */}
+      <div className="hidden lg:flex items-center gap-2 flex-wrap">
+        {/* Búsqueda */}
+        <SearchInput
+          value={searchQuery}
+          onChange={onSearchChange}
+          placeholder="Buscar por nombre o SKU..."
+          aria-label="Buscar productos"
+          className="min-w-[220px] flex-1"
+          size="md"
+        />
 
-      {/* ── Zona de filtros activos — diferenciada visualmente del formulario ─────── */}
+        {/* Categoría — min-w calibrado al texto más largo ("Embutidos") */}
+        <Select value={selectedCategory} onValueChange={onCategoryChange}>
+          <SelectTrigger className="min-w-[140px] h-10" tone="subtle">
+            <SelectValue placeholder="Categoría" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todas</SelectItem>
+            {categories.map((c) => (
+              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Estado — min-w calibrado a "Borradores" */}
+        <Select value={selectedStatus} onValueChange={onStatusChange}>
+          <SelectTrigger className="min-w-[130px] h-10" tone="subtle">
+            <SelectValue placeholder="Estado" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todos</SelectItem>
+            {STATUS_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Stock */}
+        <Select value={selectedStock} onValueChange={onStockChange}>
+          <SelectTrigger className="min-w-[120px] h-10" tone="subtle">
+            <SelectValue placeholder="Stock" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todo</SelectItem>
+            {STOCK_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Ordenar — min-w calibrado a "Más vendidos" */}
+        <Select value={sortBy} onValueChange={onSortChange}>
+          <SelectTrigger className="min-w-[150px] h-10" tone="subtle">
+            <SelectValue placeholder="Ordenar" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Por defecto</SelectItem>
+            {SORT_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Toggle grid/lista */}
+        {viewModeToggle}
+      </div>
+
+      {/* ── Móvil/tablet (<lg): barra con botón "Filtros" ────────────────────── */}
+      <div className="lg:hidden">
+        <FilterToolbar
+          searchValue={searchQuery}
+          onSearchChange={onSearchChange}
+          searchPlaceholder="Buscar por nombre o SKU..."
+          searchAriaLabel="Buscar productos"
+          activeFilterCount={activeCount}
+          onOpenFilters={() => setPanelOpen(true)}
+          filtersButtonRef={filtersButtonRef}
+          actions={viewModeToggle}
+        />
+      </div>
+
+      {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
       {activeChips.length > 0 && (
         <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
           <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
@@ -224,16 +301,18 @@ export function ProductFilters({
         </div>
       )}
 
-      {/* ── Panel de filtros: bottom sheet (móvil) o popover (desktop) ───────────── */}
-      <FilterPanel
-        isOpen={panelOpen}
-        onClose={() => setPanelOpen(false)}
-        triggerRef={filtersButtonRef}
-        sections={sections}
-        onClearAll={onClearFilters}
-        resultCount={totalProducts}
-        resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
-      />
+      {/* ── Panel de filtros: solo bottom sheet (<lg) ────────────────────────── */}
+      {isMobile && (
+        <FilterPanel
+          isOpen={panelOpen}
+          onClose={() => setPanelOpen(false)}
+          triggerRef={filtersButtonRef}
+          sections={sections}
+          onClearAll={onClearFilters}
+          resultCount={totalProducts}
+          resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
+        />
+      )}
     </div>
   );
 }
