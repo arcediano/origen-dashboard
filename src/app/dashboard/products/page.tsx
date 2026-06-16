@@ -79,6 +79,7 @@ export default function ProductosPage() {
     totalViews: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isTableLoading, setIsTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
@@ -115,8 +116,15 @@ export default function ProductosPage() {
   // CARGA DE DATOS
   // ==========================================================================
 
+  const isFirstLoad = React.useRef(true);
+
   useEffect(() => {
-    loadData();
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      loadData(true);
+      return;
+    }
+    loadData(false);
   }, [currentPage, searchQuery, selectedCategory, selectedStatus, selectedStock, sortBy]);
 
   useEffect(() => {
@@ -139,8 +147,12 @@ export default function ProductosPage() {
     }
   };
 
-  const loadData = async () => {
-    setIsLoading(true);
+  const loadData = async (isInitialLoad = false) => {
+    if (isInitialLoad) {
+      setIsLoading(true);
+    } else {
+      setIsTableLoading(true);
+    }
     setError(null);
 
     try {
@@ -172,6 +184,7 @@ export default function ProductosPage() {
       setError('Error al cargar los datos');
     } finally {
       setIsLoading(false);
+      setIsTableLoading(false);
     }
   };
 
@@ -359,7 +372,7 @@ export default function ProductosPage() {
                   onEdit={handleEdit}
                   onAdjustStock={handleAdjustStock}
                   onStatusChange={handleStatusChange}
-                  isLoading={isLoading}
+                  isLoading={isTableLoading}
                   className="block lg:hidden"
                 />
 
@@ -384,7 +397,7 @@ export default function ProductosPage() {
                       onView={handleView}
                       onEdit={handleEdit}
                       onStatusChange={handleStatusChange}
-                      isLoading={isLoading}
+                      isLoading={isTableLoading}
                     />
                   </div>
                 )}

@@ -65,6 +65,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTableLoading, setIsTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<OrderFiltersType>({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,12 +76,23 @@ export default function OrdersPage() {
   // CARGA DE DATOS
   // ==========================================================================
 
+  const isFirstLoad = React.useRef(true);
+
   useEffect(() => {
-    loadOrders();
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      loadOrders(true);
+      return;
+    }
+    loadOrders(false);
   }, [filters, currentPage]);
 
-  const loadOrders = async () => {
-    setIsLoading(true);
+  const loadOrders = async (isInitialLoad = false) => {
+    if (isInitialLoad) {
+      setIsLoading(true);
+    } else {
+      setIsTableLoading(true);
+    }
     setError(null);
 
     try {
@@ -102,6 +114,7 @@ export default function OrdersPage() {
       setError('Error al cargar los pedidos');
     } finally {
       setIsLoading(false);
+      setIsTableLoading(false);
     }
   };
 
@@ -199,7 +212,7 @@ export default function OrdersPage() {
               {/* Móvil: lista de tarjetas */}
               <MobileCardList
                 className="block lg:hidden"
-                isLoading={isLoading}
+                isLoading={isTableLoading}
                 renderSkeleton={() => <OrderCardSkeleton />}
               >
                 {orders.map((order) => (
@@ -216,7 +229,7 @@ export default function OrdersPage() {
                 <OrdersTable
                   orders={orders}
                   onViewDetails={handleViewDetails}
-                  isLoading={isLoading}
+                  isLoading={isTableLoading}
                 />
               </div>
 

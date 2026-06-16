@@ -18,7 +18,7 @@ import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
 import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
 import { MobileCardList } from '@/components/shared/MobileCardList';
-import { Pagination } from '@arcediano/ux-library';
+import { Pagination, Spinner } from '@arcediano/ux-library';
 
 // Hooks y API
 import { fetchReviews, addReviewResponse, flagReview, markReviewHelpful } from '@/lib/api/reviews';
@@ -71,18 +71,30 @@ export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);;
   const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTableLoading, setIsTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<ReviewFiltersType>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalReviews, setTotalReviews] = useState(0);
 
+  const isFirstLoad = React.useRef(true);
+
   useEffect(() => {
-    loadReviews();
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      loadReviews(true);
+      return;
+    }
+    loadReviews(false);
   }, [filters, currentPage]);
 
-  const loadReviews = async () => {
-    setIsLoading(true);
+  const loadReviews = async (isInitialLoad = false) => {
+    if (isInitialLoad) {
+      setIsLoading(true);
+    } else {
+      setIsTableLoading(true);
+    }
     setError(null);
     try {
       const response = await fetchReviews({ page: currentPage, limit: 10, filters });
@@ -98,6 +110,7 @@ export default function ReviewsPage() {
       setError('Error al cargar las reseñas');
     } finally {
       setIsLoading(false);
+      setIsTableLoading(false);
     }
   };
 
@@ -196,7 +209,7 @@ export default function ReviewsPage() {
         <motion.div variants={itemVariants}>
           <MobileCardList
             className="block lg:hidden mb-4"
-            isLoading={isLoading}
+            isLoading={isTableLoading}
             renderSkeleton={() => <ReviewCardSkeleton />}
           >
             {reviews.map((review) => (
@@ -209,7 +222,12 @@ export default function ReviewsPage() {
             ))}
           </MobileCardList>
 
-          <div className="hidden lg:block">
+          <div className="hidden lg:block relative">
+            {isTableLoading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 rounded-xl">
+                <Spinner size="lg" variant="primary" label="Actualizando reseñas..." />
+              </div>
+            )}
             <ReviewsList
               reviews={reviews}
               onRespond={handleRespond}
