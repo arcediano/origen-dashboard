@@ -3,22 +3,28 @@
  * @description Filtros de reseñas — mobile-first, estilo app nativa.
  *
  * Móvil  → barra de búsqueda + botón "Filtros" → FilterSheet (pantalla completa)
- * Desktop → barra de búsqueda + Select por grupo + pill toggles para booleanos
+ * Desktop → barra de búsqueda + Select por grupo + StarRating + pill toggles booleanos
+ *
+ * Iteración 3: Select compactos para Estado y Tipo (reemplaza ToggleGroup pills
+ * que ocupaban demasiado espacio horizontal). StarRating y booleanos (1 item c/u)
+ * se mantienen como ToggleGroupItem pill. Zona ActiveFilterChips con separación
+ * visual explícita respecto al formulario de filtros.
  */
 
 'use client';
 
 import React from 'react';
-import { CheckCircle, ThumbsUp, ImageIcon, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import { CheckCircle, ThumbsUp, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   FilterToolbar,
   FilterSheet,
   type FilterSection,
-  type ToggleOption,
   ActiveFilterChips,
   type ActiveFilterChip,
   ToggleGroup, ToggleGroupItem, StarRating,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
 import { Button } from '@arcediano/ux-library';
 import type { ReviewFilters as ReviewFiltersType, ReviewType, ReviewStatus } from '@/types/review';
@@ -47,6 +53,9 @@ const RATING_OPTIONS = [
   { label: '★ 2',                  value: '2' },
   { label: '★ 1',                  value: '1' },
 ];
+
+// Clases del trigger de Select compacto para contexto de filtros
+const triggerCls = 'h-9 py-0 sm:py-0 px-3 sm:px-3 text-sm bg-surface-alt border-border w-auto';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -81,14 +90,6 @@ export function ReviewFilters({
   ].filter(Boolean).length;
 
   const hasAnyFilter = Boolean(filters.search) || activeCount > 0;
-
-  const handleSearchChange = (value: string) => {
-    setLocalSearch(value);
-    const timer = setTimeout(() => {
-      onFilterChange({ search: value || undefined } as ReviewFiltersType);
-    }, 300);
-    return () => clearTimeout(timer);
-  };
 
   const set = (key: keyof ReviewFiltersType, value: any) =>
     onFilterChange({ [key]: value || undefined } as ReviewFiltersType);
@@ -126,6 +127,7 @@ export function ReviewFilters({
       onRemove: () => onFilterChange({ ...filters, hasImages: undefined }),
     }] : []),
   ];
+
   // ── Secciones del bottom sheet ───────────────────────────────────────────────
 
   const sheetSections: FilterSection[] = [
@@ -197,8 +199,16 @@ export function ReviewFilters({
         onOpenFilters={() => setPanelOpen(true)}
       />
 
-      {/* ── Chips de filtros activos — móvil y desktop ────────────────────────────────── */}
-      <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
+      {/* ── Zona de filtros activos — diferenciada visualmente del formulario ─────── */}
+      {activeChips.length > 0 && (
+        <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
+            Activos:
+          </span>
+          <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
+        </div>
+      )}
+
       {/* ── Bottom sheet de filtros — solo móvil ──────────────────────── */}
       <FilterSheet
         isOpen={panelOpen}
@@ -209,46 +219,50 @@ export function ReviewFilters({
         resultLabel="reseñas"
       />
 
-      {/* ── Filtros desktop: Select + pill toggles booleanos ──────────── */}
+      {/* ── Filtros desktop: Select compactos + StarRating + pill toggles booleanos ── */}
       <div className="hidden lg:flex items-center gap-2 pt-1 flex-wrap">
 
         {/* Estado */}
-        <ToggleGroup
-          type="single"
-          variant="pill"
-          size="sm"
+        <Select
           value={filters.status ?? ''}
           onValueChange={(v) => {
-            const val = typeof v === 'string' ? v : '';
-            set('status', val as ReviewStatus || undefined);
+            set('status', v as ReviewStatus || undefined);
           }}
-          className="flex-shrink-0"
+          className="w-auto"
         >
-          <ToggleGroupItem value="" aria-label="Todas las reseñas">Todas</ToggleGroupItem>
-          <ToggleGroupItem value="pending" aria-label="Pendientes">Pendientes</ToggleGroupItem>
-          <ToggleGroupItem value="approved" aria-label="Aprobadas">Aprobadas</ToggleGroupItem>
-          <ToggleGroupItem value="rejected" aria-label="Rechazadas">Rechazadas</ToggleGroupItem>
-          <ToggleGroupItem value="flagged" aria-label="Reportadas">Reportadas</ToggleGroupItem>
-        </ToggleGroup>
+          <SelectTrigger className={cn(triggerCls, 'min-w-[136px]')}>
+            <SelectValue className="text-sm">
+              {filters.status
+                ? STATUS_OPTIONS.find(o => o.value === filters.status)?.label
+                : <span className="text-text-disabled">Todos los estados</span>}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         {/* Tipo */}
-        <ToggleGroup
-          type="single"
-          variant="pill"
-          size="sm"
+        <Select
           value={filters.type ?? ''}
           onValueChange={(v) => {
-            const val = typeof v === 'string' ? v : '';
-            set('type', val as ReviewType || undefined);
+            set('type', v as ReviewType || undefined);
           }}
-          className="flex-shrink-0"
+          className="w-auto"
         >
-          <ToggleGroupItem value="" aria-label="Todos los tipos">Todos</ToggleGroupItem>
-          <ToggleGroupItem value="product" aria-label="Productos">Productos</ToggleGroupItem>
-          <ToggleGroupItem value="producer" aria-label="Productores">Productores</ToggleGroupItem>
-        </ToggleGroup>
+          <SelectTrigger className={cn(triggerCls, 'min-w-[120px]')}>
+            <SelectValue className="text-sm">
+              {filters.type
+                ? TYPE_OPTIONS.find(o => o.value === filters.type)?.label
+                : <span className="text-text-disabled">Todos los tipos</span>}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {TYPE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
-        {/* Valoración */}
+        {/* Valoración — StarRating interactivo (compacto, 1 gesto) */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className="text-xs text-text-subtle whitespace-nowrap">Valoración:</span>
           <StarRating
@@ -274,7 +288,7 @@ export function ReviewFilters({
 
         <div className="w-px h-4 bg-border-subtle mx-1" />
 
-        {/* Booleanos — ToggleGroupItem pill */}
+        {/* Booleanos — ToggleGroupItem pill individuales (1 opción c/u = toggle on/off) */}
         <ToggleGroup
           type="single"
           variant="pill"
@@ -326,4 +340,3 @@ export function ReviewFilters({
     </div>
   );
 }
-

@@ -4,6 +4,10 @@
  *
  * Móvil  → barra de búsqueda + botón toggle → FilterSheet (móvil)
  * Desktop → barra de búsqueda + Select para estado + inputs de fecha e importe
+ *
+ * Iteración 3: Select compacto para Estado (reemplaza ToggleGroup pill que
+ * ocupaba demasiado espacio). Zona ActiveFilterChips con separación visual
+ * explícita respecto al formulario de filtros.
  */
 
 'use client';
@@ -16,7 +20,7 @@ import {
   FilterSheet,
   ActiveFilterChips,
   type ActiveFilterChip,
-  ToggleGroup, ToggleGroupItem,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
 import { Input, Button, DateInput } from '@arcediano/ux-library';
 import type { OrderFilters as OrderFiltersType, OrderStatus } from '@/types/order';
@@ -37,6 +41,8 @@ const STATUS_OPTIONS = [
   { value: 'cancelled',  label: 'Cancelados' },
 ];
 
+// Clases del trigger de Select compacto para contexto de filtros
+const triggerCls = 'h-9 py-0 sm:py-0 px-3 sm:px-3 text-sm bg-surface-alt border-border w-auto';
 
 export function OrderFilters({
   filters,
@@ -58,14 +64,6 @@ export function OrderFilters({
   ].filter((v: any) => v !== undefined && v !== '' && v !== null).length;
 
   const hasAnyFilter = Boolean(filters.search) || activeCount > 0;
-
-  const handleSearchChange = (value: string) => {
-    setLocalSearch(value);
-    const timer = setTimeout(() => {
-      onFilterChange({ search: value || undefined } as OrderFiltersType);
-    }, 300);
-    return () => clearTimeout(timer);
-  };
 
   const set = (key: keyof OrderFiltersType, value: any) =>
     onFilterChange({ [key]: value || undefined } as OrderFiltersType);
@@ -115,8 +113,15 @@ export function OrderFilters({
         onOpenFilters={() => setPanelOpen(true)}
       />
 
-      {/* ── Chips de filtros activos — móvil y desktop ────────────────────────────────── */}
-      <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
+      {/* ── Zona de filtros activos — diferenciada visualmente del formulario ─────── */}
+      {activeChips.length > 0 && (
+        <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
+            Activos:
+          </span>
+          <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
+        </div>
+      )}
 
       {/* ── Bottom sheet de filtros — solo móvil ──────────────────────── */}
       <FilterSheet
@@ -157,27 +162,27 @@ export function OrderFilters({
         resultLabel={totalOrders === 1 ? 'pedido' : 'pedidos'}
       />
 
-      {/* ── Filtros desktop: estado + fechas + importe ────────────────── */}
+      {/* ── Filtros desktop: Select estado + fechas + importe ────────────── */}
       <div className="hidden lg:flex flex-wrap items-center gap-2 pt-2">
 
-        <ToggleGroup
-          type="single"
-          variant="pill"
-          size="sm"
+        {/* Estado */}
+        <Select
           value={filters.status ?? ''}
-          onValueChange={(v) => {
-            const val = typeof v === 'string' ? v : '';
-            set('status', val as OrderStatus || undefined);
-          }}
-          className="flex-shrink-0"
+          onValueChange={(v) => set('status', v as OrderStatus || undefined)}
+          className="w-auto"
         >
-          <ToggleGroupItem value="" aria-label="Todos los estados">Todos</ToggleGroupItem>
-          <ToggleGroupItem value="pending" aria-label="Pendientes">Pendientes</ToggleGroupItem>
-          <ToggleGroupItem value="processing" aria-label="Procesando">Procesando</ToggleGroupItem>
-          <ToggleGroupItem value="shipped" aria-label="Enviados">Enviados</ToggleGroupItem>
-          <ToggleGroupItem value="delivered" aria-label="Entregados">Entregados</ToggleGroupItem>
-          <ToggleGroupItem value="cancelled" aria-label="Cancelados">Cancelados</ToggleGroupItem>
-        </ToggleGroup>
+          <SelectTrigger className={cn(triggerCls, 'min-w-[136px]')}>
+            <SelectValue className="text-sm">
+              {filters.status
+                ? STATUS_OPTIONS.find(o => o.value === filters.status)?.label
+                : <span className="text-text-disabled">Todos los estados</span>}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todos los estados</SelectItem>
+            {STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         <div className="w-px h-4 bg-border-subtle mx-1" />
 
@@ -215,4 +220,3 @@ export function OrderFilters({
     </div>
   );
 }
-

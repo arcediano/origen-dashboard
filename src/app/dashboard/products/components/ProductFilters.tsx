@@ -4,6 +4,10 @@
  *
  * Móvil  → barra de búsqueda + botón "Filtros" → FilterSheet (pantalla completa)
  * Desktop → barra de búsqueda + Select por grupo + toggle de vista
+ *
+ * Iteración 3: Select compactos para Estado y Stock (reemplaza ToggleGroup pills
+ * que ocupaban demasiado espacio horizontal). Zona ActiveFilterChips con
+ * separación visual explícita respecto al formulario de filtros.
  */
 
 'use client';
@@ -17,7 +21,6 @@ import {
   ActiveFilterChips,
   type ActiveFilterChip,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-  ToggleGroup, ToggleGroupItem,
 } from '@arcediano/ux-library';
 import { Button } from '@arcediano/ux-library';
 
@@ -74,7 +77,7 @@ const SORT_OPTIONS = [
   { value: 'sales-desc', label: 'Más vendidos' },
 ];
 
-// Clases del trigger de Select adaptadas al filtro
+// Clases del trigger de Select compacto para contexto de filtros
 const triggerCls = 'h-9 py-0 sm:py-0 px-3 sm:px-3 text-sm bg-surface-alt border-border w-auto';
 
 export function ProductFilters({
@@ -157,8 +160,16 @@ export function ProductFilters({
         onOpenFilters={() => setPanelOpen(true)}
         actions={viewModeToggle}
       />
-      {/* ── Chips de filtros activos — móvil y desktop ────────────────────────────────── */}
-      <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
+
+      {/* ── Zona de filtros activos — diferenciada visualmente del formulario ─────── */}
+      {activeChips.length > 0 && (
+        <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
+            Activos:
+          </span>
+          <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
+        </div>
+      )}
 
       {/* ── Bottom sheet de filtros — solo móvil ──────────────────────── */}
       <FilterSheet
@@ -213,7 +224,7 @@ export function ProductFilters({
         resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
       />
 
-      {/* ── Filtros desktop: Select por grupo ─────────────────────────── */}
+      {/* ── Filtros desktop: Select compactos ─────────────────────────── */}
       <div className="hidden lg:flex items-center gap-2 pt-1 flex-wrap">
 
         {/* Categoría */}
@@ -232,35 +243,34 @@ export function ProductFilters({
         </Select>
 
         {/* Estado */}
-        <ToggleGroup
-          type="single"
-          variant="pill"
-          size="sm"
-          value={selectedStatus}
-          onValueChange={(v) => onStatusChange(typeof v === 'string' ? v : '')}
-          className="flex-shrink-0"
-        >
-          <ToggleGroupItem value="" aria-label="Todos los estados">Todos</ToggleGroupItem>
-          <ToggleGroupItem value="active" aria-label="Activos">Activos</ToggleGroupItem>
-          <ToggleGroupItem value="draft" aria-label="Borradores">Borradores</ToggleGroupItem>
-          <ToggleGroupItem value="out_of_stock" aria-label="Sin stock">Sin stock</ToggleGroupItem>
-          <ToggleGroupItem value="inactive" aria-label="Inactivos">Inactivos</ToggleGroupItem>
-        </ToggleGroup>
+        <Select value={selectedStatus} onValueChange={onStatusChange} className="w-auto">
+          <SelectTrigger className={cn(triggerCls, 'min-w-[144px]')}>
+            <SelectValue className="text-sm">
+              {selectedStatus
+                ? STATUS_OPTIONS.find(o => o.value === selectedStatus)?.label
+                : <span className="text-text-disabled">Todos los estados</span>}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todos los estados</SelectItem>
+            {STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         {/* Stock */}
-        <ToggleGroup
-          type="single"
-          variant="pill"
-          size="sm"
-          value={selectedStock}
-          onValueChange={(v) => onStockChange(typeof v === 'string' ? v : '')}
-          className="flex-shrink-0"
-        >
-          <ToggleGroupItem value="" aria-label="Todo el stock">Todo</ToggleGroupItem>
-          <ToggleGroupItem value="disponible" aria-label="Con stock">Con stock</ToggleGroupItem>
-          <ToggleGroupItem value="bajo" aria-label="Stock bajo">Stock bajo</ToggleGroupItem>
-          <ToggleGroupItem value="agotado" aria-label="Agotados">Agotados</ToggleGroupItem>
-        </ToggleGroup>
+        <Select value={selectedStock} onValueChange={onStockChange} className="w-auto">
+          <SelectTrigger className={cn(triggerCls, 'min-w-[120px]')}>
+            <SelectValue className="text-sm">
+              {selectedStock
+                ? STOCK_OPTIONS.find(o => o.value === selectedStock)?.label
+                : <span className="text-text-disabled">Todo el stock</span>}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todo el stock</SelectItem>
+            {STOCK_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
 
         {/* Ordenar */}
         <Select value={sortBy} onValueChange={onSortChange} className="w-auto">
@@ -286,4 +296,3 @@ export function ProductFilters({
     </div>
   );
 }
-
