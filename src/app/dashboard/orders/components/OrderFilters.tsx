@@ -139,7 +139,14 @@ export function OrderFilters({
     <div className={cn('space-y-2', className)}>
 
       {/* ── Desktop (≥lg): controles inline siempre visibles ─────────────────── */}
-      <div className="hidden lg:flex items-center gap-2 flex-wrap">
+      {/*
+        Contenedor agrupador: bg-surface-alt (blanco) sobre el fondo crema
+        garantiza contraste visual. Sin flex-wrap para mantener una única línea.
+        El Select recibe className="w-auto" para anular el w-full del wrapper.
+        Los inputs de importe usan bg-muted/50 que sobre blanco (surface-alt)
+        contrasta bien (verde pastel sobre blanco, no sobre crema).
+      */}
+      <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
         {/* Búsqueda con debounce */}
         <SearchInput
           value={localSearch}
@@ -150,13 +157,13 @@ export function OrderFilters({
           debounceMs={300}
           placeholder="Buscar pedido o cliente..."
           aria-label="Buscar pedidos"
-          className="min-w-[220px] flex-1"
+          className="min-w-[200px] flex-1"
           size="md"
         />
 
         {/* Estado — min-w calibrado a "Procesando" */}
-        <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as OrderStatus)}>
-          <SelectTrigger className="min-w-[140px] h-10" tone="subtle">
+        <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as OrderStatus)} className="w-auto">
+          <SelectTrigger className="min-w-[140px] max-w-[160px] h-10" tone="subtle">
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
           <SelectContent>
@@ -168,31 +175,31 @@ export function OrderFilters({
         </Select>
 
         {/* Período: desde */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <span className="text-xs text-text-subtle whitespace-nowrap">Desde</span>
           <DateInput
             value={formatDate(filters.dateFrom)}
             onChange={(e) => set('dateFrom', e.target.value ? new Date(e.target.value) : undefined)}
             inputSize="sm"
-            className="min-w-[148px]"
+            className="w-[148px]"
             aria-label="Fecha desde"
           />
         </div>
 
         {/* Período: hasta */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <span className="text-xs text-text-subtle whitespace-nowrap">Hasta</span>
           <DateInput
             value={formatDate(filters.dateTo)}
             onChange={(e) => set('dateTo', e.target.value ? new Date(e.target.value) : undefined)}
             inputSize="sm"
-            className="min-w-[148px]"
+            className="w-[148px]"
             aria-label="Fecha hasta"
           />
         </div>
 
         {/* Importe mínimo */}
-        <div className="relative flex items-center min-w-[110px]">
+        <div className="relative flex items-center flex-shrink-0 w-[100px]">
           <span className="absolute left-3 text-sm text-text-subtle pointer-events-none select-none">€</span>
           <input
             type="number"
@@ -212,7 +219,7 @@ export function OrderFilters({
         </div>
 
         {/* Importe máximo */}
-        <div className="relative flex items-center min-w-[110px]">
+        <div className="relative flex items-center flex-shrink-0 w-[100px]">
           <span className="absolute left-3 text-sm text-text-subtle pointer-events-none select-none">€</span>
           <input
             type="number"

@@ -180,7 +180,14 @@ export function ReviewFilters({
     <div className={cn('space-y-2', className)}>
 
       {/* ── Desktop (≥lg): controles inline siempre visibles ─────────────────── */}
-      <div className="hidden lg:flex items-center gap-3 flex-wrap">
+      {/*
+        Contenedor agrupador: bg-surface-alt (blanco) sobre el fondo crema
+        garantiza contraste visual. Sin flex-wrap para mantener una única línea.
+        Los Select reciben className="w-auto" para anular el w-full del wrapper.
+        Los bloques de StarRating y Checkboxes usan bg-muted/50 que sobre
+        blanco (surface-alt) es perfectamente visible (pastel verdoso vs crema).
+      */}
+      <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
         {/* Búsqueda con debounce */}
         <SearchInput
           value={localSearch}
@@ -191,13 +198,13 @@ export function ReviewFilters({
           debounceMs={300}
           placeholder="Buscar reseñas..."
           aria-label="Buscar reseñas"
-          className="min-w-[200px] flex-1"
+          className="min-w-[180px] flex-1"
           size="md"
         />
 
         {/* Estado — min-w calibrado a "Rechazadas" */}
-        <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as ReviewStatus)}>
-          <SelectTrigger className="min-w-[130px] h-10" tone="subtle">
+        <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as ReviewStatus)} className="w-auto">
+          <SelectTrigger className="min-w-[130px] max-w-[150px] h-10" tone="subtle">
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
           <SelectContent>
@@ -208,8 +215,8 @@ export function ReviewFilters({
         </Select>
 
         {/* Tipo — min-w calibrado a "Productores" */}
-        <Select value={filters.type ?? ''} onValueChange={(v) => set('type', v as ReviewType)}>
-          <SelectTrigger className="min-w-[130px] h-10" tone="subtle">
+        <Select value={filters.type ?? ''} onValueChange={(v) => set('type', v as ReviewType)} className="w-auto">
+          <SelectTrigger className="min-w-[125px] max-w-[145px] h-10" tone="subtle">
             <SelectValue placeholder="Tipo" />
           </SelectTrigger>
           <SelectContent>
@@ -221,11 +228,11 @@ export function ReviewFilters({
 
         {/* Valoración: StarRating interactivo con reset al pulsar la misma estrella */}
         <div
-          className="flex items-center gap-2 h-10 px-3 rounded-xl bg-muted/50 border border-transparent hover:bg-muted/70 transition-colors"
+          className="flex items-center gap-2 h-10 px-3 rounded-xl bg-muted/50 border border-transparent hover:bg-muted/70 transition-colors flex-shrink-0"
           role="group"
           aria-label="Filtrar por valoración"
         >
-          <span className="text-xs text-text-subtle whitespace-nowrap flex-shrink-0">Valoración:</span>
+          <span className="text-xs text-text-subtle whitespace-nowrap flex-shrink-0">Val.:</span>
           <StarRating
             value={filters.rating ?? 0}
             onChange={(v) => {
@@ -252,7 +259,7 @@ export function ReviewFilters({
         </div>
 
         {/* Booleanos: checkboxes inline compactos */}
-        <div className="flex items-center gap-3 h-10 px-3 rounded-xl bg-muted/50 border border-transparent">
+        <div className="flex items-center gap-3 h-10 px-3 rounded-xl bg-muted/50 border border-transparent flex-shrink-0">
           <label className="flex items-center gap-1.5 cursor-pointer select-none">
             <Checkbox
               size="sm"
@@ -269,7 +276,7 @@ export function ReviewFilters({
               checked={filters.hasResponse ?? false}
               onCheckedChange={(v) => onFilterChange({ ...filters, hasResponse: v === true ? true : undefined })}
             />
-            <span className="text-xs text-origen-bosque whitespace-nowrap">Con respuesta</span>
+            <span className="text-xs text-origen-bosque whitespace-nowrap">Con resp.</span>
           </label>
           <label className="flex items-center gap-1.5 cursor-pointer select-none">
             <Checkbox
@@ -278,7 +285,7 @@ export function ReviewFilters({
               checked={filters.hasImages ?? false}
               onCheckedChange={(v) => onFilterChange({ ...filters, hasImages: v === true ? true : undefined })}
             />
-            <span className="text-xs text-origen-bosque whitespace-nowrap">Con imágenes</span>
+            <span className="text-xs text-origen-bosque whitespace-nowrap">Con imgs.</span>
           </label>
         </div>
       </div>

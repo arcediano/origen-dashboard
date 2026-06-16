@@ -210,20 +210,28 @@ export function ProductFilters({
     <div className={cn('space-y-2', className)}>
 
       {/* ── Desktop (≥lg): controles inline siempre visibles ─────────────────── */}
-      <div className="hidden lg:flex items-center gap-2 flex-wrap">
+      {/*
+        Contenedor agrupador: bg-surface-alt (blanco) sobre el fondo crema
+        de la página garantiza contraste visual. No se usa Card porque añade
+        demasiado peso visual compitiendo con la tabla; este div actúa como
+        "barra de filtros" sin jerarquía de sección.
+        No se usa flex-wrap: todos los controles deben caber en una sola línea.
+        Los Select reciben className="w-auto" para anular el w-full del wrapper.
+      */}
+      <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
         {/* Búsqueda */}
         <SearchInput
           value={searchQuery}
           onChange={onSearchChange}
           placeholder="Buscar por nombre o SKU..."
           aria-label="Buscar productos"
-          className="min-w-[220px] flex-1"
+          className="min-w-[200px] flex-1"
           size="md"
         />
 
         {/* Categoría — min-w calibrado al texto más largo ("Embutidos") */}
-        <Select value={selectedCategory} onValueChange={onCategoryChange}>
-          <SelectTrigger className="min-w-[140px] h-10" tone="subtle">
+        <Select value={selectedCategory} onValueChange={onCategoryChange} className="w-auto">
+          <SelectTrigger className="min-w-[140px] max-w-[160px] h-10" tone="subtle">
             <SelectValue placeholder="Categoría" />
           </SelectTrigger>
           <SelectContent>
@@ -235,8 +243,8 @@ export function ProductFilters({
         </Select>
 
         {/* Estado — min-w calibrado a "Borradores" */}
-        <Select value={selectedStatus} onValueChange={onStatusChange}>
-          <SelectTrigger className="min-w-[130px] h-10" tone="subtle">
+        <Select value={selectedStatus} onValueChange={onStatusChange} className="w-auto">
+          <SelectTrigger className="min-w-[130px] max-w-[150px] h-10" tone="subtle">
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
           <SelectContent>
@@ -247,9 +255,9 @@ export function ProductFilters({
           </SelectContent>
         </Select>
 
-        {/* Stock */}
-        <Select value={selectedStock} onValueChange={onStockChange}>
-          <SelectTrigger className="min-w-[120px] h-10" tone="subtle">
+        {/* Stock — min-w calibrado a "Stock bajo" */}
+        <Select value={selectedStock} onValueChange={onStockChange} className="w-auto">
+          <SelectTrigger className="min-w-[120px] max-w-[140px] h-10" tone="subtle">
             <SelectValue placeholder="Stock" />
           </SelectTrigger>
           <SelectContent>
@@ -261,8 +269,8 @@ export function ProductFilters({
         </Select>
 
         {/* Ordenar — min-w calibrado a "Más vendidos" */}
-        <Select value={sortBy} onValueChange={onSortChange}>
-          <SelectTrigger className="min-w-[150px] h-10" tone="subtle">
+        <Select value={sortBy} onValueChange={onSortChange} className="w-auto">
+          <SelectTrigger className="min-w-[150px] max-w-[170px] h-10" tone="subtle">
             <SelectValue placeholder="Ordenar" />
           </SelectTrigger>
           <SelectContent>
