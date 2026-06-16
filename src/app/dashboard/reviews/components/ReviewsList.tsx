@@ -63,13 +63,6 @@ function sentimentAccent(rating: number): string {
   return 'border-l-4 border-l-red-300/70';
 }
 
-/** Fondo ultra sutil de la card según sentimiento */
-function sentimentBg(rating: number): string {
-  if (rating >= 4) return 'bg-green-50/30';
-  if (rating === 3) return '';
-  return 'bg-red-50/20';
-}
-
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<
@@ -203,7 +196,6 @@ export function ReviewsList({
             className={cn(
               'overflow-hidden transition-shadow hover:shadow-md',
               sentimentAccent(review.rating),
-              sentimentBg(review.rating),
             )}
           >
             <div className="p-4 sm:p-5">
@@ -399,29 +391,15 @@ export function ReviewsList({
               {/* ── Footer: votos + acciones ── */}
               <div className="flex items-center justify-between mt-4 pt-3 border-t border-border-subtle">
                 {/* Votos útil / no útil */}
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onHelpful?.(review.id, true)}
-                    aria-label={`Marcar como útil (${review.helpful} votos)`}
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <ThumbsUp className="w-3.5 h-3.5" />
-                      <span className="text-xs">{review.helpful}</span>
-                    </span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onHelpful?.(review.id, false)}
-                    aria-label={`Marcar como no útil (${review.notHelpful} votos)`}
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <ThumbsDown className="w-3.5 h-3.5" />
-                      <span className="text-xs">{review.notHelpful}</span>
-                    </span>
-                  </Button>
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-text-subtle" aria-label={`Útil: ${review.helpful} votos`}>
+                    <ThumbsUp className="w-3.5 h-3.5" aria-hidden />
+                    <span>{review.helpful}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-xs text-text-subtle" aria-label={`No útil: ${review.notHelpful} votos`}>
+                    <ThumbsDown className="w-3.5 h-3.5" aria-hidden />
+                    <span>{review.notHelpful}</span>
+                  </span>
                 </div>
 
                 {/* Acciones contextuales */}
@@ -438,11 +416,10 @@ export function ReviewsList({
                   )}
                   {showFlagDialog !== review.id && (
                     <Button
-                      variant="ghost"
+                      variant="destructive"
                       size="sm"
                       onClick={() => setShowFlagDialog(review.id)}
                       leftIcon={<Flag className="w-3.5 h-3.5" />}
-                      className="text-feedback-danger hover:bg-feedback-danger-subtle"
                       aria-label="Reportar esta reseña"
                     >
                       Reportar
