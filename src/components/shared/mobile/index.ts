@@ -1,9 +1,6 @@
 export { ScrollChipFilter } from './ScrollChipFilter';
 export type { ChipItem } from './ScrollChipFilter';
 
-export { FilterBottomSheet } from './FilterBottomSheet';
-export type { FilterSection, ChipOption, ToggleOption, FilterBottomSheetProps } from './FilterBottomSheet';
-
 export { FilterPanel } from './FilterPanel';
 export type { FilterPanelProps } from './FilterPanel';
 

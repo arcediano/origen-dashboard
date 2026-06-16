@@ -10,8 +10,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Bell, Search, SlidersHorizontal, X } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, DateRangeInput } from '@arcediano/ux-library';
-import { FilterBottomSheet } from '@/components/shared/mobile';
+import { Card, CardContent, DateRangeInput, FilterSheet } from '@arcediano/ux-library';
 import { FilterSelect } from '@/components/ui/FilterSelect';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
 
@@ -277,8 +276,8 @@ export default function NotificationsPage() {
         </Card>
       </div>
 
-      {/* FilterBottomSheet — siempre montado (portal), visible solo cuando isFilterOpen */}
-      <FilterBottomSheet
+      {/* FilterSheet — siempre montado (portal), visible solo cuando isFilterOpen */}
+      <FilterSheet
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         title="Filtros de notificaciones"

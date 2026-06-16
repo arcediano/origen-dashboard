@@ -2,18 +2,20 @@
  * @file ProductFilters.tsx
  * @description Filtros de productos — mobile-first, estilo app nativa.
  *
- * Móvil  → barra de búsqueda + botón "Filtros" → FilterBottomSheet (pantalla completa)
+ * Móvil  → barra de búsqueda + botón "Filtros" → FilterSheet (pantalla completa)
  * Desktop → barra de búsqueda + Select por grupo + toggle de vista
  */
 
 'use client';
 
 import React from 'react';
-import { Search, X, SlidersHorizontal, Grid3x3, List, ChevronDown } from 'lucide-react';
+import { Grid3x3, List, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { FilterBottomSheet } from '@/components/shared/mobile';
-import { ActiveFilterChips, type ActiveFilterChip } from '@/components/shared/ActiveFilterChips';
 import {
+  FilterToolbar,
+  FilterSheet,
+  ActiveFilterChips,
+  type ActiveFilterChip,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
 import { Button } from '@arcediano/ux-library';
@@ -121,72 +123,95 @@ export function ProductFilters({
     }] : []),
   ];
 
+  // Toggle de vista grid/lista como actions de FilterToolbar
+  const viewModeToggle = (
+    <div className="hidden lg:flex items-center gap-0.5 border border-border rounded-xl p-0.5 bg-surface-alt h-10">
+      <button
+        onClick={() => onViewModeChange('list')}
+        className={cn('p-2 rounded-lg transition-colors', viewMode === 'list' ? 'bg-surface shadow-sm text-origen-bosque' : 'text-text-subtle hover:text-origen-bosque')}
+        aria-label="Vista tabla" aria-pressed={viewMode === 'list'}
+      >
+        <List className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => onViewModeChange('grid')}
+        className={cn('p-2 rounded-lg transition-colors', viewMode === 'grid' ? 'bg-surface shadow-sm text-origen-bosque' : 'text-text-subtle hover:text-origen-bosque')}
+        aria-label="Vista cuadrícula" aria-pressed={viewMode === 'grid'}
+      >
+        <Grid3x3 className="w-4 h-4" />
+      </button>
+    </div>
+  );
+
   return (
     <div className={cn('space-y-2', className)}>
 
-      {/* ── Barra de búsqueda + botón filtros + toggle vista ──────────── */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Buscar por nombre o SKU..."
-            className="w-full h-10 pl-9 pr-8 text-sm bg-surface-alt border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
-            aria-label="Buscar productos"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => onSearchChange('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque transition-colors"
-              aria-label="Limpiar búsqueda"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Botón abrir filtros — móvil */}
-        <button
-          onClick={() => setPanelOpen(prev => !prev)}
-          className={cn(
-            'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors',
-            activeCount > 0
-              ? 'bg-origen-bosque border-origen-bosque text-white'
-              : 'bg-surface-alt border-border text-origen-bosque',
-          )}
-          aria-label="Abrir filtros"
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-          <span>Filtros</span>
-          {activeCount > 0 && (
-            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/25 text-[10px] font-bold">
-              {activeCount}
-            </span>
-          )}
-        </button>
-
-        {/* Toggle vista — desktop */}
-        <div className="hidden lg:flex items-center gap-0.5 border border-border rounded-xl p-0.5 bg-surface-alt h-10">
-          <button
-            onClick={() => onViewModeChange('list')}
-            className={cn('p-2 rounded-lg transition-colors', viewMode === 'list' ? 'bg-surface shadow-sm text-origen-bosque' : 'text-text-subtle hover:text-origen-bosque')}
-            aria-label="Vista tabla" aria-pressed={viewMode === 'list'}
-          >
-            <List className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onViewModeChange('grid')}
-            className={cn('p-2 rounded-lg transition-colors', viewMode === 'grid' ? 'bg-surface shadow-sm text-origen-bosque' : 'text-text-subtle hover:text-origen-bosque')}
-            aria-label="Vista cuadrícula" aria-pressed={viewMode === 'grid'}
-          >
-            <Grid3x3 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+      {/* ── FilterToolbar: búsqueda + botón filtros (móvil) + toggle vista (desktop) ──── */}
+      <FilterToolbar
+        searchValue={searchQuery}
+        onSearchChange={onSearchChange}
+        searchPlaceholder="Buscar por nombre o SKU..."
+        searchAriaLabel="Buscar productos"
+        activeFilterCount={activeCount}
+        onOpenFilters={() => setPanelOpen(true)}
+        actions={viewModeToggle}
+      />
       {/* ── Chips de filtros activos — móvil y desktop ────────────────────────────────── */}
       <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
+
+      {/* ── Bottom sheet de filtros — solo móvil ──────────────────────── */}
+      <FilterSheet
+        isOpen={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        sections={[
+          {
+            type: 'chips', id: 'category', title: 'Categoría',
+            options: [{ label: 'Todas', value: '' }, ...categories.map((category) => ({ label: category.label, value: category.value }))],
+            value: selectedCategory, onChange: onCategoryChange,
+          },
+          {
+            type: 'chips', id: 'status', title: 'Estado',
+            options: [
+              { label: 'Todos', value: '' },
+              { label: 'Activos', value: 'active' },
+              { label: 'Borradores', value: 'draft' },
+              { label: 'Sin stock', value: 'out_of_stock' },
+              { label: 'Inactivos', value: 'inactive' },
+            ],
+            value: selectedStatus, onChange: onStatusChange,
+          },
+          {
+            type: 'chips', id: 'stock', title: 'Stock',
+            options: [
+              { label: 'Todo', value: '' },
+              { label: 'Con stock', value: 'disponible' },
+              { label: 'Stock bajo', value: 'bajo' },
+              { label: 'Agotados', value: 'agotado' },
+            ],
+            value: selectedStock, onChange: onStockChange,
+          },
+          {
+            type: 'chips', id: 'sort', title: 'Ordenar por',
+            options: [
+              { label: 'Por defecto', value: '' },
+              { label: 'Más recientes', value: 'newest' },
+              { label: 'Más antiguos', value: 'oldest' },
+              { label: 'Nombre A-Z', value: 'name-asc' },
+              { label: 'Nombre Z-A', value: 'name-desc' },
+              { label: 'Precio ↑', value: 'price-asc' },
+              { label: 'Precio ↓', value: 'price-desc' },
+              { label: 'Stock ↑', value: 'stock-asc' },
+              { label: 'Stock ↓', value: 'stock-desc' },
+              { label: 'Más vendidos', value: 'sales-desc' },
+            ],
+            value: sortBy, onChange: onSortChange,
+          },
+        ]}
+        onClearAll={onClearFilters}
+        resultCount={totalProducts}
+        resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
+      />
+
       {/* ── Filtros desktop: Select por grupo ─────────────────────────── */}
       <div className="hidden lg:flex items-center gap-2 pt-1">
 
@@ -260,59 +285,6 @@ export function ProductFilters({
           </Button>
         )}
       </div>
-
-      {/* ── Bottom sheet de filtros — solo móvil ──────────────────────── */}
-      <FilterBottomSheet
-        isOpen={panelOpen}
-        onClose={() => setPanelOpen(false)}
-        sections={[
-          {
-            type: 'chips', id: 'category', title: 'Categoría',
-            options: [{ label: 'Todas', value: '' }, ...categories.map((category) => ({ label: category.label, value: category.value }))],
-            value: selectedCategory, onChange: onCategoryChange,
-          },
-          {
-            type: 'chips', id: 'status', title: 'Estado',
-            options: [
-              { label: 'Todos', value: '' },
-              { label: 'Activos', value: 'active' },
-              { label: 'Borradores', value: 'draft' },
-              { label: 'Sin stock', value: 'out_of_stock' },
-              { label: 'Inactivos', value: 'inactive' },
-            ],
-            value: selectedStatus, onChange: onStatusChange,
-          },
-          {
-            type: 'chips', id: 'stock', title: 'Stock',
-            options: [
-              { label: 'Todo', value: '' },
-              { label: 'Con stock', value: 'disponible' },
-              { label: 'Stock bajo', value: 'bajo' },
-              { label: 'Agotados', value: 'agotado' },
-            ],
-            value: selectedStock, onChange: onStockChange,
-          },
-          {
-            type: 'chips', id: 'sort', title: 'Ordenar por',
-            options: [
-              { label: 'Por defecto', value: '' },
-              { label: 'Más recientes', value: 'newest' },
-              { label: 'Más antiguos', value: 'oldest' },
-              { label: 'Nombre A-Z', value: 'name-asc' },
-              { label: 'Nombre Z-A', value: 'name-desc' },
-              { label: 'Precio ↑', value: 'price-asc' },
-              { label: 'Precio ↓', value: 'price-desc' },
-              { label: 'Stock ↑', value: 'stock-asc' },
-              { label: 'Stock ↓', value: 'stock-desc' },
-              { label: 'Más vendidos', value: 'sales-desc' },
-            ],
-            value: sortBy, onChange: onSortChange,
-          },
-        ]}
-        onClearAll={onClearFilters}
-        resultCount={totalProducts}
-        resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
-      />
     </div>
   );
 }

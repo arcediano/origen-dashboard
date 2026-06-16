@@ -16,8 +16,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { DateRangeInput } from '@arcediano/ux-library';
-import type { FilterSection, ChipOption, ToggleOption } from './FilterBottomSheet';
+import { DateRangeInput, type FilterSection, type ChipOption, type ToggleOption } from '@arcediano/ux-library';
 
 export type { FilterSection, ChipOption, ToggleOption };
 

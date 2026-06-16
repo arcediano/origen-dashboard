@@ -2,18 +2,22 @@
  * @component ReviewFilters
  * @description Filtros de reseñas — mobile-first, estilo app nativa.
  *
- * Móvil  → barra de búsqueda + botón "Filtros" → FilterBottomSheet (pantalla completa)
+ * Móvil  → barra de búsqueda + botón "Filtros" → FilterSheet (pantalla completa)
  * Desktop → barra de búsqueda + Select por grupo + pill toggles para booleanos
  */
 
 'use client';
 
 import React from 'react';
-import { Search, X, SlidersHorizontal, CheckCircle, ThumbsUp, ImageIcon, ChevronDown } from 'lucide-react';
+import { CheckCircle, ThumbsUp, ImageIcon, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { FilterBottomSheet, type FilterSection, type ToggleOption } from '@/components/shared/mobile';
-import { ActiveFilterChips, type ActiveFilterChip } from '@/components/shared/ActiveFilterChips';
 import {
+  FilterToolbar,
+  FilterSheet,
+  type FilterSection,
+  type ToggleOption,
+  ActiveFilterChips,
+  type ActiveFilterChip,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
 import { Button } from '@arcediano/ux-library';
@@ -184,50 +188,29 @@ export function ReviewFilters({
   return (
     <div className={cn('space-y-2', className)}>
 
-      {/* ── Barra de búsqueda + botón filtros ─────────────────────────── */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle pointer-events-none" />
-          <input
-            type="text"
-            value={localSearch}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Buscar reseñas..."
-            className="w-full h-10 pl-9 pr-8 text-sm bg-surface-alt border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
-          />
-          {localSearch && (
-            <button
-              onClick={() => { setLocalSearch(''); onFilterChange({ search: undefined } as ReviewFiltersType); }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque transition-colors"
-              aria-label="Limpiar búsqueda"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+      {/* ── FilterToolbar: búsqueda + botón filtros (móvil) con debounce ──────────── */}
+      <FilterToolbar
+        searchValue={localSearch}
+        onSearchChange={setLocalSearch}
+        onSearchDebouncedChange={(value) => onFilterChange({ search: value || undefined } as ReviewFiltersType)}
+        searchDebounceMs={300}
+        searchPlaceholder="Buscar reseñas..."
+        activeFilterCount={activeCount}
+        onOpenFilters={() => setPanelOpen(true)}
+      />
 
-        {/* Botón abrir filtros — solo móvil */}
-        <button
-          onClick={() => setPanelOpen(prev => !prev)}
-          className={cn(
-            'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors',
-            activeCount > 0
-              ? 'bg-origen-bosque border-origen-bosque text-white'
-              : 'bg-surface-alt border-border text-origen-bosque',
-          )}
-          aria-label="Abrir filtros"
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-          <span>Filtros</span>
-          {activeCount > 0 && (
-            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/25 text-[10px] font-bold">
-              {activeCount}
-            </span>
-          )}
-        </button>
-      </div>
       {/* ── Chips de filtros activos — móvil y desktop ────────────────────────────────── */}
       <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
+      {/* ── Bottom sheet de filtros — solo móvil ──────────────────────── */}
+      <FilterSheet
+        isOpen={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        sections={sheetSections}
+        onClearAll={onClearFilters}
+        resultCount={totalReviews}
+        resultLabel="reseñas"
+      />
+
       {/* ── Filtros desktop: Select + pill toggles booleanos ──────────── */}
       <div className="hidden lg:flex items-center gap-2 pt-1">
 
@@ -304,16 +287,6 @@ export function ReviewFilters({
           </Button>
         )}
       </div>
-
-      {/* ── Bottom sheet de filtros — solo móvil ──────────────────────── */}
-      <FilterBottomSheet
-        isOpen={panelOpen}
-        onClose={() => setPanelOpen(false)}
-        sections={sheetSections}
-        onClearAll={onClearFilters}
-        resultCount={totalReviews}
-        resultLabel="reseñas"
-      />
     </div>
   );
 }
