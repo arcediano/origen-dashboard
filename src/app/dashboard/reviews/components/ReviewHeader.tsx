@@ -38,8 +38,8 @@ export function ReviewHeader({ stats, className }: ReviewHeaderProps) {
 
   return (
     <div className={`flex flex-col lg:flex-row lg:items-start lg:gap-6 ${className ?? ''}`}>
-      {/* ReviewSummary — solo desktop */}
-      <div className="hidden lg:block lg:w-[280px] lg:flex-shrink-0">
+      {/* ReviewSummary — solo desktop, ocupa 50% */}
+      <div className="hidden lg:block lg:w-1/2">
         <ReviewSummary
           average={stats.averageRating}
           total={stats.total}
@@ -48,8 +48,8 @@ export function ReviewHeader({ stats, className }: ReviewHeaderProps) {
         />
       </div>
 
-      {/* 4 KPIs en grid 2×2 — siempre visible, ocupa el espacio restante en desktop */}
-      <div className="flex-1">
+      {/* 4 KPIs en grid 2×2 — siempre visible, ocupa 50% en desktop */}
+      <div className="w-full lg:w-1/2">
         <StatGrid items={kpis} columns={2} />
       </div>
     </div>
