@@ -53,56 +53,76 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return;
     }
 
-    try {
-      // BUG FIX: Eliminada la comprobación document.cookie.includes('accessToken').
-      // Los cookies accessToken son HttpOnly — document.cookie NUNCA los muestra,
-      // por lo que la comprobación anterior SIEMPRE fallaba y disparaba session:expired
-      // en cada recarga, incluso con sesión válida.
-      // Si no hay token, getCurrentUser() lanzará un GatewayError 401 de forma natural.
-      const userData = await getCurrentUser();
+    // Retry logic with exponential backoff
+    const MAX_RETRIES = 3;
+    const delays = [1000, 3000, 5000]; // ms
 
-      const hasProducerMembership =
-        (userData.roles?.includes('PRODUCER') ?? false) ||
-        userData.role === 'PRODUCER';
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        // BUG FIX: Eliminada la comprobación document.cookie.includes('accessToken').
+        // Los cookies accessToken son HttpOnly — document.cookie NUNCA los muestra,
+        // por lo que la comprobación anterior SIEMPRE fallaba y disparaba session:expired
+        // en cada recarga, incluso con sesión válida.
+        // Si no hay token, getCurrentUser() lanzará un GatewayError 401 de forma natural.
+        const userData = await getCurrentUser();
 
-      if (hasProducerMembership && userData.role !== 'PRODUCER') {
-        try {
-          const switchedUser = await setActiveRole({ role: 'PRODUCER' });
-          setUser(switchedUser);
-        } catch {
-          // Si no se puede cambiar el rol activo, mantenemos el perfil cargado
-          // y dejamos que las pantallas protegidas apliquen su control habitual.
+        const hasProducerMembership =
+          (userData.roles?.includes('PRODUCER') ?? false) ||
+          userData.role === 'PRODUCER';
+
+        if (hasProducerMembership && userData.role !== 'PRODUCER') {
+          try {
+            const switchedUser = await setActiveRole({ role: 'PRODUCER' });
+            setUser(switchedUser);
+          } catch {
+            // Si no se puede cambiar el rol activo, mantenemos el perfil cargado
+            // y dejamos que las pantallas protegidas apliquen su control habitual.
+            setUser(userData);
+          }
+        } else {
           setUser(userData);
         }
-      } else {
-        setUser(userData);
-      }
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('[AuthContext] Usuario cargado:', userData);
-      }
-    } catch (err) {
-      setUser(null);
-
-      const is401 = err instanceof Error &&
-        (err.message.includes('401') || err.message.includes('Token'));
-
-      if (is401) {
-        // 401 = sin sesión activa — estado esperado en páginas públicas, no es un error.
-        // No llamar a setError() para no mostrar mensajes erróneos en /auth/register, /auth/login, etc.
         if (process.env.NODE_ENV !== 'production') {
-          console.log('[AuthContext] Sin sesión activa (401) — usuario no autenticado.');
+          console.log('[AuthContext] Usuario cargado:', userData);
         }
-      } else {
-        // Error real (red, servidor caído, etc.) — sí merece notificación
-        const errorMessage = err instanceof Error ? err.message : 'Error al cargar datos del usuario';
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('[AuthContext] Error cargando usuario:', errorMessage);
+        // Exit retry loop on success
+        setIsLoading(false);
+        setHasTriedLoad(true);
+        return;
+      } catch (err) {
+        const is401 = err instanceof Error &&
+          (err.message.includes('401') || err.message.includes('Token'));
+
+        if (is401) {
+          // 401 = sin sesión activa — NO reintentar, es definitivo
+          setUser(null);
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('[AuthContext] Sin sesión activa (401) — usuario no autenticado.');
+          }
+          setIsLoading(false);
+          setHasTriedLoad(true);
+          return;
         }
-        setError(errorMessage);
+
+        // Para otros errores (503, red): reintentar con delay
+        if (attempt < MAX_RETRIES - 1) {
+          if (process.env.NODE_ENV !== 'production') {
+            console.warn(`[AuthContext] Intento ${attempt + 1}/${MAX_RETRIES} fallido, reintentando en ${delays[attempt]}ms:`, err);
+          }
+          await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+        } else {
+          // Agotados los reintentos
+          setUser(null);
+          const errorMessage = err instanceof Error ? err.message : 'Error al cargar datos del usuario';
+          if (process.env.NODE_ENV !== 'production') {
+            console.error('[AuthContext] Error cargando usuario tras ' + MAX_RETRIES + ' intentos:', errorMessage);
+          }
+          setError(errorMessage);
+          setIsLoading(false);
+          setHasTriedLoad(true);
+          return;
+        }
       }
-    } finally {
-      setIsLoading(false);
-      setHasTriedLoad(true);
     }
   }, []);
 

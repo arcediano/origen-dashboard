@@ -5,7 +5,7 @@
  * del usuario (ratón, teclado, toque, scroll).
  *
  * POLÍTICA DE SEGURIDAD: aplicación de administración con datos sensibles.
- * El tiempo de inactividad por defecto es 15 minutos — ajustar en la
+ * El tiempo de inactividad por defecto es 30 minutos — ajustar en la
  * constante INACTIVITY_TIMEOUT_MS si la política de seguridad lo requiere.
  *
  * @example
@@ -14,8 +14,8 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 
-/** Tiempo máximo de inactividad antes de cerrar la sesión (15 min) */
-const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
+/** Tiempo máximo de inactividad antes de cerrar la sesión (30 min) */
+const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
 
 /** Eventos del DOM que se consideran "actividad del usuario" */
 const ACTIVITY_EVENTS: ReadonlyArray<keyof WindowEventMap> = [

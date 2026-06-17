@@ -43,6 +43,8 @@ declare global {
   }
 }
 
+let _refreshPromise: Promise<boolean> | null = null;
+
 /**
  * Despacha el evento 'session:expired' con debounce de 1 segundo
  * para evitar múltiples disparos en cascada cuando varias peticiones
@@ -65,6 +67,24 @@ function dispatchSessionExpired() {
     window.lastSessionExpiredTime = now;
     window.dispatchEvent(new CustomEvent('session:expired'));
   }
+}
+
+async function tryRefreshToken(): Promise<boolean> {
+  if (_refreshPromise) return _refreshPromise;
+  _refreshPromise = (async () => {
+    try {
+      const res = await fetch(
+        window.location.origin + "/api/v1/auth/refresh",
+        { method: "POST", credentials: "include" },
+      );
+      return res.ok;
+    } catch {
+      return false;
+    } finally {
+      setTimeout(() => { _refreshPromise = null; }, 0);
+    }
+  })();
+  return _refreshPromise;
 }
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
@@ -169,12 +189,28 @@ async function request<T>(
       ? raw.join(', ')
       : (raw ?? `Error ${response.status} en ${method} ${path}`);
 
-    // POLÍTICA DE SEGURIDAD: app de administración — sin refresh automático.
-    // Cualquier 401 fuera de las páginas /auth/* cierra la sesión y fuerza
-    // al usuario a volver a introducir sus credenciales.
-    if (response.status === 401 && typeof window !== 'undefined') {
-      const isAuthPage = window.location.pathname.startsWith('/auth/');
+    // Token refresh interceptor: intenta renovar si recibe 401.
+    if (response.status === 401 && typeof window !== "undefined") {
+      const isAuthPage = window.location.pathname.startsWith("/auth/");
       if (!isAuthPage) {
+        const refreshed = await tryRefreshToken();
+        if (refreshed) {
+          const retryResponse = await fetch(url.toString(), {
+            method,
+            headers,
+            body: body !== undefined ? JSON.stringify(body) : undefined,
+            credentials: "include",
+            ...options.fetchOptions,
+          });
+          let retryData: unknown;
+          const retryContentType = retryResponse.headers.get("content-type") ?? "";
+          if (retryContentType.includes("application/json")) {
+            retryData = await retryResponse.json();
+          }
+          if (retryResponse.ok) {
+            return retryData as T;
+          }
+        }
         dispatchSessionExpired();
       }
     }
