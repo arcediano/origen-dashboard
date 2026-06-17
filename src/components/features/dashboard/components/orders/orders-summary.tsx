@@ -8,7 +8,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ChevronRight, ShoppingBag } from 'lucide-react';
-import { SectionLoader } from '@/components/shared';
+import { Card, EmptyState } from '@arcediano/ux-library';
 import { OrderItem } from '../recent/order-item';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { Order } from '../../types';
@@ -39,23 +39,31 @@ export function OrdersSummary({ orders, isLoading = false, className }: OrdersSu
 
       <div className="space-y-3">
         {isLoading ? (
-          // Estado de carga
-          <div className="bg-surface-alt rounded-2xl border border-border shadow-origen">
-            <SectionLoader message="Cargando pedidos..." />
-          </div>
+          // Estado de carga con skeleton
+          <Card className="bg-surface border border-border-subtle">
+            <div className="space-y-3 p-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-4 bg-origen-pastel rounded animate-pulse w-3/4" />
+                  <div className="h-3 bg-origen-pastel rounded animate-pulse w-1/2" />
+                </div>
+              ))}
+            </div>
+          </Card>
         ) : orders.length > 0 ? (
           orders.map((order) => (
             <OrderItem key={order.id} {...order} />
           ))
         ) : (
           // Estado vacío
-          <div className="bg-surface-alt rounded-2xl p-8 border border-border shadow-origen text-center">
-            <div className="w-16 h-16 rounded-xl bg-origen-pastel mx-auto mb-4 flex items-center justify-center">
-              <ShoppingBag className="w-8 h-8 text-origen-pino" />
-            </div>
-            <p className="text-muted-foreground mb-1">No hay pedidos recientes</p>
-            <p className="text-sm text-text-subtle">Los nuevos pedidos aparecerán aquí</p>
-          </div>
+          <Card className="bg-surface border border-border-subtle">
+            <EmptyState
+              size="sm"
+              icon={ShoppingBag}
+              title="Sin pedidos recientes"
+              description="Aquí aparecerán tus últimos pedidos."
+            />
+          </Card>
         )}
       </div>
     </motion.div>

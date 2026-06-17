@@ -8,7 +8,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ChevronRight, Package } from 'lucide-react';
-import { SectionLoader } from '@/components/shared';
+import { Card, EmptyState } from '@arcediano/ux-library';
 import { ProductItem } from '../recent/product-item';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { TopProduct } from '../../types';
@@ -39,23 +39,31 @@ export function TopProducts({ products, isLoading = false, className }: TopProdu
 
       <div className="space-y-3">
         {isLoading ? (
-          // Estado de carga
-          <div className="bg-surface-alt rounded-2xl border border-border shadow-origen">
-            <SectionLoader message="Cargando productos..." />
-          </div>
+          // Estado de carga con skeleton
+          <Card className="bg-surface border border-border-subtle">
+            <div className="space-y-3 p-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-4 bg-origen-pastel rounded animate-pulse w-3/4" />
+                  <div className="h-3 bg-origen-pastel rounded animate-pulse w-1/2" />
+                </div>
+              ))}
+            </div>
+          </Card>
         ) : products.length > 0 ? (
           products.map((product) => (
             <ProductItem key={product.id} {...product} />
           ))
         ) : (
           // Estado vacío
-          <div className="bg-surface-alt rounded-2xl p-8 border border-border shadow-origen text-center">
-            <div className="w-16 h-16 rounded-xl bg-origen-pastel mx-auto mb-4 flex items-center justify-center">
-              <Package className="w-8 h-8 text-origen-pino" />
-            </div>
-            <p className="text-muted-foreground mb-1">No hay productos registrados</p>
-            <p className="text-sm text-text-subtle">Añade productos para verlos aquí</p>
-          </div>
+          <Card className="bg-surface border border-border-subtle">
+            <EmptyState
+              size="sm"
+              icon={Package}
+              title="Sin productos"
+              description="Añade productos para verlos aquí."
+            />
+          </Card>
         )}
       </div>
     </motion.div>

@@ -19,8 +19,8 @@ export { CategoryCard, getCategoryIcon } from './category-card';
 export type { CategoryCardProps } from './category-card';
 
 // Mobile components
-export { ScrollChipFilter, MobileStatCard, MobileKPIRow, EmptyState, SectionTitle } from './mobile';
-export type { ChipItem, StatCardAccent, MobileStatCardProps, KpiItem, MobileKPIRowProps, EmptyStateProps, SectionTitleProps } from './mobile';
+export { ScrollChipFilter, MobileStatCard, MobileKPIRow, SectionTitle } from './mobile';
+export type { ChipItem, StatCardAccent, MobileStatCardProps, KpiItem, MobileKPIRowProps, SectionTitleProps } from './mobile';
 
 // Stat cards
 export { SoftStatCard } from './SoftStatCard';

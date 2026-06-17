@@ -5,9 +5,10 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Leaf, X } from 'lucide-react';
+import { PageLoader, PageError, ToggleGroup, ToggleGroupItem } from '@arcediano/ux-library';
 import { DashboardFooter } from '@/app/dashboard/components/footer/DashboardFooter';
 import {
   AlertList,
@@ -82,20 +83,30 @@ export default function ProducerDashboard() {
   const [mounted, setMounted] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<'7d' | '6m' | '1y'>('6m');
   const { user } = useAuth();
+  const isFirstLoad = useRef(true);
 
   // Hooks para datos
   const {
     stats: realStats,
     isLoading: statsLoading,
     pendingOrders,
+    error: statsError,
+    refetch: refetchStats,
   } = useDashboardStats();
-  const { orders: realOrders, isLoading: ordersLoading } = useRecentOrders(3);
-  const { products: realProducts, isLoading: productsLoading } = useTopProducts(3);
+  const { orders: realOrders, isLoading: ordersLoading, error: ordersError, refetch: refetchOrders } = useRecentOrders(3);
+  const { products: realProducts, isLoading: productsLoading, error: productsError, refetch: refetchProducts } = useTopProducts(3);
   const { producer } = useProducerProfile();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Marcar primera carga como completada cuando los datos lleguen
+  useEffect(() => {
+    if (!statsLoading && realStats) {
+      isFirstLoad.current = false;
+    }
+  }, [statsLoading, realStats]);
 
   // BUG FIX: usar el nombre real del usuario autenticado en lugar del hardcodeado 'María'
   const userName = user?.firstName ?? 'Productor';
@@ -144,6 +155,24 @@ export default function ProducerDashboard() {
 
   if (!mounted) return null;
 
+  // Mostrar PageLoader solo en la primera carga
+  if (isFirstLoad.current && statsLoading) {
+    return <PageLoader message="Cargando dashboard..." />;
+  }
+
+  // Mostrar PageError si hay errores críticos
+  if (statsError || ordersError || productsError) {
+    return (
+      <PageError
+        title="Error al cargar el dashboard"
+        message={statsError || ordersError || productsError || 'Algo salió mal'}
+        onRetry={() => {
+          void Promise.all([refetchStats(), refetchOrders(), refetchProducts()]);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="w-full">
       {/* Header */}
@@ -169,27 +198,15 @@ export default function ProducerDashboard() {
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Rendimiento comercial</h3>
-            <div className="inline-flex rounded-xl border border-border-subtle bg-surface p-1">
-              {([
-                { value: '7d', label: '7D' },
-                { value: '6m', label: '6M' },
-                { value: '1y', label: '1A' },
-              ] as const).map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setChartPeriod(option.value)}
-                  className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
-                    chartPeriod === option.value
-                      ? 'bg-origen-bosque text-white'
-                      : 'text-text-subtle hover:text-origen-bosque'
-                  }`}
-                  aria-pressed={chartPeriod === option.value}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            <ToggleGroup
+              type="single"
+              value={chartPeriod}
+              onValueChange={(v) => v && setChartPeriod(v as '7d' | '6m' | '1y')}
+            >
+              <ToggleGroupItem value="7d">7D</ToggleGroupItem>
+              <ToggleGroupItem value="6m">6M</ToggleGroupItem>
+              <ToggleGroupItem value="1y">1A</ToggleGroupItem>
+            </ToggleGroup>
           </div>
 
           <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
