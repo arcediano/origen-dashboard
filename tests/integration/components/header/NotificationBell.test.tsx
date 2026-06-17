@@ -154,6 +154,8 @@ describe('NotificationBell', () => {
 const baseNotification: Notification = {
   id: 'test-1',
   type: 'order',
+  category: 'ORDER',
+  eventType: 'NEW_ORDER',
   title: 'Notificación de prueba',
   description: 'Descripción de prueba',
   timestamp: new Date(),

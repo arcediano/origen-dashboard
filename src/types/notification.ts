@@ -29,16 +29,36 @@ export type NotificationActionType =
 export type NotificationEventType =
   | 'NEW_ORDER'
   | 'ORDER_STATUS_CHANGED'
+  | 'ORDER_DELIVERED'
   | 'ORDER_CANCELLED'
   | 'NEW_REVIEW'
+  | 'REVIEW_REPLY'
   | 'PRODUCT_LOW_STOCK'
   | 'PRODUCT_APPROVED'
   | 'PRODUCT_REJECTED'
   | 'ACCOUNT_VERIFIED'
-  | 'CERTIFICATION_PENDING'
+  | 'ACCOUNT_SUSPENDED'
+  | 'PASSWORD_CHANGED'
+  | 'PRODUCER_REQUEST_RECEIVED'
+  | 'PRODUCER_REQUEST_APPROVED'
+  | 'PRODUCER_REQUEST_REJECTED'
+  | 'ONBOARDING_COMPLETED'
+  | 'PROFILE_UNDER_REVIEW'
+  | 'PROFILE_ACTIVATED'
+  | 'DOCUMENT_APPROVED'
+  | 'DOCUMENT_REJECTED'
+  | 'DOCUMENT_EXPIRED'
+  | 'DOCUMENT_EXPIRING_SOON'
+  | 'ONBOARDING_REMINDER'
   | 'SYSTEM_MAINTENANCE'
   | 'SYSTEM_ALERT'
   | 'PROMOTION_CREATED'
+  | 'WELCOME'
+  | 'DISPUTE_OPENED'
+  | 'DISPUTE_ASSIGNED'
+  | 'DISPUTE_MESSAGE'
+  | 'DISPUTE_STATUS_CHANGED'
+  | 'DISPUTE_RESOLVED'
   | string;
 
 // ─── ACTION ───────────────────────────────────────────────────────────────────
@@ -55,7 +75,7 @@ export interface NotificationAction {
 
 export interface Notification {
   id: string;
-  /** Tipo legacy — derivado de category para compatibilidad con componentes existentes */
+  /** @deprecated Usar eventType — tipo legacy mantenido por compatibilidad */
   type: NotificationType;
   title: string;
   description: string;
@@ -66,12 +86,10 @@ export interface Notification {
   metadata?: Record<string, unknown>;
 
   // ─── Campos canonicos (Sprint 22+) ───────────────────────────────────────
-  category?: NotificationCategory;
+  category: NotificationCategory;
   priority?: NotificationPriority;
-  eventType?: NotificationEventType;
+  eventType: NotificationEventType;
   action?: NotificationAction;
-  archived?: boolean;
-  archivedAt?: Date;
   readAt?: Date;
 }
 
@@ -91,12 +109,6 @@ export interface NotificationPreference {
 }
 
 // ─── PAGINACION ───────────────────────────────────────────────────────────────
-
-export interface NotificationPageInfo {
-  nextCursor?: string;
-  hasNextPage: boolean;
-  totalUnread: number;
-}
 
 // ─── AUXILIARES ───────────────────────────────────────────────────────────────
 
@@ -118,7 +130,6 @@ export interface NotificationsResponse {
   notifications: Notification[];
   stats: NotificationStats;
   hasMore: boolean;
-  nextCursor?: string;
 }
 
 // ─── MAPPERS DE PRIORIDAD ─────────────────────────────────────────────────────

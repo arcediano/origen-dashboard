@@ -25,10 +25,12 @@ import {
   EmptyState,
   PageLoader,
   PageError,
+  NotificationCardSkeleton,
 } from '@arcediano/ux-library';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
 
-import { fetchNotifications, markNotificationAsRead } from '@/lib/api/notifications';
+import { fetchNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '@/lib/api/notifications';
+import { Button } from '@arcediano/ux-library';
 import type { Notification } from '@/types/notification';
 
 type NotificationTypeFilter = 'all' | 'operativas' | 'cuenta' | 'marketing';
@@ -47,7 +49,11 @@ function normalizeDateBoundary(value: string, mode: 'from' | 'to'): Date | null 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isInboxLoading, setIsInboxLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
   const isFirstLoadRef = useRef(true);
   const showPageLoader = useDelayedLoading(isFirstLoadRef.current && isInboxLoading);
 
@@ -118,22 +124,53 @@ export default function NotificationsPage() {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    const today = filteredNotifications.filter((notification) => notification.timestamp >= startOfToday);
-    const older = filteredNotifications.filter((notification) => notification.timestamp < startOfToday);
+    // Calcular inicio de semana (lunes)
+    const startOfWeek = new Date(startOfToday);
+    startOfWeek.setDate(startOfToday.getDate() - ((startOfToday.getDay() + 6) % 7));
+
+    // Calcular inicio de mes
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Agrupar notificaciones
+    const today = filteredNotifications.filter(
+      (notification) => notification.timestamp >= startOfToday
+    );
+    const thisWeek = filteredNotifications.filter(
+      (notification) =>
+        notification.timestamp >= startOfWeek && notification.timestamp < startOfToday
+    );
+    const thisMonth = filteredNotifications.filter(
+      (notification) =>
+        notification.timestamp >= startOfMonth && notification.timestamp < startOfWeek
+    );
+    const older = filteredNotifications.filter(
+      (notification) => notification.timestamp < startOfMonth
+    );
 
     return [
       { key: 'today', label: 'Hoy', items: today },
+      { key: 'thisWeek', label: 'Esta semana', items: thisWeek },
+      { key: 'thisMonth', label: 'Este mes', items: thisMonth },
       { key: 'older', label: 'Anteriores', items: older },
     ].filter((group) => group.items.length > 0);
   }, [filteredNotifications]);
 
-  const loadInbox = async () => {
-    setIsInboxLoading(true);
-    setError(null);
+  const loadInbox = async (pageNum: number = 1, append: boolean = false) => {
+    if (pageNum === 1) {
+      setIsInboxLoading(true);
+      setError(null);
+    } else {
+      setIsLoadingMore(true);
+    }
     try {
-      const response = await fetchNotifications({ page: 1, limit: 50 });
+      const response = await fetchNotifications({ page: pageNum, limit: 20 });
       if (response.data) {
-        setNotifications(response.data.notifications);
+        const newNotifications = response.data.notifications;
+        setNotifications(prev =>
+          append ? [...prev, ...newNotifications] : newNotifications
+        );
+        setHasMore(response.data.hasMore);
+        setPage(pageNum);
       } else {
         setError('No se pudieron cargar las notificaciones.');
       }
@@ -142,6 +179,7 @@ export default function NotificationsPage() {
       setError('Error al cargar las notificaciones. Intenta de nuevo.');
     } finally {
       setIsInboxLoading(false);
+      setIsLoadingMore(false);
       if (isFirstLoadRef.current) {
         isFirstLoadRef.current = false;
       }
@@ -149,8 +187,13 @@ export default function NotificationsPage() {
   };
 
   useEffect(() => {
-    void loadInbox();
+    void loadInbox(1, false);
   }, []);
+
+  // Resetear paginación cuando cambian los filtros
+  useEffect(() => {
+    void loadInbox(1, false);
+  }, [typeFilter, readFilter, dateFrom, dateTo]);
 
   const handleMarkAsRead = async (id: string) => {
     setNotifications((current) =>
@@ -162,8 +205,34 @@ export default function NotificationsPage() {
       await markNotificationAsRead(id);
     } catch (error) {
       console.error('[notifications] Error marcando notificacion como leida:', error);
-      void loadInbox();
+      void loadInbox(page, false);
     }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    if (unreadCount === 0 || isMarkingAll) return;
+
+    // Optimistic update
+    const snapshot = notifications.slice();
+    setNotifications((current) =>
+      current.map((notification) => ({ ...notification, read: true }))
+    );
+    setIsMarkingAll(true);
+
+    try {
+      await markAllNotificationsAsRead();
+    } catch (error) {
+      console.error('[notifications] Error marcando todas como leídas:', error);
+      // Rollback on error
+      setNotifications(snapshot);
+    } finally {
+      setIsMarkingAll(false);
+    }
+  };
+
+  const handleLoadMore = async () => {
+    if (!hasMore || isLoadingMore || isInboxLoading) return;
+    void loadInbox(page + 1, true);
   };
 
   const clearFilters = () => {
@@ -208,14 +277,11 @@ export default function NotificationsPage() {
                     className="flex-1"
                   />
 
-                  <button
-                    type="button"
+                  <Button
+                    variant={activeFilterCount > 0 ? 'primary' : 'secondary'}
+                    size="sm"
                     onClick={() => setIsFilterOpen(true)}
-                    className={
-                      activeFilterCount > 0
-                        ? 'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors bg-origen-bosque border-origen-bosque text-white'
-                        : 'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors bg-surface-alt border-border text-origen-bosque'
-                    }
+                    className="lg:hidden gap-1.5"
                     aria-label="Abrir filtros"
                   >
                     <SlidersHorizontal className="w-4 h-4" />
@@ -225,12 +291,12 @@ export default function NotificationsPage() {
                         {activeFilterCount}
                       </span>
                     )}
-                  </button>
+                  </Button>
                 </div>
 
-                <div className="hidden lg:grid lg:grid-cols-3 lg:gap-3">
+                <div className="hidden lg:flex items-center gap-3 flex-wrap">
                   <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as NotificationTypeFilter)}>
-                    <SelectTrigger className="h-10 w-auto rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm" aria-label="Filtrar por tipo">
+                    <SelectTrigger className="h-9 w-auto rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm" aria-label="Filtrar por tipo">
                       <SelectValue placeholder="Todos los tipos" />
                     </SelectTrigger>
                     <SelectContent>
@@ -242,7 +308,7 @@ export default function NotificationsPage() {
                   </Select>
 
                   <Select value={readFilter} onValueChange={(value) => setReadFilter(value as ReadFilter)}>
-                    <SelectTrigger className="h-10 w-auto rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm" aria-label="Filtrar por estado de lectura">
+                    <SelectTrigger className="h-9 w-auto rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm" aria-label="Filtrar por estado de lectura">
                       <SelectValue placeholder="Leidas y no leidas" />
                     </SelectTrigger>
                     <SelectContent>
@@ -261,19 +327,40 @@ export default function NotificationsPage() {
                     onChangeTo={setDateTo}
                     inputSize="sm"
                   />
+
+                  {activeFilterCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearFilters}
+                      className="h-9 px-3 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-xl"
+                    >
+                      Limpiar filtros
+                    </Button>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm text-muted-foreground">
                     Pendientes: <span className="font-semibold text-origen-bosque">{unreadCount}</span>
                   </p>
+                  {unreadCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleMarkAllAsRead}
+                      disabled={isMarkingAll}
+                    >
+                      Marcar todas como leídas
+                    </Button>
+                  )}
                 </div>
               </div>
 
               {isInboxLoading ? (
                 <div className="divide-y divide-border-subtle" aria-busy="true">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="h-16 animate-pulse bg-origen-pastel/20 mx-4 my-2 rounded-xl" />
+                    <NotificationCardSkeleton key={i} />
                   ))}
                 </div>
               ) : filteredNotifications.length === 0 ? (
@@ -305,6 +392,20 @@ export default function NotificationsPage() {
                       </div>
                     </div>
                   ))}
+
+                  {/* Botón Cargar más */}
+                  {hasMore && !isInboxLoading && (
+                    <div className="px-4 py-3 text-center border-t border-border-subtle sm:px-6">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleLoadMore}
+                        disabled={isLoadingMore}
+                      >
+                        {isLoadingMore ? 'Cargando...' : 'Cargar más'}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>

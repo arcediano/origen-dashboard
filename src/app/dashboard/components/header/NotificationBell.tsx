@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@arcediano/ux-library';
 import { AlertCircle, Bell, Sparkles } from 'lucide-react';
@@ -24,6 +25,7 @@ interface NotificationBellProps {
 }
 
 export function NotificationBell({ initialNotifications = [] }: NotificationBellProps) {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
   const [isLoading, setIsLoading] = useState(!initialNotifications.length);
@@ -31,7 +33,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [hasNew, setHasNew] = useState(false);
-  
+
   const buttonContainerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const prevCountRef = useRef<number>(initialNotifications.length);
@@ -64,6 +66,9 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
   }, []);
 
   useEffect(() => {
+    // Suspender polling si estamos en la página de notificaciones
+    const isNotificationsPage = pathname.startsWith('/dashboard/notifications');
+
     function startPolling() {
       pollTimerRef.current = setInterval(() => void silentPoll(), POLL_INTERVAL_MS);
     }
@@ -74,7 +79,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
       }
     }
     function handleVisibilityChange() {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'visible' && !isNotificationsPage) {
         void silentPoll();
         startPolling();
       } else {
@@ -82,14 +87,18 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
       }
     }
 
-    startPolling();
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    if (isNotificationsPage) {
+      stopPolling();
+    } else {
+      startPolling();
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
 
     return () => {
       stopPolling();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [silentPoll]);
+  }, [silentPoll, pathname]);
 
   const loadNotifications = useCallback(async () => {
     setIsLoading(true);

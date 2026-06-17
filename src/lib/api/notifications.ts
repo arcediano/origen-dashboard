@@ -114,6 +114,7 @@ function mapPriority(raw?: string): NotificationPriority | undefined {
   return undefined;
 }
 
+/** @deprecated — mantener solo para el campo type legacy en Notification */
 function mapCategory(eventType: string, category?: string): Notification['type'] {
   const cat = category?.toUpperCase() ?? '';
   if (cat === 'ORDER' || eventType.startsWith('ORDER') || eventType === 'NEW_ORDER') return 'order';
@@ -160,8 +161,6 @@ function mapBackendNotification(n: BackendNotification): Notification {
     timestamp: new Date(n.createdAt),
     read: n.isRead,
     readAt: n.readAt ? new Date(n.readAt) : undefined,
-    archived: n.archived ?? false,
-    archivedAt: n.archivedAt ? new Date(n.archivedAt) : undefined,
     actionUrl: n.actionUrl,
     action: mapAction(n),
     metadata: n.metadata,
@@ -176,14 +175,13 @@ function mapBackendNotification(n: BackendNotification): Notification {
 export async function fetchNotifications(params?: {
   page?: number;
   limit?: number;
-  type?: string;
-  read?: boolean;
+  unreadOnly?: boolean;
 }): Promise<ApiResponse<NotificationsResponse>> {
   try {
     const query = new URLSearchParams();
     if (params?.page) query.set('page', String(params.page));
     if (params?.limit) query.set('limit', String(params.limit));
-    if (params?.read !== undefined) query.set('unreadOnly', params.read ? 'false' : 'true');
+    if (params?.unreadOnly === true) query.set('unreadOnly', 'true');
     const qs = query.toString();
 
     const res = await gatewayClient.get<BackendListResponse>(
