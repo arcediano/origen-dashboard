@@ -348,9 +348,11 @@ if (isFirstLoad.current && isLoading) return <PageLoader />;
 if (isTableLoading) return <div className="fixed inset-0"><Spinner /></div>;
 ```
 
-### Excepcion documentada: seccion profile/
+### Regla sin excepciones
 
-Las paginas profile/, profile/personal/, profile/business/ y profile/certifications/ usan
-Skeleton en lugar de PageLoader para la carga inicial porque tienen un skeleton que replica
-la estructura completa de la pagina. Este patron solo es valido cuando ese skeleton esta
-implementado. Para el resto de pantallas del dashboard, usar PageLoader sin excepcion.
+PageLoader es el unico mecanismo de carga inicial de pantalla en todo el dashboard.
+La seccion profile/ (personal, business, certifications) fue migrada en 2026-06-17 al mismo
+patron: if (isLoading) return <PageLoader message="..." /> como early return.
+
+El skeleton que existia en BusinessPageSkeleton fue eliminado. No se crean nuevos skeletons
+de pantalla completa — si una pantalla necesita un indicador de carga inicial, usa PageLoader.

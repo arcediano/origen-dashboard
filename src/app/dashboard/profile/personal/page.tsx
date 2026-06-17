@@ -6,7 +6,7 @@ import { User, MapPin, Save, Camera, CheckCircle, Edit, X } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
-import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
+import { Card, CardContent, CardHeader, CardTitle, PageLoader } from '@arcediano/ux-library';
 import { Button, Input, Label, Badge, DateInput } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { getCurrentUser, updateCurrentUser, type AuthUser } from '@/lib/api/auth';
@@ -282,6 +282,8 @@ export default function PersonalInfoPage() {
       setIsSaving(false);
     }
   };
+
+  if (isLoading) return <PageLoader message="Cargando datos personales..." />;
 
   return (
     <div className="w-full">

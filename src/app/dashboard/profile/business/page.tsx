@@ -31,6 +31,7 @@ import {
   CardTitle,
   Input,
   Label,
+  PageLoader,
   Select,
   SelectTrigger,
   SelectValue,
@@ -239,53 +240,6 @@ function calculateSectionCompleteness(form: BusinessFormState): SectionCompleten
       percent: 0,
     },
   } as const;
-}
-
-function BusinessPageSkeleton() {
-  return (
-    <div className="space-y-6">
-      {/* Header skeleton */}
-      <div className="mb-6 animate-pulse">
-        <div className="h-32 sm:h-48 bg-surface rounded-t-xl" />
-        <div className="bg-surface rounded-b-xl px-6 pb-6 pt-20">
-          <div className="flex items-end gap-6 -mt-16 mb-4">
-            <div className="w-28 h-28 rounded-xl bg-surface-alt" />
-            <div className="flex-1 space-y-2">
-              <div className="h-6 w-48 bg-surface-alt rounded" />
-              <div className="h-4 w-72 bg-surface-alt rounded" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Button skeleton */}
-      <div className="flex justify-end">
-        <div className="h-10 w-40 bg-surface rounded-xl animate-pulse" />
-      </div>
-
-      {/* Section skeletons */}
-      {[...Array(6)].map((_, i) => (
-        <div key={i} className="animate-pulse">
-          <div className="rounded-xl border border-border bg-surface overflow-hidden">
-            <div className="px-6 py-4 border-b border-border-subtle">
-              <div className="flex items-center justify-between gap-3">
-                <div className="h-6 w-40 bg-surface-alt rounded" />
-                <div className="h-5 w-20 bg-surface-alt rounded" />
-              </div>
-            </div>
-            <div className="px-6 py-6 space-y-4">
-              {[...Array(2)].map((_, j) => (
-                <div key={j} className="space-y-2">
-                  <div className="h-4 w-24 bg-surface-alt rounded" />
-                  <div className="h-10 bg-surface-alt rounded" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -545,6 +499,8 @@ export default function BusinessInfoPage() {
     }
   };
 
+  if (isLoading) return <PageLoader message="Cargando datos de negocio..." />;
+
   return (
     <div className="w-full">
       <div className="fixed top-0 right-0 w-64 h-64 bg-origen-pradera/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
@@ -584,10 +540,7 @@ export default function BusinessInfoPage() {
             </Alert>
           )}
 
-          {isLoading ? (
-            <BusinessPageSkeleton />
-          ) : (
-            <>
+          <>
               {!loadError &&
                 !form.businessName &&
                 !form.taxId &&
@@ -714,10 +667,9 @@ export default function BusinessInfoPage() {
               </div>
             )}
           </div>
-            </>
-          )}
+          </>
 
-          {!isLoading && (
+          {(
             <motion.div 
               className="space-y-6"
               initial={{ opacity: 0 }}

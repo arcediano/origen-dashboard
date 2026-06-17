@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useRouter } from 'next/navigation';
 import {
   FileBadge,
@@ -18,7 +17,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library';
+import { Card, CardContent, CardHeader, CardTitle, PageLoader } from '@arcediano/ux-library';
 import { Button, Badge } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
@@ -144,7 +143,6 @@ function getCardTone(): string {
 export default function CertificationsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const showLoadingSkeleton = useDelayedLoading(loading);
   const [error, setError] = useState<string | null>(null);
   const [certifications, setCertifications] = useState<CertItem[]>([]);
   const [legalDocs, setLegalDocs] = useState<LegalDocItem[]>([]);
@@ -458,6 +456,8 @@ export default function CertificationsPage() {
   const today = new Date().toISOString().split('T')[0];
 
   // ── Render ──────────────────────────────────────────────────────────────────
+  if (loading) return <PageLoader message="Cargando certificaciones..." />;
+
   return (
     <>
     <div className="w-full">
@@ -931,15 +931,6 @@ export default function CertificationsPage() {
                 </div>)}
               </CardContent>
             </Card>
-          )}
-
-          {/* Skeleton de carga */}
-          {showLoadingSkeleton && (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-24 rounded-xl bg-muted animate-pulse" />
-              ))}
-            </div>
           )}
 
           <Alert className="mt-6">
