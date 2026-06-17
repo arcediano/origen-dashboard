@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
-import { SwipeableRow, ProductImage } from '@arcediano/ux-library';
+import { SwipeableRow, ProductImage, MobileCardList } from '@arcediano/ux-library';
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
@@ -58,12 +58,12 @@ const STATUS_CONFIG: Record<
   pending_approval: {
     label: 'En revisión',
     icon: AlertCircle,
-    chip: 'bg-amber-50 text-amber-700 border-amber-200',
+    chip: 'bg-feedback-warning-subtle text-feedback-warning border-feedback-warning/30',
   },
   scheduled: {
     label: 'Programado',
     icon: Clock,
-    chip: 'bg-blue-50 text-blue-700 border-blue-200',
+    chip: 'bg-origen-pradera/10 text-origen-pino border-origen-pradera/30',
   },
 };
 
@@ -224,6 +224,7 @@ export interface ProductMobileListProps {
   onAdjustStock?: (product: Product) => void;
   onStatusChange?: (product: Product, newStatus: 'draft' | 'pending_approval') => void;
   isLoading?:     boolean;
+  skeletonCount?: number;
   className?:     string;
 }
 
@@ -239,20 +240,18 @@ export function ProductMobileList({
   onAdjustStock,
   onStatusChange,
   isLoading = false,
+  skeletonCount,
   className,
 }: ProductMobileListProps) {
-  if (isLoading) {
-    return (
-      <div className={cn('rounded-2xl border border-border bg-surface-alt overflow-hidden shadow-subtle', className)}>
-        {Array.from({ length: 5 }).map((_, i) => <ProductRowSkeleton key={i} />)}
-      </div>
-    );
-  }
-
   if (products.length === 0) return null;
 
   return (
-    <div className={cn('rounded-2xl border border-border bg-surface-alt overflow-hidden shadow-subtle', className)}>
+    <MobileCardList
+      isLoading={isLoading}
+      skeletonCount={skeletonCount ?? 5}
+      renderSkeleton={() => <ProductRowSkeleton />}
+      className={className}
+    >
       {products.map((product) => (
         <ProductRow
           key={product.id}
@@ -263,7 +262,7 @@ export function ProductMobileList({
           onStatusChange={onStatusChange}
         />
       ))}
-    </div>
+    </MobileCardList>
   );
 }
 

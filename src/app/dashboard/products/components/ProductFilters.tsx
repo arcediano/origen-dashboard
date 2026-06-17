@@ -105,6 +105,22 @@ export function ProductFilters({
   const isMobile = useIsMobile(1024);
   const [panelOpen, setPanelOpen] = React.useState(false);
   const filtersButtonRef = React.useRef<HTMLButtonElement>(null);
+  const [localSearch, setLocalSearch] = React.useState(searchQuery ?? '');
+
+  // Debounce para búsqueda
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== (searchQuery ?? '')) {
+        onSearchChange(localSearch || '');
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [localSearch, searchQuery, onSearchChange]);
+
+  // Sincronizar cuando se limpian filtros externamente
+  React.useEffect(() => {
+    setLocalSearch(searchQuery ?? '');
+  }, [searchQuery]);
 
   // ── Chips de filtros activos ─────────────────────────────────────────────────
   const activeChips: ActiveFilterChip[] = [
@@ -221,8 +237,8 @@ export function ProductFilters({
       <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
         {/* Búsqueda */}
         <SearchInput
-          value={searchQuery}
-          onChange={onSearchChange}
+          value={localSearch}
+          onChange={(value: string) => setLocalSearch(value)}
           placeholder="Buscar por nombre o SKU..."
           aria-label="Buscar productos"
           className="min-w-[200px] flex-1"

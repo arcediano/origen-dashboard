@@ -95,7 +95,7 @@ export function ProductTable({
       accessor: (item) => {
         const stockColor =
           item.stock === 0 ? 'bg-feedback-danger' :
-          item.lowStockThreshold && item.stock <= item.lowStockThreshold ? 'bg-amber-500' :
+          item.lowStockThreshold && item.stock <= item.lowStockThreshold ? 'bg-feedback-warning' :
           'bg-feedback-success';
         return (
           <div className="flex items-center gap-2">

@@ -39,5 +39,5 @@ export function ProductStats({
     { label: 'Agotados',        value: outOfStock, icon: <XCircle />,        variant: 'danger'    },
   ];
 
-  return <StatGrid items={items} columns={4} className={cn(className)} />;
+  return <StatGrid items={items} columns={4} periodLabel="Total acumulado" className={cn(className)} />;
 }

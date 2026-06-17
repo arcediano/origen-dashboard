@@ -11,7 +11,7 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { Package, Plus, RefreshCw } from 'lucide-react';
 
 // Componentes UI
-import { Button, toast, Card, Pagination, MobilePullRefresh, PageLoader, PageError } from '@arcediano/ux-library';
+import { Button, toast, Pagination, MobilePullRefresh, PageLoader, PageError, EmptyState } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProductStats, ProductFilters, ProductTable, ProductCard, ProductMobileList } from './components';
 import { AdjustStockDialog } from './components/ProductDialogs/AdjustStockDialog';
@@ -238,7 +238,7 @@ export default function ProductosPage() {
   // RENDER
   // ==========================================================================
 
-  if (isLoading) {
+  if (isLoading && !products.length) {
     return <PageLoader message="Cargando productos..." />;
   }
 
@@ -328,36 +328,21 @@ export default function ProductosPage() {
           {/* Resultados */}
           <motion.div variants={itemVariants}>
             {products.length === 0 ? (
-              <Card className="p-8 sm:p-12 bg-surface-alt border border-border shadow-subtle">
-                <div className="flex flex-col items-center justify-center text-center">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-origen-pastel flex items-center justify-center mb-3 sm:mb-4">
-                    <Package className="w-8 h-8 text-origen-pradera" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-origen-bosque mb-2">
-                    No hay productos
-                  </h3>
-                  <p className="text-sm text-text-subtle max-w-md mb-6">
-                    {hasFilters
-                      ? 'No se encontraron productos con los filtros seleccionados.'
-                      : 'Comienza añadiendo tu primer producto.'}
-                  </p>
-                  {hasFilters ? (
-                    <Button onClick={clearFilters}>
-                      <span className="flex items-center gap-2">
-                        <RefreshCw className="w-4 h-4" />
-                        Limpiar filtros
-                      </span>
-                    </Button>
-                  ) : (
-                    <Button onClick={handleNewProduct}>
-                      <span className="flex items-center gap-2">
-                        <Plus className="w-4 h-4" />
-                        Nuevo producto
-                      </span>
-                    </Button>
-                  )}
-                </div>
-              </Card>
+              hasFilters ? (
+                <EmptyState
+                  size="sm"
+                  icon={<Package className="w-6 h-6" />}
+                  title="No hay productos"
+                  description="No se encontraron productos con los filtros seleccionados."
+                />
+              ) : (
+                <EmptyState
+                  size="sm"
+                  icon={<Package className="w-6 h-6" />}
+                  title="Aún no tienes productos"
+                  description="Crea tu primer producto para empezar a vender."
+                />
+              )
             ) : (
               <>
                 {/* ── MOBILE list (< lg) ── */}
