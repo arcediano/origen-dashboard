@@ -59,7 +59,7 @@ export function OrdersSummary({ orders, isLoading = false, className }: OrdersSu
           <Card className="bg-surface border border-border-subtle">
             <EmptyState
               size="sm"
-              icon={ShoppingBag}
+              icon={<ShoppingBag className="w-6 h-6" />}
               title="Sin pedidos recientes"
               description="Aquí aparecerán tus últimos pedidos."
             />

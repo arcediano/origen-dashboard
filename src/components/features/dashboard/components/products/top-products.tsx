@@ -59,7 +59,7 @@ export function TopProducts({ products, isLoading = false, className }: TopProdu
           <Card className="bg-surface border border-border-subtle">
             <EmptyState
               size="sm"
-              icon={Package}
+              icon={<Package className="w-6 h-6" />}
               title="Sin productos"
               description="Añade productos para verlos aquí."
             />
