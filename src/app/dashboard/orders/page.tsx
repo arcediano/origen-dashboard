@@ -11,13 +11,12 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { ShoppingBag } from 'lucide-react';
 
 // Componentes UI
-import { Card, Pagination, MobilePullRefresh, PageLoader, PageError } from '@arcediano/ux-library';
+import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, MobileCardList, EmptyState } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { OrderStats } from './components/OrderStats';
 import { OrderFilters } from './components/OrderFilters';
 import { OrdersTable } from './components/OrdersTable';
 import { OrderCard, OrderCardSkeleton } from './components/OrderCard';
-import { MobileCardList } from '@/components/shared/MobileCardList';
 
 // Hooks y API
 import { fetchOrders } from '@/lib/api/orders';
@@ -192,17 +191,12 @@ export default function OrdersPage() {
         {/* Lista móvil / Tabla desktop */}
         <motion.div variants={itemVariants}>
           {orders.length === 0 ? (
-            <Card className="p-8 sm:p-12 bg-surface-alt border border-border-subtle">
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-origen-pastel flex items-center justify-center mb-3 sm:mb-4">
-                  <ShoppingBag className="w-7 h-7 text-origen-pino" />
-                </div>
-                <p className="text-sm font-semibold text-origen-bosque mb-1">Sin pedidos</p>
-                <p className="text-xs text-text-subtle max-w-[240px]">
-                  Aún no tienes pedidos con los filtros seleccionados.
-                </p>
-              </div>
-            </Card>
+            <EmptyState
+              size="sm"
+              icon={<ShoppingBag className="w-6 h-6" />}
+              title="Sin pedidos"
+              description="Aún no tienes pedidos con los filtros seleccionados."
+            />
           ) : (
             <>
               {/* Móvil: lista de tarjetas */}

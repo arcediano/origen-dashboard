@@ -18,11 +18,15 @@ import {
   Eye,
   Truck,
   FileText,
+  Clock,
+  Package,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge, SwipeableRow } from '@arcediano/ux-library';
-import type { Order, PaymentStatus } from '@/types/order';
-import { OrderStatusChip } from './OrderStatusChip';
+import type { Order, PaymentStatus, OrderStatus } from '@/types/order';
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────
 
@@ -51,12 +55,55 @@ export function OrderCardSkeleton() {
 
 // ─── PAYMENT BADGE ────────────────────────────────────────────────────────────
 
+const STATUS_CONFIG: Record<OrderStatus, { label: string; variant: 'success' | 'warning' | 'danger' | 'info' | 'neutral'; icon: React.ElementType }> = {
+  pending: {
+    label: 'Pendiente',
+    variant: 'warning',
+    icon: Clock
+  },
+  processing: {
+    label: 'Procesando',
+    variant: 'info',
+    icon: Package
+  },
+  shipped: {
+    label: 'Enviado',
+    variant: 'info',
+    icon: Truck
+  },
+  delivered: {
+    label: 'Entregado',
+    variant: 'success',
+    icon: CheckCircle2
+  },
+  cancelled: {
+    label: 'Cancelado',
+    variant: 'danger',
+    icon: XCircle
+  },
+  refunded: {
+    label: 'Reembolsado',
+    variant: 'danger',
+    icon: RefreshCw
+  }
+};
+
 const PAYMENT_CONFIG: Record<PaymentStatus, { label: string; variant: 'success' | 'warning' | 'danger' | 'neutral'; icon: React.ElementType }> = {
   paid:     { label: 'Pagado',      variant: 'success', icon: CreditCard },
   pending:  { label: 'Pdte. pago',  variant: 'warning', icon: Banknote   },
   failed:   { label: 'Fallido',     variant: 'danger',  icon: Banknote   },
   refunded: { label: 'Reembolsado', variant: 'neutral', icon: Banknote   },
 };
+
+function StatusBadge({ status }: { status: OrderStatus }) {
+  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
+  const Icon = cfg.icon;
+  return (
+    <Badge variant={cfg.variant} size="xs" icon={<Icon className="w-3 h-3" />}>
+      {cfg.label}
+    </Badge>
+  );
+}
 
 function PaymentBadge({ status }: { status: PaymentStatus }) {
   const cfg = PAYMENT_CONFIG[status] ?? PAYMENT_CONFIG.pending;
@@ -134,7 +181,7 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
           <span className="text-sm font-bold text-origen-bosque truncate">
             {order.orderNumber}
           </span>
-          <OrderStatusChip status={order.status} size="sm" />
+          <StatusBadge status={order.status} />
         </div>
 
         {/* Fila 2: cliente (prominente) */}
