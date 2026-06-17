@@ -12,7 +12,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, StatGrid, StatCard, PageLoader, PageError, MobilePullRefresh } from '@arcediano/ux-library';
-import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2 } from 'lucide-react';
 import { loadProducerProfile } from '@/lib/api/onboarding';
 import { startStripeOnboarding, openStripeDashboard } from '@/lib/stripe/connect-client';
@@ -31,7 +30,6 @@ export default function PaymentsPage() {
   const isFirstLoad = useRef(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const showPageLoader = useDelayedLoading(isFirstLoad.current && isLoading);
   const [isOpeningStripe, setIsOpeningStripe] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
@@ -192,8 +190,7 @@ export default function PaymentsPage() {
     return null;
   };
 
-  // Render PageLoader si es primera carga
-  if (showPageLoader) {
+  if (isFirstLoad.current && isLoading) {
     return <PageLoader />;
   }
 

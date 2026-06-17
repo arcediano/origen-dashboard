@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useRouter } from 'next/navigation';
 import {
   Store,
@@ -328,7 +327,6 @@ export default function BusinessInfoPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const showSkeleton = useDelayedLoading(isLoading);
   const [form, setForm] = useState<BusinessFormState>(EMPTY_FORM);
   const [initialForm, setInitialForm] = useState<BusinessFormState>(EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -586,9 +584,9 @@ export default function BusinessInfoPage() {
             </Alert>
           )}
 
-          {showSkeleton ? (
+          {isLoading ? (
             <BusinessPageSkeleton />
-          ) : isLoading ? null : (
+          ) : (
             <>
               {!loadError &&
                 !form.businessName &&

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useRouter } from 'next/navigation';
 import { User, MapPin, Save, Camera, CheckCircle, Edit, X } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
@@ -92,7 +91,6 @@ export default function PersonalInfoPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const showLoading = useDelayedLoading(isLoading);
   const [form, setForm] = useState<PersonalFormState>(EMPTY_FORM);
   const [initialForm, setInitialForm] = useState<PersonalFormState>(EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -578,7 +576,7 @@ export default function PersonalInfoPage() {
               <Alert className="bg-origen-crema/20 border-origen-pradera/30 py-3">
                 <CheckCircle className="w-4 h-4 text-origen-pradera" />
                 <AlertDescription className="text-sm text-origen-bosque">
-                  {showLoading
+                  {isLoading
                     ? 'Cargando datos reales de tu perfil...'
                     : 'Tu identidad ha sido verificada. Si necesitas actualizar tu documento, contacta con soporte.'}
                 </AlertDescription>
