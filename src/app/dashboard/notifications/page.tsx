@@ -7,11 +7,24 @@
 
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { Bell, Search, SlidersHorizontal, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Bell, SlidersHorizontal } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, DateRangeInput, FilterSheet } from '@arcediano/ux-library';
-import { FilterSelect } from '@/components/ui/FilterSelect';
+import {
+  Card,
+  CardContent,
+  DateRangeInput,
+  FilterSheet,
+  SearchInput,
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+  EmptyState,
+  PageLoader,
+  PageError,
+} from '@arcediano/ux-library';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
 
 import { fetchNotifications, markNotificationAsRead } from '@/lib/api/notifications';
@@ -33,6 +46,8 @@ function normalizeDateBoundary(value: string, mode: 'from' | 'to'): Date | null 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isInboxLoading, setIsInboxLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const isFirstLoadRef = useRef(true);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<NotificationTypeFilter>('all');
@@ -112,13 +127,22 @@ export default function NotificationsPage() {
 
   const loadInbox = async () => {
     setIsInboxLoading(true);
+    setError(null);
     try {
       const response = await fetchNotifications({ page: 1, limit: 50 });
       if (response.data) {
         setNotifications(response.data.notifications);
+      } else {
+        setError('No se pudieron cargar las notificaciones.');
       }
+    } catch (err) {
+      console.error('[notifications] Error loading inbox:', err);
+      setError('Error al cargar las notificaciones. Intenta de nuevo.');
     } finally {
       setIsInboxLoading(false);
+      if (isFirstLoadRef.current) {
+        isFirstLoadRef.current = false;
+      }
     }
   };
 
@@ -160,120 +184,125 @@ export default function NotificationsPage() {
 
       <div className="container mx-auto space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
 
-        <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
-          <CardContent className="p-0">
-            <div className="border-b border-border-subtle px-4 py-4 sm:px-6 space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle pointer-events-none" />
-                  <input
-                    type="text"
+        {/* PageLoader — mostrado en la primera carga */}
+        {isFirstLoadRef.current && isInboxLoading && <PageLoader />}
+
+        {/* PageError — mostrado si hay error de carga */}
+        {error && !isInboxLoading && <PageError message={error} onRetry={loadInbox} />}
+
+        {/* Card principal — visible solo después de la primera carga */}
+        {!isFirstLoadRef.current && (
+          <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
+            <CardContent className="p-0">
+              <div className="border-b border-border-subtle px-4 py-4 sm:px-6 space-y-3">
+                <div className="flex items-center gap-2">
+                  <SearchInput
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(value) => setSearchQuery(value)}
                     placeholder="Buscar por titulo o detalle..."
-                    className="w-full h-10 pl-9 pr-8 text-sm bg-surface-alt border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
-                    aria-label="Buscar notificaciones"
+                    size="md"
+                    clearable
+                    className="flex-1"
                   />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-origen-bosque transition-colors"
-                      aria-label="Limpiar busqueda"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setIsFilterOpen(true)}
+                    className={
+                      activeFilterCount > 0
+                        ? 'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors bg-origen-bosque border-origen-bosque text-white'
+                        : 'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors bg-surface-alt border-border text-origen-bosque'
+                    }
+                    aria-label="Abrir filtros"
+                  >
+                    <SlidersHorizontal className="w-4 h-4" />
+                    <span>Filtros</span>
+                    {activeFilterCount > 0 && (
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/25 text-[10px] font-bold">
+                        {activeFilterCount}
+                      </span>
+                    )}
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setIsFilterOpen(true)}
-                  className={
-                    activeFilterCount > 0
-                      ? 'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors bg-origen-bosque border-origen-bosque text-white'
-                      : 'lg:hidden flex items-center gap-1.5 h-10 px-3.5 rounded-xl border text-sm font-medium transition-colors bg-surface-alt border-border text-origen-bosque'
+                <div className="hidden lg:grid lg:grid-cols-3 lg:gap-3">
+                  <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as NotificationTypeFilter)}>
+                    <SelectTrigger className="h-10 w-auto rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm" aria-label="Filtrar por tipo">
+                      <SelectValue placeholder="Todos los tipos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los tipos</SelectItem>
+                      <SelectItem value="operativas">Operativas</SelectItem>
+                      <SelectItem value="cuenta">Cuenta y sistema</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={readFilter} onValueChange={(value) => setReadFilter(value as ReadFilter)}>
+                    <SelectTrigger className="h-10 w-auto rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm" aria-label="Filtrar por estado de lectura">
+                      <SelectValue placeholder="Leidas y no leidas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Leidas y no leidas</SelectItem>
+                      <SelectItem value="unread">Solo no leidas</SelectItem>
+                      <SelectItem value="read">Solo leidas</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <DateRangeInput
+                    labelFrom="Desde"
+                    labelTo="Hasta"
+                    valueFrom={dateFrom}
+                    valueTo={dateTo}
+                    onChangeFrom={setDateFrom}
+                    onChangeTo={setDateTo}
+                    inputSize="sm"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    Pendientes: <span className="font-semibold text-origen-bosque">{unreadCount}</span>
+                  </p>
+                </div>
+              </div>
+
+              {isInboxLoading ? (
+                <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">Cargando notificaciones...</div>
+              ) : filteredNotifications.length === 0 ? (
+                <EmptyState
+                  size="sm"
+                  icon={<Bell className="w-6 h-6" />}
+                  title="Sin notificaciones"
+                  description={
+                    searchQuery || activeFilterCount > 0
+                      ? "No hay notificaciones que coincidan con los filtros seleccionados."
+                      : "No tienes notificaciones en este momento."
                   }
-                  aria-label="Abrir filtros"
-                >
-                  <SlidersHorizontal className="w-4 h-4" />
-                  <span>Filtros</span>
-                  {activeFilterCount > 0 && (
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/25 text-[10px] font-bold">
-                      {activeFilterCount}
-                    </span>
-                  )}
-                </button>
-              </div>
-
-              <div className="hidden lg:grid lg:grid-cols-3 lg:gap-3">
-                <FilterSelect
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value as NotificationTypeFilter)}
-                  className="h-10 rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm text-origen-bosque focus:outline-none focus:ring-1 focus:ring-origen-pradera/30"
-                  aria-label="Filtrar por tipo"
-                >
-                  <option value="all">Todos los tipos</option>
-                  <option value="operativas">Operativas</option>
-                  <option value="cuenta">Cuenta y sistema</option>
-                  <option value="marketing">Marketing</option>
-                </FilterSelect>
-
-                <FilterSelect
-                  value={readFilter}
-                  onChange={(e) => setReadFilter(e.target.value as ReadFilter)}
-                  className="h-10 rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm text-origen-bosque focus:outline-none focus:ring-1 focus:ring-origen-pradera/30"
-                  aria-label="Filtrar por estado de lectura"
-                >
-                  <option value="all">Leidas y no leidas</option>
-                  <option value="unread">Solo no leidas</option>
-                  <option value="read">Solo leidas</option>
-                </FilterSelect>
-
-                <DateRangeInput
-                  labelFrom="Desde"
-                  labelTo="Hasta"
-                  valueFrom={dateFrom}
-                  valueTo={dateTo}
-                  onChangeFrom={setDateFrom}
-                  onChangeTo={setDateTo}
-                  inputSize="sm"
                 />
-              </div>
-
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm text-muted-foreground">
-                  Pendientes: <span className="font-semibold text-origen-bosque">{unreadCount}</span>
-                </p>
-              </div>
-            </div>
-
-            {isInboxLoading ? (
-              <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">Cargando notificaciones...</div>
-            ) : filteredNotifications.length === 0 ? (
-              <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">No hay notificaciones para estos filtros.</div>
-            ) : (
-              <div>
-                {groupedNotifications.map((group) => (
-                  <div key={group.key}>
-                    <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:px-6">
-                      {group.label}
+              ) : (
+                <div>
+                  {groupedNotifications.map((group) => (
+                    <div key={group.key}>
+                      <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:px-6">
+                        {group.label}
+                      </div>
+                      <div className="divide-y divide-border-subtle">
+                        {group.items.map((notification) => (
+                          <NotificationItem
+                            key={notification.id}
+                            notification={notification}
+                            onMarkAsRead={handleMarkAsRead}
+                          />
+                        ))}
+                      </div>
                     </div>
-                    <div className="divide-y divide-border-subtle">
-                      {group.items.map((notification) => (
-                        <NotificationItem
-                          key={notification.id}
-                          notification={notification}
-                          onMarkAsRead={handleMarkAsRead}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* FilterSheet — siempre montado (portal), visible solo cuando isFilterOpen */}
