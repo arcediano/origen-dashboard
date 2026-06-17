@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { Euro, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp, Wallet } from 'lucide-react';
-import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Card } from '@arcediano/ux-library';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Euro, Filter, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp, Wallet } from 'lucide-react';
+import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Card, Badge, MobilePullRefresh, CardIconHeader, MobileCardList, SwipeableRow } from '@arcediano/ux-library';
 import type { StatGridItem } from '@arcediano/ux-library';
 import {
   createCampaign,
@@ -25,13 +25,13 @@ const STATUS_LABEL: Record<CampaignStatus, string> = {
   REJECTED: 'Rechazada',
 };
 
-const STATUS_COLOR: Record<CampaignStatus, string> = {
-  DRAFT:          'bg-surface text-text-subtle',
-  PENDING_REVIEW: 'bg-origen-mandarina/15 text-origen-mandarina',
-  ACTIVE:         'bg-origen-hoja/20 text-origen-pino',
-  PAUSED:         'bg-surface text-text-secondary',
-  ENDED:          'bg-surface-alt text-text-subtle',
-  REJECTED:       'bg-feedback-danger-subtle text-feedback-danger-text',
+const STATUS_BADGE: Record<CampaignStatus, 'neutral' | 'warning' | 'success' | 'danger'> = {
+  DRAFT:          'neutral',
+  PENDING_REVIEW: 'warning',
+  ACTIVE:         'success',
+  PAUSED:         'neutral',
+  ENDED:          'neutral',
+  REJECTED:       'danger',
 };
 
 function formatMoney(value: number): string {
@@ -79,13 +79,14 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
   const isCpd = form.type === 'CPD';
 
   return (
-    <form
-      onSubmit={(e) => void handleSubmit(e)}
-      className="rounded-2xl border border-border-subtle bg-surface-alt p-4 shadow-sm space-y-4"
-    >
-      <h3 className="font-semibold text-origen-bosque">Nueva campaña</h3>
-
-      <div className="grid gap-3 sm:grid-cols-2">
+    <Card variant="section" padding="md">
+      <CardIconHeader
+        icon={<Megaphone className="h-5 w-5 text-origen-pradera" />}
+        title="Nueva campaña"
+        description="Configura tipo, placement y presupuesto de tu campaña."
+      />
+      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+        <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label className="mb-1.5 block text-xs font-medium text-text-subtle">Tipo</Label>
           <Select value={form.type} onValueChange={(v) => set('type', v as CampaignType)}>
@@ -189,17 +190,15 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
             </div>
           </>
         )}
-      </div>
-
-      <div className="flex justify-end gap-2">
-        <Button variant="ghost" type="button" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button variant="primary" type="submit" disabled={submitting}>
-          {submitting ? 'Enviando...' : 'Enviar a revisión'}
-        </Button>
-      </div>
-    </form>
+        </div>
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+          <Button variant="ghost" type="button" onClick={onCancel} className="w-full sm:w-auto">Cancelar</Button>
+          <Button variant="primary" type="submit" disabled={submitting} className="w-full sm:w-auto">
+            {submitting ? 'Enviando...' : 'Enviar a revisión'}
+          </Button>
+        </div>
+      </form>
+    </Card>
   );
 }
 
@@ -208,9 +207,10 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
 interface CampaignCardProps {
   campaign: Campaign;
   onDeleted: () => void;
+  showDeleteButton?: boolean;
 }
 
-function CampaignCard({ campaign, onDeleted }: CampaignCardProps) {
+function CampaignCard({ campaign, onDeleted, showDeleteButton = true }: CampaignCardProps) {
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -226,23 +226,23 @@ function CampaignCard({ campaign, onDeleted }: CampaignCardProps) {
   };
 
   return (
-    <article className="rounded-2xl border border-border-subtle bg-surface-alt p-4 shadow-sm">
+    <Card padding="sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-text-subtle">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs uppercase tracking-[0.18em] text-text-subtle truncate">
             {campaign.type} · {campaign.placement}
           </p>
-          <h3 className="mt-1 font-semibold text-origen-bosque">
+          <h3 className="mt-1 font-semibold text-origen-bosque truncate">
             {campaign.headline ?? campaign.productSlug}
           </h3>
-          <p className="text-xs text-text-subtle">{campaign.productSlug}</p>
+          <p className="text-xs text-text-subtle truncate">{campaign.productSlug}</p>
         </div>
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_COLOR[campaign.status]}`}>
+        <Badge variant={STATUS_BADGE[campaign.status]} size="sm">
           {STATUS_LABEL[campaign.status]}
-        </span>
+        </Badge>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+      <div className="mt-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-3 lg:grid-cols-4">
         {campaign.type === 'CPD' ? (
           <>
             <div>
@@ -288,20 +288,15 @@ function CampaignCard({ campaign, onDeleted }: CampaignCardProps) {
         )}
       </div>
 
-      {campaign.status === 'DRAFT' && (
-        <div className="mt-3 flex gap-2">
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => void handleDelete()}
-            disabled={deleting}
-          >
+      {campaign.status === 'DRAFT' && showDeleteButton && (
+        <div className="mt-3 flex gap-2 pt-3 border-t border-border-subtle">
+          <Button variant="destructive" size="sm" onClick={() => void handleDelete()} disabled={deleting} className="w-full sm:w-auto">
             <Trash2 className="h-3.5 w-3.5" />
             Eliminar
           </Button>
         </div>
       )}
-    </article>
+    </Card>
   );
 }
 
@@ -310,27 +305,36 @@ function CampaignCard({ campaign, onDeleted }: CampaignCardProps) {
 export default function CampanasPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isTableLoading, setIsTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'ALL'>('ALL');
+  const isFirstLoad = React.useRef(true);
 
-  const loadCampaigns = useCallback(async () => {
-    setLoading(true);
+  const loadCampaigns = useCallback(async (isInitial = false) => {
+    if (isInitial) {
+      setLoading(true);
+    } else {
+      setIsTableLoading(true);
+    }
     setError(null);
     const result = await fetchMyCampaigns({
       status: statusFilter === 'ALL' ? undefined : statusFilter,
       limit: 50,
     });
     setLoading(false);
+    setIsTableLoading(false);
     if (result.error) {
       setError(result.error);
     } else if (result.data) {
       setCampaigns(result.data.data);
+      isFirstLoad.current = false;
     }
   }, [statusFilter]);
 
   useEffect(() => {
-    void loadCampaigns();
+    void loadCampaigns(isFirstLoad.current);
   }, [loadCampaigns]);
 
   const active = campaigns.filter((c) => c.status === 'ACTIVE').length;
@@ -353,17 +357,17 @@ export default function CampanasPage() {
   }, 0);
 
   // Show loader only on initial load
-  if (loading && campaigns.length === 0) {
+  if (isFirstLoad.current && loading) {
     return <PageLoader message="Cargando campañas..." />;
   }
 
   // Show error state if there's an error
-  if (error && campaigns.length === 0) {
+  if (error && !loading) {
     return (
       <PageError
         title="Error al cargar campañas"
         message={error}
-        onRetry={loadCampaigns}
+        onRetry={() => void loadCampaigns()}
       />
     );
   }
@@ -375,90 +379,172 @@ export default function CampanasPage() {
     { label: 'Presupuesto total', value: formatMoney(totalBudget), icon: <Wallet className="w-5 h-5" />, variant: 'bosque' },
   ];
 
+  const handleDeleteCampaign = async (id: string) => {
+    if (!confirm('¿Eliminar esta campaña en borrador?')) return;
+    const result = await deleteCampaign(id);
+    if (result.error) {
+      alert(result.error);
+    } else {
+      void loadCampaigns();
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <PageHeader
-        title="Campañas"
-        description="Gestiona tus campañas publicitarias"
-        badgeText="Campañas"
-        badgeIcon={Megaphone}
-        actions={
-          <div className="flex gap-2">
+    <div className="w-full">
+      <MobilePullRefresh onRefresh={async () => { await loadCampaigns(); }}>
+        <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 space-y-4 sm:space-y-6">
+          {/* Header */}
+          <PageHeader
+            title="Campañas"
+            description="Gestiona tus campañas publicitarias"
+            badgeText="Campañas"
+            badgeIcon={Megaphone}
+            tooltip="Campañas"
+            tooltipDetailed="Crea y gestiona tus campañas publicitarias. Las estadísticas globales de rendimiento están en el panel principal."
+            actions={
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => void loadCampaigns()}
+                  aria-label="Refrescar"
+                >
+                  <RefreshCw className={`h-4 w-4 ${(loading || isTableLoading) ? 'animate-spin' : ''}`} aria-hidden="true" />
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
+                  <Plus className="h-4 w-4" />
+                  Nueva campaña
+                </Button>
+              </div>
+            }
+          />
+
+          {/* KPIs */}
+          <StatGrid items={kpis} columns={4} />
+
+          {/* Form */}
+          {showForm && (
+            <CreateCampaignForm
+              onCreated={() => {
+                setShowForm(false);
+                void loadCampaigns();
+              }}
+              onCancel={() => setShowForm(false)}
+            />
+          )}
+
+          {/* Filtros desktop — hidden en móvil */}
+          <div className="hidden lg:flex items-center gap-3">
+            <Label className="text-sm font-medium text-text-subtle shrink-0">Estado:</Label>
+            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as CampaignStatus | 'ALL')}>
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Todas</SelectItem>
+                <SelectItem value="ACTIVE">Activas</SelectItem>
+                <SelectItem value="PENDING_REVIEW">En revisión</SelectItem>
+                <SelectItem value="PAUSED">Pausadas</SelectItem>
+                <SelectItem value="ENDED">Finalizadas</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filtros móvil */}
+          <div className="lg:hidden">
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
-              onClick={() => void loadCampaigns()}
-              aria-label="Refrescar"
+              className="w-full gap-2"
+              onClick={() => setShowFilters(true)}
             >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
-            </Button>
-            <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
-              <Plus className="h-4 w-4" />
-              Nueva campaña
+              <Filter className="h-4 w-4" />
+              Filtrar
+              {statusFilter !== 'ALL' && (
+                <Badge variant="leaf" size="xs">{STATUS_LABEL[statusFilter as CampaignStatus]}</Badge>
+              )}
             </Button>
           </div>
-        }
-      />
 
-      {/* KPIs */}
-      <StatGrid items={kpis} columns={4} />
+          {/* Panel de filtros móvil — Dialog simple */}
+          {showFilters && (
+            <div className="fixed inset-0 z-50 bg-black/40 lg:hidden" onClick={() => setShowFilters(false)}>
+              <div
+                className="absolute bottom-0 left-0 right-0 rounded-t-2xl bg-surface p-6 space-y-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="font-semibold text-origen-bosque">Filtros</h3>
+                <div className="space-y-2">
+                  <Label>Estado</Label>
+                  <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as CampaignStatus | 'ALL'); setShowFilters(false); }}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">Todas</SelectItem>
+                      <SelectItem value="ACTIVE">Activas</SelectItem>
+                      <SelectItem value="PENDING_REVIEW">En revisión</SelectItem>
+                      <SelectItem value="PAUSED">Pausadas</SelectItem>
+                      <SelectItem value="ENDED">Finalizadas</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button variant="ghost" className="w-full" onClick={() => setShowFilters(false)}>Cerrar</Button>
+              </div>
+            </div>
+          )}
 
-      {/* Form */}
-      {showForm && (
-        <CreateCampaignForm
-          onCreated={() => {
-            setShowForm(false);
-            void loadCampaigns();
-          }}
-          onCancel={() => setShowForm(false)}
-        />
-      )}
+          {/* List */}
+          {isTableLoading ? (
+            <div className="space-y-3" aria-busy="true">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-28 animate-pulse rounded-2xl bg-origen-pastel/30" />
+              ))}
+            </div>
+          ) : campaigns.length === 0 ? (
+            <Card>
+              <EmptyState
+                size="sm"
+                icon={<Megaphone className="w-6 h-6" />}
+                title="Sin campañas"
+                description="Crea tu primera campaña para empezar a promocionar tus productos."
+              />
+            </Card>
+          ) : (
+            <>
+              {/* Móvil: MobileCardList con SwipeableRow para borradores */}
+              <div className="lg:hidden space-y-3">
+                <MobileCardList>
+                  {campaigns.map((campaign) =>
+                    campaign.status === 'DRAFT' ? (
+                      <SwipeableRow
+                        key={campaign.id}
+                        actions={[{
+                          label: 'Eliminar',
+                          color: 'red',
+                          icon: Trash2,
+                          onPress: () => void handleDeleteCampaign(campaign.id),
+                        }]}
+                      >
+                        <CampaignCard campaign={campaign} onDeleted={() => void loadCampaigns()} showDeleteButton={false} />
+                      </SwipeableRow>
+                    ) : (
+                      <CampaignCard key={campaign.id} campaign={campaign} onDeleted={() => void loadCampaigns()} showDeleteButton={false} />
+                    )
+                  )}
+                </MobileCardList>
+              </div>
 
-      {/* Filter */}
-      <div className="flex items-center gap-3">
-        <Label className="text-sm font-medium text-text-subtle">Estado:</Label>
-        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as CampaignStatus | 'ALL')}>
-          <SelectTrigger className="w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Todas</SelectItem>
-            <SelectItem value="ACTIVE">Activas</SelectItem>
-            <SelectItem value="PENDING_REVIEW">En revisión</SelectItem>
-            <SelectItem value="PAUSED">Pausadas</SelectItem>
-            <SelectItem value="ENDED">Finalizadas</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* List */}
-      {loading && campaigns.length > 0 ? (
-        <div className="space-y-3" aria-busy="true" aria-label="Actualizando campañas...">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-28 animate-pulse rounded-2xl bg-origen-pastel/30" />
-          ))}
+              {/* Desktop: lista normal */}
+              <div className="hidden lg:block space-y-3">
+                {campaigns.map((campaign) => (
+                  <CampaignCard key={campaign.id} campaign={campaign} onDeleted={() => void loadCampaigns()} showDeleteButton />
+                ))}
+              </div>
+            </>
+          )}
         </div>
-      ) : campaigns.length === 0 ? (
-        <Card>
-          <EmptyState
-            size="sm"
-            icon={<Megaphone className="w-6 h-6" />}
-            title="Sin campañas"
-            description="Crea tu primera campaña para empezar a promocionar tus productos."
-          />
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {campaigns.map((campaign) => (
-            <CampaignCard
-              key={campaign.id}
-              campaign={campaign}
-              onDeleted={() => void loadCampaigns()}
-            />
-          ))}
-        </div>
-      )}
+      </MobilePullRefresh>
     </div>
   );
 }
