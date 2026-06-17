@@ -329,7 +329,7 @@ export default function ProductosPage() {
           <motion.div variants={itemVariants}>
             {products.length === 0 ? (
               hasFilters ? (
-                <Card className="bg-surface border border-border-subtle">
+                <Card>
                   <EmptyState
                     size="sm"
                     icon={<Package className="w-6 h-6" />}
@@ -338,7 +338,7 @@ export default function ProductosPage() {
                   />
                 </Card>
               ) : (
-                <Card className="bg-surface border border-border-subtle">
+                <Card>
                   <EmptyState
                     size="sm"
                     icon={<Package className="w-6 h-6" />}

@@ -191,7 +191,7 @@ export default function OrdersPage() {
         {/* Lista móvil / Tabla desktop */}
         <motion.div variants={itemVariants}>
           {orders.length === 0 ? (
-            <Card className="bg-surface border border-border-subtle">
+            <Card>
               <EmptyState
                 size="sm"
                 icon={<ShoppingBag className="w-6 h-6" />}

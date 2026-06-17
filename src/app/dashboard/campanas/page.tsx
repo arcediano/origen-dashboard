@@ -440,7 +440,7 @@ export default function CampanasPage() {
           ))}
         </div>
       ) : campaigns.length === 0 ? (
-        <Card className="bg-surface border border-border-subtle">
+        <Card>
           <EmptyState
             size="sm"
             icon={<Megaphone className="w-6 h-6" />}
