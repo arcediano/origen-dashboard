@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { useRouter } from 'next/navigation';
 import {
   FileBadge,
@@ -143,6 +144,7 @@ function getCardTone(): string {
 export default function CertificationsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const showLoadingSkeleton = useDelayedLoading(loading);
   const [error, setError] = useState<string | null>(null);
   const [certifications, setCertifications] = useState<CertItem[]>([]);
   const [legalDocs, setLegalDocs] = useState<LegalDocItem[]>([]);
@@ -932,7 +934,7 @@ export default function CertificationsPage() {
           )}
 
           {/* Skeleton de carga */}
-          {loading && (
+          {showLoadingSkeleton && (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-24 rounded-xl bg-muted animate-pulse" />

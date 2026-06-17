@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@arcediano/ux-library'
 import { Badge, Button } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
 import { useProducerProfile } from '@/components/features/dashboard/hooks';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -112,10 +113,12 @@ function ProfilePageSkeleton() {
 
 export default function ProfilePage() {
   const { producer, isLoading } = useProducerProfile();
+  const showSkeleton = useDelayedLoading(isLoading);
 
-  if (isLoading) {
+  if (showSkeleton) {
     return <ProfilePageSkeleton />;
   }
+  if (isLoading) return null;
 
   const completion = producer?.profileCompletenessPercent ?? 0;
   const totalTrackedItems = producer?.profileCompletenessMeta.totalSteps ?? 0;
