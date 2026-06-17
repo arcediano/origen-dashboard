@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Euro, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp } from 'lucide-react';
+import { Euro, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp, Wallet } from 'lucide-react';
 import { SoftStatCard } from '@/components/shared/SoftStatCard';
 import { FilterSelect } from '@/components/ui/FilterSelect';
-import { Button, DateInput, Input, Label } from '@arcediano/ux-library';
+import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@arcediano/ux-library';
+import type { StatGridItem } from '@arcediano/ux-library';
 import {
   createCampaign,
   deleteCampaign,
@@ -290,14 +291,15 @@ function CampaignCard({ campaign, onDeleted }: CampaignCardProps) {
 
       {campaign.status === 'DRAFT' && (
         <div className="mt-3 flex gap-2">
-          <button
+          <Button
+            variant="destructive"
+            size="sm"
             onClick={() => void handleDelete()}
             disabled={deleting}
-            className="flex items-center gap-1.5 rounded-xl border border-border-subtle px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
           >
             <Trash2 className="h-3.5 w-3.5" />
             Eliminar
-          </button>
+          </Button>
         </div>
       )}
     </article>
@@ -309,17 +311,21 @@ function CampaignCard({ campaign, onDeleted }: CampaignCardProps) {
 export default function CampanasPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'ALL'>('ALL');
 
   const loadCampaigns = useCallback(async () => {
     setLoading(true);
+    setError(null);
     const result = await fetchMyCampaigns({
       status: statusFilter === 'ALL' ? undefined : statusFilter,
       limit: 50,
     });
     setLoading(false);
-    if (result.data) {
+    if (result.error) {
+      setError(result.error);
+    } else if (result.data) {
       setCampaigns(result.data.data);
     }
   }, [statusFilter]);
@@ -347,62 +353,57 @@ export default function CampanasPage() {
     return acc + (c.dailyBudget ?? 0);
   }, 0);
 
+  // Show loader only on initial load
+  if (loading && campaigns.length === 0) {
+    return <PageLoader message="Cargando campañas..." />;
+  }
+
+  // Show error state if there's an error
+  if (error && campaigns.length === 0) {
+    return (
+      <PageError
+        title="Error al cargar campañas"
+        message={error}
+        onRetry={loadCampaigns}
+      />
+    );
+  }
+
+  const kpis: StatGridItem[] = [
+    { label: 'Campañas activas', value: active, icon: <TrendingUp className="w-5 h-5" />, variant: 'hoja' },
+    { label: 'Campañas en revisión', value: pending, icon: <PauseCircle className="w-5 h-5" />, variant: 'mandarina' },
+    { label: 'Total campañas', value: campaigns.length, icon: <Megaphone className="w-5 h-5" />, variant: 'pradera' },
+    { label: 'Presupuesto total', value: formatMoney(totalBudget), icon: <Wallet className="w-5 h-5" />, variant: 'bosque' },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-origen-bosque sm:text-2xl">Mis campañas</h1>
-          <p className="mt-1 text-sm text-text-subtle">
-            Gestiona tu visibilidad en el marketplace con campañas CPC y CPD.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => void loadCampaigns()}
-            className="rounded-xl border border-border-subtle p-2 text-text-subtle hover:bg-surface"
-            aria-label="Refrescar"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
-          </button>
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-origen-bosque px-3 py-2 text-sm font-semibold text-white hover:bg-origen-pino"
-          >
-            <Plus className="h-4 w-4" />
-            Nueva campaña
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Campañas"
+        description="Gestiona tus campañas publicitarias"
+        badgeText="Campañas"
+        badgeIcon={Megaphone}
+        actions={
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => void loadCampaigns()}
+              aria-label="Refrescar"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
+            </Button>
+            <Button variant="primary" size="sm" onClick={() => setShowForm(true)}>
+              <Plus className="h-4 w-4" />
+              Nueva campaña
+            </Button>
+          </div>
+        }
+      />
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
-        <SoftStatCard
-          label="Activas"
-          value={active}
-          icon={TrendingUp}
-          bg="from-origen-hoja/5 to-transparent"
-          border="border-origen-hoja/10"
-          iconColor="text-origen-hoja"
-        />
-        <SoftStatCard
-          label="En revisión"
-          value={pending}
-          icon={PauseCircle}
-          bg="from-origen-mandarina/10 to-transparent"
-          border="border-origen-mandarina/25"
-          iconColor="text-origen-mandarina"
-        />
-        <SoftStatCard
-          label="Presupuesto total"
-          value={formatMoney(totalBudget)}
-          icon={Megaphone}
-          bg="from-origen-pradera/5 to-transparent"
-          border="border-origen-pradera/10"
-          iconColor="text-origen-pradera"
-          className="col-span-2 lg:col-span-1"
-        />
-      </div>
+      <StatGrid items={kpis} columns={4} />
 
       {/* Form */}
       {showForm && (
@@ -416,36 +417,36 @@ export default function CampanasPage() {
       )}
 
       {/* Filter */}
-      <div className="flex flex-wrap gap-2">
-        {(['ALL', 'ACTIVE', 'PENDING_REVIEW', 'PAUSED', 'ENDED'] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => setStatusFilter(s)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              statusFilter === s
-                ? 'bg-origen-bosque text-white'
-                : 'border border-border-subtle text-text-subtle hover:bg-surface'
-            }`}
-          >
-            {s === 'ALL' ? 'Todas' : STATUS_LABEL[s as CampaignStatus]}
-          </button>
-        ))}
+      <div className="flex items-center gap-3">
+        <Label className="text-sm font-medium text-text-subtle">Estado:</Label>
+        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as CampaignStatus | 'ALL')}>
+          <SelectTrigger className="w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Todas</SelectItem>
+            <SelectItem value="ACTIVE">Activas</SelectItem>
+            <SelectItem value="PENDING_REVIEW">En revisión</SelectItem>
+            <SelectItem value="PAUSED">Pausadas</SelectItem>
+            <SelectItem value="ENDED">Finalizadas</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* List */}
-      {loading ? (
-        <div className="space-y-3" aria-busy="true" aria-label="Cargando campañas...">
+      {loading && campaigns.length > 0 ? (
+        <div className="space-y-3" aria-busy="true" aria-label="Actualizando campañas...">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="h-28 animate-pulse rounded-2xl bg-origen-pastel/30" />
           ))}
         </div>
       ) : campaigns.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border-subtle bg-surface-alt px-6 py-10 text-center">
-          <Megaphone className="mx-auto mb-3 h-8 w-8 text-text-subtle" aria-hidden="true" />
-          <p className="text-sm text-text-subtle">
-            Aún no tienes campañas. Crea una para aumentar tu visibilidad.
-          </p>
-        </div>
+        <EmptyState
+          size="sm"
+          icon={<Megaphone className="w-6 h-6" />}
+          title="Sin campañas"
+          description="Crea tu primera campaña para empezar a promocionar tus productos."
+        />
       ) : (
         <div className="space-y-3">
           {campaigns.map((campaign) => (
