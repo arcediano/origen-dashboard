@@ -31,13 +31,17 @@ import {
   CardTitle,
   Input,
   Label,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  Textarea,
 } from '@arcediano/ux-library';
-import { Textarea } from '@arcediano/ux-library';
 import { motion } from 'framer-motion';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
 import { getProvinciaFromCP } from '@/constants/cp-provincias';
-import { FilterSelect } from '@/components/ui/FilterSelect';
 import {
   getProducerProfile,
   updateProducerProfile,
@@ -772,12 +776,16 @@ export default function BusinessInfoPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="entityType">Tipo de entidad</Label>
-                      <FilterSelect id="entityType" value={form.entityType} onChange={(e) => setForm({ ...form, entityType: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
-                        <option value="">Selecciona una opcion</option>
-                        {ENTITY_TYPE_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </FilterSelect>
+                      <Select value={form.entityType} onValueChange={(v) => setForm({ ...form, entityType: v })} disabled={!isEditing}>
+                        <SelectTrigger id="entityType" className="w-full">
+                          <SelectValue placeholder="Selecciona una opcion" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ENTITY_TYPE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="legalRepresentativeName">Representante legal</Label>
@@ -789,12 +797,16 @@ export default function BusinessInfoPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="teamSize">Tamano del equipo</Label>
-                      <FilterSelect id="teamSize" value={form.teamSize} onChange={(e) => setForm({ ...form, teamSize: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
-                        <option value="">Selecciona una opcion</option>
-                        {TEAM_SIZE_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </FilterSelect>
+                      <Select value={form.teamSize} onValueChange={(v) => setForm({ ...form, teamSize: v })} disabled={!isEditing}>
+                        <SelectTrigger id="teamSize" className="w-full">
+                          <SelectValue placeholder="Selecciona una opcion" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TEAM_SIZE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </CardContent>
@@ -865,12 +877,16 @@ export default function BusinessInfoPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="province">Provincia</Label>
-                      <FilterSelect id="province" value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} disabled={!isEditing} className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm">
-                        <option value="">Selecciona una provincia</option>
-                        {PROVINCIAS_ESPANA.map((province) => (
-                          <option key={province} value={province}>{province}</option>
-                        ))}
-                      </FilterSelect>
+                      <Select value={form.province} onValueChange={(v) => setForm({ ...form, province: v })} disabled={!isEditing}>
+                        <SelectTrigger id="province" className="w-full">
+                          <SelectValue placeholder="Selecciona una provincia" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PROVINCIAS_ESPANA.map((province) => (
+                            <SelectItem key={province} value={province}>{province}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="postalCode">Codigo postal</Label>

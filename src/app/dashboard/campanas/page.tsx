@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Euro, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp, Wallet } from 'lucide-react';
-import { SoftStatCard } from '@/components/shared/SoftStatCard';
-import { FilterSelect } from '@/components/ui/FilterSelect';
 import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Card } from '@arcediano/ux-library';
 import type { StatGridItem } from '@arcediano/ux-library';
 import {
@@ -90,25 +88,26 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label className="mb-1.5 block text-xs font-medium text-text-subtle">Tipo</Label>
-          <FilterSelect
-            value={form.type}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => set('type', e.target.value as CampaignType)}
-            className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque"
-          >
-            <option value="CPD">CPD — Coste por día</option>
-            <option value="CPC">CPC — Coste por clic</option>
-          </FilterSelect>
+          <Select value={form.type} onValueChange={(v) => set('type', v as CampaignType)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="CPD">CPD — Coste por día</SelectItem>
+              <SelectItem value="CPC">CPC — Coste por clic</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label className="mb-1.5 block text-xs font-medium text-text-subtle">Placement</Label>
-          <FilterSelect
-            value={form.placement ?? ''}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => set('placement', e.target.value)}
-            className="w-full rounded-xl border border-border-subtle bg-surface px-3 py-2 text-sm text-origen-bosque"
-          >
-            <option value="">Seleccionar...</option>
-            {PLACEMENTS.map((p) => <option key={p} value={p}>{p}</option>)}
-          </FilterSelect>
+          <Select value={form.placement ?? ''} onValueChange={(v) => set('placement', v)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Seleccionar..." />
+            </SelectTrigger>
+            <SelectContent>
+              {PLACEMENTS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Input
