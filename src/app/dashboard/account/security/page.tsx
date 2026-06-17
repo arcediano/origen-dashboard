@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { AlertTriangle, Key, Shield, Smartphone, Check, Copy, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Alert, AlertDescription, Badge, CardIconHeader } from '@arcediano/ux-library';
+import { Alert, AlertDescription, Badge, CardIconHeader, PageLoader } from '@arcediano/ux-library';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@arcediano/ux-library';
 import { changePassword, getTwoFactorStatus, setupTwoFactor, enableTwoFactor, disableTwoFactor } from '@/lib/api/auth';
 import { logoutUser } from '@/lib/api/auth';
@@ -277,6 +277,8 @@ export default function SecurityPage() {
       setIsSaving(false);
     }
   };
+
+  if (twoFa.isLoading) return <PageLoader message="Cargando configuración de seguridad..." />;
 
   return (
     <div className="w-full">
