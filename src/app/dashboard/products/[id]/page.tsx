@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,6 +36,7 @@ import {
 
 import { type Product } from '@/types/product';
 import { fetchProductById, deleteProduct, updateProduct } from '@/lib/api/products';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 
 // ============================================================================
 // ANIMACIONES
@@ -524,6 +525,9 @@ export default function ProductoDetallePage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showStatusSheet, setShowStatusSheet]   = useState(false);
 
+  const isFirstLoad = useRef(true);
+  const showPageLoader = useDelayedLoading(isFirstLoad.current && isLoading);
+
   const loadProduct = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -536,6 +540,7 @@ export default function ProductoDetallePage() {
       setError('Error al cargar el producto');
     } finally {
       setIsLoading(false);
+      isFirstLoad.current = false;
     }
   }, [productId]);
 
@@ -613,7 +618,7 @@ export default function ProductoDetallePage() {
 
   // ── Guards ──────────────────────────────────────────────────────────────────
 
-  if (isLoading) return <PageLoader message="Cargando producto..." />;
+  if (showPageLoader) return <PageLoader message="Cargando producto..." />;
   if (error || !product) return (
     <PageError title="Error al cargar" message={error || 'Producto no encontrado'} onRetry={loadProduct} />
   );

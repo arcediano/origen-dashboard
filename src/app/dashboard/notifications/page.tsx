@@ -10,6 +10,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bell, SlidersHorizontal } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import {
   Card,
   CardContent,
@@ -48,6 +49,7 @@ export default function NotificationsPage() {
   const [isInboxLoading, setIsInboxLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const isFirstLoadRef = useRef(true);
+  const showPageLoader = useDelayedLoading(isFirstLoadRef.current && isInboxLoading);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<NotificationTypeFilter>('all');
@@ -171,7 +173,7 @@ export default function NotificationsPage() {
     setDateTo('');
   };
 
-  if (isFirstLoadRef.current && isInboxLoading) {
+  if (showPageLoader) {
     return <PageLoader />;
   }
 

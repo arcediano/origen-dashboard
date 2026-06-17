@@ -9,6 +9,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Leaf, X } from 'lucide-react';
 import { PageLoader, PageError, ToggleGroup, ToggleGroupItem } from '@arcediano/ux-library';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { DashboardFooter } from '@/app/dashboard/components/footer/DashboardFooter';
 import {
   AlertList,
@@ -80,7 +81,6 @@ function OnboardingProgressBanner() {
 }
 
 export default function ProducerDashboard() {
-  const [mounted, setMounted] = useState(false);
   const [chartPeriod, setChartPeriod] = useState<'7d' | '6m' | '1y'>('6m');
   const { user } = useAuth();
   const isFirstLoad = useRef(true);
@@ -97,9 +97,7 @@ export default function ProducerDashboard() {
   const { products: realProducts, isLoading: productsLoading, error: productsError, refetch: refetchProducts } = useTopProducts(3);
   const { producer } = useProducerProfile();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const showPageLoader = useDelayedLoading(isFirstLoad.current && statsLoading);
 
   // Marcar primera carga como completada cuando los datos lleguen
   useEffect(() => {
@@ -153,10 +151,7 @@ export default function ProducerDashboard() {
     return dashboardAlerts;
   }, [pendingOrders, producer, profileCompleteness, user?.onboardingCompleted]);
 
-  if (!mounted) return null;
-
-  // Mostrar PageLoader solo en la primera carga
-  if (isFirstLoad.current && statsLoading) {
+  if (showPageLoader) {
     return <PageLoader message="Cargando dashboard..." />;
   }
 

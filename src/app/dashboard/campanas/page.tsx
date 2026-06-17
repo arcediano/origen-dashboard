@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Euro, Filter, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp, Wallet } from 'lucide-react';
 import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Card, Badge, MobilePullRefresh, CardIconHeader, MobileCardList, SwipeableRow } from '@arcediano/ux-library';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import type { StatGridItem } from '@arcediano/ux-library';
 import {
   createCampaign,
@@ -311,6 +312,7 @@ export default function CampanasPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'ALL'>('ALL');
   const isFirstLoad = React.useRef(true);
+  const showPageLoader = useDelayedLoading(isFirstLoad.current && loading);
 
   const loadCampaigns = useCallback(async (isInitial = false) => {
     if (isInitial) {
@@ -357,7 +359,7 @@ export default function CampanasPage() {
   }, 0);
 
   // Show loader only on initial load
-  if (isFirstLoad.current && loading) {
+  if (showPageLoader) {
     return <PageLoader message="Cargando campañas..." />;
   }
 

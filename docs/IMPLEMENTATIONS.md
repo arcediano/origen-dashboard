@@ -258,3 +258,99 @@ Se documento el incidente P1 donde origen-dashboard recibia 500 al consumir `POS
 
 - Actividad: ../../_workspace/docs/actividades/2025-07-22_10-30_redesign-order-detail_disenador-ux.md
 - Referencia canónica: `src/app/dashboard/products/[id]/page.tsx`
+
+---
+
+## Estrategia de Carga (Loading Strategy)
+
+Ultima actualizacion: 2026-06-17
+Referencia de implementacion: profile/, profile/personal/, profile/business/, profile/certifications/
+
+### Regla general
+
+| Situacion | Componente | Hook auxiliar |
+|---|---|---|
+| Carga INICIAL de pantalla (primera navegacion) | PageLoader de @arcediano/ux-library | useDelayedLoading |
+| Refetch dentro de pantalla ya cargada | Skeleton inline o isLoading prop en componente de lista | No necesario |
+| Pantalla sin datos remotos | Nada, render directo | No necesario |
+
+Regla de oro: PageLoader bloquea la pantalla completa. Solo se usa cuando el usuario NO
+tiene nada que ver todavia. En cualquier otro caso, la pantalla ya esta renderizada y el
+indicador de progreso debe ser inline (skeleton o spinner dentro del componente afectado).
+
+### Hook useDelayedLoading
+
+Archivo: origen-dashboard/src/hooks/useDelayedLoading.ts
+Firma: useDelayedLoading(isLoading: boolean, delay?: number): boolean
+Delay por defecto: 200 ms.
+
+El hook retrasa la activacion del indicador de carga. Si los datos llegan antes del umbral,
+el indicador nunca se muestra y el usuario no percibe parpadeo. Siempre usar este hook al
+envolver PageLoader.
+
+### Patron: pantalla con lista y filtros
+
+```typescript
+const [items, setItems] = useState([]);
+const [isLoading, setIsLoading] = useState(true);        // carga inicial
+const [isTableLoading, setIsTableLoading] = useState(false); // refetch
+const isFirstLoad = useRef(true);
+const showPageLoader = useDelayedLoading(isFirstLoad.current && isLoading);
+
+const loadData = async (isInitialLoad = false) => {
+  if (isInitialLoad) { setIsLoading(true); }
+  else { setIsTableLoading(true); }  // no bloquea la pantalla
+  // ...fetch...
+  setIsLoading(false); setIsTableLoading(false);
+  isFirstLoad.current = false;
+};
+
+useEffect(() => {
+  if (isFirstLoad.current) { isFirstLoad.current = false; loadData(true); return; }
+  loadData(false);
+}, [filters, page]);
+
+if (showPageLoader) return <PageLoader message="Cargando..." />;
+if (error) return <PageError ... />;
+// El skeleton/spinner de isTableLoading va DENTRO del componente tabla
+return <Table isLoading={isTableLoading} items={items} />;
+```
+
+### Patron: pantalla de detalle sin refetch
+
+```typescript
+const [data, setData] = useState(null);
+const [isLoading, setIsLoading] = useState(true);
+const isFirstLoad = useRef(true);
+const showPageLoader = useDelayedLoading(isFirstLoad.current && isLoading);
+
+const loadData = async () => {
+  setIsLoading(true);
+  // ...fetch...
+  setIsLoading(false);
+  isFirstLoad.current = false;
+};
+
+useEffect(() => { loadData(); }, [id]);
+if (showPageLoader) return <PageLoader message="Cargando..." />;
+```
+
+### Anti-patrones prohibidos
+
+```typescript
+// MAL: PageLoader en cada recarga (sin isFirstLoad)
+if (isLoading) return <PageLoader />;
+
+// MAL: PageLoader sin useDelayedLoading (parpadeo en cargas rapidas)
+if (isFirstLoad.current && isLoading) return <PageLoader />;
+
+// MAL: Spinner global overlay para refetch de tabla
+if (isTableLoading) return <div className="fixed inset-0"><Spinner /></div>;
+```
+
+### Excepcion documentada: seccion profile/
+
+Las paginas profile/, profile/personal/, profile/business/ y profile/certifications/ usan
+Skeleton en lugar de PageLoader para la carga inicial porque tienen un skeleton que replica
+la estructura completa de la pagina. Este patron solo es valido cuando ese skeleton esta
+implementado. Para el resto de pantallas del dashboard, usar PageLoader sin excepcion.

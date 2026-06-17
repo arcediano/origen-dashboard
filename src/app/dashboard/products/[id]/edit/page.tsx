@@ -27,6 +27,7 @@ import { SchedulePublishCard } from '../../components/SchedulePublishCard';
 
 import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 
 // ─── Animaciones ──────────────────────────────────────────────────────────────
@@ -76,6 +77,8 @@ export default function EditProductPage() {
     reloadProduct,
   } = useProductForm(productId);
 
+  const showPageLoader = useDelayedLoading(isLoading);
+
   const stepNumber = FORM_STEPS.findIndex(s => s.id === activeTab) + 1;
   const tips = useStepTips(stepNumber, formData);
 
@@ -112,7 +115,7 @@ export default function EditProductPage() {
     if (nextStep) { handleTabChange(nextStep); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   };
 
-  if (isLoading) return <PageLoader message="Cargando producto..." />;
+  if (showPageLoader) return <PageLoader message="Cargando producto..." />;
   if (error) return <PageError title="Error al cargar" message={error} onRetry={reloadProduct} />;
 
   return (

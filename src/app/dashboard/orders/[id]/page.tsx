@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -27,6 +27,7 @@ import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 
 // Hooks y API
 import { fetchOrderById, fetchSellerOrderInvoice, updateOrderStatus } from '@/lib/api/orders';
+import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import type { Order } from '@/types/order';
 
 const statusConfig: Record<Order['status'], {
@@ -192,6 +193,9 @@ export default function OrderDetailPage() {
   const [showStatusSheet, setShowStatusSheet] = useState(false);
   const [showCancelSheet, setShowCancelSheet]   = useState(false);
 
+  const isFirstLoad = useRef(true);
+  const showPageLoader = useDelayedLoading(isFirstLoad.current && isLoading);
+
   useEffect(() => {
     loadOrder();
   }, [orderId]);
@@ -211,6 +215,7 @@ export default function OrderDetailPage() {
       setError('Error al cargar el pedido');
     } finally {
       setIsLoading(false);
+      isFirstLoad.current = false;
     }
   };
 
@@ -258,7 +263,7 @@ export default function OrderDetailPage() {
     }
   };
 
-  if (isLoading) {
+  if (showPageLoader) {
     return <PageLoader message="Cargando pedido..." />;
   }
 
