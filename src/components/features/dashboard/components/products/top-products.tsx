@@ -40,7 +40,7 @@ export function TopProducts({ products, isLoading = false, className }: TopProdu
       <div className="space-y-3">
         {isLoading ? (
           // Estado de carga con skeleton
-          <Card className="bg-surface border border-border-subtle">
+          <Card>
             <div className="space-y-3 p-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="space-y-2">
@@ -56,7 +56,7 @@ export function TopProducts({ products, isLoading = false, className }: TopProdu
           ))
         ) : (
           // Estado vacío
-          <Card className="bg-surface border border-border-subtle">
+          <Card>
             <EmptyState
               size="sm"
               icon={<Package className="w-6 h-6" />}
