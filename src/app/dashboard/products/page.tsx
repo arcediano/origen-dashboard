@@ -238,7 +238,7 @@ export default function ProductosPage() {
   // RENDER
   // ==========================================================================
 
-  if (isLoading && !products.length) {
+  if (isFirstLoad.current && isLoading) {
     return <PageLoader message="Cargando productos..." />;
   }
 
@@ -301,6 +301,7 @@ export default function ProductosPage() {
               active={stats.active}
               lowStock={stats.lowStock}
               outOfStock={stats.outOfStock}
+              isLoading={isTableLoading}
             />
           </motion.div>
 

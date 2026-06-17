@@ -210,8 +210,16 @@ export default function ProducerDashboard() {
           </div>
 
           <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-            <SalesChart period={chartPeriod} />
-            <VisitsChart period={chartPeriod} />
+            {statsLoading && !realStats ? (
+              <div className="h-64 animate-pulse rounded-2xl bg-origen-pastel/20" />
+            ) : (
+              <SalesChart period={chartPeriod} />
+            )}
+            {statsLoading && !realStats ? (
+              <div className="h-64 animate-pulse rounded-2xl bg-origen-pastel/20" />
+            ) : (
+              <VisitsChart period={chartPeriod} />
+            )}
           </div>
         </div>
 

@@ -171,6 +171,14 @@ export default function NotificationsPage() {
     setDateTo('');
   };
 
+  if (isFirstLoadRef.current && isInboxLoading) {
+    return <PageLoader />;
+  }
+
+  if (error && !isInboxLoading) {
+    return <PageError message={error} onRetry={loadInbox} />;
+  }
+
   return (
     <div className="w-full">
       <PageHeader
@@ -184,15 +192,8 @@ export default function NotificationsPage() {
 
       <div className="container mx-auto space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
 
-        {/* PageLoader — mostrado en la primera carga */}
-        {isFirstLoadRef.current && isInboxLoading && <PageLoader />}
-
-        {/* PageError — mostrado si hay error de carga */}
-        {error && !isInboxLoading && <PageError message={error} onRetry={loadInbox} />}
-
-        {/* Card principal — visible solo después de la primera carga */}
-        {!isFirstLoadRef.current && (
-          <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
+        {/* Card principal */}
+        <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
             <CardContent className="p-0">
               <div className="border-b border-border-subtle px-4 py-4 sm:px-6 space-y-3">
                 <div className="flex items-center gap-2">
@@ -268,7 +269,11 @@ export default function NotificationsPage() {
               </div>
 
               {isInboxLoading ? (
-                <div className="px-4 py-8 text-sm text-text-subtle sm:px-6">Cargando notificaciones...</div>
+                <div className="divide-y divide-border-subtle" aria-busy="true">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="h-16 animate-pulse bg-origen-pastel/20 mx-4 my-2 rounded-xl" />
+                  ))}
+                </div>
               ) : filteredNotifications.length === 0 ? (
                 <EmptyState
                   size="sm"
@@ -302,7 +307,6 @@ export default function NotificationsPage() {
               )}
             </CardContent>
           </Card>
-        )}
       </div>
 
       {/* FilterSheet — siempre montado (portal), visible solo cuando isFilterOpen */}

@@ -135,7 +135,7 @@ export default function OrdersPage() {
   // RENDER
   // ==========================================================================
 
-  if (isLoading && !orders.length) {
+  if (isFirstLoad.current && isLoading) {
     return <PageLoader message="Cargando pedidos..." />;
   }
 
@@ -174,7 +174,7 @@ export default function OrdersPage() {
         {/* Estadísticas */}
         {stats && (
           <motion.div variants={itemVariants}>
-            <OrderStats stats={stats} />
+            <OrderStats stats={stats} isLoading={isTableLoading} />
           </motion.div>
         )}
 

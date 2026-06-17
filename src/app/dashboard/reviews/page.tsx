@@ -162,7 +162,7 @@ export default function ReviewsPage() {
   };
 
   // ── Carga inicial: PageLoader de pantalla completa ────────────────────────
-  if (isLoading && !reviews.length) return <PageLoader message="Cargando reseñas..." />;
+  if (isFirstLoad.current && isLoading) return <PageLoader message="Cargando reseñas..." />;
 
   if (error) return <PageError title="Error al cargar" message={error} onRetry={loadReviews} />;
 
@@ -190,7 +190,7 @@ export default function ReviewsPage() {
           {/* Cabecera: ReviewSummary (desktop) + 4 KPIs 2×2 */}
           {stats && (
             <motion.div variants={itemVariants}>
-              <ReviewHeader stats={stats} />
+              <ReviewHeader stats={stats} isLoading={isTableLoading} />
             </motion.div>
           )}
 

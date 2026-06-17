@@ -18,10 +18,11 @@ import type { ReviewStats } from '@/types/review';
 
 interface ReviewHeaderProps {
   stats: ReviewStats;
+  isLoading?: boolean;
   className?: string;
 }
 
-export function ReviewHeader({ stats, className }: ReviewHeaderProps) {
+export function ReviewHeader({ stats, isLoading = false, className }: ReviewHeaderProps) {
   const kpis: StatGridItem[] = [
     { label: 'Total reseñas', value: stats.total,                      icon: <MessageSquare />, variant: 'pradera'   },
     { label: 'Pendientes',    value: stats.pending,                    icon: <Star />,          variant: 'mandarina' },
@@ -48,7 +49,7 @@ export function ReviewHeader({ stats, className }: ReviewHeaderProps) {
 
       {/* 4 KPIs en grid 2×2 — siempre visible, ocupa 50% en desktop */}
       <div className="w-full lg:w-1/2">
-        <StatGrid items={kpis} columns={2} />
+        <StatGrid items={kpis} columns={2} loading={isLoading} />
       </div>
     </div>
   );

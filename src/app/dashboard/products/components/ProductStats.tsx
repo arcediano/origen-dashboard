@@ -22,6 +22,7 @@ export interface ProductStatsProps {
   active: number;
   lowStock: number;
   outOfStock: number;
+  isLoading?: boolean;
   className?: string;
 }
 
@@ -30,6 +31,7 @@ export function ProductStats({
   active,
   lowStock,
   outOfStock,
+  isLoading = false,
   className,
 }: ProductStatsProps) {
   const items: StatGridItem[] = [
@@ -39,5 +41,5 @@ export function ProductStats({
     { label: 'Agotados',        value: outOfStock, icon: <XCircle />,        variant: 'danger'    },
   ];
 
-  return <StatGrid items={items} columns={4} periodLabel="Total acumulado" className={cn(className)} />;
+  return <StatGrid items={items} columns={4} periodLabel="Total acumulado" loading={isLoading} className={cn(className)} />;
 }

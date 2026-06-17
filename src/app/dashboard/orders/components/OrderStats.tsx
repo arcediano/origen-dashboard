@@ -20,10 +20,11 @@ import type { OrderStats as OrderStatsType } from '@/types/order';
 
 interface OrderStatsProps {
   stats: OrderStatsType;
+  isLoading?: boolean;
   className?: string;
 }
 
-export function OrderStats({ stats, className }: OrderStatsProps) {
+export function OrderStats({ stats, isLoading = false, className }: OrderStatsProps) {
   const items: StatGridItem[] = [
     { label: 'Total pedidos', value: stats.total,                         icon: <ShoppingBag />,   variant: 'pradera'   },
     { label: 'Ingresos',      value: `${stats.totalRevenue.toFixed(0)}€`, icon: <TrendingUp />,    variant: 'hoja'      },
@@ -31,5 +32,5 @@ export function OrderStats({ stats, className }: OrderStatsProps) {
     { label: 'Hoy',           value: stats.todayOrders,                   icon: <CalendarCheck />, variant: 'bosque'    },
   ];
 
-  return <StatGrid items={items} columns={4} periodLabel="Mes actual" className={cn(className)} />;
+  return <StatGrid items={items} columns={4} periodLabel="Mes actual" loading={isLoading} className={cn(className)} />;
 }
