@@ -191,12 +191,14 @@ export default function OrdersPage() {
         {/* Lista móvil / Tabla desktop */}
         <motion.div variants={itemVariants}>
           {orders.length === 0 ? (
-            <EmptyState
-              size="sm"
-              icon={<ShoppingBag className="w-6 h-6" />}
-              title="Sin pedidos"
-              description="Aún no tienes pedidos con los filtros seleccionados."
-            />
+            <Card className="bg-surface border border-border-subtle">
+              <EmptyState
+                size="sm"
+                icon={<ShoppingBag className="w-6 h-6" />}
+                title="Sin pedidos"
+                description="Aún no tienes pedidos con los filtros seleccionados."
+              />
+            </Card>
           ) : (
             <>
               {/* Móvil: lista de tarjetas */}

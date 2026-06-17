@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Euro, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp, Wallet } from 'lucide-react';
 import { SoftStatCard } from '@/components/shared/SoftStatCard';
 import { FilterSelect } from '@/components/ui/FilterSelect';
-import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@arcediano/ux-library';
+import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Card } from '@arcediano/ux-library';
 import type { StatGridItem } from '@arcediano/ux-library';
 import {
   createCampaign,
@@ -441,12 +441,14 @@ export default function CampanasPage() {
           ))}
         </div>
       ) : campaigns.length === 0 ? (
-        <EmptyState
-          size="sm"
-          icon={<Megaphone className="w-6 h-6" />}
-          title="Sin campañas"
-          description="Crea tu primera campaña para empezar a promocionar tus productos."
-        />
+        <Card className="bg-surface border border-border-subtle">
+          <EmptyState
+            size="sm"
+            icon={<Megaphone className="w-6 h-6" />}
+            title="Sin campañas"
+            description="Crea tu primera campaña para empezar a promocionar tus productos."
+          />
+        </Card>
       ) : (
         <div className="space-y-3">
           {campaigns.map((campaign) => (

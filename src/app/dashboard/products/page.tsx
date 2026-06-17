@@ -11,7 +11,7 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { Package, Plus, RefreshCw } from 'lucide-react';
 
 // Componentes UI
-import { Button, toast, Pagination, MobilePullRefresh, PageLoader, PageError, EmptyState } from '@arcediano/ux-library';
+import { Button, toast, Pagination, MobilePullRefresh, PageLoader, PageError, EmptyState, Card } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProductStats, ProductFilters, ProductTable, ProductCard, ProductMobileList } from './components';
 import { AdjustStockDialog } from './components/ProductDialogs/AdjustStockDialog';
@@ -329,19 +329,23 @@ export default function ProductosPage() {
           <motion.div variants={itemVariants}>
             {products.length === 0 ? (
               hasFilters ? (
-                <EmptyState
-                  size="sm"
-                  icon={<Package className="w-6 h-6" />}
-                  title="No hay productos"
-                  description="No se encontraron productos con los filtros seleccionados."
-                />
+                <Card className="bg-surface border border-border-subtle">
+                  <EmptyState
+                    size="sm"
+                    icon={<Package className="w-6 h-6" />}
+                    title="No hay productos"
+                    description="No se encontraron productos con los filtros seleccionados."
+                  />
+                </Card>
               ) : (
-                <EmptyState
-                  size="sm"
-                  icon={<Package className="w-6 h-6" />}
-                  title="Aún no tienes productos"
-                  description="Crea tu primer producto para empezar a vender."
-                />
+                <Card className="bg-surface border border-border-subtle">
+                  <EmptyState
+                    size="sm"
+                    icon={<Package className="w-6 h-6" />}
+                    title="Aún no tienes productos"
+                    description="Crea tu primer producto para empezar a vender."
+                  />
+                </Card>
               )
             ) : (
               <>

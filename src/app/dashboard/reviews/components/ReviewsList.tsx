@@ -139,12 +139,14 @@ export function ReviewsList({
   // ── Estado vacío ──────────────────────────────────────────────────────────
   if (reviews.length === 0) {
     return (
-      <EmptyState
-        size="sm"
-        icon={<MessageSquare className="w-6 h-6" />}
-        title="No hay reseñas"
-        description="No se encontraron reseñas con los filtros seleccionados."
-      />
+      <Card className="bg-surface border border-border-subtle">
+        <EmptyState
+          size="sm"
+          icon={<MessageSquare className="w-6 h-6" />}
+          title="No hay reseñas"
+          description="No se encontraron reseñas con los filtros seleccionados."
+        />
+      </Card>
     );
   }
 
