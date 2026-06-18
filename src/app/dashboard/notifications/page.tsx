@@ -237,7 +237,28 @@ export default function NotificationsPage() {
     void loadInbox(page + 1, true);
   };
 
+  // Handlers de filtro — batchean setIsInboxLoading(true) con el cambio de estado
+  // para que React renderice skeleton y lista filtrada en el mismo ciclo,
+  // evitando que la lista filtrada aparezca un frame antes del skeleton.
+  const applyTypeFilter = (v: string) => {
+    if (!isFirstLoadRef.current) setIsInboxLoading(true);
+    setTypeFilter(v as NotificationTypeFilter);
+  };
+  const applyReadFilter = (v: string) => {
+    if (!isFirstLoadRef.current) setIsInboxLoading(true);
+    setReadFilter(v as ReadFilter);
+  };
+  const applyDateFrom = (v: string) => {
+    if (!isFirstLoadRef.current) setIsInboxLoading(true);
+    setDateFrom(v);
+  };
+  const applyDateTo = (v: string) => {
+    if (!isFirstLoadRef.current) setIsInboxLoading(true);
+    setDateTo(v);
+  };
+
   const clearFilters = () => {
+    if (!isFirstLoadRef.current) setIsInboxLoading(true);
     setTypeFilter('all');
     setReadFilter('all');
     setDateFrom('');
@@ -261,22 +282,22 @@ export default function NotificationsPage() {
     ...(typeFilter !== 'all' ? [{
       id: 'type',
       label: TYPE_LABELS[typeFilter] ?? typeFilter,
-      onRemove: () => setTypeFilter('all'),
+      onRemove: () => applyTypeFilter('all'),
     }] : []),
     ...(readFilter !== 'all' ? [{
       id: 'read',
       label: READ_LABELS[readFilter] ?? readFilter,
-      onRemove: () => setReadFilter('all'),
+      onRemove: () => applyReadFilter('all'),
     }] : []),
     ...(dateFrom ? [{
       id: 'dateFrom',
       label: `Desde: ${dateFrom}`,
-      onRemove: () => setDateFrom(''),
+      onRemove: () => applyDateFrom(''),
     }] : []),
     ...(dateTo ? [{
       id: 'dateTo',
       label: `Hasta: ${dateTo}`,
-      onRemove: () => setDateTo(''),
+      onRemove: () => applyDateTo(''),
     }] : []),
   ];
 
@@ -294,7 +315,7 @@ export default function NotificationsPage() {
         { label: 'Marketing', value: 'marketing' },
       ],
       value: typeFilter,
-      onChange: (value) => setTypeFilter(value as NotificationTypeFilter),
+      onChange: applyTypeFilter,
     },
     {
       type: 'chips',
@@ -306,7 +327,7 @@ export default function NotificationsPage() {
         { label: 'Leídas', value: 'read' },
       ],
       value: readFilter,
-      onChange: (value) => setReadFilter(value as ReadFilter),
+      onChange: applyReadFilter,
     },
     {
       type: 'daterange',
@@ -314,8 +335,8 @@ export default function NotificationsPage() {
       title: 'Rango de fechas',
       valueFrom: dateFrom,
       valueTo: dateTo,
-      onChangeFrom: setDateFrom,
-      onChangeTo: setDateTo,
+      onChangeFrom: applyDateFrom,
+      onChangeTo: applyDateTo,
     },
   ];
 
@@ -355,7 +376,7 @@ export default function NotificationsPage() {
               clearable
             />
 
-            <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as NotificationTypeFilter)} className="w-auto">
+            <Select value={typeFilter} onValueChange={applyTypeFilter} className="w-auto">
               <SelectTrigger className="min-w-[160px] max-w-[180px] h-10" tone="subtle">
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
@@ -367,7 +388,7 @@ export default function NotificationsPage() {
               </SelectContent>
             </Select>
 
-            <Select value={readFilter} onValueChange={(v) => setReadFilter(v as ReadFilter)} className="w-auto">
+            <Select value={readFilter} onValueChange={applyReadFilter} className="w-auto">
               <SelectTrigger className="min-w-[130px] max-w-[150px] h-10" tone="subtle">
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
@@ -382,7 +403,7 @@ export default function NotificationsPage() {
               <span className="text-xs text-text-subtle whitespace-nowrap">Desde</span>
               <DateInput
                 value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
+                onChange={(e) => applyDateFrom(e.target.value)}
                 inputSize="sm"
                 className="w-[148px]"
                 aria-label="Fecha desde"
@@ -393,7 +414,7 @@ export default function NotificationsPage() {
               <span className="text-xs text-text-subtle whitespace-nowrap">Hasta</span>
               <DateInput
                 value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
+                onChange={(e) => applyDateTo(e.target.value)}
                 inputSize="sm"
                 className="w-[148px]"
                 aria-label="Fecha hasta"
