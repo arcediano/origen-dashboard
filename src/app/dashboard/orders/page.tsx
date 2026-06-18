@@ -139,7 +139,7 @@ export default function OrdersPage() {
     return <PageLoader message="Cargando pedidos..." />;
   }
 
-  if (error) {
+  if (error && !isFirstLoad.current) {
     return (
       <PageError
         title="Error al cargar"

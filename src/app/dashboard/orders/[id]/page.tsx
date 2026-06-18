@@ -27,7 +27,6 @@ import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 
 // Hooks y API
 import { fetchOrderById, fetchSellerOrderInvoice, updateOrderStatus } from '@/lib/api/orders';
-import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import type { Order } from '@/types/order';
 
 const statusConfig: Record<Order['status'], {
@@ -194,7 +193,6 @@ export default function OrderDetailPage() {
   const [showCancelSheet, setShowCancelSheet]   = useState(false);
 
   const isFirstLoad = useRef(true);
-  const showPageLoader = useDelayedLoading(isFirstLoad.current && isLoading);
 
   useEffect(() => {
     loadOrder();
@@ -263,7 +261,7 @@ export default function OrderDetailPage() {
     }
   };
 
-  if (showPageLoader) {
+  if (isFirstLoad.current && isLoading) {
     return <PageLoader message="Cargando pedido..." />;
   }
 

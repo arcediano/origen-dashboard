@@ -164,7 +164,7 @@ export default function ReviewsPage() {
   // ── Carga inicial: PageLoader de pantalla completa ────────────────────────
   if (isFirstLoad.current && isLoading) return <PageLoader message="Cargando reseñas..." />;
 
-  if (error) return <PageError title="Error al cargar" message={error} onRetry={loadReviews} />;
+  if (error && !isFirstLoad.current) return <PageError title="Error al cargar" message={error} onRetry={loadReviews} />;
 
   const handleRefresh = async () => { await loadReviews(); };
 

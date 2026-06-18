@@ -242,7 +242,7 @@ export default function ProductosPage() {
     return <PageLoader message="Cargando productos..." />;
   }
 
-  if (error) {
+  if (error && !isFirstLoad.current) {
     return (
       <PageError
         title="Error al cargar"

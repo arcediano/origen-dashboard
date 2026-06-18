@@ -4,4 +4,3 @@
  */
 
 export * from './seller';
-export * from './document';

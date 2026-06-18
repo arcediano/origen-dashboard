@@ -8,7 +8,6 @@
  */
 
 import Stripe from 'stripe';
-import { STRIPE_CONFIG, calculatePlatformFee } from './config';
 
 export type StripeOnboardingSource = 'onboarding' | 'account_payments';
 
@@ -22,10 +21,11 @@ let _stripe: Stripe | null = null;
 
 function getStripe(): Stripe {
   if (!_stripe) {
-    if (!STRIPE_CONFIG.secretKey) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
       throw new Error('STRIPE_SECRET_KEY is not defined');
     }
-    _stripe = new Stripe(STRIPE_CONFIG.secretKey, {
+    _stripe = new Stripe(secretKey, {
       apiVersion: '2026-05-27.dahlia',
       typescript: true,
     });
@@ -59,8 +59,8 @@ export async function createConnectAccount(params: {
 
   try {
     const account = await stripe.accounts.create({
-      type: STRIPE_CONFIG.connectConfig.type,
-      country: STRIPE_CONFIG.connectConfig.country,
+      type: 'express',
+      country: 'ES',
       ...(email ? { email } : {}),
       ...(businessName || website ? {
         business_profile: {
@@ -107,7 +107,7 @@ export async function createAccountLinkWithBase(
   source?: string,
 ) {
   try {
-    const base = baseUrl ?? STRIPE_CONFIG.baseUrl;
+    const base = baseUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
     const resolvedSource = normalizeOnboardingSource(source);
     const sourceParam = `source=${resolvedSource}`;
     const accountLink = await stripe.accountLinks.create({
