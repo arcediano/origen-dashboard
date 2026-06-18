@@ -16,6 +16,13 @@ import {
   FilterToolbar,
   FilterPanel,
   ActiveFilterChips,
+  SearchInput,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  DateInput,
   EmptyState,
   PageLoader,
   PageError,
@@ -333,18 +340,81 @@ export default function NotificationsPage() {
 
       <div className="container mx-auto space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
 
-        {/* ── Filtros — patrón "Bosque Comercial" v5.5 ────────────────────────── */}
+        {/* ── Filtros ───────────────────────────────────────────────────────── */}
         <div className="space-y-2">
-          <FilterToolbar
-            searchValue={searchQuery}
-            onSearchChange={setSearchQuery}
-            searchPlaceholder="Buscar por título o detalle..."
-            searchAriaLabel="Buscar notificaciones"
-            activeFilterCount={activeFilterCount}
-            onOpenFilters={() => setIsFilterOpen(true)}
-            filtersButtonRef={filtersButtonRef}
-          />
 
+          {/* Desktop (≥lg): controles inline siempre visibles */}
+          <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Buscar por título o detalle..."
+              aria-label="Buscar notificaciones"
+              className="min-w-[200px] flex-1"
+              size="md"
+              clearable
+            />
+
+            <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as NotificationTypeFilter)}>
+              <SelectTrigger className="min-w-[160px] max-w-[180px] h-10" tone="subtle">
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los tipos</SelectItem>
+                <SelectItem value="operativas">Operativas</SelectItem>
+                <SelectItem value="cuenta">Cuenta y sistema</SelectItem>
+                <SelectItem value="marketing">Marketing</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={readFilter} onValueChange={(v) => setReadFilter(v as ReadFilter)}>
+              <SelectTrigger className="min-w-[140px] max-w-[160px] h-10" tone="subtle">
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="unread">No leídas</SelectItem>
+                <SelectItem value="read">Leídas</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <span className="text-xs text-text-subtle whitespace-nowrap">Desde</span>
+              <DateInput
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                inputSize="sm"
+                className="w-[148px]"
+                aria-label="Fecha desde"
+              />
+            </div>
+
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <span className="text-xs text-text-subtle whitespace-nowrap">Hasta</span>
+              <DateInput
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                inputSize="sm"
+                className="w-[148px]"
+                aria-label="Fecha hasta"
+              />
+            </div>
+          </div>
+
+          {/* Móvil/tablet (<lg): barra con botón "Filtros" */}
+          <div className="lg:hidden">
+            <FilterToolbar
+              searchValue={searchQuery}
+              onSearchChange={setSearchQuery}
+              searchPlaceholder="Buscar por título o detalle..."
+              searchAriaLabel="Buscar notificaciones"
+              activeFilterCount={activeFilterCount}
+              onOpenFilters={() => setIsFilterOpen(true)}
+              filtersButtonRef={filtersButtonRef}
+            />
+          </div>
+
+          {/* Chips de filtros activos — ambos breakpoints */}
           {activeChips.length > 0 && (
             <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
               <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
