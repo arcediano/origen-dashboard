@@ -10,7 +10,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bell, SlidersHorizontal } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import {
   Card,
   CardContent,
@@ -55,7 +54,6 @@ export default function NotificationsPage() {
   const [hasMore, setHasMore] = useState(false);
   const [isMarkingAll, setIsMarkingAll] = useState(false);
   const isFirstLoadRef = useRef(true);
-  const showPageLoader = useDelayedLoading(isFirstLoadRef.current && isInboxLoading);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<NotificationTypeFilter>('all');
@@ -186,13 +184,10 @@ export default function NotificationsPage() {
     }
   };
 
+  // Carga inicial + recarga cuando cambian filtros
   useEffect(() => {
     void loadInbox(1, false);
-  }, []);
-
-  // Resetear paginación cuando cambian los filtros
-  useEffect(() => {
-    void loadInbox(1, false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typeFilter, readFilter, dateFrom, dateTo]);
 
   const handleMarkAsRead = async (id: string) => {
@@ -242,7 +237,7 @@ export default function NotificationsPage() {
     setDateTo('');
   };
 
-  if (showPageLoader) {
+  if (isFirstLoadRef.current && isInboxLoading) {
     return <PageLoader />;
   }
 
