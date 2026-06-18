@@ -343,59 +343,70 @@ export default function NotificationsPage() {
         {/* ── Filtros ───────────────────────────────────────────────────────── */}
         <div className="space-y-2">
 
-          {/* Desktop (≥lg): controles inline siempre visibles */}
-          <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
-            <SearchInput
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Buscar por título o detalle..."
-              aria-label="Buscar notificaciones"
-              className="min-w-[200px] flex-1"
-              size="md"
-              clearable
-            />
+          {/* Desktop (≥lg): controles inline siempre visibles, sin separación entre campos */}
+          <div className="hidden lg:flex items-stretch bg-surface-alt border border-border-subtle rounded-xl overflow-hidden shadow-sm">
+            {/* Búsqueda — ocupa el espacio restante */}
+            <div className="flex-1 flex items-center px-3 py-1.5 border-r border-border-subtle min-w-0">
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Buscar por título o detalle..."
+                aria-label="Buscar notificaciones"
+                className="w-full"
+                size="md"
+                clearable
+              />
+            </div>
 
-            <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as NotificationTypeFilter)}>
-              <SelectTrigger className="min-w-[160px] max-w-[180px] h-10" tone="subtle">
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los tipos</SelectItem>
-                <SelectItem value="operativas">Operativas</SelectItem>
-                <SelectItem value="cuenta">Cuenta y sistema</SelectItem>
-                <SelectItem value="marketing">Marketing</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Tipo */}
+            <div className="flex items-center px-3 py-1.5 border-r border-border-subtle flex-shrink-0">
+              <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as NotificationTypeFilter)}>
+                <SelectTrigger className="w-[168px] h-9 border-0 shadow-none bg-transparent focus:ring-0 px-0" tone="subtle">
+                  <SelectValue placeholder="Tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  <SelectItem value="operativas">Operativas</SelectItem>
+                  <SelectItem value="cuenta">Cuenta y sistema</SelectItem>
+                  <SelectItem value="marketing">Marketing</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Select value={readFilter} onValueChange={(v) => setReadFilter(v as ReadFilter)}>
-              <SelectTrigger className="min-w-[140px] max-w-[160px] h-10" tone="subtle">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                <SelectItem value="unread">No leídas</SelectItem>
-                <SelectItem value="read">Leídas</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Estado de lectura */}
+            <div className="flex items-center px-3 py-1.5 border-r border-border-subtle flex-shrink-0">
+              <Select value={readFilter} onValueChange={(v) => setReadFilter(v as ReadFilter)}>
+                <SelectTrigger className="w-[148px] h-9 border-0 shadow-none bg-transparent focus:ring-0 px-0" tone="subtle">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="unread">No leídas</SelectItem>
+                  <SelectItem value="read">Leídas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <div className="flex items-center gap-1 flex-shrink-0">
+            {/* Fecha desde */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 border-r border-border-subtle flex-shrink-0">
               <span className="text-xs text-text-subtle whitespace-nowrap">Desde</span>
               <DateInput
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
                 inputSize="sm"
-                className="w-[148px]"
+                className="w-[132px]"
                 aria-label="Fecha desde"
               />
             </div>
 
-            <div className="flex items-center gap-1 flex-shrink-0">
+            {/* Fecha hasta */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 flex-shrink-0">
               <span className="text-xs text-text-subtle whitespace-nowrap">Hasta</span>
               <DateInput
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
                 inputSize="sm"
-                className="w-[148px]"
+                className="w-[132px]"
                 aria-label="Fecha hasta"
               />
             </div>
