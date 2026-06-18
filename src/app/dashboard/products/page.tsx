@@ -239,7 +239,7 @@ export default function ProductosPage() {
   // ==========================================================================
 
   if (isFirstLoad.current && isLoading) {
-    return <PageLoader message="Cargando productos..." />;
+    return <PageLoader message="Cargando productos..." className="animate-fade-in" />;
   }
 
   if (error && !isFirstLoad.current) {

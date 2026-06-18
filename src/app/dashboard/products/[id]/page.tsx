@@ -616,7 +616,7 @@ export default function ProductoDetallePage() {
 
   // ── Guards ──────────────────────────────────────────────────────────────────
 
-  if (isFirstLoad.current && isLoading) return <PageLoader message="Cargando producto..." />;
+  if (isFirstLoad.current && isLoading) return <PageLoader message="Cargando producto..." className="animate-fade-in" />;
   if (error || !product) return (
     <PageError title="Error al cargar" message={error || 'Producto no encontrado'} onRetry={loadProduct} />
   );

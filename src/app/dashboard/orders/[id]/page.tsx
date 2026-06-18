@@ -262,7 +262,7 @@ export default function OrderDetailPage() {
   };
 
   if (isFirstLoad.current && isLoading) {
-    return <PageLoader message="Cargando pedido..." />;
+    return <PageLoader message="Cargando pedido..." className="animate-fade-in" />;
   }
 
   if (error || !order) {

@@ -341,7 +341,7 @@ export default function NotificationsPage() {
   ];
 
   if (isFirstLoadRef.current && isInboxLoading) {
-    return <PageLoader />;
+    return <PageLoader className="animate-fade-in" />;
   }
 
   if (error && !isInboxLoading) {

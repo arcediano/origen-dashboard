@@ -136,7 +136,7 @@ export default function OrdersPage() {
   // ==========================================================================
 
   if (isFirstLoad.current && isLoading) {
-    return <PageLoader message="Cargando pedidos..." />;
+    return <PageLoader message="Cargando pedidos..." className="animate-fade-in" />;
   }
 
   if (error && !isFirstLoad.current) {

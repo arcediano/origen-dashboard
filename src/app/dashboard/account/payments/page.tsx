@@ -191,7 +191,7 @@ export default function PaymentsPage() {
   };
 
   if (isFirstLoad.current && isLoading) {
-    return <PageLoader />;
+    return <PageLoader className="animate-fade-in" />;
   }
 
   return (

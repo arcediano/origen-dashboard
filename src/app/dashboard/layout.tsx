@@ -39,7 +39,6 @@ function DashboardContentWrapper({
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [actionBarOpen, setActionBarOpen] = useState(false);
 
   const { isAuthenticated, isProducer, isLoading: authLoading, user } = useAuth();
@@ -93,9 +92,6 @@ function DashboardContentWrapper({
 
   // Inicializar responsive y montar componente
   useEffect(() => {
-    if (!isAuthenticated || !isProducer) return;
-    setMounted(true);
-    
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024);
     };
@@ -103,7 +99,7 @@ function DashboardContentWrapper({
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, [isAuthenticated, isProducer]);
+  }, []);
 
   // Cuando una página activa su propia ActionBar, el layout cede la reserva del BottomTabBar
   useEffect(() => {
@@ -125,7 +121,6 @@ function DashboardContentWrapper({
     );
   }
 
-  if (!mounted) return null;
   if (!isAuthenticated || !isProducer) return null;
 
     return (

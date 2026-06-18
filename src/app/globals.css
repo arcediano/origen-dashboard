@@ -326,4 +326,12 @@
     /* placeholder — la regla real está fuera de @layer para mayor especificidad */
   }
 
+  .animate-fade-in {
+    animation: fade-in 0.15s ease-out both;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }

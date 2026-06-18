@@ -278,7 +278,7 @@ export default function SecurityPage() {
     }
   };
 
-  if (twoFa.isLoading) return <PageLoader message="Cargando configuración de seguridad..." />;
+  if (twoFa.isLoading) return <PageLoader message="Cargando configuración de seguridad..." className="animate-fade-in" />;
 
   return (
     <div className="w-full">

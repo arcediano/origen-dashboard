@@ -360,7 +360,7 @@ export default function CampanasPage() {
 
   // Show loader only on initial load
   if (showPageLoader) {
-    return <PageLoader message="Cargando campañas..." />;
+    return <PageLoader message="Cargando campañas..." className="animate-fade-in" />;
   }
 
   // Show error state if there's an error

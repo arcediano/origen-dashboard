@@ -115,7 +115,7 @@ export default function EditProductPage() {
     if (nextStep) { handleTabChange(nextStep); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   };
 
-  if (showPageLoader) return <PageLoader message="Cargando producto..." />;
+  if (showPageLoader) return <PageLoader message="Cargando producto..." className="animate-fade-in" />;
   if (error) return <PageError title="Error al cargar" message={error} onRetry={reloadProduct} />;
 
   return (

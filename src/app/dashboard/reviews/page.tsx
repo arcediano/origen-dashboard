@@ -162,7 +162,7 @@ export default function ReviewsPage() {
   };
 
   // ── Carga inicial: PageLoader de pantalla completa ────────────────────────
-  if (isFirstLoad.current && isLoading) return <PageLoader message="Cargando reseñas..." />;
+  if (isFirstLoad.current && isLoading) return <PageLoader message="Cargando reseñas..." className="animate-fade-in" />;
 
   if (error && !isFirstLoad.current) return <PageError title="Error al cargar" message={error} onRetry={loadReviews} />;
 

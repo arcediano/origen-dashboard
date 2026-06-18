@@ -152,7 +152,7 @@ export default function ProducerDashboard() {
   }, [pendingOrders, producer, profileCompleteness, user?.onboardingCompleted]);
 
   if (showPageLoader) {
-    return <PageLoader message="Cargando dashboard..." />;
+    return <PageLoader message="Cargando dashboard..." className="animate-fade-in" />;
   }
 
   // Mostrar PageError si hay errores críticos
