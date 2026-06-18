@@ -469,8 +469,20 @@ export default function NotificationsPage() {
               </div>
 
               {isInboxLoading ? (
-                <div className="flex items-center justify-center py-12" aria-busy="true">
-                  <Spinner size="md" />
+                <div className="flex flex-col items-center justify-center gap-4 py-16" aria-busy="true" aria-live="polite">
+                  <div className="relative flex items-center justify-center w-20 h-20 rounded-full bg-origen-crema/80 shadow-inner">
+                    <Spinner size="xl" variant="primary" label="Cargando notificaciones..." />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-sm font-medium text-origen-bosque">
+                      {activeFilterCount > 0 ? 'Aplicando filtros...' : 'Cargando notificaciones...'}
+                    </p>
+                    <p className="text-xs text-text-subtle">
+                      {activeFilterCount > 0
+                        ? 'Buscando notificaciones que coincidan con tu selección'
+                        : 'Obteniendo tu bandeja de entrada'}
+                    </p>
+                  </div>
                 </div>
               ) : filteredNotifications.length === 0 ? (
                 <EmptyState
