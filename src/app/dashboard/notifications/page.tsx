@@ -7,29 +7,27 @@
 
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Bell, SlidersHorizontal } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Bell } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import {
   Card,
   CardContent,
-  DateRangeInput,
-  FilterSheet,
-  SearchInput,
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
+  FilterToolbar,
+  FilterPanel,
+  ActiveFilterChips,
   EmptyState,
   PageLoader,
   PageError,
   NotificationCardSkeleton,
+  useIsMobile,
+  Button,
+  type ActiveFilterChip,
+  type FilterSection,
 } from '@arcediano/ux-library';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
 
 import { fetchNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '@/lib/api/notifications';
-import { Button } from '@arcediano/ux-library';
 import type { Notification } from '@/types/notification';
 
 type NotificationTypeFilter = 'all' | 'operativas' | 'cuenta' | 'marketing';
@@ -61,6 +59,8 @@ export default function NotificationsPage() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const isMobile = useIsMobile(1024);
+  const filtersButtonRef = useRef<HTMLButtonElement>(null);
 
   const unreadCount = useMemo(
     () => notifications.filter((notification) => !notification.read).length,
@@ -237,6 +237,81 @@ export default function NotificationsPage() {
     setDateTo('');
   };
 
+  // ── Chips de filtros activos ───────────────────────────────────────────────
+
+  const TYPE_LABELS: Record<string, string> = {
+    operativas: 'Operativas',
+    cuenta:     'Cuenta y sistema',
+    marketing:  'Marketing',
+  };
+
+  const READ_LABELS: Record<string, string> = {
+    unread: 'Solo no leídas',
+    read:   'Solo leídas',
+  };
+
+  const activeChips: ActiveFilterChip[] = [
+    ...(typeFilter !== 'all' ? [{
+      id: 'type',
+      label: TYPE_LABELS[typeFilter] ?? typeFilter,
+      onRemove: () => setTypeFilter('all'),
+    }] : []),
+    ...(readFilter !== 'all' ? [{
+      id: 'read',
+      label: READ_LABELS[readFilter] ?? readFilter,
+      onRemove: () => setReadFilter('all'),
+    }] : []),
+    ...(dateFrom ? [{
+      id: 'dateFrom',
+      label: `Desde: ${dateFrom}`,
+      onRemove: () => setDateFrom(''),
+    }] : []),
+    ...(dateTo ? [{
+      id: 'dateTo',
+      label: `Hasta: ${dateTo}`,
+      onRemove: () => setDateTo(''),
+    }] : []),
+  ];
+
+  // ── Secciones del panel de filtros ────────────────────────────────────────
+
+  const filterSections: FilterSection[] = [
+    {
+      type: 'chips',
+      id: 'type',
+      title: 'Tipo',
+      options: [
+        { label: 'Todos', value: 'all' },
+        { label: 'Operativas', value: 'operativas' },
+        { label: 'Cuenta y sistema', value: 'cuenta' },
+        { label: 'Marketing', value: 'marketing' },
+      ],
+      value: typeFilter,
+      onChange: (value) => setTypeFilter(value as NotificationTypeFilter),
+    },
+    {
+      type: 'chips',
+      id: 'read',
+      title: 'Estado de lectura',
+      options: [
+        { label: 'Todas', value: 'all' },
+        { label: 'No leídas', value: 'unread' },
+        { label: 'Leídas', value: 'read' },
+      ],
+      value: readFilter,
+      onChange: (value) => setReadFilter(value as ReadFilter),
+    },
+    {
+      type: 'daterange',
+      id: 'date',
+      title: 'Rango de fechas',
+      valueFrom: dateFrom,
+      valueTo: dateTo,
+      onChangeFrom: setDateFrom,
+      onChangeTo: setDateTo,
+    },
+  ];
+
   if (isFirstLoadRef.current && isInboxLoading) {
     return <PageLoader />;
   }
@@ -258,83 +333,32 @@ export default function NotificationsPage() {
 
       <div className="container mx-auto space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
 
+        {/* ── Filtros — patrón "Bosque Comercial" v5.5 ────────────────────────── */}
+        <div className="space-y-2">
+          <FilterToolbar
+            searchValue={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Buscar por título o detalle..."
+            searchAriaLabel="Buscar notificaciones"
+            activeFilterCount={activeFilterCount}
+            onOpenFilters={() => setIsFilterOpen(true)}
+            filtersButtonRef={filtersButtonRef}
+          />
+
+          {activeChips.length > 0 && (
+            <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
+                Activos:
+              </span>
+              <ActiveFilterChips chips={activeChips} onClearAll={clearFilters} />
+            </div>
+          )}
+        </div>
+
         {/* Card principal */}
         <Card id="notifications-inbox" variant="elevated" className="rounded-2xl border border-border-subtle shadow-sm">
             <CardContent className="p-0">
-              <div className="border-b border-border-subtle px-4 py-4 sm:px-6 space-y-3">
-                <div className="flex items-center gap-2">
-                  <SearchInput
-                    value={searchQuery}
-                    onChange={(value) => setSearchQuery(value)}
-                    placeholder="Buscar por titulo o detalle..."
-                    size="md"
-                    clearable
-                    className="flex-1"
-                  />
-
-                  <Button
-                    variant={activeFilterCount > 0 ? 'primary' : 'secondary'}
-                    size="sm"
-                    onClick={() => setIsFilterOpen(true)}
-                    className="lg:hidden gap-1.5"
-                    aria-label="Abrir filtros"
-                  >
-                    <SlidersHorizontal className="w-4 h-4" />
-                    <span>Filtros</span>
-                    {activeFilterCount > 0 && (
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/25 text-[10px] font-bold">
-                        {activeFilterCount}
-                      </span>
-                    )}
-                  </Button>
-                </div>
-
-                <div className="hidden lg:flex items-center gap-3 flex-wrap">
-                  <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as NotificationTypeFilter)}>
-                    <SelectTrigger className="h-9 w-auto rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm" aria-label="Filtrar por tipo">
-                      <SelectValue placeholder="Todos los tipos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los tipos</SelectItem>
-                      <SelectItem value="operativas">Operativas</SelectItem>
-                      <SelectItem value="cuenta">Cuenta y sistema</SelectItem>
-                      <SelectItem value="marketing">Marketing</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={readFilter} onValueChange={(value) => setReadFilter(value as ReadFilter)}>
-                    <SelectTrigger className="h-9 w-auto rounded-xl border border-border-subtle bg-surface-alt px-3 text-sm" aria-label="Filtrar por estado de lectura">
-                      <SelectValue placeholder="Leidas y no leidas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Leidas y no leidas</SelectItem>
-                      <SelectItem value="unread">Solo no leidas</SelectItem>
-                      <SelectItem value="read">Solo leidas</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <DateRangeInput
-                    labelFrom="Desde"
-                    labelTo="Hasta"
-                    valueFrom={dateFrom}
-                    valueTo={dateTo}
-                    onChangeFrom={setDateFrom}
-                    onChangeTo={setDateTo}
-                    inputSize="sm"
-                  />
-
-                  {activeFilterCount > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearFilters}
-                      className="h-9 px-3 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-xl"
-                    >
-                      Limpiar filtros
-                    </Button>
-                  )}
-                </div>
-
+              <div className="border-b border-border-subtle px-4 py-4 sm:px-6">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm text-muted-foreground">
                     Pendientes: <span className="font-semibold text-origen-bosque">{unreadCount}</span>
@@ -407,51 +431,18 @@ export default function NotificationsPage() {
           </Card>
       </div>
 
-      {/* FilterSheet — siempre montado (portal), visible solo cuando isFilterOpen */}
-      <FilterSheet
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-        title="Filtros de notificaciones"
-        sections={[
-          {
-            type: 'chips',
-            id: 'type',
-            title: 'Tipo',
-            options: [
-              { label: 'Todos', value: 'all' },
-              { label: 'Operativas', value: 'operativas' },
-              { label: 'Cuenta y sistema', value: 'cuenta' },
-              { label: 'Marketing', value: 'marketing' },
-            ],
-            value: typeFilter,
-            onChange: (value) => setTypeFilter(value as NotificationTypeFilter),
-          },
-          {
-            type: 'chips',
-            id: 'read',
-            title: 'Estado de lectura',
-            options: [
-              { label: 'Todas', value: 'all' },
-              { label: 'No leidas', value: 'unread' },
-              { label: 'Leidas', value: 'read' },
-            ],
-            value: readFilter,
-            onChange: (value) => setReadFilter(value as ReadFilter),
-          },
-          {
-            type: 'daterange',
-            id: 'date',
-            title: 'Rango de fechas',
-            valueFrom: dateFrom,
-            valueTo: dateTo,
-            onChangeFrom: setDateFrom,
-            onChangeTo: setDateTo,
-          },
-        ]}
-        onClearAll={clearFilters}
-        resultCount={filteredNotifications.length}
-        resultLabel="notificaciones"
-      />
+      {/* FilterPanel — montado solo en móvil/tablet (<lg), como en Products/Orders/Reviews */}
+      {isMobile && (
+        <FilterPanel
+          isOpen={isFilterOpen}
+          onClose={() => setIsFilterOpen(false)}
+          triggerRef={filtersButtonRef}
+          sections={filterSections}
+          onClearAll={clearFilters}
+          resultCount={filteredNotifications.length}
+          resultLabel="notificaciones"
+        />
+      )}
     </div>
   );
 }
