@@ -23,7 +23,6 @@ import {
   SelectContent,
   SelectItem,
   DateInput,
-  Spinner,
   EmptyState,
   PageLoader,
   PageError,
@@ -469,20 +468,20 @@ export default function NotificationsPage() {
               </div>
 
               {isInboxLoading ? (
-                <div className="flex flex-col items-center justify-center gap-4 py-16" aria-busy="true" aria-live="polite">
-                  <div className="relative flex items-center justify-center w-20 h-20 rounded-full bg-origen-crema/80 shadow-inner">
-                    <Spinner size="xl" variant="primary" label="Cargando notificaciones..." />
-                  </div>
-                  <div className="text-center space-y-1">
-                    <p className="text-sm font-medium text-origen-bosque">
-                      {activeFilterCount > 0 ? 'Aplicando filtros...' : 'Cargando notificaciones...'}
-                    </p>
-                    <p className="text-xs text-text-subtle">
-                      {activeFilterCount > 0
-                        ? 'Buscando notificaciones que coincidan con tu selección'
-                        : 'Obteniendo tu bandeja de entrada'}
-                    </p>
-                  </div>
+                <div aria-busy="true" aria-live="polite">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex items-start gap-3 px-4 py-4 sm:px-6 border-b border-border-subtle last:border-b-0 animate-pulse">
+                      <div className="h-9 w-9 rounded-full bg-border flex-shrink-0" />
+                      <div className="flex-1 space-y-2 min-w-0">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="h-3.5 w-2/5 rounded bg-border" />
+                          <div className="h-3 w-16 rounded bg-border flex-shrink-0" />
+                        </div>
+                        <div className="h-3 w-3/4 rounded bg-border" />
+                        <div className="h-3 w-1/2 rounded bg-border" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : filteredNotifications.length === 0 ? (
                 <EmptyState
