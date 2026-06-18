@@ -26,7 +26,6 @@ import {
   EmptyState,
   PageLoader,
   PageError,
-  NotificationCardSkeleton,
   useIsMobile,
   Button,
   type ActiveFilterChip,
@@ -36,6 +35,28 @@ import { NotificationItem } from '@/app/dashboard/components/header/Notification
 
 import { fetchNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '@/lib/api/notifications';
 import type { Notification } from '@/types/notification';
+
+function NotificationRowSkeleton() {
+  return (
+    <div className="px-4 py-3.5 sm:px-6 animate-pulse" aria-hidden>
+      <div className="flex gap-3 items-start">
+        <div className="w-9 h-9 flex-shrink-0 rounded-xl bg-muted/70" />
+        <div className="flex-1 min-w-0 space-y-2 pt-0.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="h-3.5 w-2/5 rounded-md bg-muted/70" />
+            <div className="h-3.5 w-14 rounded-full bg-muted/50 flex-shrink-0" />
+          </div>
+          <div className="h-3 w-full rounded-md bg-muted/50" />
+          <div className="h-3 w-3/4 rounded-md bg-muted/50" />
+          <div className="flex items-center justify-between mt-0.5">
+            <div className="h-2.5 w-16 rounded-md bg-muted/40" />
+            <div className="h-4 w-14 rounded-full bg-muted/40" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 type NotificationTypeFilter = 'all' | 'operativas' | 'cuenta' | 'marketing';
 type ReadFilter = 'all' | 'unread' | 'read';
@@ -452,11 +473,11 @@ export default function NotificationsPage() {
               <div className="border-b border-border-subtle px-4 py-4 sm:px-6">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm text-muted-foreground">
-                    Pendientes: <span className="font-semibold text-origen-bosque">{unreadCount}</span>
+                    No leídos: <span className="font-semibold text-origen-bosque">{unreadCount}</span>
                   </p>
                   {unreadCount > 0 && (
                     <Button
-                      variant="ghost"
+                      variant="secondary"
                       size="sm"
                       onClick={handleMarkAllAsRead}
                       disabled={isMarkingAll}
@@ -470,7 +491,7 @@ export default function NotificationsPage() {
               {isInboxLoading ? (
                 <div className="divide-y divide-border-subtle" aria-busy="true">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <NotificationCardSkeleton key={i} />
+                    <NotificationRowSkeleton key={i} />
                   ))}
                 </div>
               ) : filteredNotifications.length === 0 ? (
@@ -507,7 +528,7 @@ export default function NotificationsPage() {
                   {hasMore && !isInboxLoading && (
                     <div className="px-4 py-3 text-center border-t border-border-subtle sm:px-6">
                       <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
                         onClick={handleLoadMore}
                         disabled={isLoadingMore}
