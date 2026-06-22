@@ -1,23 +1,14 @@
 /**
  * @file producer-card.tsx
- * @description Tarjeta de perfil del productor autenticado.
- * Diseño v2 (2026-06-22): banner como imagen protagonista + logo como avatar
- * superpuesto, siguiendo el patrón Instagram/LinkedIn de cover + profile pic.
- * Conectada a la API real: ProducerProfile (GET /api/v1/producers/me).
+ * @description Tarjeta de perfil del productor conectada a la API real.
+ * Props: ProducerProfile (GET /api/v1/producers/me) + isLoading + error.
  */
 
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Badge,
-  Card,
-} from '@arcediano/ux-library';
+import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
 import { MapPin, CheckCircle2, Clock, XCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { itemVariants } from '../layout/dashboard-shell';
@@ -34,32 +25,6 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-/**
- * Gradiente de fallback por categoría del productor (HSL inline).
- * Se usa cuando no hay coverImageUrl disponible. Se aplica como estilo
- * inline para garantizar que Tailwind JIT no purgue las clases dinámicas.
- * Los colores referencian los tokens CSS del sistema.
- */
-const CATEGORY_GRADIENT_STYLES: Record<string, React.CSSProperties> = {
-  'Frutas y verduras': { background: 'linear-gradient(135deg, hsl(155 38% 41% / 0.5), hsl(156 49% 63% / 0.7))' },
-  'Quesos': { background: 'linear-gradient(135deg, hsl(45 95% 56% / 0.4), hsl(34 92% 60% / 0.5))' },
-  'Vinos': { background: 'linear-gradient(135deg, hsl(156 40% 33% / 0.6), hsl(156 46% 24% / 0.8))' },
-  'Aceite de oliva': { background: 'linear-gradient(135deg, hsl(34 92% 60% / 0.4), hsl(31 70% 62% / 0.6))' },
-  'Miel': { background: 'linear-gradient(135deg, hsl(45 95% 56% / 0.5), hsl(34 92% 60% / 0.6))' },
-  'Embutidos': { background: 'linear-gradient(135deg, hsl(156 40% 33% / 0.5), hsl(156 46% 24% / 0.7))' },
-  'Conservas': { background: 'linear-gradient(135deg, hsl(156 49% 63% / 0.4), hsl(155 38% 41% / 0.6))' },
-  'Panadería': { background: 'linear-gradient(135deg, hsl(31 70% 62% / 0.5), hsl(34 92% 60% / 0.4))' },
-};
-
-const DEFAULT_GRADIENT_STYLE: React.CSSProperties = {
-  background: 'linear-gradient(135deg, hsl(156 46% 24%), hsl(156 40% 33%))',
-};
-
-function getCategoryGradientStyle(categories?: string[]): React.CSSProperties {
-  if (!categories?.length) return DEFAULT_GRADIENT_STYLE;
-  return CATEGORY_GRADIENT_STYLES[categories[0]] ?? DEFAULT_GRADIENT_STYLE;
-}
-
 // ─── sub-components ───────────────────────────────────────────────────────────
 
 interface StatusBadgeProps {
@@ -69,36 +34,40 @@ interface StatusBadgeProps {
 function StatusBadge({ status }: StatusBadgeProps) {
   const config: Record<
     AccountStatus,
-    { label: string; variant: 'success' | 'warning' | 'danger'; Icon: React.ElementType }
+    { label: string; className: string; Icon: React.ElementType }
   > = {
     active: {
-      label: 'Activa',
-      variant: 'success',
+      label: 'Cuenta activa',
+      className:
+        'bg-green-50 text-green-700 border border-green-200',
       Icon: CheckCircle2,
     },
     pending: {
-      label: 'Pendiente',
-      variant: 'warning',
+      label: 'Verificación pendiente',
+      className:
+        'bg-amber-50 text-amber-700 border border-amber-200',
       Icon: Clock,
     },
     suspended: {
-      label: 'Suspendida',
-      variant: 'danger',
+      label: 'Cuenta suspendida',
+      className:
+        'bg-feedback-danger-subtle text-red-700 border border-red-200',
       Icon: XCircle,
     },
   };
 
-  const { label, variant, Icon } = config[status];
+  const { label, className, Icon } = config[status];
 
   return (
-    <Badge
-      variant={variant}
-      size="xs"
-      icon={<Icon className="w-3 h-3" aria-hidden="true" />}
-      className="shadow-sm"
+    <div
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium',
+        className,
+      )}
     >
-      {label}
-    </Badge>
+      <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+      <span>{label}</span>
+    </div>
   );
 }
 
@@ -111,19 +80,23 @@ function CompletenessBar({ percent }: CompletenessBarProps) {
 
   const barColor =
     clamped < 40
-      ? 'bg-feedback-danger'
+      ? 'bg-red-400'
       : clamped < 70
-        ? 'bg-origen-mandarina'
+        ? 'bg-amber-400'
         : 'bg-origen-pradera';
 
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[11px] text-text-subtle">Perfil completado</span>
-        <span className="text-[11px] font-semibold text-origen-bosque">{clamped}%</span>
+        <span className="text-[11px] text-text-subtle">
+          Completitud del perfil
+        </span>
+        <span className="text-[11px] font-semibold text-origen-bosque">
+          {clamped}%
+        </span>
       </div>
       <div
-        className="w-full h-1.5 rounded-full bg-border-subtle overflow-hidden"
+        className="w-full h-1.5 rounded-full bg-border overflow-hidden"
         role="progressbar"
         aria-valuenow={clamped}
         aria-valuemin={0}
@@ -144,15 +117,18 @@ function CompletenessBar({ percent }: CompletenessBarProps) {
 function ProducerCardSkeleton({ className }: { className?: string }) {
   return (
     <div
-      className={cn('animate-pulse rounded-2xl overflow-hidden border border-border-subtle bg-surface-alt', className)}
+      className={cn(
+        'flex flex-col lg:flex-row gap-4 items-start animate-pulse',
+        className,
+      )}
     >
-      {/* Banner skeleton */}
-      <div className="aspect-video bg-border-subtle" />
-      {/* Content skeleton */}
-      <div className="p-4 pt-8 space-y-2">
-        <div className="h-4 w-40 rounded bg-border-subtle" />
-        <div className="h-3 w-28 rounded bg-border-subtle" />
-        <div className="mt-3 h-1.5 w-full rounded bg-border-subtle" />
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-border flex-shrink-0" />
+        <div className="space-y-2">
+          <div className="h-4 w-40 rounded bg-border" />
+          <div className="h-3 w-28 rounded bg-border" />
+          <div className="h-1.5 w-36 rounded bg-border mt-2" />
+        </div>
       </div>
     </div>
   );
@@ -184,7 +160,7 @@ export function ProducerCard({
   if (error) {
     return (
       <motion.div variants={itemVariants} className={cn(className)}>
-        <p className="text-xs text-feedback-danger">{error}</p>
+        <p className="text-xs text-red-600">{error}</p>
       </motion.div>
     );
   }
@@ -193,123 +169,68 @@ export function ProducerCard({
 
   const initials = getInitials(producer.name);
   const isIncomplete = producer.profileCompletenessPercent < 100;
-  const categoryGradientStyle = getCategoryGradientStyle(producer.categories);
-  const primaryCategory = producer.categories?.[0];
 
   return (
-    <motion.div variants={itemVariants} className={className}>
-      {/*
-        El Link es el elemento focusable. La clase 'group' está en él
-        para que group-hover: aplique correctamente a sus descendientes.
-      */}
-      <Link
-        href="/dashboard/profile"
-        className={cn(
-          'group block rounded-2xl',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera/45 focus-visible:ring-offset-2',
-        )}
-        aria-label={`Ver perfil de ${producer.name}`}
-      >
-        <Card
-          variant="media"
-          padding="none"
-          className="cursor-pointer"
-          role="article"
-        >
-          {/* ── Zona de imagen – ratio 16/9 ─────────────────────────── */}
-          <div
-            className="relative aspect-video overflow-hidden"
-            style={!producer.coverImageUrl ? categoryGradientStyle : undefined}
-          >
-            {/* Banner del productor */}
-            {producer.coverImageUrl && (
-              <Image
-                src={producer.coverImageUrl}
-                alt=""
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-              />
+    <motion.div
+      variants={itemVariants}
+      className={cn('flex flex-col gap-3', className)}
+    >
+      {/* Row 1: Avatar + name + location */}
+      <div className="flex flex-col lg:flex-row gap-4 items-start">
+        <div className="flex items-center gap-3">
+          <Avatar className="w-12 h-12 sm:w-16 sm:h-16 ring-4 ring-white shadow-xl flex-shrink-0">
+            {producer.avatarUrl && (
+              <AvatarImage src={producer.avatarUrl} alt={producer.name} />
             )}
+            <AvatarFallback className="bg-gradient-to-br from-origen-pradera to-origen-hoja text-white text-base sm:text-xl">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
 
-            {/* Overlay: gradiente de abajo hacia arriba para legibilidad */}
-            <div
-              className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"
-              aria-hidden="true"
-            />
-
-            {/* Badge de estado – esquina superior derecha */}
-            <div className="absolute top-3 right-3">
-              <StatusBadge status={producer.accountStatus} />
-            </div>
-
-            {/* Avatar (logo) superpuesto – esquina inferior izquierda,
-                sobresale 20px hacia el área de contenido */}
-            <div className="absolute -bottom-5 left-4">
-              <Avatar
-                size="lg"
-                className="ring-2 ring-white shadow-md"
-              >
-                {producer.avatarUrl && (
-                  <AvatarImage src={producer.avatarUrl} alt={producer.name} />
-                )}
-                <AvatarFallback className="bg-gradient-to-br from-origen-pradera to-origen-hoja text-white font-semibold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
-
-          {/* ── Contenido – pt-8 para compensar el avatar que sobresale ── */}
-          <div className="p-4 pt-8">
-            {/* Nombre del negocio */}
-            <h2 className="font-serif font-semibold text-base text-origen-oscuro leading-tight line-clamp-1">
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-xl font-semibold text-origen-bosque truncate">
               {producer.name}
             </h2>
 
-            {/* Localización */}
             {producer.location && (
-              <p className="mt-1 flex items-center gap-1 text-xs text-text-subtle">
-                <MapPin
-                  size={11}
-                  className="text-origen-pradera flex-shrink-0"
-                  aria-hidden="true"
-                />
-                <span className="line-clamp-1">{producer.location}</span>
-              </p>
-            )}
-
-            {/* Categoría y bio */}
-            <div className="mt-2.5 flex items-center gap-2 flex-wrap">
-              {primaryCategory && (
-                <Badge variant="outline" size="xs">
-                  {primaryCategory}
-                </Badge>
-              )}
-              {producer.shortBio && (
-                <span className="text-xs text-text-subtle line-clamp-1 min-w-0 flex-1">
-                  {producer.shortBio}
-                </span>
-              )}
-            </div>
-
-            {/* Barra de completitud del perfil */}
-            <div className="mt-4">
-              <CompletenessBar percent={producer.profileCompletenessPercent} />
-            </div>
-
-            {/* CTA: solo cuando el perfil no está completo */}
-            {isIncomplete && (
-              <div className="mt-3">
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-origen-bosque underline underline-offset-2 hover:text-origen-pino transition-colors">
-                  Completar perfil
-                  <ArrowRight className="w-3 h-3" aria-hidden="true" />
-                </span>
+              <div className="flex items-center gap-1.5 mt-1 text-xs sm:text-sm text-text-subtle">
+                <MapPin className="w-3.5 h-3.5 text-origen-pradera flex-shrink-0" />
+                <span>{producer.location}</span>
               </div>
             )}
           </div>
-        </Card>
-      </Link>
+        </div>
+
+        {/* Status badge — desktop: inline, mobile: below */}
+        <div className="hidden sm:flex flex-wrap gap-2 lg:ml-auto">
+          <StatusBadge status={producer.accountStatus} />
+        </div>
+      </div>
+
+      {/* Status badge — mobile */}
+      <div className="sm:hidden">
+        <StatusBadge status={producer.accountStatus} />
+      </div>
+
+      {/* Row 2: profile completeness */}
+      <div className="max-w-xs sm:max-w-sm">
+        <CompletenessBar percent={producer.profileCompletenessPercent} />
+      </div>
+
+      {/* Row 3: CTA — only when profile is incomplete */}
+      {isIncomplete && (
+        <div>
+          <Link
+            href="/dashboard/profile"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-origen-bosque hover:text-origen-pino underline underline-offset-2 transition-colors"
+          >
+            Completar perfil
+            <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+      )}
     </motion.div>
   );
 }
+
+
