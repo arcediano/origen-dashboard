@@ -18,6 +18,7 @@ import {
   OrdersSummary,
   TopProducts,
   WelcomeHeader,
+  ProducerCard,
   SalesChart,
   VisitsChart,
 } from '@/components/features/dashboard';
@@ -170,10 +171,22 @@ export default function ProducerDashboard() {
 
   return (
     <div className="w-full">
-      {/* Header */}
+      {/* Header: saludo + card de perfil del productor */}
       <div className="bg-transparent">
         <div className="container mx-auto px-4 py-3 sm:px-6 sm:py-4 lg:py-6">
-          <WelcomeHeader userName={userName} showViewStoreButton={false} />
+          {/* Mobile y tablet: columna única — saludo arriba, card abajo */}
+          {/* Desktop (lg+): fila — saludo a la izquierda, card a la derecha */}
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+            <div className="flex-1 min-w-0">
+              <WelcomeHeader userName={userName} showViewStoreButton={false} />
+            </div>
+            <div className="w-full lg:w-72 xl:w-80 flex-shrink-0">
+              <ProducerCard
+                producer={producer}
+                isLoading={false}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
