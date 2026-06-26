@@ -13,7 +13,7 @@ import {
   Card, CardHeader, CardTitle, CardContent,
   Textarea,
 } from '@arcediano/ux-library';
-import { RichTextEditor } from '@/components/shared';
+import { RichTextEditor } from '@arcediano/ux-library';
 import {
   Leaf,
   CheckCircle,

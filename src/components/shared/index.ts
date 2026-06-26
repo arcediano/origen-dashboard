@@ -25,7 +25,3 @@ export type { ChipItem, StatCardAccent, MobileStatCardProps, KpiItem, MobileKPIR
 // Stat cards
 export { SoftStatCard } from './SoftStatCard';
 export type { SoftStatCardProps } from './SoftStatCard';
-
-// Rich text editor
-export { RichTextEditor } from './RichTextEditor';
-export type { } from './RichTextEditor';
