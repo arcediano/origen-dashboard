@@ -476,6 +476,8 @@ export function mapApiProducts(apiProducts: ApiProduct[]): Product[] {
 /**
  * Calcula estadísticas agregadas a partir de una lista de productos.
  * Usado por fetchProductStats() cuando no hay un endpoint dedicado de stats.
+ * @deprecated Sin uso activo en runtime - fetchProductStats usa el endpoint del backend.
+ * Mantener como utilidad de tests unitarios o fallback offline.
  */
 export function computeProductStats(products: Product[]): ProductStats {
   const active    = products.filter(p => p.status === 'active').length;

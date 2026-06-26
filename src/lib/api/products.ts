@@ -612,6 +612,8 @@ export interface ProductViewChartPoint {
 /**
  * Serie temporal de visitas a los productos del productor autenticado.
  * Ruta backend: GET /products/producer/my-products/views/chart?period=7d|6m|1y
+ * @deprecated Sin uso activo - ningún componente del dashboard importa esta función.
+ * Reservada para futura gráfica global de visitas. Verificar imports antes de eliminar.
  */
 export async function fetchProductViewChart(
   period: '7d' | '6m' | '1y',

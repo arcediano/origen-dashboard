@@ -301,6 +301,9 @@ export default function ProductosPage() {
               active={stats.active}
               lowStock={stats.lowStock}
               outOfStock={stats.outOfStock}
+              totalRevenue={stats.totalRevenue}
+              totalSales={stats.totalSales}
+              totalViews={stats.totalViews}
               isLoading={isTableLoading}
             />
           </motion.div>
