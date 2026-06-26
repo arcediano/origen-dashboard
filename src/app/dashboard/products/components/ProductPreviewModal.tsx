@@ -12,6 +12,7 @@ import React, { useState } from 'react';
 import { X, Tag, Leaf, Award, CheckCircle, AlertCircle, Eye, ShoppingBag, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge, Button, Dialog, DialogContent } from '@arcediano/ux-library';
+import { sanitizeHtml } from '@/lib/security/sanitizeHtml';
 import type { ProductFormData } from '@/types/product';
 
 // ============================================================================
@@ -272,7 +273,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
 
           {/* ── Info de producción ───────────────────────────────────────────── */}
           {hasProduction && (
-            <div className="px-5 sm:px-6 py-5 border-t border-border space-y-2">
+            <div className="px-5 sm:px-6 py-5 border-t border-border space-y-3">
               <h3 className="text-sm font-semibold text-origen-bosque flex items-center gap-2">
                 <Leaf className="w-4 h-4 text-origen-pradera" />
                 Producción
@@ -284,14 +285,27 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
                 {formData.productionInfo?.origin && (
                   <div><span className="text-muted-foreground">Origen: </span><span className="font-medium">{formData.productionInfo.origin}</span></div>
                 )}
-                {formData.productionInfo?.productionMethod && (
-                  <div className="sm:col-span-2"><span className="text-muted-foreground">Método: </span><span className="font-medium">{formData.productionInfo.productionMethod}</span></div>
-                )}
               </div>
               {formData.productionInfo?.story && (
-                <p className="text-xs text-muted-foreground leading-relaxed mt-1 italic">
-                  "{formData.productionInfo.story}"
-                </p>
+                <div
+                  className="text-xs text-muted-foreground leading-relaxed mt-1
+                    [&_strong]:font-semibold [&_em]:italic
+                    [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4
+                    [&_p]:mb-1 [&_p:last-child]:mb-0"
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(formData.productionInfo?.story || "") }}
+                />
+              )}
+              {formData.productionInfo?.productionMethod && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Método de producción:</p>
+                  <div
+                    className="text-xs text-muted-foreground leading-relaxed
+                      [&_strong]:font-semibold [&_em]:italic
+                      [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4
+                      [&_p]:mb-1 [&_p:last-child]:mb-0"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(formData.productionInfo?.productionMethod || "") }}
+                  />
+                </div>
               )}
             </div>
           )}

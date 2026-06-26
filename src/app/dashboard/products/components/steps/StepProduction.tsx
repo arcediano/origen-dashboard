@@ -12,8 +12,8 @@ import { Tooltip } from '@arcediano/ux-library';
 import {
   Card, CardHeader, CardTitle, CardContent,
   Textarea,
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
+import { RichTextEditor } from '@/components/shared';
 import {
   Leaf,
   CheckCircle,
@@ -307,32 +307,41 @@ export function StepProduction({
               exit={{ opacity: 0, x: 20 }}
               className="space-y-6"
             >
-              <Textarea
+              <RichTextEditor
                 label="Historia del productor"
-                tooltip="Las historias auténticas conectan con los clientes. Incluye tradición familiar, métodos artesanales, pasión por la calidad."
+                tooltip="Las historias auténticas conectan con los clientes."
                 value={productionInfo.story}
-                onChange={(e) => handleChange('story', e.target.value)}
-                className="min-h-[120px]"
-                placeholder="Tradición familiar, métodos artesanales, pasión por la calidad, el origen de los ingredientes..."
+                onChange={(html) => handleChange('story', html)}
+                placeholder="Tradición familiar, métodos artesanales, pasión por la calidad..."
+                minHeight="120px"
               />
 
-              <Textarea
+              <RichTextEditor
                 label="Proceso artesanal"
-                tooltip="Describe las técnicas tradicionales, detalles del proceso, tiempos de maduración que hacen único tu producto."
+                tooltip="Describe las técnicas tradicionales, detalles del proceso, tiempos de maduracion."
                 value={productionInfo.artisanProcess}
-                onChange={(e) => handleChange('artisanProcess', e.target.value)}
-                className="min-h-[100px]"
-                placeholder="Técnicas tradicionales, detalles del proceso, tiempos de maduración..."
+                onChange={(html) => handleChange('artisanProcess', html)}
+                placeholder="Técnicas tradicionales, detalles del proceso, tiempos de maduracion..."
+                minHeight="100px"
               />
 
-              <Textarea
+              <RichTextEditor
+                label="Metodo de produccion"
+                tooltip="Describe el proceso tecnico de produccion de tu producto."
+                value={productionInfo.productionMethod}
+                onChange={(html) => handleChange('productionMethod', html)}
+                placeholder="Proceso de elaboracion, tecnicas y tiempos: fermentacion, maduracion..."
+                minHeight="100px"
+              />
+
+              <RichTextEditor
                 label="Bienestar animal"
-                tooltip="Si tu producto es de origen animal, indica las condiciones de cría, alimentación y cuidados."
-                helperText="Opcional — solo si aplica"
+                tooltip="Si tu producto es de origen animal, indica las condiciones de cria y cuidados."
+                helperText="Opcional - solo si aplica"
                 value={productionInfo.animalWelfare}
-                onChange={(e) => handleChange('animalWelfare', e.target.value)}
-                className="min-h-[100px]"
-                placeholder="Cría en libertad, alimentación natural, sin antibióticos, pastoreo tradicional..."
+                onChange={(html) => handleChange('animalWelfare', html)}
+                placeholder="Cria en libertad, alimentacion natural, sin antibioticos..."
+                minHeight="100px"
               />
             </motion.div>
           )}
@@ -362,21 +371,6 @@ export function StepProduction({
                   placeholder="Finca El Valle"
                 />
               </div>
-
-              <Select
-                value={productionInfo.productionMethod}
-                onValueChange={(v) => handleChange('productionMethod', v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar método" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="artesanal">Artesanal</SelectItem>
-                  <SelectItem value="tradicional">Tradicional</SelectItem>
-                  <SelectItem value="ecologico">Ecológico</SelectItem>
-                  <SelectItem value="industrial">Industrial</SelectItem>
-                </SelectContent>
-              </Select>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <DateInput
