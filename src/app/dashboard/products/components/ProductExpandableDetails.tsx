@@ -58,6 +58,9 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
 
   useEffect(() => {
     fetchProductViewCount(product.id, '7d').then((res) => {
+      if (res.error) {
+        console.warn('[ProductExpandableDetails] Error conteo:', res.error, { productId: product.id });
+      }
       if (!res.error && res.data) setViewCount(res.data.count);
     });
   }, [product.id]);
@@ -80,6 +83,9 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
     setViewChartLoading(true);
     fetchProductViewChartById(product.id, viewChartPeriod).then((res) => {
       if (!active) return;
+      if (res.error) {
+        console.warn('[ProductExpandableDetails] Error gráfica:', res.error, { productId: product.id });
+      }
       setViewChartData(!res.error && res.data && res.data.length > 0 ? res.data : []);
       setViewChartLoading(false);
     });
