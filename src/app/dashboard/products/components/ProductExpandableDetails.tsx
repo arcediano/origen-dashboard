@@ -144,7 +144,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
           <p className="text-2xl font-bold text-origen-bosque">
             {viewCount === null ? '—' : viewCount}
           </p>
-          <p className="mt-2 text-xs text-muted-foreground">Visitantes únicos últimos 7 días</p>
+          <p className="mt-2 text-xs text-muted-foreground">Visitantes únicos · 24 h</p>
         </div>
 
         {/* Conversión */}
