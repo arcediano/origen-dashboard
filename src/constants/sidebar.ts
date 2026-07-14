@@ -5,6 +5,7 @@
 
 import {
   CreditCard,
+  FileText,
   LayoutDashboard,
   Megaphone,
   Package,
@@ -63,6 +64,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/perfil': 'Perfil',
   '/dashboard': 'Inicio',
   '/dashboard/orders': 'Pedidos',
+  '/dashboard/facturas': 'Facturas de venta',
   '/dashboard/products': 'Productos',
   '/dashboard/products/create': 'Nuevo producto',
   '/dashboard/reviews': 'Resenas',
@@ -86,6 +88,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   campanas: 'Campañas',
   dashboard: 'Inicio',
   orders: 'Pedidos',
+  facturas: 'Facturas de venta',
   products: 'Productos',
   create: 'Nuevo producto',
   reviews: 'Resenas',
@@ -119,6 +122,13 @@ const OPERATIONS_ITEMS: MenuItem[] = [
     icon: ShoppingBag,
     href: '/dashboard/orders',
     matchPaths: ['/dashboard/orders*'],
+  },
+  {
+    id: 'facturas',
+    label: 'Facturas de venta',
+    icon: FileText,
+    href: '/dashboard/facturas',
+    matchPaths: ['/dashboard/facturas*'],
   },
   {
     id: 'productos',

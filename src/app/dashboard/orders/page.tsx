@@ -6,9 +6,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, FileText } from 'lucide-react';
 
 // Componentes UI
 import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, MobileCardList, EmptyState } from '@arcediano/ux-library';
@@ -163,6 +164,13 @@ export default function OrdersPage() {
         tooltip="Pedidos"
         tooltipDetailed="Gestiona todos los pedidos, su estado y seguimiento."
       />
+
+      {/* Acceso a facturas — visible en móvil */}
+      <div className="lg:hidden px-4 sm:px-6">
+        <Link href="/dashboard/facturas" className="inline-flex items-center gap-1.5 text-sm font-medium text-origen-pradera hover:text-origen-bosque transition-colors">
+          <FileText className="h-4 w-4" /> Ver facturas de venta
+        </Link>
+      </div>
 
       {/* Contenido principal */}
       <motion.div

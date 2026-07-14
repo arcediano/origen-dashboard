@@ -454,7 +454,9 @@ export default function OrderDetailPage() {
                     <InfoRow label="Fecha de pago" value={format(order.payment.paidAt, 'dd MMM yyyy', { locale: es })} />
                   )}
                 </div>
-                {order.invoice && (
+
+                {/* Tres estados de factura */}
+                {order.invoice ? (
                   <div className="mt-3 pt-3 border-t border-border-subtle space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
@@ -480,7 +482,28 @@ export default function OrderDetailPage() {
                       <p className="text-xs text-feedback-danger">{invoiceError}</p>
                     )}
                   </div>
-                )}
+                ) : (() => {
+                  // isMultiSeller viene calculado desde el servidor sobre el pedido
+                  // completo (order.items aquí ya está filtrado a solo los productos
+                  // de este vendedor, así que nunca se podría derivar correctamente
+                  // en el cliente contando nada dentro de ese array).
+                  const isMultiSeller = order.isMultiSeller === true;
+
+                  return isMultiSeller ? (
+                    <div className="mt-3 pt-3 border-t border-border-subtle">
+                      <div className="flex items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
+                        <Info className="w-4 h-4 text-origen-pino shrink-0 mt-0.5" aria-hidden />
+                        <p className="text-xs text-text-subtle leading-relaxed">
+                          Este pedido incluye productos de varios productores. La factura consolidada la gestiona el comprador.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-3 pt-3 border-t border-border-subtle">
+                      <p className="text-xs text-text-disabled">Factura aún no disponible.</p>
+                    </div>
+                  );
+                })()}
               </SectionAccordion>
 
               {/* ── Envío ── (acordeón) */}

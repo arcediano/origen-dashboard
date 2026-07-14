@@ -67,6 +67,8 @@ interface BackendOrder {
     issuedAt?: string;
     hasPdf: boolean;
   };
+  /** true si el pedido incluye productos de más de un productor (calculado en servidor). */
+  isMultiSeller?: boolean;
   items: BackendOrderItem[];
 }
 
@@ -206,6 +208,7 @@ function mapBackendOrder(o: BackendOrder): Order {
           hasPdf: o.invoice.hasPdf,
         }
       : undefined,
+    isMultiSeller: o.isMultiSeller,
 
     createdAt: new Date(o.createdAt),
     updatedAt: new Date(o.updatedAt),
@@ -436,5 +439,82 @@ export async function fetchOrderStats(): Promise<ApiResponse<OrderStats>> {
   } catch (err) {
     console.error('[orders] fetchOrderStats', err);
     return { error: 'Error al obtener estadísticas', status: 500 };
+  }
+}
+
+// ─── FACTURAS ─────────────────────────────────────────────────────────────────
+
+interface BackendInvoiceListItem {
+  orderId: string;
+  orderNumber: string;
+  invoiceNumber: string;
+  status: 'draft' | 'issued' | 'cancelled';
+  issuedAt: string;
+  hasPdf: boolean;
+  total: number;
+}
+
+interface BackendInvoiceListResponse {
+  items: BackendInvoiceListItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface InvoiceListItem {
+  orderId: string;
+  orderNumber: string;
+  invoiceNumber: string;
+  status: 'draft' | 'issued' | 'cancelled';
+  issuedAt: string;
+  hasPdf: boolean;
+  total: number;
+}
+
+/**
+ * Obtiene el listado paginado de facturas de venta del productor autenticado.
+ * GET /api/v1/orders/seller/invoices
+ *
+ * Nota: Solo incluye facturas emitidas de pedidos con un único vendedor.
+ * Los pedidos multi-vendedor están excluidos del listado por decisión de diseño.
+ */
+export async function fetchSellerInvoices(
+  params?: SellerOrdersParams,
+): Promise<ApiResponse<{ invoices: InvoiceListItem[]; total: number; page: number; limit: number }>> {
+  try {
+    const res = await gatewayClient.get<BackendInvoiceListResponse>('/orders/seller/invoices', {
+      params: {
+        ...(params?.page !== undefined ? { page: params.page } : {}),
+        ...(params?.limit !== undefined ? { limit: params.limit } : {}),
+      },
+    });
+
+    const invoices = (res.items ?? []).map((item) => ({
+      orderId: item.orderId,
+      orderNumber: item.orderNumber,
+      invoiceNumber: item.invoiceNumber,
+      status: item.status,
+      issuedAt: item.issuedAt,
+      hasPdf: item.hasPdf,
+      total: item.total,
+    }));
+
+    return {
+      data: {
+        invoices,
+        total: res.total,
+        page: res.page,
+        limit: res.limit,
+      },
+      status: 200,
+    };
+  } catch (err) {
+    console.error('[orders] fetchSellerInvoices', err);
+    const message =
+      err instanceof GatewayError ? err.message : 'Error al cargar facturas';
+    return {
+      error: message,
+      status: err instanceof GatewayError ? err.status : 500,
+    };
   }
 }

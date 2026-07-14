@@ -110,6 +110,8 @@ export interface Order {
   timeline: OrderTimeline[];
   notes?: string;
   invoice?: OrderInvoice;
+  /** true si el pedido incluye productos de más de un productor (calculado en servidor sobre los items sin filtrar). */
+  isMultiSeller?: boolean;
   
   createdAt: Date;
   updatedAt: Date;
