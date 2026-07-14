@@ -61,7 +61,7 @@ export function InvoiceCard({ invoice, onPress, onDownload }: InvoiceCardProps) 
         </div>
         <p className="text-xs text-text-subtle truncate">Pedido {invoice.orderNumber}</p>
         <p className="text-[11px] text-text-disabled mt-1">
-          {format(new Date(invoice.issuedAt), 'dd MMM yyyy', { locale: es })}
+          {invoice.issuedAt ? format(new Date(invoice.issuedAt), 'dd MMM yyyy', { locale: es }) : '—'}
         </p>
       </div>
 

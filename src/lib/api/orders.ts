@@ -252,6 +252,15 @@ export interface SellerOrdersParams {
   limit?: number;
 }
 
+export interface InvoiceFilterParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: 'issued' | 'cancelled' | 'all';
+  dateFrom?: string;
+  dateTo?: string;
+}
+
 // ─── API ─────────────────────────────────────────────────────────────────────
 
 /**
@@ -466,7 +475,7 @@ export interface InvoiceListItem {
   orderNumber: string;
   invoiceNumber: string;
   status: 'draft' | 'issued' | 'cancelled';
-  issuedAt: string;
+  issuedAt?: string;
   hasPdf: boolean;
   total: number;
 }
@@ -479,13 +488,17 @@ export interface InvoiceListItem {
  * Los pedidos multi-vendedor están excluidos del listado por decisión de diseño.
  */
 export async function fetchSellerInvoices(
-  params?: SellerOrdersParams,
+  params?: InvoiceFilterParams,
 ): Promise<ApiResponse<{ invoices: InvoiceListItem[]; total: number; page: number; limit: number }>> {
   try {
     const res = await gatewayClient.get<BackendInvoiceListResponse>('/orders/seller/invoices', {
       params: {
         ...(params?.page !== undefined ? { page: params.page } : {}),
         ...(params?.limit !== undefined ? { limit: params.limit } : {}),
+        ...(params?.search !== undefined ? { search: params.search } : {}),
+        ...(params?.status !== undefined ? { status: params.status } : {}),
+        ...(params?.dateFrom !== undefined ? { dateFrom: params.dateFrom } : {}),
+        ...(params?.dateTo !== undefined ? { dateTo: params.dateTo } : {}),
       },
     });
 

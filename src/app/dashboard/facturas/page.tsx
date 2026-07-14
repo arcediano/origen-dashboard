@@ -22,9 +22,10 @@ import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, MobileCardL
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { InvoicesTable } from './components/InvoicesTable';
 import { InvoiceCard, InvoiceCardSkeleton } from './components/InvoiceCard';
+import { InvoiceFilters } from './components/InvoiceFilters';
 
 // API
-import { fetchSellerInvoices, type InvoiceListItem } from '@/lib/api/orders';
+import { fetchSellerInvoices, type InvoiceListItem, type InvoiceFilterParams } from '@/lib/api/orders';
 
 // ============================================================================
 // ANIMACIONES
@@ -68,6 +69,7 @@ export default function FacturasPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalInvoices, setTotalInvoices] = useState(0);
+  const [filters, setFilters] = useState<InvoiceFilterParams>({ status: 'issued' });
 
   // ==========================================================================
   // CARGA DE DATOS
@@ -82,7 +84,7 @@ export default function FacturasPage() {
       return;
     }
     loadInvoices(false);
-  }, [currentPage]);
+  }, [currentPage, filters]);
 
   const loadInvoices = async (isInitialLoad = false) => {
     if (isInitialLoad) {
@@ -94,6 +96,7 @@ export default function FacturasPage() {
 
     try {
       const response = await fetchSellerInvoices({
+        ...filters,
         page: currentPage,
         limit: 10,
       });
@@ -130,6 +133,16 @@ export default function FacturasPage() {
       console.error('Error descargando factura:', err);
       alert('Error al descargar la factura');
     }
+  };
+
+  const handleFilterChange = (newFilters: InvoiceFilterParams) => {
+    setFilters({ ...filters, ...newFilters });
+    setCurrentPage(1); // Reset a página 1 al cambiar filtros
+  };
+
+  const handleClearFilters = () => {
+    setFilters({ status: 'issued' });
+    setCurrentPage(1);
   };
 
   const handleRefresh = async () => { await loadInvoices(); };
@@ -172,6 +185,16 @@ export default function FacturasPage() {
           animate="visible"
           className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8"
         >
+          {/* Filtros */}
+          <motion.div variants={itemVariants}>
+            <InvoiceFilters
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClearFilters={handleClearFilters}
+              totalInvoices={totalInvoices}
+            />
+          </motion.div>
+
           {/* Lista móvil / Tabla desktop */}
           <motion.div variants={itemVariants}>
             {invoices.length === 0 ? (
@@ -179,8 +202,16 @@ export default function FacturasPage() {
                 <EmptyState
                   size="sm"
                   icon={<FileText className="w-6 h-6" />}
-                  title="Sin facturas"
-                  description="Aún no tienes facturas emitidas."
+                  title={
+                    filters.search || filters.dateFrom || filters.dateTo || (filters.status && filters.status !== 'issued')
+                      ? "No hay facturas que coincidan"
+                      : "Sin facturas"
+                  }
+                  description={
+                    filters.search || filters.dateFrom || filters.dateTo || (filters.status && filters.status !== 'issued')
+                      ? "Intenta con otros filtros o criterios de búsqueda."
+                      : "Aún no tienes facturas emitidas."
+                  }
                 />
               </Card>
             ) : (

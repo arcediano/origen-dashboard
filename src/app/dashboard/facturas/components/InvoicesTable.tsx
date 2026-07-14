@@ -56,10 +56,10 @@ export function InvoicesTable({
       key: 'issuedAt',
       header: 'Fecha de emisión',
       accessor: (item) => (
-        <p className="text-sm text-text-subtle">{format(new Date(item.issuedAt), 'dd MMM yyyy', { locale: es })}</p>
+        <p className="text-sm text-text-subtle">{item.issuedAt ? format(new Date(item.issuedAt), 'dd MMM yyyy', { locale: es }) : '—'}</p>
       ),
       sortable: true,
-      sortValue: (item) => item.issuedAt,
+      sortValue: (item) => item.issuedAt ?? '',
       hideOnMobile: true,
     },
     {
