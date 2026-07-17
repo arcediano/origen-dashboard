@@ -435,6 +435,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     sku:              api.sku,
     barcode:          api.barcode,
     stock:            api.stock,
+    reservedStock:    api.reservedStock,
     lowStockThreshold: api.lowStockThreshold,
     trackInventory:   api.trackInventory,
     allowBackorders:  api.allowBackorders,

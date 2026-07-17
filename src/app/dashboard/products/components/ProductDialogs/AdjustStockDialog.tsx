@@ -24,8 +24,8 @@ export interface AdjustStockDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Producto seleccionado */
   product: Product | null;
-  /** Función a ejecutar tras confirmar (para actualizar UI) */
-  onConfirm: (productId: string, newStock: number) => void;
+  /** Función a ejecutar tras confirmar (para actualizar UI) — ahora recibe el Product completo del servidor */
+  onConfirm: (productId: string, updatedProduct: Product) => void;
 }
 
 // ============================================================================
@@ -38,47 +38,92 @@ export function AdjustStockDialog({
   product,
   onConfirm,
 }: AdjustStockDialogProps) {
-  const [stockValue, setStockValue] = useState(0);
+  const [stockValue, setStockValue] = useState<string>(''); // Mantener como string para validación (H10)
   const [adjustmentType, setAdjustmentType] = useState<'set' | 'add' | 'remove'>('set');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [inputError, setInputError] = useState<string | null>(null); // Error de validación de entrada (H7)
 
   useEffect(() => {
     if (product) {
-      setStockValue(product.stock);
+      setStockValue(String(product.stock));
       setAdjustmentType('set');
       setError(null);
+      setInputError(null);
     }
   }, [product]);
 
   if (!product) return null;
 
-  const resultValue =
+  // Validación mínima de entrada (H7)
+  const isValidInput = stockValue !== '' && !isNaN(parseInt(stockValue)) && parseInt(stockValue) >= 0;
+  const stockValueNum = parseInt(stockValue) || 0;
+
+  // Estimación del resultado (solo para display, no usada para decisión)
+  const estimatedResult =
     adjustmentType === 'set'
-      ? stockValue
+      ? stockValueNum
       : adjustmentType === 'add'
-      ? product.stock + stockValue
-      : Math.max(0, product.stock - stockValue);
+      ? product.stock + stockValueNum
+      : Math.max(0, product.stock - stockValueNum);
+
+  // Mapear nombres para el backend (H3)
+  const modeMap: Record<'set' | 'add' | 'remove', 'set' | 'increment' | 'decrement'> = {
+    'set': 'set',
+    'add': 'increment',
+    'remove': 'decrement',
+  };
 
   const handleConfirm = async () => {
+    // Validación previa al envío (H7, H10)
+    if (!isValidInput) {
+      setInputError('Por favor, introduce un número válido >= 0');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
+    setInputError(null);
 
     try {
-      const response = await updateProductStock(product.id, resultValue);
+      const mode = modeMap[adjustmentType];
+      const response = await updateProductStock(product.id, mode, stockValueNum);
 
       if (response.error) {
+        // Diferenciar errores HTTP específicos (H14 - veremos si es 409)
         setError(response.error);
         return;
       }
 
-      onConfirm(product.id, resultValue);
-      onOpenChange(false);
+      if (response.data) {
+        // Usar el Product completo devuelto del backend como fuente de verdad (H9)
+        onConfirm(product.id, response.data);
+        onOpenChange(false);
+      }
     } catch (err) {
       setError('Error al actualizar el stock. Inténtalo de nuevo.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleStockValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // H10: Distinguir entre "campo vacío" (no actualizar) y "no-numérico" (mostrar error)
+    if (value === '') {
+      setStockValue('');
+      setInputError(null); // Sin error si está vacío, solo no permitir envío
+      return;
+    }
+
+    if (isNaN(parseInt(value))) {
+      setInputError('Introduce un número válido');
+      return;
+    }
+
+    setStockValue(value);
+    setInputError(null);
   };
 
   return (
@@ -137,7 +182,7 @@ export function AdjustStockDialog({
           </button>
         </div>
 
-        {/* Input de cantidad */}
+        {/* Input de cantidad (H7, H10) */}
         <div>
           <Input
             id="stock-value"
@@ -148,24 +193,35 @@ export function AdjustStockDialog({
               'Cantidad a retirar'
             }
             value={stockValue}
-            onChange={(e) => setStockValue(parseInt(e.target.value) || 0)}
+            onChange={handleStockValueChange}
             min={0}
             autoFocus
+            error={inputError || undefined}
           />
+          {inputError && (
+            <p className="text-xs text-feedback-danger mt-1">{inputError}</p>
+          )}
         </div>
 
-        {/* Resumen del ajuste */}
-        <div className="p-3 bg-surface rounded-lg border border-border-subtle">
-          <p className="text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">Stock actual:</span> {product.stock} unidades
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            <span className="font-medium text-foreground">Resultado:</span>{' '}
-            <span className={cn('font-semibold', resultValue === 0 ? 'text-feedback-danger' : 'text-origen-hoja')}>
-              {resultValue} unidades
-            </span>
-          </p>
-        </div>
+        {/* Resumen del ajuste (H8 — estimación, el backend decide) */}
+        {stockValue !== '' && (
+          <div className="p-3 bg-surface rounded-lg border border-border-subtle">
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Stock actual:</span> {product.stock} unidades
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              <span className="font-medium text-foreground">Resultado estimado:</span>{' '}
+              <span className={cn('font-semibold', estimatedResult === 0 ? 'text-feedback-danger' : 'text-origen-hoja')}>
+                {estimatedResult} unidades
+              </span>
+            </p>
+            {(product.reservedStock ?? 0) > 0 && estimatedResult < (product.reservedStock ?? 0) && (
+              <p className="text-xs text-feedback-danger mt-2">
+                ⚠️ El resultado ({estimatedResult}) sería menor que lo reservado ({product.reservedStock}). El servidor rechazará esto.
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Mensaje de error */}
         {error && (
@@ -185,7 +241,7 @@ export function AdjustStockDialog({
         </Button>
         <Button
           onClick={handleConfirm}
-          disabled={isLoading}
+          disabled={isLoading || !isValidInput}
         >
           {isLoading ? (
             <span className="flex items-center gap-2">

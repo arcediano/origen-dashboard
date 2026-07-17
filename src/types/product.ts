@@ -238,6 +238,7 @@ export interface Product {
   sku: string;
   barcode?: string;
   stock: number;
+  reservedStock?: number; // Cantidad reservada en pedidos pendientes (H1-Etapa2)
   lowStockThreshold: number;
   trackInventory: boolean;
   allowBackorders?: boolean;

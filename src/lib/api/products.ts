@@ -802,10 +802,11 @@ export async function duplicateProduct(id: string): Promise<ApiResponse<Product>
  */
 export async function updateProductStock(
   id: string,
-  stock: number,
+  mode: 'set' | 'increment' | 'decrement',
+  value: number,
 ): Promise<ApiResponse<Product>> {
   try {
-    const raw = await gatewayClient.patch<ApiProduct>(`/products/${id}/stock`, { stock });
+    const raw = await gatewayClient.patch<ApiProduct>(`/products/${id}/stock`, { mode, value });
     return { data: mapApiProductToProduct(raw), status: 200 };
   } catch (error) {
     return handleError(error, 'updateProductStock');

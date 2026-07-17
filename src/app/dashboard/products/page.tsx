@@ -196,11 +196,12 @@ export default function ProductosPage() {
     setAdjustStockDialogOpen(true);
   };
 
-  const handleConfirmAdjustStock = (productId: string, newStock: number) => {
+  // H9: Usar el Product completo del servidor como fuente de verdad (no recalcular status localmente)
+  const handleConfirmAdjustStock = (productId: string, updatedProduct: Product) => {
     setProducts((prev) =>
       prev.map((p) =>
         p.id === productId
-          ? { ...p, stock: newStock, status: newStock > 0 ? 'active' : 'out_of_stock' }
+          ? updatedProduct // Usar directamente el Product devuelto del servidor
           : p
       )
     );
