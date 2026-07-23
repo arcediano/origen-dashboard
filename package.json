@@ -11,7 +11,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@arcediano/ux-library": "^0.10.0",
+    "@arcediano/ux-library": "^0.19.4",
     "@hookform/resolvers": "^3.9.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
