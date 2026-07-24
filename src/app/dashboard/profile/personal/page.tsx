@@ -542,6 +542,12 @@ export default function PersonalInfoPage() {
                         />
                       </div>
                     </div>
+
+                    <div className="p-3 bg-origen-pastel/20 rounded-md border border-origen-pradera/10">
+                      <p className="text-xs text-text-subtle">
+                        Esta es tu dirección productiva, la misma que gestionas en Mi negocio. Cualquier cambio aquí se refleja allí y viceversa.
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>

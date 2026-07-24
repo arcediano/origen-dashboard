@@ -63,6 +63,7 @@ export interface ProducerProfileData {
     categories?: string[];
     entityType?: string;
     legalRepresentativeName?: string;
+    whyOrigin?: string | null;
     billingAddress?: {
       street?: string;
       streetNumber?: string;
@@ -89,6 +90,7 @@ export interface ProducerProfileData {
     productionPhilosophy?: string | null;
     values?: string[];
     website?: string | null;
+    introVideoUrl?: string | null;
     instagramHandle?: string | null;
   } | null;
   visual: ProducerProfileVisual | null;
@@ -130,9 +132,11 @@ export interface UpdateProducerProfilePayload {
   };
   tagline?: string;
   description?: string;
+  whyOrigin?: string;
   productionPhilosophy?: string;
   values?: string[];
   website?: string;
+  introVideoUrl?: string;
   instagramHandle?: string;
   categories?: string[];
   logoKey?: string;

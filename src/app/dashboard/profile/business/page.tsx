@@ -61,11 +61,13 @@ type BusinessFormState = {
   teamSize: string;
   description: string;
   tagline: string;
+  whyOrigin: string;
   productionPhilosophy: string;
   values: string[];
   categories: string[];
   phone: string;
   website: string;
+  introVideoUrl: string;
   instagram: string;
   street: string;
   streetNumber: string;
@@ -73,6 +75,13 @@ type BusinessFormState = {
   city: string;
   province: string;
   postalCode: string;
+  billingAddressSameAsProduction: boolean;
+  billingStreet: string;
+  billingStreetNumber: string;
+  billingStreetComplement: string;
+  billingCity: string;
+  billingProvince: string;
+  billingPostalCode: string;
   logo: string | null;
   banner: string | null;
   logoKey: string | null;
@@ -89,11 +98,13 @@ const EMPTY_FORM: BusinessFormState = {
   teamSize: '',
   description: '',
   tagline: '',
+  whyOrigin: '',
   productionPhilosophy: '',
   values: [],
   categories: [],
   phone: '',
   website: '',
+  introVideoUrl: '',
   instagram: '',
   street: '',
   streetNumber: '',
@@ -101,6 +112,13 @@ const EMPTY_FORM: BusinessFormState = {
   city: '',
   province: '',
   postalCode: '',
+  billingAddressSameAsProduction: true,
+  billingStreet: '',
+  billingStreetNumber: '',
+  billingStreetComplement: '',
+  billingCity: '',
+  billingProvince: '',
+  billingPostalCode: '',
   logo: null,
   banner: null,
   logoKey: null,
@@ -159,6 +177,9 @@ function mapProfileToForm(data: ProducerProfileData): BusinessFormState {
   const logoUrl = resolveVisualUrl(data.visual?.logoUrl, data.visual?.logoKey);
   const bannerUrl = resolveVisualUrl(data.visual?.bannerUrl, data.visual?.bannerKey);
 
+  // Si no hay billingAddress, usar la dirección productiva (default)
+  const hasBillingAddress = data.fiscal?.billingAddress?.street !== null && data.fiscal?.billingAddress?.street !== undefined;
+
   return {
     businessName: data.story?.businessName ?? data.fiscal?.businessName ?? '',
     legalName: data.fiscal?.legalName ?? '',
@@ -169,11 +190,13 @@ function mapProfileToForm(data: ProducerProfileData): BusinessFormState {
     teamSize: mapTeamSizeFromApi(data.location?.teamSize),
     description: data.story?.description ?? '',
     tagline: data.story?.tagline ?? '',
+    whyOrigin: data.fiscal?.whyOrigin ?? '',
     productionPhilosophy: data.story?.productionPhilosophy ?? '',
     values: data.story?.values ?? [],
     categories: data.fiscal?.categories ?? [],
     phone: data.fiscal?.businessPhone ?? '',
     website: data.story?.website ?? '',
+    introVideoUrl: data.story?.introVideoUrl ?? '',
     instagram: data.story?.instagramHandle ?? '',
     street: data.location?.street ?? '',
     streetNumber: data.location?.streetNumber ?? '',
@@ -181,6 +204,13 @@ function mapProfileToForm(data: ProducerProfileData): BusinessFormState {
     city: data.location?.city ?? '',
     province: data.location?.province ?? '',
     postalCode: data.location?.postalCode ?? '',
+    billingAddressSameAsProduction: !hasBillingAddress,
+    billingStreet: data.fiscal?.billingAddress?.street ?? '',
+    billingStreetNumber: data.fiscal?.billingAddress?.streetNumber ?? '',
+    billingStreetComplement: data.fiscal?.billingAddress?.streetComplement ?? '',
+    billingCity: data.fiscal?.billingAddress?.city ?? '',
+    billingProvince: data.fiscal?.billingAddress?.province ?? '',
+    billingPostalCode: data.fiscal?.billingAddress?.postalCode ?? '',
     logo: logoUrl,
     banner: bannerUrl,
     logoKey: data.visual?.logoKey ?? null,
@@ -469,11 +499,26 @@ export default function BusinessInfoPage() {
       postalCode: form.postalCode.trim() || undefined,
       foundedYear: form.foundedYear ? Number(form.foundedYear) : undefined,
       teamSize: form.teamSize || undefined,
+      billingAddressSameAsProduction: form.billingAddressSameAsProduction,
+      ...(
+        !form.billingAddressSameAsProduction && {
+          billingAddress: {
+            street: form.billingStreet.trim(),
+            streetNumber: form.billingStreetNumber.trim(),
+            streetComplement: form.billingStreetComplement.trim() || undefined,
+            city: form.billingCity.trim(),
+            province: form.billingProvince,
+            postalCode: form.billingPostalCode.trim(),
+          },
+        }
+      ),
       tagline: form.tagline.trim() || undefined,
       description: form.description.trim() || undefined,
+      whyOrigin: form.whyOrigin.trim() || undefined,
       productionPhilosophy: form.productionPhilosophy.trim() || undefined,
       values: form.values.length > 0 ? form.values : undefined,
       website: form.website.trim() || undefined,
+      introVideoUrl: form.introVideoUrl.trim() || undefined,
       instagramHandle: form.instagram.trim() || undefined,
       categories: form.categories.length > 0 ? form.categories : undefined,
       ...(form.logoKey && { logoKey: form.logoKey }),
@@ -863,6 +908,72 @@ export default function BusinessInfoPage() {
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
+                      <MapPin className="w-5 h-5 text-origen-pradera" />
+                      Direccion de facturacion
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="billingAddressSameAsProduction"
+                        checked={form.billingAddressSameAsProduction}
+                        onChange={(e) => setForm({ ...form, billingAddressSameAsProduction: e.target.checked })}
+                        disabled={!isEditing}
+                        className="w-4 h-4 cursor-pointer"
+                      />
+                      <Label htmlFor="billingAddressSameAsProduction" className="cursor-pointer">
+                        Usar la misma direccion que la productiva
+                      </Label>
+                    </div>
+
+                    {!form.billingAddressSameAsProduction && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="billingStreet">Calle</Label>
+                          <Input id="billingStreet" value={form.billingStreet} onChange={(e) => setForm({ ...form, billingStreet: e.target.value })} disabled={!isEditing} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="billingStreetNumber">Numero</Label>
+                          <Input id="billingStreetNumber" value={form.billingStreetNumber} onChange={(e) => setForm({ ...form, billingStreetNumber: e.target.value })} disabled={!isEditing} />
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="billingStreetComplement">Complemento</Label>
+                          <Input id="billingStreetComplement" value={form.billingStreetComplement} onChange={(e) => setForm({ ...form, billingStreetComplement: e.target.value })} disabled={!isEditing} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="billingCity">Ciudad</Label>
+                          <Input id="billingCity" value={form.billingCity} onChange={(e) => setForm({ ...form, billingCity: e.target.value })} disabled={!isEditing} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="billingProvince">Provincia</Label>
+                          <Select value={form.billingProvince} onValueChange={(v) => setForm({ ...form, billingProvince: v })} disabled={!isEditing}>
+                            <SelectTrigger id="billingProvince" className="w-full">
+                              <SelectValue placeholder="Selecciona una provincia" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {PROVINCIAS_ESPANA.map((province) => (
+                                <SelectItem key={province} value={province}>{province}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="billingPostalCode">Codigo postal</Label>
+                          <Input id="billingPostalCode" value={form.billingPostalCode} onChange={(e) => setForm({ ...form, billingPostalCode: e.target.value.replace(/\D/g, '').slice(0, 5) })} disabled={!isEditing} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
                       <FileText className="w-5 h-5 text-origen-pradera" />
                       Historia y valores
                     </CardTitle>
@@ -881,6 +992,15 @@ export default function BusinessInfoPage() {
                     <Label htmlFor="businessDescription">Descripcion</Label>
                     <Textarea id="businessDescription" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} disabled={!isEditing} rows={5} />
                     {errors.description && <p className="text-xs text-feedback-danger">{errors.description}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="whyOrigin">Por que Origen?</Label>
+                    <Textarea id="whyOrigin" value={form.whyOrigin} onChange={(e) => setForm({ ...form, whyOrigin: e.target.value })} disabled={!isEditing} rows={3} placeholder="Cuéntanos tu motivación para unirte a Origen" />
+                    {errors.whyOrigin && <p className="text-xs text-feedback-danger">{errors.whyOrigin}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="introVideoUrl">Video de presentacion</Label>
+                    <Input id="introVideoUrl" value={form.introVideoUrl} onChange={(e) => setForm({ ...form, introVideoUrl: e.target.value })} disabled={!isEditing} placeholder="https://youtube.com/watch?v=..." />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="productionPhilosophy">Filosofia de produccion</Label>
