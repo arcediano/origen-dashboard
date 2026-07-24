@@ -89,6 +89,26 @@ export interface OnboardingData {
     pendingDocumentKey?: string | null; // ADR-009
     pendingExpiresAt?: string | null; // ADR-009
   }> | null;
+  logistics?: {
+    isInOriginRoute?: boolean;
+    logisticsLevel?: 'centralized' | 'transport' | 'own';
+    useCentralizedTransport?: boolean | null;
+    minOrderAmount?: number;
+    sustainablePackaging?: boolean;
+    packagingDescription?: string | null;
+    deliveryOptions?: Array<{
+      name: string;
+      description?: string | null;
+      price: number;
+      estimatedDays: number;
+    }>;
+    shippingZones?: Array<{
+      type: 'PROVINCE' | 'POSTAL' | 'CUSTOM';
+      value: string;
+      label: string;
+      isExcluded?: boolean;
+    }>;
+  } | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
