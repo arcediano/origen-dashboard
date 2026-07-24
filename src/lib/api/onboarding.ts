@@ -113,6 +113,12 @@ export interface OnboardingData {
       isExcluded?: boolean;
     }>;
   } | null;
+  pickupAssignment?: {
+    id: string;
+    state: 'ACTIVE' | 'PENDING_CHOICE';
+    routeName: string | null;
+    warehouseName: string | null;
+  } | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -392,4 +398,15 @@ export interface ProducerReadinessReport {
  */
 export async function getMyReadiness(): Promise<ProducerReadinessReport> {
   return gatewayClient.get<ProducerReadinessReport>('/producers/me/readiness');
+}
+
+/**
+ * Responde a una asignación pendiente de ruta de recogida (PENDING_CHOICE).
+ * El productor elige si delegar en Origen o gestionar su propio envío.
+ */
+export async function respondPickupAssignmentChoice(
+  assignmentId: string,
+  choice: 'delegated' | 'own',
+): Promise<{ success: boolean }> {
+  return gatewayClient.patch(`/producers/me/pickup-assignment/${assignmentId}/choice`, { choice });
 }

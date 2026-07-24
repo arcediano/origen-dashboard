@@ -36,7 +36,7 @@ import {
 } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
-import { loadOnboardingData, saveStep4 } from '@/lib/api/onboarding';
+import { loadOnboardingData, saveStep4, respondPickupAssignmentChoice } from '@/lib/api/onboarding';
 import type {
   DeliveryOption as OnboardingDeliveryOption,
   ShippingZone as OnboardingShippingZone,
@@ -139,6 +139,11 @@ export default function EnviosPage() {
   const [logisticsLevel, setLogisticsLevel] = useState<LogisticsLevel>('own');
   const [profilePubliclyReady, setProfilePubliclyReady] = useState(false);
 
+  // Pickup assignment — elección de ruta de recogida (si aplica)
+  const [pickupAssignment, setPickupAssignment] = useState<{ id: string; state: 'ACTIVE' | 'PENDING_CHOICE'; routeName: string | null; warehouseName: string | null } | null>(null);
+  const [respondingPickupChoice, setRespondingPickupChoice] = useState(false);
+  const [pickupChoiceError, setPickupChoiceError] = useState<string | null>(null);
+
   // Configuración editable del productor
   const [useCentralizedTransport, setUseCentralizedTransport] = useState(true);
   const [minOrderAmount, setMinOrderAmount] = useState<number>(0);
@@ -163,6 +168,7 @@ export default function EnviosPage() {
       setProfilePubliclyReady(Boolean(response?.data?.profilePubliclyReady));
       setIsInOriginRoute(Boolean(logistics?.isInOriginRoute));
       setLogisticsLevel((logistics?.logisticsLevel as LogisticsLevel) ?? 'own');
+      setPickupAssignment(response?.data?.pickupAssignment ?? null);
       setUseCentralizedTransport(logistics?.useCentralizedTransport ?? true);
       setMinOrderAmount(Number(logistics?.minOrderAmount ?? 0));
       setSustainablePackaging(Boolean(logistics?.sustainablePackaging));
@@ -303,6 +309,25 @@ export default function EnviosPage() {
     }
   };
 
+  const handlePickupChoice = async (choice: 'delegated' | 'own') => {
+    if (!pickupAssignment) return;
+
+    setRespondingPickupChoice(true);
+    setPickupChoiceError(null);
+
+    try {
+      await respondPickupAssignmentChoice(pickupAssignment.id, choice);
+      setSaveSuccess(`Elección guardada: ${choice === 'delegated' ? 'Delegaremos la recogida' : 'Gestionarás tu propio envío'}.`);
+      await loadData();
+    } catch (error) {
+      setPickupChoiceError(
+        error instanceof Error ? error.message : 'No se pudo procesar tu elección de recogida.',
+      );
+    } finally {
+      setRespondingPickupChoice(false);
+    }
+  };
+
   if (isLoading) return <PageLoader message="Cargando tu configuración de logística..." />;
 
   if (loadError) {
@@ -397,6 +422,66 @@ export default function EnviosPage() {
             </div>
           </div>
         </Card>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            ASIGNACIÓN DE RUTA DE RECOGIDA — si aplica
+        ══════════════════════════════════════════════════════════════════ */}
+        {pickupAssignment && (
+          <Card variant={pickupAssignment.state === 'PENDING_CHOICE' ? 'default' : 'section'} padding="md" className={pickupAssignment.state === 'PENDING_CHOICE' ? 'border-origen-pradera/40 bg-origen-crema/40' : ''}>
+            <CardIconHeader
+              icon={<Route className="h-5 w-5" />}
+              title={pickupAssignment.state === 'PENDING_CHOICE' ? 'Opción de recogida pendiente' : 'Ruta de recogida asignada'}
+              description={pickupAssignment.state === 'PENDING_CHOICE' ? 'Se ha habilitado una ruta de recogida para tu negocio' : 'Tu ruta de recogida actual'}
+            />
+            <CardContent>
+              {pickupAssignment.state === 'PENDING_CHOICE' ? (
+                <div className="space-y-4">
+                  <Alert variant="warning">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Se ha abierto una nueva ruta de recogida que cubre tu código postal. Elige si quieres que delegues la recogida en Origen o prefieres mantener tu propio sistema de envíos.
+                    </AlertDescription>
+                  </Alert>
+                  <div className="bg-surface-alt rounded-xl p-4 space-y-2">
+                    <p className="text-sm font-medium text-text-primary">Ruta: <span className="text-origen-bosque font-semibold">{pickupAssignment.routeName}</span></p>
+                    <p className="text-sm text-muted-foreground">Almacén: {pickupAssignment.warehouseName}</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => handlePickupChoice('delegated')}
+                      disabled={respondingPickupChoice}
+                      className="flex-1"
+                    >
+                      {respondingPickupChoice ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+                      Delegar en Origen
+                    </Button>
+                    <Button
+                      onClick={() => handlePickupChoice('own')}
+                      disabled={respondingPickupChoice}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Gestionar mi propio envío
+                    </Button>
+                  </div>
+                  {pickupChoiceError && (
+                    <p className="text-sm text-feedback-danger">{pickupChoiceError}</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 border border-origen-pradera/30 bg-origen-pastel/40 rounded-xl">
+                    <CheckCircle2 className="h-5 w-5 text-origen-pradera flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-origen-bosque">Ruta activa</p>
+                      <p className="text-sm text-muted-foreground">{pickupAssignment.routeName} • {pickupAssignment.warehouseName}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* ══════════════════════════════════════════════════════════════════
             TRANSPORTE CENTRALIZADO — solo si logisticsLevel === 'transport'
