@@ -22,6 +22,9 @@ export interface OnboardingDataResponse {
 }
 
 export interface OnboardingData {
+  /** Gate único de visibilidad en el marketplace (ADR-007). Determina si el
+   *  guard de "al menos un método de envío activo" aplica al guardar logística. */
+  profilePubliclyReady?: boolean;
   fiscal?: {
     businessName?: string;
     legalName?: string;
@@ -100,7 +103,8 @@ export interface OnboardingData {
       name: string;
       description?: string | null;
       price: number;
-      estimatedDays: number;
+      /** Texto libre, p. ej. "1", "2-3", "Mismo día" — nunca un número puro (ver schema.prisma DeliveryOption.estimatedDays). */
+      estimatedDays: string;
     }>;
     shippingZones?: Array<{
       type: 'PROVINCE' | 'POSTAL' | 'CUSTOM';
