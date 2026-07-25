@@ -55,6 +55,10 @@ import {
   type UpdateProducerProfilePayload,
 } from '@/lib/api/producers';
 import { uploadFile } from '@/lib/api/media';
+import {
+  getMyReadiness,
+  type ProducerReadinessReport,
+} from '@/lib/api/onboarding';
 
 type BusinessFormState = {
   businessName: string;
@@ -223,6 +227,47 @@ function mapProfileToForm(data: ProducerProfileData): BusinessFormState {
   };
 }
 
+/**
+ * Mapea códigos de blocker a texto legible para mostrar en UI
+ */
+function mapBlockerToText(blocker: string): string {
+  const blockerMap: Record<string, string> = {
+    'taxId_missing': 'CIF/NIF requerido',
+    'businessName_missing': 'Nombre comercial requerido',
+    'entityType_missing': 'Tipo de entidad requerido',
+    'categories_empty': 'Al menos una categoría requerida',
+    'location_incomplete': 'Dirección completa requerida (ciudad, provincia, código postal)',
+    'storyName_short': 'Nombre comercial debe tener al menos 3 caracteres',
+    'description_short': 'Descripción debe tener al menos 50 caracteres',
+    'logo_missing': 'Logo requerido',
+  };
+  return blockerMap[blocker] || blocker;
+}
+
+/**
+ * Determina si un campo específico es un bloqueador según el readiness report
+ */
+function isFieldBlocker(
+  fieldKey: keyof ProducerReadinessReport['profileChecks'],
+  readinessReport: ProducerReadinessReport | null,
+): boolean {
+  if (!readinessReport) return false;
+  const check = readinessReport.profileChecks[fieldKey];
+  return !check.passed && !!check.blocker;
+}
+
+/**
+ * Componente indicador de campo obligatorio para publicar
+ */
+function RequiredFieldIndicator({ isRequired }: { isRequired: boolean }) {
+  if (!isRequired) return null;
+  return (
+    <Badge variant="danger" size="xs" className="ml-1">
+      Obligatorio
+    </Badge>
+  );
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 // Cálculo de completitud por secciones
 // ──────────────────────────────────────────────────────────────────────────
@@ -324,6 +369,7 @@ export default function BusinessInfoPage() {
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [newCategory, setNewCategory] = useState('');
   const [isUploadingVisual, setIsUploadingVisual] = useState(false);
+  const [readinessReport, setReadinessReport] = useState<ProducerReadinessReport | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
@@ -375,7 +421,11 @@ export default function BusinessInfoPage() {
       setLoadError(null);
 
       try {
-        const response = await getProducerProfile();
+        const [response, readiness] = await Promise.all([
+          getProducerProfile(),
+          getMyReadiness(),
+        ]);
+
         if (!response?.data) {
           throw new Error('No hay datos de perfil para el negocio.');
         }
@@ -385,6 +435,7 @@ export default function BusinessInfoPage() {
         if (!mounted) return;
         setForm(mapped);
         setInitialForm(mapped);
+        setReadinessReport(readiness);
       } catch (error) {
         if (!mounted) return;
         setLoadError(error instanceof Error ? error.message : 'Error al cargar perfil comercial.');
@@ -413,6 +464,9 @@ export default function BusinessInfoPage() {
     }
     if (form.description.trim() && form.description.trim().length < 50) {
       nextErrors.description = 'La descripcion debe tener al menos 50 caracteres';
+    }
+    if (form.tagline.trim() && form.tagline.trim().length < 3) {
+      nextErrors.tagline = 'El tagline debe tener al menos 3 caracteres';
     }
 
     setErrors(nextErrors);
@@ -581,6 +635,22 @@ export default function BusinessInfoPage() {
             </Alert>
           )}
 
+          {readinessReport && !readinessReport.canSubmitProducts && (
+            <Alert variant="warning" className="mb-6">
+              <AlertDescription>
+                <div className="space-y-1">
+                  <p className="font-semibold">Tu perfil no está listo para ser público.</p>
+                  <p className="text-sm">Completa los siguientes campos obligatorios:</p>
+                  <ul className="text-sm list-disc list-inside mt-2 space-y-0.5">
+                    {readinessReport.blockers.map((blocker) => (
+                      <li key={blocker}>{mapBlockerToText(blocker)}</li>
+                    ))}
+                  </ul>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <>
               {!loadError &&
                 !form.businessName &&
@@ -637,7 +707,7 @@ export default function BusinessInfoPage() {
 
               <CardContent className="relative px-4 sm:px-6 pb-5 sm:pb-6">
                 <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 -mt-10 sm:-mt-16 mb-3 sm:mb-4">
-                  <div className="relative">
+                  <div className="relative flex flex-col items-center sm:items-start">
                     <Avatar
                       src={form.logo ?? undefined}
                       alt={form.businessName || 'Logo de negocio'}
@@ -677,6 +747,11 @@ export default function BusinessInfoPage() {
                       onChange={handleLogoFileChange}
                       aria-label="Subir logo"
                     />
+                    {isFieldBlocker('logo', readinessReport) && (
+                      <Badge variant="danger" size="xs" className="mt-2">
+                        Obligatorio
+                      </Badge>
+                    )}
                   </div>
 
                   <div className="flex-1 pb-1 sm:pb-2 min-w-0">
@@ -775,7 +850,10 @@ export default function BusinessInfoPage() {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="businessName">Nombre comercial</Label>
+                      <Label htmlFor="businessName" className="flex items-center">
+                        Nombre comercial
+                        <RequiredFieldIndicator isRequired={isFieldBlocker('businessName', readinessReport)} />
+                      </Label>
                       <Input id="businessName" value={form.businessName} onChange={(e) => setForm({ ...form, businessName: e.target.value })} disabled={!isEditing} />
                     </div>
                     <div className="space-y-2">
@@ -783,11 +861,17 @@ export default function BusinessInfoPage() {
                       <Input id="legalName" value={form.legalName} onChange={(e) => setForm({ ...form, legalName: e.target.value })} disabled={!isEditing} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="taxId">CIF / NIF</Label>
+                      <Label htmlFor="taxId" className="flex items-center">
+                        CIF / NIF
+                        <RequiredFieldIndicator isRequired={isFieldBlocker('taxId', readinessReport)} />
+                      </Label>
                       <Input id="taxId" value={form.taxId} onChange={(e) => setForm({ ...form, taxId: e.target.value.toUpperCase() })} disabled={!isEditing} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="entityType">Tipo de entidad</Label>
+                      <Label htmlFor="entityType" className="flex items-center">
+                        Tipo de entidad
+                        <RequiredFieldIndicator isRequired={isFieldBlocker('entityType', readinessReport)} />
+                      </Label>
                       <Select value={form.entityType} onValueChange={(v) => setForm({ ...form, entityType: v })} disabled={!isEditing}>
                         <SelectTrigger id="entityType" className="w-full">
                           <SelectValue placeholder="Selecciona una opcion" />
@@ -884,11 +968,17 @@ export default function BusinessInfoPage() {
                       <Input id="streetComplement" value={form.streetComplement} onChange={(e) => setForm({ ...form, streetComplement: e.target.value })} disabled={!isEditing} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="city">Ciudad</Label>
+                      <Label htmlFor="city" className="flex items-center">
+                        Ciudad
+                        <RequiredFieldIndicator isRequired={isFieldBlocker('location', readinessReport)} />
+                      </Label>
                       <Input id="city" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} disabled={!isEditing} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="province">Provincia</Label>
+                      <Label htmlFor="province" className="flex items-center">
+                        Provincia
+                        <RequiredFieldIndicator isRequired={isFieldBlocker('location', readinessReport)} />
+                      </Label>
                       <Select value={form.province} onValueChange={(v) => setForm({ ...form, province: v })} disabled={!isEditing}>
                         <SelectTrigger id="province" className="w-full">
                           <SelectValue placeholder="Selecciona una provincia" />
@@ -901,7 +991,10 @@ export default function BusinessInfoPage() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="postalCode">Codigo postal</Label>
+                      <Label htmlFor="postalCode" className="flex items-center">
+                        Codigo postal
+                        <RequiredFieldIndicator isRequired={isFieldBlocker('location', readinessReport)} />
+                      </Label>
                       <Input
                         id="postalCode"
                         value={form.postalCode}
@@ -994,11 +1087,18 @@ export default function BusinessInfoPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="tagline">Tagline</Label>
+                    <Label htmlFor="tagline" className="flex items-center">
+                      Tagline
+                      <RequiredFieldIndicator isRequired={isFieldBlocker('storyName', readinessReport)} />
+                    </Label>
                     <Input id="tagline" value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} disabled={!isEditing} />
+                    {errors.tagline && <p className="text-xs text-feedback-danger">{errors.tagline}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="businessDescription">Descripcion</Label>
+                    <Label htmlFor="businessDescription" className="flex items-center">
+                      Descripcion
+                      <RequiredFieldIndicator isRequired={isFieldBlocker('description', readinessReport)} />
+                    </Label>
                     <Textarea id="businessDescription" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} disabled={!isEditing} rows={5} />
                     {errors.description && <p className="text-xs text-feedback-danger">{errors.description}</p>}
                   </div>
@@ -1041,8 +1141,9 @@ export default function BusinessInfoPage() {
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Tags className="w-5 h-5 text-origen-pradera" />
                       Categorias
+                      <RequiredFieldIndicator isRequired={isFieldBlocker('categories', readinessReport)} />
                     </CardTitle>
-                    <SectionStatusBadge 
+                    <SectionStatusBadge
                       isComplete={sectionCompleteness.categories.isComplete}
                       percent={sectionCompleteness.categories.percent}
                     />
