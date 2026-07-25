@@ -259,7 +259,7 @@ function calculateSectionCompleteness(form: BusinessFormState): SectionCompleten
     },
     categories: {
       isComplete: form.categories.length > 0,
-      filledFields: form.categories.length,
+      filledFields: form.categories.length > 0 ? 1 : 0,
       totalFields: 1,
       percent: 0,
     },

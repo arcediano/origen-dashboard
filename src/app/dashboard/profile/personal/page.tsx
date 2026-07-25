@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, MapPin, Save, Camera, CheckCircle, Edit, X } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
@@ -11,6 +11,8 @@ import { Button, Input, Label, Badge, DateInput } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { getCurrentUser, updateCurrentUser, type AuthUser } from '@/lib/api/auth';
 import { loadOnboardingData, loadProducerProfile, saveStep1, saveStep2, type OnboardingData } from '@/lib/api/onboarding';
+import { getProducerProfile, updateProducerProfile, type ProducerProfileData } from '@/lib/api/producers';
+import { uploadFile } from '@/lib/api/media';
 
 type PersonalFormState = {
   name: string;
@@ -99,6 +101,9 @@ export default function PersonalInfoPage() {
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [avatarKey, setAvatarKey] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const initials = useMemo(() => {
     const clean = form.name.trim();
@@ -120,9 +125,10 @@ export default function PersonalInfoPage() {
       setLoadError(null);
 
       try {
-        const [user, onboardingRes] = await Promise.all([
+        const [user, onboardingRes, producerProfile] = await Promise.all([
           getCurrentUser(),
           loadOnboardingData(),
+          getProducerProfile(),
         ]);
 
         if (!onboardingRes?.data) {
@@ -130,24 +136,35 @@ export default function PersonalInfoPage() {
         }
 
         const data = onboardingRes.data;
+
+        // Formatear birthDate al formato YYYY-MM-DD si existe
+        let formattedBirthDate = '';
+        if (user.birthDate) {
+          const date = new Date(user.birthDate);
+          if (!isNaN(date.getTime())) {
+            formattedBirthDate = date.toISOString().split('T')[0];
+          }
+        }
+
         const mapped: PersonalFormState = {
           name: `${user.firstName} ${user.lastName}`.trim(),
           email: user.email,
-          phone: data.fiscal?.businessPhone ?? '',
-          birthDate: '',
+          phone: user.phone ?? '',
+          birthDate: formattedBirthDate,
           address: buildAddress(data.location?.street, data.location?.streetNumber),
           city: data.location?.city ?? '',
           postalCode: data.location?.postalCode ?? '',
           province: data.location?.province ?? '',
           country: 'Espana',
           bio: data.story?.tagline ?? data.story?.description ?? '',
-          avatar: null,
+          avatar: producerProfile?.data?.visual?.logoUrl ?? null,
         };
 
         if (!mounted) return;
 
         setAuthUser(user);
         setOnboardingData(data);
+        setAvatarKey(producerProfile?.data?.visual?.logoKey ?? null);
         setForm(mapped);
         setInitialForm(mapped);
       } catch (error) {
@@ -169,7 +186,11 @@ export default function PersonalInfoPage() {
     const nextErrors: Record<string, string> = {};
 
     if (!form.name.trim()) nextErrors.name = 'El nombre es obligatorio';
-    if (!form.phone.trim()) nextErrors.phone = 'El telefono es obligatorio';
+    if (!form.phone.trim()) {
+      nextErrors.phone = 'El telefono es obligatorio';
+    } else if (!/^[+\d\s-]{9,20}$/.test(form.phone.trim())) {
+      nextErrors.phone = 'Formato de teléfono inválido. Ejemplo: +34 612 345 678';
+    }
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -181,6 +202,23 @@ export default function PersonalInfoPage() {
     setSaveError(null);
     setSaveSuccess(null);
     setIsEditing(false);
+  };
+
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingAvatar(true);
+    setSaveError(null);
+    try {
+      const { key, url } = await uploadFile(file, 'visual/logo');
+      setForm((prev) => ({ ...prev, avatar: url ?? URL.createObjectURL(file) }));
+      setAvatarKey(key);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Error al subir la imagen de avatar.');
+    } finally {
+      setIsUploadingAvatar(false);
+      e.target.value = '';
+    }
   };
 
   const handleSave = async () => {
@@ -265,10 +303,29 @@ export default function PersonalInfoPage() {
       ];
 
       if (authUser) {
+        const authUserPayload: Parameters<typeof updateCurrentUser>[0] = {};
+
         const fullName = splitName(form.name);
         if (fullName.firstName && (fullName.firstName !== authUser.firstName || fullName.lastName !== authUser.lastName)) {
-          updates.push(updateCurrentUser({ firstName: fullName.firstName, lastName: fullName.lastName }));
+          authUserPayload.firstName = fullName.firstName;
+          authUserPayload.lastName = fullName.lastName;
         }
+
+        if (form.phone !== (authUser.phone ?? '')) {
+          authUserPayload.phone = form.phone;
+        }
+
+        if (form.birthDate !== (initialForm.birthDate ?? '')) {
+          authUserPayload.birthDate = form.birthDate;
+        }
+
+        if (Object.keys(authUserPayload).length > 0) {
+          updates.push(updateCurrentUser(authUserPayload));
+        }
+      }
+
+      if (avatarKey && avatarKey !== initialForm.avatar) {
+        updates.push(updateProducerProfile({ logoKey: avatarKey }));
       }
 
       await Promise.all(updates);
@@ -340,14 +397,28 @@ export default function PersonalInfoPage() {
 
                       {isEditing && (
                         <>
-                          <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <div
+                            className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                            onClick={() => avatarInputRef.current?.click()}
+                          />
+                          <div
+                            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                            onClick={() => avatarInputRef.current?.click()}
+                          >
                             <div className="bg-surface-alt rounded-full p-2 shadow-lg">
                               <Camera className="w-4 h-4 text-origen-bosque" />
                             </div>
                           </div>
                         </>
                       )}
+                      <input
+                        ref={avatarInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={handleAvatarFileChange}
+                        aria-label="Subir avatar"
+                      />
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -467,7 +538,7 @@ export default function PersonalInfoPage() {
                         label="Fecha de nacimiento"
                         value={form.birthDate}
                         onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
-                        disabled={true}
+                        disabled={!isEditing}
                         inputSize="md"
                       />
                     </div>

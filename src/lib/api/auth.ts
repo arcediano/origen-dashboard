@@ -26,6 +26,8 @@ export interface AuthUser {
   roles?: UserRole[];
   producerCode: string | null;
   onboardingCompleted: boolean;
+  phone?: string | null;
+  birthDate?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -33,6 +35,8 @@ export interface AuthUser {
 export interface UpdateCurrentUserPayload {
   firstName?: string;
   lastName?: string;
+  phone?: string;
+  birthDate?: string;
 }
 
 export interface ChangePasswordPayload {

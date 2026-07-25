@@ -517,10 +517,28 @@ export default function OrderDetailPage() {
                       <p className="text-xs text-text-subtle">{order.shipping.address.addressLine2}</p>
                     )}
                     <p className="text-xs text-text-subtle">
-                      {order.shipping.address.city}, {order.shipping.address.postalCode}
+                      {order.shipping.address.postalCode} {order.shipping.address.city}
+                      {order.shipping.address.state && `, ${order.shipping.address.state}`}
+                      {order.shipping.address.country && `, ${order.shipping.address.country}`}
                     </p>
                   </div>
                 </div>
+                {(order.shipping.address.phone || order.shipping.address.email) && (
+                  <div className="pt-3 border-t border-border-subtle space-y-1.5">
+                    {order.shipping.address.phone && (
+                      <InfoRow
+                        label="Teléfono"
+                        value={<a href={`tel:${order.shipping.address.phone}`} className="text-origen-pradera hover:underline">{order.shipping.address.phone}</a>}
+                      />
+                    )}
+                    {order.shipping.address.email && (
+                      <InfoRow
+                        label="Email"
+                        value={<a href={`mailto:${order.shipping.address.email}`} className="text-origen-pradera hover:underline">{order.shipping.address.email}</a>}
+                      />
+                    )}
+                  </div>
+                )}
                 {order.shipping.trackingNumber && (
                   <div className="pt-3 border-t border-border-subtle space-y-1.5">
                     <InfoRow
@@ -556,8 +574,12 @@ export default function OrderDetailPage() {
                 <div className="divide-y divide-border-subtle">
                   {order.items.map((item) => (
                     <div key={item.id} className="flex items-center gap-3 px-5 py-4">
-                      <div className="w-14 h-14 rounded-2xl bg-origen-crema/60 flex items-center justify-center flex-shrink-0 border border-border-subtle">
-                        <Package className="w-6 h-6 text-text-disabled" />
+                      <div className="w-14 h-14 rounded-2xl bg-origen-crema/60 flex items-center justify-center flex-shrink-0 border border-border-subtle overflow-hidden">
+                        {item.productImage ? (
+                          <img src={item.productImage} alt={item.productName} className="w-full h-full object-cover" />
+                        ) : (
+                          <Package className="w-6 h-6 text-text-disabled" />
+                        )}
                       </div>
                       {/* Info */}
                       <div className="flex-1 min-w-0">
@@ -566,6 +588,12 @@ export default function OrderDetailPage() {
                           {item.quantity} × {item.unitPrice.toFixed(2)}€
                           {item.discount && <span className="text-origen-hoja ml-1.5">−{item.discount}%</span>}
                         </p>
+                        {item.commissionRate !== undefined && (
+                          <p className="text-xs text-text-disabled mt-1">
+                            Comisión: {item.commissionRate}%
+                            {item.commissionAmount && ` (${item.commissionAmount.toFixed(2)}€)`}
+                          </p>
+                        )}
                       </div>
                       {/* Precio */}
                       <p className="text-sm font-bold text-origen-bosque flex-shrink-0 tabular-nums">{item.totalPrice.toFixed(2)}€</p>
@@ -579,6 +607,18 @@ export default function OrderDetailPage() {
                     <span>Subtotal</span>
                     <span className="font-medium text-origen-bosque">{order.subtotal.toFixed(2)}€</span>
                   </div>
+                  {order.couponCode && (
+                    <div className="flex justify-between text-xs text-text-subtle">
+                      <span>Cupón</span>
+                      <span className="font-medium text-origen-hoja">{order.couponCode}</span>
+                    </div>
+                  )}
+                  {order.discount && (
+                    <div className="flex justify-between text-xs text-text-subtle">
+                      <span>Descuento</span>
+                      <span className="font-medium text-origen-hoja">−{order.discount.toFixed(2)}€</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-xs text-text-subtle">
                     <span>Gastos de envío</span>
                     <span className="font-medium text-origen-bosque">{order.shipping.cost.toFixed(2)}€</span>
@@ -596,38 +636,82 @@ export default function OrderDetailPage() {
                 </div>
               </motion.div>
 
-              {/* ── Historial del pedido ── (acordeón) */}
+              {/* ── Historial del pedido ── Resumen de eventos reales */}
               <SectionAccordion title="Historial del pedido" icon={Clock} index={2}>
-                <div>
-                  {order.timeline.map((event, index) => (
-                    <div key={event.id} className="flex items-start gap-3">
-                      {/* Dot + connector */}
+                <div className="space-y-4">
+                  {/* Evento: Pedido creado */}
+                  <div className="flex items-start gap-3">
+                    <div className="relative flex flex-col items-center flex-shrink-0">
+                      <div className="w-3 h-3 rounded-full mt-0.5 flex-shrink-0 bg-origen-bosque ring-4 ring-origen-bosque/15" />
+                      {(order.payment.paidAt || order.shipping.deliveredAt) && (
+                        <div className="w-0.5 h-8 bg-border-subtle mt-1" />
+                      )}
+                    </div>
+                    <div className="flex-1 pb-2">
+                      <p className="text-sm font-medium text-origen-bosque leading-tight">Pedido recibido</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs text-text-subtle">
+                          {format(order.createdAt, 'dd MMM · HH:mm', { locale: es })}
+                        </p>
+                        <span className="text-text-disabled text-xs">·</span>
+                        <p className="text-xs text-text-subtle">
+                          {formatDistanceToNow(order.createdAt, { addSuffix: true, locale: es })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Evento: Pago realizado */}
+                  {order.payment.paidAt && (
+                    <div className="flex items-start gap-3">
                       <div className="relative flex flex-col items-center flex-shrink-0">
-                        <div className={cn(
-                          'w-3 h-3 rounded-full mt-0.5 flex-shrink-0',
-                          index === 0
-                            ? 'bg-origen-bosque ring-4 ring-origen-bosque/15'
-                            : 'bg-origen-pradera/40',
-                        )} />
-                        {index < order.timeline.length - 1 && (
+                        <div className="w-3 h-3 rounded-full mt-0.5 flex-shrink-0 bg-origen-pradera/40" />
+                        {order.shipping.deliveredAt && (
                           <div className="w-0.5 h-8 bg-border-subtle mt-1" />
                         )}
                       </div>
-                      {/* Contenido */}
                       <div className="flex-1 pb-2">
-                        <p className="text-sm font-medium text-origen-bosque leading-tight">{event.description}</p>
+                        <p className="text-sm font-medium text-origen-bosque leading-tight">Pago realizado</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-xs text-text-subtle">
-                            {format(event.createdAt, 'dd MMM · HH:mm', { locale: es })}
+                            {format(order.payment.paidAt, 'dd MMM · HH:mm', { locale: es })}
                           </p>
                           <span className="text-text-disabled text-xs">·</span>
                           <p className="text-xs text-text-subtle">
-                            {formatDistanceToNow(event.createdAt, { addSuffix: true, locale: es })}
+                            {formatDistanceToNow(order.payment.paidAt, { addSuffix: true, locale: es })}
                           </p>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )}
+
+                  {/* Evento: Entregado */}
+                  {order.shipping.deliveredAt && (
+                    <div className="flex items-start gap-3">
+                      <div className="relative flex flex-col items-center flex-shrink-0">
+                        <div className="w-3 h-3 rounded-full mt-0.5 flex-shrink-0 bg-origen-pradera/40" />
+                      </div>
+                      <div className="flex-1 pb-2">
+                        <p className="text-sm font-medium text-origen-bosque leading-tight">Pedido entregado</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-xs text-text-subtle">
+                            {format(order.shipping.deliveredAt, 'dd MMM · HH:mm', { locale: es })}
+                          </p>
+                          <span className="text-text-disabled text-xs">·</span>
+                          <p className="text-xs text-text-subtle">
+                            {formatDistanceToNow(order.shipping.deliveredAt, { addSuffix: true, locale: es })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Nota: Si no hay eventos reales de pago/entrega, mostrar un mensaje */}
+                  {!order.payment.paidAt && !order.shipping.deliveredAt && (
+                    <p className="text-xs text-text-subtle italic">
+                      Se mostrarán más detalles del historial según se procese el pedido.
+                    </p>
+                  )}
                 </div>
               </SectionAccordion>
 

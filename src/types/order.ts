@@ -33,6 +33,8 @@ export interface OrderItem {
   unitPrice: number;
   totalPrice: number;
   discount?: number;
+  commissionRate?: number;
+  commissionAmount?: number;
   metadata?: Record<string, any>;
 }
 
@@ -95,28 +97,29 @@ export interface Order {
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
-  
+  couponCode?: string;
+
   items: OrderItem[];
   subtotal: number;
   discount?: number;
   shippingCost: number;
   tax?: number;
   total: number;
-  
+
   status: OrderStatus;
   payment: OrderPayment;
   shipping: OrderShipping;
-  
+
   timeline: OrderTimeline[];
   notes?: string;
   invoice?: OrderInvoice;
   /** true si el pedido incluye productos de más de un productor (calculado en servidor sobre los items sin filtrar). */
   isMultiSeller?: boolean;
-  
+
   createdAt: Date;
   updatedAt: Date;
   completedAt?: Date;
-  
+
   metadata?: Record<string, any>;
 }
 

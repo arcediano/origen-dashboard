@@ -32,6 +32,8 @@ interface BackendOrderItem {
   unitPrice: number;
   quantity: number;
   subtotal: number;
+  commissionRate?: number;
+  commissionAmount?: number;
 }
 
 interface BackendShippingAddress {
@@ -60,6 +62,8 @@ interface BackendOrder {
   estimatedDelivery?: string;
   createdAt: string;
   updatedAt: string;
+  paidAt?: string;
+  deliveredAt?: string;
   invoice?: {
     id: string;
     invoiceNumber: string;
@@ -163,12 +167,15 @@ function mapBackendOrder(o: BackendOrder): Order {
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       totalPrice: item.subtotal,
+      commissionRate: item.commissionRate,
+      commissionAmount: item.commissionAmount,
     })),
 
     subtotal: o.subtotal,
     shippingCost: o.shippingCost,
     discount: o.discountAmount > 0 ? o.discountAmount : undefined,
     total: o.total,
+    couponCode: o.couponCode,
 
     status,
 
@@ -176,6 +183,7 @@ function mapBackendOrder(o: BackendOrder): Order {
       method: mapPaymentMethod(o.paymentMethod),
       status: status === 'pending' ? 'pending' : status === 'refunded' ? 'refunded' : 'paid',
       amount: o.total,
+      paidAt: o.paidAt ? new Date(o.paidAt) : undefined,
     },
 
     shipping: {
@@ -183,6 +191,7 @@ function mapBackendOrder(o: BackendOrder): Order {
       status: mapShippingStatus(o.status),
       cost: o.shippingCost,
       estimatedDate: o.estimatedDelivery ? new Date(o.estimatedDelivery) : undefined,
+      deliveredAt: o.deliveredAt ? new Date(o.deliveredAt) : undefined,
       address: {
         fullName: addr.fullName ?? '',
         addressLine1: addr.addressLine1 ?? '',
