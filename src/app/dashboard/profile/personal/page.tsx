@@ -6,7 +6,7 @@ import { User, MapPin, Save, Camera, CheckCircle, Edit, X } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
-import { Card, CardContent, CardHeader, CardTitle, PageLoader } from '@arcediano/ux-library';
+import { Avatar, Card, CardContent, CardHeader, CardTitle, PageLoader } from '@arcediano/ux-library';
 import { Button, Input, Label, Badge, DateInput } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { getCurrentUser, updateCurrentUser, type AuthUser } from '@/lib/api/auth';
@@ -364,36 +364,36 @@ export default function PersonalInfoPage() {
         <div className="mt-6">
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
             {loadError && (
-              <Alert className="border-feedback-danger/30 bg-feedback-danger/10">
+              <Alert variant="error">
                 <AlertDescription>{loadError}</AlertDescription>
               </Alert>
             )}
 
             {saveError && (
-              <Alert className="border-feedback-danger/30 bg-feedback-danger/10">
+              <Alert variant="error">
                 <AlertDescription>{saveError}</AlertDescription>
               </Alert>
             )}
 
             {saveSuccess && (
-              <Alert className="border-origen-pradera/30 bg-origen-pastel/40">
-                <CheckCircle className="w-4 h-4 text-origen-pradera" />
-                <AlertDescription className="text-origen-bosque">{saveSuccess}</AlertDescription>
+              <Alert variant="success">
+                <AlertDescription>{saveSuccess}</AlertDescription>
               </Alert>
             )}
 
             <motion.div variants={itemVariants}>
               <Card className="border border-border shadow-sm">
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-start gap-6">
                     <div className="relative group flex-shrink-0">
-                      <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-origen-pradera to-origen-hoja flex items-center justify-center shadow-md overflow-hidden">
-                        {form.avatar ? (
-                          <img src={form.avatar} alt={form.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-white text-3xl font-semibold">{initials}</span>
-                        )}
-                      </div>
+                      <Avatar
+                        src={form.avatar ?? undefined}
+                        alt={form.name}
+                        shape="rounded"
+                        size="2xl"
+                        className="w-24 h-24 shadow-md bg-gradient-to-br from-origen-pradera to-origen-hoja"
+                        fallback={<span className="text-white text-3xl font-semibold">{initials}</span>}
+                      />
 
                       {isEditing && (
                         <>
@@ -419,6 +419,9 @@ export default function PersonalInfoPage() {
                         onChange={handleAvatarFileChange}
                         aria-label="Subir avatar"
                       />
+                      <p className="mt-2 max-w-[6.5rem] text-center text-[11px] leading-snug text-text-subtle">
+                        Mismo logo que en Mi negocio
+                      </p>
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -427,8 +430,7 @@ export default function PersonalInfoPage() {
                           <h2 className="text-xl font-bold text-origen-bosque truncate">{form.name || 'Perfil de productor'}</h2>
                           <p className="text-sm text-muted-foreground truncate">{form.email || 'Sin email disponible'}</p>
                           <div className="flex flex-wrap gap-2 mt-2">
-                            <Badge variant="success" size="xs" className="flex items-center gap-1">
-                              <CheckCircle className="w-3 h-3" />
+                            <Badge variant="success" size="xs" icon={<CheckCircle className="w-3 h-3" />}>
                               Verificado
                             </Badge>
                             <Badge variant="leaf" size="xs">Productor</Badge>
@@ -488,7 +490,7 @@ export default function PersonalInfoPage() {
                   <CardContent className="pt-4 space-y-4">
                     <div className="space-y-1">
                       <Label htmlFor="name" className="text-sm font-medium">
-                        Nombre completo <span className="text-red-500">*</span>
+                        Nombre completo <span className="text-feedback-danger">*</span>
                       </Label>
                       <Input
                         id="name"
@@ -519,7 +521,7 @@ export default function PersonalInfoPage() {
 
                     <div className="space-y-1">
                       <Label htmlFor="phone" className="text-sm font-medium">
-                        Telefono <span className="text-red-500">*</span>
+                        Telefono <span className="text-feedback-danger">*</span>
                       </Label>
                       <Input
                         id="phone"
@@ -652,9 +654,8 @@ export default function PersonalInfoPage() {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Alert className="bg-origen-crema/20 border-origen-pradera/30 py-3">
-                <CheckCircle className="w-4 h-4 text-origen-pradera" />
-                <AlertDescription className="text-sm text-origen-bosque">
+              <Alert variant={isLoading ? 'default' : 'success'} className="py-3">
+                <AlertDescription className="text-sm">
                   {isLoading
                     ? 'Cargando datos reales de tu perfil...'
                     : 'Tu identidad ha sido verificada. Si necesitas actualizar tu documento, contacta con soporte.'}

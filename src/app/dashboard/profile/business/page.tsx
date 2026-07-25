@@ -23,12 +23,14 @@ import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSec
 import {
   Alert,
   AlertDescription,
+  Avatar,
   Badge,
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  CheckboxWithLabel,
   Input,
   Label,
   PageLoader,
@@ -38,8 +40,11 @@ import {
   SelectContent,
   SelectItem,
   Textarea,
+  ToggleGroup,
+  ToggleGroupItem,
 } from '@arcediano/ux-library';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
 import { getProvinciaFromCP } from '@/constants/cp-provincias';
@@ -432,14 +437,6 @@ export default function BusinessInfoPage() {
     }));
   };
 
-  const handleToggleValue = (valueId: string) => {
-    setForm((prev) => ({
-      ...prev,
-      values: prev.values.includes(valueId)
-        ? prev.values.filter((item) => item !== valueId)
-        : [...prev.values, valueId],
-    }));
-  };
 
   const handleLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -567,21 +564,20 @@ export default function BusinessInfoPage() {
 
         <div className="mt-6">
           {loadError && (
-            <Alert className="mb-6 border-feedback-danger/30 bg-feedback-danger/10">
+            <Alert variant="error" className="mb-6">
               <AlertDescription>{loadError}</AlertDescription>
             </Alert>
           )}
 
           {saveError && (
-            <Alert className="mb-6 border-feedback-danger/30 bg-feedback-danger/10">
+            <Alert variant="error" className="mb-6">
               <AlertDescription>{saveError}</AlertDescription>
             </Alert>
           )}
 
           {saveSuccess && (
-            <Alert className="mb-6 border-origen-pradera/30 bg-origen-pastel/40">
-              <CheckCircle className="w-4 h-4 text-origen-pradera" />
-              <AlertDescription className="text-origen-bosque">{saveSuccess}</AlertDescription>
+            <Alert variant="success" className="mb-6">
+              <AlertDescription>{saveSuccess}</AlertDescription>
             </Alert>
           )}
 
@@ -591,8 +587,8 @@ export default function BusinessInfoPage() {
                 !form.taxId &&
                 !form.description &&
                 form.categories.length === 0 && (
-                  <Alert className="mb-6 border-origen-pradera/30 bg-origen-pastel/30">
-                    <AlertDescription className="text-origen-bosque">
+                  <Alert variant="organic" className="mb-6">
+                    <AlertDescription>
                       Aun no hay datos de negocio cargados. Empieza por completar nombre, historia y ubicacion.
                     </AlertDescription>
                   </Alert>
@@ -602,7 +598,17 @@ export default function BusinessInfoPage() {
             <Card className="overflow-hidden border border-border shadow-sm">
               <div className="h-44 sm:h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
                 {form.banner ? (
-                  <img src={form.banner} alt="Banner" className="w-full h-full object-cover" />
+                  <>
+                    <img src={form.banner} alt="Banner" className="w-full h-full object-cover" />
+                    {/* Scrim de protección: garantiza contraste del nombre/tagline que se solapa
+                        con el borde inferior del banner (bloque flotante en CardContent, -mt-10/-mt-16).
+                        Solo se aplica sobre fotos reales de banner, nunca sobre el degradado de marca
+                        por defecto (que ya tiene contraste controlado con texto oscuro). */}
+                    <div
+                      className="absolute inset-x-0 bottom-0 h-24 sm:h-28 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none"
+                      aria-hidden="true"
+                    />
+                  </>
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <ImageIcon className="w-16 h-16 text-white/30" />
@@ -632,15 +638,14 @@ export default function BusinessInfoPage() {
               <CardContent className="relative px-4 sm:px-6 pb-5 sm:pb-6">
                 <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 -mt-10 sm:-mt-16 mb-3 sm:mb-4">
                   <div className="relative">
-                    <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl bg-surface-alt shadow-xl border-4 border-white flex items-center justify-center overflow-hidden">
-                      {form.logo ? (
-                        <img src={form.logo} alt={form.businessName || 'Logo de negocio'} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-                          <span className="text-2xl sm:text-3xl font-bold text-origen-pradera/50">{producerInitial}</span>
-                        </div>
-                      )}
-                    </div>
+                    <Avatar
+                      src={form.logo ?? undefined}
+                      alt={form.businessName || 'Logo de negocio'}
+                      shape="rounded"
+                      size="2xl"
+                      className="w-20 h-20 sm:w-28 sm:h-28 border-4 border-white shadow-xl"
+                      fallback={<span className="text-2xl sm:text-3xl font-bold text-origen-pradera/50">{producerInitial}</span>}
+                    />
                     {isEditing && (
                       <button
                         type="button"
@@ -675,10 +680,20 @@ export default function BusinessInfoPage() {
                   </div>
 
                   <div className="flex-1 pb-1 sm:pb-2 min-w-0">
-                    <h2 className="text-xl sm:text-2xl font-bold leading-tight text-origen-bosque break-words">
+                    <h2
+                      className={cn(
+                        'text-xl sm:text-2xl font-bold leading-tight break-words',
+                        form.banner ? 'text-white drop-shadow-sm' : 'text-origen-bosque'
+                      )}
+                    >
                       {form.businessName || 'Perfil comercial'}
                     </h2>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-1 leading-relaxed break-words">
+                    <p
+                      className={cn(
+                        'text-xs sm:text-sm mt-1 leading-relaxed break-words',
+                        form.banner ? 'text-white/85 drop-shadow-sm' : 'text-muted-foreground'
+                      )}
+                    >
                       {form.tagline || 'Agrega un tagline para contar que hace unico tu negocio'}
                     </p>
                   </div>
@@ -915,19 +930,13 @@ export default function BusinessInfoPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        id="billingAddressSameAsProduction"
-                        checked={form.billingAddressSameAsProduction}
-                        onChange={(e) => setForm({ ...form, billingAddressSameAsProduction: e.target.checked })}
-                        disabled={!isEditing}
-                        className="w-4 h-4 cursor-pointer"
-                      />
-                      <Label htmlFor="billingAddressSameAsProduction" className="cursor-pointer">
-                        Usar la misma direccion que la productiva
-                      </Label>
-                    </div>
+                    <CheckboxWithLabel
+                      id="billingAddressSameAsProduction"
+                      label="Usar la misma direccion que la productiva"
+                      checked={form.billingAddressSameAsProduction}
+                      onCheckedChange={(checked) => setForm({ ...form, billingAddressSameAsProduction: checked === true })}
+                      disabled={!isEditing}
+                    />
 
                     {!form.billingAddressSameAsProduction && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1008,22 +1017,20 @@ export default function BusinessInfoPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Valores</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {CORE_VALUES.map((value) => {
-                        const selected = form.values.includes(value.id);
-                        return (
-                          <button
-                            key={value.id}
-                            type="button"
-                            disabled={!isEditing}
-                            onClick={() => handleToggleValue(value.id)}
-                            className={selected ? 'rounded-full border border-origen-pradera bg-origen-pradera/10 px-3 py-1.5 text-sm text-origen-bosque' : 'rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-sm text-text-subtle'}
-                          >
-                            {value.label}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    <ToggleGroup
+                      type="multiple"
+                      variant="pill"
+                      size="sm"
+                      value={form.values}
+                      onValueChange={(next) => setForm((prev) => ({ ...prev, values: Array.isArray(next) ? next : [next] }))}
+                      className="gap-2"
+                    >
+                      {CORE_VALUES.map((value) => (
+                        <ToggleGroupItem key={value.id} value={value.id} disabled={!isEditing}>
+                          {value.label}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
                   </div>
                 </CardContent>
               </Card>
@@ -1047,7 +1054,7 @@ export default function BusinessInfoPage() {
                       <Badge key={cat} variant="leaf" size="md" className="px-3 py-1.5">
                         {cat}
                         {isEditing && (
-                          <button className="ml-2 hover:text-red-500" onClick={() => handleRemoveCategory(cat)}>
+                          <button className="ml-2 hover:text-feedback-danger" onClick={() => handleRemoveCategory(cat)}>
                             <X className="w-3 h-3" />
                           </button>
                         )}
@@ -1057,18 +1064,26 @@ export default function BusinessInfoPage() {
 
                   {isEditing && (
                     <>
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      <ToggleGroup
+                        type="multiple"
+                        variant="pill"
+                        size="sm"
+                        value={form.categories.filter((cat) => PRODUCER_CATEGORIES.some((c) => c.id === cat))}
+                        onValueChange={(next) => {
+                          const selected = Array.isArray(next) ? next : [next];
+                          const customCategories = form.categories.filter(
+                            (cat) => !PRODUCER_CATEGORIES.some((c) => c.id === cat)
+                          );
+                          setForm((prev) => ({ ...prev, categories: [...customCategories, ...selected] }));
+                        }}
+                        className="gap-2 mb-3"
+                      >
                         {PRODUCER_CATEGORIES.map((category) => (
-                          <button
-                            key={category.id}
-                            type="button"
-                            onClick={() => !form.categories.includes(category.id) && setForm((prev) => ({ ...prev, categories: [...prev.categories, category.id] }))}
-                            className="rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-sm text-origen-bosque"
-                          >
+                          <ToggleGroupItem key={category.id} value={category.id}>
                             {category.name}
-                          </button>
+                          </ToggleGroupItem>
                         ))}
-                      </div>
+                      </ToggleGroup>
                       <div className="flex gap-2">
                         <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="Nueva categoria" />
                         <Button variant="secondary" size="md" onClick={handleAddCategory}>

@@ -15,8 +15,10 @@ import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, Credi
 
 // Componentes UI
 import {
+  Avatar,
   Button, Badge,
   ActionBar,
+  ProductImage,
   Sheet, SheetContent, SheetHeader, SheetTitle,
   MobilePullRefresh,
   PageLoader,
@@ -78,19 +80,19 @@ const statusConfig: Record<Order['status'], {
     variant: 'danger',
     label: 'Cancelado',
     icon: XCircle,
-    color: 'text-red-700',
+    color: 'text-feedback-danger-text',
     bandBg: 'bg-feedback-danger-subtle',
-    heroBg: 'bg-gradient-to-br from-feedback-danger-subtle to-red-50/60',
-    heroBorder: 'border-red-200',
+    heroBg: 'bg-gradient-to-br from-feedback-danger-subtle to-feedback-danger-subtle/60',
+    heroBorder: 'border-feedback-danger/30',
   },
   refunded: {
     variant: 'danger',
     label: 'Reembolsado',
     icon: XCircle,
-    color: 'text-red-700',
+    color: 'text-feedback-danger-text',
     bandBg: 'bg-feedback-danger-subtle',
-    heroBg: 'bg-gradient-to-br from-feedback-danger-subtle to-red-50/60',
-    heroBorder: 'border-red-200',
+    heroBg: 'bg-gradient-to-br from-feedback-danger-subtle to-feedback-danger-subtle/60',
+    heroBorder: 'border-feedback-danger/30',
   }
 };
 
@@ -420,11 +422,14 @@ export default function OrderDetailPage() {
               {/* ── Cliente ── (acordeón) */}
               <SectionAccordion title="Cliente" icon={Mail} defaultOpen index={2}>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-origen-pastel flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm font-bold text-origen-bosque">
-                      {order.customerName.split(' ').map((n: string) => n[0]).slice(0, 2).join('')}
-                    </span>
-                  </div>
+                  <Avatar
+                    size="sm"
+                    fallback={
+                      <span className="font-bold text-origen-bosque">
+                        {order.customerName.split(' ').map((n: string) => n[0]).slice(0, 2).join('')}
+                      </span>
+                    }
+                  />
                   <p className="text-sm font-semibold text-origen-bosque leading-tight">{order.customerName}</p>
                 </div>
                 <div className="space-y-1.5">
@@ -574,12 +579,12 @@ export default function OrderDetailPage() {
                 <div className="divide-y divide-border-subtle">
                   {order.items.map((item) => (
                     <div key={item.id} className="flex items-center gap-3 px-5 py-4">
-                      <div className="w-14 h-14 rounded-2xl bg-origen-crema/60 flex items-center justify-center flex-shrink-0 border border-border-subtle overflow-hidden">
-                        {item.productImage ? (
-                          <img src={item.productImage} alt={item.productName} className="w-full h-full object-cover" />
-                        ) : (
-                          <Package className="w-6 h-6 text-text-disabled" />
-                        )}
+                      <div className="w-14 h-14 rounded-2xl bg-origen-crema/60 flex-shrink-0 border border-border-subtle overflow-hidden">
+                        <ProductImage
+                          src={item.productImage}
+                          alt={item.productName}
+                          fallback={<Package className="w-6 h-6 text-text-disabled" />}
+                        />
                       </div>
                       {/* Info */}
                       <div className="flex-1 min-w-0">
@@ -801,7 +806,7 @@ export default function OrderDetailPage() {
                 onClick={() => handleUpdateStatus('cancelled')}
                 loading={updating}
                 loadingText="Cancelando..."
-                className="w-full text-feedback-danger hover:bg-red-50"
+                className="w-full text-feedback-danger hover:bg-feedback-danger-subtle"
               >
                 Sí, cancelar pedido
               </Button>
