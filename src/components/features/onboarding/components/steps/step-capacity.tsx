@@ -275,7 +275,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
                 zoneType === 'postal' ? 'Ej: 28001, 280*, 28000-28050' :
                 'Códigos postales cubiertos (ej: 28001, 280*, 28000-28050)'
               }
-              className={cn(parseError && "border-red-300 focus:border-red-400")}
+              className={cn(parseError && "border-feedback-danger/50 focus:border-feedback-danger")}
             />
           </div>
           <Button
@@ -300,7 +300,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
         )}
 
         {parseError && (
-          <p className="text-xs text-red-600 flex items-center gap-1">
+          <p className="text-xs text-feedback-danger-text flex items-center gap-1">
             <AlertCircle className="w-3.5 h-3.5" />
             {parseError}
           </p>
@@ -341,7 +341,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
               {includedZones.map((zone) => (
                 <span key={zone.id} className="inline-flex items-center gap-1 px-2 py-1 bg-surface-alt text-xs text-origen-bosque border border-border rounded-full">
                   {zone.label}
-                  <button type="button" onClick={() => onRemoveZone(zone.id)} className="text-text-subtle hover:text-red-600">
+                  <button type="button" onClick={() => onRemoveZone(zone.id)} className="text-text-subtle hover:text-feedback-danger">
                     <X className="w-3 h-3" />
                   </button>
                 </span>
@@ -373,7 +373,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
                       className={cn(
                         "p-1.5 rounded-lg text-xs font-medium transition-colors",
                         excludedZones.some(z => z.id === zone.id)
-                          ? "bg-red-100 text-red-700 hover:bg-red-200"
+                          ? "bg-feedback-danger-subtle text-feedback-danger-text hover:bg-feedback-danger/20"
                           : "bg-surface text-muted-foreground hover:bg-border"
                       )}
                     >
@@ -383,7 +383,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
                   <button
                     type="button"
                     onClick={() => onRemoveZone(zone.id)}
-                    className="p-1.5 rounded-lg text-text-subtle hover:text-red-600 hover:bg-red-50"
+                    className="p-1.5 rounded-lg text-text-subtle hover:text-feedback-danger hover:bg-feedback-danger-subtle"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -556,29 +556,29 @@ export function EnhancedStep4Capacity({
       )}
 
       {!detectingZone && data.logisticsLevel === 'centralized' && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-feedback-success-subtle border border-feedback-success/30 rounded-2xl">
           <div className="flex items-start gap-3 flex-1">
-            <Route className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <Route className="w-5 h-5 text-feedback-success flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-green-800">Logística centralizada disponible</p>
-              <p className="text-xs text-green-700 mt-0.5">
+              <p className="text-sm font-semibold text-feedback-success-text">Logística centralizada disponible</p>
+              <p className="text-xs text-feedback-success-text/80 mt-0.5">
                 Origen recoge los pedidos en tu dirección de producción y gestiona la entrega al comprador. No necesitas configurar transportistas.
               </p>
             </div>
           </div>
-          <span className="self-start sm:self-center text-xs font-medium bg-green-100 text-green-700 px-2.5 py-1 rounded-full border border-green-200">
+          <span className="self-start sm:self-center text-xs font-medium bg-feedback-success-subtle text-feedback-success-text px-2.5 py-1 rounded-full border border-feedback-success/30">
             Nivel 1 · Ruta Origen
           </span>
         </div>
       )}
 
       {!detectingZone && data.logisticsLevel === 'transport' && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-feedback-info-subtle border border-feedback-info/30 rounded-2xl">
           <div className="flex items-start gap-3 flex-1">
-            <Truck className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <Truck className="w-5 h-5 text-feedback-info flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-blue-800">Transporte concertado disponible en tu zona</p>
-              <p className="text-xs text-blue-700 mt-0.5">
+              <p className="text-sm font-semibold text-feedback-info-text">Transporte concertado disponible en tu zona</p>
+              <p className="text-xs text-feedback-info-text/80 mt-0.5">
                 Tu zona no tiene logística centralizada, pero puedes usar nuestro transportista concertado. Tú preparas el pedido, nosotros lo enviamos.
               </p>
               {/* Toggle para usar transporte concertado */}
@@ -590,13 +590,13 @@ export function EnhancedStep4Capacity({
                   checked={data.useCentralizedTransport ?? true}
                   onCheckedChange={(checked) => onChange({ ...data, useCentralizedTransport: checked === true })}
                 />
-                <label htmlFor="use-centralized-transport" className="text-xs font-medium text-blue-800 cursor-pointer">
+                <label htmlFor="use-centralized-transport" className="text-xs font-medium text-feedback-info-text cursor-pointer">
                   Usar el transportista concertado de Origen
                 </label>
               </div>
             </div>
           </div>
-          <span className="self-start sm:self-center text-xs font-medium bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200">
+          <span className="self-start sm:self-center text-xs font-medium bg-feedback-info-subtle text-feedback-info-text px-2.5 py-1 rounded-full border border-feedback-info/30">
             Nivel 2 · Transporte
           </span>
         </div>
@@ -641,19 +641,19 @@ export function EnhancedStep4Capacity({
         <div className={cn(
           "p-5 rounded-xl border",
           data.isInOriginRoute
-            ? "bg-green-50 border-green-200"
-            : "bg-amber-50 border-amber-200"
+            ? "bg-feedback-success-subtle border-feedback-success/30"
+            : "bg-feedback-warning-subtle border-feedback-warning/30"
         )}>
           <div className="flex items-start gap-3">
             {data.isInOriginRoute ? (
-              <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-5 h-5 text-feedback-success flex-shrink-0 mt-0.5" />
             ) : (
-              <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <Info className="w-5 h-5 text-feedback-warning flex-shrink-0 mt-0.5" />
             )}
             <div>
               <p className={cn(
                 "text-sm font-medium",
-                data.isInOriginRoute ? "text-green-800" : "text-amber-800"
+                data.isInOriginRoute ? "text-feedback-success-text" : "text-feedback-warning-text"
               )}>
                 {data.isInOriginRoute
                   ? 'Envío gestionado por Origen'
@@ -661,7 +661,7 @@ export function EnhancedStep4Capacity({
               </p>
               <p className={cn(
                 "text-xs mt-1",
-                data.isInOriginRoute ? "text-green-700" : "text-amber-700"
+                data.isInOriginRoute ? "text-feedback-success-text/80" : "text-feedback-warning-text/80"
               )}>
                 {data.isInOriginRoute
                   ? 'Tus productos se entregarán a través de nuestra ruta semanal. Precio fijo: 3.90€ por pedido.'
@@ -779,7 +779,7 @@ export function EnhancedStep4Capacity({
                           type="button"
                           onClick={() => handleRemoveDeliveryOption(option.id)}
                           aria-label="Eliminar método de envío"
-                          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-text-subtle hover:text-red-600 hover:bg-red-50 transition-colors"
+                          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-text-subtle hover:text-feedback-danger hover:bg-feedback-danger-subtle transition-colors"
                         >
                           <X className="w-5 h-5" />
                         </button>
@@ -798,7 +798,7 @@ export function EnhancedStep4Capacity({
               <p className="text-xs text-muted-foreground mb-3">
                 Define cómo vas a entregar tus pedidos: precio, tiempo estimado y descripción.
               </p>
-              <p className="text-xs text-red-700 flex items-center justify-center gap-1.5">
+              <p className="text-xs text-feedback-danger-text flex items-center justify-center gap-1.5">
                 <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                 Añade al menos un método para poder continuar
               </p>
@@ -835,8 +835,8 @@ export function EnhancedStep4Capacity({
         />
 
         {!hasIncludedZones && (
-          <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-red-200">
-            <p className="text-xs text-red-700 flex items-center gap-2">
+          <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-feedback-danger/30">
+            <p className="text-xs text-feedback-danger-text flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
               Añade al menos una zona de entrega para continuar
             </p>
@@ -844,8 +844,8 @@ export function EnhancedStep4Capacity({
         )}
 
         {data.isInOriginRoute && (
-          <div className="mt-4 p-3 bg-blue-50/30 rounded-lg border border-blue-100">
-            <p className="text-xs text-blue-700 flex items-center gap-2">
+          <div className="mt-4 p-3 bg-feedback-info-subtle/60 rounded-lg border border-feedback-info/20">
+            <p className="text-xs text-feedback-info-text flex items-center gap-2">
               <Info className="w-4 h-4" />
               Al estar en ruta de Origen, solo puedes excluir zonas. Las zonas incluidas se entregan automáticamente.
             </p>
@@ -953,7 +953,7 @@ export function EnhancedStep4Capacity({
                 inputSize="md"
               />
               {!data.packagingDescription?.trim() && (
-                <p className="text-xs text-feedback-danger mt-1 flex items-center gap-1">
+                <p className="text-xs text-feedback-danger-text mt-1 flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
                   Obligatorio para continuar
                 </p>

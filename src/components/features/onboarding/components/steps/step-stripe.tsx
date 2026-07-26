@@ -120,20 +120,20 @@ export function EnhancedStep6Stripe({
           BANNER DE IMPACTO — mobile-first, siempre visible si no conectado
       ────────────────────────────────────────────────────────────────────── */}
       {!data.stripeConnected && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-feedback-warning-subtle border border-feedback-warning/30 rounded-2xl">
           <div className="flex items-start gap-3 flex-1">
-            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-feedback-warning flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-amber-800">
+              <p className="text-sm font-semibold text-feedback-warning-text">
                 Necesitas conectar Stripe para cobrar tus pedidos
               </p>
-              <p className="text-xs text-amber-700 mt-0.5">
+              <p className="text-xs text-feedback-warning-text/80 mt-0.5">
                 Sin cuenta de pagos, los pedidos que recibas quedarán en espera y no podrás procesarlos.
                 Puedes conectarlo ahora o después desde tu panel, pero hasta entonces no podrás operar.
               </p>
             </div>
           </div>
-          <span className="self-start sm:self-center text-xs font-medium bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200">
+          <span className="self-start sm:self-center text-xs font-medium bg-feedback-warning-subtle text-feedback-warning-text px-2.5 py-1 rounded-full border border-feedback-warning/30">
             Pendiente de configurar
           </span>
         </div>
@@ -188,7 +188,7 @@ export function EnhancedStep6Stripe({
         </div>
 
         <div className="mt-5 flex justify-center">
-          <div className="inline-flex items-center gap-1.5 text-xs text-green-700 bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+          <div className="inline-flex items-center gap-1.5 text-xs text-feedback-success-text bg-feedback-success-subtle px-3 py-1.5 rounded-full border border-feedback-success/30">
             <Shield className="w-3.5 h-3.5" />
             Pagos seguros · PCI-DSS compliant
           </div>
@@ -200,18 +200,18 @@ export function EnhancedStep6Stripe({
       ────────────────────────────────────────────────────────────────────── */}
       <div className={cn(
         'bg-surface-alt rounded-2xl border p-4 md:p-5 shadow-sm transition-all',
-        data.stripeConnected ? 'border-green-200' : 'border-border hover:border-origen-pradera/30',
+        data.stripeConnected ? 'border-feedback-success/40' : 'border-border hover:border-origen-pradera/30',
       )}>
 
         <div className="flex items-center gap-3 mb-6">
           <div className={cn(
             'w-12 h-12 rounded-xl flex items-center justify-center',
             data.stripeConnected
-              ? 'bg-green-50'
+              ? 'bg-feedback-success-subtle'
               : 'bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20',
           )}>
             {data.stripeConnected
-              ? <CheckCircle2 className="w-6 h-6 text-green-600" />
+              ? <CheckCircle2 className="w-6 h-6 text-feedback-success" />
               : <Zap className="w-6 h-6 text-origen-pradera" />
             }
           </div>
@@ -229,11 +229,11 @@ export function EnhancedStep6Stripe({
 
         {data.stripeConnected ? (
           <div className="space-y-4">
-            <div className="p-4 bg-green-50 rounded-xl border border-green-200 flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <div className="p-4 bg-feedback-success-subtle rounded-xl border border-feedback-success/30 flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-feedback-success flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-green-800">Cuenta Stripe conectada correctamente</p>
-                <p className="text-xs text-green-700 mt-1">
+                <p className="text-sm font-medium text-feedback-success-text">Cuenta Stripe conectada correctamente</p>
+                <p className="text-xs text-feedback-success-text/80 mt-1">
                   Tu cuenta bancaria está lista para recibir los pagos de tus pedidos.
                 </p>
               </div>
@@ -263,15 +263,15 @@ export function EnhancedStep6Stripe({
 
             {/* Error de conexión con reintento */}
             {connectError && (
-              <div className="w-full p-3 bg-feedback-danger-subtle rounded-xl border border-red-200 flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="w-full p-3 bg-feedback-danger-subtle rounded-xl border border-feedback-danger/30 flex flex-col sm:flex-row sm:items-center gap-2">
                 <div className="flex items-start gap-2 flex-1">
                   <AlertCircle className="w-4 h-4 text-feedback-danger flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-red-700">{connectError}</p>
+                  <p className="text-xs text-feedback-danger-text">{connectError}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setConnectError('')}
-                  className="self-end text-xs font-medium text-red-700 underline underline-offset-2 sm:self-auto"
+                  className="self-end text-xs font-medium text-feedback-danger-text underline underline-offset-2 sm:self-auto"
                 >
                   Reintentar
                 </button>
@@ -352,14 +352,14 @@ export function EnhancedStep6Stripe({
           RESUMEN FINAL
       ────────────────────────────────────────────────────────────────────── */}
       {data.stripeConnected && data.acceptTerms && (
-        <div className="bg-green-50 rounded-2xl border border-green-200 p-6">
+        <div className="bg-feedback-success-subtle rounded-2xl border border-feedback-success/30 p-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-              <CheckCircle2 className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 rounded-full bg-feedback-success/15 flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="w-6 h-6 text-feedback-success" />
             </div>
             <div>
-              <h3 className="font-semibold text-green-800">¡Todo listo para finalizar!</h3>
-              <p className="text-sm text-green-700 mt-0.5">
+              <h3 className="font-semibold text-feedback-success-text">¡Todo listo para finalizar!</h3>
+              <p className="text-sm text-feedback-success-text/80 mt-0.5">
                 Tu cuenta de cobro está conectada y los términos aceptados.
               </p>
             </div>

@@ -150,7 +150,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             </div>
           </div>
           {hasLogo && (
-            <span className="text-xs text-green-600 flex items-center gap-1 bg-green-50 px-3 py-1.5 rounded-full">
+            <span className="text-xs text-feedback-success-text flex items-center gap-1 bg-feedback-success-subtle px-3 py-1.5 rounded-full">
               <CheckCircle2 className="w-3.5 h-3.5" />
               Subido
             </span>
@@ -218,7 +218,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             </div>
           </div>
           {hasBanner && (
-            <span className="text-xs text-green-600 flex items-center gap-1 bg-green-50 px-3 py-1.5 rounded-full">
+            <span className="text-xs text-feedback-success-text flex items-center gap-1 bg-feedback-success-subtle px-3 py-1.5 rounded-full">
               <CheckCircle2 className="w-3.5 h-3.5" />
               Subido
             </span>
@@ -286,7 +286,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-semibold text-origen-bosque">Video de presentación</h2>
                 <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-0.5 rounded-full">Recomendado</span>
-                {data.introVideo && isValidVideoUrl(data.introVideo) && <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />}
+                {data.introVideo && isValidVideoUrl(data.introVideo) && <CheckCircle2 className="w-3.5 h-3.5 text-feedback-success" />}
               </div>
               <p className="text-xs text-muted-foreground">+80% de visitas con video</p>
             </div>
@@ -303,13 +303,13 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             inputSize="md"
             error={data.introVideo && !isValidVideoUrl(data.introVideo) ? 'Introduce una URL válida de YouTube o Vimeo' : undefined}
             className={cn(
-              data.introVideo && isValidVideoUrl(data.introVideo) && "border-green-400 focus:border-green-500"
+              data.introVideo && isValidVideoUrl(data.introVideo) && "border-feedback-success focus:border-feedback-success"
             )}
           />
 
           {/* Embed preview */}
           {data.introVideo && isValidVideoUrl(data.introVideo) && getVideoEmbedUrl(data.introVideo) && (
-            <div className="rounded-xl overflow-hidden border border-green-200 bg-black aspect-video">
+            <div className="rounded-xl overflow-hidden border border-feedback-success/30 bg-black aspect-video">
               <iframe
                 src={getVideoEmbedUrl(data.introVideo)!}
                 className="w-full h-full"

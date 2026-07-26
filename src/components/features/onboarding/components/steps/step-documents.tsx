@@ -182,9 +182,9 @@ export function EnhancedStep5Documents({
             style={{ width: `${progress}%` }}
           />
         </div>
-        <div className="flex items-center gap-2 mt-3 p-2.5 bg-amber-50 rounded-lg border border-amber-200">
-          <Clock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-          <p className="text-xs text-amber-700 font-medium">
+        <div className="flex items-center gap-2 mt-3 p-2.5 bg-feedback-warning-subtle rounded-lg border border-feedback-warning/30">
+          <Clock className="w-3.5 h-3.5 text-feedback-warning flex-shrink-0" />
+          <p className="text-xs text-feedback-warning-text font-medium">
             Verificación: 24-48h hábiles tras recibir los documentos
           </p>
         </div>
@@ -214,9 +214,9 @@ export function EnhancedStep5Documents({
                 <div className="flex items-center gap-2 flex-wrap">
                   <Shield className="w-4 h-4 text-origen-pradera flex-shrink-0" />
                   <h3 className="font-medium text-origen-bosque">CIF / NIF</h3>
-                  <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
+                  <span className="text-xs text-feedback-danger-text bg-feedback-danger-subtle px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
                   {data.cif?.status === 'verified' && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="text-xs bg-feedback-success-subtle text-feedback-success-text px-2 py-0.5 rounded-full flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Verificado
                     </span>
                   )}
@@ -246,7 +246,7 @@ export function EnhancedStep5Documents({
                     htmlFor="cifExpiresAt"
                     className="block text-sm font-medium text-origen-bosque mb-1"
                   >
-                    Fecha de caducidad <span className="text-red-500">*</span>
+                    Fecha de caducidad <span className="text-feedback-danger">*</span>
                   </label>
                   <input
                     id="cifExpiresAt"
@@ -271,9 +271,9 @@ export function EnhancedStep5Documents({
                 <div className="flex items-center gap-2 flex-wrap">
                   <Shield className="w-4 h-4 text-origen-pradera flex-shrink-0" />
                   <h3 className="font-medium text-origen-bosque">Seguro RC</h3>
-                  <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
+                  <span className="text-xs text-feedback-danger-text bg-feedback-danger-subtle px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
                   {data.seguroRC?.status === 'verified' && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="text-xs bg-feedback-success-subtle text-feedback-success-text px-2 py-0.5 rounded-full flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Verificado
                     </span>
                   )}
@@ -303,7 +303,7 @@ export function EnhancedStep5Documents({
                     htmlFor="seguroRcExpiresAt"
                     className="block text-sm font-medium text-origen-bosque mb-1"
                   >
-                    Fecha de caducidad <span className="text-red-500">*</span>
+                    Fecha de caducidad <span className="text-feedback-danger">*</span>
                   </label>
                   <input
                     id="seguroRcExpiresAt"
@@ -328,9 +328,9 @@ export function EnhancedStep5Documents({
                 <div className="flex items-center gap-2 flex-wrap">
                   <Shield className="w-4 h-4 text-origen-pradera flex-shrink-0" />
                   <h3 className="font-medium text-origen-bosque">Manipulador de alimentos</h3>
-                  <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
+                  <span className="text-xs text-feedback-danger-text bg-feedback-danger-subtle px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
                   {data.manipuladorAlimentos?.status === 'verified' && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="text-xs bg-feedback-success-subtle text-feedback-success-text px-2 py-0.5 rounded-full flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Verificado
                     </span>
                   )}
@@ -360,7 +360,7 @@ export function EnhancedStep5Documents({
                     htmlFor="manipuladorAlimentosExpiresAt"
                     className="block text-sm font-medium text-origen-bosque mb-1"
                   >
-                    Fecha de caducidad <span className="text-red-500">*</span>
+                    Fecha de caducidad <span className="text-feedback-danger">*</span>
                   </label>
                   <input
                     id="manipuladorAlimentosExpiresAt"
@@ -417,13 +417,13 @@ export function EnhancedStep5Documents({
                         <p className="text-xs text-muted-foreground">{cert.issuingBody}</p>
                       </div>
                       {isVerified && (
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="text-xs bg-feedback-success-subtle text-feedback-success-text px-2 py-0.5 rounded-full flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3" />
                           Verificado
                         </span>
                       )}
                       {isPending && (
-                        <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="text-xs bg-feedback-warning-subtle text-feedback-warning-text px-2 py-0.5 rounded-full flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           Pendiente
                         </span>
@@ -480,7 +480,7 @@ export function EnhancedStep5Documents({
             <h3 className="font-semibold text-origen-bosque">Estado de verificación</h3>
             <div className="mt-2 space-y-2">
               <div className="flex items-center gap-2 text-sm">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <div className="w-2 h-2 rounded-full bg-feedback-success" />
                 <span className="text-muted-foreground">Documentos obligatorios:</span>
                 <span className="font-medium text-origen-bosque">
                   {[hasCif, hasSeguro, hasManipulador].filter(Boolean).length}/3
@@ -496,7 +496,7 @@ export function EnhancedStep5Documents({
                 </div>
               )}
               <div className="flex items-center gap-2 text-sm">
-                <div className="w-2 h-2 rounded-full bg-amber-500" />
+                <div className="w-2 h-2 rounded-full bg-feedback-warning" />
                 <span className="text-muted-foreground">Pendientes de verificación:</span>
                 <span className="font-medium text-origen-bosque">
                   {pendingCertifications.length + 
@@ -508,8 +508,8 @@ export function EnhancedStep5Documents({
             </div>
             
             {isComplete && (
-              <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                <p className="text-xs text-green-700 flex items-center gap-2">
+              <div className="mt-4 p-3 bg-feedback-success-subtle rounded-lg border border-feedback-success/30">
+                <p className="text-xs text-feedback-success-text flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4" />
                   ¡Todos los documentos han sido subidos correctamente! Los verificaremos en 24-48h.
                 </p>

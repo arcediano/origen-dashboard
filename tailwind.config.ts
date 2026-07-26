@@ -93,6 +93,11 @@ const config: Config = {
         "text-disabled":  "hsl(var(--text-disabled))",
 
         // Tokens de feedback (estándar en todos los proyectos — BRAND-T2 Sprint 17)
+        // NOTA: "warning" y "warning-text" ya estaban en uso en varios componentes
+        // (ProductCard, MobileStatCard, etc.) pero no estaban definidos aquí — las
+        // clases `text-feedback-warning`/`bg-feedback-warning` no generaban color
+        // real. Completado junto con el nuevo token "info" (auditoría de onboarding,
+        // manual v5.16).
         feedback: {
           "success":        "hsl(var(--hoja))",
           "success-subtle": "hsl(var(--pastel))",
@@ -100,7 +105,12 @@ const config: Config = {
           "danger":         "#ef4444",
           "danger-subtle":  "#fef2f2",
           "danger-text":    "#b91c1c",
+          "warning":        "#d97706",
           "warning-subtle": "#fffbeb",
+          "warning-text":   "#92400e",
+          "info":           "#3b82f6",
+          "info-subtle":    "#eff6ff",
+          "info-text":      "#1e40af",
         },
 
         // Variables del sistema (shadcn/ui)

@@ -353,7 +353,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
             className={cn(
               "min-h-[120px] text-base focus:ring-2",
               charCount >= 50
-                ? "border-green-400 focus:border-green-500 focus:ring-green-200"
+                ? "border-feedback-success focus:border-feedback-success focus:ring-feedback-success/20"
                 : "border-border focus:border-origen-pradera focus:ring-origen-pradera/20"
             )}
             maxLength={500}
@@ -372,7 +372,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                   style={{ width: `${Math.min((charCount / 50) * 100, 100)}%` }}
                 />
               </div>
-              <p className="text-xs text-amber-600 flex items-center gap-1 mt-1">
+              <p className="text-xs text-feedback-warning-text flex items-center gap-1 mt-1">
                 <AlertCircle className="w-3 h-3" />
                 {50 - charCount} caracteres más para poder continuar
               </p>
@@ -381,7 +381,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
 
           {charCount >= 50 && (
             <div className="flex items-center justify-between">
-              <span className="text-xs text-green-600 flex items-center gap-1">
+              <span className="text-xs text-feedback-success flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 ¡Listo! Ya puedes continuar
               </span>
@@ -408,7 +408,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-semibold text-origen-bosque">Filosofía de producción</h2>
                 <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-0.5 rounded-full">Recomendado</span>
-                {data.productionPhilosophy && <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />}
+                {data.productionPhilosophy && <CheckCircle2 className="w-3.5 h-3.5 text-feedback-success" />}
               </div>
               <p className="text-xs text-muted-foreground">Métodos, valores y compromiso con la calidad</p>
             </div>
@@ -434,7 +434,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">{philosophyCharCount}/500</span>
                 {data.productionPhilosophy && data.productionPhilosophy.length > 50 && (
-                  <span className="text-xs text-green-600 flex items-center gap-1">
+                  <span className="text-xs text-feedback-success flex items-center gap-1">
                     <Sparkles className="w-3.5 h-3.5" />
                     Gracias por compartir
                   </span>
@@ -514,13 +514,13 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
         </div>
 
         {!hasValues && (
-          <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-red-200 flex items-start gap-3">
+          <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-feedback-danger/30 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-feedback-danger flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-red-700">
+              <p className="text-sm font-medium text-feedback-danger-text">
                 Selecciona al menos un valor
               </p>
-              <p className="text-xs text-red-600 mt-1">
+              <p className="text-xs text-feedback-danger-text/80 mt-1">
                 Los valores ayudan a los compradores a conectar con tu marca
               </p>
             </div>
@@ -544,9 +544,9 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-base font-semibold text-origen-bosque">Certificaciones</h2>
-                <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">Requiere verificación</span>
+                <span className="text-xs bg-feedback-warning-subtle text-feedback-warning-text px-2 py-0.5 rounded-full border border-feedback-warning/30">Requiere verificación</span>
                 {data.certifications && data.certifications.length > 0 && (
-                  <span className="text-xs text-green-600 font-medium">{data.certifications.length} seleccionada(s)</span>
+                  <span className="text-xs text-feedback-success font-medium">{data.certifications.length} seleccionada(s)</span>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">Sellos de calidad que verificamos en el Paso 6</p>
@@ -614,7 +614,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                 <h2 className="text-base font-semibold text-origen-bosque">Fotos del equipo o proceso</h2>
                 <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-0.5 rounded-full">Recomendado</span>
                 {data.photos && data.photos.length > 0 && (
-                  <span className="text-xs text-green-600">{data.photos.length} foto(s)</span>
+                  <span className="text-xs text-feedback-success">{data.photos.length} foto(s)</span>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">Los perfiles con fotos reciben +40% visitas</p>

@@ -408,7 +408,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           {/* Tipo de entidad — selector compacto para reducir scroll en mobile */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              Forma jurídica <span className="text-red-500">*</span>
+              Forma jurídica <span className="text-feedback-danger">*</span>
             </label>
             <Select
               value={data.entityType || ''}
@@ -449,7 +449,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             <div>
               {taxIdValidation.valid && taxIdValidation.type && (
                 <div className="flex justify-end mb-1">
-                  <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-semibold text-feedback-success-text bg-feedback-success-subtle px-2 py-0.5 rounded-full">
                     {taxIdBadge[taxIdValidation.type]} ✓
                   </span>
                 </div>
@@ -561,7 +561,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
             />
             <div className="space-y-2">
               <label className="text-sm font-medium text-origen-bosque">
-                Provincia <span className="text-red-500">*</span>
+                Provincia <span className="text-feedback-danger">*</span>
               </label>
               <Select
                 value={data.province || ''}
@@ -753,13 +753,13 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
         </div>
 
         {!hasCategories && (
-          <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-red-200 flex items-start gap-3">
+          <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-feedback-danger/30 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-feedback-danger flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-red-700">
+              <p className="text-sm font-medium text-feedback-danger-text">
                 Selecciona al menos una categoría
               </p>
-              <p className="text-xs text-red-600 mt-1">
+              <p className="text-xs text-feedback-danger-text/80 mt-1">
                 Necesitamos saber qué productos vendes para personalizar tu experiencia.
               </p>
             </div>

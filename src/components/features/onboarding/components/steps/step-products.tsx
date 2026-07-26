@@ -303,7 +303,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
       data-product-id={product.id}
       className={cn(
         'rounded-2xl border transition-all duration-200',
-        isComplete ? 'border-green-200 bg-green-50/30' : 'border-border bg-surface-alt',
+        isComplete ? 'border-feedback-success/30 bg-feedback-success-subtle/50' : 'border-border bg-surface-alt',
       )}
     >
       {/* ── Header compacto (siempre visible) ── */}
@@ -335,7 +335,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
               </span>
             )}
             {isComplete && (
-              <span className="text-xs text-green-700 flex items-center gap-0.5">
+              <span className="text-xs text-feedback-success-text flex items-center gap-0.5">
                 <CheckCircle2 className="w-3 h-3" /> Completo
               </span>
             )}
@@ -397,7 +397,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
               className={cn(
                 'min-h-[80px] text-sm',
                 product.description.length >= 20
-                  ? 'border-green-400 focus:border-green-500'
+                  ? 'border-feedback-success focus:border-feedback-success'
                   : 'border-border',
               )}
               maxLength={200}
@@ -411,7 +411,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
           {/* Categoría de producto */}
           <div className="space-y-2" data-testid="product-category-selector">
             <p className="text-sm font-medium text-origen-bosque">
-              Categoría <span className="text-red-500">*</span>
+              Categoría <span className="text-feedback-danger">*</span>
             </p>
             {productCategories.length === 0 ? (
               <p className="text-xs text-muted-foreground">Cargando categorías…</p>
@@ -450,7 +450,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
               </ProductSelect>
             )}
             {!product.categoryId && productCategories.length > 0 && (
-              <p className="text-xs text-amber-700 flex items-center gap-1">
+              <p className="text-xs text-feedback-warning-text flex items-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                 Asigna una categoría al producto para continuar
               </p>
@@ -499,7 +499,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
           {/* Alérgenos EU 1169/2011 */}
           <div className="space-y-3">
             <p className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              Alérgenos <span className="text-red-500">*</span>
+              Alérgenos <span className="text-feedback-danger">*</span>
               <span className="text-xs text-muted-foreground font-normal">(Reglamento UE 1169/2011)</span>
             </p>
 
@@ -532,8 +532,8 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
                         className={cn(
                           'flex flex-col items-center gap-1 p-2 rounded-xl border text-center transition-all min-h-[44px]',
                           product.allergens.includes(a.id)
-                            ? 'bg-red-50 border-red-300 text-red-700'
-                            : 'bg-surface border-border text-muted-foreground hover:border-red-200',
+                            ? 'bg-feedback-danger-subtle border-feedback-danger/40 text-feedback-danger-text'
+                            : 'bg-surface border-border text-muted-foreground hover:border-feedback-danger/30',
                         )}
                       >
                         <span className="text-base leading-none">{a.emoji}</span>
@@ -554,8 +554,8 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
                         className={cn(
                           'flex flex-col items-center gap-1 p-2 rounded-xl border text-center transition-all min-h-[44px]',
                           product.mayContain.includes(a.id)
-                            ? 'bg-amber-50 border-amber-300 text-amber-700'
-                            : 'bg-surface border-border text-muted-foreground hover:border-amber-200',
+                            ? 'bg-feedback-warning-subtle border-feedback-warning/40 text-feedback-warning-text'
+                            : 'bg-surface border-border text-muted-foreground hover:border-feedback-warning/30',
                           product.allergens.includes(a.id) && 'opacity-40 pointer-events-none',
                         )}
                       >
@@ -569,7 +569,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
             )}
 
             {!product.noAllergens && product.allergens.length === 0 && product.mayContain.length === 0 && (
-              <p className="text-xs text-amber-700 flex items-center gap-1">
+              <p className="text-xs text-feedback-warning-text flex items-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                 Indica los alérgenos o marca "Sin alérgenos" para continuar
               </p>
@@ -650,7 +650,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
             <button
               type="button"
               onClick={onRemove}
-              className="text-xs text-red-600 hover:text-red-700 flex items-center gap-1"
+              className="text-xs text-feedback-danger hover:text-feedback-danger-text flex items-center gap-1"
             >
               <X className="w-3.5 h-3.5" />
               Eliminar producto
@@ -735,11 +735,11 @@ export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete
       </div>
 
       {/* Aviso opcional */}
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3">
-        <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+      <div className="p-4 bg-feedback-info-subtle border border-feedback-info/30 rounded-2xl flex items-start gap-3">
+        <Info className="w-5 h-5 text-feedback-info flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-semibold text-blue-800">Este paso es opcional</p>
-          <p className="text-xs text-blue-700 mt-0.5">
+          <p className="text-sm font-semibold text-feedback-info-text">Este paso es opcional</p>
+          <p className="text-xs text-feedback-info-text/80 mt-0.5">
             Puedes añadir tus productos ahora o hacerlo más tarde desde{' '}
             <span className="font-medium">"Mi catálogo"</span> en tu dashboard.
             Los productos que añadas aquí se guardarán como borradores privados listos para publicar.
