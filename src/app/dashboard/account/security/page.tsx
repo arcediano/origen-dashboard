@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AlertTriangle, Key, Shield, Smartphone, Check, Copy, X } from 'lucide-react';
+import { Key, Shield, Smartphone, Check, Copy, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Alert, AlertDescription, Badge, CardIconHeader, PageLoader } from '@arcediano/ux-library';
@@ -316,15 +316,13 @@ export default function SecurityPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {saveError && (
-                  <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
-                    <AlertTriangle className="w-4 h-4" />
+                  <Alert variant="error">
                     <AlertDescription>{saveError}</AlertDescription>
                   </Alert>
                 )}
 
                 {saveSuccess && (
-                  <Alert>
-                    <Shield className="w-4 h-4" />
+                  <Alert variant="success">
                     <AlertDescription>{saveSuccess}</AlertDescription>
                   </Alert>
                 )}
@@ -435,8 +433,7 @@ export default function SecurityPage() {
 
                             <div className="px-6 py-4 space-y-4">
                               {twoFa.error && (
-                                <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
-                                  <AlertTriangle className="w-4 h-4" />
+                                <Alert variant="error">
                                   <AlertDescription>{twoFa.error}</AlertDescription>
                                 </Alert>
                               )}
@@ -508,8 +505,7 @@ export default function SecurityPage() {
 
                         <div className="px-6 py-4 space-y-4">
                           {twoFa.error && (
-                            <Alert className="border-feedback-danger/30 bg-feedback-danger-subtle text-feedback-danger">
-                              <AlertTriangle className="w-4 h-4" />
+                            <Alert variant="error">
                               <AlertDescription>{twoFa.error}</AlertDescription>
                             </Alert>
                           )}
@@ -611,8 +607,7 @@ export default function SecurityPage() {
                         </DialogHeader>
 
                         <div className="px-6 py-4 space-y-4">
-                          <Alert className="border-feedback-warning/30 bg-feedback-warning-subtle text-feedback-warning">
-                            <AlertTriangle className="w-4 h-4" />
+                          <Alert variant="warning">
                             <AlertDescription>
                               No podremos mostrar estos códigos de nuevo. Guarda una copia en un lugar seguro.
                             </AlertDescription>
@@ -650,8 +645,7 @@ export default function SecurityPage() {
                   </div>
                 )}
 
-                <Alert>
-                  <Shield className="w-4 h-4" />
+                <Alert variant="info">
                   <AlertDescription>
                     Recomendamos usar una contraseña única y activar la verificación en dos pasos antes de actualizar datos bancarios o fiscales.
                   </AlertDescription>
