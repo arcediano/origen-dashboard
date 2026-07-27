@@ -44,7 +44,6 @@ import {
   ToggleGroupItem,
 } from '@arcediano/ux-library';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
 import { getProvinciaFromCP } from '@/constants/cp-provincias';
@@ -668,22 +667,23 @@ export default function BusinessInfoPage() {
             <Card className="overflow-hidden border border-border shadow-sm">
               <div className="h-44 sm:h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
                 {form.banner ? (
-                  <>
-                    <img src={form.banner} alt="Banner" className="w-full h-full object-cover" />
-                    {/* Scrim de protección: garantiza contraste del nombre/tagline que se solapa
-                        con el borde inferior del banner (bloque flotante en CardContent, -mt-10/-mt-16).
-                        Solo se aplica sobre fotos reales de banner, nunca sobre el degradado de marca
-                        por defecto (que ya tiene contraste controlado con texto oscuro). */}
-                    <div
-                      className="absolute inset-x-0 bottom-0 h-24 sm:h-28 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none"
-                      aria-hidden="true"
-                    />
-                  </>
+                  <img src={form.banner} alt="Banner" className="w-full h-full object-cover" />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <ImageIcon className="w-16 h-16 text-white/30" />
                   </div>
                 )}
+                {/* Scrim de protección: siempre presente (con foto de banner o con el degradado
+                    de marca por defecto), garantiza contraste AA del nombre/tagline que se solapa
+                    con el borde inferior del banner (bloque flotante en CardContent, -mt-10/-mt-16).
+                    Se usa el tono oscuro de marca (`origen-oscuro`) en vez de negro puro, mismo
+                    patrón ya usado en `HomepageProducersCarousel` (origen-web) para overlays sobre
+                    foto — ver manual de diseño §4.1bis. Al aplicarse siempre, el texto puede usar
+                    una única variante de color (blanco) sin lógica condicional. */}
+                <div
+                  className="absolute inset-x-0 bottom-0 h-28 sm:h-32 bg-gradient-to-t from-origen-oscuro/85 via-origen-oscuro/35 to-transparent pointer-events-none"
+                  aria-hidden="true"
+                />
                 {isEditing && (
                   <button
                     type="button"
@@ -707,7 +707,7 @@ export default function BusinessInfoPage() {
 
               <CardContent className="relative px-4 sm:px-6 pb-5 sm:pb-6">
                 <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 -mt-10 sm:-mt-16 mb-3 sm:mb-4">
-                  <div className="relative flex flex-col items-center sm:items-start">
+                  <div className="relative flex flex-col items-start">
                     <Avatar
                       src={form.logo ?? undefined}
                       alt={form.businessName || 'Logo de negocio'}
@@ -754,21 +754,11 @@ export default function BusinessInfoPage() {
                     )}
                   </div>
 
-                  <div className="flex-1 pb-1 sm:pb-2 min-w-0">
-                    <h2
-                      className={cn(
-                        'text-xl sm:text-2xl font-bold leading-tight break-words',
-                        form.banner ? 'text-white drop-shadow-sm' : 'text-origen-bosque'
-                      )}
-                    >
+                  <div className="flex-1 pb-1 sm:pb-2 min-w-0 text-left">
+                    <h2 className="text-xl sm:text-2xl font-bold leading-tight break-words text-white drop-shadow-sm">
                       {form.businessName || 'Perfil comercial'}
                     </h2>
-                    <p
-                      className={cn(
-                        'text-xs sm:text-sm mt-1 leading-relaxed break-words',
-                        form.banner ? 'text-white/85 drop-shadow-sm' : 'text-muted-foreground'
-                      )}
-                    >
+                    <p className="text-xs sm:text-sm mt-1 leading-relaxed break-words text-white/85 drop-shadow-sm">
                       {form.tagline || 'Agrega un tagline para contar que hace unico tu negocio'}
                     </p>
                   </div>

@@ -513,20 +513,28 @@ export default function OrderDetailPage() {
 
               {/* ── Envío ── (acordeón) */}
               <SectionAccordion title="Dirección de envío" icon={MapPin} defaultOpen index={4}>
-                <div className="flex items-start gap-2 mb-3">
-                  <MapPin className="w-4 h-4 text-origen-pradera mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-origen-bosque">{order.shipping.address.fullName}</p>
-                    <p className="text-xs text-text-subtle mt-0.5">{order.shipping.address.addressLine1}</p>
-                    {order.shipping.address.addressLine2 && (
-                      <p className="text-xs text-text-subtle">{order.shipping.address.addressLine2}</p>
-                    )}
-                    <p className="text-xs text-text-subtle">
-                      {order.shipping.address.postalCode} {order.shipping.address.city}
-                      {order.shipping.address.state && `, ${order.shipping.address.state}`}
-                      {order.shipping.address.country && `, ${order.shipping.address.country}`}
-                    </p>
-                  </div>
+                {/* Layout de dos columnas en pantallas anchas (nombre / dirección completa),
+                    consistente con el patrón InfoRow del resto de secciones del acordeón —
+                    antes era un bloque icon+texto autodimensionado que dejaba gran parte del
+                    ancho de la tarjeta vacío en desktop. Colapsa a una columna en móvil. */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-6 mb-1 [&>div]:border-0">
+                  <InfoRow label="Nombre" value={order.shipping.address.fullName} />
+                  <InfoRow
+                    label="Dirección"
+                    value={
+                      <span className="block text-right">
+                        <span className="block">{order.shipping.address.addressLine1}</span>
+                        {order.shipping.address.addressLine2 && (
+                          <span className="block">{order.shipping.address.addressLine2}</span>
+                        )}
+                        <span className="block">
+                          {order.shipping.address.postalCode} {order.shipping.address.city}
+                          {order.shipping.address.state && `, ${order.shipping.address.state}`}
+                          {order.shipping.address.country && `, ${order.shipping.address.country}`}
+                        </span>
+                      </span>
+                    }
+                  />
                 </div>
                 {(order.shipping.address.phone || order.shipping.address.email) && (
                   <div className="pt-3 border-t border-border-subtle space-y-1.5">

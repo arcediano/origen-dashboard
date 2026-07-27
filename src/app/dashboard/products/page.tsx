@@ -13,13 +13,13 @@ import { Package, Plus, RefreshCw } from 'lucide-react';
 // Componentes UI
 import { Button, toast, Pagination, MobilePullRefresh, PageLoader, PageError, EmptyState, Card } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { ProductStats, ProductFilters, ProductTable, ProductCard, ProductMobileList } from './components';
+import { ProductFilters, ProductTable, ProductCard, ProductMobileList } from './components';
 import { AdjustStockDialog } from './components/ProductDialogs/AdjustStockDialog';
 import { DeleteProductDialog } from './components/ProductDialogs/DeleteProductDialog';
 
 // Hooks y APIs
 import { useProductFilters } from '@/hooks/useProductFilters';
-import { fetchProductFacets, fetchProducts, fetchProductStats, updateProductStatus } from '@/lib/api/products';
+import { fetchProductFacets, fetchProducts, updateProductStatus } from '@/lib/api/products';
 import { type Product } from '@/types/product';
 
 // ============================================================================
@@ -61,18 +61,6 @@ export default function ProductosPage() {
   const [totalProducts, setTotalProducts] = useState(0);
   const [serverTotalPages, setServerTotalPages] = useState(0);
   const [categories, setCategories] = useState<Array<{ value: string; label: string }>>([]);
-  const [stats, setStats] = useState({
-    total: 0,
-    active: 0,
-    draft: 0,
-    inactive: 0,
-    lowStock: 0,
-    outOfStock: 0,
-    totalRevenue: 0,
-    avgRating: 0,
-    totalSales: 0,
-    totalViews: 0,
-  });
   const [isLoading, setIsLoading] = useState(true);
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -151,18 +139,15 @@ export default function ProductosPage() {
     setError(null);
 
     try {
-      const [productsResponse, statsResponse] = await Promise.all([
-        fetchProducts({
-          page: currentPage,
-          limit: 10,
-          search: searchQuery || undefined,
-          categoryId: selectedCategory || undefined,
-          status: selectedStatus || undefined,
-          stockState: selectedStock || undefined,
-          sortBy: sortBy || undefined,
-        }),
-        fetchProductStats()
-      ]);
+      const productsResponse = await fetchProducts({
+        page: currentPage,
+        limit: 10,
+        search: searchQuery || undefined,
+        categoryId: selectedCategory || undefined,
+        status: selectedStatus || undefined,
+        stockState: selectedStock || undefined,
+        sortBy: sortBy || undefined,
+      });
 
       if (productsResponse.error) {
         setError(productsResponse.error);
@@ -170,10 +155,6 @@ export default function ProductosPage() {
         setProducts(productsResponse.data.items);
         setTotalProducts(productsResponse.data.total);
         setServerTotalPages(productsResponse.data.totalPages);
-      }
-
-      if (statsResponse.data) {
-        setStats(statsResponse.data);
       }
     } catch (err) {
       setError('Error al cargar los datos');
@@ -239,7 +220,7 @@ export default function ProductosPage() {
   // RENDER
   // ==========================================================================
 
-  if (isFirstLoad.current && isLoading) {
+  if (isLoading && products.length === 0) {
     return <PageLoader message="Cargando productos..." className="animate-fade-in" />;
   }
 
@@ -295,20 +276,6 @@ export default function ProductosPage() {
           animate="visible"
           className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8"
         >
-          {/* Estadísticas */}
-          <motion.div variants={itemVariants}>
-            <ProductStats
-              total={stats.total}
-              active={stats.active}
-              lowStock={stats.lowStock}
-              outOfStock={stats.outOfStock}
-              totalRevenue={stats.totalRevenue}
-              totalSales={stats.totalSales}
-              totalViews={stats.totalViews}
-              isLoading={isTableLoading}
-            />
-          </motion.div>
-
           {/* Filtros */}
           <motion.div variants={itemVariants}>
             <ProductFilters

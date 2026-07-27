@@ -36,6 +36,7 @@ import {
 
 import { type Product } from '@/types/product';
 import { fetchProductById, deleteProduct, updateProduct } from '@/lib/api/products';
+import { sanitizeHtml } from '@/lib/html-sanitizer';
 
 // ============================================================================
 // ANIMACIONES
@@ -210,20 +211,60 @@ function ProduccionSection({ info, formatDate }: {
   formatDate: (d?: Date | string | null) => string;
 }) {
   return (
-    <div className="space-y-4 pt-3">
+    <div className="space-y-6 pt-3">
+      {/* Historia del productor */}
       {info.story && (
-        <p className="text-sm text-text-subtle leading-relaxed italic border-l-2 border-origen-pradera/30 pl-3">
-          "{info.story}"
-        </p>
+        <div className="border-l-2 border-origen-pradera/30 pl-4">
+          <h4 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-2">Historia</h4>
+          <div
+            className="text-sm text-text-default leading-relaxed prose prose-sm max-w-none [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:ml-4 [&_blockquote]:italic [&_blockquote]:text-text-subtle"
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(info.story) }}
+          />
+        </div>
       )}
+
+      {/* Proceso artesanal */}
+      {info.artisanProcess && (
+        <div className="border-l-2 border-origen-pradera/30 pl-4">
+          <h4 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-2">Proceso artesanal</h4>
+          <div
+            className="text-sm text-text-default leading-relaxed prose prose-sm max-w-none [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:ml-4 [&_blockquote]:italic [&_blockquote]:text-text-subtle"
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(info.artisanProcess) }}
+          />
+        </div>
+      )}
+
+      {/* Método de producción */}
+      {info.productionMethod && (
+        <div className="border-l-2 border-origen-pradera/30 pl-4">
+          <h4 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-2">Método de producción</h4>
+          <div
+            className="text-sm text-text-default leading-relaxed prose prose-sm max-w-none [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:ml-4 [&_blockquote]:italic [&_blockquote]:text-text-subtle"
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(info.productionMethod) }}
+          />
+        </div>
+      )}
+
+      {/* Bienestar animal */}
+      {info.animalWelfare && (
+        <div className="border-l-2 border-origen-pradera/30 pl-4">
+          <h4 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-2">Bienestar animal</h4>
+          <div
+            className="text-sm text-text-default leading-relaxed prose prose-sm max-w-none [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:ml-4 [&_blockquote]:italic [&_blockquote]:text-text-subtle"
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(info.animalWelfare) }}
+          />
+        </div>
+      )}
+
+      {/* Información general */}
       <div>
         <InfoRow label="Productor" value={info.farmName} />
         <InfoRow label="Origen" value={info.origin} />
-        <InfoRow label="Método" value={info.productionMethod} />
         <InfoRow label="Lote" value={info.batchNumber} />
         <InfoRow label="Cosecha" value={info.harvestDate ? formatDate(info.harvestDate) : undefined} />
         <InfoRow label="Caducidad" value={info.expiryDate ? formatDate(info.expiryDate) : undefined} />
       </div>
+
       {info.practices?.length > 0 && (
         <div>
           <SectionLabel>Prácticas sostenibles</SectionLabel>
@@ -703,7 +744,7 @@ export default function ProductoDetallePage() {
           }
         />
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-[calc(124px+env(safe-area-inset-bottom,0px))] lg:pb-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-[calc(152px+env(safe-area-inset-bottom,0px))] lg:pb-10">
           <div>
 
             {/* ── Banner borrador — visible hasta que el producto esté activo ── */}

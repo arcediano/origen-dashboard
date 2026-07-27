@@ -200,8 +200,8 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
         description: 'Tu perfil de productor ha sido verificado y ya puedes vender.',
         icon:        Briefcase,
       },
-      // CERTIFICATION_PENDING no está disponible en el backend desplegado aún.
-      // Habilitar cuando se añada la migración de base de datos correspondiente.
+      // CERTIFICATION_PENDING no tiene entrada en EVENT_MAP del backend.
+      // Dejar comentario intacto hasta que se añada soporte futuro.
     ],
   },
 
@@ -245,8 +245,8 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
     label: 'Sistema',
     icon:  Settings,
     events: [
-      // SYSTEM_MAINTENANCE y SYSTEM_ALERT no están disponibles en el backend desplegado aún.
-      // Habilitar cuando se añada la migración de base de datos correspondiente.
+      // SYSTEM_MAINTENANCE y SYSTEM_ALERT tienen soporte en el backend.
+      // Los toggles para estos eventos se pueden añadir en futuras iteraciones.
       {
         eventType:   'WELCOME',
         title:       'Bienvenida',
@@ -257,9 +257,9 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
     ],
   },
 
-  // ── Marketing (pendiente despliegue) ──────────────────────────────────────
-  // PROMOTION_CREATED no está disponible en el backend desplegado aún.
-  // Habilitar cuando se añada la migración de base de datos correspondiente.
+  // ── Marketing (soporte backend disponible) ────────────────────────────────
+  // PROMOTION_CREATED tiene soporte en el backend.
+  // Los toggles para eventos de marketing se pueden añadir en futuras iteraciones del backlog.
 ];
 
 // ─── Legacy compatibility (Sprint 24 tests) ─────────────────────────────────
