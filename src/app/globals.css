@@ -35,6 +35,7 @@
     --oscuro:    155 54% 7%;        /* #081C15 - Verde Negro     (Texto principal) */
     --pastel:    155 60% 91%;       /* #D8F3DC - Verde Pastel    (Fondos suaves)   */
     --mandarina: 34 100% 67%;       /* #FFB347 - Naranja         (Acento compl.)   */
+    --cereza:    352 73% 58%;       /* #E05470 - Cereza          (urgencia y favoritos, alineado con origen-web/origen-admin) */
 
     /* ----- ESTADOS HOVER ----- */
     --hover-bosque:   155 56% 11%;  /* #0D2B1D - Hover Verde Bosque  */

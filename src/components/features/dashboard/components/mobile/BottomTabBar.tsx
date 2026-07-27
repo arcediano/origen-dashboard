@@ -114,7 +114,7 @@ export function BottomTabBar() {
                       <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-black text-white bg-red-500 border-2 border-white flex items-center justify-center shadow-md"
+                        className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-black text-white bg-origen-cereza border-2 border-white flex items-center justify-center shadow-md"
                       >
                         {tab.badge > 9 ? '9+' : tab.badge}
                       </motion.span>
@@ -180,7 +180,7 @@ export function BottomTabBar() {
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black text-white bg-red-500 border-2 border-white flex items-center justify-center shadow-md"
+                      className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black text-white bg-origen-cereza border-2 border-white flex items-center justify-center shadow-md"
                     >
                       {tab.badge > 9 ? '9+' : tab.badge}
                     </motion.span>

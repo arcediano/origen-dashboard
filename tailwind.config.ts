@@ -71,6 +71,7 @@ const config: Config = {
           oscuro: "hsl(var(--oscuro))",      // #081C15 - Verde Negro
           pastel: "hsl(var(--pastel))",      // #D8F3DC - Verde Pastel
           mandarina: "hsl(var(--mandarina))", // #FFB347 - Naranja Mandarina
+          cereza: "hsl(var(--cereza))",       // #E05470 - Cereza (urgencia y favoritos)
         },
 
         // Estados hover
