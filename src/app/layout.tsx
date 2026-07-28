@@ -6,8 +6,6 @@
 import type { Metadata } from "next";
 import { Manrope, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-// ⚠️ TEMPORAL: eliminar cuando se use plan de pago en Render o UptimeRobot externo
-import { DevKeepAlive } from "@/components/dev/DevKeepAlive";
 import { Providers } from "@/components/providers/Providers";
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans", weight: ["400", "500", "600", "700", "800"] });
@@ -34,8 +32,6 @@ export default function RootLayout({
       <body className={`${manrope.variable} ${cormorant.variable} font-sans`}>
         <Providers>
           {children}
-          {/* ⚠️ TEMPORAL — keep-alive para Render free tier. Eliminar al pasar a plan de pago. */}
-          {process.env.NEXT_PUBLIC_DEV_KEEPALIVE === 'true' && <DevKeepAlive />}
         </Providers>
       </body>
     </html>
