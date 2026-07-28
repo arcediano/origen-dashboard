@@ -28,6 +28,7 @@ import {
   Button,
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
   CheckboxWithLabel,
@@ -669,7 +670,7 @@ export default function BusinessInfoPage() {
 
           <div className="mb-6">
             <Card variant="elevated" className="overflow-hidden">
-              <div className="h-44 sm:h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
+              <div className="h-40 sm:h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
                 {form.banner ? (
                   <img src={form.banner} alt="Banner" className="w-full h-full object-cover" />
                 ) : (
@@ -704,15 +705,23 @@ export default function BusinessInfoPage() {
                 />
               </div>
 
-              <CardContent className="relative px-4 sm:px-6 pb-5 sm:pb-6">
-                <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6 -mt-10 sm:-mt-16 mb-3 sm:mb-4">
-                  <div className="relative flex flex-col items-start">
+              {/* Patron "identidad separada del banner": el nombre y el tagline viven
+                  siempre en el flujo normal de CardContent (fondo blanco, tipografia de
+                  marca), nunca superpuestos a la imagen del banner. Solo el avatar (con
+                  su propio margen negativo, desacoplado del bloque de texto) se solapa
+                  visualmente con el banner. Esto elimina por construccion el riesgo de
+                  contraste que arrastraban los dos intentos anteriores (scrim posicionado
+                  a ciegas en v5.18/v5.21, luego chip flotante en v5.21) — ver manual de
+                  diseño para el detalle de por que se descartan ambos. */}
+              <CardContent className="px-4 sm:px-6 pb-5 sm:pb-6">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
+                  <div className="relative flex flex-col items-start shrink-0 -mt-10 sm:-mt-14">
                     <Avatar
                       src={form.logo ?? undefined}
                       alt={form.businessName || 'Logo de negocio'}
                       shape="rounded"
                       size="2xl"
-                      className="w-20 h-20 sm:w-28 sm:h-28 border-4 border-white shadow-xl"
+                      className="w-20 h-20 sm:w-28 sm:h-28 border-4 border-white shadow-xl bg-white"
                       fallback={<span className="text-2xl sm:text-3xl font-bold text-origen-pradera/50">{producerInitial}</span>}
                     />
                     {isUploadingLogo && (
@@ -759,22 +768,13 @@ export default function BusinessInfoPage() {
                     )}
                   </div>
 
-                  <div className="flex-1 pb-1 sm:pb-2 min-w-0 max-w-full text-left">
-                    {/* Chip con fondo propio (`bg-origen-oscuro/85` + `backdrop-blur-sm`) en vez
-                        de depender de un scrim posicionado sobre el banner: el bloque de
-                        nombre/tagline puede caer sobre la imagen del banner, sobre su degradado
-                        por defecto o sobre el fondo blanco de `CardContent` según el contenido
-                        (nombre largo, con/sin tagline, breakpoint), y el chip garantiza contraste
-                        AA en los tres casos sin necesidad de calcular esa posición — ver manual
-                        de diseño, causa raíz documentada. */}
-                    <div className="inline-block max-w-full rounded-xl bg-origen-oscuro/85 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-3">
-                      <h2 className="text-lg sm:text-2xl font-bold leading-tight break-words text-white">
-                        {form.businessName || 'Perfil comercial'}
-                      </h2>
-                      <p className="text-xs sm:text-sm mt-0.5 leading-relaxed break-words text-white/85">
-                        {form.tagline || 'Agrega un tagline para contar que hace unico tu negocio'}
-                      </p>
-                    </div>
+                  <div className="flex-1 min-w-0 max-w-full pt-2 sm:pt-3 text-left">
+                    <CardTitle size="lg" className="break-words">
+                      {form.businessName || 'Perfil comercial'}
+                    </CardTitle>
+                    <CardDescription size="sm" className="mt-1 break-words">
+                      {form.tagline || 'Agrega un tagline para contar que hace unico tu negocio'}
+                    </CardDescription>
                   </div>
                 </div>
               </CardContent>
