@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, MapPin, Save, Camera, CheckCircle, Edit, X } from 'lucide-react';
+import { User, MapPin, Camera, CheckCircle, Edit } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
@@ -358,7 +358,7 @@ export default function PersonalInfoPage() {
         onBack={() => router.push('/dashboard/profile')}
       />
 
-      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 ${isEditing ? 'lg:pb-28' : ''}`}>
         <ProfileSectionNav className="mt-3" />
 
         <div className="mt-6">
@@ -437,40 +437,16 @@ export default function PersonalInfoPage() {
                           </div>
                         </div>
 
-                        <div className="flex gap-2 flex-shrink-0">
-                          {!isEditing ? (
+                        {!isEditing && (
+                          <div className="flex gap-2 flex-shrink-0">
                             <Button onClick={() => setIsEditing(true)} size="sm" variant="secondary" disabled={isLoading}>
                               <span className="flex items-center gap-1">
                                 <Edit className="w-3.5 h-3.5" />
                                 Editar
                               </span>
                             </Button>
-                          ) : (
-                            <>
-                              <Button variant="ghost" size="sm" onClick={handleCancel} className="text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                  <X className="w-3.5 h-3.5" />
-                                  Cancelar
-                                </span>
-                              </Button>
-                              <Button size="sm" onClick={handleSave} disabled={isSaving || isLoading}>
-                                <span className="flex items-center gap-1">
-                                  {isSaving ? (
-                                    <>
-                                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                      Guardando
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Save className="w-3.5 h-3.5" />
-                                      Guardar
-                                    </>
-                                  )}
-                                </span>
-                              </Button>
-                            </>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -666,9 +642,10 @@ export default function PersonalInfoPage() {
         </div>
       </div>
 
-      {/* Barra de guardado sticky – solo móvil */}
+      {/* Barra de guardado sticky – todos los breakpoints, para no obligar a volver
+          arriba al editar campos por debajo de la primera pantalla */}
       {isEditing && (
-        <div className="fixed left-0 right-0 bottom-[calc(88px+env(safe-area-inset-bottom))] lg:hidden z-30 px-4 sm:px-6">
+        <div className="fixed left-0 right-0 bottom-[calc(88px+env(safe-area-inset-bottom))] lg:bottom-6 z-30 px-4 sm:px-6">
           <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
             <div className="flex gap-2">
               <Button variant="ghost" className="flex-1" onClick={handleCancel}>Cancelar</Button>

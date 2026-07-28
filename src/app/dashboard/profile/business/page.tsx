@@ -367,7 +367,8 @@ export default function BusinessInfoPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [newCategory, setNewCategory] = useState('');
-  const [isUploadingVisual, setIsUploadingVisual] = useState(false);
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [readinessReport, setReadinessReport] = useState<ProducerReadinessReport | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -494,7 +495,7 @@ export default function BusinessInfoPage() {
   const handleLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setIsUploadingVisual(true);
+    setIsUploadingLogo(true);
     setSaveError(null);
     try {
       const { key, url } = await uploadFile(file, 'visual/logo');
@@ -502,7 +503,7 @@ export default function BusinessInfoPage() {
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Error al subir el logo.');
     } finally {
-      setIsUploadingVisual(false);
+      setIsUploadingLogo(false);
       e.target.value = '';
     }
   };
@@ -510,7 +511,7 @@ export default function BusinessInfoPage() {
   const handleBannerFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setIsUploadingVisual(true);
+    setIsUploadingBanner(true);
     setSaveError(null);
     try {
       const { key, url } = await uploadFile(file, 'visual/banner');
@@ -518,7 +519,7 @@ export default function BusinessInfoPage() {
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Error al subir el banner.');
     } finally {
-      setIsUploadingVisual(false);
+      setIsUploadingBanner(false);
       e.target.value = '';
     }
   };
@@ -615,7 +616,7 @@ export default function BusinessInfoPage() {
         onBack={() => router.push('/dashboard/profile')}
       />
 
-      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 ${isEditing ? 'lg:pb-28' : ''}`}>
         <ProfileSectionNav className="mt-3" />
 
         <div className="mt-6">
@@ -676,7 +677,7 @@ export default function BusinessInfoPage() {
                     <ImageIcon className="w-16 h-16 text-white/30" />
                   </div>
                 )}
-                {isUploadingVisual && (
+                {isUploadingBanner && (
                   <div className="absolute inset-0 flex items-center justify-center bg-origen-oscuro/50 backdrop-blur-[1px]">
                     <Loader2 className="w-7 h-7 text-white animate-spin" aria-hidden="true" />
                     <span className="sr-only">Subiendo imagen…</span>
@@ -685,7 +686,7 @@ export default function BusinessInfoPage() {
                 {isEditing && (
                   <button
                     type="button"
-                    disabled={isUploadingVisual}
+                    disabled={isUploadingBanner}
                     onClick={() => bannerInputRef.current?.click()}
                     className="absolute bottom-3 right-3 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-alt shadow-lg flex items-center justify-center text-origen-bosque hover:text-origen-pradera transition-colors disabled:opacity-50"
                     aria-label="Cambiar banner"
@@ -714,7 +715,7 @@ export default function BusinessInfoPage() {
                       className="w-20 h-20 sm:w-28 sm:h-28 border-4 border-white shadow-xl"
                       fallback={<span className="text-2xl sm:text-3xl font-bold text-origen-pradera/50">{producerInitial}</span>}
                     />
-                    {isUploadingVisual && (
+                    {isUploadingLogo && (
                       <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-origen-oscuro/50 backdrop-blur-[1px]">
                         <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 text-white animate-spin" aria-hidden="true" />
                         <span className="sr-only">Subiendo imagen…</span>
@@ -724,7 +725,7 @@ export default function BusinessInfoPage() {
                       <button
                         type="button"
                         aria-label="Cambiar logo"
-                        disabled={isUploadingVisual}
+                        disabled={isUploadingLogo}
                         onClick={() => logoInputRef.current?.click()}
                         className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-surface-alt border border-border shadow-md flex items-center justify-center text-origen-bosque hover:text-origen-pradera disabled:opacity-50"
                       >
@@ -780,31 +781,16 @@ export default function BusinessInfoPage() {
             </Card>
           </div>
 
-          <div className="mb-8 flex flex-col sm:flex-row sm:justify-end gap-3">
-            {!isEditing ? (
+          {!isEditing && (
+            <div className="mb-8 flex flex-col sm:flex-row sm:justify-end gap-3">
               <Button onClick={() => setIsEditing(true)} size="md" disabled={isLoading} className="w-full sm:w-auto">
                 <span className="flex items-center justify-center gap-2">
                   <Edit className="w-4 h-4" />
                   Editar informacion del negocio
                 </span>
               </Button>
-            ) : (
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <Button variant="ghost" size="md" onClick={handleCancel} className="w-full sm:w-auto">
-                  <span className="flex items-center justify-center gap-2">
-                    <X className="w-4 h-4" />
-                    Cancelar
-                  </span>
-                </Button>
-                <Button size="md" onClick={handleSave} disabled={isSaving || isLoading} className="w-full sm:w-auto">
-                  <span className="flex items-center justify-center gap-2">
-                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    Guardar cambios
-                  </span>
-                </Button>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
           </>
 
           {(
@@ -1209,9 +1195,10 @@ export default function BusinessInfoPage() {
         </div>
       </div>
 
-      {/* Barra de guardado sticky – solo móvil */}
+      {/* Barra de guardado sticky – todos los breakpoints, para no obligar a volver
+          arriba al editar secciones bajas de la pantalla (Categorías, Historia, etc.) */}
       {isEditing && (
-        <div className="fixed left-0 right-0 bottom-[calc(88px+env(safe-area-inset-bottom))] lg:hidden z-30 px-4 sm:px-6">
+        <div className="fixed left-0 right-0 bottom-[calc(88px+env(safe-area-inset-bottom))] lg:bottom-6 z-30 px-4 sm:px-6">
           <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
             <div className="flex gap-2">
               <Button variant="ghost" size="md" className="flex-1" onClick={handleCancel}>
@@ -1220,7 +1207,7 @@ export default function BusinessInfoPage() {
                   Cancelar
                 </span>
               </Button>
-              <Button size="md" className="flex-1" onClick={handleSave} disabled={isSaving || isUploadingVisual}>
+              <Button size="md" className="flex-1" onClick={handleSave} disabled={isSaving || isUploadingBanner || isUploadingLogo}>
                 <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
                   {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Guardar cambios
