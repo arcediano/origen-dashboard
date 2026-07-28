@@ -532,7 +532,10 @@ export default function BusinessInfoPage() {
   };
 
   const handleSave = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      setSaveError('Hay campos con errores. Revisa los mensajes marcados en el formulario antes de guardar.');
+      return;
+    }
 
     const payload: UpdateProducerProfilePayload = {
       businessName: form.businessName.trim() || undefined,
@@ -664,7 +667,7 @@ export default function BusinessInfoPage() {
                 )}
 
           <div className="mb-6">
-            <Card className="overflow-hidden border border-border shadow-sm">
+            <Card variant="elevated" className="overflow-hidden">
               <div className="h-44 sm:h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
                 {form.banner ? (
                   <img src={form.banner} alt="Banner" className="w-full h-full object-cover" />
@@ -673,17 +676,12 @@ export default function BusinessInfoPage() {
                     <ImageIcon className="w-16 h-16 text-white/30" />
                   </div>
                 )}
-                {/* Scrim de protección: siempre presente (con foto de banner o con el degradado
-                    de marca por defecto), garantiza contraste AA del nombre/tagline que se solapa
-                    con el borde inferior del banner (bloque flotante en CardContent, -mt-10/-mt-16).
-                    Se usa el tono oscuro de marca (`origen-oscuro`) en vez de negro puro, mismo
-                    patrón ya usado en `HomepageProducersCarousel` (origen-web) para overlays sobre
-                    foto — ver manual de diseño §4.1bis. Al aplicarse siempre, el texto puede usar
-                    una única variante de color (blanco) sin lógica condicional. */}
-                <div
-                  className="absolute inset-x-0 bottom-0 h-28 sm:h-32 bg-gradient-to-t from-origen-oscuro/85 via-origen-oscuro/35 to-transparent pointer-events-none"
-                  aria-hidden="true"
-                />
+                {isUploadingVisual && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-origen-oscuro/50 backdrop-blur-[1px]">
+                    <Loader2 className="w-7 h-7 text-white animate-spin" aria-hidden="true" />
+                    <span className="sr-only">Subiendo imagen…</span>
+                  </div>
+                )}
                 {isEditing && (
                   <button
                     type="button"
@@ -716,6 +714,12 @@ export default function BusinessInfoPage() {
                       className="w-20 h-20 sm:w-28 sm:h-28 border-4 border-white shadow-xl"
                       fallback={<span className="text-2xl sm:text-3xl font-bold text-origen-pradera/50">{producerInitial}</span>}
                     />
+                    {isUploadingVisual && (
+                      <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-origen-oscuro/50 backdrop-blur-[1px]">
+                        <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 text-white animate-spin" aria-hidden="true" />
+                        <span className="sr-only">Subiendo imagen…</span>
+                      </div>
+                    )}
                     {isEditing && (
                       <button
                         type="button"
@@ -734,7 +738,7 @@ export default function BusinessInfoPage() {
                         aria-label="Cambiar logo"
                         onClick={() => logoInputRef.current?.click()}
                         onKeyDown={(e) => e.key === 'Enter' && logoInputRef.current?.click()}
-                        className="absolute inset-0 hidden sm:flex bg-black/40 rounded-xl opacity-0 hover:opacity-100 transition-opacity items-center justify-center cursor-pointer"
+                        className="absolute inset-0 hidden sm:flex bg-origen-oscuro/50 rounded-xl opacity-0 hover:opacity-100 transition-opacity items-center justify-center cursor-pointer"
                       >
                         <Camera className="w-8 h-8 text-white" />
                       </div>
@@ -754,13 +758,22 @@ export default function BusinessInfoPage() {
                     )}
                   </div>
 
-                  <div className="flex-1 pb-1 sm:pb-2 min-w-0 text-left">
-                    <h2 className="text-xl sm:text-2xl font-bold leading-tight break-words text-white drop-shadow-sm">
-                      {form.businessName || 'Perfil comercial'}
-                    </h2>
-                    <p className="text-xs sm:text-sm mt-1 leading-relaxed break-words text-white/85 drop-shadow-sm">
-                      {form.tagline || 'Agrega un tagline para contar que hace unico tu negocio'}
-                    </p>
+                  <div className="flex-1 pb-1 sm:pb-2 min-w-0 max-w-full text-left">
+                    {/* Chip con fondo propio (`bg-origen-oscuro/85` + `backdrop-blur-sm`) en vez
+                        de depender de un scrim posicionado sobre el banner: el bloque de
+                        nombre/tagline puede caer sobre la imagen del banner, sobre su degradado
+                        por defecto o sobre el fondo blanco de `CardContent` según el contenido
+                        (nombre largo, con/sin tagline, breakpoint), y el chip garantiza contraste
+                        AA en los tres casos sin necesidad de calcular esa posición — ver manual
+                        de diseño, causa raíz documentada. */}
+                    <div className="inline-block max-w-full rounded-xl bg-origen-oscuro/85 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-3">
+                      <h2 className="text-lg sm:text-2xl font-bold leading-tight break-words text-white">
+                        {form.businessName || 'Perfil comercial'}
+                      </h2>
+                      <p className="text-xs sm:text-sm mt-0.5 leading-relaxed break-words text-white/85">
+                        {form.tagline || 'Agrega un tagline para contar que hace unico tu negocio'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -1009,6 +1022,9 @@ export default function BusinessInfoPage() {
                       <MapPin className="w-5 h-5 text-origen-pradera" />
                       Direccion de facturacion
                     </CardTitle>
+                    <Badge variant="outline" size="xs" className="w-fit self-start sm:self-auto">
+                      Opcional
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
