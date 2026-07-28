@@ -167,14 +167,37 @@ async function request<T>(
     headers['Cookie'] = options.cookies;
   }
 
-  const response = await fetch(url.toString(), {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-    // Enviar cookies HttpOnly del browser automáticamente en el cliente
-    credentials: 'include',
-    ...options.fetchOptions,
-  });
+  // Crear un AbortController para timeout explícito (~20 segundos)
+  const controller = new AbortController();
+  const REQUEST_TIMEOUT_MS = 20000; // 20 segundos
+  const timeoutHandle = setTimeout(() => {
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(url.toString(), {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      // Enviar cookies HttpOnly del browser automáticamente en el cliente
+      credentials: 'include',
+      signal: controller.signal,
+      ...options.fetchOptions,
+    });
+  } catch (err) {
+    clearTimeout(timeoutHandle);
+    // Si fue un abort por timeout, lanzar error con mensaje descriptivo
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new GatewayError(
+        0,
+        'Tiempo de espera agotado. El servidor puede estar reiniciándose, inténtalo de nuevo en unos segundos.',
+      );
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutHandle);
+  }
 
   // Intentar parsear la respuesta como JSON
   let data: unknown;

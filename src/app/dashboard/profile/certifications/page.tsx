@@ -25,6 +25,7 @@ import { ConfirmDialog, DateInput, Spinner } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 import { loadOnboardingData, updateProducerDocument, updateProducerCertification } from '@/lib/api/onboarding';
 import { uploadFile } from '@/lib/api/media';
+import { GatewayError } from '@/lib/api/client';
 import { 
   type DocStatus,
   countDocumentStates,
@@ -361,8 +362,18 @@ export default function CertificationsPage() {
 
       setCertifications(certs);
       setLegalDocs(Array.from(docMap.values()));
-    } catch {
-      setError('No se pudieron cargar los datos. Inténtalo de nuevo.');
+    } catch (err) {
+      if (err instanceof GatewayError) {
+        if (err.status === 401) {
+          setError('Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.');
+        } else if (err.status === 503 || err.message.includes('timeout') || err.message.includes('de espera')) {
+          setError('El servidor no está disponible temporalmente o hay un problema de conexión. Inténtalo de nuevo en unos segundos.');
+        } else {
+          setError(`Error ${err.status}: ${err.message || 'No se pudieron cargar los datos. Inténtalo de nuevo.'}`);
+        }
+      } else {
+        setError('No se pudieron cargar los datos. Inténtalo de nuevo.');
+      }
     } finally {
       setLoading(false);
     }

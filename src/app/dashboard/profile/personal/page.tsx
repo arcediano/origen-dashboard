@@ -103,6 +103,7 @@ export default function PersonalInfoPage() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [avatarKey, setAvatarKey] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [partialLoadErrors, setPartialLoadErrors] = useState<Record<string, string>>({});
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const initials = useMemo(() => {
@@ -123,21 +124,48 @@ export default function PersonalInfoPage() {
     const loadProfileData = async () => {
       setIsLoading(true);
       setLoadError(null);
+      setPartialLoadErrors({});
 
       try {
-        const [user, onboardingRes, producerProfile] = await Promise.all([
+        const results = await Promise.allSettled([
           getCurrentUser(),
           loadOnboardingData(),
           getProducerProfile(),
         ]);
 
-        if (!onboardingRes?.data) {
-          throw new Error('No hay datos de onboarding disponibles para este perfil');
+        const [userResult, onboardingResult, producerProfileResult] = results;
+
+        // Si el usuario falla, bloqueamos la página
+        if (userResult.status === 'rejected') {
+          if (!mounted) return;
+          const errorMsg = userResult.reason instanceof Error ? userResult.reason.message : 'Error al cargar datos de usuario';
+          setLoadError(errorMsg);
+          setIsLoading(false);
+          return;
         }
 
-        const data = onboardingRes.data;
+        const user = userResult.value;
 
-        // Formatear birthDate al formato YYYY-MM-DD si existe
+        // Recopilar datos parciales, con errores de secciones específicas
+        let data: OnboardingData | null = null;
+        let producerProfile: any = null;
+        const errors: Record<string, string> = {};
+
+        if (onboardingResult.status === 'rejected') {
+          errors.onboarding = onboardingResult.reason instanceof Error ? onboardingResult.reason.message : 'No se pudo cargar la información de dirección y empresa';
+        } else if (onboardingResult.value?.data) {
+          data = onboardingResult.value.data;
+        }
+
+        if (producerProfileResult.status === 'rejected') {
+          errors.producerProfile = producerProfileResult.reason instanceof Error ? producerProfileResult.reason.message : 'No se pudo cargar la información de perfil comercial';
+        } else if (producerProfileResult.status === 'fulfilled') {
+          producerProfile = producerProfileResult.value;
+        }
+
+        if (!mounted) return;
+
+        // Mapear los datos disponibles
         let formattedBirthDate = '';
         if (user.birthDate) {
           const date = new Date(user.birthDate);
@@ -151,22 +179,21 @@ export default function PersonalInfoPage() {
           email: user.email,
           phone: user.phone ?? '',
           birthDate: formattedBirthDate,
-          address: buildAddress(data.location?.street, data.location?.streetNumber),
-          city: data.location?.city ?? '',
-          postalCode: data.location?.postalCode ?? '',
-          province: data.location?.province ?? '',
+          address: buildAddress(data?.location?.street, data?.location?.streetNumber),
+          city: data?.location?.city ?? '',
+          postalCode: data?.location?.postalCode ?? '',
+          province: data?.location?.province ?? '',
           country: 'Espana',
-          bio: data.story?.tagline ?? data.story?.description ?? '',
+          bio: data?.story?.tagline ?? data?.story?.description ?? '',
           avatar: producerProfile?.data?.visual?.logoUrl ?? null,
         };
-
-        if (!mounted) return;
 
         setAuthUser(user);
         setOnboardingData(data);
         setAvatarKey(producerProfile?.data?.visual?.logoKey ?? null);
         setForm(mapped);
         setInitialForm(mapped);
+        setPartialLoadErrors(errors);
       } catch (error) {
         if (!mounted) return;
         setLoadError(error instanceof Error ? error.message : 'Error al cargar el perfil');
@@ -202,6 +229,43 @@ export default function PersonalInfoPage() {
     setSaveError(null);
     setSaveSuccess(null);
     setIsEditing(false);
+  };
+
+  const retryPartialLoad = async (section: string) => {
+    try {
+      const errors = { ...partialLoadErrors };
+      delete errors[section];
+      setPartialLoadErrors(errors);
+
+      if (section === 'onboarding') {
+        const result = await loadOnboardingData();
+        if (result?.data) {
+          setOnboardingData(result.data);
+          setForm((prev) => ({
+            ...prev,
+            address: buildAddress(result.data.location?.street, result.data.location?.streetNumber),
+            city: result.data.location?.city ?? '',
+            postalCode: result.data.location?.postalCode ?? '',
+            province: result.data.location?.province ?? '',
+            bio: result.data.story?.tagline ?? result.data.story?.description ?? '',
+          }));
+        }
+      } else if (section === 'producerProfile') {
+        const result = await getProducerProfile();
+        if (result?.data) {
+          setAvatarKey(result.data.visual?.logoKey ?? null);
+          setForm((prev) => ({
+            ...prev,
+            avatar: result.data.visual?.logoUrl ?? null,
+          }));
+        }
+      }
+    } catch (error) {
+      setPartialLoadErrors((prev) => ({
+        ...prev,
+        [section]: error instanceof Error ? error.message : 'Error al reintentar cargar esta sección',
+      }));
+    }
   };
 
   const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -368,6 +432,20 @@ export default function PersonalInfoPage() {
                 <AlertDescription>{loadError}</AlertDescription>
               </Alert>
             )}
+
+            {Object.entries(partialLoadErrors).map(([section, error]) => (
+              <Alert key={section} variant="warning" className="flex items-center justify-between">
+                <AlertDescription>{error}</AlertDescription>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => retryPartialLoad(section)}
+                  className="ml-4 flex-shrink-0"
+                >
+                  Reintentar
+                </Button>
+              </Alert>
+            ))}
 
             {saveError && (
               <Alert variant="error">
