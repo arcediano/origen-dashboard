@@ -225,6 +225,7 @@ export default function EditProductPage() {
                 publishStatus={publishStatus}
                 publishError={publishError}
                 onPreview={() => setShowPreview(true)}
+                showMobileBar={false}
               />
             </div>
 

@@ -52,6 +52,15 @@ export interface CreateProductNavigationProps {
   onPreview?: () => void;
   /** Clase CSS adicional */
   className?: string;
+  /**
+   * Si `false`, omite la barra sticky móvil interna (nav `sm:hidden`).
+   * Úsalo cuando la pantalla consumidora ya tiene su propia `ActionBar` móvil
+   * (p. ej. `products/[id]/edit`, que envuelve este componente en `hidden sm:block`
+   * y usa `ActionBar` de `@arcediano/ux-library` para móvil) — evita duplicar
+   * markup nunca visible. Por defecto `true` (comportamiento histórico, usado
+   * por `products/create`, que no tiene una `ActionBar` propia).
+   */
+  showMobileBar?: boolean;
 }
 
 // ============================================================================
@@ -74,6 +83,7 @@ export function CreateProductNavigation({
   publishStatus,
   publishError,
   className,
+  showMobileBar = true,
 }: CreateProductNavigationProps) {
   const [showStepErrors, setShowStepErrors] = useState(false);
 
@@ -128,6 +138,7 @@ export function CreateProductNavigation({
           MOBILE: Barra sticky full-width con texto en todos los botones
           Sigue el mismo patrón que ActionBar de @arcediano/ux-library
       ══════════════════════════════════════════════════════════ */}
+      {showMobileBar && (
       <nav
         aria-label="Navegación de pasos"
         className="sm:hidden fixed bottom-0 inset-x-0 z-40 w-full border-t border-border bg-background/95 backdrop-blur-sm shadow-[0_-4px_20px_rgba(27,67,50,0.08)] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
@@ -249,6 +260,7 @@ export function CreateProductNavigation({
           </Button>
         </div>
       </nav>
+      )}
 
       {/* ══════════════════════════════════════════════════════════
           DESKTOP (sm+): Botonera horizontal — igual que antes
