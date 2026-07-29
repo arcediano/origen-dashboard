@@ -13,6 +13,7 @@ import {
   CurrencyInput,
   PercentageInput,
 } from '@arcediano/ux-library';
+import { FlashDealForm } from '../FlashDealForm';
 import {
   DollarSign,
   Tag,
@@ -548,140 +549,38 @@ export function StepPricing({
             </Alert>
           )}
 
-          {/* Formulario de oferta flash */}
+          {/* Formulario de oferta flash — componente compartido */}
           <AnimatePresence>
             {showFlashDealForm && hasBasePrice && (!flashDeals.length || editingFlashDealId) && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="p-4 sm:p-5 bg-yellow-50/30 rounded-xl border-2 border-yellow-200/20 space-y-4">
-                  <h4 className="text-sm font-medium text-origen-bosque">
-                    {editingFlashDealId ? 'Editar oferta flash' : 'Nueva oferta flash'}
-                  </h4>
-
-                  {/* Selector de tipo (2 botones: PERCENTAGE, FIXED) */}
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { id: 'PERCENTAGE', icon: Percent, label: 'Porcentaje', desc: 'Descuento en %' },
-                      { id: 'FIXED', icon: DollarSign, label: 'Precio fijo', desc: 'Precio especial' }
-                    ].map((type) => (
-                      <button
-                        key={type.id}
-                        onClick={() => setNewFlashDeal({ ...newFlashDeal, discountType: type.id as any })}
-                        className={cn(
-                          "flex flex-col items-center p-2 sm:p-3 rounded-lg border-2 transition-all",
-                          newFlashDeal.discountType === type.id
-                            ? "border-yellow-400 bg-yellow-100/50"
-                            : "border-yellow-200/30 hover:border-yellow-300 bg-white"
-                        )}
-                      >
-                        <type.icon className="w-4 h-4 mb-1" />
-                        <span className="text-xs font-semibold">{type.label}</span>
-                        <span className="text-xs text-text-subtle">{type.desc}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Campo de valor */}
-                  <div>
-                    <label className="block text-xs font-medium text-origen-bosque mb-1.5">
-                      {newFlashDeal.discountType === 'PERCENTAGE' ? 'Descuento (%)' : 'Precio fijo (€)'}
-                    </label>
-                    {newFlashDeal.discountType === 'PERCENTAGE' ? (
-                      <PercentageInput
-                        value={newFlashDeal.discountValue || 10}
-                        onChange={(value) => setNewFlashDeal({ ...newFlashDeal, discountValue: value })}
-                        min={0.1}
-                        max={90}
-                        className="h-10 w-full rounded-lg"
-                      />
-                    ) : (
-                      <CurrencyInput
-                        value={newFlashDeal.discountValue || 0}
-                        onChange={(value) => setNewFlashDeal({ ...newFlashDeal, discountValue: value })}
-                        min={0}
-                        className="h-10 w-full rounded-lg"
-                      />
-                    )}
-                  </div>
-
-                  {/* Campos de fecha */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-origen-bosque mb-1.5">Inicio</label>
-                      <Input
-                        type="datetime-local"
-                        value={newFlashDeal.startsAt || ''}
-                        onChange={(e) => setNewFlashDeal({ ...newFlashDeal, startsAt: e.target.value })}
-                        className="h-10 w-full rounded-lg text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-origen-bosque mb-1.5">Fin</label>
-                      <Input
-                        type="datetime-local"
-                        value={newFlashDeal.endsAt || ''}
-                        onChange={(e) => setNewFlashDeal({ ...newFlashDeal, endsAt: e.target.value })}
-                        className="h-10 w-full rounded-lg text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Vista previa */}
-                  {newFlashDeal.discountValue && newFlashDeal.startsAt && newFlashDeal.endsAt && (
-                    <div className="p-3 bg-white rounded-lg border border-yellow-200/50">
-                      <p className="text-xs text-text-subtle mb-2">Vista previa:</p>
-                      <p className="text-sm font-semibold text-origen-bosque">
-                        {newFlashDeal.discountType === 'PERCENTAGE'
-                          ? `Precio especial: ${(basePrice * (1 - (newFlashDeal.discountValue || 0) / 100)).toFixed(2)}€`
-                          : `Precio especial: ${newFlashDeal.discountValue?.toFixed(2)}€`}
-                      </p>
-                      <p className="text-xs text-text-subtle mt-1">
-                        Del {new Date(newFlashDeal.startsAt).toLocaleDateString('es')} al {new Date(newFlashDeal.endsAt).toLocaleDateString('es')}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Aviso de no-acumulación con tiers */}
-                  {tiers.length > 0 && (
-                    <Alert variant="info" className="text-xs">
-                      <AlertCircle className="w-3 h-3 mr-1 shrink-0 mt-0.5" />
-                      <p>Mientras la oferta flash esté activa, los descuentos por cantidad no se aplicarán</p>
-                    </Alert>
-                  )}
-
-                  {flashDealError && (
-                    <Alert variant="error" className="text-xs">
-                      <AlertCircle className="w-3 h-3 mr-1 shrink-0" />
-                      {flashDealError}
-                    </Alert>
-                  )}
-
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      onClick={handleAddFlashDeal}
-                      disabled={isLoadingFlashDeal}
-                      className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white"
-                      size="sm"
-                    >
-                      {isLoadingFlashDeal ? 'Guardando...' : editingFlashDealId ? 'Guardar cambios' : 'Crear oferta'}
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setShowFlashDealForm(false);
-                        resetFlashDealForm();
-                      }}
-                      variant="secondary"
-                      size="sm"
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
+              <FlashDealForm
+                basePrice={basePrice}
+                existingDeal={editingFlashDealId ? flashDeals.find(d => d.id === editingFlashDealId) : null}
+                hasTiers={tiers.length > 0}
+                onSaved={(deal) => {
+                  if (editingFlashDealId) {
+                    setFlashDeals(flashDeals.map((d) => (d.id === editingFlashDealId ? deal : d)));
+                  } else {
+                    setFlashDeals([...flashDeals, deal]);
+                    // Si no hay productId (modo wizard), guardar en formData
+                    if (!productId) {
+                      const flashDealData: FlashDealFormValue = {
+                        discountType: deal.discountType,
+                        discountValue: deal.discountValue,
+                        startsAt: typeof deal.startsAt === 'string' ? deal.startsAt : new Date(deal.startsAt).toISOString().slice(0, 16),
+                        endsAt: typeof deal.endsAt === 'string' ? deal.endsAt : new Date(deal.endsAt).toISOString().slice(0, 16),
+                      };
+                      onInputChange('flashDeal', flashDealData);
+                      onFlashDealChange?.(flashDealData);
+                    }
+                  }
+                  resetFlashDealForm();
+                  setShowFlashDealForm(false);
+                }}
+                onCancel={() => {
+                  setShowFlashDealForm(false);
+                  resetFlashDealForm();
+                }}
+              />
             )}
           </AnimatePresence>
 

@@ -232,6 +232,14 @@ export interface FlashDeal {
   updatedAt?: Date;
 }
 
+export interface FlashDealWithProduct extends FlashDeal {
+  productId: string;
+  productName: string;
+  productSlug: string;
+  productMainImageUrl?: string | null;
+  productBasePrice: number;
+}
+
 export interface FlashDealFormValue {
   discountType: 'PERCENTAGE' | 'FIXED';
   discountValue: number;

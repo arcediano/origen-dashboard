@@ -12,7 +12,9 @@
  */
 
 import { gatewayClient, GatewayError } from './client';
-import { type Product, type ProductFormData, type FlashDeal } from '@/types/product';
+import { type Product, type ProductFormData, type FlashDeal, type FlashDealWithProduct } from '@/types/product';
+
+export type { FlashDealWithProduct };
 import { uploadFile } from './media';
 import {
   type ApiProduct,
@@ -1072,5 +1074,44 @@ export async function scheduleProduct(
     return { data: raw, status: 200 };
   } catch (error) {
     return handleError(error, 'scheduleProduct');
+  }
+}
+
+// ─── OFERTAS FLASH AGREGADAS ──────────────────────────────────────────────────
+
+/**
+ * Obtiene todas las ofertas flash del productor autenticado con filtrado por estado.
+ * Ruta backend: GET /products/producer/flash-deals
+ */
+export async function fetchMyFlashDeals(params?: {
+  status?: 'active' | 'scheduled' | 'finished' | 'cancelled';
+  page?: number;
+  limit?: number;
+}): Promise<ApiResponse<{ data: FlashDealWithProduct[]; total: number; page: number; limit: number }>> {
+  try {
+    const query: Record<string, string | number | undefined> = {
+      page: params?.page ?? 1,
+      limit: params?.limit ?? 20,
+    };
+
+    if (params?.status) {
+      query.status = params.status;
+    }
+
+    const raw = await gatewayClient.get<{
+      data: FlashDealWithProduct[];
+      total: number;
+      page: number;
+      limit: number;
+    }>('/products/producer/flash-deals', {
+      params: query as Record<string, string | number | boolean | undefined | null>,
+    });
+
+    return {
+      data: raw,
+      status: 200,
+    };
+  } catch (error) {
+    return handleError(error, 'fetchMyFlashDeals');
   }
 }

@@ -13,6 +13,7 @@ import {
   Star,
   Truck,
   User,
+  Zap,
 } from 'lucide-react';
 
 export interface SubmenuItem {
@@ -61,6 +62,7 @@ export interface DashboardBreadcrumbItem {
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard/campanas': 'Campañas',
+  '/dashboard/ofertas-flash': 'Ofertas flash',
   '/dashboard/perfil': 'Perfil',
   '/dashboard': 'Inicio',
   '/dashboard/orders': 'Pedidos',
@@ -86,6 +88,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 const SEGMENT_LABELS: Record<string, string> = {
   campanas: 'Campañas',
+  'ofertas-flash': 'Ofertas flash',
   dashboard: 'Inicio',
   orders: 'Pedidos',
   facturas: 'Facturas de venta',
@@ -153,6 +156,13 @@ const ANALYTICS_ITEMS: MenuItem[] = [
     icon: Megaphone,
     href: '/dashboard/campanas',
     matchPaths: ['/dashboard/campanas*'],
+  },
+  {
+    id: 'ofertas-flash',
+    label: 'Ofertas flash',
+    icon: Zap,
+    href: '/dashboard/ofertas-flash',
+    matchPaths: ['/dashboard/ofertas-flash*'],
   },
 ];
 

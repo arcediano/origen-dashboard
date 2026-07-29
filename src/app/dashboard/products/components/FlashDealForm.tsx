@@ -1,0 +1,277 @@
+'use client';
+
+import { Button, Input, Alert } from '@arcediano/ux-library';
+import { CurrencyInput, PercentageInput } from '@arcediano/ux-library';
+import {
+  DollarSign,
+  AlertCircle,
+  Percent,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { z } from 'zod';
+import type { FlashDeal, FlashDealFormValue } from '@/types/product';
+import { createFlashDeal, updateFlashDeal } from '@/lib/api/products';
+
+interface FlashDealFormProps {
+  productId?: string;
+  basePrice: number;
+  existingDeal?: FlashDeal | null;
+  hasTiers?: boolean;
+  onSaved: (deal: FlashDeal) => void;
+  onCancel: () => void;
+}
+
+const FlashDealSchema = z.object({
+  discountType: z.enum(['PERCENTAGE', 'FIXED']),
+  discountValue: z.number().min(0.01),
+  startsAt: z.string(),
+  endsAt: z.string(),
+}).refine((data) => {
+  const now = new Date();
+  const endsAt = new Date(data.endsAt);
+  const startsAt = new Date(data.startsAt);
+  return endsAt > startsAt && endsAt > now;
+}, 'Las fechas deben ser válidas');
+
+export function FlashDealForm({
+  productId,
+  basePrice,
+  existingDeal,
+  hasTiers = false,
+  onSaved,
+  onCancel,
+}: FlashDealFormProps) {
+  const [formData, setFormData] = useState<Partial<FlashDealFormValue>>(() => {
+    if (existingDeal) {
+      return {
+        discountType: existingDeal.discountType,
+        discountValue: existingDeal.discountValue,
+        startsAt: new Date(existingDeal.startsAt).toISOString().slice(0, 16),
+        endsAt: new Date(existingDeal.endsAt).toISOString().slice(0, 16),
+      };
+    }
+    return {
+      discountType: 'PERCENTAGE',
+      discountValue: 10,
+      startsAt: new Date().toISOString().slice(0, 16),
+      endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+    };
+  });
+
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    setError(null);
+
+    try {
+      FlashDealSchema.parse(formData);
+
+      if (!productId) {
+        // Modo formulario en wizard (sin guardar en BD)
+        const flashDealData: FlashDealFormValue = {
+          discountType: formData.discountType as 'PERCENTAGE' | 'FIXED',
+          discountValue: formData.discountValue || 0,
+          startsAt: formData.startsAt || '',
+          endsAt: formData.endsAt || '',
+        };
+
+        // Llamar onSaved con un deal parcial (sin id, será generado por el backend)
+        onSaved({
+          id: '', // Se generará al guardar en BD
+          discountType: formData.discountType as 'PERCENTAGE' | 'FIXED',
+          discountValue: formData.discountValue || 0,
+          startsAt: new Date(formData.startsAt || ''),
+          endsAt: new Date(formData.endsAt || ''),
+          isActive: true,
+          isCurrentlyActive: false,
+          stacksWithTiers: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+        return;
+      }
+
+      // Modo con productId: guardar en BD
+      setIsLoading(true);
+
+      if (existingDeal) {
+        // Edición
+        const result = await updateFlashDeal(productId, existingDeal.id, {
+          discountType: formData.discountType || 'PERCENTAGE',
+          discountValue: formData.discountValue || 0,
+          startsAt: formData.startsAt || '',
+          endsAt: formData.endsAt || '',
+        });
+
+        if (result.error) {
+          setError(result.error);
+        } else if (result.data) {
+          onSaved(result.data);
+        }
+      } else {
+        // Creación
+        const result = await createFlashDeal(productId, {
+          discountType: formData.discountType || 'PERCENTAGE',
+          discountValue: formData.discountValue || 0,
+          startsAt: formData.startsAt || '',
+          endsAt: formData.endsAt || '',
+        });
+
+        if (result.error) {
+          setError(result.error);
+        } else if (result.data) {
+          onSaved(result.data);
+        }
+      }
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setError('Revisa las fechas y valores de la oferta flash');
+      } else {
+        setError('Error inesperado');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const effectivePrice =
+    formData.discountValue && basePrice
+      ? formData.discountType === 'PERCENTAGE'
+        ? basePrice * (1 - (formData.discountValue || 0) / 100)
+        : formData.discountValue
+      : undefined;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      className="overflow-hidden"
+    >
+      <div className="p-4 sm:p-5 bg-yellow-50/30 rounded-xl border-2 border-yellow-200/20 space-y-4">
+        <h4 className="text-sm font-medium text-origen-bosque">
+          {existingDeal ? 'Editar oferta flash' : 'Nueva oferta flash'}
+        </h4>
+
+        {/* Selector de tipo (2 botones: PERCENTAGE, FIXED) */}
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { id: 'PERCENTAGE', icon: Percent, label: 'Porcentaje', desc: 'Descuento en %' },
+            { id: 'FIXED', icon: DollarSign, label: 'Precio fijo', desc: 'Precio especial' }
+          ].map((type) => (
+            <button
+              key={type.id}
+              onClick={() => setFormData({ ...formData, discountType: type.id as any })}
+              className={cn(
+                "flex flex-col items-center p-2 sm:p-3 rounded-lg border-2 transition-all",
+                formData.discountType === type.id
+                  ? "border-yellow-400 bg-yellow-100/50"
+                  : "border-yellow-200/30 hover:border-yellow-300 bg-white"
+              )}
+            >
+              <type.icon className="w-4 h-4 mb-1" />
+              <span className="text-xs font-semibold">{type.label}</span>
+              <span className="text-xs text-text-subtle">{type.desc}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Campo de valor */}
+        <div>
+          <label className="block text-xs font-medium text-origen-bosque mb-1.5">
+            {formData.discountType === 'PERCENTAGE' ? 'Descuento (%)' : 'Precio fijo (€)'}
+          </label>
+          {formData.discountType === 'PERCENTAGE' ? (
+            <PercentageInput
+              value={formData.discountValue || 10}
+              onChange={(value) => setFormData({ ...formData, discountValue: value })}
+              min={0.1}
+              max={90}
+              className="h-10 w-full rounded-lg"
+            />
+          ) : (
+            <CurrencyInput
+              value={formData.discountValue || 0}
+              onChange={(value) => setFormData({ ...formData, discountValue: value })}
+              min={0}
+              className="h-10 w-full rounded-lg"
+            />
+          )}
+        </div>
+
+        {/* Campos de fecha */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-origen-bosque mb-1.5">Inicio</label>
+            <Input
+              type="datetime-local"
+              value={formData.startsAt || ''}
+              onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
+              className="h-10 w-full rounded-lg text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-origen-bosque mb-1.5">Fin</label>
+            <Input
+              type="datetime-local"
+              value={formData.endsAt || ''}
+              onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
+              className="h-10 w-full rounded-lg text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Vista previa */}
+        {effectivePrice && formData.startsAt && formData.endsAt && (
+          <div className="p-3 bg-white rounded-lg border border-yellow-200/50">
+            <p className="text-xs text-text-subtle mb-2">Vista previa:</p>
+            <p className="text-sm font-semibold text-origen-bosque">
+              Precio especial: {effectivePrice.toFixed(2)}€
+            </p>
+            <p className="text-xs text-text-subtle mt-1">
+              Del {new Date(formData.startsAt).toLocaleDateString('es')} al {new Date(formData.endsAt).toLocaleDateString('es')}
+            </p>
+          </div>
+        )}
+
+        {/* Aviso de no-acumulación con tiers */}
+        {hasTiers && (
+          <Alert variant="info" className="text-xs">
+            <AlertCircle className="w-3 h-3 mr-1 shrink-0 mt-0.5" />
+            <p>Mientras la oferta flash esté activa, los descuentos por cantidad no se aplicarán</p>
+          </Alert>
+        )}
+
+        {error && (
+          <Alert variant="error" className="text-xs">
+            <AlertCircle className="w-3 h-3 mr-1 shrink-0" />
+            {error}
+          </Alert>
+        )}
+
+        <div className="flex gap-2 pt-2">
+          <Button
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white"
+            size="sm"
+          >
+            {isLoading ? 'Guardando...' : existingDeal ? 'Guardar cambios' : 'Crear oferta'}
+          </Button>
+          <Button
+            onClick={onCancel}
+            variant="secondary"
+            size="sm"
+            disabled={isLoading}
+          >
+            Cancelar
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
