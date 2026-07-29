@@ -513,7 +513,7 @@ export function StepPricing({
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
               <div className="flex items-center gap-2 shrink-0">
-                <Zap className="w-4 h-4 text-yellow-500" />
+                <Zap className="w-4 h-4 text-origen-mandarina" />
                 <h3 className="text-sm font-semibold text-origen-bosque">Oferta flash</h3>
               </div>
               {flashDeals.length > 0 && (
@@ -532,7 +532,7 @@ export function StepPricing({
                 className={cn(
                   "shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-lg border-2 transition-all text-xs font-medium min-h-[36px]",
                   hasBasePrice
-                    ? "border-yellow-300/30 hover:border-yellow-400 hover:bg-yellow-50/50 text-yellow-700 bg-surface-alt"
+                    ? "border-origen-mandarina/30 hover:border-origen-mandarina hover:bg-origen-mandarina/10 text-origen-bosque bg-surface-alt"
                     : "border-border bg-surface text-text-subtle cursor-not-allowed"
                 )}
               >
@@ -586,7 +586,7 @@ export function StepPricing({
 
           {/* Resumen de oferta existente */}
           {flashDeals.length > 0 && (
-            <div className="p-4 sm:p-5 bg-yellow-50/50 rounded-xl border border-yellow-200/50 space-y-3">
+            <div className="p-4 sm:p-5 bg-origen-mandarina/10 rounded-xl border border-origen-mandarina/30 space-y-3">
               {flashDeals.map((deal) => (
                 <div key={deal.id}>
                   <div className="flex items-start justify-between">
@@ -598,7 +598,7 @@ export function StepPricing({
                       </p>
                       <p className="text-xs text-text-subtle mt-1">
                         {deal.isCurrentlyActive ? (
-                          <span className="text-yellow-600 font-medium">Activa ahora</span>
+                          <span className="text-origen-bosque font-medium">Activa ahora</span>
                         ) : (
                           `Hasta ${new Date(deal.endsAt).toLocaleDateString('es')}`
                         )}
@@ -634,13 +634,14 @@ export function StepPricing({
 
           {/* Estado vacío */}
           {!showFlashDealForm && !flashDeals.length && hasBasePrice && (
-            <div className="p-6 text-center rounded-xl border-2 border-dashed border-yellow-200/50 bg-yellow-50/20">
-              <Zap className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+            <div className="p-6 text-center rounded-xl border-2 border-dashed border-origen-mandarina/30 bg-origen-mandarina/10">
+              <Zap className="w-8 h-8 text-origen-mandarina mx-auto mb-2" />
               <p className="text-sm font-medium text-origen-bosque mb-1">Sin oferta flash</p>
               <p className="text-xs text-text-subtle mb-3">Crea una oferta temporal con descuento de tiempo limitado</p>
               <Button
                 onClick={() => setShowFlashDealForm(true)}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs"
+                variant="primary"
+                className="text-xs"
                 size="sm"
               >
                 <Plus className="w-3 h-3 mr-1" />

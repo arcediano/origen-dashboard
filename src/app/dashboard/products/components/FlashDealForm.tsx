@@ -152,7 +152,7 @@ export function FlashDealForm({
       exit={{ opacity: 0, height: 0 }}
       className="overflow-hidden"
     >
-      <div className="p-4 sm:p-5 bg-yellow-50/30 rounded-xl border-2 border-yellow-200/20 space-y-4">
+      <div className="p-4 sm:p-5 bg-origen-mandarina/10 rounded-xl border-2 border-origen-mandarina/30 space-y-4">
         <h4 className="text-sm font-medium text-origen-bosque">
           {existingDeal ? 'Editar oferta flash' : 'Nueva oferta flash'}
         </h4>
@@ -169,12 +169,24 @@ export function FlashDealForm({
               className={cn(
                 "flex flex-col items-center p-2 sm:p-3 rounded-lg border-2 transition-all",
                 formData.discountType === type.id
-                  ? "border-yellow-400 bg-yellow-100/50"
-                  : "border-yellow-200/30 hover:border-yellow-300 bg-white"
+                  ? "border-origen-mandarina bg-origen-mandarina/15"
+                  : "border-origen-mandarina/20 hover:border-origen-mandarina/40 bg-white"
               )}
             >
-              <type.icon className="w-4 h-4 mb-1" />
-              <span className="text-xs font-semibold">{type.label}</span>
+              <type.icon
+                className={cn(
+                  "w-4 h-4 mb-1",
+                  formData.discountType === type.id && "text-origen-bosque"
+                )}
+              />
+              <span
+                className={cn(
+                  "text-xs font-semibold",
+                  formData.discountType === type.id && "text-origen-bosque"
+                )}
+              >
+                {type.label}
+              </span>
               <span className="text-xs text-text-subtle">{type.desc}</span>
             </button>
           ))}
@@ -227,7 +239,7 @@ export function FlashDealForm({
 
         {/* Vista previa */}
         {effectivePrice && formData.startsAt && formData.endsAt && (
-          <div className="p-3 bg-white rounded-lg border border-yellow-200/50">
+          <div className="p-3 bg-white rounded-lg border border-origen-mandarina/40">
             <p className="text-xs text-text-subtle mb-2">Vista previa:</p>
             <p className="text-sm font-semibold text-origen-bosque">
               Precio especial: {effectivePrice.toFixed(2)}€
@@ -257,7 +269,8 @@ export function FlashDealForm({
           <Button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white"
+            variant="primary"
+            className="flex-1"
             size="sm"
           >
             {isLoading ? 'Guardando...' : existingDeal ? 'Guardar cambios' : 'Crear oferta'}

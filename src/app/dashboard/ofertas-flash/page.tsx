@@ -6,7 +6,6 @@ import {
   Plus,
   Trash2,
   Edit2,
-  RefreshCw,
   Flame,
   Clock,
   CheckCircle,
@@ -404,20 +403,10 @@ export default function OfertasFlashPage() {
             tooltip="Ofertas flash"
             tooltipDetailed="Crea descuentos temporales en tus productos para generar urgencia de compra. Las ofertas activas se muestran automáticamente en el catálogo y en la home."
             actions={
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => void loadDeals(false)}
-                  aria-label="Refrescar"
-                >
-                  <RefreshCw className={`h-4 w-4 ${(loading || isTableLoading) ? 'animate-spin' : ''}`} aria-hidden="true" />
-                </Button>
-                <Button variant="primary" size="sm" onClick={() => setShowCreateModal(true)}>
-                  <Plus className="h-4 w-4" />
-                  Nueva oferta
-                </Button>
-              </div>
+              <Button variant="primary" size="sm" onClick={() => setShowCreateModal(true)}>
+                <Plus className="h-4 w-4" />
+                Nueva oferta
+              </Button>
             }
           />
 
