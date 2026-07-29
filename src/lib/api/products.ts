@@ -12,7 +12,7 @@
  */
 
 import { gatewayClient, GatewayError } from './client';
-import { type Product, type ProductFormData } from '@/types/product';
+import { type Product, type ProductFormData, type FlashDeal } from '@/types/product';
 import { uploadFile } from './media';
 import {
   type ApiProduct,
@@ -961,6 +961,77 @@ export async function updateProductCertification(
     return { data: raw, status: 200 };
   } catch (error) {
     return handleError(error, 'updateProductCertification');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// FLASH DEALS (Ofertas Flash)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Crea una nueva oferta flash para un producto.
+ * Ruta backend: POST /products/:id/flash-deal
+ */
+export async function createFlashDeal(
+  productId: string,
+  data: {
+    discountType: string;
+    discountValue: number;
+    startsAt: string;
+    endsAt: string;
+  },
+): Promise<ApiResponse<FlashDeal>> {
+  try {
+    // El gateway reenvía el cuerpo del microservicio sin desenvolver
+    // { success, data } — hay que extraer .data aquí explícitamente.
+    const raw = await gatewayClient.post<{ success: boolean; data: FlashDeal }>(
+      `/products/${productId}/flash-deal`,
+      data,
+    );
+    return { data: raw.data, status: 201 };
+  } catch (error) {
+    return handleError(error, 'createFlashDeal');
+  }
+}
+
+/**
+ * Actualiza una oferta flash existente de un producto.
+ * Ruta backend: PATCH /products/:id/flash-deal/:dealId
+ */
+export async function updateFlashDeal(
+  productId: string,
+  dealId: string,
+  data: {
+    discountType?: string;
+    discountValue?: number;
+    startsAt?: string;
+    endsAt?: string;
+  },
+): Promise<ApiResponse<FlashDeal>> {
+  try {
+    const raw = await gatewayClient.patch<{ success: boolean; data: FlashDeal }>(
+      `/products/${productId}/flash-deal/${dealId}`,
+      data,
+    );
+    return { data: raw.data, status: 200 };
+  } catch (error) {
+    return handleError(error, 'updateFlashDeal');
+  }
+}
+
+/**
+ * Cancela una oferta flash de un producto (soft delete: isActive = false).
+ * Ruta backend: DELETE /products/:id/flash-deal/:dealId
+ */
+export async function cancelFlashDeal(
+  productId: string,
+  dealId: string,
+): Promise<ApiResponse<null>> {
+  try {
+    await gatewayClient.delete(`/products/${productId}/flash-deal/${dealId}`);
+    return { status: 204, data: null };
+  } catch (error) {
+    return handleError(error, 'cancelFlashDeal');
   }
 }
 

@@ -215,6 +215,31 @@ export interface InventoryData {
 }
 
 // ============================================================================
+// TIPOS DE OFERTAS FLASH
+// ============================================================================
+
+export interface FlashDeal {
+  id: string;
+  discountType: 'PERCENTAGE' | 'FIXED';
+  discountValue: number;
+  startsAt: Date;
+  endsAt: Date;
+  isActive: boolean;
+  isCurrentlyActive: boolean;
+  effectivePrice?: number;
+  stacksWithTiers: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface FlashDealFormValue {
+  discountType: 'PERCENTAGE' | 'FIXED';
+  discountValue: number;
+  startsAt: string;
+  endsAt: string;
+}
+
+// ============================================================================
 // TIPO PRODUCTO PRINCIPAL
 // ============================================================================
 
@@ -235,6 +260,7 @@ export interface Product {
   basePrice: number;
   comparePrice?: number;
   priceTiers: PriceTier[];
+  flashDeal?: FlashDeal;
   sku: string;
   barcode?: string;
   stock: number;

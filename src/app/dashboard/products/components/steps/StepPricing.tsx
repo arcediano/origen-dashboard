@@ -35,7 +35,8 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { z } from 'zod';
-import type { PriceTier } from '@/types/product';
+import type { PriceTier, FlashDeal, FlashDealFormValue } from '@/types/product';
+import { createFlashDeal, updateFlashDeal, cancelFlashDeal } from '@/lib/api/products';
 
 interface StepPricingProps {
   formData?: any;
@@ -43,6 +44,8 @@ interface StepPricingProps {
   touched?: Record<string, boolean>;
   onInputChange: (field: string, value: any) => void;
   onPriceTiersChange?: (priceTiers: PriceTier[]) => void;
+  onFlashDealChange?: (flashDeal: FlashDealFormValue | null) => void;
+  productId?: string;
   completed?: boolean;
 }
 
@@ -63,6 +66,18 @@ const TierSchema = z.object({
   if (data.type === 'bundle') return data.buyQuantity && data.payQuantity && data.buyQuantity > data.payQuantity;
   return true;
 }, 'Valores no válidos');
+
+const FlashDealSchema = z.object({
+  discountType: z.enum(['PERCENTAGE', 'FIXED']),
+  discountValue: z.number().min(0.01),
+  startsAt: z.string(),
+  endsAt: z.string(),
+}).refine((data) => {
+  const now = new Date();
+  const endsAt = new Date(data.endsAt);
+  const startsAt = new Date(data.startsAt);
+  return endsAt > startsAt && endsAt > now;
+}, 'Las fechas deben ser válidas');
 
 // ============================================================================
 // HELPERS
@@ -101,11 +116,13 @@ function getTierTitle(tier: Partial<PriceTier>): string {
 // ============================================================================
 
 export function StepPricing({
-  formData = { basePrice: undefined, comparePrice: undefined, priceTiers: [] },
+  formData = { basePrice: undefined, comparePrice: undefined, priceTiers: [], flashDeal: undefined },
   errors = {},
   touched = {},
   onInputChange,
   onPriceTiersChange,
+  onFlashDealChange,
+  productId,
   completed
 }: StepPricingProps) {
 
@@ -123,6 +140,19 @@ export function StepPricing({
     buyQuantity: 3,
     payQuantity: 2,
   });
+
+  // Estado para flashDeal
+  const [showFlashDealForm, setShowFlashDealForm] = useState(false);
+  const [editingFlashDealId, setEditingFlashDealId] = useState<string | null>(null);
+  const [flashDeals, setFlashDeals] = useState<FlashDeal[]>(() => formData.flashDeal ? [formData.flashDeal] : []);
+  const [newFlashDeal, setNewFlashDeal] = useState<Partial<FlashDealFormValue>>({
+    discountType: 'PERCENTAGE',
+    discountValue: 10,
+    startsAt: new Date().toISOString().slice(0, 16),
+    endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+  });
+  const [flashDealError, setFlashDealError] = useState<string | null>(null);
+  const [isLoadingFlashDeal, setIsLoadingFlashDeal] = useState(false);
 
   const basePrice = formData.basePrice || 0;
   const hasBasePrice = basePrice > 0;
@@ -262,6 +292,106 @@ export function StepPricing({
   };
 
   // ============================================================================
+  // HANDLERS DE FLASH DEAL
+  // ============================================================================
+
+  const handleAddFlashDeal = async () => {
+    setFlashDealError(null);
+    try {
+      FlashDealSchema.parse(newFlashDeal);
+
+      if (!productId) {
+        // Modo creación: guardar en formData
+        const flashDealData: FlashDealFormValue = {
+          discountType: newFlashDeal.discountType as 'PERCENTAGE' | 'FIXED',
+          discountValue: newFlashDeal.discountValue || 0,
+          startsAt: newFlashDeal.startsAt || '',
+          endsAt: newFlashDeal.endsAt || '',
+        };
+        onInputChange('flashDeal', flashDealData);
+        onFlashDealChange?.(flashDealData);
+        resetFlashDealForm();
+        setShowFlashDealForm(false);
+      } else if (editingFlashDealId) {
+        // Modo edición de una oferta existente: PATCH inmediato
+        setIsLoadingFlashDeal(true);
+        const result = await updateFlashDeal(productId, editingFlashDealId, {
+          discountType: newFlashDeal.discountType || 'PERCENTAGE',
+          discountValue: newFlashDeal.discountValue || 0,
+          startsAt: newFlashDeal.startsAt || '',
+          endsAt: newFlashDeal.endsAt || '',
+        });
+        setIsLoadingFlashDeal(false);
+
+        if (result.error) {
+          setFlashDealError(result.error);
+        } else if (result.data) {
+          setFlashDeals(flashDeals.map((d) => (d.id === editingFlashDealId ? result.data! : d)));
+          resetFlashDealForm();
+          setShowFlashDealForm(false);
+        }
+      } else {
+        // Modo creación de una oferta nueva: llamar a API inmediatamente
+        setIsLoadingFlashDeal(true);
+        const result = await createFlashDeal(productId, {
+          discountType: newFlashDeal.discountType || 'PERCENTAGE',
+          discountValue: newFlashDeal.discountValue || 0,
+          startsAt: newFlashDeal.startsAt || '',
+          endsAt: newFlashDeal.endsAt || '',
+        });
+        setIsLoadingFlashDeal(false);
+
+        if (result.error) {
+          setFlashDealError(result.error);
+        } else if (result.data) {
+          setFlashDeals([...flashDeals, result.data]);
+          resetFlashDealForm();
+          setShowFlashDealForm(false);
+        }
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setFlashDealError('Revisa las fechas y valores de la oferta flash');
+      }
+    }
+  };
+
+  const handleEditFlashDeal = (deal: FlashDeal) => {
+    setEditingFlashDealId(deal.id);
+    setNewFlashDeal({
+      discountType: deal.discountType,
+      discountValue: deal.discountValue,
+      startsAt: new Date(deal.startsAt).toISOString().slice(0, 16),
+      endsAt: new Date(deal.endsAt).toISOString().slice(0, 16),
+    });
+    setFlashDealError(null);
+    setShowFlashDealForm(true);
+  };
+
+  const handleCancelFlashDeal = async (dealId: string) => {
+    if (!productId) return;
+
+    setIsLoadingFlashDeal(true);
+    const result = await cancelFlashDeal(productId, dealId);
+    setIsLoadingFlashDeal(false);
+
+    if (!result.error) {
+      setFlashDeals(flashDeals.filter(d => d.id !== dealId));
+    }
+  };
+
+  const resetFlashDealForm = () => {
+    setNewFlashDeal({
+      discountType: 'PERCENTAGE',
+      discountValue: 10,
+      startsAt: new Date().toISOString().slice(0, 16),
+      endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+    });
+    setFlashDealError(null);
+    setEditingFlashDealId(null);
+  };
+
+  // ============================================================================
   // RENDER
   // ============================================================================
 
@@ -376,6 +506,250 @@ export function StepPricing({
             </div>
           </div>
         )}
+
+        {/* Sección de oferta flash */}
+        <div className="space-y-4 mb-6">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <div className="flex items-center gap-2 shrink-0">
+                <Zap className="w-4 h-4 text-yellow-500" />
+                <h3 className="text-sm font-semibold text-origen-bosque">Oferta flash</h3>
+              </div>
+              {flashDeals.length > 0 && (
+                <Badge variant="warning" size="sm">
+                  {flashDeals[0].isCurrentlyActive ? 'Activa ahora' : 'Programada'}
+                </Badge>
+              )}
+            </div>
+            {!flashDeals.length || !productId ? (
+              <button
+                onClick={() => {
+                  resetFlashDealForm();
+                  setShowFlashDealForm(!showFlashDealForm);
+                }}
+                disabled={!hasBasePrice}
+                className={cn(
+                  "shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-lg border-2 transition-all text-xs font-medium min-h-[36px]",
+                  hasBasePrice
+                    ? "border-yellow-300/30 hover:border-yellow-400 hover:bg-yellow-50/50 text-yellow-700 bg-surface-alt"
+                    : "border-border bg-surface text-text-subtle cursor-not-allowed"
+                )}
+              >
+                <Plus className="w-3 h-3 shrink-0" />
+                <span>{showFlashDealForm ? 'Cancelar' : 'Nueva oferta'}</span>
+              </button>
+            ) : null}
+          </div>
+
+          {!hasBasePrice && (
+            <Alert variant="warning" className="mb-4">
+              <AlertCircle className="w-4 h-4 mr-2" />
+              Configura primero el precio de venta para crear una oferta flash
+            </Alert>
+          )}
+
+          {/* Formulario de oferta flash */}
+          <AnimatePresence>
+            {showFlashDealForm && hasBasePrice && (!flashDeals.length || editingFlashDealId) && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="p-4 sm:p-5 bg-yellow-50/30 rounded-xl border-2 border-yellow-200/20 space-y-4">
+                  <h4 className="text-sm font-medium text-origen-bosque">
+                    {editingFlashDealId ? 'Editar oferta flash' : 'Nueva oferta flash'}
+                  </h4>
+
+                  {/* Selector de tipo (2 botones: PERCENTAGE, FIXED) */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: 'PERCENTAGE', icon: Percent, label: 'Porcentaje', desc: 'Descuento en %' },
+                      { id: 'FIXED', icon: DollarSign, label: 'Precio fijo', desc: 'Precio especial' }
+                    ].map((type) => (
+                      <button
+                        key={type.id}
+                        onClick={() => setNewFlashDeal({ ...newFlashDeal, discountType: type.id as any })}
+                        className={cn(
+                          "flex flex-col items-center p-2 sm:p-3 rounded-lg border-2 transition-all",
+                          newFlashDeal.discountType === type.id
+                            ? "border-yellow-400 bg-yellow-100/50"
+                            : "border-yellow-200/30 hover:border-yellow-300 bg-white"
+                        )}
+                      >
+                        <type.icon className="w-4 h-4 mb-1" />
+                        <span className="text-xs font-semibold">{type.label}</span>
+                        <span className="text-xs text-text-subtle">{type.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Campo de valor */}
+                  <div>
+                    <label className="block text-xs font-medium text-origen-bosque mb-1.5">
+                      {newFlashDeal.discountType === 'PERCENTAGE' ? 'Descuento (%)' : 'Precio fijo (€)'}
+                    </label>
+                    {newFlashDeal.discountType === 'PERCENTAGE' ? (
+                      <PercentageInput
+                        value={newFlashDeal.discountValue || 10}
+                        onChange={(value) => setNewFlashDeal({ ...newFlashDeal, discountValue: value })}
+                        min={0.1}
+                        max={90}
+                        className="h-10 w-full rounded-lg"
+                      />
+                    ) : (
+                      <CurrencyInput
+                        value={newFlashDeal.discountValue || 0}
+                        onChange={(value) => setNewFlashDeal({ ...newFlashDeal, discountValue: value })}
+                        min={0}
+                        className="h-10 w-full rounded-lg"
+                      />
+                    )}
+                  </div>
+
+                  {/* Campos de fecha */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-origen-bosque mb-1.5">Inicio</label>
+                      <Input
+                        type="datetime-local"
+                        value={newFlashDeal.startsAt || ''}
+                        onChange={(e) => setNewFlashDeal({ ...newFlashDeal, startsAt: e.target.value })}
+                        className="h-10 w-full rounded-lg text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-origen-bosque mb-1.5">Fin</label>
+                      <Input
+                        type="datetime-local"
+                        value={newFlashDeal.endsAt || ''}
+                        onChange={(e) => setNewFlashDeal({ ...newFlashDeal, endsAt: e.target.value })}
+                        className="h-10 w-full rounded-lg text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Vista previa */}
+                  {newFlashDeal.discountValue && newFlashDeal.startsAt && newFlashDeal.endsAt && (
+                    <div className="p-3 bg-white rounded-lg border border-yellow-200/50">
+                      <p className="text-xs text-text-subtle mb-2">Vista previa:</p>
+                      <p className="text-sm font-semibold text-origen-bosque">
+                        {newFlashDeal.discountType === 'PERCENTAGE'
+                          ? `Precio especial: ${(basePrice * (1 - (newFlashDeal.discountValue || 0) / 100)).toFixed(2)}€`
+                          : `Precio especial: ${newFlashDeal.discountValue?.toFixed(2)}€`}
+                      </p>
+                      <p className="text-xs text-text-subtle mt-1">
+                        Del {new Date(newFlashDeal.startsAt).toLocaleDateString('es')} al {new Date(newFlashDeal.endsAt).toLocaleDateString('es')}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Aviso de no-acumulación con tiers */}
+                  {tiers.length > 0 && (
+                    <Alert variant="info" className="text-xs">
+                      <AlertCircle className="w-3 h-3 mr-1 shrink-0 mt-0.5" />
+                      <p>Mientras la oferta flash esté activa, los descuentos por cantidad no se aplicarán</p>
+                    </Alert>
+                  )}
+
+                  {flashDealError && (
+                    <Alert variant="error" className="text-xs">
+                      <AlertCircle className="w-3 h-3 mr-1 shrink-0" />
+                      {flashDealError}
+                    </Alert>
+                  )}
+
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      onClick={handleAddFlashDeal}
+                      disabled={isLoadingFlashDeal}
+                      className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white"
+                      size="sm"
+                    >
+                      {isLoadingFlashDeal ? 'Guardando...' : editingFlashDealId ? 'Guardar cambios' : 'Crear oferta'}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowFlashDealForm(false);
+                        resetFlashDealForm();
+                      }}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Resumen de oferta existente */}
+          {flashDeals.length > 0 && (
+            <div className="p-4 sm:p-5 bg-yellow-50/50 rounded-xl border border-yellow-200/50 space-y-3">
+              {flashDeals.map((deal) => (
+                <div key={deal.id}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-origen-bosque">
+                        {deal.discountType === 'PERCENTAGE'
+                          ? `Descuento del ${deal.discountValue}%`
+                          : `Precio especial ${deal.discountValue}€`}
+                      </p>
+                      <p className="text-xs text-text-subtle mt-1">
+                        {deal.isCurrentlyActive ? (
+                          <span className="text-yellow-600 font-medium">Activa ahora</span>
+                        ) : (
+                          `Hasta ${new Date(deal.endsAt).toLocaleDateString('es')}`
+                        )}
+                      </p>
+                    </div>
+                    {productId && (
+                      <div className="flex gap-1 shrink-0">
+                        <Button
+                          onClick={() => handleEditFlashDeal(deal)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs"
+                          disabled={isLoadingFlashDeal}
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          onClick={() => handleCancelFlashDeal(deal.id)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs text-red-600"
+                          disabled={isLoadingFlashDeal}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Estado vacío */}
+          {!showFlashDealForm && !flashDeals.length && hasBasePrice && (
+            <div className="p-6 text-center rounded-xl border-2 border-dashed border-yellow-200/50 bg-yellow-50/20">
+              <Zap className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+              <p className="text-sm font-medium text-origen-bosque mb-1">Sin oferta flash</p>
+              <p className="text-xs text-text-subtle mb-3">Crea una oferta temporal con descuento de tiempo limitado</p>
+              <Button
+                onClick={() => setShowFlashDealForm(true)}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs"
+                size="sm"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                Crear oferta flash
+              </Button>
+            </div>
+          )}
+        </div>
 
         {/* Sección de ofertas por cantidad */}
         <div className="space-y-4">
