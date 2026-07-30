@@ -6,6 +6,7 @@ import {
   DollarSign,
   AlertCircle,
   Percent,
+  Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -152,8 +153,9 @@ export function FlashDealForm({
       exit={{ opacity: 0, height: 0 }}
       className="overflow-hidden"
     >
-      <div className="p-4 sm:p-5 bg-origen-mandarina/10 rounded-xl border-2 border-origen-mandarina/30 space-y-4">
-        <h4 className="text-sm font-medium text-origen-bosque">
+      <div className="p-4 sm:p-5 bg-white rounded-xl border border-origen-mandarina/20 shadow-subtle space-y-4">
+        <h4 className="text-sm font-medium text-origen-bosque flex items-center gap-1.5">
+          <Zap className="w-3.5 h-3.5 text-origen-mandarina shrink-0" />
           {existingDeal ? 'Editar oferta flash' : 'Nueva oferta flash'}
         </h4>
 
@@ -265,7 +267,7 @@ export function FlashDealForm({
           </Alert>
         )}
 
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2 pt-3 border-t border-border-subtle">
           <Button
             onClick={handleSubmit}
             disabled={isLoading}

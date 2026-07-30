@@ -373,11 +373,15 @@ export function StepPricing({
     if (!productId) return;
 
     setIsLoadingFlashDeal(true);
+    setFlashDealError(null);
     const result = await cancelFlashDeal(productId, dealId);
     setIsLoadingFlashDeal(false);
 
     if (!result.error) {
       setFlashDeals(flashDeals.filter(d => d.id !== dealId));
+      setFlashDealError(null);
+    } else {
+      setFlashDealError(result.error);
     }
   };
 
@@ -549,6 +553,13 @@ export function StepPricing({
             </Alert>
           )}
 
+          {flashDealError && (
+            <Alert variant="error" className="mb-4">
+              <AlertCircle className="w-4 h-4 mr-2" />
+              {flashDealError}
+            </Alert>
+          )}
+
           {/* Formulario de oferta flash — componente compartido */}
           <AnimatePresence>
             {showFlashDealForm && hasBasePrice && (!flashDeals.length || editingFlashDealId) && (
@@ -586,7 +597,7 @@ export function StepPricing({
 
           {/* Resumen de oferta existente */}
           {flashDeals.length > 0 && (
-            <div className="p-4 sm:p-5 bg-origen-mandarina/10 rounded-xl border border-origen-mandarina/30 space-y-3">
+            <div className="p-4 sm:p-5 bg-white rounded-xl border border-origen-mandarina/20 shadow-subtle space-y-3">
               {flashDeals.map((deal) => (
                 <div key={deal.id}>
                   <div className="flex items-start justify-between">
@@ -634,7 +645,7 @@ export function StepPricing({
 
           {/* Estado vacío */}
           {!showFlashDealForm && !flashDeals.length && hasBasePrice && (
-            <div className="p-6 text-center rounded-xl border-2 border-dashed border-origen-mandarina/30 bg-origen-mandarina/10">
+            <div className="p-6 text-center rounded-xl border border-dashed border-origen-mandarina/25 bg-surface-alt">
               <Zap className="w-8 h-8 text-origen-mandarina mx-auto mb-2" />
               <p className="text-sm font-medium text-origen-bosque mb-1">Sin oferta flash</p>
               <p className="text-xs text-text-subtle mb-3">Crea una oferta temporal con descuento de tiempo limitado</p>
