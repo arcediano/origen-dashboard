@@ -42,6 +42,8 @@ interface ProductFormStepsProps {
   skuSuggestion?: string;
   /** ID del producto en modo edición — permite llamadas granulares a la API de certs. */
   productId?: string;
+  /** Indica si el producto está publicado (ACTIVE u OUT_OF_STOCK). Usado para mostrar indicadores de campos sensibles. */
+  isPublishedProduct?: boolean;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -56,6 +58,7 @@ export function ProductFormSteps({
   onImagesChange,
   skuSuggestion,
   productId,
+  isPublishedProduct,
 }: ProductFormStepsProps) {
   return (
     <AnimatePresence mode="wait">
@@ -73,6 +76,7 @@ export function ProductFormSteps({
             touched={{}}
             onInputChange={onInputChange}
             completed={completedTabs.basic}
+            isPublishedProduct={isPublishedProduct}
           />
         )}
 
@@ -81,6 +85,7 @@ export function ProductFormSteps({
             gallery={formData.gallery}
             onImagesChange={onImagesChange}
             completed={completedTabs.images}
+            isPublishedProduct={isPublishedProduct}
           />
         )}
 
@@ -100,6 +105,7 @@ export function ProductFormSteps({
             nutritionalInfo={formData.nutritionalInfo || defaultNutritionalInfo}
             onNestedChange={onNestedChange}
             completed={completedTabs.nutritional}
+            isPublishedProduct={isPublishedProduct}
           />
         )}
 
@@ -108,6 +114,7 @@ export function ProductFormSteps({
             productionInfo={formData.productionInfo || defaultProductionInfo}
             onNestedChange={onNestedChange}
             completed={completedTabs.production}
+            isPublishedProduct={isPublishedProduct}
           />
         )}
 
@@ -130,6 +137,7 @@ export function ProductFormSteps({
             completed={completedTabs.certifications}
             productCategory={formData.categoryName || formData.categoryId}
             productId={productId}
+            isPublishedProduct={isPublishedProduct}
           />
         )}
       </motion.div>

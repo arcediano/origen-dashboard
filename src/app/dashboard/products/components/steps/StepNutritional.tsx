@@ -11,11 +11,12 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
   Checkbox,
   Textarea,
+  Label,
 } from '@arcediano/ux-library';
 import { Tooltip } from '@arcediano/ux-library';
-import { 
-  FlaskConical, 
-  CheckCircle, 
+import {
+  FlaskConical,
+  CheckCircle,
   Sparkles,
   AlertCircle,
   Scale,
@@ -48,11 +49,28 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import type { NutritionalInfo } from '@/types/product';
+import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
 
 interface StepNutritionalProps {
   nutritionalInfo?: NutritionalInfo;
   onNestedChange: (section: string, field: string, value: any) => void;
   completed?: boolean;
+  isPublishedProduct?: boolean;
+}
+
+// Helper para renderizar indicador de campo sensible
+function SensitiveFieldIndicator({ fieldName }: { fieldName: string }) {
+  const labels = SENSITIVE_FIELD_LABELS[fieldName];
+  if (!labels) return null;
+
+  return (
+    <Tooltip
+      content="Campo sensible"
+      detailed="Editar este campo enviará el producto a revisión y lo ocultará del catálogo hasta que se apruebe."
+      size="sm"
+      className="[&_button]:text-feedback-warning [&_button:hover]:text-feedback-warning/80"
+    />
+  );
 }
 
 // ============================================================================
@@ -92,7 +110,7 @@ const getAllergenIcon = (allergen: string) => {
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
-export function StepNutritional({ 
+export function StepNutritional({
   nutritionalInfo = {
     servingSize: '100g',
     servingSizeValue: 100,
@@ -112,7 +130,8 @@ export function StepNutritional({
     isSoyFree: false,
   },
   onNestedChange,
-  completed 
+  completed,
+  isPublishedProduct = false,
 }: StepNutritionalProps) {
   
   const [ingredientInput, setIngredientInput] = useState('');
@@ -451,12 +470,17 @@ export function StepNutritional({
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <AlertCircle className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-foreground">
+                    <Label className="text-sm font-medium">
                       Contiene
-                    </span>
-                    <Tooltip 
+                    </Label>
+                    {isPublishedProduct && (
+                      <div className="p-2 -m-2">
+                        <SensitiveFieldIndicator fieldName="allergens" />
+                      </div>
+                    )}
+                    <Tooltip
                       content="Alérgenos presentes"
                       size="sm"
                     />
@@ -485,12 +509,17 @@ export function StepNutritional({
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <AlertTriangle className="h-5 w-5 text-origen-pradera" />
-                    <span className="text-sm font-medium text-foreground">
+                    <Label className="text-sm font-medium">
                       Puede contener
-                    </span>
-                    <Tooltip 
+                    </Label>
+                    {isPublishedProduct && (
+                      <div className="p-2 -m-2">
+                        <SensitiveFieldIndicator fieldName="mayContain" />
+                      </div>
+                    )}
+                    <Tooltip
                       content="Trazas"
                       size="sm"
                     />
@@ -583,13 +612,20 @@ export function StepNutritional({
             >
               {/* Ingredientes */}
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <FileText className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-foreground">
-                    Ingredientes
-                    <span className="text-red-500 ml-1">*</span>
-                  </span>
-                  <Tooltip 
+                  <div className="flex items-center gap-1.5">
+                    <Label className="text-sm font-medium">
+                      Ingredientes
+                    </Label>
+                    <span className="text-red-500">*</span>
+                    {isPublishedProduct && (
+                      <div className="p-2 -m-2">
+                        <SensitiveFieldIndicator fieldName="ingredients" />
+                      </div>
+                    )}
+                  </div>
+                  <Tooltip
                     content="Lista en orden descendente"
                     size="sm"
                   />

@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Button, Input, Badge, DateInput } from '@arcediano/ux-library';
+import { Button, Input, Badge, DateInput, Label } from '@arcediano/ux-library';
 import { Checkbox } from '@arcediano/ux-library';
 import { ImageUploader } from '../../components/ImageUploader';
 import { Tooltip } from '@arcediano/ux-library';
@@ -38,11 +38,28 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import type { ProductionInfo, ProductionMedia } from '@/types/product';
 import type { ProductImage } from '@/types/product';
+import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
 
 interface StepProductionProps {
   productionInfo?: ProductionInfo;
   onNestedChange: (section: string, field: string, value: any) => void;
   completed?: boolean;
+  isPublishedProduct?: boolean;
+}
+
+// Helper para renderizar indicador de campo sensible
+function SensitiveFieldIndicator({ fieldName }: { fieldName: string }) {
+  const labels = SENSITIVE_FIELD_LABELS[fieldName];
+  if (!labels) return null;
+
+  return (
+    <Tooltip
+      content="Campo sensible"
+      detailed="Editar este campo enviará el producto a revisión y lo ocultará del catálogo hasta que se apruebe."
+      size="sm"
+      className="[&_button]:text-feedback-warning [&_button:hover]:text-feedback-warning/80"
+    />
+  );
 }
 
 // ============================================================================
@@ -64,7 +81,7 @@ const SUSTAINABLE_PRACTICES = [
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
-export function StepProduction({ 
+export function StepProduction({
   productionInfo = {
     story: '',
     farmName: '',
@@ -81,7 +98,8 @@ export function StepProduction({
     media: [],
   },
   onNestedChange,
-  completed 
+  completed,
+  isPublishedProduct = false,
 }: StepProductionProps) {
   
   const [activeTab, setActiveTab] = useState('story');
@@ -356,50 +374,110 @@ export function StepProduction({
               className="space-y-6"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label="País de origen"
-                  value={productionInfo.origin}
-                  onChange={(e) => handleChange('origin', e.target.value)}
-                  inputSize="lg"
-                  placeholder="España"
-                />
-                <Input
-                  label="Finca / Taller"
-                  value={productionInfo.farmName}
-                  onChange={(e) => handleChange('farmName', e.target.value)}
-                  inputSize="lg"
-                  placeholder="Finca El Valle"
-                />
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Label className="text-sm font-medium">
+                      País de origen
+                    </Label>
+                    {isPublishedProduct && (
+                      <div className="p-2 -m-2">
+                        <SensitiveFieldIndicator fieldName="origin" />
+                      </div>
+                    )}
+                  </div>
+                  <Input
+                    value={productionInfo.origin}
+                    onChange={(e) => handleChange('origin', e.target.value)}
+                    inputSize="lg"
+                    placeholder="España"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Label className="text-sm font-medium">
+                      Finca / Taller
+                    </Label>
+                    {isPublishedProduct && (
+                      <div className="p-2 -m-2">
+                        <SensitiveFieldIndicator fieldName="farmName" />
+                      </div>
+                    )}
+                  </div>
+                  <Input
+                    value={productionInfo.farmName}
+                    onChange={(e) => handleChange('farmName', e.target.value)}
+                    inputSize="lg"
+                    placeholder="Finca El Valle"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <DateInput
-                  label="Fecha de cosecha"
-                  value={productionInfo.harvestDate ? new Date(productionInfo.harvestDate).toISOString().split('T')[0] : ''}
-                  onChange={(e) => handleChange('harvestDate', e.target.value ? new Date(e.target.value) : undefined)}
-                  inputSize="md"
-                />
-                <DateInput
-                  label="Fecha de producción"
-                  value={productionInfo.productionDate ? new Date(productionInfo.productionDate).toISOString().split('T')[0] : ''}
-                  onChange={(e) => handleChange('productionDate', e.target.value ? new Date(e.target.value) : undefined)}
-                  inputSize="md"
-                />
-                <DateInput
-                  label="Fecha de caducidad"
-                  value={productionInfo.expiryDate ? new Date(productionInfo.expiryDate).toISOString().split('T')[0] : ''}
-                  onChange={(e) => handleChange('expiryDate', e.target.value ? new Date(e.target.value) : undefined)}
-                  inputSize="md"
-                />
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Label className="text-sm font-medium">
+                      Fecha de cosecha
+                    </Label>
+                    {isPublishedProduct && (
+                      <div className="p-2 -m-2">
+                        <SensitiveFieldIndicator fieldName="harvestDate" />
+                      </div>
+                    )}
+                  </div>
+                  <DateInput
+                    value={productionInfo.harvestDate ? new Date(productionInfo.harvestDate).toISOString().split('T')[0] : ''}
+                    onChange={(e) => handleChange('harvestDate', e.target.value ? new Date(e.target.value) : undefined)}
+                    inputSize="md"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Label className="text-sm font-medium">
+                      Fecha de producción
+                    </Label>
+                    {isPublishedProduct && (
+                      <div className="p-2 -m-2">
+                        <SensitiveFieldIndicator fieldName="productionDate" />
+                      </div>
+                    )}
+                  </div>
+                  <DateInput
+                    value={productionInfo.productionDate ? new Date(productionInfo.productionDate).toISOString().split('T')[0] : ''}
+                    onChange={(e) => handleChange('productionDate', e.target.value ? new Date(e.target.value) : undefined)}
+                    inputSize="md"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Label className="text-sm font-medium">
+                      Fecha de caducidad
+                    </Label>
+                    {isPublishedProduct && (
+                      <div className="p-2 -m-2">
+                        <SensitiveFieldIndicator fieldName="expiryDate" />
+                      </div>
+                    )}
+                  </div>
+                  <DateInput
+                    value={productionInfo.expiryDate ? new Date(productionInfo.expiryDate).toISOString().split('T')[0] : ''}
+                    onChange={(e) => handleChange('expiryDate', e.target.value ? new Date(e.target.value) : undefined)}
+                    inputSize="md"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <Package className="h-5 w-5 text-origen-pradera" />
-                  <span className="text-sm font-medium text-foreground">
+                  <Label className="text-sm font-medium">
                     Número de lote
-                  </span>
-                  <Tooltip 
+                  </Label>
+                  {isPublishedProduct && (
+                    <div className="p-2 -m-2">
+                      <SensitiveFieldIndicator fieldName="batchNumber" />
+                    </div>
+                  )}
+                  <Tooltip
                     content="Para trazabilidad"
                     size="sm"
                   />

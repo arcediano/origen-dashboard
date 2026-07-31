@@ -85,6 +85,8 @@ interface StepCertificationsAttributesProps {
   productCategory?: string;
   /** ID del producto cuando estamos en modo edición. Permite llamadas granulares al backend. */
   productId?: string;
+  /** Indica si el producto está publicado (ACTIVE u OUT_OF_STOCK). Usado para mostrar indicadores de campos sensibles. */
+  isPublishedProduct?: boolean;
 }
 
 // ============================================================================
@@ -193,6 +195,7 @@ export function StepCertificationsAttributes({
   completed,
   productCategory = 'general',
   productId,
+  isPublishedProduct = false,
 }: StepCertificationsAttributesProps) {
 
   const [activeTab, setActiveTab] = useState('certifications');

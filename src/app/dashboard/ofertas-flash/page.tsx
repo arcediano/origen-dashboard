@@ -11,6 +11,7 @@ import {
   CheckCircle,
   Filter,
   Package,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   Button,
@@ -44,6 +45,7 @@ import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { fetchMyFlashDeals, fetchProducts, cancelFlashDeal, type FlashDealWithProduct } from '@/lib/api/products';
 import { FlashDealForm } from '../products/components/FlashDealForm';
 import type { Product } from '@/types/product';
+import Link from 'next/link';
 
 // ─── Status label ────────────────────────────────────────────────────────────
 
@@ -168,6 +170,7 @@ interface DealCardProps {
 function DealCard({ deal, onEdit }: DealCardProps) {
   const status = getStatus(deal);
   const isFinished = status === 'finished' || status === 'cancelled';
+  const showNotVisible = status === 'active' && deal.productVisible === false;
 
   return (
     <Card padding="sm">
@@ -184,6 +187,19 @@ function DealCard({ deal, onEdit }: DealCardProps) {
         </div>
         <Badge variant={STATUS_BADGE[status]} size="sm">{STATUS_LABEL[status]}</Badge>
       </div>
+
+      {showNotVisible && (
+        <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-feedback-warning-subtle px-2.5 py-2">
+          <AlertTriangle className="h-3.5 w-3.5 text-feedback-warning shrink-0 mt-0.5" aria-hidden />
+          <p className="text-xs text-feedback-warning-text leading-relaxed">
+            Producto no visible.{' '}
+            <Link href={`/dashboard/products/${deal.productId}`} className="underline underline-offset-2 font-medium">
+              Ver detalle
+            </Link>
+          </p>
+        </div>
+      )}
+
       <div className="mt-2 flex items-center justify-between text-xs">
         <span className="font-semibold text-sm text-origen-pradera">
           {formatPrice(deal.discountValue, deal.discountType)}
@@ -294,9 +310,16 @@ export default function OfertasFlashPage() {
   const activeCount = deals.filter((d) => getStatus(d) === 'active').length;
   const scheduledCount = deals.filter((d) => getStatus(d) === 'scheduled').length;
   const finishedCount = deals.filter((d) => getStatus(d) === 'finished').length;
+  const notVisibleCount = deals.filter((d) => getStatus(d) === 'active' && d.productVisible === false).length;
 
   const stats: StatGridItem[] = [
-    { label: 'Activas ahora', value: activeCount, icon: <Flame className="w-5 h-5" />, variant: 'hoja' },
+    {
+      label: 'Activas ahora',
+      value: activeCount,
+      icon: <Flame className="w-5 h-5" />,
+      variant: 'hoja',
+      subtitle: notVisibleCount > 0 ? `${notVisibleCount} no visible${notVisibleCount > 1 ? 's' : ''} ahora mismo` : undefined,
+    },
     { label: 'Programadas', value: scheduledCount, icon: <Clock className="w-5 h-5" />, variant: 'mandarina' },
     { label: 'Finalizadas', value: finishedCount, icon: <CheckCircle className="w-5 h-5" />, variant: 'bosque' },
     { label: 'Total ofertas', value: deals.length, icon: <Zap className="w-5 h-5" />, variant: 'pradera' },
@@ -317,20 +340,30 @@ export default function OfertasFlashPage() {
     {
       key: 'producto',
       header: 'Producto',
-      accessor: (deal) => (
-        <div className="flex items-center gap-3">
-          {deal.productMainImageUrl && (
-            <img
-              src={deal.productMainImageUrl}
-              alt={deal.productName}
-              className="w-8 h-8 rounded-lg object-cover shrink-0"
-            />
-          )}
-          <span className="text-sm font-medium text-origen-bosque truncate max-w-[220px]" title={deal.productName}>
-            {deal.productName}
-          </span>
-        </div>
-      ),
+      accessor: (deal) => {
+        const status = getStatus(deal);
+        return (
+          <div className="flex flex-col">
+            <div className="flex items-center gap-3">
+              {deal.productMainImageUrl && (
+                <img
+                  src={deal.productMainImageUrl}
+                  alt={deal.productName}
+                  className="w-8 h-8 rounded-lg object-cover shrink-0"
+                />
+              )}
+              <span className="text-sm font-medium text-origen-bosque truncate max-w-[220px]" title={deal.productName}>
+                {deal.productName}
+              </span>
+            </div>
+            {status === 'active' && deal.productVisible === false && (
+              <Link href={`/dashboard/products/${deal.productId}`} className="text-xs text-feedback-warning-text underline underline-offset-2 mt-1">
+                Ver por qué no es visible
+              </Link>
+            )}
+          </div>
+        );
+      },
       sortable: true,
       sortValue: (deal) => deal.productName,
     },
@@ -359,7 +392,17 @@ export default function OfertasFlashPage() {
       header: 'Estado',
       accessor: (deal) => {
         const status = getStatus(deal);
-        return <Badge variant={STATUS_BADGE[status]} size="sm">{STATUS_LABEL[status]}</Badge>;
+        return (
+          <div className="flex items-center gap-2">
+            <Badge variant={STATUS_BADGE[status]} size="sm">{STATUS_LABEL[status]}</Badge>
+            {status === 'active' && deal.productVisible === false && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-feedback-warning">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                Producto no visible
+              </span>
+            )}
+          </div>
+        );
       },
     },
     {

@@ -21,3 +21,4 @@ export { ProductPreviewModal } from './ProductPreviewModal';
 export { AdjustStockDialog } from './ProductDialogs/AdjustStockDialog';
 export { DeleteProductDialog } from './ProductDialogs/DeleteProductDialog';
 export { SuccessPublishModal } from './ProductDialogs/SuccessPublishModal';
+export { SensitiveChangeConfirmDialog } from './ProductDialogs/SensitiveChangeConfirmDialog';

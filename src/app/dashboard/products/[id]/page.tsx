@@ -22,6 +22,9 @@ import {
   MobilePullRefresh,
   PageLoader,
   PageError,
+  Alert,
+  AlertTitle,
+  AlertDescription,
 } from '@arcediano/ux-library';
 
 import { PageHeader } from '../../components/PageHeader';
@@ -37,6 +40,7 @@ import {
 import { type Product } from '@/types/product';
 import { fetchProductById, deleteProduct, updateProduct } from '@/lib/api/products';
 import { sanitizeHtml } from '@/lib/html-sanitizer';
+import { formatFieldsInSentence } from '@/lib/constants/sensitiveFields';
 
 // ============================================================================
 // ANIMACIONES
@@ -442,45 +446,66 @@ function StatusCard({
 
       {/* En revisión — informar al productor que no puede editar el estado */}
       {isPendingApproval && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <p className="text-xs font-semibold text-amber-800">Pendiente de revisión</p>
-          </div>
-          <p className="text-[11px] text-amber-700 leading-relaxed">
-            Tu producto está siendo revisado por el equipo de Origen. Te notificaremos cuando sea aprobado o si necesita cambios.
-          </p>
-        </div>
+        (() => {
+          const isFirstSubmission = !product.publishedAt;
+          const fields = (product.lastReviewTriggerFields as string[]) || [];
+          const camposFormateados = fields.length > 0 ? formatFieldsInSentence(fields) : null;
+
+          if (isFirstSubmission) {
+            // Caso a: Primera publicación
+            return (
+              <Alert variant="warning">
+                <AlertTitle>Pendiente de revisión</AlertTitle>
+                <AlertDescription>
+                  Tu producto está siendo revisado por el equipo de Origen. Te notificaremos
+                  cuando sea aprobado o si necesita cambios.
+                </AlertDescription>
+              </Alert>
+            );
+          } else {
+            // Caso b: Producto ya activo oculto por edición sensible
+            return (
+              <Alert variant="warning">
+                <AlertTitle>Tu producto ha dejado de ser visible</AlertTitle>
+                <AlertDescription>
+                  Editaste {camposFormateados || 'información sensible'} y tu producto salió automáticamente del
+                  catálogo público mientras el equipo de Origen revisa el cambio. El resto
+                  de la información de tu producto sigue intacta; te notificaremos en
+                  cuanto se apruebe.
+                </AlertDescription>
+              </Alert>
+            );
+          }
+        })()
       )}
 
       {/* Borrador incompleto — explicar por qué no se puede publicar */}
       {isDraft && !isComplete && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <p className="text-xs font-semibold text-amber-800">No se puede enviar a revisión</p>
-          </div>
-          <p className="text-[11px] text-amber-700 leading-relaxed">
-            Faltan datos obligatorios:{' '}
-            <span className="font-medium">{missingFields.join(', ')}</span>.
-          </p>
-          <Link
-            href={`/dashboard/products/${product.id}/edit`}
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 underline underline-offset-2 hover:text-amber-900"
-          >
-            <Edit className="w-3 h-3" /> Completar producto
-          </Link>
-        </div>
+        <Alert variant="warning">
+          <AlertTitle>No se puede enviar a revisión</AlertTitle>
+          <AlertDescription className="space-y-2">
+            <p>
+              Faltan datos obligatorios:{' '}
+              <span className="font-medium">{missingFields.join(', ')}</span>.
+            </p>
+            <Link
+              href={`/dashboard/products/${product.id}/edit`}
+              className="inline-flex items-center gap-1 text-xs font-semibold underline underline-offset-2"
+            >
+              <Edit className="w-3 h-3" /> Completar producto
+            </Link>
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Borrador completo — listo para enviar */}
       {isDraft && isComplete && (
-        <div className="rounded-2xl border border-origen-pradera/30 bg-origen-pastel/20 p-3 flex items-start gap-2">
-          <CheckCircle className="w-3.5 h-3.5 text-origen-hoja shrink-0 mt-0.5" />
-          <p className="text-[11px] text-origen-bosque leading-relaxed">
-            Toda la información está completa. Puedes enviarlo a revisión.
-          </p>
-        </div>
+        <Alert variant="success">
+          <AlertTitle>Toda la información está completa</AlertTitle>
+          <AlertDescription>
+            Puedes enviarlo a revisión.
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Producto inactivo — puede corregir y re-enviar */}

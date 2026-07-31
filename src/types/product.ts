@@ -238,6 +238,10 @@ export interface FlashDealWithProduct extends FlashDeal {
   productSlug: string;
   productMainImageUrl?: string | null;
   productBasePrice: number;
+  /** Indica si el producto es visible en el catálogo público (status=ACTIVE y visibility=PUBLIC) */
+  productVisible?: boolean;
+  /** Status crudo del producto (ej: 'pending_approval', 'inactive', 'draft') — opcional */
+  productStatus?: string;
 }
 
 export interface FlashDealFormValue {
@@ -288,6 +292,8 @@ export interface Product {
   visibility: 'public' | 'private' | 'password';
   publishedAt?: Date;
   scheduledAt?: Date;
+  /** Campos que dispararon la última transición automática a PENDING_APPROVAL */
+  lastReviewTriggerFields?: string[];
   sales?: number;
   revenue?: number;
   rating?: number;

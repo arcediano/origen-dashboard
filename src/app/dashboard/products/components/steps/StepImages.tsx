@@ -8,10 +8,11 @@
 import { Card } from '@arcediano/ux-library';
 import { ImageUploader } from '../../components/ImageUploader';
 import { Badge } from '@arcediano/ux-library';
+import { Label } from '@arcediano/ux-library';
 import { Tooltip } from '@arcediano/ux-library';
-import { 
-  Camera, 
-  CheckCircle, 
+import {
+  Camera,
+  CheckCircle,
   Sparkles,
   AlertCircle,
   Layers
@@ -20,17 +21,35 @@ import { cn } from '@/lib/utils';
 import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
 import { motion } from 'framer-motion';
 import type { ProductImage } from '@/types/product';
+import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
 
 interface StepImagesProps {
   gallery?: ProductImage[];
   onImagesChange: (images: ProductImage[]) => void;
   completed?: boolean;
+  isPublishedProduct?: boolean;
 }
 
-export function StepImages({ 
-  gallery = [], 
+// Helper para renderizar indicador de campo sensible
+function SensitiveFieldIndicator({ fieldName }: { fieldName: string }) {
+  const labels = SENSITIVE_FIELD_LABELS[fieldName];
+  if (!labels) return null;
+
+  return (
+    <Tooltip
+      content="Campo sensible"
+      detailed="Editar este campo enviará el producto a revisión y lo ocultará del catálogo hasta que se apruebe."
+      size="sm"
+      className="[&_button]:text-feedback-warning [&_button:hover]:text-feedback-warning/80"
+    />
+  );
+}
+
+export function StepImages({
+  gallery = [],
   onImagesChange,
-  completed 
+  completed,
+  isPublishedProduct = false,
 }: StepImagesProps) {
   
   return (
@@ -78,11 +97,18 @@ export function StepImages({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Camera className="h-5 w-5 text-origen-pradera" />
-            <span className="text-sm font-medium text-foreground">
-              Galería de imágenes
-              <span className="text-red-500 ml-1">*</span>
-            </span>
-            <Tooltip 
+            <div className="flex items-center gap-1.5">
+              <Label className="text-sm font-medium">
+                Galería de imágenes
+              </Label>
+              <span className="text-red-500">*</span>
+              {isPublishedProduct && (
+                <div className="p-2 -m-2">
+                  <SensitiveFieldIndicator fieldName="gallery" />
+                </div>
+              )}
+            </div>
+            <Tooltip
               content="Imágenes del producto"
               detailed={`Sube imagenes de alta calidad. La primera sera la principal. ${getImageQualityHint(IMAGE_QUALITY_PRESETS.productImage)}. Formatos: JPG, PNG, WebP. Maximo 5 imagenes, 10MB cada una.`}
               size="sm"

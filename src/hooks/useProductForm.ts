@@ -30,7 +30,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from '@arcediano/ux-library';
 import type { 
@@ -64,6 +64,47 @@ const FORM_STEP_KEYS: FormStepId[] = [
   'inventory',
   'certifications',
 ];
+
+/**
+ * Lista de campos granularizados que disparan revisión automática si el producto
+ * está publicado (ACTIVE/OUT_OF_STOCK) y se modifican.
+ *
+ * Corresponde con los campos sensibles detectados en backend:
+ * origen-master-microservices/src/modules/products/products/products.service.ts
+ * en la función detectSensitiveChanges() (línea ~1021)
+ *
+ * Mantenerse sincronizado: si el backend agrega/quita campos sensibles,
+ * actualizar esta lista también.
+ */
+const SENSITIVE_FIELDS = {
+  // Campos atomicos
+  atomic: [
+    'name',
+    'shortDescription',
+    'fullDescription',
+    'mainImage',
+    'gallery',
+    'categoryId',
+    'subcategoryId',
+    'certifications',
+  ],
+  // Subcampos de nutritionalInfo que son sensibles (seguridad alimentaria)
+  nutritional: [
+    'allergens',
+    'mayContain',
+    'ingredients',
+  ],
+  // Subcampos de productionInfo que son sensibles (trazabilidad)
+  production: [
+    'origin',
+    'farmName',
+    'producerName',
+    'batchNumber',
+    'harvestDate',
+    'productionDate',
+    'expiryDate',
+  ],
+};
 
 // Pasos que el productor DEBE completar para poder publicar.
 // Los pasos opcionales (nutritional, production, certifications) no bloquean la publicación.
@@ -197,7 +238,20 @@ export function useProductForm(productId?: string) {
   
   // Ref para evitar que el auto-guardado dispare en la carga inicial
   const isInitialDataLoad = useRef(true);
-  
+
+  // Ref para guardar el producto original al cargar (para detección de cambios sensibles)
+  const originalProductRef = useRef<ProductFormData | null>(null);
+
+  // Ref con el status crudo del backend ('ACTIVE' | 'OUT_OF_STOCK' | ...), sin pasar por
+  // productToFormData (que colapsa cualquier status distinto de 'active' a 'draft' — ver
+  // línea ~164 — por lo que ProductFormData.status NUNCA puede valer 'out_of_stock' y no
+  // sirve para calcular isPublishedProduct).
+  const originalStatusRef = useRef<string | null>(null);
+
+  // Estados para detección de cambios sensibles
+  const [sensitiveDirtyFields, setSensitiveDirtyFields] = useState<string[]>([]);
+  const [pendingSensitiveConfirmation, setPendingSensitiveConfirmation] = useState(false);
+
   // Dialog States
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -217,14 +271,18 @@ export function useProductForm(productId?: string) {
   const loadProduct = async (id: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetchProductById(id);
       if (response.error) {
         setError(response.error);
       } else if (response.data) {
         isInitialDataLoad.current = true;
-        setFormData(productToFormData(response.data));
+        const formData = productToFormData(response.data);
+        setFormData(formData);
+        // Guardar el producto original para detectar cambios sensibles
+        originalProductRef.current = formData;
+        originalStatusRef.current = response.data.status;
         setLastSaved(new Date());
       }
     } catch (err) {
@@ -259,6 +317,74 @@ export function useProductForm(productId?: string) {
   };
 
   // ==========================================================================
+  // DETECCIÓN DE CAMBIOS SENSIBLES
+  // ==========================================================================
+  // Declarado antes del efecto de auto-guardado porque este último depende de
+  // isPublishedProduct/sensitiveDirtyFields en su array de dependencias.
+
+  /**
+   * Calcula si el producto actual está publicado (ACTIVE u OUT_OF_STOCK).
+   * Se basa en el status crudo del backend cargado originalmente (originalStatusRef),
+   * no en formData.status (que colapsa todo lo que no sea 'active' a 'draft'), y no en
+   * el estado actual del formulario, para mantener la bandera estable durante la edición.
+   */
+  const isPublishedProduct = useMemo(() => {
+    return originalStatusRef.current === 'ACTIVE' || originalStatusRef.current === 'OUT_OF_STOCK';
+  }, [originalStatusRef.current]);
+
+  /**
+   * Calcula el arreglo de campos sensibles que han cambiado en la sesión actual.
+   * Solo se calcula para productos publicados y compara contra el original.
+   */
+  const computedSensitiveDirtyFields = useMemo(() => {
+    if (!isPublishedProduct || !originalProductRef.current) return [];
+
+    const dirty: string[] = [];
+    const original = originalProductRef.current;
+
+    // Campos atomicos
+    for (const field of SENSITIVE_FIELDS.atomic) {
+      const currentVal = formData[field as keyof ProductFormData];
+      const originalVal = original[field as keyof ProductFormData];
+
+      if (JSON.stringify(currentVal) !== JSON.stringify(originalVal)) {
+        dirty.push(field);
+      }
+    }
+
+    // Subcampos de nutritionalInfo
+    if (formData.nutritionalInfo && original.nutritionalInfo) {
+      for (const subfield of SENSITIVE_FIELDS.nutritional) {
+        const currentVal = (formData.nutritionalInfo as any)[subfield];
+        const originalVal = (original.nutritionalInfo as any)[subfield];
+
+        if (JSON.stringify(currentVal) !== JSON.stringify(originalVal)) {
+          dirty.push(subfield);
+        }
+      }
+    }
+
+    // Subcampos de productionInfo
+    if (formData.productionInfo && original.productionInfo) {
+      for (const subfield of SENSITIVE_FIELDS.production) {
+        const currentVal = (formData.productionInfo as any)[subfield];
+        const originalVal = (original.productionInfo as any)[subfield];
+
+        if (JSON.stringify(currentVal) !== JSON.stringify(originalVal)) {
+          dirty.push(subfield);
+        }
+      }
+    }
+
+    return dirty;
+  }, [formData, isPublishedProduct]);
+
+  // Actualizar sensitiveDirtyFields cuando cambia computedSensitiveDirtyFields
+  useEffect(() => {
+    setSensitiveDirtyFields(computedSensitiveDirtyFields);
+  }, [computedSensitiveDirtyFields]);
+
+  // ==========================================================================
   // AUTO-GUARDADO
   // ==========================================================================
 
@@ -287,6 +413,15 @@ export function useProductForm(productId?: string) {
       return () => clearTimeout(timer);
     } else {
       // Modo edición: auto-save en API cada 3 s (más conservador)
+      // Si hay cambios sensibles sobre un producto publicado, pausar autoguardado
+      // y requerir confirmación explícita
+      if (isPublishedProduct && sensitiveDirtyFields.length > 0) {
+        // Pausar autoguardado: establecer pendingSensitiveConfirmation
+        // El usuario debe confirmar explícitamente via confirmSensitiveSave
+        setPendingSensitiveConfirmation(true);
+        return () => {}; // Sin timer
+      }
+
       const timer = setTimeout(async () => {
         setIsAutoSaving(true);
         try {
@@ -301,7 +436,7 @@ export function useProductForm(productId?: string) {
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [formData, productId]);
+  }, [formData, productId, isPublishedProduct, sensitiveDirtyFields]);
 
   // ==========================================================================
   // VALIDACIÓN DE PASOS
@@ -436,8 +571,14 @@ export function useProductForm(productId?: string) {
   // ==========================================================================
 
   const handleSave = useCallback(async () => {
+    // Si hay confirmación pendiente de cambios sensibles, no guardar directamente.
+    // El modal de confirmación debe invocar confirmSensitiveSave en su lugar.
+    if (pendingSensitiveConfirmation) {
+      return;
+    }
+
     setIsSaving(true);
-    
+
     try {
       if (productId) {
         // Edición: convertir y enviar a API
@@ -461,7 +602,7 @@ export function useProductForm(productId?: string) {
     } finally {
       setIsSaving(false);
     }
-  }, [formData, productId, router]);
+  }, [formData, productId, router, pendingSensitiveConfirmation]);
 
   const handlePublish = useCallback(async () => {
     // Solo verificar pasos obligatorios; nutricional, producción y certificaciones son opcionales.
@@ -516,6 +657,36 @@ export function useProductForm(productId?: string) {
     router.push('/dashboard/products');
   }, [router]);
 
+  /**
+   * Ejecuta el guardado real tras confirmación explícita de cambios sensibles.
+   * Se invoca desde el modal de confirmación, no desde autoguardado.
+   * Resetea originalProductRef tras persistir con éxito para permitir que
+   * futuras ediciones se comparen contra el nuevo estado guardado.
+   */
+  const confirmSensitiveSave = useCallback(async () => {
+    setIsSaving(true);
+    setPendingSensitiveConfirmation(false);
+
+    try {
+      if (productId) {
+        const productData = formDataToProduct(formData);
+        const response = await updateProduct(productId, productData);
+        if (response.error) {
+          setError(response.error);
+        } else {
+          setLastSaved(new Date());
+          // Resetear originalProductRef: el producto ha sido guardado con los cambios sensibles
+          // Las futuras ediciones se compararán contra este nuevo estado
+          originalProductRef.current = formData;
+        }
+      }
+    } catch (error) {
+      setError('Error al guardar el producto');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [formData, productId]);
+
   // ==========================================================================
   // RETURN
   // ==========================================================================
@@ -548,11 +719,14 @@ export function useProductForm(productId?: string) {
     certificationsApproved: formData.certifications.every(c => c.verified) || false,
     hasPendingManualCerts: formData.certifications.some(c => c.source === 'manual' && !c.verified),
     isEditMode: !!productId,
-    
+    isPublishedProduct,
+    sensitiveDirtyFields,
+    pendingSensitiveConfirmation,
+
     // Validación por paso
     getStepErrors,
     currentStepErrors,
-    
+
     // Handlers
     handleInputChange,
     handleNestedChange,
@@ -561,7 +735,8 @@ export function useProductForm(productId?: string) {
     handleSave,
     handlePublish,
     handleCancel,
-    
+    confirmSensitiveSave,
+
     // Utilidades
     reloadProduct: productId ? () => loadProduct(productId) : undefined,
   };
