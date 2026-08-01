@@ -226,12 +226,12 @@ export function SalesChart({ period = '6m' }: SalesChartProps) {
               <YAxis tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} width={36} />
               <Tooltip formatter={(value: number, name: string) => [`${value}€`, name]} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="currentPeriod" name="Periodo actual" fill="hsl(var(--pradera))" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="currentPeriod" name="Periodo actual" fill="hsl(var(--hoja))" radius={[6, 6, 0, 0]} />
               <Line
                 type="monotone"
                 dataKey="previousPeriod"
                 name="Periodo anterior"
-                stroke="hsl(var(--bosque))"
+                stroke="hsl(var(--data-anterior))"
                 strokeWidth={2}
                 dot={{ r: 2 }}
                 activeDot={{ r: 4 }}

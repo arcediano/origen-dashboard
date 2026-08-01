@@ -219,7 +219,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
                   type="monotone"
                   dataKey="previousPeriod"
                   name="Periodo anterior"
-                  stroke="hsl(var(--pino))"
+                  stroke="hsl(var(--data-anterior))"
                   strokeWidth={2}
                   dot={{ r: 2 }}
                   activeDot={{ r: 3 }}
