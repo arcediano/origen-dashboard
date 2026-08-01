@@ -14,6 +14,16 @@ const cormorant = Cormorant_Garamond({ subsets: ["latin"], variable: "--font-ser
 export const metadata: Metadata = {
   title: "Origen - Panel de Vendedores",
   description: "Panel de administración para vendedores del marketplace Origen",
+  manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/origen-icon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+    ],
+    apple: [{ url: "/apple-touch-icon-180.png", sizes: "180x180" }],
+  },
 };
 
 export const viewport = {

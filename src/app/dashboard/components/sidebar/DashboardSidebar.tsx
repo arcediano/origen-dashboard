@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@arcediano/ux-library';
-import { HelpCircle, Leaf, LogOut, X } from 'lucide-react';
+import { HelpCircle, LogOut, X } from 'lucide-react';
 import { SidebarMenuItem } from './SidebarMenuItem';
 import { DASHBOARD_NAV_SECTIONS } from '@/constants/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -113,11 +113,9 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
           <div className="border-b border-border-subtle px-5 pb-5 pt-[max(env(safe-area-inset-top),1.25rem)]">
             <div className="mb-5 flex items-center justify-between">
               <Link href="/dashboard" className="flex items-center gap-3" onClick={handleItemClick}>
-                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-bosque via-origen-pino to-origen-hoja shadow-md">
-                  <Leaf className="h-5 w-5 text-white" />
-                </div>
+                <img src="/origen-icon.svg" alt="" width={36} height={36} className="h-9 w-9" />
                 <div>
-                  <span className="block text-base font-semibold text-origen-bosque">origen.</span>
+                  <span className="block text-base font-semibold text-origen-bosque">Origen.</span>
                   <span className="block text-[11px] font-medium text-muted-foreground">Panel del productor</span>
                 </div>
               </Link>
@@ -150,11 +148,9 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-border-subtle bg-surface-alt/95 backdrop-blur-xl shadow-xl lg:flex">
       <div className="border-b border-border-subtle px-5 py-6">
         <Link href="/dashboard" className="mb-5 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-bosque via-origen-pino to-origen-hoja shadow-md">
-            <Leaf className="h-5 w-5 text-white" />
-          </div>
+          <img src="/origen-icon.svg" alt="" width={40} height={40} className="h-10 w-10" />
           <div>
-            <span className="block text-lg font-semibold text-origen-bosque">origen.</span>
+            <span className="block text-lg font-semibold text-origen-bosque">Origen.</span>
             <span className="block text-xs font-medium text-muted-foreground">Panel del productor</span>
           </div>
         </Link>
