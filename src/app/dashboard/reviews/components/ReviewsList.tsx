@@ -285,7 +285,7 @@ export function ReviewsList({
                       {formatDistanceToNow(review.response.createdAt, { locale: es, addSuffix: true })}
                     </span>
                   </div>
-                  <p className="text-xs text-text-subtle leading-relaxed pl-7">
+                  <p className="text-xs text-text-subtle leading-relaxed pl-7 line-clamp-2">
                     {review.response.content}
                   </p>
                 </div>
