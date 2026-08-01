@@ -78,17 +78,15 @@ export default function PrivacyPolicyPage() {
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 md:gap-3 group focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2 rounded-lg p-1">
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                <svg className="w-6 h-6 md:w-7 md:h-7 text-white" viewBox="0 0 200 200">
-                  <circle cx="100" cy="100" r="85" fill="none" stroke="white" strokeWidth="3"/>
-                  <path d="M100 140 L100 80" stroke="white" strokeWidth="5" strokeLinecap="round"/>
-                  <path d="M100 90 Q85 75, 75 65" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-                  <path d="M100 90 Q115 75, 125 65" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-                  <circle cx="100" cy="140" r="8" fill="white"/><circle cx="100" cy="140" r="5" fill="#74C69D"/>
-                </svg>
-              </div>
+              <img
+                src="/origen-icon.svg"
+                alt=""
+                width={44}
+                height={44}
+                className="w-10 h-10 md:w-11 md:h-11 group-hover:scale-105 transition-transform"
+              />
               <div className="flex flex-col">
-                <span className="text-lg md:text-xl font-bold text-origen-bosque leading-tight">ORIGEN</span>
+                <span className="text-lg md:text-xl font-bold text-origen-bosque leading-tight">Origen.</span>
                 <span className="text-[10px] md:text-xs text-origen-hoja -mt-1">Productores locales</span>
               </div>
             </Link>

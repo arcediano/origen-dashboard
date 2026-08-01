@@ -915,16 +915,7 @@ export default function OnboardingPage() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-sm">
-                <svg className="w-5 h-5 text-white" viewBox="0 0 200 200">
-                  <circle cx="100" cy="100" r="85" fill="none" stroke="white" strokeWidth="3"/>
-                  <path d="M100 140 L100 80" stroke="white" strokeWidth="5" strokeLinecap="round"/>
-                  <path d="M100 90 Q85 75, 75 65" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-                  <path d="M100 90 Q115 75, 125 65" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-                  <circle cx="100" cy="140" r="8" fill="white"/>
-                  <circle cx="100" cy="140" r="5" fill="#74C69D"/>
-                </svg>
-              </div>
+              <img src="/origen-icon.svg" alt="" width={36} height={36} className="h-9 w-9" />
             </Link>
             
             <div className="flex items-center gap-2">

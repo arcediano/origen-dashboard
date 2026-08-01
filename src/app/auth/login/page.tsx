@@ -14,7 +14,6 @@ import { AuthFooter } from '@arcediano/ux-library';
 import Link from 'next/link';
 import {
   Shield,
-  Leaf,
   Sparkles,
   CheckCircle,
   Award,
@@ -36,11 +35,9 @@ export default function LoginPage() {
             href="/"
             className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-origen-pradera rounded-lg p-1"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
-              <Leaf className="w-5 h-5 text-white" />
-            </div>
+            <img src="/origen-icon.svg" alt="" width={36} height={36} className="h-9 w-9" />
             <div className="flex flex-col leading-none">
-              <span className="text-base font-bold text-origen-bosque tracking-tight">ORIGEN</span>
+              <span className="text-base font-bold text-origen-bosque tracking-tight">Origen.</span>
               <span className="text-[10px] text-origen-hoja -mt-0.5">Productores locales</span>
             </div>
           </Link>
