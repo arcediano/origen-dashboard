@@ -52,6 +52,13 @@ const PLACEMENTS = [
   'product-related',
 ];
 
+const PLACEMENT_LABELS: Record<string, string> = {
+  'homepage-strip': 'Franja de inicio',
+  'catalog-sidebar': 'Barra lateral de tienda',
+  'catalog-inline': 'Dentro de tienda',
+  'product-related': 'Productos relacionados',
+};
+
 interface CreateFormProps {
   onCreated: () => void;
   onCancel: () => void;
@@ -107,7 +114,7 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
               <SelectValue placeholder="Seleccionar..." />
             </SelectTrigger>
             <SelectContent>
-              {PLACEMENTS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+              {PLACEMENTS.map((p) => <SelectItem key={p} value={p}>{PLACEMENT_LABELS[p]}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -231,7 +238,7 @@ function CampaignCard({ campaign, onDeleted, showDeleteButton = true }: Campaign
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <p className="text-xs uppercase tracking-[0.18em] text-text-subtle truncate">
-            {campaign.type} · {campaign.placement}
+            {campaign.type} · {PLACEMENT_LABELS[campaign.placement] || campaign.placement}
           </p>
           <h3 className="mt-1 font-semibold text-origen-bosque truncate">
             {campaign.headline ?? campaign.productSlug}
