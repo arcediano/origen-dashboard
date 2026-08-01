@@ -183,7 +183,7 @@ export function SidebarMenuItem({
       {isActive && (
         <motion.div
           layoutId="activeNav"
-          className="absolute left-0 w-1 h-6 rounded-full bg-origen-menta"
+          className="absolute left-0 w-1 h-6 rounded-full bg-hoja-tinta"
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         />
       )}

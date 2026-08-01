@@ -74,7 +74,7 @@ export function SegmentedControl({
             {isActive && (
               <motion.div
                 layoutId={layoutId}
-                className="absolute inset-0 bg-gradient-to-r from-origen-bosque to-origen-pino rounded-xl shadow-sm"
+                className="absolute inset-0 bg-origen-bosque rounded-xl shadow-sm"
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}
