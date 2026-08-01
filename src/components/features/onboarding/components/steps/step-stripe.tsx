@@ -331,14 +331,14 @@ export function EnhancedStep6Stripe({
                 href="https://stripe.com/es/legal"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-origen-pradera hover:text-origen-bosque underline underline-offset-2"
+                className="text-hoja-tinta hover:underline underline underline-offset-2"
               >
                 Términos de Stripe
               </a>{' '}y la{' '}
               <a
                 href="#"
                 onClick={(e) => e.preventDefault()}
-                className="text-origen-pradera hover:text-origen-bosque underline underline-offset-2"
+                className="text-hoja-tinta hover:underline underline underline-offset-2"
               >
                 Política de privacidad de Origen
               </a>.

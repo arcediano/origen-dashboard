@@ -323,7 +323,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
         <button
           type="button"
           onClick={() => onAddZone({ id: `custom-ES-${Date.now()}`, type: 'custom', value: 'ES', label: 'Toda España' })}
-          className="text-xs text-origen-pradera hover:text-origen-bosque underline underline-offset-2"
+          className="text-xs text-hoja-tinta hover:underline underline underline-offset-2"
         >
           + Añadir toda España de una vez
         </button>

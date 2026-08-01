@@ -179,7 +179,7 @@ export function DashboardFooter({
               whileHover={{ y: -2 }}
               className="flex items-center gap-2.5 group cursor-default"
             >
-              <Clock className="w-5 h-5 text-origen-menta group-hover:scale-110 transition-transform" />
+              <Clock className="w-5 h-5 text-hoja-tinta group-hover:scale-110 transition-transform" />
               <div className="text-left">
                 <p className="text-sm font-bold text-origen-bosque">{metrics.support}</p>
                 <p className="text-[10px] text-muted-foreground">soporte continuo</p>

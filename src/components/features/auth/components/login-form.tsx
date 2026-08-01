@@ -345,7 +345,7 @@ export function SimpleLogin() {
                 <span /> {/* spacer para alinear el enlace a la derecha */}
                 <Link
                   href="/auth/forgot-password"
-                  className="text-[10px] md:text-xs text-origen-pradera hover:text-origen-bosque transition-colors"
+                  className="text-[10px] md:text-xs text-hoja-tinta hover:underline transition-colors"
                 >
                   ¿Olvidaste?
                 </Link>
@@ -396,7 +396,7 @@ export function SimpleLogin() {
                 ¿No tienes cuenta?{' '}
                 <Link
                   href="/auth/register"
-                  className="text-origen-pradera hover:text-origen-bosque font-medium"
+                  className="text-hoja-tinta hover:underline font-medium"
                 >
                   Regístrate como productor
                 </Link>
@@ -454,7 +454,7 @@ export function SimpleLogin() {
                       setTwoFactorCode('');
                       setErrors({});
                     }}
-                    className="text-xs text-origen-pradera hover:text-origen-bosque transition-colors underline"
+                    className="text-xs text-hoja-tinta hover:underline transition-colors underline"
                   >
                     Usar código de recuperación
                   </button>
@@ -489,7 +489,7 @@ export function SimpleLogin() {
                       setRecoveryCode('');
                       setErrors({});
                     }}
-                    className="text-xs text-origen-pradera hover:text-origen-bosque transition-colors underline"
+                    className="text-xs text-hoja-tinta hover:underline transition-colors underline"
                   >
                     Usar código TOTP
                   </button>

@@ -340,7 +340,7 @@ export default function SecurityPage() {
                     />
                     <button
                       type="button"
-                      className="text-xs text-origen-pradera hover:text-origen-bosque"
+                      className="text-xs text-hoja-tinta hover:underline"
                       onClick={() => setShowPasswords((prev) => ({ ...prev, current: !prev.current }))}
                     >
                       {showPasswords.current ? 'Ocultar' : 'Mostrar'}
@@ -358,7 +358,7 @@ export default function SecurityPage() {
                     />
                     <button
                       type="button"
-                      className="text-xs text-origen-pradera hover:text-origen-bosque"
+                      className="text-xs text-hoja-tinta hover:underline"
                       onClick={() => setShowPasswords((prev) => ({ ...prev, next: !prev.next }))}
                     >
                       {showPasswords.next ? 'Ocultar' : 'Mostrar'}
@@ -376,7 +376,7 @@ export default function SecurityPage() {
                     />
                     <button
                       type="button"
-                      className="text-xs text-origen-pradera hover:text-origen-bosque"
+                      className="text-xs text-hoja-tinta hover:underline"
                       onClick={() => setShowPasswords((prev) => ({ ...prev, confirm: !prev.confirm }))}
                     >
                       {showPasswords.confirm ? 'Ocultar' : 'Mostrar'}

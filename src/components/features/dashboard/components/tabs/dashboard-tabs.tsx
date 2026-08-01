@@ -19,7 +19,7 @@ interface DashboardTabsProps {
 const defaultContent = (
   <div className="bg-surface-alt rounded-2xl p-8 border border-border shadow-origen text-center">
     <div className="w-16 h-16 rounded-xl bg-origen-menta/20 mx-auto mb-4 flex items-center justify-center">
-      <BarChart3 className="w-8 h-8 text-origen-menta" />
+      <BarChart3 className="w-8 h-8 text-hoja-tinta" />
     </div>
     <p className="text-muted-foreground mb-1">Analíticas detalladas</p>
     <p className="text-sm text-text-subtle">Próximamente: gráficos de ventas, visitas y rendimiento</p>

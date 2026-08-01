@@ -216,7 +216,7 @@ export function ContactForm() {
             </button>
             <label className="text-xs text-muted-foreground leading-relaxed">
               He leído y acepto la{' '}
-              <a href="/privacidad" className="text-origen-pradera hover:text-origen-bosque underline transition-colors">Política de privacidad</a>.
+              <a href="/privacidad" className="text-hoja-tinta hover:underline underline transition-colors">Política de privacidad</a>.
               Mis datos serán usados exclusivamente para responder a esta consulta.
             </label>
           </div>

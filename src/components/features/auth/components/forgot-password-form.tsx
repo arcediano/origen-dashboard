@@ -69,7 +69,7 @@ function SuccessState({ email }: { email: string }) {
 
       <Link
         href="/auth/login"
-        className="inline-flex items-center gap-2 text-sm text-origen-pradera hover:text-origen-bosque font-medium transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-hoja-tinta hover:underline font-medium transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver al inicio de sesión

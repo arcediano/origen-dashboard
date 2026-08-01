@@ -146,7 +146,7 @@ export function UserMenu({
           className={cn(
             'w-10 h-10 ring-2 transition-all cursor-pointer',
             isOpen
-              ? 'ring-origen-menta ring-offset-2 scale-105'
+              ? 'ring-hoja-tinta ring-offset-2 scale-105'
               : 'ring-white group-hover:ring-origen-pradera shadow-md',
           )}
         >

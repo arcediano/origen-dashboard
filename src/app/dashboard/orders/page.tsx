@@ -167,7 +167,7 @@ export default function OrdersPage() {
 
       {/* Acceso a facturas — visible en móvil */}
       <div className="lg:hidden px-4 sm:px-6">
-        <Link href="/dashboard/facturas" className="inline-flex items-center gap-1.5 text-sm font-medium text-origen-pradera hover:text-origen-bosque transition-colors">
+        <Link href="/dashboard/facturas" className="inline-flex items-center gap-1.5 text-sm font-medium text-hoja-tinta hover:underline transition-colors">
           <FileText className="h-4 w-4" /> Ver facturas de venta
         </Link>
       </div>

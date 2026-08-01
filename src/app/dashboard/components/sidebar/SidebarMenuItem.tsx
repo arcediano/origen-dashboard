@@ -83,7 +83,7 @@ export function SidebarMenuItem({
             <Icon className={cn(
               'w-5 h-5 flex-shrink-0 transition-colors',
               (isActive || hasActiveChild)
-                ? 'text-origen-menta'
+                ? 'text-hoja-tinta'
                 : 'text-text-subtle group-hover:text-origen-pradera'
             )} aria-hidden="true" />
             <span className={cn(
@@ -106,7 +106,7 @@ export function SidebarMenuItem({
             <ChevronDown className={cn(
               'w-4 h-4 transition-transform',
               isOpen ? 'rotate-180' : '',
-              (isActive || hasActiveChild) ? 'text-origen-menta' : 'text-text-subtle'
+              (isActive || hasActiveChild) ? 'text-hoja-tinta' : 'text-text-subtle'
             )} aria-hidden="true" />
           </div>
 
@@ -114,7 +114,7 @@ export function SidebarMenuItem({
           {(isActive || hasActiveChild) && (
             <motion.div
               layoutId="activeNav"
-              className="absolute left-0 w-1 h-6 rounded-full bg-origen-menta"
+              className="absolute left-0 w-1 h-6 rounded-full bg-hoja-tinta"
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             />
           )}
@@ -163,7 +163,7 @@ export function SidebarMenuItem({
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <Icon className={cn(
           'w-5 h-5 flex-shrink-0 transition-colors',
-          isActive ? 'text-origen-menta' : 'text-text-subtle group-hover:text-origen-pradera'
+          isActive ? 'text-hoja-tinta' : 'text-text-subtle group-hover:text-origen-pradera'
         )} aria-hidden="true" />
         <span className={cn(
           'truncate',

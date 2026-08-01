@@ -27,14 +27,14 @@ export default function HelpCenterPage() {
             <div className="border border-border rounded-lg p-4">
               <h3 className="font-medium text-foreground">Documentación</h3>
               <p className="text-muted-foreground text-sm mt-1">Guías detalladas sobre todas las funcionalidades de la plataforma.</p>
-              <button className="mt-2 text-sm text-origen-pradera hover:text-origen-bosque font-medium">
+              <button className="mt-2 text-sm text-hoja-tinta hover:underline font-medium">
                 Ver documentación
               </button>
             </div>
             <div className="border border-border rounded-lg p-4">
               <h3 className="font-medium text-foreground">Video Tutoriales</h3>
               <p className="text-muted-foreground text-sm mt-1">Vídeos explicativos paso a paso para cada función.</p>
-              <button className="mt-2 text-sm text-origen-pradera hover:text-origen-bosque font-medium">
+              <button className="mt-2 text-sm text-hoja-tinta hover:underline font-medium">
                 Ver tutoriales
               </button>
             </div>

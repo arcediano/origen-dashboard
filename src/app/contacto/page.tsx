@@ -196,7 +196,7 @@ export default function ContactPage() {
                     <span className="text-sm text-muted-foreground">¿Prefieres llamarnos?</span>
                     <a
                       href="tel:+34911234567"
-                      className="text-sm font-medium text-origen-pradera hover:text-origen-bosque transition-colors flex items-center gap-1"
+                      className="text-sm font-medium text-hoja-tinta hover:underline transition-colors flex items-center gap-1"
                     >
                       +34 91 123 45 67
                       <ChevronRight className="w-3.5 h-3.5" />

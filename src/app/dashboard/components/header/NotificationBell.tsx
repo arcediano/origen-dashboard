@@ -270,7 +270,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-origen-menta/10 flex items-center justify-center">
-                    <Bell className="w-4 h-4 text-origen-menta" />
+                    <Bell className="w-4 h-4 text-hoja-tinta" />
                   </div>
                   <h3 className="text-sm font-semibold text-origen-bosque">Notificaciones</h3>
                 </div>
@@ -280,7 +280,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                     disabled={isUpdating}
                     type="button"
                     aria-label="Marcar todas las notificaciones como leídas"
-                    className="text-xs text-origen-menta hover:text-origen-pradera transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-xs text-hoja-tinta hover:underline transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Marcar todas
                   </button>
@@ -305,7 +305,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                   <button
                     onClick={() => void loadNotifications()}
                     type="button"
-                    className="mt-3 text-xs text-origen-menta hover:text-origen-pradera transition-colors font-medium"
+                    className="mt-3 text-xs text-hoja-tinta hover:underline transition-colors font-medium"
                   >
                     Reintentar
                   </button>

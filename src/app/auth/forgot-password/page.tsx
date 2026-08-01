@@ -139,7 +139,7 @@ export default function RecuperarPage() {
                     <span className="text-sm text-muted-foreground">💬 ¿Necesitas ayuda?</span>
                     <Link
                       href="/contacto"
-                      className="text-sm font-medium text-origen-pradera hover:text-origen-bosque transition-colors flex items-center gap-1"
+                      className="text-sm font-medium text-hoja-tinta hover:underline transition-colors flex items-center gap-1"
                     >
                       Contactar soporte
                       <ChevronRight className="w-3.5 h-3.5" />

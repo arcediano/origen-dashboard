@@ -173,8 +173,8 @@ export function AdjustStockDialog({
             className={cn(
               'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all border-2',
               adjustmentType === 'remove'
-                ? 'bg-origen-menta text-white border-origen-menta'
-                : 'bg-surface-alt text-origen-bosque border-border-subtle hover:border-origen-menta'
+                ? 'bg-origen-bosque text-white border-origen-bosque'
+                : 'bg-surface-alt text-origen-bosque border-border-subtle hover:border-origen-bosque'
             )}
           >
             <Minus className="w-4 h-4" />

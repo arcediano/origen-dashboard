@@ -696,7 +696,7 @@ export default function PersonalInfoPage() {
                       onChange={(e) => setForm({ ...form, bio: e.target.value })}
                       disabled={!isEditing}
                       rows={4}
-                      className="w-full p-3 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-origen-menta/50 focus:border-origen-pradera disabled:bg-surface"
+                      className="w-full p-3 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-hoja-tinta focus:border-hoja-tinta disabled:bg-surface"
                       placeholder="Cuentanos algo sobre ti..."
                     />
                     <p className="text-xs text-muted-foreground">

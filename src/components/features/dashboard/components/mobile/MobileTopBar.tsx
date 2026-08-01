@@ -227,7 +227,7 @@ export function MobileTopBar() {
             <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-gradient-to-r from-origen-crema to-surface-alt">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-origen-menta/10 flex items-center justify-center">
-                  <Bell className="w-3.5 h-3.5 text-origen-menta" />
+                  <Bell className="w-3.5 h-3.5 text-hoja-tinta" />
                 </div>
                 <h3 className="text-sm font-semibold text-origen-bosque">Notificaciones</h3>
               </div>
@@ -235,7 +235,7 @@ export function MobileTopBar() {
                 <button
                   onClick={() => { void handleMarkAllAsRead(); }}
                   disabled={isUpdatingAll}
-                  className="text-xs text-origen-menta hover:text-origen-pradera font-medium disabled:opacity-50 transition-colors"
+                  className="text-xs text-hoja-tinta hover:underline font-medium disabled:opacity-50 transition-colors"
                 >
                   Marcar todas
                 </button>

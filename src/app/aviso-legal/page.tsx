@@ -103,7 +103,7 @@ export default function LegalNoticePage() {
       <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 lg:py-16">
         <div className="max-w-3xl mx-auto">
 
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-origen-pradera hover:text-origen-bosque transition-colors mb-6">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-hoja-tinta hover:underline transition-colors mb-6">
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio
           </Link>
@@ -151,7 +151,7 @@ export default function LegalNoticePage() {
                   <div className="mt-3 space-y-1 text-sm">
                     <p className="text-foreground">
                       <span className="font-medium text-origen-bosque">Email: </span>
-                      <a href={`mailto:${section.contact.email}`} className="text-origen-pradera hover:text-origen-bosque transition-colors underline">{section.contact.email}</a>
+                      <a href={`mailto:${section.contact.email}`} className="text-hoja-tinta hover:underline transition-colors underline">{section.contact.email}</a>
                     </p>
                     <p className="text-foreground">
                       <span className="font-medium text-origen-bosque">Dirección: </span>{section.contact.address}
