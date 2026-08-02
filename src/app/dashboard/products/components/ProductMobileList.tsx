@@ -48,7 +48,8 @@ const STATUS_CONFIG: Record<
   inactive: {
     label: 'Inactivo',
     icon: XCircle,
-    chip: 'bg-origen-mandarina/10 text-origen-mandarina border-origen-mandarina/30',
+    // text-feedback-warning-text, no mandarina: mandarina como texto falla WCAG AA (~2.1:1).
+    chip: 'bg-origen-mandarina/10 text-feedback-warning-text border-origen-mandarina/30',
   },
   out_of_stock: {
     label: 'Agotado',
@@ -195,7 +196,10 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
                 Sin stock
               </span>
             ) : isLowStock ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-origen-mandarina">
+              // text-feedback-warning-text, no mandarina: mandarina como texto
+              // da ~2.1:1 (falla WCAG AA) y además está prohibido como texto
+              // por la guía. warning-text es el token semántico de aviso (7.1:1).
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-feedback-warning-text">
                 <span className="w-1.5 h-1.5 rounded-full bg-origen-mandarina flex-shrink-0" />
                 Stock: {product.stock}
               </span>

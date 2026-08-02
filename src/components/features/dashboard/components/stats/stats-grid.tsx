@@ -91,7 +91,7 @@ export function StatsGrid({
       {collapsible && (
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex items-center gap-2 mb-4 text-origen-mandarina hover:text-origen-mandarina/80 transition-colors"
+          className="flex items-center gap-2 mb-4 text-origen-bosque hover:text-origen-pino transition-colors"
         >
           <ChevronRight className={`w-4 h-4 transition-transform ${isCollapsed ? '' : 'rotate-90'}`} />
           <span>Estadísticas {isCollapsed ? '(mostrar)' : '(ocultar)'}</span>

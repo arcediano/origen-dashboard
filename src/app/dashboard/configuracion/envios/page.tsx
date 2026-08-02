@@ -613,7 +613,9 @@ export default function EnviosPage() {
                         <>
                           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                             <h3 className="text-base font-semibold text-origen-bosque sm:text-lg">{option.name}</h3>
-                            <span className="text-lg font-bold text-origen-pradera sm:text-xl">{option.price.toFixed(2)}€</span>
+                            {/* text-origen-bosque, no pradera: pradera como texto está prohibido
+                                por la guía (contraste insuficiente, ~1.87:1 sobre fondo claro). */}
+                            <span className="text-lg font-bold text-origen-bosque sm:text-xl">{option.price.toFixed(2)}€</span>
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">{option.description}</p>
                           <p className="text-xs text-muted-foreground mt-1">Entrega: {option.estimatedDays} días</p>
@@ -628,7 +630,7 @@ export default function EnviosPage() {
                         aria-label={isEditing ? 'Confirmar cambios' : 'Editar método de envío'}
                         className={
                           isEditing
-                            ? 'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-origen-pradera text-white hover:bg-origen-bosque transition-colors'
+                            ? 'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-origen-bosque text-white hover:bg-origen-pino transition-colors'
                             : 'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-text-subtle hover:text-origen-bosque hover:bg-surface transition-colors'
                         }
                       >
@@ -784,7 +786,7 @@ export default function EnviosPage() {
               }
             >
               <div className="flex items-center gap-3">
-                <div className={sustainablePackaging ? 'w-10 h-10 rounded-lg flex items-center justify-center bg-origen-pradera text-white' : 'w-10 h-10 rounded-lg flex items-center justify-center bg-origen-crema text-origen-bosque'}>
+                <div className={sustainablePackaging ? 'w-10 h-10 rounded-lg flex items-center justify-center bg-origen-bosque text-white' : 'w-10 h-10 rounded-lg flex items-center justify-center bg-origen-crema text-origen-bosque'}>
                   <Leaf className="w-5 h-5" />
                 </div>
                 <div className="text-left">

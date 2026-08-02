@@ -32,10 +32,12 @@ export interface StatStripProps {
 
 // ─── Color del valor por variante ─────────────────────────────────────────────
 
+// warning usa text-feedback-warning-text, no mandarina: mandarina como texto
+// falla WCAG AA (~2.1:1) y está prohibido como texto por la guía v6.
 const valueColor: Record<StatStripVariant, string> = {
   default: 'text-origen-bosque',
   success: 'text-origen-hoja',
-  warning: 'text-origen-mandarina',
+  warning: 'text-feedback-warning-text',
   danger:  'text-feedback-danger',
 };
 

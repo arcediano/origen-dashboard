@@ -273,7 +273,7 @@ export function SimpleLogin() {
           <div className={cn(
             "w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 rounded-2xl flex items-center justify-center shadow-md",
             requiresTwoFactor
-              ? 'bg-gradient-to-br from-origen-pradera to-origen-hoja'
+              ? 'bg-origen-bosque'
               : 'bg-gradient-to-br from-origen-bosque to-origen-pino'
           )}>
             {requiresTwoFactor ? (

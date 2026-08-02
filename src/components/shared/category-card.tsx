@@ -101,7 +101,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           className={cn(
             'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all',
             isSelected
-              ? 'bg-gradient-to-br from-origen-pradera to-origen-hoja text-white shadow-md'
+              ? 'bg-origen-bosque text-white shadow-md'
               : 'bg-gradient-to-br from-origen-crema to-origen-pastel text-origen-bosque group-hover:scale-110',
           )}
         >

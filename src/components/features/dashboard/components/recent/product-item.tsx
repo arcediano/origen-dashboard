@@ -60,7 +60,7 @@ export function ProductItem({
               src={imageUrl}
               alt={name}
               fallback={
-                <div className="w-full h-full bg-gradient-to-br from-origen-pradera to-origen-hoja flex items-center justify-center">
+                <div className="w-full h-full bg-gradient-to-br from-origen-pino to-origen-hoja flex items-center justify-center">
                   <Package className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
               }

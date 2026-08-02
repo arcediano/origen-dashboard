@@ -182,7 +182,7 @@ export function ProducerCard({
             {producer.avatarUrl && (
               <AvatarImage src={producer.avatarUrl} alt={producer.name} />
             )}
-            <AvatarFallback className="bg-gradient-to-br from-origen-pradera to-origen-hoja text-white text-base sm:text-xl">
+            <AvatarFallback className="bg-origen-bosque text-white text-base sm:text-xl">
               {initials}
             </AvatarFallback>
           </Avatar>

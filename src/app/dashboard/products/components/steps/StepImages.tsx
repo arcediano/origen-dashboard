@@ -64,7 +64,7 @@ export function StepImages({
           <div className="flex items-center gap-3">
             <div className={cn(
               "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-              completed ? "bg-gradient-to-br from-origen-pradera to-origen-hoja text-white" : "bg-origen-pradera/10 text-origen-hoja"
+              completed ? "bg-origen-bosque text-white" : "bg-origen-pradera/10 text-origen-bosque"
             )}>
               {completed ? <CheckCircle className="w-5 h-5" /> : <Layers className="w-5 h-5" />}
             </div>

@@ -25,10 +25,13 @@ interface OrganicScoreBadgeProps {
   className?: string;
 }
 
+// pradera/hoja/mandarina como texto fallan WCAG AA (1.87:1 / 3.86:1 / 2.1:1) —
+// sustituidos por bosque/pino (verde real, ≥5.4:1) y feedback-warning-text
+// (7.1:1), manteniendo el fondo tintado original. Ver auditoría v6.
 function getLevel(score: number) {
-  if (score >= 0.8) return { label: 'Excelente', color: 'bg-origen-pradera/15 text-origen-pradera border-origen-pradera/30' };
-  if (score >= 0.6) return { label: 'Bueno',     color: 'bg-origen-hoja/15 text-origen-hoja border-origen-hoja/30' };
-  if (score >= 0.4) return { label: 'Regular',   color: 'bg-origen-mandarina/10 text-origen-mandarina border-origen-mandarina/30' };
+  if (score >= 0.8) return { label: 'Excelente', color: 'bg-origen-pradera/15 text-origen-bosque border-origen-pradera/30' };
+  if (score >= 0.6) return { label: 'Bueno',     color: 'bg-origen-hoja/15 text-origen-pino border-origen-hoja/30' };
+  if (score >= 0.4) return { label: 'Regular',   color: 'bg-origen-mandarina/10 text-feedback-warning-text border-origen-mandarina/30' };
   return               { label: 'Bajo',       color: 'bg-feedback-danger-subtle text-feedback-danger-text border-feedback-danger/30' };
 }
 

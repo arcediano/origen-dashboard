@@ -76,7 +76,7 @@ export default function PerfilPage() {
         <div className="rounded-2xl border border-origen-pradera/20 bg-gradient-to-r from-origen-crema/60 to-surface-alt p-5 shadow-sm">
           <div className="flex items-center gap-4">
             <Avatar className="w-16 h-16 ring-2 ring-white shadow-lg flex-shrink-0">
-              <AvatarFallback className="bg-gradient-to-br from-origen-pradera to-origen-hoja text-white text-xl font-semibold">
+              <AvatarFallback className="bg-origen-bosque text-white text-xl font-semibold">
                 {userInitials}
               </AvatarFallback>
             </Avatar>

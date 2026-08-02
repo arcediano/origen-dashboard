@@ -485,7 +485,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
                     className={cn(
                       'px-2.5 py-1 rounded-lg text-xs font-medium border transition-all',
                       product.unit === u.value
-                        ? 'bg-origen-pradera text-white border-origen-pradera'
+                        ? 'bg-origen-bosque text-white border-origen-bosque'
                         : 'bg-surface text-muted-foreground border-border hover:border-origen-pradera/50',
                     )}
                   >
@@ -592,7 +592,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                     product.availabilityType === value
-                      ? 'bg-origen-pradera text-white border-origen-pradera'
+                      ? 'bg-origen-bosque text-white border-origen-bosque'
                       : 'bg-surface text-muted-foreground border-border hover:border-origen-pradera/50',
                   )}
                 >
@@ -615,7 +615,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
                       className={cn(
                         'py-1.5 rounded-lg text-xs font-medium border transition-all',
                         (product.activeMonths ?? []).includes(i + 1)
-                          ? 'bg-origen-pradera text-white border-origen-pradera'
+                          ? 'bg-origen-bosque text-white border-origen-bosque'
                           : 'bg-surface text-muted-foreground border-border hover:border-origen-pradera/30',
                       )}
                     >

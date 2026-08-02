@@ -249,7 +249,7 @@ export function ImageUploader({
 
               {/* Badge de imagen principal */}
               {showMainBadge && image.isMain && (
-                <div className="absolute top-1 left-1 bg-origen-pradera text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1">
+                <div className="absolute top-1 left-1 bg-origen-bosque text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1">
                   <Star className="w-3 h-3 fill-white" />
                   Principal
                 </div>

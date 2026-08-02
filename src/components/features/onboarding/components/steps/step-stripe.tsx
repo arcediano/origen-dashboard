@@ -176,7 +176,7 @@ export function EnhancedStep6Stripe({
                 key={item.step}
                 className="flex sm:flex-col items-start sm:items-center sm:text-center gap-3 p-4 bg-origen-crema/20 rounded-xl border border-border-subtle"
               >
-                <div className="w-10 h-10 rounded-full bg-origen-pradera text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-origen-bosque text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
                   {item.step}
                 </div>
                 <div>

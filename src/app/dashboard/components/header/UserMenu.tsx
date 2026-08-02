@@ -153,7 +153,7 @@ export function UserMenu({
           {userAvatar ? (
             <AvatarImage src={userAvatar} alt={userName} />
           ) : (
-            <AvatarFallback className="bg-gradient-to-br from-origen-pradera to-origen-hoja text-white text-sm font-semibold">
+            <AvatarFallback className="bg-origen-bosque text-white text-sm font-semibold">
               {userInitials}
             </AvatarFallback>
           )}
@@ -177,7 +177,7 @@ export function UserMenu({
             <div className="px-5 py-5 bg-gradient-to-r from-origen-crema/40 to-transparent border-b border-border-subtle">
               <div className="flex items-start gap-4">
                 <Avatar className="w-14 h-14 ring-2 ring-surface-alt shadow-lg">
-                  <AvatarFallback className="bg-gradient-to-br from-origen-pradera to-origen-hoja text-white text-lg font-semibold">
+                  <AvatarFallback className="bg-origen-bosque text-white text-lg font-semibold">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>

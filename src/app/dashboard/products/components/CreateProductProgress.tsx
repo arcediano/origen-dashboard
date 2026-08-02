@@ -105,7 +105,7 @@ export function CreateProductProgress({
                 <div className={cn(
                   "relative w-11 h-11 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
                   isActive && "border-origen-pradera bg-origen-pradera/10 shadow-lg shadow-origen-pradera/20",
-                  isCompleted && !isActive && "border-origen-pradera bg-origen-pradera text-white",
+                  isCompleted && !isActive && "border-origen-bosque bg-origen-bosque text-white",
                   !isActive && !isCompleted && "border-border bg-surface-alt text-text-subtle"
                 )}>
                   {isCompleted && !isActive ? (

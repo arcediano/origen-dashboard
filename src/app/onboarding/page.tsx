@@ -983,7 +983,7 @@ export default function OnboardingPage() {
                       <div className="relative z-10 flex-shrink-0">
                         <div className={cn(
                           "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                          isCompleted && "bg-origen-pradera text-white shadow-sm",
+                          isCompleted && "bg-origen-bosque text-white shadow-sm",
                           isActive && "bg-surface-alt border-2 shadow-sm",
                           isActive && `border-${step.color.replace('text-', '')}`,
                           isPending && "bg-surface border border-border text-text-subtle",

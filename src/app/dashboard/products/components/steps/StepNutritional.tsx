@@ -196,7 +196,7 @@ export function StepNutritional({
           <div className="flex items-center gap-3">
             <div className={cn(
               "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-              isStepComplete ? "bg-gradient-to-br from-origen-pradera to-origen-hoja text-white" : "bg-origen-pradera/10 text-origen-hoja"
+              isStepComplete ? "bg-origen-bosque text-white" : "bg-origen-pradera/10 text-origen-bosque"
             )}>
               {isStepComplete ? <CheckCircle className="w-5 h-5" /> : <FlaskConical className="w-5 h-5" />}
             </div>

@@ -244,7 +244,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
               "min-h-11 px-2 py-2 text-[11px] leading-tight font-semibold transition-all",
               i > 0 && "border-l border-border",
               zoneType === type
-                ? "bg-origen-pradera text-white"
+                ? "bg-origen-bosque text-white"
                 : "bg-surface-alt text-muted-foreground hover:bg-origen-crema/40 hover:text-origen-bosque"
             )}
           >
@@ -768,7 +768,7 @@ export function EnhancedStep4Capacity({
                         className={cn(
                           'min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl transition-colors',
                           isEditing
-                            ? 'bg-origen-pradera text-white hover:bg-origen-bosque'
+                            ? 'bg-origen-bosque text-white hover:bg-origen-pino'
                             : 'text-text-subtle hover:text-origen-bosque hover:bg-surface'
                         )}
                       >
@@ -927,7 +927,7 @@ export function EnhancedStep4Capacity({
               <div className={cn(
                 "w-10 h-10 rounded-lg flex items-center justify-center",
                 data.sustainablePackaging
-                  ? "bg-origen-pradera text-white"
+                  ? "bg-origen-bosque text-white"
                   : "bg-origen-crema text-origen-bosque"
               )}>
                 <Leaf className="w-5 h-5" />

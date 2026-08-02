@@ -496,7 +496,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                   <div className={cn(
                     "w-9 h-9 rounded-lg flex items-center justify-center mb-1.5 transition-all",
                     isSelected
-                      ? "bg-gradient-to-br from-origen-pradera to-origen-hoja text-white shadow-md"
+                      ? "bg-origen-bosque text-white shadow-md"
                       : "bg-origen-crema text-origen-bosque group-hover:scale-110"
                   )}>
                     <IconComponent className="w-5 h-5" />
@@ -576,7 +576,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                     <div className={cn(
                       "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
                       isSelected
-                        ? "bg-gradient-to-br from-origen-pradera to-origen-hoja text-white"
+                        ? "bg-origen-bosque text-white"
                         : "bg-origen-crema text-origen-bosque"
                     )}>
                       <IconComponent className="w-5 h-5" />

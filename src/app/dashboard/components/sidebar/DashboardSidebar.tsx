@@ -126,7 +126,7 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
 
             <div className="rounded-3xl border border-border-subtle bg-surface p-4 shadow-sm">
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-pradera to-origen-hoja text-sm font-semibold text-white shadow-sm">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-origen-bosque text-sm font-semibold text-white shadow-sm">
                   {userInitials}
                 </div>
                 <div className="min-w-0 flex-1">

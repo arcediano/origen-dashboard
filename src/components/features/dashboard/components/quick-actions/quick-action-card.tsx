@@ -24,7 +24,7 @@ export function QuickActionCard({
   description,
   icon: Icon,
   href,
-  gradient = 'from-origen-pradera to-origen-hoja',
+  gradient = 'from-origen-pino to-origen-hoja',
   badge,
   className
 }: QuickActionCardProps) {
@@ -54,7 +54,7 @@ export function QuickActionCard({
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-origen-bosque sm:text-base lg:text-lg">{title}</h3>
               {badge && (
-                <span className="px-2 py-0.5 text-xs font-medium bg-origen-pradera text-white rounded-full">
+                <span className="px-2 py-0.5 text-xs font-medium bg-origen-bosque text-white rounded-full">
                   {badge}
                 </span>
               )}

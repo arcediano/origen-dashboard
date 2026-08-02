@@ -24,7 +24,7 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     description: 'Añade un producto a tu catálogo',
     icon: Package,
     href: '/dashboard/products/create',
-    gradient: 'from-origen-pradera to-origen-hoja',
+    gradient: 'from-origen-pino to-origen-hoja',
   },
   {
     id: 'view-orders',
@@ -33,7 +33,7 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     icon: ShoppingBag,
     href: '/dashboard/orders',
     badge: 3,
-    gradient: 'from-origen-pradera to-origen-hoja',
+    gradient: 'from-origen-pino to-origen-hoja',
   },
   {
     id: 'business-profile',
