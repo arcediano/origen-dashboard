@@ -22,7 +22,7 @@ import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductF
 import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
-import { toast } from '@arcediano/ux-library';
+import { toast, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { useEffect, useState } from 'react';
 
 // ─── Animaciones ──────────────────────────────────────────────────────────────
@@ -116,7 +116,7 @@ export default function CreateProductPage() {
           className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-6"
         >
           {/* padding inferior móvil — iguala la altura de CreateProductNavigation (137px − 24px outer pb) */}
-          <div className="lg:col-span-2 space-y-6 pb-[calc(113px+env(safe-area-inset-bottom,0px))] sm:pb-0">
+          <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 25)} sm:pb-0`}>
             <ProductFormSteps
               activeTab={activeTab}
               formData={formData}

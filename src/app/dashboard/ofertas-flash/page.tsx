@@ -38,6 +38,8 @@ import {
   DialogTitle,
   DialogDescription,
   Table,
+  appShellPaddingClass,
+  NAV_HEIGHT_MOBILE_DASHBOARD,
   type Column,
   type StatGridItem,
 } from '@arcediano/ux-library';
@@ -436,7 +438,7 @@ export default function OfertasFlashPage() {
   return (
     <div className="w-full">
       <MobilePullRefresh onRefresh={handleRefresh}>
-        <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 space-y-4 sm:space-y-6">
+        <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8 space-y-4 sm:space-y-6`}>
           {/* Cabecera */}
           <PageHeader
             title="Ofertas flash"

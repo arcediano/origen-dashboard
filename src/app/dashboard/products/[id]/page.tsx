@@ -25,6 +25,8 @@ import {
   Alert,
   AlertTitle,
   AlertDescription,
+  appShellPaddingClass,
+  NAV_HEIGHT_MOBILE_DASHBOARD,
 } from '@arcediano/ux-library';
 
 import { PageHeader } from '../../components/PageHeader';
@@ -769,7 +771,7 @@ export default function ProductoDetallePage() {
           }
         />
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-[calc(152px+env(safe-area-inset-bottom,0px))] lg:pb-10">
+        <div className={`container mx-auto px-4 sm:px-6 lg:px-8 pt-4 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-10`}>
           <div>
 
             {/* ── Banner borrador — visible hasta que el producto esté activo ── */}

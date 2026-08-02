@@ -23,6 +23,8 @@ import {
   MobilePullRefresh,
   PageLoader,
   PageError,
+  appShellPaddingClass,
+  NAV_HEIGHT_MOBILE_DASHBOARD,
 } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
@@ -328,7 +330,7 @@ export default function OrderDetailPage() {
           variants={containerVariants}
           className={cn(
             'container mx-auto px-4 sm:px-6 lg:px-8 pt-4 lg:pb-10',
-            nextAction ? 'pb-[calc(124px+env(safe-area-inset-bottom,0px))]' : 'pb-6'
+            nextAction ? appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 36) : 'pb-6'
           )}
         >
           <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6">

@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { logoutUser } from '@/lib/api/auth';
-import { Avatar, AvatarFallback, Badge } from '@arcediano/ux-library';
+import { Avatar, AvatarFallback, Badge, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { ChevronRight, HelpCircle, LogOut, Settings2, User } from 'lucide-react';
 
 export default function PerfilPage() {
@@ -63,7 +63,7 @@ export default function PerfilPage() {
   ] as const;
 
   return (
-    <div className="w-full pb-[calc(88px+env(safe-area-inset-bottom))]">
+    <div className={`w-full ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)}`}>
 
       {/* ── Page title ── */}
       <div className="px-4 pt-6 pb-2 sm:px-6">

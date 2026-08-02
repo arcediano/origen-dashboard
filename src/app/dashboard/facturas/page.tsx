@@ -18,7 +18,7 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { FileText } from 'lucide-react';
 
 // Componentes UI
-import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, MobileCardList, EmptyState } from '@arcediano/ux-library';
+import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, MobileCardList, EmptyState, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { InvoicesTable } from './components/InvoicesTable';
 import { InvoiceCard, InvoiceCardSkeleton } from './components/InvoiceCard';
@@ -183,7 +183,7 @@ export default function FacturasPage() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8"
+          className={`container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8`}
         >
           {/* Filtros */}
           <motion.div variants={itemVariants}>

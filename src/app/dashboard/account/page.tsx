@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { ChevronRight, CreditCard, HelpCircle, KeyRound, MonitorCog, Settings2, Store } from 'lucide-react';
+import { appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, Card, CardContent, CardHeader, CardTitle, CardIconHeader } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle, CardIconHeader } from '@arcediano/ux-library';
 
 export default function AccountPage() {
   const accountSections = [
@@ -41,7 +41,7 @@ export default function AccountPage() {
         tooltipDetailed="Este espacio concentra tareas personales y de configuración, sin duplicar notificaciones."
       />
 
-      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 space-y-6">
+      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8 space-y-6`}>
         <Card variant="section" padding="md">
           <CardIconHeader
             icon={<MonitorCog className="h-5 w-5 text-origen-pradera" />}

@@ -5,8 +5,7 @@ import { useState, useEffect } from 'react';
 import { Key, Shield, Smartphone, Check, Copy, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Alert, AlertDescription, Badge, CardIconHeader, PageLoader } from '@arcediano/ux-library';
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@arcediano/ux-library';
+import { Alert, AlertDescription, Badge, CardIconHeader, PageLoader, Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { changePassword, getTwoFactorStatus, setupTwoFactor, enableTwoFactor, disableTwoFactor } from '@/lib/api/auth';
 import { logoutUser } from '@/lib/api/auth';
 import { GatewayError } from '@/lib/api/client';
@@ -293,7 +292,7 @@ export default function SecurityPage() {
         onBack={() => router.push('/dashboard/account')}
       />
 
-      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8`}>
         <div className="mb-5">
           <Card variant="section" padding="md">
             <CardIconHeader

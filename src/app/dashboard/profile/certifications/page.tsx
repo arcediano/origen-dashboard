@@ -22,6 +22,7 @@ import { Button, Badge } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
 import { ConfirmDialog, DateInput, Spinner } from '@arcediano/ux-library';
+import { appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { FileUpload, type UploadedFile } from '@/components/shared';
 import { loadOnboardingData, updateProducerDocument, updateProducerCertification } from '@/lib/api/onboarding';
 import { uploadFile } from '@/lib/api/media';
@@ -483,7 +484,7 @@ export default function CertificationsPage() {
         onBack={() => router.push('/dashboard/profile')}
       />
 
-      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8`}>
         <div className="mt-6 space-y-6">
           {/* Error global de carga */}
           {error && (

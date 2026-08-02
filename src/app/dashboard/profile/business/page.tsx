@@ -43,6 +43,9 @@ import {
   Textarea,
   ToggleGroup,
   ToggleGroupItem,
+  appShellPaddingClass,
+  appShellBottomOffsetClass,
+  NAV_HEIGHT_MOBILE_DASHBOARD,
 } from '@arcediano/ux-library';
 import { motion } from 'framer-motion';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
@@ -617,7 +620,7 @@ export default function BusinessInfoPage() {
         onBack={() => router.push('/dashboard/profile')}
       />
 
-      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 ${isEditing ? 'lg:pb-28' : ''}`}>
+      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8 ${isEditing ? 'lg:pb-28' : ''}`}>
         <ProfileSectionNav className="mt-3" />
 
         <div className="mt-6">
@@ -1198,7 +1201,7 @@ export default function BusinessInfoPage() {
       {/* Barra de guardado sticky – todos los breakpoints, para no obligar a volver
           arriba al editar secciones bajas de la pantalla (Categorías, Historia, etc.) */}
       {isEditing && (
-        <div className="fixed left-0 right-0 bottom-[calc(88px+env(safe-area-inset-bottom))] lg:bottom-6 z-30 px-4 sm:px-6">
+        <div className={`fixed left-0 right-0 ${appShellBottomOffsetClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} lg:bottom-6 z-30 px-4 sm:px-6`}>
           <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
             <div className="flex gap-2">
               <Button variant="ghost" size="md" className="flex-1" onClick={handleCancel}>

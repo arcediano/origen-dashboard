@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { DashboardSidebar } from '@/app/dashboard/components/sidebar/DashboardSidebar';
 import { DashboardHeader } from '@/app/dashboard/components/header/DashboardHeader';
 import { BottomTabBar, MobileTopBar, MobilePageTransition } from '@/components/features/dashboard/components/mobile';
@@ -148,7 +149,7 @@ function DashboardContentWrapper({
           !isMobile && "lg:ml-72",
         // Mobile: pt para header fijo (56px); pb para BottomTabBar solo cuando no hay ActionBar propia
         isMobile && "pt-14",
-        isMobile && !actionBarOpen && "pb-[calc(88px+env(safe-area-inset-bottom))]",
+        isMobile && !actionBarOpen && appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0),
           !isMobile && "lg:px-4 lg:pb-6",
         )}
       >

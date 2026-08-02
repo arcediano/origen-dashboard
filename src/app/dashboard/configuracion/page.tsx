@@ -6,6 +6,7 @@
 'use client';
 
 import { Bell } from 'lucide-react';
+import { appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { NotificationsPreferencesPanel } from '@/app/dashboard/notifications/components/NotificationsPreferencesPanel';
 
@@ -22,7 +23,7 @@ export default function ConfiguracionPage() {
         tooltipDetailed="Configura por cada tipo de aviso si quieres recibirlo por email o por push."
       />
 
-      <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-10">
+      <div className={`container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-10`}>
         <NotificationsPreferencesPanel />
       </div>
     </div>

@@ -28,6 +28,8 @@ import {
   PageError,
   useIsMobile,
   Button,
+  appShellPaddingClass,
+  NAV_HEIGHT_MOBILE_DASHBOARD,
   type ActiveFilterChip,
   type FilterSection,
 } from '@arcediano/ux-library';
@@ -359,7 +361,7 @@ export default function NotificationsPage() {
         tooltipDetailed="Gestiona tu bandeja de entrada y configura cómo recibes cada tipo de alerta."
       />
 
-      <div className="container mx-auto space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+      <div className={`container mx-auto space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8`}>
 
         {/* ── Filtros ───────────────────────────────────────────────────────── */}
         <div className="space-y-2">

@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
-import { Button } from '@arcediano/ux-library';
+import { Button, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { MobileStepperBar } from '@/components/features/onboarding/components/MobileStepperBar';
 import { MobileNavBar } from '@/components/features/onboarding/components/MobileNavBar';
 import { StepValidationPanel } from '@/components/features/onboarding/components/StepValidationPanel';
@@ -939,7 +939,7 @@ export default function OnboardingPage() {
       {/* ====================================================================
           MAIN - Layout: Timeline vertical (4) + Formulario (8)
       ==================================================================== */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 lg:py-8 pb-[calc(9.5rem+env(safe-area-inset-bottom))] lg:pb-8">
+      <main className={`max-w-7xl mx-auto px-4 sm:px-6 py-4 lg:py-8 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-8`}>
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
 
           {/* ====================================================================

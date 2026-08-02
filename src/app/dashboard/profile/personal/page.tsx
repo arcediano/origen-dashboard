@@ -9,6 +9,7 @@ import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSec
 import { Avatar, Card, CardContent, CardHeader, CardTitle, PageLoader } from '@arcediano/ux-library';
 import { Button, Input, Label, Badge, DateInput } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
+import { appShellPaddingClass, appShellBottomOffsetClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { getCurrentUser, updateCurrentUser, type AuthUser } from '@/lib/api/auth';
 import { loadOnboardingData, loadProducerProfile, saveStep1, saveStep2, type OnboardingData } from '@/lib/api/onboarding';
 import { getProducerProfile, updateProducerProfile, type ProducerProfileData } from '@/lib/api/producers';
@@ -422,7 +423,7 @@ export default function PersonalInfoPage() {
         onBack={() => router.push('/dashboard/profile')}
       />
 
-      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 ${isEditing ? 'lg:pb-28' : ''}`}>
+      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8 ${isEditing ? 'lg:pb-28' : ''}`}>
         <ProfileSectionNav className="mt-3" />
 
         <div className="mt-6">
@@ -723,7 +724,7 @@ export default function PersonalInfoPage() {
       {/* Barra de guardado sticky – todos los breakpoints, para no obligar a volver
           arriba al editar campos por debajo de la primera pantalla */}
       {isEditing && (
-        <div className="fixed left-0 right-0 bottom-[calc(88px+env(safe-area-inset-bottom))] lg:bottom-6 z-30 px-4 sm:px-6">
+        <div className={`fixed left-0 right-0 ${appShellBottomOffsetClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} lg:bottom-6 z-30 px-4 sm:px-6`}>
           <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
             <div className="flex gap-2">
               <Button variant="ghost" className="flex-1" onClick={handleCancel}>Cancelar</Button>

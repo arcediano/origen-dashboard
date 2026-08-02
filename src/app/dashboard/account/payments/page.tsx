@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, StatGrid, StatCard, PageLoader, PageError, MobilePullRefresh } from '@arcediano/ux-library';
+import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, StatGrid, StatCard, PageLoader, PageError, MobilePullRefresh, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2 } from 'lucide-react';
 import { loadProducerProfile } from '@/lib/api/onboarding';
 import { startStripeOnboarding, openStripeDashboard } from '@/lib/stripe/connect-client';
@@ -196,7 +196,7 @@ export default function PaymentsPage() {
 
   return (
     <div className="w-full">
-      <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8">
+      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8`}>
         <PageHeader
           title="Cobros"
           description="Gestiona Stripe, el estado de tu cuenta y cómo cobras tus ventas"

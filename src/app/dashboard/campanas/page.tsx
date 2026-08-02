@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { Euro, Filter, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp, Wallet } from 'lucide-react';
-import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Card, Badge, MobilePullRefresh, CardIconHeader, MobileCardList, SwipeableRow } from '@arcediano/ux-library';
+import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Card, Badge, MobilePullRefresh, CardIconHeader, MobileCardList, SwipeableRow, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import type { StatGridItem } from '@arcediano/ux-library';
 import {
@@ -401,7 +401,7 @@ export default function CampanasPage() {
   return (
     <div className="w-full">
       <MobilePullRefresh onRefresh={async () => { await loadCampaigns(); }}>
-        <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] sm:pb-8 space-y-4 sm:space-y-6">
+        <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8 space-y-4 sm:space-y-6`}>
           {/* Header */}
           <PageHeader
             title="Campañas"
