@@ -28,7 +28,7 @@ export function TestimonialsSection() {
       quote: "El sistema de pagos seguro y la logística integrada me han ahorrado horas de gestión semanal.",
       category: "Quesos artesanales",
       initials: "AM",
-      bgColor: "from-origen-menta/80 to-origen-menta/60",
+      bgColor: "from-origen-bosque to-origen-pino",
     },
   ];
 

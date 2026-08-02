@@ -28,7 +28,7 @@
     --pino: 155 37% 30%;        /* #2D6A4F - Verde Pino (H2) */
     --hoja: 155 42% 38%;        /* #40916C - Verde Esmeralda (H3, enlaces) */
     --pradera: 155 42% 65%;     /* #74C69D - Verde Menta (Interactivo) */
-    --menta: 28 56% 64%;        /* #D4A373 - Beige Arena (Acento) */
+    --menta: 152 45% 86%;       /* #C9EBD9 - Verde Menta pastel (guia v6: corregido, era beige/naranja; solo fondo, nunca texto/relleno solido) */
     --crema: 154 55% 97%;       /* #F1FAEE - Blanco Verdeado (Fondo) */
 
     /* ----- COLORES DE APOYO (Manual Sección 3.2) ----- */
@@ -40,7 +40,7 @@
     /* ----- ESTADOS HOVER ----- */
     --hover-bosque:   155 56% 11%;  /* #0D2B1D - Hover Verde Bosque  */
     --hover-pradera:  155 42% 55%;  /* #5BB580 - Hover Verde Menta   */
-    --hover-menta:    30  41% 57%;  /* #C4905D - Hover Beige Arena   */
+    --hover-menta:    152 42% 78%;  /* guia v6: recalculado en verde, coherente con --menta (sin consumidores activos hoy) */
 
     /* ----- TOKENS SEMÁNTICOS ----- */
     /* Uso: sustituyen directamente los grises de Tailwind en componentes */
@@ -49,8 +49,11 @@
     --surface-raised: 0 0% 100%;             /* Fondo elevado (modales)      */
     --border-subtle: 155 30% 90%;            /* Bordes muy sutiles           */
     --border-strong: var(--hoja);            /* Bordes de énfasis / active   */
-    --text-subtle:   var(--hoja);            /* Texto secundario / muted     */
+    --texto-suave:   158 15% 32%;            /* guia v6: texto secundario/overlines, >=6:1 sobre blanco */
+    --text-subtle:   var(--texto-suave);     /* guia v6: antes var(--hoja), ~3.6:1 (no cumplia AA)      */
     --text-disabled: 155 15% 60%;            /* Texto deshabilitado          */
+    --hoja-tinta:    155 42% 31%;            /* guia v6 (R4): texto de links, valores positivos y estado activo de nav */
+    --data-anterior: 156 12% 78%;            /* guia v6 (R2): serie comparativa en graficos             */
 
     /* ----- SISTEMA SHADCN/UI ----- */
 
@@ -104,10 +107,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
-    background-image:
-      radial-gradient(circle at 8% -12%, hsl(var(--pradera) / 0.14), transparent 40%),
-      radial-gradient(circle at 92% -8%, hsl(var(--menta) / 0.1), transparent 34%),
-      linear-gradient(180deg, hsl(var(--surface-alt)) 0%, hsl(var(--background)) 20%, hsl(var(--background)) 100%);
+    /* guia v6 (R1): fondo crema plano en apps autenticadas; el lavado
+       de marca con radial-gradient queda reservado a marketing/auth. */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

@@ -65,6 +65,7 @@ const config: Config = {
           pino: "hsl(var(--pino))",          // #2D6A4F - Verde Pino
           hoja: "hsl(var(--hoja))",          // #40916C - Verde Esmeralda
           pradera: "hsl(var(--pradera))",    // #74C69D - Verde Menta
+          menta: "hsl(var(--menta))",        // guia v6: verde menta pastel (antes ausente de esta config; ya en uso en el codigo como bg-origen-menta)
           crema: "hsl(var(--crema))",        // #F1FAEE - Blanco Verdeado
 
           // Apoyo
@@ -92,6 +93,8 @@ const config: Config = {
         "border-strong":  "hsl(var(--border-strong))",
         "text-subtle":    "hsl(var(--text-subtle))",
         "text-disabled":  "hsl(var(--text-disabled))",
+        "hoja-tinta":     "hsl(var(--hoja-tinta))",     // guia v6 (R4): links, valores positivos, estado activo
+        "data-anterior":  "hsl(var(--data-anterior))",  // guia v6 (R2): serie comparativa en graficos
 
         // Tokens de feedback (estándar en todos los proyectos — BRAND-T2 Sprint 17)
         // NOTA: "warning" y "warning-text" ya estaban en uso en varios componentes
