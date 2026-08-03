@@ -5,6 +5,7 @@
  *
  * Endpoints reales (gateway → orders-service):
  *   GET   /api/v1/orders/seller          — lista pedidos del productor (paginado)
+ *   GET   /api/v1/orders/seller/stats    — estadísticas agregadas del productor
  *   GET   /api/v1/orders/seller/:id      — detalle de pedido
  *   PATCH /api/v1/orders/seller/:id/status — actualizar estado de pedido
  */
@@ -224,33 +225,19 @@ function mapBackendOrder(o: BackendOrder): Order {
   };
 }
 
-function computeStats(orders: Order[]): OrderStats {
-  const delivered = orders.filter((o) => o.status === 'delivered');
-  const totalRevenue = delivered.reduce((acc, o) => acc + o.total, 0);
-  const today = new Date().toDateString();
-
-  return {
-    total: orders.length,
-    pending: orders.filter((o) => o.status === 'pending').length,
-    processing: orders.filter((o) => o.status === 'processing').length,
-    shipped: orders.filter((o) => o.status === 'shipped').length,
-    delivered: delivered.length,
-    cancelled: orders.filter((o) => o.status === 'cancelled').length,
-    refunded: orders.filter((o) => o.status === 'refunded').length,
-    totalRevenue,
-    averageOrderValue: delivered.length > 0 ? totalRevenue / delivered.length : 0,
-    todayOrders: orders.filter(
-      (o) => new Date(o.createdAt).toDateString() === today,
-    ).length,
-    todayRevenue: orders
-      .filter(
-        (o) =>
-          o.status === 'delivered' &&
-          new Date(o.createdAt).toDateString() === today,
-      )
-      .reduce((acc, o) => acc + o.total, 0),
-  };
-}
+const EMPTY_STATS: OrderStats = {
+  total: 0,
+  pending: 0,
+  processing: 0,
+  shipped: 0,
+  delivered: 0,
+  cancelled: 0,
+  refunded: 0,
+  totalRevenue: 0,
+  averageOrderValue: 0,
+  todayOrders: 0,
+  todayRevenue: 0,
+};
 
 // ─── Params públicos ──────────────────────────────────────────────────────────
 
@@ -312,6 +299,26 @@ export async function fetchSellerOrders(
 }
 
 /**
+ * Obtiene las estadísticas agregadas de pedidos del productor autenticado
+ * (todos los estados, no limitadas a la página actual).
+ * GET /api/v1/orders/seller/stats
+ */
+export async function fetchSellerOrderStats(): Promise<ApiResponse<OrderStats>> {
+  try {
+    const res = await gatewayClient.get<OrderStats>('/orders/seller/stats');
+    return { data: res, status: 200 };
+  } catch (err) {
+    console.error('[orders] fetchSellerOrderStats', err);
+    const message =
+      err instanceof GatewayError ? err.message : 'Error al obtener estadísticas';
+    return {
+      error: message,
+      status: err instanceof GatewayError ? err.status : 500,
+    };
+  }
+}
+
+/**
  * Obtiene el detalle de un pedido del productor por ID.
  * GET /api/v1/orders/seller/:id
  */
@@ -346,12 +353,15 @@ export async function fetchOrders(params?: {
   filters?: OrderFilters;
 }): Promise<ApiResponse<OrdersResponse>> {
   try {
-    const result = await fetchSellerOrders({
-      page: params?.page,
-      limit: params?.limit,
-      status: params?.filters?.status,
-      search: params?.filters?.search,
-    });
+    const [result, statsResult] = await Promise.all([
+      fetchSellerOrders({
+        page: params?.page,
+        limit: params?.limit,
+        status: params?.filters?.status,
+        search: params?.filters?.search,
+      }),
+      fetchSellerOrderStats(),
+    ]);
 
     if (result.error || !result.data) {
       return {
@@ -363,10 +373,23 @@ export async function fetchOrders(params?: {
     const { orders, total, page, limit } = result.data;
     const totalPages = limit > 0 ? Math.ceil(total / limit) : 1;
 
+    // Si falla el endpoint de estadísticas, no debe romper la carga de
+    // pedidos: se degrada a estadísticas en 0 y se loguea el error.
+    if (statsResult.error || !statsResult.data) {
+      console.error('[orders] fetchOrders: fetchSellerOrderStats falló', statsResult.error);
+    }
+
+    // `total` SIEMPRE se sobreescribe con el total de la paginación (fuente
+    // única de verdad), nunca con el que devuelva el endpoint de stats.
+    const stats: OrderStats = {
+      ...(statsResult.data ?? EMPTY_STATS),
+      total,
+    };
+
     return {
       data: {
         orders,
-        stats: computeStats(orders),
+        stats,
         total,
         page,
         limit,
@@ -441,23 +464,13 @@ export async function updateOrderStatus(
 }
 
 /**
- * Obtiene estadísticas de pedidos.
- * Computa las estadísticas desde la primera página de la API (hasta 50 pedidos).
+ * Obtiene estadísticas agregadas de pedidos del productor.
+ * Usado por el Dashboard principal (use-dashboard-stats.ts).
+ * Delega en fetchSellerOrderStats (endpoint de agregación del backend),
+ * en vez de recalcular sobre un slice paginado de pedidos.
  */
 export async function fetchOrderStats(): Promise<ApiResponse<OrderStats>> {
-  try {
-    const result = await fetchSellerOrders({ limit: 50 });
-    if (result.error || !result.data) {
-      return {
-        error: result.error ?? 'Error al obtener estadísticas',
-        status: result.status,
-      };
-    }
-    return { data: computeStats(result.data.orders), status: 200 };
-  } catch (err) {
-    console.error('[orders] fetchOrderStats', err);
-    return { error: 'Error al obtener estadísticas', status: 500 };
-  }
+  return fetchSellerOrderStats();
 }
 
 // ─── FACTURAS ─────────────────────────────────────────────────────────────────

@@ -22,6 +22,7 @@ import {
   mockSellerOrders,
   ordersEmptyHandler,
   ordersErrorHandler,
+  ordersStatsErrorHandler,
 } from '../../mocks/handlers/orders.handlers';
 import { TEST_API_BASE } from '../../mocks/api-base';
 
@@ -358,7 +359,7 @@ describe('fetchOrderStats', () => {
   });
 
   it('devuelve error cuando la API responde 500', async () => {
-    server.use(ordersErrorHandler);
+    server.use(ordersStatsErrorHandler);
     const result = await fetchOrderStats();
     expect(result.error).toBeDefined();
   });

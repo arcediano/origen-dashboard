@@ -67,9 +67,37 @@ export const mockSellerOrders = [
   makeBackendOrder({ id: 'ord-sel-003', orderNumber: 'ORG-2024-00003', status: 'shipped',   total: 78.20 }),
 ];
 
+// ─── Estadísticas agregadas (mismo cálculo que OrdersService.getSellerStats) ──
+
+function computeMockStats() {
+  const delivered = mockSellerOrders.filter((o) => o.status === 'delivered');
+  const totalRevenue = delivered.reduce((acc, o) => acc + o.total, 0);
+
+  return {
+    total: mockSellerOrders.length,
+    pending: mockSellerOrders.filter((o) => o.status === 'pending').length,
+    processing: mockSellerOrders.filter((o) => o.status === 'processing').length,
+    shipped: mockSellerOrders.filter((o) => o.status === 'shipped').length,
+    delivered: delivered.length,
+    cancelled: mockSellerOrders.filter((o) => o.status === 'cancelled').length,
+    refunded: mockSellerOrders.filter((o) => o.status === 'refunded').length,
+    totalRevenue,
+    averageOrderValue: delivered.length > 0 ? totalRevenue / delivered.length : 0,
+    todayOrders: 0,
+    todayRevenue: 0,
+  };
+}
+
 // ─── Handlers normales ────────────────────────────────────────────────────────
 
 export const ordersHandlers = [
+  // GET /orders/seller/stats — estadísticas agregadas del vendedor
+  // IMPORTANTE: declarado antes de /orders/seller/:id para que MSW no lo
+  // confunda con una petición de detalle (mismo criterio que el backend real).
+  http.get(`${BASE}/orders/seller/stats`, () => {
+    return HttpResponse.json(computeMockStats());
+  }),
+
   // GET /orders/seller — lista paginada
   http.get(`${BASE}/orders/seller`, ({ request }) => {
     const url = new URL(request.url);
@@ -136,5 +164,25 @@ export const ordersEmptyHandler = http.get(`${BASE}/orders/seller`, () =>
 );
 
 export const ordersErrorHandler = http.get(`${BASE}/orders/seller`, () =>
+  HttpResponse.json({ message: 'Internal server error' }, { status: 500 }),
+);
+
+export const ordersStatsEmptyHandler = http.get(`${BASE}/orders/seller/stats`, () =>
+  HttpResponse.json({
+    total: 0,
+    pending: 0,
+    processing: 0,
+    shipped: 0,
+    delivered: 0,
+    cancelled: 0,
+    refunded: 0,
+    totalRevenue: 0,
+    averageOrderValue: 0,
+    todayOrders: 0,
+    todayRevenue: 0,
+  }),
+);
+
+export const ordersStatsErrorHandler = http.get(`${BASE}/orders/seller/stats`, () =>
   HttpResponse.json({ message: 'Internal server error' }, { status: 500 }),
 );

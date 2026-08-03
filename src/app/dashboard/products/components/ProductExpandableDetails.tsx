@@ -165,7 +165,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
       </div>
 
       {/* Gráfica de visitas por producto */}
-      <div className="p-5 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
+      <div className="p-5 bg-origen-nube rounded-xl border border-origen-pradera/20">
         <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
           <h5 className="text-sm font-medium text-origen-bosque flex items-center gap-2">
             <Eye className="w-4 h-4 text-origen-pradera" />
@@ -245,7 +245,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
       {/* Dos columnas */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Información financiera */}
-        <div className="p-5 bg-origen-crema/20 rounded-xl border border-origen-pradera/20">
+        <div className="p-5 bg-origen-nube rounded-xl border border-origen-pradera/20">
           <h5 className="text-sm font-medium text-origen-bosque mb-4 flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-origen-pradera" />
             Detalles financieros
@@ -253,7 +253,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
           <div className="space-y-3">
             <div className="flex justify-between items-center pb-2 border-b border-border/50">
               <span className="text-sm text-muted-foreground">Precio base</span>
-              <span className="text-base font-semibold text-origen-pradera">{product.basePrice.toFixed(2)}€</span>
+              <span className="text-base font-semibold text-origen-bosque">{product.basePrice.toFixed(2)}€</span>
             </div>
             {product.comparePrice && product.comparePrice > product.basePrice && (
               <div className="flex justify-between items-center pb-2 border-b border-border/50">
@@ -281,7 +281,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         </div>
 
         {/* Información de producto */}
-        <div className="p-5 bg-origen-crema/20 rounded-xl border border-origen-pradera/20">
+        <div className="p-5 bg-origen-nube rounded-xl border border-origen-pradera/20">
           <h5 className="text-sm font-medium text-origen-bosque mb-4 flex items-center gap-2">
             <Package className="w-4 h-4 text-origen-pradera" />
             Detalles del producto

@@ -108,7 +108,7 @@ export function OrdersTable({
       header: 'Importe',
       accessor: (item) => (
         <div>
-          <p className="text-sm font-bold text-origen-pradera">{item.total.toFixed(2)}€</p>
+          <p className="text-sm font-bold text-origen-bosque">{item.total.toFixed(2)}€</p>
           <p className="text-xs text-text-subtle">{item.items.length} {item.items.length === 1 ? 'producto' : 'productos'}</p>
         </div>
       ),
@@ -187,8 +187,10 @@ export function OrdersTable({
             <div key={event.id} className="flex items-start gap-3">
               <div className="relative">
                 <div className={cn(
-                  'w-2 h-2 rounded-full mt-1.5',
-                  index === 0 ? 'bg-origen-pradera' : 'bg-border'
+                  'rounded-full mt-1.5',
+                  index === 0
+                    ? 'w-2 h-2 bg-origen-bosque'
+                    : 'w-2.5 h-2.5 bg-white border border-border'
                 )} />
                 {index < order.timeline.length - 1 && (
                   <div className="absolute top-3 left-1 w-0.5 h-8 bg-border -translate-x-[3px]" />
@@ -210,7 +212,7 @@ export function OrdersTable({
         <h4 className="text-sm font-medium text-origen-bosque mb-3">Productos</h4>
         <div className="space-y-2">
           {order.items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between p-2 bg-origen-crema/30 rounded-lg">
+            <div key={item.id} className="flex items-center justify-between p-2 bg-origen-nube rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-surface-alt flex items-center justify-center">
                   <Package className="w-5 h-5 text-text-subtle" />
@@ -220,7 +222,7 @@ export function OrdersTable({
                   <p className="text-xs text-text-subtle">{item.quantity} x {item.unitPrice.toFixed(2)}€</p>
                 </div>
               </div>
-              <p className="text-sm font-bold text-origen-pradera">{item.totalPrice.toFixed(2)}€</p>
+              <p className="text-sm font-bold text-origen-bosque">{item.totalPrice.toFixed(2)}€</p>
             </div>
           ))}
         </div>
@@ -267,7 +269,7 @@ export function OrdersTable({
       </div>
 
       {/* Resumen de pago */}
-      <div className="mt-4 p-3 bg-origen-crema/30 rounded-lg">
+      <div className="mt-4 p-3 bg-origen-nube rounded-lg">
         <div className="flex justify-between text-sm">
           <span className="text-text-subtle">Subtotal</span>
           <span className="font-medium">{order.subtotal.toFixed(2)}€</span>
@@ -284,7 +286,7 @@ export function OrdersTable({
         )}
         <div className="flex justify-between text-base font-bold mt-2 pt-2 border-t border-border">
           <span className="text-origen-bosque">Total</span>
-          <span className="text-origen-pradera">{order.total.toFixed(2)}€</span>
+          <span className="text-origen-bosque">{order.total.toFixed(2)}€</span>
         </div>
       </div>
     </div>

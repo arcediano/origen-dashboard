@@ -66,7 +66,7 @@ export function InvoicesTable({
       key: 'total',
       header: 'Importe',
       accessor: (item) => (
-        <p className="text-sm font-bold text-origen-pradera">{item.total.toFixed(2)}€</p>
+        <p className="text-sm font-bold text-origen-bosque">{item.total.toFixed(2)}€</p>
       ),
       sortable: true,
       sortValue: (item) => item.total,

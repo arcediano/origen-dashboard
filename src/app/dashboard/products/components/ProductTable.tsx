@@ -76,7 +76,7 @@ export function ProductTable({
       header: 'Precio',
       accessor: (item) => (
         <div className="whitespace-nowrap">
-          <span className="text-sm font-semibold text-origen-pradera">
+          <span className="text-sm font-semibold text-origen-bosque">
             {item.basePrice.toFixed(2)}€
           </span>
           {item.comparePrice && item.comparePrice > item.basePrice && (

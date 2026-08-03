@@ -44,22 +44,22 @@ describe('OrganicScoreBadge', () => {
 
   // ─── Niveles semánticos ────────────────────────────────────────────────────
 
-  it('aplica clase text-origen-pradera para score ≥ 0.80 (Excelente)', () => {
+  it('aplica clase text-origen-bosque para score ≥ 0.80 (Excelente)', () => {
     const { container } = render(<OrganicScoreBadge score={0.85} />);
     const badge = container.querySelector('span');
-    expect(badge?.className).toContain('text-origen-pradera');
+    expect(badge?.className).toContain('text-origen-bosque');
   });
 
-  it('aplica clase text-origen-hoja para score ≥ 0.60 y < 0.80 (Bueno)', () => {
+  it('aplica clase text-origen-pino para score ≥ 0.60 y < 0.80 (Bueno)', () => {
     const { container } = render(<OrganicScoreBadge score={0.65} />);
     const badge = container.querySelector('span');
-    expect(badge?.className).toContain('text-origen-hoja');
+    expect(badge?.className).toContain('text-origen-pino');
   });
 
-  it('aplica clase text-origen-mandarina para score ≥ 0.40 y < 0.60 (Regular)', () => {
+  it('aplica clase text-feedback-warning-text para score ≥ 0.40 y < 0.60 (Regular)', () => {
     const { container } = render(<OrganicScoreBadge score={0.50} />);
     const badge = container.querySelector('span');
-    expect(badge?.className).toContain('text-origen-mandarina');
+    expect(badge?.className).toContain('text-feedback-warning-text');
   });
 
   it('aplica clase text-feedback-danger-text para score < 0.40 (Bajo)', () => {
@@ -70,22 +70,22 @@ describe('OrganicScoreBadge', () => {
 
   // ─── Umbrales exactos ─────────────────────────────────────────────────────
 
-  it('score exactamente 0.80 → Excelente (text-origen-pradera)', () => {
+  it('score exactamente 0.80 → Excelente (text-origen-bosque)', () => {
     const { container } = render(<OrganicScoreBadge score={0.80} />);
     const badge = container.querySelector('span');
-    expect(badge?.className).toContain('text-origen-pradera');
+    expect(badge?.className).toContain('text-origen-bosque');
   });
 
-  it('score exactamente 0.60 → Bueno (text-origen-hoja)', () => {
+  it('score exactamente 0.60 → Bueno (text-origen-pino)', () => {
     const { container } = render(<OrganicScoreBadge score={0.60} />);
     const badge = container.querySelector('span');
-    expect(badge?.className).toContain('text-origen-hoja');
+    expect(badge?.className).toContain('text-origen-pino');
   });
 
-  it('score exactamente 0.40 → Regular (text-origen-mandarina)', () => {
+  it('score exactamente 0.40 → Regular (text-feedback-warning-text)', () => {
     const { container } = render(<OrganicScoreBadge score={0.40} />);
     const badge = container.querySelector('span');
-    expect(badge?.className).toContain('text-origen-mandarina');
+    expect(badge?.className).toContain('text-feedback-warning-text');
   });
 
   // ─── Prop showLabel ───────────────────────────────────────────────────────

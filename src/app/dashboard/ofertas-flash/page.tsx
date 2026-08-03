@@ -203,7 +203,7 @@ function DealCard({ deal, onEdit }: DealCardProps) {
       )}
 
       <div className="mt-2 flex items-center justify-between text-xs">
-        <span className="font-semibold text-sm text-origen-pradera">
+        <span className="font-semibold text-sm text-origen-bosque">
           {formatPrice(deal.discountValue, deal.discountType)}
         </span>
         <span className="text-text-subtle">{formatDate(deal.startsAt)} — {formatDate(deal.endsAt)}</span>
@@ -373,7 +373,7 @@ export default function OfertasFlashPage() {
       key: 'descuento',
       header: 'Descuento',
       accessor: (deal) => (
-        <span className="text-sm font-semibold text-origen-pradera whitespace-nowrap">
+        <span className="text-sm font-semibold text-origen-bosque whitespace-nowrap">
           {formatPrice(deal.discountValue, deal.discountType)}
         </span>
       ),

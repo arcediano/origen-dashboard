@@ -32,5 +32,5 @@ export function OrderStats({ stats, isLoading = false, className }: OrderStatsPr
     { label: 'Hoy',           value: stats.todayOrders,                   icon: <CalendarCheck />, variant: 'bosque'    },
   ];
 
-  return <StatGrid items={items} columns={4} periodLabel="Mes actual" loading={isLoading} className={cn(className)} />;
+  return <StatGrid items={items} columns={4} loading={isLoading} className={cn(className)} />;
 }

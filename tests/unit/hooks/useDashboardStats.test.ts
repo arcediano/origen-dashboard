@@ -1,24 +1,26 @@
 /**
  * @file useDashboardStats.test.ts
  * @description Tests de integración para el hook useDashboardStats.
- * Usa MSW para interceptar las llamadas reales a fetchOrderStats (vía fetchSellerOrders).
+ * Usa MSW para interceptar las llamadas reales a fetchOrderStats (vía
+ * fetchSellerOrderStats → GET /orders/seller/stats).
  *
- * Fixture de MSW (mockSellerOrders en orders.handlers.ts):
+ * Fixture de MSW (mockSellerOrders en orders.handlers.ts, agregado por
+ * computeMockStats en el handler de /orders/seller/stats):
  *   - ord-sel-001: status=pending,   total=49.95, createdAt=2 días atrás
  *   - ord-sel-002: status=delivered, total=32.50, createdAt=2 días atrás
  *   - ord-sel-003: status=shipped,   total=78.20, createdAt=2 días atrás
  *
- * computeStats produce:
+ * Estadisticas agregadas resultantes:
  *   total=3, pending=1, totalRevenue=32.50 (solo delivered),
- *   todayOrders=0 (ninguno es de hoy), todayRevenue=0
+ *   todayOrders=0, todayRevenue=0
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { server } from '../../mocks/server';
 import {
-  ordersEmptyHandler,
-  ordersErrorHandler,
+  ordersStatsEmptyHandler,
+  ordersStatsErrorHandler,
 } from '../../mocks/handlers/orders.handlers';
 import { useDashboardStats } from '@/components/features/dashboard/hooks/use-dashboard-stats';
 
@@ -121,7 +123,7 @@ describe('useDashboardStats', () => {
   });
 
   it('devuelve stats vacías (ceros) cuando no hay pedidos', async () => {
-    server.use(ordersEmptyHandler);
+    server.use(ordersStatsEmptyHandler);
     const { result } = renderHook(() => useDashboardStats());
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -135,7 +137,7 @@ describe('useDashboardStats', () => {
   });
 
   it('establece error cuando la API falla', async () => {
-    server.use(ordersErrorHandler);
+    server.use(ordersStatsErrorHandler);
     const { result } = renderHook(() => useDashboardStats());
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -161,7 +163,7 @@ describe('useDashboardStats', () => {
   });
 
   it('se recupera de un error al hacer refetch con la API disponible', async () => {
-    server.use(ordersErrorHandler);
+    server.use(ordersStatsErrorHandler);
     const { result } = renderHook(() => useDashboardStats());
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));

@@ -617,7 +617,7 @@ export default function OrderDetailPage() {
                 </div>
 
                 {/* Resumen de precios */}
-                <div className="px-5 py-4 bg-origen-crema/30 border-t border-border-subtle space-y-1.5">
+                <div className="px-5 py-4 bg-origen-nube border-t border-border-subtle space-y-1.5">
                   <div className="flex justify-between text-xs text-text-subtle">
                     <span>Subtotal</span>
                     <span className="font-medium text-origen-bosque">{order.subtotal.toFixed(2)}€</span>
