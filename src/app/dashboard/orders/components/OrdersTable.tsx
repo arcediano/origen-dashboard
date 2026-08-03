@@ -178,98 +178,87 @@ export function OrdersTable({
   ];
 
   const expandableDetails = (order: Order) => (
-    <div className="space-y-4 p-2">
+    <div className="flex flex-col gap-4 p-2">
       {/* Línea de tiempo */}
       <div>
-        <h4 className="text-sm font-medium text-origen-bosque mb-3">Línea de tiempo</h4>
-        <div className="space-y-2">
+        <h4 className="text-[11px] font-bold uppercase tracking-wide text-hoja-tinta">Línea de tiempo</h4>
+        <div className="flex flex-wrap gap-4 mt-2">
           {order.timeline.map((event, index) => (
-            <div key={event.id} className="flex items-start gap-3">
-              <div className="relative">
-                <div className={cn(
-                  'rounded-full mt-1.5',
-                  index === 0
-                    ? 'w-2 h-2 bg-origen-bosque'
-                    : 'w-2.5 h-2.5 bg-white border border-border'
-                )} />
-                {index < order.timeline.length - 1 && (
-                  <div className="absolute top-3 left-1 w-0.5 h-8 bg-border -translate-x-[3px]" />
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-origen-bosque">{event.description}</p>
-                <p className="text-xs text-text-subtle">
-                  {format(event.createdAt, 'dd MMM yyyy HH:mm', { locale: es })}
-                </p>
-              </div>
-            </div>
+            <span
+              key={event.id}
+              className={cn(
+                'inline-flex items-center gap-1.5 text-xs',
+                index === 0 ? 'font-semibold text-origen-bosque' : 'text-text-subtle'
+              )}
+            >
+              <span className={cn(
+                'w-2 h-2 rounded-full shrink-0',
+                index === 0 ? 'bg-origen-bosque' : 'border border-border-subtle'
+              )} />
+              {event.description}
+              {index === 0 && (
+                <> · {format(event.createdAt, 'dd MMM, HH:mm', { locale: es })}</>
+              )}
+            </span>
           ))}
         </div>
       </div>
 
       {/* Productos */}
       <div>
-        <h4 className="text-sm font-medium text-origen-bosque mb-3">Productos</h4>
-        <div className="space-y-2">
+        <h4 className="text-[11px] font-bold uppercase tracking-wide text-hoja-tinta">Productos</h4>
+        <div className="space-y-2 mt-2">
           {order.items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between p-2 bg-origen-nube rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-surface-alt flex items-center justify-center">
-                  <Package className="w-5 h-5 text-text-subtle" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-origen-bosque">{item.productName}</p>
-                  <p className="text-xs text-text-subtle">{item.quantity} x {item.unitPrice.toFixed(2)}€</p>
-                </div>
+            <div key={item.id} className="flex items-center gap-3 p-2.5 sm:px-3.5 bg-white border border-border-subtle rounded-[10px]">
+              <div className="w-8 h-8 rounded-lg bg-origen-nube flex items-center justify-center shrink-0">
+                <Package className="w-4 h-4 text-text-subtle" />
               </div>
-              <p className="text-sm font-bold text-origen-bosque">{item.totalPrice.toFixed(2)}€</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-origen-bosque truncate">{item.productName}</p>
+                <p className="text-xs text-text-subtle">{item.quantity} x {item.unitPrice.toFixed(2)}€</p>
+              </div>
+              <p className="text-sm font-bold text-origen-bosque shrink-0">{item.totalPrice.toFixed(2)}€</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Dirección de envío */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <h4 className="text-sm font-medium text-origen-bosque mb-2">Dirección de envío</h4>
-          <p className="text-xs text-text-subtle">{order.shipping.address.fullName}</p>
-          <p className="text-xs text-text-subtle">{order.shipping.address.addressLine1}</p>
-          {order.shipping.address.addressLine2 && (
-            <p className="text-xs text-text-subtle">{order.shipping.address.addressLine2}</p>
-          )}
-          <p className="text-xs text-text-subtle">
-            {order.shipping.address.city}, {order.shipping.address.postalCode}
-          </p>
-          <p className="text-xs text-text-subtle">{order.shipping.address.country}</p>
-          {order.shipping.address.phone && (
-            <p className="text-xs text-text-subtle mt-1">Tel: {order.shipping.address.phone}</p>
-          )}
-        </div>
-
-        {/* Seguimiento */}
-        {order.shipping.trackingNumber && (
-          <div>
-            <h4 className="text-sm font-medium text-origen-bosque mb-2">Seguimiento</h4>
-            <p className="text-xs text-text-subtle">Método: {order.shipping.method}</p>
-            <p className="text-xs text-text-subtle">Transportista: {order.shipping.carrier}</p>
-            <p className="text-xs text-text-subtle">Nº seguimiento: {order.shipping.trackingNumber}</p>
-            {order.shipping.trackingUrl && (
-              <a 
-                href={order.shipping.trackingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-origen-pradera hover:underline inline-flex items-center gap-1 mt-1"
-              >
-                Ver seguimiento
-                <ChevronRight className="w-3 h-3" />
-              </a>
-            )}
-          </div>
-        )}
+      <div>
+        <h4 className="text-[11px] font-bold uppercase tracking-wide text-hoja-tinta">Dirección de envío</h4>
+        <p className="mt-2 text-xs leading-relaxed text-text-subtle">
+          {order.shipping.address.fullName}<br />
+          {order.shipping.address.addressLine1}
+          {order.shipping.address.addressLine2 && <>, {order.shipping.address.addressLine2}</>}<br />
+          {order.shipping.address.city}, {order.shipping.address.postalCode} · {order.shipping.address.country}
+          {order.shipping.address.phone && <> · Tel: {order.shipping.address.phone}</>}
+        </p>
       </div>
 
+      {/* Seguimiento */}
+      {order.shipping.trackingNumber && (
+        <div>
+          <h4 className="text-[11px] font-bold uppercase tracking-wide text-hoja-tinta">Seguimiento</h4>
+          <p className="mt-2 text-xs leading-relaxed text-text-subtle">
+            Método: {order.shipping.method} · Transportista: {order.shipping.carrier}<br />
+            Nº seguimiento: {order.shipping.trackingNumber}
+          </p>
+          {order.shipping.trackingUrl && (
+            <a
+              href={order.shipping.trackingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-origen-pradera hover:underline inline-flex items-center gap-1 mt-1"
+            >
+              Ver seguimiento
+              <ChevronRight className="w-3 h-3" />
+            </a>
+          )}
+        </div>
+      )}
+
       {/* Resumen de pago */}
-      <div className="mt-4 p-3 bg-origen-nube rounded-lg">
+      <div className="p-3.5 bg-white border border-border-subtle rounded-[10px]">
         <div className="flex justify-between text-sm">
           <span className="text-text-subtle">Subtotal</span>
           <span className="font-medium">{order.subtotal.toFixed(2)}€</span>
