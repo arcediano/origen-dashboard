@@ -75,6 +75,18 @@ interface BackendOrder {
   /** true si el pedido incluye productos de más de un productor (calculado en servidor). */
   isMultiSeller?: boolean;
   items: BackendOrderItem[];
+  /**
+   * Historial real de transiciones de estado del pedido (order_status_history),
+   * ordenado por createdAt descendente. Opcional por retrocompatibilidad con
+   * respuestas antiguas del backend que aún no lo incluían.
+   */
+  timeline?: BackendTimelineEvent[];
+}
+
+interface BackendTimelineEvent {
+  id: string;
+  status: string;
+  createdAt: string;
 }
 
 interface BackendInvoiceDownloadResponse {
@@ -148,6 +160,25 @@ function mapOrderStatus(raw: string): OrderStatus {
   return valid.includes(raw as OrderStatus) ? (raw as OrderStatus) : 'pending';
 }
 
+/**
+ * Etiquetas legibles en español para cada evento del timeline de un pedido.
+ * La generación del texto se resuelve en el frontend (D5 del plan de
+ * desarrollo "timeline-pedidos"): el backend solo expone el enum de estado
+ * (status) como fuente única de verdad, y este diccionario traduce cada
+ * estado del enum real (incluyendo 'confirmed' y 'returned', que no forman
+ * parte de OrderStatus tras el colapso) a la descripción mostrada en la UI.
+ */
+const TIMELINE_STATUS_LABELS: Record<string, string> = {
+  pending: 'Pedido creado',
+  confirmed: 'Pago confirmado',
+  processing: 'En preparación',
+  shipped: 'Enviado',
+  delivered: 'Entregado',
+  cancelled: 'Cancelado',
+  returned: 'Devuelto',
+  refunded: 'Reembolsado',
+};
+
 function mapBackendOrder(o: BackendOrder): Order {
   const status = mapOrderStatus(o.status);
   const addr = o.shippingAddress ?? {};
@@ -206,8 +237,19 @@ function mapBackendOrder(o: BackendOrder): Order {
       },
     },
 
-    // El backend no expone timeline para el vendedor
-    timeline: [],
+    timeline: (o.timeline ?? [])
+      .map((event) => ({
+        id: event.id,
+        // Colapso de estados (igual que mapOrderStatus para el status principal
+        // del pedido): 'confirmed' se muestra como 'processing' para que el
+        // color/estilo del evento sea consistente con el badge de estado actual.
+        status: mapOrderStatus(event.status),
+        description: TIMELINE_STATUS_LABELS[event.status] ?? event.status,
+        createdAt: new Date(event.createdAt),
+      }))
+      // Reordenado defensivo por createdAt descendente: no acoplar la UI al
+      // orden en que el backend entregue la respuesta HTTP.
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
 
     invoice: o.invoice
       ? {

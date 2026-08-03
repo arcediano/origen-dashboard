@@ -100,9 +100,14 @@ describe('fetchSellerOrders', () => {
     expect(result.data!.orders[0].shipping.address.city).toBe('Madrid');
   });
 
-  it('timeline es un array vacío (el backend no lo expone al vendedor)', async () => {
+  it('mapea el timeline real devuelto por el backend, ordenado createdAt descendente', async () => {
     const result = await fetchSellerOrders();
-    expect(result.data!.orders[0].timeline).toEqual([]);
+    const timeline = result.data!.orders[0].timeline;
+    expect(timeline.length).toBe(2);
+    // El evento más reciente (createdAt mayor) debe quedar en el índice 0.
+    expect(timeline[0].createdAt.getTime()).toBeGreaterThan(timeline[1].createdAt.getTime());
+    expect(timeline[1].status).toBe('pending');
+    expect(timeline[1].description).toBe('Pedido creado');
   });
 });
 

@@ -58,6 +58,20 @@ function makeBackendOrder(overrides: {
         subtotal: 45.00,
       },
     ],
+    // timeline real (order_status_history), ordenado createdAt desc — igual
+    // que lo devuelve toSellerOrderResponse() en el backend.
+    timeline: [
+      {
+        id: `hist-${overrides.id}-2`,
+        status: overrides.status,
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        id: `hist-${overrides.id}-1`,
+        status: 'pending',
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+    ],
   };
 }
 
