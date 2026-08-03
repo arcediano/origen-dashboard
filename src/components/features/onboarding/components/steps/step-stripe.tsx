@@ -163,7 +163,7 @@ export function EnhancedStep6Stripe({
             },
             {
               title: 'Vende',
-              desc: 'Tus clientes pagan con tarjeta, bizum o transferencia de forma segura',
+              desc: 'Tus clientes pagan con tarjeta de forma segura',
               step: '2',
             },
             {

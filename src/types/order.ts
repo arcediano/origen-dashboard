@@ -51,7 +51,7 @@ export interface OrderAddress {
 }
 
 export interface OrderPayment {
-  method: 'card' | 'transfer' | 'paypal' | 'cash' | 'other';
+  method: 'card' | 'other';
   status: PaymentStatus;
   transactionId?: string;
   amount: number;

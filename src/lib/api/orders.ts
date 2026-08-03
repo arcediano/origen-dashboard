@@ -110,20 +110,16 @@ interface BackendSellerListResponse {
 
 // ─── Mappers ─────────────────────────────────────────────────────────────────
 
+// Simplificado (plan "eliminar-metodos-pago-no-stripe", 2026-08-03): el
+// negocio opera exclusivamente con pagos online vía Stripe (card); el
+// backend ya no acepta ni genera paypal/transfer/bank_transfer/cash. Se
+// mantiene el caso 'other' de forma defensiva por si quedara algún dato
+// legado no cubierto por la normalización de datos de esa misma tarea.
 function mapPaymentMethod(method: string): Order['payment']['method'] {
   switch (method?.toLowerCase()) {
     case 'card':
     case 'tarjeta':
       return 'card';
-    case 'transfer':
-    case 'transferencia':
-    case 'bank_transfer':
-      return 'transfer';
-    case 'paypal':
-      return 'paypal';
-    case 'cash':
-    case 'efectivo':
-      return 'cash';
     default:
       return 'other';
   }
