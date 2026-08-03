@@ -25,6 +25,7 @@ import {
   PageError,
   appShellPaddingClass,
   NAV_HEIGHT_MOBILE_DASHBOARD,
+  toast,
 } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
@@ -231,9 +232,15 @@ export default function OrderDetailPage() {
         setOrder(response.data);
         setShowStatusSheet(false);
         setShowCancelSheet(false);
+      } else if (response.error) {
+        // El backend rechaza el avance de estado (p.ej. pago aún no confirmado,
+        // ver gate de pago en changeStatusBySeller). Antes este error se
+        // tragaba silenciosamente; ahora se muestra al vendedor.
+        toast({ title: 'No se pudo actualizar el pedido', description: response.error, variant: 'error' });
       }
     } catch (err) {
       console.error('Error actualizando estado:', err);
+      toast({ title: 'No se pudo actualizar el pedido', description: 'Error al actualizar el pedido', variant: 'error' });
     } finally {
       setUpdating(false);
     }
