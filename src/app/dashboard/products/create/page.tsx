@@ -21,6 +21,7 @@ import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductF
 
 import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
+import { useHideBottomTabBar } from '@/hooks/useHideBottomTabBar';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 import { toast, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { useEffect, useState } from 'react';
@@ -77,6 +78,12 @@ export default function CreateProductPage() {
   const handleTabChange = (tab: FormStepId) => setActiveTab(tab);
 
   const [showPreview, setShowPreview] = useState(false);
+
+  // Esta página renderiza su propia barra de navegación de pasos
+  // (CreateProductNavigation, fixed bottom-0 en móvil) — oculta el
+  // BottomTabBar global para que no se pinte encima de ella (mismo bug
+  // corregido en products/[id]/edit/page.tsx con <HideBottomTabBar />).
+  useHideBottomTabBar();
 
   return (
     <div className="w-full">

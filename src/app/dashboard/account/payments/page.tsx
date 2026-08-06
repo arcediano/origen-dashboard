@@ -240,7 +240,7 @@ export default function PaymentsPage() {
                       title="Panel de cobros y liquidación"
                       size="md"
                     />
-                    <h2 className="mt-3 text-xl sm:text-2xl lg:text-3xl font-bold text-origen-bosque">
+                    <h2 className="mt-3 text-lg sm:text-xl lg:text-2xl font-bold text-origen-bosque leading-tight">
                       {paymentStage === 'connected'
                         ? 'Tu cuenta está lista para recibir pagos'
                         : paymentStage === 'pending'
