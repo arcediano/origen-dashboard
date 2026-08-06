@@ -63,18 +63,29 @@ export function WelcomeHeader({
       </div>
 
       {showViewStoreButton && (
-        <div className="hidden sm:block">
-          <Button
-            variant="secondary"
-            size="lg"
-            className="h-auto py-3 px-6"
+        <>
+          {/* Desktop: botón completo con texto */}
+          <div className="hidden sm:block">
+            <Button
+              variant="secondary"
+              size="lg"
+              className="h-auto py-3 px-6"
+            >
+              <span className="flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                Ver tienda pública
+              </span>
+            </Button>
+          </div>
+          {/* Móvil: icon-only junto al saludo */}
+          <button
+            type="button"
+            aria-label="Ver tienda pública"
+            className="sm:hidden w-11 h-11 rounded-xl bg-surface-alt border border-border-subtle flex items-center justify-center active:scale-95 transition-transform flex-shrink-0"
           >
-            <span className="flex items-center gap-2">
-              <Eye className="w-4 h-4" />
-              Ver tienda pública
-            </span>
-          </Button>
-        </div>
+            <Eye className="w-5 h-5 text-origen-bosque" />
+          </button>
+        </>
       )}
     </motion.div>
   );

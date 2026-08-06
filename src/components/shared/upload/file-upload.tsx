@@ -422,7 +422,7 @@ export function FileUpload({
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDownloadFile(file)}
-                  className="text-muted-foreground hover:text-origen-bosque h-8 w-8 p-0"
+                  className="text-muted-foreground hover:text-origen-bosque h-11 w-11 p-0"
                 >
                   <Download className="w-4 h-4" />
                 </Button>
@@ -431,7 +431,7 @@ export function FileUpload({
                   variant="ghost"
                   size="sm"
                   onClick={() => handleRemoveFile(file.id)}
-                  className="text-muted-foreground hover:text-red-600 h-8 w-8 p-0"
+                  className="text-muted-foreground hover:text-red-600 h-11 w-11 p-0"
                 >
                   <X className="w-4 h-4" />
                 </Button>

@@ -88,8 +88,8 @@ export function BottomTabBar() {
                     animate={{
                       y: active ? -18 : -14,
                       boxShadow: active
-                        ? '0 8px_24px_rgba(27,67,50,0.45)'
-                        : '0_4px_16px_rgba(27,67,50,0.30)',
+                        ? '0 8px 24px rgba(27,67,50,0.45)'
+                        : '0 4px 16px rgba(27,67,50,0.30)',
                     }}
                     transition={{ type: 'spring', stiffness: 420, damping: 28 }}
                     className={cn(

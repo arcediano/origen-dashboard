@@ -18,7 +18,7 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { FileText } from 'lucide-react';
 
 // Componentes UI
-import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, MobileCardList, EmptyState, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
+import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, MobileCardList, EmptyState, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, toast } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { InvoicesTable } from './components/InvoicesTable';
 import { InvoiceCard, InvoiceCardSkeleton } from './components/InvoiceCard';
@@ -131,7 +131,7 @@ export default function FacturasPage() {
       window.open(downloadUrl, '_blank');
     } catch (err) {
       console.error('Error descargando factura:', err);
-      alert('Error al descargar la factura');
+      toast({ title: 'Error al descargar la factura', description: 'Inténtalo de nuevo en unos segundos.', variant: 'error' });
     }
   };
 

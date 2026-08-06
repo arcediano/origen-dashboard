@@ -8,8 +8,8 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, ShoppingBag, DollarSign, Star, Loader2, ChevronRight } from 'lucide-react';
-import { StatCard, StatGrid } from '@arcediano/ux-library';
+import { Eye, ShoppingBag, DollarSign, Star, Loader2, ChevronRight, Sparkles } from 'lucide-react';
+import { StatCard, StatGrid, Card, EmptyState } from '@arcediano/ux-library';
 import type { StatGridItem } from '@arcediano/ux-library';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { DashboardStats } from '../../types';
@@ -99,10 +99,15 @@ export function StatsGrid({
       )}
 
       {isEmpty ? (
-        <div className="bg-origen-pastel rounded-lg p-6 text-center text-origen-bosque">
-          <p>No hay actividad reciente</p>
-          <p className="text-sm mt-2">Los datos aparecerán cuando tengas visitas o pedidos</p>
-        </div>
+        <Card className="bg-white">
+          <EmptyState
+            icon={<Sparkles className="h-8 w-8" />}
+            title="Tu panel está listo"
+            description="Los datos aparecerán en cuanto tengas visitas o pedidos en tu tienda."
+            action={{ label: 'Añadir producto', href: '/dashboard/products' }}
+            size="sm"
+          />
+        </Card>
       ) : !isCollapsed && (
         isLoading ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">

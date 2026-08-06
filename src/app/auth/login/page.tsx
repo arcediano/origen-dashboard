@@ -72,46 +72,35 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              {/* Stats */}
+              {/* Beneficios cualitativos — sin cifras sin fuente verificable */}
               <div className="grid grid-cols-2 gap-4 pt-4">
                 {[
                   {
-                    value: '+500',
-                    label: 'Productores',
+                    label: 'Red creciente de productores locales',
                     icon: Users,
-                    color: 'from-origen-pradera/60 to-origen-hoja/60'
                   },
                   {
-                    value: '50k+',
-                    label: 'Compradores',
+                    label: 'Compradores buscando productos cercanos',
                     icon: Globe,
-                    color: 'from-origen-pradera/60 to-origen-hoja/60'
                   },
                   {
-                    value: '+40%',
-                    label: 'Crecimiento',
+                    label: 'Herramientas para hacer crecer tu negocio',
                     icon: TrendingUp,
-                    color: 'from-origen-hoja/60 to-origen-pino/60'
                   },
                   {
-                    value: '24h',
-                    label: 'Soporte',
+                    label: 'Soporte cercano cuando lo necesites',
                     icon: Clock,
-                    color: 'from-origen-pino/60 to-origen-bosque/60'
                   }
-                ].map((stat, index) => {
-                  const Icon = stat.icon;
+                ].map((item, index) => {
+                  const Icon = item.icon;
                   return (
                     <div key={index} className="group">
-                        <div className="bg-surface-alt rounded-xl p-4 border border-border hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-origen-hoja/50 transition-all duration-300 group-hover:border-origen-hoja">
+                      <div className="bg-surface-alt rounded-xl p-4 border border-border hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-origen-hoja/50 transition-all duration-300 group-hover:border-origen-hoja">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-md`}>
-                            <Icon className="w-5 h-5 text-white" />
+                          <div className="w-10 h-10 rounded-lg bg-origen-pradera/15 flex items-center justify-center flex-shrink-0">
+                            <Icon className="w-5 h-5 text-origen-pradera" />
                           </div>
-                          <div>
-                            <div className="text-xl font-bold text-origen-bosque">{stat.value}</div>
-                            <div className="text-xs text-muted-foreground">{stat.label}</div>
-                          </div>
+                          <p className="text-xs font-medium text-origen-bosque leading-snug">{item.label}</p>
                         </div>
                       </div>
                     </div>

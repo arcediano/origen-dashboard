@@ -692,7 +692,7 @@ export default function BusinessInfoPage() {
                     type="button"
                     disabled={isUploadingBanner}
                     onClick={() => bannerInputRef.current?.click()}
-                    className="absolute bottom-3 right-3 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-alt shadow-lg flex items-center justify-center text-origen-bosque hover:text-origen-pradera transition-colors disabled:opacity-50"
+                    className="absolute bottom-3 right-3 w-11 h-11 rounded-full bg-surface-alt shadow-lg flex items-center justify-center text-origen-bosque hover:text-origen-pradera transition-colors disabled:opacity-50"
                     aria-label="Cambiar banner"
                   >
                     <Camera className="w-5 h-5" />
@@ -739,7 +739,7 @@ export default function BusinessInfoPage() {
                         aria-label="Cambiar logo"
                         disabled={isUploadingLogo}
                         onClick={() => logoInputRef.current?.click()}
-                        className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-surface-alt border border-border shadow-md flex items-center justify-center text-origen-bosque hover:text-origen-pradera disabled:opacity-50"
+                        className="absolute -bottom-2 -right-2 h-11 w-11 rounded-full bg-surface-alt border border-border shadow-md flex items-center justify-center text-origen-bosque hover:text-origen-pradera disabled:opacity-50"
                       >
                         <Camera className="w-4 h-4" />
                       </button>

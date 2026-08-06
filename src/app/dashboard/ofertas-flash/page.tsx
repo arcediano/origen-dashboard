@@ -40,6 +40,7 @@ import {
   Table,
   appShellPaddingClass,
   NAV_HEIGHT_MOBILE_DASHBOARD,
+  toast,
   type Column,
   type StatGridItem,
 } from '@arcediano/ux-library';
@@ -299,7 +300,7 @@ export default function OfertasFlashPage() {
     if (!result.error) {
       setDeals((prev) => prev.filter((d) => d.id !== dealId));
     } else {
-      alert(result.error);
+      toast({ title: 'Error al cancelar la oferta', description: result.error, variant: 'error' });
     }
   };
 

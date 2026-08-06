@@ -174,7 +174,7 @@ export function UserMenu({
             aria-label="Opciones de cuenta"
             onKeyDown={handleMenuKeyDown}
           >
-            <div className="px-5 py-5 bg-gradient-to-r from-origen-crema/40 to-transparent border-b border-border-subtle">
+            <div className="px-5 py-5 bg-origen-crema/40 border-b border-border-subtle">
               <div className="flex items-start gap-4">
                 <Avatar className="w-14 h-14 ring-2 ring-surface-alt shadow-lg">
                   <AvatarFallback className="bg-origen-bosque text-white text-lg font-semibold">

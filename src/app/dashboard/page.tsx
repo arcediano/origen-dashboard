@@ -36,24 +36,27 @@ import { useAuth } from '@/contexts/AuthContext';
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
-function OnboardingProgressBanner() {
+function OnboardingProgressBanner({ progress }: { progress: number }) {
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed) return null;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="rounded-[28px] border border-origen-pradera/25 bg-gradient-to-br from-origen-crema via-surface-alt to-surface p-4 shadow-sm sm:p-5">
+      <div className="rounded-[28px] border border-origen-pradera/25 bg-surface-alt p-4 shadow-sm sm:p-5">
         <div className="flex items-start gap-3 sm:items-center sm:justify-between">
           <div className="flex min-w-0 flex-1 gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex-shrink-0">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-origen-pradera/15 flex-shrink-0">
               <Leaf className="h-5 w-5 text-origen-pradera" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-origen-bosque leading-tight">Completa tu panel de venta</p>
               <p className="mt-1 text-xs text-text-subtle sm:text-sm">Activa pagos, revisa tu perfil y deja la tienda lista para recibir pedidos.</p>
               <div className="mt-3 h-1.5 w-full max-w-xs rounded-full bg-origen-pradera/10">
-                <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-origen-pradera to-origen-hoja" />
+                <div
+                  className="h-full rounded-full bg-origen-pradera transition-[width] duration-300"
+                  style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+                />
               </div>
             </div>
           </div>
@@ -178,7 +181,7 @@ export default function ProducerDashboard() {
       </div>
 
       {/* Banner de onboarding pendiente */}
-      {!user?.onboardingCompleted && <OnboardingProgressBanner />}
+      {!user?.onboardingCompleted && <OnboardingProgressBanner progress={profileCompleteness} />}
 
       {/* Contenido principal */}
       <DashboardShell>
@@ -224,7 +227,7 @@ export default function ProducerDashboard() {
         </div>
       </DashboardShell>
 
-      <DashboardFooter className="hidden lg:block" />
+      <DashboardFooter />
     </div>
   );
 }

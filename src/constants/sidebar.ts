@@ -232,7 +232,7 @@ export const MOBILE_ROOT_TABS: RootTabItem[] = [
   },
   {
     id: 'perfil',
-    label: 'Perfil',
+    label: 'Cuenta',
     icon: User,
     href: '/dashboard/perfil',
     matchPaths: [

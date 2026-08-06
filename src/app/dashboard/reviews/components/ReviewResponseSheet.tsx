@@ -79,7 +79,7 @@ export function ReviewResponseSheet({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-text-subtle hover:bg-surface-alt"
+            className="w-11 h-11 rounded-full flex items-center justify-center text-text-subtle hover:bg-surface-alt"
             aria-label="Cerrar"
           >
             <X className="w-4 h-4" />

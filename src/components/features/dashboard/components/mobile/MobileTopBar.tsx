@@ -154,7 +154,7 @@ export function MobileTopBar() {
               <motion.button
                 whileTap={{ scale: 0.82 }}
                 onClick={handleBackNavigation}
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-surface-alt/80 hover:bg-origen-pradera/10 transition-colors text-origen-bosque border border-border-subtle flex-shrink-0"
+                className="w-11 h-11 rounded-full flex items-center justify-center bg-surface-alt/80 hover:bg-origen-pradera/10 transition-colors text-origen-bosque border border-border-subtle flex-shrink-0"
                 type="button"
                 aria-label="Volver"
               >
@@ -181,7 +181,7 @@ export function MobileTopBar() {
             whileTap={{ scale: 0.82 }}
             onClick={() => { void openNotifications(); }}
             className={cn(
-              'relative w-9 h-9 rounded-full flex items-center justify-center transition-colors',
+              'relative w-11 h-11 rounded-full flex items-center justify-center transition-colors',
               isNotifOpen
                 ? 'bg-origen-pradera/10 text-origen-bosque'
                 : 'hover:bg-origen-pradera/10 text-foreground',

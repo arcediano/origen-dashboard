@@ -906,7 +906,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema/30">
+    <div className="min-h-screen bg-origen-crema">
       
       {/* ====================================================================
           HEADER - Ultra minimal

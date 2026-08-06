@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { Euro, Filter, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp, Wallet } from 'lucide-react';
-import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Card, Badge, MobilePullRefresh, CardIconHeader, MobileCardList, SwipeableRow, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
+import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Card, Badge, MobilePullRefresh, CardIconHeader, MobileCardList, SwipeableRow, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, toast } from '@arcediano/ux-library';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import type { StatGridItem } from '@arcediano/ux-library';
 import {
@@ -78,7 +78,7 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
     const result = await createCampaign(form as CreateCampaignPayload);
     setSubmitting(false);
     if (result.error) {
-      alert(result.error);
+      toast({ title: 'Error al crear la campaña', description: result.error, variant: 'error' });
     } else {
       onCreated();
     }
@@ -227,7 +227,7 @@ function CampaignCard({ campaign, onDeleted, showDeleteButton = true }: Campaign
     const result = await deleteCampaign(campaign.id);
     setDeleting(false);
     if (result.error) {
-      alert(result.error);
+      toast({ title: 'Error al eliminar la campaña', description: result.error, variant: 'error' });
     } else {
       onDeleted();
     }
@@ -392,7 +392,7 @@ export default function CampanasPage() {
     if (!confirm('¿Eliminar esta campaña en borrador?')) return;
     const result = await deleteCampaign(id);
     if (result.error) {
-      alert(result.error);
+      toast({ title: 'Error al eliminar la campaña', description: result.error, variant: 'error' });
     } else {
       void loadCampaigns();
     }

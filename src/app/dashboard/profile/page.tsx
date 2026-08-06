@@ -52,7 +52,7 @@ function ProfilePageSkeleton() {
           </div>
         </div>
 
-        <Card className="hidden lg:block mt-6 border-origen-pradera/20 bg-gradient-to-r from-origen-crema/30 to-white">
+        <Card className="hidden lg:block mt-6 border-origen-pradera/20 bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
@@ -156,7 +156,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Desktop: card completa */}
-        <Card className="hidden lg:block border-origen-pradera/20 bg-gradient-to-r from-origen-crema/30 to-white">
+        <Card className="hidden lg:block border-origen-pradera/20 bg-white">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-4">

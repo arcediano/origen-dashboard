@@ -67,13 +67,13 @@ export default function PerfilPage() {
 
       {/* ── Page title ── */}
       <div className="px-4 pt-6 pb-2 sm:px-6">
-        <h1 className="text-xl font-semibold text-origen-bosque">Perfil</h1>
+        <h1 className="text-xl font-semibold text-origen-bosque">Cuenta</h1>
       </div>
 
       <div className="container mx-auto px-4 py-3 sm:px-6 space-y-4 max-w-lg">
 
         {/* ── User header card ── */}
-        <div className="rounded-2xl border border-origen-pradera/20 bg-gradient-to-r from-origen-crema/60 to-surface-alt p-5 shadow-sm">
+        <div className="rounded-2xl border border-origen-pradera/20 bg-surface-alt p-5 shadow-sm">
           <div className="flex items-center gap-4">
             <Avatar className="w-16 h-16 ring-2 ring-white shadow-lg flex-shrink-0">
               <AvatarFallback className="bg-origen-bosque text-white text-xl font-semibold">

@@ -76,7 +76,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               <button
                 onClick={handleCopyCode}
                 aria-label="Copiar código"
-                className="flex-shrink-0 w-8 h-8 rounded-lg bg-surface-alt/10 flex items-center justify-center hover:bg-surface-alt/20 active:scale-95 transition-all border border-white/15"
+                className="flex-shrink-0 w-11 h-11 rounded-lg bg-surface-alt/10 flex items-center justify-center hover:bg-surface-alt/20 active:scale-95 transition-all border border-white/15"
               >
                 {copied
                   ? <CheckCircle className="w-3.5 h-3.5 text-origen-hoja" />

@@ -266,7 +266,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
             aria-label="Notificaciones recientes"
           >
             {/* Cabecera */}
-              <div className="bg-gradient-to-r from-origen-crema to-surface-alt px-4 py-3 border-b border-border-subtle">
+              <div className="bg-origen-crema/50 px-4 py-3 border-b border-border-subtle">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-origen-menta/10 flex items-center justify-center">
