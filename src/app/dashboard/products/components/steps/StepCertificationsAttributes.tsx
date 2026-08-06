@@ -683,7 +683,7 @@ export function StepCertificationsAttributes({
                 className={cn(
                   "pb-3 min-h-[44px] text-sm font-medium transition-colors relative flex items-center gap-2",
                   activeTab === tab.id
-                    ? 'text-origen-pradera border-b-2 border-origen-pradera'
+                    ? 'text-origen-bosque border-b-2 border-origen-bosque'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >

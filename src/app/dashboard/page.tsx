@@ -31,6 +31,8 @@ import {
   useProducerProfile,
 } from '@/components/features/dashboard/hooks';
 import { useAuth } from '@/contexts/AuthContext';
+import { getMyReadiness } from '@/lib/api/onboarding';
+import type { ProducerReadinessReport } from '@/lib/api/onboarding';
 
 // ============================================================================
 // COMPONENTE PRINCIPAL
@@ -87,6 +89,8 @@ export default function ProducerDashboard() {
   const [chartPeriod, setChartPeriod] = useState<'7d' | '6m' | '1y'>('6m');
   const { user } = useAuth();
   const isFirstLoad = useRef(true);
+  const [readiness, setReadiness] = useState<ProducerReadinessReport | null>(null);
+  const [readinessLoading, setReadinessLoading] = useState(true);
 
   // Hooks para datos
   const {
@@ -99,6 +103,23 @@ export default function ProducerDashboard() {
   const { orders: realOrders, isLoading: ordersLoading, error: ordersError, refetch: refetchOrders } = useRecentOrders(3);
   const { products: realProducts, isLoading: productsLoading, error: productsError, refetch: refetchProducts } = useTopProducts(3);
   const { producer } = useProducerProfile();
+
+  // Obtener estado de readiness (incluyendo estado de pago)
+  useEffect(() => {
+    const fetchReadiness = async () => {
+      try {
+        const report = await getMyReadiness();
+        setReadiness(report);
+      } catch (error) {
+        console.error('Error fetching readiness:', error);
+        // No lanzar error — las alertas de Stripe simplemente no se mostrarán
+      } finally {
+        setReadinessLoading(false);
+      }
+    };
+
+    void fetchReadiness();
+  }, []);
 
   const showPageLoader = useDelayedLoading(isFirstLoad.current && statsLoading);
 
@@ -141,6 +162,41 @@ export default function ProducerDashboard() {
       });
     }
 
+    // ── Alertas de Stripe (Estado de cuenta de pago) ──────────────────────────────
+    if (readiness?.payment) {
+      const { status } = readiness.payment;
+
+      // RESTRICTED: Bloqueo activo — no puede cobrar
+      if (status === 'RESTRICTED') {
+        dashboardAlerts.push({
+          id: 'payment-restricted',
+          type: 'error',
+          title: 'Tus cobros están pausados',
+          description: 'Stripe ha restringido tu cuenta y no puedes recibir pagos hasta resolverlo. Tus productos pueden dejar de ser visibles mientras tanto.',
+          dismissible: false,
+          action: {
+            label: 'Resolver ahora',
+            href: '/dashboard/account/payments',
+          },
+        });
+      }
+
+      // ACTION_REQUIRED: Cuenta operativa pero con verificacion pendiente
+      if (status === 'ACTION_REQUIRED') {
+        dashboardAlerts.push({
+          id: 'payment-action-required',
+          type: 'warning',
+          title: 'Tu cuenta de Stripe necesita atención',
+          description: 'Stripe pide información adicional para mantener tus cobros activos. Resuelvelo antes de que se restrinja tu cuenta.',
+          dismissible: true,
+          action: {
+            label: 'Revisar cobros',
+            href: '/dashboard/account/payments',
+          },
+        });
+      }
+    }
+
     if (pendingOrders > 0) {
       dashboardAlerts.push({
         id: 'pending-orders',
@@ -152,7 +208,7 @@ export default function ProducerDashboard() {
     }
 
     return dashboardAlerts;
-  }, [pendingOrders, producer, profileCompleteness, user?.onboardingCompleted]);
+  }, [pendingOrders, producer, profileCompleteness, readiness, user?.onboardingCompleted]);
 
   if (showPageLoader) {
     return <PageLoader message="Cargando dashboard..." className="animate-fade-in" />;

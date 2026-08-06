@@ -95,7 +95,8 @@ export function FinalCTASection() {
                 </Button>
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-origen-bosque to-origen-pino hover:from-origen-pino hover:to-origen-bosque text-white px-6 py-3 text-sm md:text-base shadow-md hover:shadow-lg transition-all"
+                  variant="primary"
+                  className="px-6 py-3 text-sm md:text-base"
                 >
                   <span className="flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />

@@ -369,6 +369,12 @@ export async function updateProducerCertification(
 
 // ─── Readiness (ADR-007) ──────────────────────────────────────────────────────
 
+export interface PaymentReadinessStatus {
+  status: 'NOT_CONNECTED' | 'PENDING_VERIFICATION' | 'ACTION_REQUIRED' | 'RESTRICTED' | 'OK';
+  requirementsDue: string[];
+  deadline: string | null;
+}
+
 export interface ProducerReadinessReport {
   canSubmitProducts: boolean;
   producerStatus: string;
@@ -389,6 +395,7 @@ export interface ProducerReadinessReport {
     SEGURO_RC:             string;
     MANIPULADOR_ALIMENTOS: string;
   };
+  payment: PaymentReadinessStatus;
   blockers: string[];
 }
 

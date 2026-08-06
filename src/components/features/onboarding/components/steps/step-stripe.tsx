@@ -40,7 +40,7 @@ import {
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
 export interface EnhancedStep6StripeData {
-  stripeConnected: boolean;
+  stripeConnected?: boolean; // ⚠️ G2 FIX: Ahora opcional (no se persiste desde el cliente)
   stripeAccountId?: string;
   acceptTerms: boolean;
 }

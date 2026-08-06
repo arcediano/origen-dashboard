@@ -245,7 +245,7 @@ export function ReviewsList({
                 <button
                   type="button"
                   onClick={() => setExpandedId(isExpanded ? null : review.id)}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-origen-pradera hover:text-origen-hoja transition-colors mb-2"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-hoja-tinta hover:underline transition-colors mb-2"
                   aria-expanded={isExpanded}
                 >
                   {isExpanded ? 'Ver menos' : 'Ver más'}

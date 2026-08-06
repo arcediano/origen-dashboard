@@ -6,6 +6,7 @@
 'use client';
 
 import React from 'react';
+import { Button } from '@arcediano/ux-library';
 import { PlusCircle, Eye, Edit, Send, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
@@ -33,87 +34,82 @@ export function ProductTableActions({
   return (
     <div className={cn('flex items-center gap-1', className)}>
       {/* Botón de ajuste de stock */}
-      <button
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={(e) => {
           e.stopPropagation();
           onAdjustStock(product);
         }}
-        className="p-1.5 sm:p-2 rounded-md text-muted-foreground hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
         title="Ajustar stock"
         aria-label="Ajustar stock"
+        className="min-h-11 min-w-11 sm:min-h-9 sm:min-w-9"
       >
         <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
-          Ajustar stock
-        </span>
-      </button>
+      </Button>
 
       {/* Botón de ver producto */}
-      <button
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={(e) => {
           e.stopPropagation();
           onView(product.id);
         }}
-        className="p-1.5 sm:p-2 rounded-md text-muted-foreground hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
         title="Ver producto"
         aria-label="Ver producto"
+        className="min-h-11 min-w-11 sm:min-h-9 sm:min-w-9"
       >
         <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
-          Ver producto
-        </span>
-      </button>
+      </Button>
 
       {/* Botón de editar producto */}
-      <button
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={(e) => {
           e.stopPropagation();
           onEdit(product.id);
         }}
-        className="p-1.5 sm:p-2 rounded-md text-muted-foreground hover:text-origen-pradera hover:bg-origen-pradera/10 transition-all group relative"
         title="Editar producto"
         aria-label="Editar producto"
+        className="min-h-11 min-w-11 sm:min-h-9 sm:min-w-9"
       >
         <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
-          Editar producto
-        </span>
-      </button>
+      </Button>
 
       {/* Enviar a revisión — solo para borradores */}
       {canSubmit && (
-        <button
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={(e) => {
             e.stopPropagation();
             onStatusChange!(product, 'pending_approval');
           }}
-          className="p-1.5 sm:p-2 rounded-md text-green-600 hover:text-white hover:bg-green-600 transition-all group relative"
           title="Enviar a revisión"
           aria-label="Enviar a revisión"
+          className="min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 text-hoja-tinta hover:text-hoja-tinta hover:bg-feedback-success-subtle"
         >
           <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
-            Enviar a revisión
-          </span>
-        </button>
+        </Button>
       )}
 
       {/* Volver a borrador — solo para pendientes */}
       {canRetract && (
-        <button
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={(e) => {
             e.stopPropagation();
             onStatusChange!(product, 'draft');
           }}
-          className="p-1.5 sm:p-2 rounded-md text-amber-600 hover:text-white hover:bg-amber-500 transition-all group relative"
           title="Volver a borrador"
           aria-label="Volver a borrador"
+          className="min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 text-feedback-warning-text hover:text-feedback-warning-text hover:bg-feedback-warning-subtle"
         >
           <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-origen-oscuro text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 hidden sm:block">
-            Volver a borrador
-          </span>
-        </button>
+        </Button>
       )}
     </div>
   );

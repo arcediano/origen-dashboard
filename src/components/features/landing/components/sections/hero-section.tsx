@@ -198,9 +198,10 @@ export function HeroSection() {
               {/* CTA principal y social proof */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <Button
+                  variant="primary"
                   size="lg"
                   rightIcon={<ArrowRight className="w-5 h-5 flex-shrink-0" />}
-                  className="h-auto bg-origen-hoja hover:bg-origen-hoja/90 text-white text-sm sm:text-base md:text-lg px-5 sm:px-8 md:px-10 py-3 sm:py-4 rounded-xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-0.5 w-full sm:w-auto font-semibold border-2 border-white/30 whitespace-nowrap"
+                  className="h-auto text-sm sm:text-base md:text-lg px-5 sm:px-8 md:px-10 py-3 sm:py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 w-full sm:w-auto font-semibold border-2 border-white/30 whitespace-nowrap"
                   onClick={() => document.getElementById('registration-form')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   Empezar registro gratuito

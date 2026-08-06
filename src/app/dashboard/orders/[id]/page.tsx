@@ -403,12 +403,12 @@ export default function OrderDetailPage() {
                     )}
                     {canCancel && (
                       <Button
-                        variant="ghost"
+                        variant="destructive"
                         size="sm"
-                        leftIcon={<XCircle className="w-4 h-4 text-feedback-danger" />}
+                        leftIcon={<XCircle className="w-4 h-4" />}
                         onClick={() => setShowCancelSheet(true)}
                         disabled={updating}
-                        className="w-full justify-start text-feedback-danger hover:bg-feedback-danger-subtle"
+                        className="w-full justify-start"
                       >
                         Cancelar pedido
                       </Button>
@@ -759,7 +759,8 @@ export default function OrderDetailPage() {
                 label: 'Cancelar pedido',
                 leftIcon: <XCircle className="w-4 h-4" />,
                 onClick: () => setShowCancelSheet(true),
-                disabled: updating,                variant: 'ghost' as const,                className: 'text-feedback-danger',
+                disabled: updating,
+                variant: 'destructive' as const,
               }] : []}
             />
           </>

@@ -74,12 +74,13 @@ function StripeCompleteContent() {
         return;
       }
 
-      // 2. Actualizar el paso 6 en BD como conectado.
-      // saveStep6 es un upsert idempotente: si la cuenta ya estaba conectada
-      // (caso "modificar cuenta" desde Mi cuenta > Cobros) simplemente
-      // confirma el mismo estado sin efectos secundarios adicionales.
+      // 2. Actualizar el paso 6 en BD.
+      // ⚠️ NOTA: No enviamos stripeConnected: true (G2 FIX).
+      // stripeConnected es read-only, derivado de:
+      // - El webhook de Stripe (charges_enabled)
+      // - Verificación server-side en saveStep6 del backend
+      // El estado "conectado/pendiente" se refleja en GET /producers/me/readiness
       await saveStep6({
-        stripeConnected: true,
         stripeAccountId: acctId,
         acceptTerms: true,
       });
@@ -108,9 +109,10 @@ function StripeCompleteContent() {
       {state === 'success' && (
         <>
           <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto" />
-          <h1 className="text-xl font-bold text-origen-bosque">¡Cuenta conectada!</h1>
+          <h1 className="text-xl font-bold text-origen-bosque">Formulario enviado</h1>
           <p className="text-sm text-muted-foreground">
-            Tu cuenta Stripe está lista para recibir pagos. Redirigiendo...
+            Estamos verificando tu cuenta con Stripe. Esto puede tardar unos minutos.
+            Una vez verificada, podrás recibir pagos. Redirigiendo...
           </p>
         </>
       )}

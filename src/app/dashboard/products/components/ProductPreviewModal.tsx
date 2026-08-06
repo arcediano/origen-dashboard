@@ -78,7 +78,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
         <div className="flex flex-col max-h-[90vh]">
 
         {/* ── Banner PREVIEW ───────────────────────────────────────────────── */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-origen-pradera px-4 py-2.5">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-origen-bosque px-4 py-2.5">
           <div className="flex items-center gap-2">
             <Eye className="w-4 h-4 text-white" />
             <span className="text-xs font-semibold text-white tracking-wide uppercase">
@@ -133,7 +133,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
 
               {/* Precio */}
               <div className="flex items-baseline gap-3">
-                <span className="text-2xl font-bold text-origen-pradera">
+                <span className="text-2xl font-bold text-origen-bosque">
                   {formatPrice(formData.basePrice)}
                 </span>
                 {formData.comparePrice && formData.comparePrice > (formData.basePrice ?? 0) && (
@@ -161,7 +161,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
               {formData.tags?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {formData.tags.slice(0, 6).map(tag => (
-                    <span key={tag} className="inline-flex items-center gap-1 text-[10px] bg-origen-pradera/10 text-origen-pradera px-2 py-0.5 rounded-full border border-origen-pradera/20">
+                    <span key={tag} className="inline-flex items-center gap-1 text-[10px] bg-origen-pastel text-origen-bosque px-2 py-0.5 rounded-full border border-origen-pradera/20">
                       <Tag className="w-2.5 h-2.5" />
                       {tag}
                     </span>

@@ -171,7 +171,7 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
               <button
                 type="button"
                 onClick={() => setExpanded((v) => !v)}
-                className="flex items-center gap-0.5 text-[11px] text-origen-pradera mt-1"
+                className="flex items-center gap-0.5 text-[11px] text-hoja-tinta hover:underline mt-1"
                 aria-expanded={expanded}
               >
                 {expanded ? (
