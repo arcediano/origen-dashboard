@@ -47,8 +47,8 @@ export function SensitiveChangeConfirmDialog({
         <DialogDescription className="space-y-3">
           <p>
             Mientras un administrador revisa estos cambios, tu producto dejará de
-            mostrarse en el catálogo público. El resto de tus productos no se ve
-            afectado.
+            mostrarse en el catálogo público y todas sus ofertas activas quedarán
+            pausadas. El resto de tus productos no se ve afectado.
           </p>
         </DialogDescription>
 

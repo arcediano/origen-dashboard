@@ -54,6 +54,7 @@ import Link from 'next/link';
 
 const STATUS_LABEL: Record<string, string> = {
   active: 'Activa',
+  paused: 'Pausada',
   scheduled: 'Programada',
   finished: 'Finalizada',
   cancelled: 'Cancelada',
@@ -61,6 +62,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const STATUS_BADGE: Record<string, 'success' | 'warning' | 'neutral' | 'danger'> = {
   active: 'success',
+  paused: 'warning',
   scheduled: 'warning',
   finished: 'neutral',
   cancelled: 'danger',
@@ -74,6 +76,9 @@ const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
   { value: 'cancelled', label: 'Canceladas' },
 ];
 
+/** Estado calculado solo por fechas (`startsAt`/`endsAt`/`isActive`). Úsalo
+ * para lógica de negocio (filtros, KPIs, acciones disponibles) — para lo que
+ * se muestra en pantalla usa siempre `getDisplayStatus`. */
 function getStatus(deal: FlashDealWithProduct): string {
   if (!deal.isActive) return 'cancelled';
   const now = new Date();
@@ -82,6 +87,15 @@ function getStatus(deal: FlashDealWithProduct): string {
   if (now < startsAt) return 'scheduled';
   if (now <= endsAt) return 'active';
   return 'finished';
+}
+
+/** Estado a mostrar en badges: una oferta dentro de su ventana de fechas
+ * pero con el producto oculto no debe leerse como "Activa" — se muestra
+ * como "Pausada" hasta que el producto vuelva a estar visible. */
+function getDisplayStatus(deal: FlashDealWithProduct): string {
+  const status = getStatus(deal);
+  if (status === 'active' && deal.productVisible === false) return 'paused';
+  return status;
 }
 
 function formatDate(date: Date | string): string {
@@ -172,8 +186,9 @@ interface DealCardProps {
 
 function DealCard({ deal, onEdit }: DealCardProps) {
   const status = getStatus(deal);
+  const displayStatus = getDisplayStatus(deal);
   const isFinished = status === 'finished' || status === 'cancelled';
-  const showNotVisible = status === 'active' && deal.productVisible === false;
+  const showNotVisible = displayStatus === 'paused';
 
   return (
     <Card padding="sm">
@@ -188,7 +203,7 @@ function DealCard({ deal, onEdit }: DealCardProps) {
           )}
           <p className="text-sm font-semibold text-origen-bosque truncate">{deal.productName}</p>
         </div>
-        <Badge variant={STATUS_BADGE[status]} size="sm">{STATUS_LABEL[status]}</Badge>
+        <Badge variant={STATUS_BADGE[displayStatus]} size="sm">{STATUS_LABEL[displayStatus]}</Badge>
       </div>
 
       {showNotVisible && (
@@ -344,7 +359,7 @@ export default function OfertasFlashPage() {
       key: 'producto',
       header: 'Producto',
       accessor: (deal) => {
-        const status = getStatus(deal);
+        const displayStatus = getDisplayStatus(deal);
         return (
           <div className="flex flex-col">
             <div className="flex items-center gap-3">
@@ -359,7 +374,7 @@ export default function OfertasFlashPage() {
                 {deal.productName}
               </span>
             </div>
-            {status === 'active' && deal.productVisible === false && (
+            {displayStatus === 'paused' && (
               <Link href={`/dashboard/products/${deal.productId}`} className="text-xs text-feedback-warning-text underline underline-offset-2 mt-1">
                 Ver por qué no es visible
               </Link>
@@ -394,11 +409,11 @@ export default function OfertasFlashPage() {
       key: 'estado',
       header: 'Estado',
       accessor: (deal) => {
-        const status = getStatus(deal);
+        const displayStatus = getDisplayStatus(deal);
         return (
           <div className="flex items-center gap-2">
-            <Badge variant={STATUS_BADGE[status]} size="sm">{STATUS_LABEL[status]}</Badge>
-            {status === 'active' && deal.productVisible === false && (
+            <Badge variant={STATUS_BADGE[displayStatus]} size="sm">{STATUS_LABEL[displayStatus]}</Badge>
+            {displayStatus === 'paused' && (
               <span className="inline-flex items-center gap-1 text-xs font-medium text-feedback-warning">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 Producto no visible
