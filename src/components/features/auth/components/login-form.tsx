@@ -528,17 +528,17 @@ export function SimpleLogin() {
       {/* Trust badges */}
       <div className="mt-5 md:mt-6 flex flex-wrap items-center justify-center gap-2 md:gap-3 text-[10px] md:text-xs">
         <div className="flex items-center gap-1">
-          <Shield className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera" />
+          <Shield className="w-3 h-3 md:w-3.5 md:h-3.5 text-hoja-tinta" />
           <span className="text-muted-foreground">SSL 256-bit</span>
         </div>
         <span className="w-1 h-1 rounded-full bg-border hidden sm:block" />
         <div className="flex items-center gap-1">
-          <CheckCircle2 className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera" />
+          <CheckCircle2 className="w-3 h-3 md:w-3.5 md:h-3.5 text-hoja-tinta" />
           <span className="text-muted-foreground">+500 productores</span>
         </div>
         <span className="w-1 h-1 rounded-full bg-border hidden sm:block" />
         <div className="flex items-center gap-1">
-          <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera" />
+          <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-hoja-tinta" />
           <span className="text-muted-foreground">Respuesta 24h</span>
         </div>
       </div>

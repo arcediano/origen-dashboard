@@ -96,7 +96,7 @@ export function StepImages({
         {/* Uploader */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Camera className="h-5 w-5 text-origen-pradera" />
+            <Camera className="h-5 w-5 text-hoja-tinta" />
             <div className="flex items-center gap-1.5">
               <Label className="text-sm font-medium">
                 Galería de imágenes

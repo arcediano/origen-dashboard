@@ -158,7 +158,7 @@ function SectionAccordion({
         aria-expanded={open}
       >
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-origen-pradera/15 to-origen-hoja/15 flex items-center justify-center shrink-0">
-          <Icon className="w-4 h-4 text-origen-pradera" />
+          <Icon className="w-4 h-4 text-hoja-tinta" />
         </div>
         <span className="flex-1 text-sm font-semibold text-origen-bosque">{title}</span>
         <ChevronDown className={cn('w-4 h-4 text-text-subtle transition-transform duration-200', open && 'rotate-180')} />
@@ -443,12 +443,12 @@ export default function OrderDetailPage() {
                 </div>
                 <div className="space-y-1.5">
                   <a href={`mailto:${order.customerEmail}`} className="flex items-center gap-2 text-xs text-text-subtle hover:text-origen-pradera transition-colors">
-                    <Mail className="w-3.5 h-3.5 flex-shrink-0 text-origen-pradera" />
+                    <Mail className="w-3.5 h-3.5 flex-shrink-0 text-hoja-tinta" />
                     {order.customerEmail}
                   </a>
                   {order.customerPhone && (
                     <a href={`tel:${order.customerPhone}`} className="flex items-center gap-2 text-xs text-text-subtle hover:text-origen-pradera transition-colors">
-                      <Phone className="w-3.5 h-3.5 flex-shrink-0 text-origen-pradera" />
+                      <Phone className="w-3.5 h-3.5 flex-shrink-0 text-hoja-tinta" />
                       {order.customerPhone}
                     </a>
                   )}
@@ -474,7 +474,7 @@ export default function OrderDetailPage() {
                   <div className="mt-3 pt-3 border-t border-border-subtle space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <FileText className="w-4 h-4 text-origen-pradera shrink-0" />
+                        <FileText className="w-4 h-4 text-hoja-tinta shrink-0" />
                         <span className="text-xs text-text-subtle truncate">Factura {order.invoice.invoiceNumber}</span>
                       </div>
                       <Badge variant={order.invoice.status === 'issued' ? 'success' : 'warning'} size="xs">
@@ -588,7 +588,7 @@ export default function OrderDetailPage() {
               {/* ── Artículos del pedido ── */}
               <motion.div custom={1} variants={cardVariants} className="rounded-[28px] border border-border bg-surface-alt shadow-subtle overflow-hidden">
                 <div className="px-5 py-3.5 border-b border-border-subtle flex items-center gap-2">
-                  <Package className="w-4 h-4 text-origen-pradera" />
+                  <Package className="w-4 h-4 text-hoja-tinta" />
                   <span className="text-sm font-semibold text-origen-bosque">Artículos del pedido</span>
                   <span className="ml-auto text-xs text-text-subtle">{order.items.length} artículo{order.items.length !== 1 ? 's' : ''}</span>
                 </div>

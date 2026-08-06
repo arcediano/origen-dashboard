@@ -194,7 +194,7 @@ export function ProducerCard({
 
             {producer.location && (
               <div className="flex items-center gap-1.5 mt-1 text-xs sm:text-sm text-text-subtle">
-                <MapPin className="w-3.5 h-3.5 text-origen-pradera flex-shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-hoja-tinta flex-shrink-0" />
                 <span>{producer.location}</span>
               </div>
             )}

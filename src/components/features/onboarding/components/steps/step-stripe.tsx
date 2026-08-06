@@ -146,7 +146,7 @@ export function EnhancedStep6Stripe({
 
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <CreditCard className="w-6 h-6 text-origen-pradera" />
+            <CreditCard className="w-6 h-6 text-hoja-tinta" />
           </div>
           <div>
             <h2 className="text-lg font-bold text-origen-bosque sm:text-xl">¿Cómo funcionan los pagos?</h2>
@@ -212,7 +212,7 @@ export function EnhancedStep6Stripe({
           )}>
             {data.stripeConnected
               ? <CheckCircle2 className="w-6 h-6 text-feedback-success" />
-              : <Zap className="w-6 h-6 text-origen-pradera" />
+              : <Zap className="w-6 h-6 text-hoja-tinta" />
             }
           </div>
           <div>
@@ -252,7 +252,7 @@ export function EnhancedStep6Stripe({
             {/* Aviso de qué datos necesita el productor */}
             <div className="w-full p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
               <p className="text-xs text-muted-foreground flex items-start gap-2">
-                <Info className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
+                <Info className="w-4 h-4 text-hoja-tinta flex-shrink-0 mt-0.5" />
                 <span>
                   ¿No tienes cuenta Stripe?{' '}
                   <span className="font-medium">La crearás durante el proceso, es gratis</span>.
@@ -370,12 +370,12 @@ export function EnhancedStep6Stripe({
       {/* Trust badges */}
       <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground border-t border-border">
         <div className="flex items-center gap-1.5">
-          <Shield className="w-3.5 h-3.5 text-origen-pradera" />
+          <Shield className="w-3.5 h-3.5 text-hoja-tinta" />
           <span>Pagos seguros</span>
         </div>
         <span className="w-1 h-1 rounded-full bg-border" />
         <div className="flex items-center gap-1.5">
-          <Lock className="w-3.5 h-3.5 text-origen-pradera" />
+          <Lock className="w-3.5 h-3.5 text-hoja-tinta" />
           <span>Protección contra fraude</span>
         </div>
       </div>

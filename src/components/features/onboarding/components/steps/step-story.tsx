@@ -268,7 +268,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
         
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-            <Building className="w-5 h-5 text-origen-pradera" />
+            <Building className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-origen-bosque">Nombre y eslogan</h2>
@@ -297,7 +297,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           {/* Presencia digital */}
           <div className="pt-3 border-t border-border-subtle space-y-3">
             <p className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              <Globe className="w-4 h-4 text-origen-pradera" />
+              <Globe className="w-4 h-4 text-hoja-tinta" />
               Presencia digital
               <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
             </p>
@@ -337,7 +337,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
         
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-            <BookOpen className="w-5 h-5 text-origen-pradera" />
+            <BookOpen className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-origen-bosque">Cuéntanos tu historia</h2>
@@ -402,7 +402,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
         >
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-              <Sprout className="w-5 h-5 text-origen-pradera" />
+              <Sprout className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -443,7 +443,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
 
               <div className="p-3 bg-origen-crema/30 rounded-lg border border-origen-pradera/30">
                 <p className="text-xs text-origen-bosque flex items-center gap-2">
-                  <Info className="w-4 h-4 text-origen-pradera" />
+                  <Info className="w-4 h-4 text-hoja-tinta" />
                   Los compradores valoran la transparencia. Sé específico sobre tus métodos.
                 </p>
               </div>
@@ -459,7 +459,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
         
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-            <Heart className="w-5 h-5 text-origen-pradera" />
+            <Heart className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-origen-bosque">Valores</h2>
@@ -539,7 +539,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
         >
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-              <FileBadge className="w-5 h-5 text-origen-pradera" />
+              <FileBadge className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -586,7 +586,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                       <p className="text-xs text-muted-foreground">{cert.issuingBody}</p>
                     </div>
                     {isSelected && (
-                      <CheckCircle2 className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-4 h-4 text-hoja-tinta flex-shrink-0 mt-0.5" />
                     )}
                   </button>
                 );
@@ -607,7 +607,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
         >
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-              <Camera className="w-5 h-5 text-origen-pradera" />
+              <Camera className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
               <div className="flex items-center gap-2">

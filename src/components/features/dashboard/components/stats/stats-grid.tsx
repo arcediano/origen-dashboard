@@ -112,7 +112,7 @@ export function StatsGrid({
         isLoading ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             <div className="col-span-full flex items-center justify-center py-8">
-              <Loader2 className="w-8 h-8 text-origen-pradera animate-spin" />
+              <Loader2 className="w-8 h-8 text-hoja-tinta animate-spin" />
             </div>
           </div>
         ) : (

@@ -124,7 +124,7 @@ export default function HelpCenterPage() {
               href="/contacto"
               className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-surface-alt hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2"
             >
-              <Store className="w-4 h-4 text-origen-pradera" />
+              <Store className="w-4 h-4 text-hoja-tinta" />
               <span className="hidden sm:inline">Contactar soporte</span>
               <span className="sm:hidden">Contacto</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -142,7 +142,7 @@ export default function HelpCenterPage() {
           {/* Hero */}
           <div className="text-center mb-10 md:mb-12 space-y-3">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
-              <Sparkles className="w-4 h-4 text-origen-pradera" />
+              <Sparkles className="w-4 h-4 text-hoja-tinta" />
               <span className="text-xs md:text-sm font-semibold text-origen-bosque">Centro de ayuda</span>
             </div>
             <h1 className="text-2xl md:text-4xl font-bold text-origen-bosque">
@@ -162,7 +162,7 @@ export default function HelpCenterPage() {
                 <Link key={item.title} href={item.href} className="group">
                   <Card variant="section" padding="md" className="h-full">
                     <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center mb-3 group-hover:bg-origen-pradera/15 transition-colors">
-                      <Icon className="w-5 h-5 text-origen-pradera" />
+                      <Icon className="w-5 h-5 text-hoja-tinta" />
                     </div>
                     <p className="text-sm font-semibold text-origen-bosque">{item.title}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
@@ -175,7 +175,7 @@ export default function HelpCenterPage() {
           {/* FAQ */}
           <div className="mb-10 md:mb-12">
             <h2 className="text-lg font-bold text-origen-bosque mb-4 flex items-center gap-2">
-              <LifeBuoy className="w-5 h-5 text-origen-pradera" />
+              <LifeBuoy className="w-5 h-5 text-hoja-tinta" />
               Preguntas frecuentes
             </h2>
             <div className="space-y-3">
@@ -198,7 +198,7 @@ export default function HelpCenterPage() {
                   className="flex items-center gap-3 rounded-xl border border-border p-4 hover:border-origen-pradera hover:bg-origen-crema/30 transition-colors"
                 >
                   <div className="w-10 h-10 rounded-full bg-origen-crema flex items-center justify-center flex-shrink-0">
-                    <Mail className="h-5 w-5 text-origen-pradera" />
+                    <Mail className="h-5 w-5 text-hoja-tinta" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-origen-bosque">Email de soporte</p>
@@ -210,7 +210,7 @@ export default function HelpCenterPage() {
                   className="flex items-center gap-3 rounded-xl border border-border p-4 hover:border-origen-pradera hover:bg-origen-crema/30 transition-colors"
                 >
                   <div className="w-10 h-10 rounded-full bg-origen-crema flex items-center justify-center flex-shrink-0">
-                    <Phone className="h-5 w-5 text-origen-pradera" />
+                    <Phone className="h-5 w-5 text-hoja-tinta" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-origen-bosque">Teléfono</p>

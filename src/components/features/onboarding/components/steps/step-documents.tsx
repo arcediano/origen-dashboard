@@ -197,7 +197,7 @@ export function EnhancedStep5Documents({
         
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-            <FileText className="w-5 h-5 text-origen-pradera" />
+            <FileText className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
             <h2 className="text-base font-semibold text-origen-bosque">Documentos obligatorios</h2>
@@ -212,7 +212,7 @@ export function EnhancedStep5Documents({
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Shield className="w-4 h-4 text-origen-pradera flex-shrink-0" />
+                  <Shield className="w-4 h-4 text-hoja-tinta flex-shrink-0" />
                   <h3 className="font-medium text-origen-bosque">CIF / NIF</h3>
                   <span className="text-xs text-feedback-danger-text bg-feedback-danger-subtle px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
                   {data.cif?.status === 'verified' && (
@@ -228,7 +228,7 @@ export function EnhancedStep5Documents({
               <div className="flex items-center justify-between p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-5 h-5 text-origen-pradera" />
+                    <FileText className="w-5 h-5 text-hoja-tinta" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-origen-bosque truncate">{data.cif.name}</p>
@@ -269,7 +269,7 @@ export function EnhancedStep5Documents({
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Shield className="w-4 h-4 text-origen-pradera flex-shrink-0" />
+                  <Shield className="w-4 h-4 text-hoja-tinta flex-shrink-0" />
                   <h3 className="font-medium text-origen-bosque">Seguro RC</h3>
                   <span className="text-xs text-feedback-danger-text bg-feedback-danger-subtle px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
                   {data.seguroRC?.status === 'verified' && (
@@ -285,7 +285,7 @@ export function EnhancedStep5Documents({
               <div className="flex items-center justify-between p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-5 h-5 text-origen-pradera" />
+                    <FileText className="w-5 h-5 text-hoja-tinta" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-origen-bosque truncate">{data.seguroRC.name}</p>
@@ -326,7 +326,7 @@ export function EnhancedStep5Documents({
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Shield className="w-4 h-4 text-origen-pradera flex-shrink-0" />
+                  <Shield className="w-4 h-4 text-hoja-tinta flex-shrink-0" />
                   <h3 className="font-medium text-origen-bosque">Manipulador de alimentos</h3>
                   <span className="text-xs text-feedback-danger-text bg-feedback-danger-subtle px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
                   {data.manipuladorAlimentos?.status === 'verified' && (
@@ -342,7 +342,7 @@ export function EnhancedStep5Documents({
               <div className="flex items-center justify-between p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-5 h-5 text-origen-pradera" />
+                    <FileText className="w-5 h-5 text-hoja-tinta" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-origen-bosque truncate">{data.manipuladorAlimentos.name}</p>
@@ -388,7 +388,7 @@ export function EnhancedStep5Documents({
           
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-              <Award className="w-5 h-5 text-origen-pradera" />
+              <Award className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
               <h2 className="text-base font-semibold text-origen-bosque">Certificaciones seleccionadas</h2>
@@ -410,7 +410,7 @@ export function EnhancedStep5Documents({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
-                        <IconComponent className="w-4 h-4 text-origen-pradera" />
+                        <IconComponent className="w-4 h-4 text-hoja-tinta" />
                       </div>
                       <div>
                         <h3 className="font-medium text-origen-bosque">{cert.name}</h3>
@@ -434,7 +434,7 @@ export function EnhancedStep5Documents({
                   {uploadedDoc ? (
                     <div className="flex items-center justify-between p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
                       <div className="flex items-center gap-3 flex-1">
-                        <FileText className="w-5 h-5 text-origen-pradera" />
+                        <FileText className="w-5 h-5 text-hoja-tinta" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-origen-bosque truncate">{uploadedDoc.name}</p>
                           <p className="text-xs text-muted-foreground">{(uploadedDoc.size / 1024).toFixed(1)} KB</p>
@@ -474,7 +474,7 @@ export function EnhancedStep5Documents({
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md transition-all">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-full bg-origen-pradera/10 flex items-center justify-center">
-            <Shield className="w-5 h-5 text-origen-pradera" />
+            <Shield className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-origen-bosque">Estado de verificación</h3>
@@ -524,17 +524,17 @@ export function EnhancedStep5Documents({
       ==================================================================== */}
       <div className="flex items-center gap-4 pt-2 text-xs text-muted-foreground border-t border-border">
         <div className="flex items-center gap-1.5">
-          <Lock className="w-3.5 h-3.5 text-origen-pradera" />
+          <Lock className="w-3.5 h-3.5 text-hoja-tinta" />
           <span>Cifrado SSL 256-bit</span>
         </div>
         <span className="w-1 h-1 rounded-full bg-border" />
         <div className="flex items-center gap-1.5">
-          <Clock className="w-3.5 h-3.5 text-origen-pradera" />
+          <Clock className="w-3.5 h-3.5 text-hoja-tinta" />
           <span>Verificación 24-48h</span>
         </div>
         <span className="w-1 h-1 rounded-full bg-border" />
         <div className="flex items-center gap-1.5">
-          <Shield className="w-3.5 h-3.5 text-origen-pradera" />
+          <Shield className="w-3.5 h-3.5 text-hoja-tinta" />
           <span>Documentos seguros</span>
         </div>
       </div>

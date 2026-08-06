@@ -66,7 +66,7 @@ export function CreateProductProgress({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
-              <TrendingUp className="w-3 h-3 text-origen-pradera" />
+              <TrendingUp className="w-3 h-3 text-hoja-tinta" />
             </div>
             <span className="text-xs font-medium text-origen-bosque">Progreso general</span>
             <Tooltip 

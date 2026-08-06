@@ -296,7 +296,7 @@ export default function SecurityPage() {
         <div className="mb-5">
           <Card variant="section" padding="md">
             <CardIconHeader
-              icon={<Shield className="h-5 w-5 text-origen-pradera" />}
+              icon={<Shield className="h-5 w-5 text-hoja-tinta" />}
               title="Protege tu cuenta"
               description="Mantén seguro el acceso a tu panel y activa barreras extra antes de modificar datos sensibles."
             />
@@ -309,7 +309,7 @@ export default function SecurityPage() {
             <Card className="rounded-2xl border border-border-subtle shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Key className="w-5 h-5 text-origen-pradera" />
+                  <Key className="w-5 h-5 text-hoja-tinta" />
                   Cambiar contraseña
                 </CardTitle>
               </CardHeader>
@@ -399,7 +399,7 @@ export default function SecurityPage() {
             <Card className="rounded-2xl border border-border-subtle shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Smartphone className="w-5 h-5 text-origen-pradera" />
+                  <Smartphone className="w-5 h-5 text-hoja-tinta" />
                   Verificación en dos pasos
                 </CardTitle>
               </CardHeader>
@@ -657,7 +657,7 @@ export default function SecurityPage() {
             <Card className="rounded-2xl border border-border-subtle shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Smartphone className="w-5 h-5 text-origen-pradera" />
+                  <Smartphone className="w-5 h-5 text-hoja-tinta" />
                   Estado de protección
                 </CardTitle>
               </CardHeader>

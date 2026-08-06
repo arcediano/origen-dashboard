@@ -129,7 +129,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
           />
         </div>
         <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-          <Info className="w-3.5 h-3.5 text-origen-pradera" />
+          <Info className="w-3.5 h-3.5 text-hoja-tinta" />
           Las imágenes generan confianza. Un perfil completo multiplica las visitas.
         </p>
       </div>
@@ -142,7 +142,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-              <ImageIcon className="w-5 h-5 text-origen-pradera" />
+              <ImageIcon className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
               <h2 className="text-base font-semibold text-origen-bosque">Logo del negocio</h2>
@@ -207,7 +207,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-              <Camera className="w-5 h-5 text-origen-pradera" />
+              <Camera className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -280,7 +280,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
         >
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-              <Video className="w-5 h-5 text-origen-pradera" />
+              <Video className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -320,7 +320,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
           )}
 
           <div className="flex items-start gap-2 p-3 bg-origen-crema/30 rounded-lg">
-            <Sparkles className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
+            <Sparkles className="w-4 h-4 text-hoja-tinta flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
               <span className="font-medium">Consejo:</span> Un video auténtico genera más confianza que uno muy editado.
             </p>

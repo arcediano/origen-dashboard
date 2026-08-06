@@ -325,7 +325,7 @@ export function StepInventory({
         {/* Datos de envío */}
         <div className="pt-4 border-t border-border">
           <h3 className="text-sm font-semibold text-origen-bosque mb-4 flex items-center gap-2">
-            <Truck className="w-4 h-4 text-origen-pradera" />
+            <Truck className="w-4 h-4 text-hoja-tinta" />
             Datos de envío
           </h3>
           
@@ -430,7 +430,7 @@ export function StepInventory({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-border">
           <div>
             <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-              <TrendingDown className="w-3 h-3 text-origen-pradera" />
+              <TrendingDown className="w-3 h-3 text-hoja-tinta" />
               Punto de reorden
             </p>
             <Input
@@ -446,7 +446,7 @@ export function StepInventory({
 
           <div>
             <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3 text-origen-pradera" />
+              <TrendingUp className="w-3 h-3 text-hoja-tinta" />
               Stock máximo
             </p>
             <Input

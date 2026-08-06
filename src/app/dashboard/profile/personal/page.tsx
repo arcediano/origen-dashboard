@@ -538,7 +538,7 @@ export default function PersonalInfoPage() {
                 <Card className="border border-border shadow-sm h-full">
                   <CardHeader className="pb-3 border-b border-border-subtle">
                     <CardTitle className="flex items-center gap-2 text-base">
-                      <User className="w-4 h-4 text-origen-pradera" />
+                      <User className="w-4 h-4 text-hoja-tinta" />
                       Datos personales
                     </CardTitle>
                   </CardHeader>
@@ -607,7 +607,7 @@ export default function PersonalInfoPage() {
                 <Card className="border border-border shadow-sm h-full">
                   <CardHeader className="pb-3 border-b border-border-subtle">
                     <CardTitle className="flex items-center gap-2 text-base">
-                      <MapPin className="w-4 h-4 text-origen-pradera" />
+                      <MapPin className="w-4 h-4 text-hoja-tinta" />
                       Direccion
                     </CardTitle>
                   </CardHeader>
@@ -685,7 +685,7 @@ export default function PersonalInfoPage() {
               <Card className="border border-border shadow-sm">
                 <CardHeader className="pb-3 border-b border-border-subtle">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <User className="w-4 h-4 text-origen-pradera" />
+                    <User className="w-4 h-4 text-hoja-tinta" />
                     Biografia
                   </CardTitle>
                 </CardHeader>

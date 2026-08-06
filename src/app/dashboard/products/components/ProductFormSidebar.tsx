@@ -30,7 +30,7 @@ export function ProductFormSidebar({ tips, keyFact }: ProductFormSidebarProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-origen-pradera" />
+                  <Sparkles className="w-4 h-4 text-hoja-tinta" />
                 </div>
                 <CardTitle size="sm">Consejos útiles</CardTitle>
               </div>
@@ -55,7 +55,7 @@ export function ProductFormSidebar({ tips, keyFact }: ProductFormSidebarProps) {
             {keyFact && (
               <div className="mt-4 p-3 bg-origen-crema/30 rounded-lg border border-origen-pradera/20">
                 <div className="flex items-center gap-2 mb-1">
-                  <TrendingUp className="w-3.5 h-3.5 text-origen-pradera" />
+                  <TrendingUp className="w-3.5 h-3.5 text-hoja-tinta" />
                   <span className="text-xs font-medium text-origen-bosque">Dato clave</span>
                 </div>
                 <p className="text-xs text-muted-foreground">{keyFact}</p>

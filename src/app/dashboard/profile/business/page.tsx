@@ -830,7 +830,7 @@ export default function BusinessInfoPage() {
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <Building2 className="w-5 h-5 text-origen-pradera" />
+                      <Building2 className="w-5 h-5 text-hoja-tinta" />
                       Identidad del negocio
                     </CardTitle>
                     <SectionStatusBadge 
@@ -904,7 +904,7 @@ export default function BusinessInfoPage() {
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <Phone className="w-5 h-5 text-origen-pradera" />
+                      <Phone className="w-5 h-5 text-hoja-tinta" />
                       Contacto y presencia web
                     </CardTitle>
                     <SectionStatusBadge 
@@ -936,7 +936,7 @@ export default function BusinessInfoPage() {
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <MapPin className="w-5 h-5 text-origen-pradera" />
+                      <MapPin className="w-5 h-5 text-hoja-tinta" />
                       Direccion productiva
                     </CardTitle>
                     <SectionStatusBadge 
@@ -1008,7 +1008,7 @@ export default function BusinessInfoPage() {
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <MapPin className="w-5 h-5 text-origen-pradera" />
+                      <MapPin className="w-5 h-5 text-hoja-tinta" />
                       Direccion de facturacion
                     </CardTitle>
                     <Badge variant="outline" size="xs" className="w-fit self-start sm:self-auto">
@@ -1071,7 +1071,7 @@ export default function BusinessInfoPage() {
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <FileText className="w-5 h-5 text-origen-pradera" />
+                      <FileText className="w-5 h-5 text-hoja-tinta" />
                       Historia y valores
                     </CardTitle>
                     <SectionStatusBadge 
@@ -1134,7 +1134,7 @@ export default function BusinessInfoPage() {
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <Tags className="w-5 h-5 text-origen-pradera" />
+                      <Tags className="w-5 h-5 text-hoja-tinta" />
                       Categorias
                       <RequiredFieldIndicator isRequired={isFieldBlocker('categories', readinessReport)} />
                     </CardTitle>

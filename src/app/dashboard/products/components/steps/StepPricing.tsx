@@ -446,7 +446,7 @@ export function StepPricing({
           {/* Precio base */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-origen-pradera" />
+              <DollarSign className="h-5 w-5 text-hoja-tinta" />
               <span className="text-sm font-medium text-foreground">
                 Precio de venta
                 <span className="text-red-500 ml-1">*</span>
@@ -478,7 +478,7 @@ export function StepPricing({
           {/* Precio tachado */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Tag className="h-5 w-5 text-origen-pradera" />
+              <Tag className="h-5 w-5 text-hoja-tinta" />
               <span className="text-sm font-medium text-foreground">
                 Precio tachado
                 <span className="text-xs font-normal text-muted-foreground ml-1">(opcional)</span>
@@ -668,7 +668,7 @@ export function StepPricing({
             {/* Título + badge — flex-1 para que no comprima el botón */}
             <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
               <div className="flex items-center gap-2 shrink-0">
-                <Gift className="w-4 h-4 text-origen-pradera" />
+                <Gift className="w-4 h-4 text-hoja-tinta" />
                 <h3 className="text-sm font-semibold text-origen-bosque">Ofertas por cantidad</h3>
               </div>
               {tiers.length > 0 && (
@@ -738,7 +738,7 @@ export function StepPricing({
                       >
                         <type.icon className={cn(
                           "w-5 h-5 mb-1",
-                          newTier.type === type.id ? "text-origen-pradera" : "text-text-subtle"
+                          newTier.type === type.id ? "text-hoja-tinta" : "text-text-subtle"
                         )} />
                         <span className="text-xs font-medium text-center leading-tight">{type.label}</span>
                         <span className="text-[10px] text-text-subtle hidden sm:block text-center mt-0.5 leading-tight">{type.desc}</span>
@@ -751,7 +751,7 @@ export function StepPricing({
                     {/* Cantidad mínima */}
                     <div>
                       <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                        <Hash className="w-3 h-3 text-origen-pradera" />
+                        <Hash className="w-3 h-3 text-hoja-tinta" />
                         Cantidad mínima
                       </p>
                       <Input
@@ -768,7 +768,7 @@ export function StepPricing({
                     {/* Cantidad máxima */}
                     <div>
                       <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                        <Hash className="w-3 h-3 text-origen-pradera" />
+                        <Hash className="w-3 h-3 text-hoja-tinta" />
                         Cantidad máxima
                       </p>
                       <Input
@@ -787,7 +787,7 @@ export function StepPricing({
                   {newTier.type === 'percentage' && (
                     <div>
                       <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                        <Percent className="w-3 h-3 text-origen-pradera" />
+                        <Percent className="w-3 h-3 text-hoja-tinta" />
                         Porcentaje de descuento
                       </p>
                       <PercentageInput
@@ -806,7 +806,7 @@ export function StepPricing({
                   {newTier.type === 'fixed' && (
                     <div>
                       <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                        <DollarSign className="w-3 h-3 text-origen-pradera" />
+                        <DollarSign className="w-3 h-3 text-hoja-tinta" />
                         Precio de oferta (€ por unidad)
                       </p>
                       <CurrencyInput
@@ -827,7 +827,7 @@ export function StepPricing({
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                            <Package className="w-3 h-3 text-origen-pradera" />
+                            <Package className="w-3 h-3 text-hoja-tinta" />
                             El cliente lleva (uds)
                           </p>
                           <Input
@@ -840,7 +840,7 @@ export function StepPricing({
                         </div>
                         <div>
                           <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
-                            <Gift className="w-3 h-3 text-origen-pradera" />
+                            <Gift className="w-3 h-3 text-hoja-tinta" />
                             El cliente paga solo (uds)
                           </p>
                           <Input
@@ -971,7 +971,7 @@ export function StepPricing({
                       <div className="flex items-start gap-3">
                         {/* Icono del tipo */}
                         <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
-                          {tier.type === 'percentage' && <Percent className="w-5 h-5 text-origen-pradera" />}
+                          {tier.type === 'percentage' && <Percent className="w-5 h-5 text-hoja-tinta" />}
                           {tier.type === 'fixed' && <DollarSign className="w-5 h-5 text-origen-hoja" />}
                           {tier.type === 'bundle' && <Gift className="w-5 h-5 text-amber-500" />}
                         </div>

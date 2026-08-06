@@ -54,7 +54,7 @@ export function SuccessPublishModal({
       <DialogContent>
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <Clock className="w-6 h-6 text-origen-pradera" />
+            <Clock className="w-6 h-6 text-hoja-tinta" />
             <DialogTitle>Producto enviado a revisión</DialogTitle>
           </div>
           <DialogDescription>{`${productName} está pendiente de verificación por el equipo de Origen`}</DialogDescription>
@@ -63,7 +63,7 @@ export function SuccessPublishModal({
           <div className="flex flex-col items-center text-center">
             {/* Icono animado */}
             <div className="w-20 h-20 rounded-full bg-origen-pradera/10 flex items-center justify-center mb-4 animate-in zoom-in-50 duration-500">
-              <Package className="w-10 h-10 text-origen-pradera" />
+              <Package className="w-10 h-10 text-hoja-tinta" />
             </div>
 
             <h4 className="text-lg font-semibold text-origen-bosque mb-2">

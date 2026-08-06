@@ -574,15 +574,15 @@ export function StepCertificationsAttributes({
                     className="w-full flex items-center justify-between gap-3 px-4 py-4 sm:py-3 text-sm active:bg-origen-crema/60 hover:bg-origen-crema/40 transition-colors focus:outline-none text-left disabled:opacity-50 min-h-[60px] sm:min-h-0"
                   >
                     <span className="flex items-center gap-3 min-w-0">
-                      <Award className="w-5 h-5 sm:w-4 sm:h-4 shrink-0 text-origen-pradera" />
+                      <Award className="w-5 h-5 sm:w-4 sm:h-4 shrink-0 text-hoja-tinta" />
                       <span className="min-w-0">
                         <span className="block font-medium text-origen-bosque">{item.name}</span>
                         <span className="block text-xs text-muted-foreground mt-0.5">{item.issuingBody}</span>
                       </span>
                     </span>
                     {certActionLoading === item.id
-                      ? <Loader2 className="w-5 h-5 sm:w-4 sm:h-4 shrink-0 animate-spin text-origen-pradera" />
-                      : <Plus className="w-5 h-5 sm:w-4 sm:h-4 shrink-0 text-origen-pradera" />
+                      ? <Loader2 className="w-5 h-5 sm:w-4 sm:h-4 shrink-0 animate-spin text-hoja-tinta" />
+                      : <Plus className="w-5 h-5 sm:w-4 sm:h-4 shrink-0 text-hoja-tinta" />
                     }
                   </button>
                 </li>
@@ -709,7 +709,7 @@ export function StepCertificationsAttributes({
             >
               {/* Mensaje informativo */}
               <div className="p-4 bg-origen-crema/40 rounded-xl border border-origen-pradera/20 flex items-start gap-3">
-                <Info className="w-5 h-5 text-origen-pradera shrink-0 mt-0.5" />
+                <Info className="w-5 h-5 text-hoja-tinta shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-origen-bosque">Certificaciones verificadas</p>
                   <p className="text-xs text-origen-hoja mt-1">
@@ -967,7 +967,7 @@ export function StepCertificationsAttributes({
                             )}>
                               <Award className={cn(
                                 "w-5 h-5",
-                                cert.verified ? "text-origen-hoja" : isExpired ? "text-feedback-danger" : "text-origen-pradera"
+                                cert.verified ? "text-origen-hoja" : isExpired ? "text-feedback-danger" : "text-hoja-tinta"
                               )} />
                             </div>
 
@@ -1110,7 +1110,7 @@ export function StepCertificationsAttributes({
               {/* Explicación + preview de cómo aparecen en la tienda */}
               <div className="p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
                 <div className="flex items-start gap-3">
-                  <Lightbulb className="w-5 h-5 text-origen-pradera shrink-0 mt-0.5" />
+                  <Lightbulb className="w-5 h-5 text-hoja-tinta shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-origen-bosque">¿Qué son los atributos?</p>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -1145,7 +1145,7 @@ export function StepCertificationsAttributes({
               {/* Ejemplos por categoría */}
               <div>
                 <p className="text-sm font-semibold text-origen-bosque mb-3 flex items-center gap-2">
-                  <Star className="w-4 h-4 text-origen-pradera" />
+                  <Star className="w-4 h-4 text-hoja-tinta" />
                   Atributos comunes{categoryDisplayName ? ` para ${categoryDisplayName}` : ''}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1358,7 +1358,7 @@ export function StepCertificationsAttributes({
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-10 h-10 rounded-lg bg-origen-crema flex items-center justify-center shrink-0">
-                            <Tag className="w-5 h-5 text-origen-pradera" />
+                            <Tag className="w-5 h-5 text-hoja-tinta" />
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
@@ -1419,7 +1419,7 @@ export function StepCertificationsAttributes({
         {/* ── Impacto en ventas ─────────────────────────────────────────────── */}
         <div className="mt-6 p-4 bg-gradient-to-br from-origen-crema/30 to-white rounded-xl border border-origen-pradera/20">
           <div className="flex items-center gap-2 mb-1.5">
-            <TrendingUp className="w-4 h-4 text-origen-pradera" />
+            <TrendingUp className="w-4 h-4 text-hoja-tinta" />
             <span className="text-xs font-semibold text-origen-bosque">Impacto en ventas</span>
           </div>
           <p className="text-xs text-muted-foreground">

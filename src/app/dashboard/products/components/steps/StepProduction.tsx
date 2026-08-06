@@ -468,7 +468,7 @@ export function StepProduction({
 
               <div className="space-y-2">
                 <div className="flex items-center gap-1.5">
-                  <Package className="h-5 w-5 text-origen-pradera" />
+                  <Package className="h-5 w-5 text-hoja-tinta" />
                   <Label className="text-sm font-medium">
                     Número de lote
                   </Label>
@@ -503,7 +503,7 @@ export function StepProduction({
             >
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <TreePine className="h-5 w-5 text-origen-pradera" />
+                  <TreePine className="h-5 w-5 text-hoja-tinta" />
                   <span className="text-sm font-medium text-foreground">
                     Prácticas sostenibles
                   </span>
@@ -529,7 +529,7 @@ export function StepProduction({
                       />
                       <div className="flex-1">
                         <label htmlFor={practice.id} className="flex items-center gap-2 cursor-pointer">
-                          <span className="text-origen-pradera">{practice.icon}</span>
+                          <span className="text-hoja-tinta">{practice.icon}</span>
                           <span className="text-sm font-medium">{practice.label}</span>
                         </label>
                         <AnimatePresence>
@@ -587,7 +587,7 @@ export function StepProduction({
               {/* Sección de vídeos */}
               <div className="mt-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Film className="h-5 w-5 text-origen-pradera" />
+                  <Film className="h-5 w-5 text-hoja-tinta" />
                   <h3 className="text-sm font-medium text-origen-bosque">Vídeos del proceso</h3>
                 </div>
 

@@ -371,7 +371,7 @@ export function CreateProductNavigation({
 
         {isLastStep && hasCertifications && !certificationsApproved && allStepsCompleted && (
           <div className="p-3 bg-origen-crema/40 rounded-xl border border-origen-pradera/20 flex items-start gap-2">
-            <Shield className="w-4 h-4 text-origen-pradera shrink-0 mt-0.5" aria-hidden="true" />
+            <Shield className="w-4 h-4 text-hoja-tinta shrink-0 mt-0.5" aria-hidden="true" />
             <div>
               <p className="text-xs font-medium text-origen-bosque">Certificaciones pendientes</p>
               <p className="text-[10px] text-origen-hoja mt-0.5">

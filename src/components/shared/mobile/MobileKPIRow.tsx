@@ -32,11 +32,11 @@ export interface MobileKPIRowProps {
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 
 const ACCENT_MAP: Record<StatCardAccent, { icon: string; bg: string; border: string }> = {
-  pradera: { icon: 'text-origen-pradera',   bg: 'from-origen-pradera/8 to-transparent',           border: 'border-origen-pradera/20'          },
+  pradera: { icon: 'text-hoja-tinta',   bg: 'from-origen-pradera/8 to-transparent',           border: 'border-origen-pradera/20'          },
   bosque:  { icon: 'text-origen-bosque',    bg: 'from-origen-bosque/8 to-transparent',            border: 'border-origen-bosque/20'           },
   amber:   { icon: 'text-feedback-warning', bg: 'from-feedback-warning-subtle/20 to-transparent', border: 'border-feedback-warning/20'        },
   red:     { icon: 'text-feedback-danger',  bg: 'from-feedback-danger-subtle/20 to-transparent',  border: 'border-feedback-danger/20'         },
-  blue:    { icon: 'text-origen-pradera',   bg: 'from-origen-pradera/5 to-transparent',           border: 'border-origen-pradera/10'          },
+  blue:    { icon: 'text-hoja-tinta',   bg: 'from-origen-pradera/5 to-transparent',           border: 'border-origen-pradera/10'          },
   green:   { icon: 'text-origen-hoja',      bg: 'from-origen-hoja/5 to-transparent',              border: 'border-origen-hoja/10'             },
 };
 

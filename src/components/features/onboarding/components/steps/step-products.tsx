@@ -252,7 +252,7 @@ const ProductSelectItem: React.FC<ProductSelectItemProps> = ({ value, children, 
     )}
   >
     <span className="flex-1 text-left">{children}</span>
-    {isSelected && <CheckCircle2 className="h-4 w-4 text-origen-pradera flex-shrink-0" />}
+    {isSelected && <CheckCircle2 className="h-4 w-4 text-hoja-tinta flex-shrink-0" />}
   </button>
 );
 
@@ -729,7 +729,7 @@ export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete
           />
         </div>
         <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-          <Info className="w-3.5 h-3.5 text-origen-pradera" />
+          <Info className="w-3.5 h-3.5 text-hoja-tinta" />
           Este paso es opcional. Puedes añadir hasta 5 productos ahora o completarlo más tarde desde "Mi catálogo".
         </p>
       </div>
@@ -785,7 +785,7 @@ export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete
 
       {/* Trust badge */}
       <div className="flex items-start gap-2 p-3 bg-origen-crema/20 rounded-xl border border-border-subtle">
-        <Info className="w-4 h-4 text-origen-pradera flex-shrink-0 mt-0.5" />
+        <Info className="w-4 h-4 text-hoja-tinta flex-shrink-0 mt-0.5" />
         <p className="text-xs text-muted-foreground">
           La información de alérgenos es obligatoria por el{' '}
           <span className="font-medium">Reglamento UE 1169/2011</span>.

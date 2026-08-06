@@ -604,7 +604,7 @@ export default function CertificationsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Shield className="w-5 h-5 text-origen-pradera" />
+                  <Shield className="w-5 h-5 text-hoja-tinta" />
                   Documentación legal obligatoria
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
@@ -626,7 +626,7 @@ export default function CertificationsPage() {
                       <div className="flex flex-col gap-4 h-full">
                         <div className="flex items-start gap-4">
                           <div className="w-12 h-12 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-                            <FileBadge className="w-6 h-6 text-origen-pradera" />
+                            <FileBadge className="w-6 h-6 text-hoja-tinta" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-col gap-2">
@@ -774,7 +774,7 @@ export default function CertificationsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Award className="w-5 h-5 text-origen-pradera" />
+                  <Award className="w-5 h-5 text-hoja-tinta" />
                   Certificaciones de calidad
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
@@ -801,7 +801,7 @@ export default function CertificationsPage() {
                       <div className="flex flex-col gap-4 h-full">
                         <div className="flex items-start gap-4">
                           <div className="w-12 h-12 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-                            <Award className="w-6 h-6 text-origen-pradera" />
+                            <Award className="w-6 h-6 text-hoja-tinta" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-col gap-2">

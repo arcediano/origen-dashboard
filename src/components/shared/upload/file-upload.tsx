@@ -377,7 +377,7 @@ export function FileUpload({
       {value.length > 0 && (
         <div className="mt-4 space-y-2">
           <p className="text-xs font-medium text-foreground flex items-center gap-2">
-            <FileText className="w-4 h-4 text-origen-pradera" />
+            <FileText className="w-4 h-4 text-hoja-tinta" />
             Archivos cargados ({value.length}/{maxFiles})
           </p>
 

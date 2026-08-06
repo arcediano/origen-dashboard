@@ -206,7 +206,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
           {formData.fullDescription && (
             <div className="px-5 sm:px-6 py-5 border-t border-border space-y-2">
               <h3 className="text-sm font-semibold text-origen-bosque flex items-center gap-2">
-                <Package className="w-4 h-4 text-origen-pradera" />
+                <Package className="w-4 h-4 text-hoja-tinta" />
                 Descripción
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
@@ -219,7 +219,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
           {hasCerts && (
             <div className="px-5 sm:px-6 py-5 border-t border-border space-y-3">
               <h3 className="text-sm font-semibold text-origen-bosque flex items-center gap-2">
-                <Award className="w-4 h-4 text-origen-pradera" />
+                <Award className="w-4 h-4 text-hoja-tinta" />
                 Certificaciones
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -246,7 +246,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
           {hasNutritional && (
             <div className="px-5 sm:px-6 py-5 border-t border-border space-y-3">
               <h3 className="text-sm font-semibold text-origen-bosque flex items-center gap-2">
-                <Leaf className="w-4 h-4 text-origen-pradera" />
+                <Leaf className="w-4 h-4 text-hoja-tinta" />
                 Información nutricional
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -275,7 +275,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
           {hasProduction && (
             <div className="px-5 sm:px-6 py-5 border-t border-border space-y-3">
               <h3 className="text-sm font-semibold text-origen-bosque flex items-center gap-2">
-                <Leaf className="w-4 h-4 text-origen-pradera" />
+                <Leaf className="w-4 h-4 text-hoja-tinta" />
                 Producción
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">

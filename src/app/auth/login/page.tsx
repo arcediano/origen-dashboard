@@ -54,7 +54,7 @@ export default function LoginPage() {
 
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
-                <Sparkles className="w-4 h-4 text-origen-pradera" />
+                <Sparkles className="w-4 h-4 text-hoja-tinta" />
                 <span className="text-xs md:text-sm font-semibold text-origen-bosque">
                   Espacio exclusivo para productores
                 </span>
@@ -98,7 +98,7 @@ export default function LoginPage() {
                       <div className="bg-surface-alt rounded-xl p-4 border border-border hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-origen-hoja/50 transition-all duration-300 group-hover:border-origen-hoja">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-origen-pradera/15 flex items-center justify-center flex-shrink-0">
-                            <Icon className="w-5 h-5 text-origen-pradera" />
+                            <Icon className="w-5 h-5 text-hoja-tinta" />
                           </div>
                           <p className="text-xs font-medium text-origen-bosque leading-snug">{item.label}</p>
                         </div>
@@ -111,7 +111,7 @@ export default function LoginPage() {
               {/* Beneficios */}
               <div className="space-y-4 pt-4">
                 <h3 className="text-sm font-bold text-origen-bosque uppercase tracking-wider flex items-center gap-2">
-                  <Award className="w-4 h-4 text-origen-pradera" />
+                  <Award className="w-4 h-4 text-hoja-tinta" />
                   Todo incluido en tu cuenta
                 </h3>
 
@@ -124,7 +124,7 @@ export default function LoginPage() {
                   ].map((benefit, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <div className="w-5 h-5 rounded-full bg-origen-pradera/10 flex items-center justify-center">
-                        <CheckCircle className="w-3 h-3 text-origen-pradera" />
+                        <CheckCircle className="w-3 h-3 text-hoja-tinta" />
                       </div>
                       <span className="text-sm text-foreground">{benefit}</span>
                     </div>

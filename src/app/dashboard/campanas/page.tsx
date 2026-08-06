@@ -89,7 +89,7 @@ function CreateCampaignForm({ onCreated, onCancel }: CreateFormProps) {
   return (
     <Card variant="section" padding="md">
       <CardIconHeader
-        icon={<Megaphone className="h-5 w-5 text-origen-pradera" />}
+        icon={<Megaphone className="h-5 w-5 text-hoja-tinta" />}
         title="Nueva campaña"
         description="Configura tipo, placement y presupuesto de tu campaña."
       />

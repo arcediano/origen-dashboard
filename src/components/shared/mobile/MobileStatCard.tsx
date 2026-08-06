@@ -37,11 +37,11 @@ export interface MobileStatCardProps {
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 
 const ACCENT_MAP: Record<StatCardAccent, { icon: string; border: string; bg: string }> = {
-  pradera: { icon: 'text-origen-pradera',   border: 'border-l-origen-pradera',        bg: 'from-origen-pradera/5 to-transparent'             },
+  pradera: { icon: 'text-hoja-tinta',   border: 'border-l-origen-pradera',        bg: 'from-origen-pradera/5 to-transparent'             },
   bosque:  { icon: 'text-origen-bosque',    border: 'border-l-origen-bosque',         bg: 'from-origen-bosque/5 to-transparent'              },
   amber:   { icon: 'text-feedback-warning', border: 'border-l-feedback-warning',      bg: 'from-feedback-warning-subtle/20 to-transparent'   },
   red:     { icon: 'text-feedback-danger',  border: 'border-l-feedback-danger',       bg: 'from-feedback-danger-subtle/20 to-transparent'    },
-  blue:    { icon: 'text-origen-pradera',   border: 'border-l-origen-pradera/60',     bg: 'from-origen-pradera/5 to-transparent'             },
+  blue:    { icon: 'text-hoja-tinta',   border: 'border-l-origen-pradera/60',     bg: 'from-origen-pradera/5 to-transparent'             },
   green:   { icon: 'text-origen-hoja',      border: 'border-l-origen-hoja',           bg: 'from-origen-hoja/5 to-transparent'                },
 };
 

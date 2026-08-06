@@ -103,7 +103,7 @@ export function ProcessSection() {
               {index < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 z-10">
                   <div className="w-6 h-6 bg-surface-alt border-2 border-origen-pradera rounded-full flex items-center justify-center">
-                    <ArrowRight className="w-3 h-3 text-origen-pradera" />
+                    <ArrowRight className="w-3 h-3 text-hoja-tinta" />
                   </div>
                 </div>
               )}

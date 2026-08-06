@@ -69,7 +69,7 @@ const STEPS = [
     id: 1,
     title: 'Ubicación',
     icon: MapPin,
-    color: 'text-origen-pradera',
+    color: 'text-hoja-tinta',
     bgColor: 'bg-origen-pradera/10',
     time: '2 min',
     description: 'Dirección, provincia y categorías',
@@ -129,7 +129,7 @@ const STEPS = [
     id: 7,
     title: 'Pagos',
     icon: CreditCard,
-    color: 'text-origen-pradera',
+    color: 'text-hoja-tinta',
     bgColor: 'bg-origen-pradera/10',
     time: '2 min',
     description: 'Conectar Stripe',
@@ -950,7 +950,7 @@ export default function OnboardingPage() {
               
               {/* Título de la sección */}
               <div className="flex items-center gap-2 pb-2 border-b border-border">
-                <Sparkles className="w-4 h-4 text-origen-pradera" />
+                <Sparkles className="w-4 h-4 text-hoja-tinta" />
                 <h2 className="text-xs font-bold text-origen-bosque uppercase tracking-wider">
                   Configura tu tienda
                 </h2>
@@ -1061,7 +1061,7 @@ export default function OnboardingPage() {
               <div className="mt-4 bg-surface-alt/50 rounded-xl border border-border-subtle p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-origen-pradera/5 flex items-center justify-center">
-                    <Clock className="w-4 h-4 text-origen-pradera" />
+                    <Clock className="w-4 h-4 text-hoja-tinta" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Tiempo total</p>

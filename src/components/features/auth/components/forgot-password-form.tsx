@@ -38,7 +38,7 @@ function SuccessState({ email }: { email: string }) {
       className="text-center space-y-6"
     >
       <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center border border-origen-pradera/20">
-        <CheckCircle2 className="w-8 h-8 md:w-10 md:h-10 text-origen-pradera" />
+        <CheckCircle2 className="w-8 h-8 md:w-10 md:h-10 text-hoja-tinta" />
       </div>
 
       <div className="space-y-2">
@@ -196,17 +196,17 @@ export function SimpleForgotPassword() {
       {/* Trust badges */}
       <div className="mt-5 md:mt-6 flex flex-wrap items-center justify-center gap-2 md:gap-3 text-[10px] md:text-xs">
         <div className="flex items-center gap-1 group cursor-default">
-          <Shield className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera group-hover:text-origen-hoja transition-colors" />
+          <Shield className="w-3 h-3 md:w-3.5 md:h-3.5 text-hoja-tinta group-hover:text-origen-hoja transition-colors" />
           <span className="text-muted-foreground group-hover:text-foreground transition-colors">SSL 256-bit</span>
         </div>
         <span className="w-1 h-1 rounded-full bg-border hidden sm:block" />
         <div className="flex items-center gap-1 group cursor-default">
-          <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera group-hover:text-origen-hoja transition-colors" />
+          <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-hoja-tinta group-hover:text-origen-hoja transition-colors" />
           <span className="text-muted-foreground group-hover:text-foreground transition-colors">Enlace válido 30 min</span>
         </div>
         <span className="w-1 h-1 rounded-full bg-border hidden sm:block" />
         <div className="flex items-center gap-1 group cursor-default">
-          <Mail className="w-3 h-3 md:w-3.5 md:h-3.5 text-origen-pradera group-hover:text-origen-hoja transition-colors" />
+          <Mail className="w-3 h-3 md:w-3.5 md:h-3.5 text-hoja-tinta group-hover:text-origen-hoja transition-colors" />
           <span className="text-muted-foreground group-hover:text-foreground transition-colors">Email seguro</span>
         </div>
       </div>

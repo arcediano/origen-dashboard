@@ -131,7 +131,7 @@ export function AdjustStockDialog({
       <DialogContent>
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <Package className="w-5 h-5 text-origen-pradera" />
+            <Package className="w-5 h-5 text-hoja-tinta" />
             <DialogTitle>Ajustar stock</DialogTitle>
           </div>
           <DialogDescription>{`Modifica el stock de ${product.name}`}</DialogDescription>

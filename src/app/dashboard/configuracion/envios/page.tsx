@@ -364,7 +364,7 @@ export default function EnviosPage() {
         <div className="rounded-[28px] border border-origen-pradera/25 bg-gradient-to-br from-origen-crema via-surface-alt to-surface p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex-shrink-0">
-              <Truck className="h-5 w-5 text-origen-pradera" />
+              <Truck className="h-5 w-5 text-hoja-tinta" />
             </div>
             <div>
               <p className="text-sm font-semibold text-origen-bosque leading-tight">Entrega sin fricción</p>
@@ -389,7 +389,7 @@ export default function EnviosPage() {
 
         {saveSuccess && (
           <Alert className="border-origen-pradera/30 bg-origen-pastel/40">
-            <CheckCircle2 className="w-4 h-4 text-origen-pradera" />
+            <CheckCircle2 className="w-4 h-4 text-hoja-tinta" />
             <AlertDescription className="text-origen-bosque">{saveSuccess}</AlertDescription>
           </Alert>
         )}
@@ -411,7 +411,7 @@ export default function EnviosPage() {
               </div>
               <p className="mt-1.5 text-sm text-muted-foreground">{level.description}</p>
               <p className="mt-3 text-xs text-text-subtle flex items-start gap-1.5">
-                <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-origen-pradera" />
+                <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-hoja-tinta" />
                 <span>
                   Este valor se calcula automáticamente a partir de tu código postal de producción. Si necesitas
                   revisarlo,{' '}
@@ -473,7 +473,7 @@ export default function EnviosPage() {
               ) : (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 p-3 border border-origen-pradera/30 bg-origen-pastel/40 rounded-xl">
-                    <CheckCircle2 className="h-5 w-5 text-origen-pradera flex-shrink-0" />
+                    <CheckCircle2 className="h-5 w-5 text-hoja-tinta flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-origen-bosque">Ruta activa</p>
                       <p className="text-sm text-muted-foreground">{pickupAssignment.routeName} • {pickupAssignment.warehouseName}</p>
@@ -570,7 +570,7 @@ export default function EnviosPage() {
                 <div key={option.id} className="rounded-xl border-2 border-border-subtle bg-surface-alt p-4 transition-all hover:border-origen-pradera/50">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                     <div className="w-9 h-9 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-5 h-5 text-origen-pradera" />
+                      <Icon className="w-5 h-5 text-hoja-tinta" />
                     </div>
 
                     <div className="flex-1">
@@ -794,7 +794,7 @@ export default function EnviosPage() {
                   <p className="text-xs text-muted-foreground">Materiales reciclados, compostables o reutilizables</p>
                 </div>
               </div>
-              {sustainablePackaging && <CheckCircle2 className="w-6 h-6 text-origen-pradera flex-shrink-0" />}
+              {sustainablePackaging && <CheckCircle2 className="w-6 h-6 text-hoja-tinta flex-shrink-0" />}
             </button>
 
             {sustainablePackaging && (

@@ -72,7 +72,7 @@ const spinnerSizes: Record<SpinnerSize, string> = {
 
 const spinnerColors: Record<SpinnerVariant, string> = {
   default:   'text-text-subtle',
-  primary:   'text-origen-pradera',
+  primary:   'text-hoja-tinta',
   secondary: 'text-origen-hoja',
   white:     'text-white',
 };

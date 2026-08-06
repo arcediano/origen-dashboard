@@ -103,7 +103,7 @@ function SectionAccordion({
         aria-expanded={open}
       >
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-origen-pradera/15 to-origen-hoja/15 flex items-center justify-center shrink-0">
-          <Icon className="w-4 h-4 text-origen-pradera" />
+          <Icon className="w-4 h-4 text-hoja-tinta" />
         </div>
         <span className="flex-1 text-sm font-semibold text-origen-bosque">{title}</span>
         <ChevronDown className={cn('w-4 h-4 text-text-subtle transition-transform duration-200', open && 'rotate-180')} />
@@ -513,7 +513,7 @@ function StatusCard({
       {/* Producto inactivo — puede corregir y re-enviar */}
       {isInactive && isComplete && (
         <div className="rounded-2xl border border-origen-pradera/20 bg-origen-crema/40 p-3 flex items-start gap-2">
-          <Info className="w-3.5 h-3.5 text-origen-pradera shrink-0 mt-0.5" />
+          <Info className="w-3.5 h-3.5 text-hoja-tinta shrink-0 mt-0.5" />
           <p className="text-[11px] text-origen-bosque leading-relaxed">
             El producto está inactivo. Si realizaste correcciones, puedes volver a enviarlo a revisión.
           </p>
@@ -543,7 +543,7 @@ function StatusCard({
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             {isPublic
-              ? <Globe className="w-4 h-4 text-origen-pradera shrink-0" />
+              ? <Globe className="w-4 h-4 text-hoja-tinta shrink-0" />
               : <Lock  className="w-4 h-4 text-text-subtle shrink-0" />}
             <div className="min-w-0">
               <p className="text-sm font-medium text-origen-bosque">
@@ -853,7 +853,7 @@ export default function ProductoDetallePage() {
                     <div className="flex items-center justify-between gap-3 pt-3 border-t border-border-subtle">
                       <div className="flex items-center gap-2">
                         {product.visibility === 'public'
-                          ? <Globe className="w-3.5 h-3.5 text-origen-pradera" />
+                          ? <Globe className="w-3.5 h-3.5 text-hoja-tinta" />
                           : <Lock  className="w-3.5 h-3.5 text-text-subtle" />}
                         <span className="text-xs text-text-subtle">
                           {product.visibility === 'public' ? 'Visible en marketplace' : 'Oculto en marketplace'}
@@ -908,7 +908,7 @@ export default function ProductoDetallePage() {
                             )}>
                               {cert.verified
                                 ? <CheckCircle className="w-4 h-4 text-origen-hoja" />
-                                : <Award className="w-4 h-4 text-origen-pradera" />}
+                                : <Award className="w-4 h-4 text-hoja-tinta" />}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-semibold text-origen-bosque truncate">{cert.name}</p>

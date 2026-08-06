@@ -94,7 +94,7 @@ export function ContactForm() {
           {/* Nombre */}
           <div className="space-y-1.5">
             <label className="text-xs md:text-sm font-medium text-origen-bosque flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-origen-pradera" />
+              <User className="w-3.5 h-3.5 text-hoja-tinta" />
               Nombre <span className="text-red-500">*</span>
             </label>
             <input
@@ -118,7 +118,7 @@ export function ContactForm() {
           {/* Email */}
           <div className="space-y-1.5">
             <label className="text-xs md:text-sm font-medium text-origen-bosque flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-origen-pradera" />
+              <Mail className="w-3.5 h-3.5 text-hoja-tinta" />
               Email <span className="text-red-500">*</span>
             </label>
             <input
@@ -143,7 +143,7 @@ export function ContactForm() {
         {/* Asunto */}
         <div className="space-y-1.5">
           <label className="text-xs md:text-sm font-medium text-origen-bosque flex items-center gap-1.5">
-            <MessageSquare className="w-3.5 h-3.5 text-origen-pradera" />
+            <MessageSquare className="w-3.5 h-3.5 text-hoja-tinta" />
             Asunto <span className="text-red-500">*</span>
           </label>
           <Select onValueChange={v => { setForm(p => ({ ...p, subject: v })); clearError('subject'); }}>
@@ -265,7 +265,7 @@ export function ContactForm() {
               className="flex items-start gap-3 p-4 bg-origen-crema/50 border border-origen-pradera/30 rounded-xl"
             >
               <div className="w-8 h-8 rounded-full bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-                <CheckCircle className="w-4 h-4 text-origen-pradera" />
+                <CheckCircle className="w-4 h-4 text-hoja-tinta" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-origen-bosque">¡Mensaje enviado con éxito!</p>

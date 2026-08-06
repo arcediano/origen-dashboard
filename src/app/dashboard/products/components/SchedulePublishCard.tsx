@@ -61,7 +61,7 @@ export function SchedulePublishCard({ productId, currentScheduledAt }: ScheduleP
       {/* Cabecera */}
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 rounded-xl bg-origen-pradera/10 flex items-center justify-center shrink-0">
-          <CalendarClock className="w-4 h-4 text-origen-pradera" />
+          <CalendarClock className="w-4 h-4 text-hoja-tinta" />
         </div>
         <div>
           <p className="text-sm font-semibold text-origen-bosque">Programar publicación</p>

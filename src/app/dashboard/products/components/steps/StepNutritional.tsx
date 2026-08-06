@@ -266,7 +266,7 @@ export function StepNutritional({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Scale className="h-5 w-5 text-origen-pradera" />
+                    <Scale className="h-5 w-5 text-hoja-tinta" />
                     <span className="text-sm font-medium text-foreground">
                       Tamaño de ración
                       <span className="text-red-500 ml-1">*</span>
@@ -306,7 +306,7 @@ export function StepNutritional({
 
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Flame className="h-5 w-5 text-origen-pradera" />
+                    <Flame className="h-5 w-5 text-hoja-tinta" />
                     <span className="text-sm font-medium text-foreground">
                       Calorías (kcal)
                     </span>
@@ -471,7 +471,7 @@ export function StepNutritional({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <div className="flex items-center gap-1.5">
-                    <AlertCircle className="h-5 w-5 text-origen-pradera" />
+                    <AlertCircle className="h-5 w-5 text-hoja-tinta" />
                     <Label className="text-sm font-medium">
                       Contiene
                     </Label>
@@ -509,7 +509,7 @@ export function StepNutritional({
 
                 <div className="space-y-2">
                   <div className="flex items-center gap-1.5">
-                    <AlertTriangle className="h-5 w-5 text-origen-pradera" />
+                    <AlertTriangle className="h-5 w-5 text-hoja-tinta" />
                     <Label className="text-sm font-medium">
                       Puede contener
                     </Label>
@@ -559,7 +559,7 @@ export function StepNutritional({
             >
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Ban className="h-5 w-5 text-origen-pradera" />
+                  <Ban className="h-5 w-5 text-hoja-tinta" />
                   <span className="text-sm font-medium text-foreground">
                     Declaraciones de ausencia
                   </span>
@@ -581,7 +581,7 @@ export function StepNutritional({
                         onCheckedChange={(checked) => handleChange(option.id, checked)}
                       />
                       <label htmlFor={option.id} className="flex items-center gap-2 flex-1 cursor-pointer">
-                        <span className="text-origen-pradera">{option.icon}</span>
+                        <span className="text-hoja-tinta">{option.icon}</span>
                         <span className="text-sm font-medium">{option.label}</span>
                       </label>
                     </div>
@@ -590,7 +590,7 @@ export function StepNutritional({
               </div>
 
               <div className="mt-4 p-3 bg-origen-crema/40 rounded-lg border border-origen-pradera/20 flex items-start gap-2">
-                <Info className="w-4 h-4 text-origen-pradera shrink-0 mt-0.5" />
+                <Info className="w-4 h-4 text-hoja-tinta shrink-0 mt-0.5" />
                 <p className="text-xs text-origen-hoja">
                   Estas declaraciones aparecerán como badges en la ficha del producto, ayudando a clientes con necesidades específicas.
                 </p>
@@ -610,7 +610,7 @@ export function StepNutritional({
               {/* Ingredientes */}
               <div className="space-y-2">
                 <div className="flex items-center gap-1.5">
-                  <FileText className="h-5 w-5 text-origen-pradera" />
+                  <FileText className="h-5 w-5 text-hoja-tinta" />
                   <div className="flex items-center gap-1.5">
                     <Label className="text-sm font-medium">
                       Ingredientes
@@ -675,7 +675,7 @@ export function StepNutritional({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-origen-pradera" />
+                    <Clock className="h-5 w-5 text-hoja-tinta" />
                     <span className="text-sm font-medium text-foreground">
                       Preparación
                     </span>
@@ -694,7 +694,7 @@ export function StepNutritional({
 
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Package className="h-5 w-5 text-origen-pradera" />
+                    <Package className="h-5 w-5 text-hoja-tinta" />
                     <span className="text-sm font-medium text-foreground">
                       Conservación
                     </span>
@@ -717,7 +717,7 @@ export function StepNutritional({
 
         {/* Badge de información */}
         <div className="mt-6 flex items-center justify-center gap-2 p-3 bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5 rounded-lg border border-origen-pradera/20">
-          <Heart className="h-4 w-4 text-origen-pradera" />
+          <Heart className="h-4 w-4 text-hoja-tinta" />
           <span className="text-xs text-muted-foreground">
             La información nutricional completa genera confianza en tus clientes
           </span>

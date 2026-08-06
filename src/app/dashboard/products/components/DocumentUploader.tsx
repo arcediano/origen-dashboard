@@ -180,7 +180,7 @@ export function DocumentUploader({
         <input {...getInputProps()} />
         <div className="flex flex-col items-center text-center">
           {isUploading
-            ? <Loader2 className="w-6 h-6 text-origen-pradera animate-spin mb-1" />
+            ? <Loader2 className="w-6 h-6 text-hoja-tinta animate-spin mb-1" />
             : <Upload className="w-6 h-6 text-text-subtle mb-1" />
           }
           <p className="text-xs font-medium text-foreground">
@@ -206,7 +206,7 @@ export function DocumentUploader({
               className="flex items-center justify-between p-3 bg-surface-alt rounded-lg border border-border hover:border-origen-pradera/30 transition-all group"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <FileText className="w-5 h-5 text-origen-pradera shrink-0" />
+                <FileText className="w-5 h-5 text-hoja-tinta shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate" title={doc.name}>{doc.name}</p>
                   <p className="text-[10px] text-text-subtle">{formatFileSize(doc.size)}</p>
@@ -216,7 +216,7 @@ export function DocumentUploader({
               <div className="flex items-center gap-2">
                 {doc.uploading && (
                   <div className="flex items-center gap-1">
-                    <Loader2 className="w-3 h-3 text-origen-pradera animate-spin" />
+                    <Loader2 className="w-3 h-3 text-hoja-tinta animate-spin" />
                     <span className="text-[10px] text-muted-foreground">Subiendo...</span>
                   </div>
                 )}

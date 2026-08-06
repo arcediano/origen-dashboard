@@ -44,7 +44,7 @@ export default function AccountPage() {
       <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8 space-y-6`}>
         <Card variant="section" padding="md">
           <CardIconHeader
-            icon={<MonitorCog className="h-5 w-5 text-origen-pradera" />}
+            icon={<MonitorCog className="h-5 w-5 text-hoja-tinta" />}
             title="Una sola entrada para toda tu cuenta"
             description="Aquí se concentran tareas personales y configuración. Notificaciones se gestionan desde la campana."
           />
@@ -60,7 +60,7 @@ export default function AccountPage() {
                 className={`flex items-center gap-4 p-4 hover:bg-surface-alt transition-colors ${index > 0 ? 'border-t border-border-subtle' : ''}`}
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-origen-pradera/10 flex-shrink-0">
-                  <Icon className="h-5 w-5 text-origen-pradera" />
+                  <Icon className="h-5 w-5 text-hoja-tinta" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-origen-bosque">{section.title}</p>
@@ -76,7 +76,7 @@ export default function AccountPage() {
           <Card className="rounded-2xl border border-border-subtle shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-origen-pradera" />
+                <HelpCircle className="h-5 w-5 text-hoja-tinta" />
                 Soporte y ayuda
               </CardTitle>
             </CardHeader>

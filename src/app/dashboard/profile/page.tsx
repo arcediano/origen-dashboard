@@ -143,7 +143,7 @@ export default function ProfilePage() {
         {/* Móvil: fila compacta */}
         <div className="lg:hidden flex items-center gap-3 p-4 rounded-2xl bg-surface-alt border border-border-subtle">
           <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-            <User className="w-5 h-5 text-origen-pradera" />
+            <User className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1.5">
@@ -161,7 +161,7 @@ export default function ProfilePage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-origen-pradera/10 flex items-center justify-center">
-                  <User className="w-6 h-6 text-origen-pradera" />
+                  <User className="w-6 h-6 text-hoja-tinta" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-origen-bosque">Completitud del perfil</h3>
@@ -182,7 +182,7 @@ export default function ProfilePage() {
 
         <Link href="/dashboard/profile/personal" className="flex items-center gap-3 px-4 py-4 active:bg-surface-alt transition-colors">
           <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-            <User className="w-5 h-5 text-origen-pradera" />
+            <User className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[15px] font-semibold text-origen-bosque leading-tight">Información personal</p>
@@ -196,7 +196,7 @@ export default function ProfilePage() {
 
         <Link href="/dashboard/profile/business" className="flex items-center gap-3 px-4 py-4 active:bg-surface-alt transition-colors">
           <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-            <Store className="w-5 h-5 text-origen-pradera" />
+            <Store className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[15px] font-semibold text-origen-bosque leading-tight">Mi negocio</p>
@@ -210,7 +210,7 @@ export default function ProfilePage() {
 
         <Link href="/dashboard/profile/certifications" className="flex items-center gap-3 px-4 py-4 active:bg-surface-alt transition-colors">
           <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-            <FileBadge className="w-5 h-5 text-origen-pradera" />
+            <FileBadge className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[15px] font-semibold text-origen-bosque leading-tight">Certificaciones</p>
@@ -235,7 +235,7 @@ export default function ProfilePage() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <User className="w-5 h-5 text-origen-pradera" />
+                  <User className="w-5 h-5 text-hoja-tinta" />
                   Información personal
                 </CardTitle>
                 <Badge variant={personalVerified ? 'success' : 'warning'} size="xs">{personalVerified ? 'Verificado' : 'Pendiente'}</Badge>
@@ -266,7 +266,7 @@ export default function ProfilePage() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Store className="w-5 h-5 text-origen-pradera" />
+                  <Store className="w-5 h-5 text-hoja-tinta" />
                   Mi negocio
                 </CardTitle>
                 <Badge variant={businessVerified ? 'success' : 'warning'} size="xs">{businessVerified ? 'Verificado' : 'Pendiente'}</Badge>
@@ -297,7 +297,7 @@ export default function ProfilePage() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <FileBadge className="w-5 h-5 text-origen-pradera" />
+                  <FileBadge className="w-5 h-5 text-hoja-tinta" />
                   Certificaciones
                 </CardTitle>
                 <Badge variant={certificationsPending > 0 ? 'warning' : 'success'} size="xs">

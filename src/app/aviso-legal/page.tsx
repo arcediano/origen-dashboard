@@ -90,7 +90,7 @@ export default function LegalNoticePage() {
               </div>
             </Link>
             <Link href="/auth/register" className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-surface-alt hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2">
-              <Store className="w-4 h-4 text-origen-pradera" />
+              <Store className="w-4 h-4 text-hoja-tinta" />
               <span className="hidden sm:inline">Nuevo productor</span>
               <span className="sm:hidden">Registro</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -129,7 +129,7 @@ export default function LegalNoticePage() {
             {sections.map(section => (
               <div key={section.number} className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm">
                 <h2 className="text-base md:text-lg font-bold text-origen-bosque mb-3 pb-2 border-b border-border-subtle flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-origen-pradera text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-hoja-tinta text-xs font-bold flex items-center justify-center flex-shrink-0">
                     {section.number}
                   </span>
                   {section.title}
@@ -164,7 +164,7 @@ export default function LegalNoticePage() {
 
           {/* Nota LSSICE */}
           <div className="mt-6 flex items-start gap-3 p-4 bg-origen-crema/50 border border-origen-pradera/30 rounded-xl">
-            <Info className="w-5 h-5 text-origen-pradera flex-shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 text-hoja-tinta flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
               Este Aviso Legal cumple con la Ley 34/2002 (LSSICE), el Real Decreto Legislativo 1/2007 de Defensa de Consumidores y Usuarios, y el Reglamento (UE) 2022/2065 sobre Servicios Digitales.
             </p>

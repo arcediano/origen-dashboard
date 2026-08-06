@@ -100,7 +100,7 @@ export function TestimonialsSection() {
         {/* Badge de confianza */}
         <div className="text-center mt-8 md:mt-16 md:pt-12 md:border-t md:border-border">
           <div className="inline-flex items-center gap-3 bg-surface-alt rounded-xl px-5 py-3 md:px-8 md:py-4 shadow-lg border border-border">
-            <ShieldCheck className="w-6 h-6 md:w-8 md:h-8 text-origen-pradera" />
+            <ShieldCheck className="w-6 h-6 md:w-8 md:h-8 text-hoja-tinta" />
             <div className="text-left">
               <p className="font-bold text-origen-bosque text-sm md:text-base">+500 productores verificados</p>
               <p className="text-muted-foreground text-xs md:text-sm">Comunidad en crecimiento constante</p>

@@ -236,7 +236,7 @@ export default function PaymentsPage() {
                 <div className="flex flex-col gap-3 sm:gap-4 lg:gap-5 lg:flex-row lg:items-end lg:justify-between p-4 sm:p-5 lg:p-6">
                   <div className="max-w-2xl">
                     <CardIconHeader
-                      icon={<CreditCard className="h-6 w-6 text-origen-pradera" aria-hidden="true" />}
+                      icon={<CreditCard className="h-6 w-6 text-hoja-tinta" aria-hidden="true" />}
                       title="Panel de cobros y liquidación"
                       size="md"
                     />
@@ -270,7 +270,7 @@ export default function PaymentsPage() {
                       )}
                       {isRefreshing && (
                         <span className="inline-flex items-center gap-1.5">
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-origen-pradera" aria-hidden="true" />
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-hoja-tinta" aria-hidden="true" />
                         </span>
                       )}
                     </div>
@@ -303,7 +303,7 @@ export default function PaymentsPage() {
                 <Card className="rounded-xl sm:rounded-2xl">
                   <CardHeader className="p-4 sm:p-5 lg:p-6 border-b border-border-subtle">
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                      <Landmark className="h-5 w-5 text-origen-pradera" aria-hidden="true" />
+                      <Landmark className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />
                       Estado de la cuenta de cobro
                     </CardTitle>
                   </CardHeader>
@@ -369,7 +369,7 @@ export default function PaymentsPage() {
                   <Card variant="section" className="rounded-xl sm:rounded-2xl">
                     <CardHeader className="p-4 sm:p-5 lg:p-6 border-b border-border-subtle">
                       <CardIconHeader
-                        icon={<ShieldCheck className="h-5 w-5 text-origen-pradera" aria-hidden="true" />}
+                        icon={<ShieldCheck className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />}
                         title="Próximos pasos"
                         size="md"
                       />

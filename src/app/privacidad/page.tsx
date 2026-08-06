@@ -91,7 +91,7 @@ export default function PrivacyPolicyPage() {
               </div>
             </Link>
             <Link href="/auth/register" className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-surface-alt hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2">
-              <Store className="w-4 h-4 text-origen-pradera" />
+              <Store className="w-4 h-4 text-hoja-tinta" />
               <span className="hidden sm:inline">Nuevo productor</span>
               <span className="sm:hidden">Registro</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -131,7 +131,7 @@ export default function PrivacyPolicyPage() {
             {sections.map(section => (
               <div key={section.number} className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm">
                 <h2 className="text-base md:text-lg font-bold text-origen-bosque mb-3 pb-2 border-b border-border-subtle flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-origen-pradera text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-hoja-tinta text-xs font-bold flex items-center justify-center flex-shrink-0">
                     {section.number}
                   </span>
                   {section.title}

@@ -138,7 +138,7 @@ export function NotificationsPreferencesPanel() {
           >
             <CardHeader className="px-4 py-3 sm:px-6 border-b border-border-subtle bg-surface-alt">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold text-origen-bosque">
-                <GroupIcon className="w-4 h-4 text-origen-pradera" aria-hidden="true" />
+                <GroupIcon className="w-4 h-4 text-hoja-tinta" aria-hidden="true" />
                 {group.label}
               </CardTitle>
             </CardHeader>
@@ -190,7 +190,7 @@ export function NotificationsPreferencesPanel() {
 
       {/* Nota de seguridad */}
       <div className="flex items-start gap-2 rounded-[16px] border border-origen-pradera/20 bg-origen-pastel/40 px-4 py-3">
-        <Bell className="w-3.5 h-3.5 text-origen-pradera mt-0.5 flex-shrink-0" aria-hidden="true" />
+        <Bell className="w-3.5 h-3.5 text-hoja-tinta mt-0.5 flex-shrink-0" aria-hidden="true" />
         <p className="text-xs text-text-subtle">
           Los eventos de seguridad (cambio de contraseña, cuenta suspendida) siempre se
           envían por email independientemente de esta configuración.

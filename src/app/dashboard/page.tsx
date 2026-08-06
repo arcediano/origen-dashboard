@@ -49,7 +49,7 @@ function OnboardingProgressBanner({ progress }: { progress: number }) {
         <div className="flex items-start gap-3 sm:items-center sm:justify-between">
           <div className="flex min-w-0 flex-1 gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-origen-pradera/15 flex-shrink-0">
-              <Leaf className="h-5 w-5 text-origen-pradera" />
+              <Leaf className="h-5 w-5 text-hoja-tinta" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-origen-bosque leading-tight">Completa tu panel de venta</p>

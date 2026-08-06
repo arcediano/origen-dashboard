@@ -294,7 +294,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
 
         {zoneType === 'named' && (
           <p className="text-xs text-muted-foreground flex items-start gap-1">
-            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-origen-pradera" />
+            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-hoja-tinta" />
             <span>Asigna un nombre a la zona y los códigos postales que cubre. Ej: nombre <em>"Cuenca"</em>, CPs <em>16001, 160*</em></span>
           </p>
         )}
@@ -308,7 +308,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
 
         {(zoneType === 'postal' || zoneType === 'named') && !parseError && (
           <p className="text-xs text-muted-foreground flex items-start gap-1">
-            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-origen-pradera" />
+            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-hoja-tinta" />
             <span>
               <strong>Formatos CP:</strong> individual <code className="bg-surface px-1 rounded">28001</code>,
               comodín <code className="bg-surface px-1 rounded">280*</code>,
@@ -355,7 +355,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
                 className="flex items-center justify-between p-3 bg-origen-crema/20 rounded-lg border border-origen-pradera/30"
               >
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-origen-pradera" />
+                  <MapPin className="w-4 h-4 text-hoja-tinta" />
                   <div>
                     <p className="text-sm font-medium text-origen-bosque">{zone.label}</p>
                     <p className="text-xs text-muted-foreground">
@@ -550,7 +550,7 @@ export function EnhancedStep4Capacity({
       ==================================================================== */}
       {detectingZone && (
         <div className="flex items-center gap-3 p-4 bg-origen-crema/40 border border-border rounded-2xl animate-pulse">
-          <Compass className="w-5 h-5 text-origen-pradera flex-shrink-0" />
+          <Compass className="w-5 h-5 text-hoja-tinta flex-shrink-0" />
           <p className="text-sm text-muted-foreground">Detectando disponibilidad logística para tu zona...</p>
         </div>
       )}
@@ -626,7 +626,7 @@ export function EnhancedStep4Capacity({
 
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-            <Compass className="w-5 h-5 text-origen-pradera" />
+            <Compass className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
             <h2 className="text-base font-semibold text-origen-bosque">Rutas de Origen</h2>
@@ -681,7 +681,7 @@ export function EnhancedStep4Capacity({
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-                <Truck className="w-5 h-5 text-origen-pradera" />
+                <Truck className="w-5 h-5 text-hoja-tinta" />
               </div>
               <div>
                 <h2 className="text-base font-semibold text-origen-bosque">Tus métodos de envío</h2>
@@ -711,7 +711,7 @@ export function EnhancedStep4Capacity({
                 >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                     <div className="w-9 h-9 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-5 h-5 text-origen-pradera" />
+                      <Icon className="w-5 h-5 text-hoja-tinta" />
                     </div>
                     
                     <div className="flex-1">
@@ -814,7 +814,7 @@ export function EnhancedStep4Capacity({
         
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-            <MapPin className="w-5 h-5 text-origen-pradera" />
+            <MapPin className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
             <h2 className="text-base font-semibold text-origen-bosque">Zonas de entrega</h2>
@@ -860,7 +860,7 @@ export function EnhancedStep4Capacity({
         
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-            <Euro className="w-5 h-5 text-origen-pradera" />
+            <Euro className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
             <h2 className="text-base font-semibold text-origen-bosque">Pedido mínimo</h2>
@@ -898,7 +898,7 @@ export function EnhancedStep4Capacity({
         
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
-            <Recycle className="w-5 h-5 text-origen-pradera" />
+            <Recycle className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -938,7 +938,7 @@ export function EnhancedStep4Capacity({
               </div>
             </div>
             {data.sustainablePackaging && (
-              <CheckCircle2 className="w-6 h-6 text-origen-pradera" />
+              <CheckCircle2 className="w-6 h-6 text-hoja-tinta" />
             )}
           </button>
 
@@ -974,12 +974,12 @@ export function EnhancedStep4Capacity({
       ==================================================================== */}
       <div className="flex flex-wrap items-center gap-3 border-t border-border pt-2 text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5">
-          <Lock className="w-3.5 h-3.5 text-origen-pradera" />
+          <Lock className="w-3.5 h-3.5 text-hoja-tinta" />
           <span>Configuración guardada</span>
         </div>
         <span className="w-1 h-1 rounded-full bg-border" />
         <div className="flex items-center gap-1.5">
-          <Clock className="w-3.5 h-3.5 text-origen-pradera" />
+          <Clock className="w-3.5 h-3.5 text-hoja-tinta" />
           <span>Puedes modificarlo después</span>
         </div>
       </div>

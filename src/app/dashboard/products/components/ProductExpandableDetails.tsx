@@ -98,7 +98,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
       <div className="flex items-center justify-between pb-3 border-b-2 border-origen-pradera/30">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
-            <TrendingUp className="w-4 h-4 text-origen-pradera" />
+            <TrendingUp className="w-4 h-4 text-hoja-tinta" />
           </div>
           <div>
             <h4 className="text-base font-semibold text-origen-bosque">Informe de rendimiento</h4>
@@ -124,7 +124,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         {/* Ventas */}
         <div className="p-4 bg-gradient-to-br from-origen-pradera/5 to-transparent rounded-xl border border-origen-pradera/10">
           <div className="flex items-center gap-2 mb-2">
-            <ShoppingBag className="w-5 h-5 text-origen-pradera" />
+            <ShoppingBag className="w-5 h-5 text-hoja-tinta" />
             <span className="text-xs font-medium text-muted-foreground">Ventas</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{product.sales || 0}</p>
@@ -134,7 +134,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         {/* Ingresos */}
         <div className="p-4 bg-gradient-to-br from-origen-crema/40 to-transparent rounded-xl border border-origen-pradera/10">
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="w-5 h-5 text-origen-pradera" />
+            <DollarSign className="w-5 h-5 text-hoja-tinta" />
             <span className="text-xs font-medium text-muted-foreground">Ingresos</span>
           </div>
           <p className="text-2xl font-bold text-origen-bosque">{product.revenue?.toFixed(2) || 0}€</p>
@@ -168,7 +168,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
       <div className="p-5 bg-origen-nube rounded-xl border border-origen-pradera/20">
         <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
           <h5 className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-            <Eye className="w-4 h-4 text-origen-pradera" />
+            <Eye className="w-4 h-4 text-hoja-tinta" />
             Visitas a este producto
           </h5>
           <div className="inline-flex rounded-lg border border-border-subtle bg-surface p-0.5">
@@ -247,7 +247,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         {/* Información financiera */}
         <div className="p-5 bg-origen-nube rounded-xl border border-origen-pradera/20">
           <h5 className="text-sm font-medium text-origen-bosque mb-4 flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-origen-pradera" />
+            <DollarSign className="w-4 h-4 text-hoja-tinta" />
             Detalles financieros
           </h5>
           <div className="space-y-3">
@@ -283,7 +283,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         {/* Información de producto */}
         <div className="p-5 bg-origen-nube rounded-xl border border-origen-pradera/20">
           <h5 className="text-sm font-medium text-origen-bosque mb-4 flex items-center gap-2">
-            <Package className="w-4 h-4 text-origen-pradera" />
+            <Package className="w-4 h-4 text-hoja-tinta" />
             Detalles del producto
           </h5>
           <div className="space-y-3">
