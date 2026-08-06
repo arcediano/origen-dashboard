@@ -44,7 +44,7 @@ export default function ContactPage() {
               />
               <div className="flex flex-col">
                 <span className="text-lg md:text-xl font-bold text-origen-bosque leading-tight">Origen.</span>
-                <span className="text-[10px] md:text-xs text-origen-hoja -mt-1">Productores locales</span>
+                <span className="text-[10px] md:text-xs text-hoja-tinta -mt-1">Productores locales</span>
               </div>
             </Link>
 
@@ -75,7 +75,7 @@ export default function ContactPage() {
             </div>
             <h1 className="text-2xl font-bold text-origen-bosque">
               ¿En qué podemos{' '}
-              <span className="text-origen-pradera">ayudarte?</span>
+              <span className="text-hoja-tinta">ayudarte?</span>
             </h1>
             <p className="text-sm text-muted-foreground max-w-sm mx-auto">
               Nuestro equipo está disponible para resolver cualquier duda.

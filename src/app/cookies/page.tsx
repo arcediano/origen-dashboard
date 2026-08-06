@@ -11,7 +11,7 @@ const cookieTypes = [
   {
     type: 'Necesarias',
     badge: 'Siempre activas',
-    badgeColor: 'bg-origen-hoja/10 text-origen-hoja',
+    badgeColor: 'bg-origen-hoja/10 text-hoja-tinta',
     description: 'Esenciales para el funcionamiento básico del sitio. Sin ellas algunas funciones no estarían disponibles.',
     examples: [
       'Autenticación de usuarios y gestión de sesiones',
@@ -22,7 +22,7 @@ const cookieTypes = [
   {
     type: 'Analíticas',
     badge: 'Opcionales',
-    badgeColor: 'bg-origen-pradera/10 text-origen-pradera',
+    badgeColor: 'bg-origen-pradera/10 text-hoja-tinta',
     description: 'Nos ayudan a entender cómo interactúas con el sitio para poder mejorar la experiencia continuamente.',
     examples: [
       'Google Analytics — medición de visitas y comportamiento',
@@ -33,7 +33,7 @@ const cookieTypes = [
   {
     type: 'Funcionales',
     badge: 'Opcionales',
-    badgeColor: 'bg-origen-pradera/10 text-origen-pradera',
+    badgeColor: 'bg-origen-pradera/10 text-hoja-tinta',
     description: 'Permiten una experiencia más personalizada recordando tus preferencias entre visitas.',
     examples: [
       'Recordar tus preferencias de filtros y búsqueda',
@@ -91,7 +91,7 @@ export default function CookiePolicyPage() {
               />
               <div className="flex flex-col">
                 <span className="text-lg md:text-xl font-bold text-origen-bosque leading-tight">Origen.</span>
-                <span className="text-[10px] md:text-xs text-origen-hoja -mt-1">Productores locales</span>
+                <span className="text-[10px] md:text-xs text-hoja-tinta -mt-1">Productores locales</span>
               </div>
             </Link>
             <Link href="/auth/register" className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-surface-alt hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2">

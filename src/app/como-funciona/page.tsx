@@ -95,7 +95,7 @@ function StepCard({ step }: { step: typeof producerSteps[0] }) {
             <Icon className="w-5 h-5 md:w-7 md:h-7 text-origen-bosque" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-xs font-bold text-origen-pradera uppercase tracking-wider mb-1">Paso {step.step}</div>
+            <div className="text-xs font-bold text-hoja-tinta uppercase tracking-wider mb-1">Paso {step.step}</div>
             <h3 className="text-base md:text-xl font-bold text-origen-bosque">{step.title}</h3>
           </div>
         </div>
@@ -138,7 +138,7 @@ export default function HowItWorksPage() {
               />
               <div className="flex flex-col">
                 <span className="text-lg md:text-xl font-bold text-origen-bosque leading-tight">Origen.</span>
-                <span className="text-[10px] md:text-xs text-origen-hoja -mt-1">Productores locales</span>
+                <span className="text-[10px] md:text-xs text-hoja-tinta -mt-1">Productores locales</span>
               </div>
             </Link>
 

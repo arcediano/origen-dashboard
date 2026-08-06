@@ -38,7 +38,9 @@ export const CustomCheckbox: React.FC<CustomCheckboxProps> = ({
             className={cn(
               'h-5 w-5 rounded-md border-2 bg-surface-alt transition-all',
               'focus:outline-none focus:ring-2 focus:ring-origen-pradera/50 focus:ring-offset-2',
-              checked ? 'bg-origen-pradera border-origen-pradera' : 'border-border hover:border-origen-pradera',
+              // R23: pradera es un verde claro para bordes/fills de baja opacidad,
+              // no para una superficie sólida con icono blanco encima (1.9:1, falla).
+              checked ? 'bg-origen-pino border-origen-pino' : 'border-border hover:border-origen-pradera',
               error && 'border-destructive'
             )}
           >

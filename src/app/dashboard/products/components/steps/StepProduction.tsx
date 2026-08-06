@@ -525,7 +525,7 @@ export function StepProduction({
                         id={practice.id}
                         checked={productionInfo.practices?.includes(practice.id) || false}
                         onCheckedChange={() => handlePracticeToggle(practice.id)}
-                        className="data-[state=checked]:bg-origen-pradera mt-1"
+                        className="mt-1"
                       />
                       <div className="flex-1">
                         <label htmlFor={practice.id} className="flex items-center gap-2 cursor-pointer">

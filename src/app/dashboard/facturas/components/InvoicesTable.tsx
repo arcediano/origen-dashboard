@@ -44,7 +44,7 @@ export function InvoicesTable({
       accessor: (item) => (
         <Link
           href={`/dashboard/orders/${item.orderId}`}
-          className="text-sm text-origen-pradera hover:underline"
+          className="text-sm text-hoja-tinta hover:underline"
           onClick={(e) => e.stopPropagation()}
         >
           {item.orderNumber}

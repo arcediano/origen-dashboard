@@ -87,7 +87,7 @@ export function SuccessPublishModal({
               </div>
               <div className="p-3 bg-origen-crema/50 rounded-lg border border-origen-pradera/20">
                 <p className="text-xs text-muted-foreground">Estado</p>
-                <p className="text-sm font-semibold text-origen-pradera">Pendiente</p>
+                <p className="text-sm font-semibold text-feedback-warning-text">Pendiente</p>
               </div>
             </div>
           </div>

@@ -29,12 +29,12 @@ export function OrderItem({
   date
 }: OrderItemProps) {
   const statusConfig = {
-    pending: { 
-      label: 'Pendiente', 
-      color: 'bg-amber-500',
-      bg: 'bg-amber-50',
-      text: 'text-amber-700',
-      border: 'border-amber-200'
+    pending: {
+      label: 'Pendiente',
+      color: 'bg-feedback-warning',
+      bg: 'bg-feedback-warning-subtle',
+      text: 'text-feedback-warning-text',
+      border: 'border-feedback-warning/30'
     },
     processing: {
       label: 'Procesando',
@@ -50,19 +50,19 @@ export function OrderItem({
       text: 'text-origen-bosque',
       border: 'border-origen-bosque/20'
     },
-    delivered: { 
-      label: 'Entregado', 
-      color: 'bg-green-500',
-      bg: 'bg-green-50',
-      text: 'text-green-700',
-      border: 'border-green-200'
+    delivered: {
+      label: 'Entregado',
+      color: 'bg-feedback-success',
+      bg: 'bg-feedback-success-subtle',
+      text: 'text-feedback-success-text',
+      border: 'border-feedback-success/30'
     },
-    cancelled: { 
-      label: 'Cancelado', 
+    cancelled: {
+      label: 'Cancelado',
       color: 'bg-feedback-danger',
       bg: 'bg-feedback-danger-subtle',
-      text: 'text-red-700',
-      border: 'border-red-200'
+      text: 'text-feedback-danger-text',
+      border: 'border-feedback-danger-border'
     }
   };
 

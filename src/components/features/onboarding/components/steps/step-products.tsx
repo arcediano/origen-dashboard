@@ -718,9 +718,9 @@ export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
-            <span className="text-sm font-medium text-origen-hoja">Productos del catálogo inicial</span>
+            <span className="text-sm font-medium text-hoja-tinta">Productos del catálogo inicial</span>
           </div>
-          <span className="text-sm font-semibold text-origen-pradera">{data.products.length} / {MAX_PRODUCTS}</span>
+          <span className="text-sm font-semibold text-hoja-tinta">{data.products.length} / {MAX_PRODUCTS}</span>
         </div>
         <div className="h-2.5 bg-origen-crema rounded-full overflow-hidden">
           <div

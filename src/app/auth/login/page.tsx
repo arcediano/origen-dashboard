@@ -38,7 +38,7 @@ export default function LoginPage() {
             <img src="/origen-icon.svg" alt="" width={36} height={36} className="h-9 w-9" />
             <div className="flex flex-col leading-none">
               <span className="text-base font-bold text-origen-bosque tracking-tight">Origen.</span>
-              <span className="text-[10px] text-origen-hoja -mt-0.5">Productores locales</span>
+              <span className="text-[10px] text-hoja-tinta -mt-0.5">Productores locales</span>
             </div>
           </Link>
         </div>

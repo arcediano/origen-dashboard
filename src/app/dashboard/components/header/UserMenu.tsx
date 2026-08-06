@@ -231,7 +231,7 @@ export function UserMenu({
                   <Link
                     href="/dashboard/profile/certifications"
                     onClick={closeMenu}
-                    className="mt-2 flex items-center gap-1.5 text-[11px] text-origen-pradera hover:underline"
+                    className="mt-2 flex items-center gap-1.5 text-[11px] text-hoja-tinta hover:underline"
                   >
                     <AlertTriangle className="w-3 h-3" />
                     Revisar documentos requeridos →

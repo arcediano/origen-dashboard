@@ -249,9 +249,9 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
-            <span className="text-sm font-medium text-origen-hoja">Historia y valores</span>
+            <span className="text-sm font-medium text-hoja-tinta">Historia y valores</span>
           </div>
-          <span className="text-sm font-semibold text-origen-pradera">{completedSteps}/3</span>
+          <span className="text-sm font-semibold text-hoja-tinta">{completedSteps}/3</span>
         </div>
         <div className="h-2.5 bg-origen-crema rounded-full overflow-hidden">
           <div 

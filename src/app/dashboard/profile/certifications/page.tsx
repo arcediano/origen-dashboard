@@ -543,7 +543,7 @@ export default function CertificationsPage() {
                       <div className="w-full sm:w-48">
                         <Progress value={overallProgress} className="h-2.5" />
                       </div>
-                      <span className="text-lg font-bold text-origen-pradera">{overallProgress}%</span>
+                      <span className="text-lg font-bold text-hoja-tinta">{overallProgress}%</span>
                     </div>
                   </div>
                   <div>

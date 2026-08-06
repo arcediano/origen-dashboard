@@ -550,13 +550,13 @@ export default function OrderDetailPage() {
                     {order.shipping.address.phone && (
                       <InfoRow
                         label="Teléfono"
-                        value={<a href={`tel:${order.shipping.address.phone}`} className="text-origen-pradera hover:underline">{order.shipping.address.phone}</a>}
+                        value={<a href={`tel:${order.shipping.address.phone}`} className="text-hoja-tinta hover:underline">{order.shipping.address.phone}</a>}
                       />
                     )}
                     {order.shipping.address.email && (
                       <InfoRow
                         label="Email"
-                        value={<a href={`mailto:${order.shipping.address.email}`} className="text-origen-pradera hover:underline">{order.shipping.address.email}</a>}
+                        value={<a href={`mailto:${order.shipping.address.email}`} className="text-hoja-tinta hover:underline">{order.shipping.address.email}</a>}
                       />
                     )}
                   </div>
@@ -572,7 +572,7 @@ export default function OrderDetailPage() {
                         href={order.shipping.trackingUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-medium text-origen-pradera hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-hoja-tinta hover:underline"
                       >
                         Seguir envío <ExternalLink className="w-3 h-3" />
                       </a>

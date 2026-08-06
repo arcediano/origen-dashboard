@@ -725,7 +725,7 @@ export default function BusinessInfoPage() {
                       shape="rounded"
                       size="2xl"
                       className="w-20 h-20 sm:w-28 sm:h-28 border-4 border-white shadow-xl bg-white"
-                      fallback={<span className="text-2xl sm:text-3xl font-bold text-origen-pradera/50">{producerInitial}</span>}
+                      fallback={<span className="text-2xl sm:text-3xl font-bold text-hoja-tinta">{producerInitial}</span>}
                     />
                     {isUploadingLogo && (
                       <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-origen-oscuro/50 backdrop-blur-[1px]">
@@ -809,7 +809,7 @@ export default function BusinessInfoPage() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-origen-bosque">Completitud del perfil comercial</span>
-                      <span className="text-lg font-bold text-origen-pradera">{overallCompleteness.totalPercent}%</span>
+                      <span className="text-lg font-bold text-hoja-tinta">{overallCompleteness.totalPercent}%</span>
                     </div>
                     <div className="w-full h-2 bg-border rounded-full overflow-hidden">
                       <motion.div 

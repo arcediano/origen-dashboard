@@ -296,7 +296,7 @@ export function StepInventory({
               id="trackInventory"
               checked={formData?.trackInventory}
               onCheckedChange={(checked) => handleChange('trackInventory', checked)}
-              className="data-[state=checked]:bg-origen-pradera mt-1"
+              className="mt-1"
             />
             <div>
               <label htmlFor="trackInventory" className="text-sm font-medium text-origen-bosque cursor-pointer">
@@ -311,7 +311,7 @@ export function StepInventory({
               id="allowBackorders"
               checked={formData?.allowBackorders}
               onCheckedChange={(checked) => handleChange('allowBackorders', checked)}
-              className="data-[state=checked]:bg-origen-pradera mt-1"
+              className="mt-1"
             />
             <div>
               <label htmlFor="allowBackorders" className="text-sm font-medium text-origen-bosque cursor-pointer">

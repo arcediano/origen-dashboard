@@ -117,7 +117,7 @@ export function CreateProductProgress({
                 <span className={cn(
                   "text-[10px] sm:text-xs font-medium text-center max-w-[52px] sm:max-w-[60px] leading-tight line-clamp-2",
                   isActive && "text-origen-bosque",
-                  isCompleted && !isActive && "text-origen-pradera",
+                  isCompleted && !isActive && "text-hoja-tinta",
                   !isActive && !isCompleted && "text-text-subtle"
                 )}>
                   {step.label}

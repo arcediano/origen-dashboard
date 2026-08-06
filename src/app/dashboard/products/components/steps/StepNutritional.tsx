@@ -498,7 +498,6 @@ export function StepNutritional({
                                 : nutritionalInfo.allergens.filter((a: string) => a !== allergen);
                               handleChange('allergens', updated);
                             }}
-                            className="data-[state=checked]:bg-origen-pradera"
                           />
                           <Icon className="w-4 h-4 text-text-subtle" />
                           <span className="text-sm">{allergen}</span>
@@ -538,7 +537,6 @@ export function StepNutritional({
                                 : current.filter((a: string) => a !== allergen);
                               handleChange('mayContain', updated);
                             }}
-                            className="data-[state=checked]:bg-origen-pradera"
                           />
                           <Icon className="w-4 h-4 text-text-subtle" />
                           <span className="text-sm">{allergen}</span>
@@ -581,7 +579,6 @@ export function StepNutritional({
                         id={option.id}
                         checked={nutritionalInfo[option.id as keyof NutritionalInfo] as boolean}
                         onCheckedChange={(checked) => handleChange(option.id, checked)}
-                        className="data-[state=checked]:bg-origen-pradera"
                       />
                       <label htmlFor={option.id} className="flex items-center gap-2 flex-1 cursor-pointer">
                         <span className="text-origen-pradera">{option.icon}</span>

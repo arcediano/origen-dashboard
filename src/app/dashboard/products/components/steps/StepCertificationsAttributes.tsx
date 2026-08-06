@@ -1164,7 +1164,7 @@ export function StepCertificationsAttributes({
                         <div className="flex-1">
                           <p className="text-sm font-medium text-origen-bosque">{example.name}</p>
                           <p className="text-xs text-muted-foreground mt-0.5">{example.description}</p>
-                          <div className="mt-1.5 flex items-center gap-1 text-[10px] text-origen-pradera">
+                          <div className="mt-1.5 flex items-center gap-1 text-[10px] text-hoja-tinta">
                             <span>Ej: {example.example}{example.unit ? ` ${example.unit}` : ''}</span>
                           </div>
                         </div>
@@ -1185,7 +1185,7 @@ export function StepCertificationsAttributes({
                       </AnimatePresence>
                       {/* Chip "Usar" siempre visible en móvil */}
                       <div className="absolute top-2 right-2 sm:hidden">
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-origen-pradera/10 text-origen-pradera text-[10px] rounded-full font-medium border border-origen-pradera/20">
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-origen-pradera/10 text-hoja-tinta text-[10px] rounded-full font-medium border border-origen-pradera/20">
                           <Plus className="w-2.5 h-2.5" /> Usar
                         </span>
                       </div>
@@ -1311,7 +1311,7 @@ export function StepCertificationsAttributes({
                             id="attr-visible"
                             checked={newAttr.visible}
                             onCheckedChange={(checked) => setNewAttr({ ...newAttr, visible: checked as boolean })}
-                            className="data-[state=checked]:bg-origen-pradera mt-0.5"
+                            className="mt-0.5"
                           />
                           <div>
                             <label htmlFor="attr-visible" className="text-sm text-foreground cursor-pointer">
@@ -1424,9 +1424,9 @@ export function StepCertificationsAttributes({
           </div>
           <p className="text-xs text-muted-foreground">
             Los productos con certificaciones verificadas tienen un{' '}
-            <span className="font-bold text-origen-pradera">35% más</span> de clics.
+            <span className="font-bold text-hoja-tinta">35% más</span> de clics.
             Los atributos detallados aumentan la confianza del cliente en un{' '}
-            <span className="font-bold text-origen-pradera">28%</span>.
+            <span className="font-bold text-hoja-tinta">28%</span>.
           </p>
         </div>
       </Card>

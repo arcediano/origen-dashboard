@@ -306,7 +306,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                       <>
                         Ya existe una solicitud pendiente de revisión con este email.
                         Si tienes alguna duda, contacta con nosotros desde la{' '}
-                        <a href="/contacto" className="font-semibold text-origen-hoja hover:underline">
+                        <a href="/contacto" className="font-semibold text-hoja-tinta hover:underline">
                           sección de contacto
                         </a>.
                       </>
@@ -314,7 +314,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                       <>
                         Ha ocurrido un error al enviar tu solicitud. Por favor, ponte en contacto
                         con nuestro equipo de soporte desde la{' '}
-                        <a href="/contacto" className="font-semibold text-origen-hoja hover:underline">
+                        <a href="/contacto" className="font-semibold text-hoja-tinta hover:underline">
                           sección de contacto
                         </a>
                         {' '}de nuestra página web.
@@ -324,7 +324,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 </div>
                 <a
                   href="/contacto"
-                  className="inline-flex w-full items-center justify-center py-2.5 rounded-xl border border-origen-hoja/30 bg-origen-hoja/10 text-sm font-semibold text-origen-hoja hover:bg-origen-hoja/20 hover:border-origen-hoja/50 active:scale-[.98] transition-all"
+                  className="inline-flex w-full items-center justify-center py-2.5 rounded-xl border border-origen-hoja/30 bg-origen-hoja/10 text-sm font-semibold text-hoja-tinta hover:bg-origen-hoja/20 hover:border-origen-hoja/50 active:scale-[.98] transition-all"
                 >
                   Contactar soporte
                 </a>
@@ -559,7 +559,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                   {...register('whyOrigin')}
                 />
                 {textareaValid && (
-                  <div className="flex items-center gap-2 text-sm text-origen-hoja bg-origen-crema/50 p-3 rounded-lg border border-origen-hoja/30">
+                  <div className="flex items-center gap-2 text-sm text-hoja-tinta bg-origen-crema/50 p-3 rounded-lg border border-origen-hoja/30">
                     <CheckCircle2 className="w-4 h-4" />
                     <span className="font-medium">¡Gracias por contarnos tu historia!</span>
                   </div>

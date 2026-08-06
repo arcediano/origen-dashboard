@@ -415,7 +415,7 @@ export default function EnviosPage() {
                 <span>
                   Este valor se calcula automáticamente a partir de tu código postal de producción. Si necesitas
                   revisarlo,{' '}
-                  <Link href="/dashboard/profile/business" className="text-origen-pradera underline underline-offset-2 hover:text-origen-bosque">
+                  <Link href="/dashboard/profile/business" className="text-hoja-tinta underline underline-offset-2 hover:text-origen-bosque">
                     actualiza tu dirección en Mi negocio
                   </Link>
                   .

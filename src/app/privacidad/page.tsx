@@ -87,7 +87,7 @@ export default function PrivacyPolicyPage() {
               />
               <div className="flex flex-col">
                 <span className="text-lg md:text-xl font-bold text-origen-bosque leading-tight">Origen.</span>
-                <span className="text-[10px] md:text-xs text-origen-hoja -mt-1">Productores locales</span>
+                <span className="text-[10px] md:text-xs text-hoja-tinta -mt-1">Productores locales</span>
               </div>
             </Link>
             <Link href="/auth/register" className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-surface-alt hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2">

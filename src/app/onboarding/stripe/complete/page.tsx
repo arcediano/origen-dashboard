@@ -108,7 +108,7 @@ function StripeCompleteContent() {
 
       {state === 'success' && (
         <>
-          <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto" />
+          <CheckCircle2 className="w-14 h-14 text-feedback-success mx-auto" />
           <h1 className="text-xl font-bold text-origen-bosque">Formulario enviado</h1>
           <p className="text-sm text-muted-foreground">
             Estamos verificando tu cuenta con Stripe. Esto puede tardar unos minutos.

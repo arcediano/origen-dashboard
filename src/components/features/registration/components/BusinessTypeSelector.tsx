@@ -43,7 +43,9 @@ export const BusinessTypeSelector: React.FC<BusinessTypeSelectorProps> = ({ valu
           >
             {isSelected && (
               <div className="absolute top-2 right-2">
-                <div className="w-6 h-6 rounded-full bg-origen-pradera flex items-center justify-center shadow-sm">
+                {/* R23: pradera es fill de baja opacidad, no superficie sólida
+                    con icono blanco (1.9:1, falla WCAG) — usa pino (5.4:1). */}
+                <div className="w-6 h-6 rounded-full bg-origen-pino flex items-center justify-center shadow-sm">
                   <Check className="w-3.5 h-3.5 text-white" />
                 </div>
               </div>

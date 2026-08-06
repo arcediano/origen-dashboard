@@ -34,8 +34,8 @@ export function ProductItem({
   const stockStatus = stock > 10 ? 'normal' : stock > 0 ? 'low' : 'out';
   
   const stockConfig = {
-    normal: { color: 'bg-green-500', label: 'Stock OK' },
-    low: { color: 'bg-amber-500', label: 'Stock bajo' },
+    normal: { color: 'bg-feedback-success', label: 'Stock OK' },
+    low: { color: 'bg-feedback-warning', label: 'Stock bajo' },
     out: { color: 'bg-feedback-danger', label: 'Sin stock' }
   };
 
@@ -75,7 +75,7 @@ export function ProductItem({
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 sm:gap-4">
-                <span className="font-semibold text-sm sm:text-xl text-origen-hoja">
+                <span className="font-semibold text-sm sm:text-xl text-hoja-tinta">
                   {price.toFixed(2)}€
                 </span>
                 
@@ -99,9 +99,9 @@ export function ProductItem({
                 {trend !== undefined && (
                   <span className={cn(
                     "text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full",
-                    trend > 0 
-                      ? "bg-green-50 text-green-700 border border-green-200" 
-                      : "bg-feedback-danger-subtle text-red-700 border border-red-200"
+                    trend > 0
+                      ? "bg-feedback-success-subtle text-feedback-success-text border border-feedback-success/30"
+                      : "bg-feedback-danger-subtle text-feedback-danger-text border border-feedback-danger-border"
                   )}>
                     {trend > 0 ? '+' : ''}{trend}%
                   </span>

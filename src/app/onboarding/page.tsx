@@ -1028,13 +1028,13 @@ export default function OnboardingPage() {
                           
                           {/* Indicador de estado */}
                           {isActive && (
-                            <span className="text-[10px] font-medium text-origen-pradera flex items-center gap-1">
+                            <span className="text-[10px] font-medium text-hoja-tinta flex items-center gap-1">
                               <span className="w-1.5 h-1.5 rounded-full bg-origen-pradera animate-pulse" />
                               En progreso
                             </span>
                           )}
                           {isCompleted && (
-                            <span className="text-[10px] font-medium text-origen-hoja flex items-center gap-1">
+                            <span className="text-[10px] font-medium text-hoja-tinta flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
                               Listo
                             </span>

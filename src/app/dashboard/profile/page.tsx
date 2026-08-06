@@ -148,7 +148,7 @@ export default function ProfilePage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-sm font-medium text-origen-bosque">Completitud del perfil</p>
-              <span className="text-sm font-bold text-origen-pradera">{completion}%</span>
+              <span className="text-sm font-bold text-hoja-tinta">{completion}%</span>
             </div>
             <Progress value={completion} className="h-1.5" />
             <p className="text-xs text-text-subtle mt-1">{pendingItems} elementos por completar</p>

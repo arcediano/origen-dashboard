@@ -248,7 +248,7 @@ export function OrdersTable({
               href={order.shipping.trackingUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-origen-pradera hover:underline inline-flex items-center gap-1 mt-1"
+              className="text-xs text-hoja-tinta hover:underline inline-flex items-center gap-1 mt-1"
             >
               Ver seguimiento
               <ChevronRight className="w-3 h-3" />

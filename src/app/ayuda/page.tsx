@@ -116,7 +116,7 @@ export default function HelpCenterPage() {
               />
               <div className="flex flex-col">
                 <span className="text-lg md:text-xl font-bold text-origen-bosque leading-tight">Origen.</span>
-                <span className="text-[10px] md:text-xs text-origen-hoja -mt-1">Productores locales</span>
+                <span className="text-[10px] md:text-xs text-hoja-tinta -mt-1">Productores locales</span>
               </div>
             </Link>
 

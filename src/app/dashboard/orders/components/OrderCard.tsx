@@ -204,7 +204,7 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
         </span>
         <PaymentBadge status={order.payment.status} />
         {order.invoice?.hasPdf && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-origen-pradera font-medium">
+          <span className="inline-flex items-center gap-1 text-[10px] text-hoja-tinta font-medium">
             <FileText className="w-2.5 h-2.5" />
             Factura
           </span>

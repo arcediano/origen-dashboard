@@ -118,9 +118,9 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
-            <span className="text-sm font-medium text-origen-hoja">Perfil visual</span>
+            <span className="text-sm font-medium text-hoja-tinta">Perfil visual</span>
           </div>
-          <span className="text-sm font-semibold text-origen-pradera">{completedSteps}/{totalSteps}</span>
+          <span className="text-sm font-semibold text-hoja-tinta">{completedSteps}/{totalSteps}</span>
         </div>
         <div className="h-2.5 bg-origen-crema rounded-full overflow-hidden">
           <div 

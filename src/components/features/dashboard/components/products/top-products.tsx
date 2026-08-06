@@ -31,7 +31,7 @@ export function TopProducts({ products, isLoading = false, className }: TopProdu
         </h3>
         <Link
           href="/dashboard/products"
-          className="text-sm text-origen-pradera hover:text-origen-hoja flex items-center gap-1"
+          className="text-sm text-hoja-tinta hover:text-origen-bosque flex items-center gap-1"
         >
           Ver todos <ChevronRight className="w-4 h-4" />
         </Link>

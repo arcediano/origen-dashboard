@@ -39,19 +39,19 @@ function StatusBadge({ status }: StatusBadgeProps) {
     active: {
       label: 'Cuenta activa',
       className:
-        'bg-green-50 text-green-700 border border-green-200',
+        'bg-feedback-success-subtle text-feedback-success-text border border-feedback-success/30',
       Icon: CheckCircle2,
     },
     pending: {
       label: 'Verificación pendiente',
       className:
-        'bg-amber-50 text-amber-700 border border-amber-200',
+        'bg-feedback-warning-subtle text-feedback-warning-text border border-feedback-warning/30',
       Icon: Clock,
     },
     suspended: {
       label: 'Cuenta suspendida',
       className:
-        'bg-feedback-danger-subtle text-red-700 border border-red-200',
+        'bg-feedback-danger-subtle text-feedback-danger-text border border-feedback-danger-border',
       Icon: XCircle,
     },
   };
