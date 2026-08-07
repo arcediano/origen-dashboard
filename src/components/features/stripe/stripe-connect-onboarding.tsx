@@ -44,6 +44,23 @@ export function StripeConnectOnboarding({
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string>('');
 
+  // Copia local del accountId real, porque fetchClientSecret puede crear una
+  // cuenta Stripe nueva (productor sin stripeAccountId todavía) y ese valor
+  // nunca llega de vuelta a través de la prop `stripeAccountId` del padre --
+  // sin esto, handleExit seguía viendo undefined y no guardaba nada al salir
+  // (bug detectado por auditor-seguridad tras el hotfix que quitó la guarda
+  // de render: el crash desaparecía pero el fallo se movía, en silencio, al
+  // punto de salida del flujo).
+  const [resolvedAccountId, setResolvedAccountId] = React.useState<string | undefined | null>(
+    stripeAccountId,
+  );
+
+  React.useEffect(() => {
+    if (stripeAccountId) {
+      setResolvedAccountId(stripeAccountId);
+    }
+  }, [stripeAccountId]);
+
   /**
    * Fetch del clientSecret desde el endpoint de account-session.
    */
@@ -53,7 +70,7 @@ export function StripeConnectOnboarding({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          accountId: stripeAccountId ?? undefined,
+          accountId: resolvedAccountId ?? undefined,
           email: onboardingContext.email,
           firstName: onboardingContext.firstName,
           lastName: onboardingContext.lastName,
@@ -76,6 +93,12 @@ export function StripeConnectOnboarding({
         throw new Error('No client secret returned');
       }
 
+      // Capturar el accountId real (nuevo o reutilizado) para que handleExit
+      // pueda usarlo -- sin esto, un productor nuevo nunca queda vinculado.
+      if (data.data.accountId) {
+        setResolvedAccountId(data.data.accountId);
+      }
+
       // IMPORTANTE: No loguear el clientSecret
       return data.data.clientSecret;
     } catch (err) {
@@ -86,7 +109,7 @@ export function StripeConnectOnboarding({
       }
       throw err;
     }
-  }, [stripeAccountId, onboardingContext, source, onError]);
+  }, [resolvedAccountId, onboardingContext, source, onError]);
 
   /**
    * Se dispara cuando el componente embebido carga.
@@ -122,12 +145,15 @@ export function StripeConnectOnboarding({
    * nunca del hecho de que onExit se haya disparado.
    */
   const handleExit = React.useCallback(async () => {
-    if (!stripeAccountId) return;
+    // Usa resolvedAccountId (real, capturado en fetchClientSecret), no la
+    // prop stripeAccountId -- para un productor nuevo esa prop nunca se
+    // actualiza durante esta sesión de montaje.
+    if (!resolvedAccountId) return;
 
     try {
       // Paso 1: Leer el estado real de la cuenta desde Stripe (server-side check)
       const statusResponse = await fetch(
-        `${API_BASE_URL}/api/stripe/status?accountId=${encodeURIComponent(stripeAccountId)}`,
+        `${API_BASE_URL}/api/stripe/status?accountId=${encodeURIComponent(resolvedAccountId)}`,
         { method: 'GET' },
       );
 
@@ -144,7 +170,7 @@ export function StripeConnectOnboarding({
         // (ver tipo EnhancedStep6StripeData - stripeConnected es opcional)
         if (statusData.data?.detailsSubmitted) {
           await saveStep6({
-            stripeAccountId,
+            stripeAccountId: resolvedAccountId,
             acceptTerms: true,
             // IMPORTANTE: NO incluir stripeConnected aquí
             // La fuente de verdad es el webhook que escribió detailsSubmitted
@@ -160,7 +186,7 @@ export function StripeConnectOnboarding({
     // El padre debe llamar al endpoint de readiness/producersOnboarding/data
     // para obtener los datos REALES que el webhook puso en BD
     onVerified();
-  }, [stripeAccountId, onVerified]);
+  }, [resolvedAccountId, onVerified]);
 
   // Nota: NO se exige stripeAccountId aquí -- un productor nuevo llega sin
   // cuenta todavía. fetchClientSecret envía accountId undefined en ese caso,
