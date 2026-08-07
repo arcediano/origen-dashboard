@@ -85,4 +85,5 @@ export interface ReviewFilters {
   verifiedOnly?: boolean;
   hasResponse?: boolean;
   hasImages?: boolean;
+  product?: string; // Filtro por ID de producto (desde query param ?product=...)
 }

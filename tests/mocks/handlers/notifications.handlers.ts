@@ -82,17 +82,29 @@ export const notificationsHandlers = [
 ];
 
 // Override handler for the empty-notifications scenario
-export const notificationsEmptyHandler = http.get(`${BASE}/notifications`, () => {
-  return HttpResponse.json({
-    data: [],
-    meta: { page: 1, limit: 50, total: 0, totalPages: 0, unread: 0 },
-  });
-});
+export const notificationsEmptyHandler = [
+  http.get(`${BASE}/notifications`, () => {
+    return HttpResponse.json({
+      data: [],
+      meta: { page: 1, limit: 50, total: 0, totalPages: 0, unread: 0 },
+    });
+  }),
+  http.get(`${BASE}/notifications/unread-count`, () => {
+    return HttpResponse.json({
+      data: { count: 0 },
+    });
+  }),
+];
 
 // Override handler for a server error
-export const notificationsErrorHandler = http.get(`${BASE}/notifications`, () => {
-  return HttpResponse.json({ message: 'Internal server error' }, { status: 500 });
-});
+export const notificationsErrorHandler = [
+  http.get(`${BASE}/notifications`, () => {
+    return HttpResponse.json({ message: 'Internal server error' }, { status: 500 });
+  }),
+  http.get(`${BASE}/notifications/unread-count`, () => {
+    return HttpResponse.json({ message: 'Internal server error' }, { status: 500 });
+  }),
+];
 
 // ─── Preferences handlers ──────────────────────────────────────────────────
 

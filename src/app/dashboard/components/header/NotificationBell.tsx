@@ -14,7 +14,7 @@ import { Button, NotificationCardSkeleton } from '@arcediano/ux-library';
 import { AlertCircle, Bell, Settings, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NotificationItem } from './NotificationItem';
-import { fetchUnreadNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '@/lib/api/notifications';
+import { fetchUnreadNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount } from '@/lib/api/notifications';
 import type { Notification } from '@/types/notification';
 
 /** Intervalo de polling cuando la pestaña está visible (ms) */
@@ -28,6 +28,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(!initialNotifications.length);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,14 +52,22 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
   const silentPoll = useCallback(async () => {
     if (document.visibilityState !== 'visible') return;
     try {
-      const response = await fetchUnreadNotifications();
-      if (response.data) {
-        const incoming = response.data;
+      const [notificationsResponse, countResponse] = await Promise.all([
+        fetchUnreadNotifications(),
+        getUnreadCount(),
+      ]);
+
+      if (notificationsResponse.data) {
+        const incoming = notificationsResponse.data;
         setNotifications(incoming);
         if (incoming.length > prevCountRef.current) {
           setHasNew(true);
         }
         prevCountRef.current = incoming.length;
+      }
+
+      if (countResponse.data) {
+        setUnreadCount(countResponse.data.count);
       }
     } catch {
       // polling silencioso — no mostrar error
@@ -104,11 +113,19 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetchUnreadNotifications();
-      if (response.data) {
-        setNotifications(response.data);
-      } else if (response.error) {
-        setError(response.error);
+      const [notificationsResponse, countResponse] = await Promise.all([
+        fetchUnreadNotifications(),
+        getUnreadCount(),
+      ]);
+
+      if (notificationsResponse.data) {
+        setNotifications(notificationsResponse.data);
+      } else if (notificationsResponse.error) {
+        setError(notificationsResponse.error);
+      }
+
+      if (countResponse.data) {
+        setUnreadCount(countResponse.data.count);
       }
     } catch (err) {
       console.error('Error cargando notificaciones:', err);
@@ -143,7 +160,6 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
     };
   }, [isOpen]);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
   const previewNotifications = notifications.slice(0, 5);
 
   const groupedPreviewNotifications = (() => {
@@ -162,6 +178,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
   const handleMarkAsRead = useCallback(async (id: string) => {
     // Optimistic: remove from list immediately (all fetched notifications are unread)
     setNotifications(prev => prev.filter(n => n.id !== id));
+    setUnreadCount(prev => Math.max(0, prev - 1));
     try {
       await markNotificationAsRead(id);
     } catch (error) {
@@ -175,8 +192,10 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
     if (!unreadCount || isUpdating) return;
     // Snapshot for rollback in case of failure
     const snapshot = notifications.slice();
+    const snapshotCount = unreadCount;
     setIsUpdating(true);
     setNotifications([]);
+    setUnreadCount(0);
     setIsOpen(false);
     try {
       await markAllNotificationsAsRead();
@@ -184,6 +203,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
       console.error('Error marcando todas como leídas:', error);
       // Rollback optimistic update
       setNotifications(snapshot);
+      setUnreadCount(snapshotCount);
     } finally {
       setIsUpdating(false);
     }

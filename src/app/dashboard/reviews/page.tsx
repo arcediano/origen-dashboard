@@ -13,6 +13,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { MessageSquare } from 'lucide-react';
 
@@ -48,6 +49,7 @@ const containerVariants: Variants = {
 // ============================================================================
 
 export default function ReviewsPage() {
+  const searchParams = useSearchParams();
   const prefersReducedMotion = useReducedMotion() ?? false;
 
   const itemVariants: Variants = {
@@ -72,6 +74,14 @@ export default function ReviewsPage() {
   const [totalReviews, setTotalReviews]   = useState(0);
 
   const isFirstLoad = React.useRef(true);
+
+  // ── Aplica filtro de producto desde query param al primer render ──────────────
+  useEffect(() => {
+    const productId = searchParams.get('product');
+    if (productId && isFirstLoad.current) {
+      setFilters((prev) => ({ ...prev, product: productId }));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (isFirstLoad.current) {

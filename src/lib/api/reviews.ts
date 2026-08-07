@@ -152,6 +152,7 @@ export async function fetchReviews(params?: {
         status: filters?.status?.toUpperCase(),
         rating: filters?.rating,
         search: filters?.search,
+        product: filters?.product,
         verifiedOnly: filters?.verifiedOnly ? 'true' : undefined,
         hasResponse: filters?.hasResponse ? 'true' : undefined,
         hasImages: filters?.hasImages ? 'true' : undefined,

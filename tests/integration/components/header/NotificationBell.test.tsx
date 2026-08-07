@@ -123,7 +123,7 @@ describe('NotificationBell', () => {
   });
 
   it('muestra estado vacío cuando la API no devuelve notificaciones', async () => {
-    server.use(notificationsEmptyHandler);
+    server.use(...notificationsEmptyHandler);
 
     render(<NotificationBell />);
 
@@ -135,7 +135,7 @@ describe('NotificationBell', () => {
   });
 
   it('muestra estado de error con botón de reintento cuando la API falla', async () => {
-    server.use(notificationsErrorHandler);
+    server.use(...notificationsErrorHandler);
 
     render(<NotificationBell />);
 
