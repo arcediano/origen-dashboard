@@ -85,7 +85,7 @@ export default function LegalNoticePage() {
                 className="w-10 h-10 md:w-11 md:h-11 group-hover:scale-105 transition-transform"
               />
               <div className="flex flex-col">
-                <span className="text-lg md:text-xl font-bold text-origen-bosque leading-tight">Origen.</span>
+                <span className="text-lg md:text-xl font-semibold text-origen-bosque leading-tight">Origen.</span>
                 <span className="text-[10px] md:text-xs text-hoja-tinta -mt-1">Productores locales</span>
               </div>
             </Link>

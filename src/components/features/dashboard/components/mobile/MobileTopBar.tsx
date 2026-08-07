@@ -13,7 +13,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MobileTopBar as UXMobileTopBar, Button, NotificationCardSkeleton } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
-import { AlertCircle, Bell, ChevronLeft, Leaf, Settings, Sparkles } from 'lucide-react';
+import { AlertCircle, Bell, ChevronLeft, Settings, Sparkles } from 'lucide-react';
 import { getDashboardPageTitle, isRootMobileTab } from '@/constants/sidebar';
 import { fetchUnreadNotifications, markAllNotificationsAsRead, markNotificationAsRead, getUnreadCount } from '@/lib/api/notifications';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
@@ -151,12 +151,10 @@ export function MobileTopBar() {
               transition={{ duration: 0.2, ease: 'easeOut' }}
               className="flex items-center gap-2"
             >
-              <div className="w-7 h-7 rounded-[10px] flex items-center justify-center bg-gradient-to-br from-origen-bosque to-origen-pino shadow-sm flex-shrink-0">
-                <Leaf className="w-3.5 h-3.5 text-white" />
-              </div>
+              <img src="/origen-icon.svg" alt="" width={28} height={28} className="h-7 w-7 flex-shrink-0" />
               <div className="min-w-0">
-                <span className="block text-[17px] font-bold text-origen-bosque tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
-                  origen.
+                <span className="block text-[17px] font-semibold text-origen-bosque tracking-tight">
+                  Origen.
                 </span>
                 <span className="block text-[11px] font-medium text-muted-foreground truncate">
                   Panel del productor
