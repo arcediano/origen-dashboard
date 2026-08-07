@@ -42,7 +42,7 @@ export function MobileNavBar({
   if (currentStep >= 1 && !isLastStep) {
     secondaryActions.push({
       id: 'skip',
-      label: 'Más tarde',
+      label: isSubmitting ? 'Guardando...' : 'Guardar y salir',
       onClick: onSkip,
       disabled: isSubmitting,
       variant: 'ghost' as const,

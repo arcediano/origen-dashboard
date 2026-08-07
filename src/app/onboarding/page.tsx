@@ -784,8 +784,22 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleSkipOnboarding = () => {
-    router.push('/dashboard');
+  const handleSkipOnboarding = async () => {
+    setIsSubmitting(true);
+    setSaveError(null);
+    try {
+      await saveCurrentStep(currentStep);
+      router.push('/dashboard');
+    } catch (error: unknown) {
+      console.error('[Onboarding] handleSkipOnboarding error:', error);
+      if (error instanceof GatewayError && error.status === 401) {
+        redirectToLoginOnExpiredSession();
+        return;
+      }
+      setSaveError(getUserFriendlyError(error, 'Error al guardar. Inténtalo de nuevo.'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // ========================================================================
@@ -1192,7 +1206,14 @@ export default function OnboardingPage() {
                     disabled={isSubmitting}
                     className="h-10 px-4 text-muted-foreground text-xs"
                   >
-                    Completar más tarde
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-3 h-3 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin mr-2" />
+                        Guardando...
+                      </>
+                    ) : (
+                      'Guardar y salir'
+                    )}
                   </Button>
                 )}
 
