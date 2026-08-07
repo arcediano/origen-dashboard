@@ -8,7 +8,8 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Bell } from 'lucide-react';
+import Link from 'next/link';
+import { Bell, Settings } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import {
   Card,
@@ -28,6 +29,7 @@ import {
   PageError,
   useIsMobile,
   Button,
+  NotificationCardSkeleton,
   appShellPaddingClass,
   NAV_HEIGHT_MOBILE_DASHBOARD,
   type ActiveFilterChip,
@@ -456,33 +458,45 @@ export default function NotificationsPage() {
                   <p className="text-sm text-muted-foreground">
                     No leídos: <span className="font-semibold text-origen-bosque">{unreadCount}</span>
                   </p>
-                  {unreadCount > 0 && (
+                  <div className="flex items-center gap-2">
+                    {unreadCount > 0 && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleMarkAllAsRead}
+                        disabled={isMarkingAll}
+                      >
+                        Marcar todas como leídas
+                      </Button>
+                    )}
+                    {/* Icono + label desde sm; icono solo (con aria-label) en móvil,
+                        para no perder el acceso a Preferencias en la bandeja —
+                        antes quedaba oculto por completo por debajo de 640px. */}
                     <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleMarkAllAsRead}
-                      disabled={isMarkingAll}
+                      asChild
+                      variant="ghost"
+                      size="icon"
+                      className="sm:hidden text-hoja-tinta hover:text-origen-bosque"
                     >
-                      Marcar todas como leídas
+                      <Link href="/dashboard/configuracion" aria-label="Preferencias de notificaciones" title="Preferencias de notificaciones">
+                        <Settings className="w-4 h-4" />
+                      </Link>
                     </Button>
-                  )}
+                    <Link
+                      href="/dashboard/configuracion"
+                      className="hidden sm:inline-flex items-center gap-1.5 text-sm text-hoja-tinta hover:underline transition-colors font-medium whitespace-nowrap"
+                    >
+                      <Settings className="w-3.5 h-3.5" aria-hidden />
+                      Preferencias
+                    </Link>
+                  </div>
                 </div>
               </div>
 
               {isInboxLoading ? (
-                <div aria-busy="true" aria-live="polite">
+                <div aria-busy="true" aria-live="polite" className="divide-y divide-border-subtle">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="flex items-start gap-3 px-4 py-4 sm:px-6 border-b border-border-subtle last:border-b-0 animate-pulse">
-                      <div className="h-9 w-9 rounded-full bg-border flex-shrink-0" />
-                      <div className="flex-1 space-y-2 min-w-0">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="h-3.5 w-2/5 rounded bg-border" />
-                          <div className="h-3 w-16 rounded bg-border flex-shrink-0" />
-                        </div>
-                        <div className="h-3 w-3/4 rounded bg-border" />
-                        <div className="h-3 w-1/2 rounded bg-border" />
-                      </div>
-                    </div>
+                    <NotificationCardSkeleton key={i} />
                   ))}
                 </div>
               ) : filteredNotifications.length === 0 ? (

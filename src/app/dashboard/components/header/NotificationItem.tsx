@@ -25,12 +25,21 @@ interface NotificationItemProps {
   notification: Notification;
   onMarkAsRead?: (id: string) => void;
   onClose?: () => void;
+  /**
+   * Vista previa densa para dropdown/panel de campana (avatar y tipografía
+   * más pequeños, sin badges de categoría/prioridad, sin botón explícito de
+   * "marcar como leída" — el clic en toda la tarjeta ya marca y navega).
+   * La bandeja completa (`/dashboard/notifications`) no la usa: ahí cada
+   * notificación necesita su detalle completo y el control explícito.
+   */
+  compact?: boolean;
 }
 
 export function NotificationItem({
   notification,
   onMarkAsRead,
   onClose,
+  compact = false,
 }: NotificationItemProps) {
   const router = useRouter();
   const safeUrl = getSafeActionUrl(notification.action?.url ?? notification.actionUrl);
@@ -72,8 +81,9 @@ export function NotificationItem({
     >
       <NotificationCard
         notification={notification}
-        onMarkAsRead={!safeUrl ? onMarkAsRead : undefined}
+        onMarkAsRead={onMarkAsRead}
         onClose={onClose}
+        compact={compact}
       />
     </div>
   );

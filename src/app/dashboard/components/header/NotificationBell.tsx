@@ -10,8 +10,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Button } from '@arcediano/ux-library';
-import { AlertCircle, Bell, Sparkles } from 'lucide-react';
+import { Button, NotificationCardSkeleton } from '@arcediano/ux-library';
+import { AlertCircle, Bell, Settings, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NotificationItem } from './NotificationItem';
 import { fetchUnreadNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '@/lib/api/notifications';
@@ -258,7 +258,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-alt rounded-xl shadow-xl border border-border-subtle overflow-hidden z-50"
+            className="absolute right-0 mt-2 w-[min(20rem,calc(100vw-2rem))] sm:w-96 bg-surface-alt rounded-xl shadow-xl border border-border-subtle overflow-hidden z-50"
             onClick={(e) => e.stopPropagation()}
             id="notification-bell-panel"
             role="dialog"
@@ -274,31 +274,49 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                   </div>
                   <h3 className="text-sm font-semibold text-origen-bosque">Notificaciones</h3>
                 </div>
-                {unreadCount > 0 && (
-                  <button
-                    onClick={handleMarkAllAsRead}
-                    disabled={isUpdating}
-                    type="button"
-                    aria-label="Marcar todas las notificaciones como leídas"
-                    className="text-xs text-hoja-tinta hover:underline transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                <div className="flex items-center gap-1">
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={handleMarkAllAsRead}
+                      disabled={isUpdating}
+                      type="button"
+                      aria-label="Marcar todas las notificaciones como leídas"
+                      className="text-xs text-hoja-tinta hover:underline transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Marcar todas
+                    </button>
+                  )}
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="icon-sm"
+                    className="text-text-subtle hover:text-origen-bosque"
                   >
-                    Marcar todas
-                  </button>
-                )}
+                    <Link
+                      href="/dashboard/configuracion"
+                      onClick={close}
+                      aria-label="Preferencias de notificaciones"
+                      title="Preferencias de notificaciones"
+                    >
+                      <Settings className="w-3.5 h-3.5" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
 
             {/* Lista */}
             <div className="max-h-[32rem] overflow-y-auto">
               {isLoading ? (
-                <div className="px-4 py-8 text-center">
-                  <div className="w-12 h-12 rounded-full bg-origen-crema mx-auto mb-3 animate-pulse" />
-                  <p className="text-sm text-text-subtle">Cargando...</p>
+                <div role="status" aria-live="polite" aria-label="Cargando notificaciones">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <NotificationCardSkeleton key={i} compact />
+                  ))}
                 </div>
               ) : error ? (
                 <div className="px-4 py-8 text-center">
-                  <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3">
-                    <AlertCircle className="w-8 h-8 text-red-400" />
+                  <div className="w-16 h-16 rounded-full bg-feedback-danger-subtle flex items-center justify-center mx-auto mb-3">
+                    <AlertCircle className="w-8 h-8 text-feedback-danger" />
                   </div>
                   <p className="text-sm text-muted-foreground">No se pudieron cargar</p>
                   <p className="text-xs text-text-subtle mt-1">las notificaciones</p>
@@ -322,7 +340,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                 <div>
                   {groupedPreviewNotifications.map((group) => (
                     <div key={group.key}>
-                      <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                      <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                         {group.label}
                       </div>
                       <div className="divide-y divide-border-subtle">
@@ -332,6 +350,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                             notification={notification}
                             onMarkAsRead={handleMarkAsRead}
                             onClose={close}
+                            compact
                           />
                         ))}
                       </div>

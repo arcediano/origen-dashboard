@@ -11,9 +11,9 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MobileTopBar as UXMobileTopBar } from '@arcediano/ux-library';
+import { MobileTopBar as UXMobileTopBar, Button, NotificationCardSkeleton } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
-import { Bell, ChevronLeft, Leaf, Sparkles } from 'lucide-react';
+import { AlertCircle, Bell, ChevronLeft, Leaf, Settings, Sparkles } from 'lucide-react';
 import { getDashboardPageTitle, isRootMobileTab } from '@/constants/sidebar';
 import { fetchUnreadNotifications, markAllNotificationsAsRead, markNotificationAsRead, getUnreadCount } from '@/lib/api/notifications';
 import { NotificationItem } from '@/app/dashboard/components/header/NotificationItem';
@@ -28,8 +28,21 @@ export function MobileTopBar() {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifList, setNotifList] = useState<Notification[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
+  const [notifError, setNotifError] = useState(false);
   const [isUpdatingAll, setIsUpdatingAll] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  const groupedNotifList = (() => {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const preview = notifList.slice(0, 5);
+    const today = preview.filter((notification) => notification.timestamp >= startOfToday);
+    const older = preview.filter((notification) => notification.timestamp < startOfToday);
+    return [
+      { key: 'today', label: 'Hoy', items: today },
+      { key: 'older', label: 'Anteriores', items: older },
+    ].filter((group) => group.items.length > 0);
+  })();
 
   useEffect(() => {
     setMounted(true);
@@ -55,20 +68,29 @@ export function MobileTopBar() {
     };
   }, []);
 
+  const loadPreview = useCallback(async () => {
+    setNotifLoading(true);
+    setNotifError(false);
+    try {
+      const response = await fetchUnreadNotifications();
+      if (response.data) {
+        setNotifList(response.data);
+      } else {
+        setNotifError(true);
+      }
+    } catch {
+      setNotifError(true);
+    } finally {
+      setNotifLoading(false);
+    }
+  }, []);
+
   const openNotifications = useCallback(async () => {
     setIsNotifOpen(true);
     if (notifList.length === 0) {
-      setNotifLoading(true);
-      try {
-        const response = await fetchUnreadNotifications();
-        if (response.data) setNotifList(response.data);
-      } catch {
-        // silently fail
-      } finally {
-        setNotifLoading(false);
-      }
+      void loadPreview();
     }
-  }, [notifList.length]);
+  }, [notifList.length, loadPreview]);
 
   const closeNotifications = useCallback(() => setIsNotifOpen(false), []);
 
@@ -223,31 +245,64 @@ export function MobileTopBar() {
             role="dialog"
             aria-label="Notificaciones recientes"
           >
-            {/* Cabecera del panel */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-gradient-to-r from-origen-crema to-surface-alt">
+            {/* Cabecera del panel — fondo plano (R1: sin degradados en cards/dropdowns de contenido) */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-origen-crema/50">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-origen-menta/10 flex items-center justify-center">
                   <Bell className="w-3.5 h-3.5 text-hoja-tinta" />
                 </div>
                 <h3 className="text-sm font-semibold text-origen-bosque">Notificaciones</h3>
               </div>
-              {liveNotificationCount > 0 && (
-                <button
-                  onClick={() => { void handleMarkAllAsRead(); }}
-                  disabled={isUpdatingAll}
-                  className="text-xs text-hoja-tinta hover:underline font-medium disabled:opacity-50 transition-colors"
+              <div className="flex items-center gap-1">
+                {liveNotificationCount > 0 && (
+                  <button
+                    onClick={() => { void handleMarkAllAsRead(); }}
+                    disabled={isUpdatingAll}
+                    className="text-xs text-hoja-tinta hover:underline font-medium disabled:opacity-50 transition-colors px-1"
+                  >
+                    Marcar todas
+                  </button>
+                )}
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="icon"
+                  className="text-text-subtle hover:text-origen-bosque"
                 >
-                  Marcar todas
-                </button>
-              )}
+                  <Link
+                    href="/dashboard/configuracion"
+                    onClick={closeNotifications}
+                    aria-label="Preferencias de notificaciones"
+                    title="Preferencias de notificaciones"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </Link>
+                </Button>
+              </div>
             </div>
 
-            {/* Lista — máx 5 notificaciones */}
+            {/* Lista — máx 5 notificaciones, agrupadas Hoy/Anteriores como en el dropdown de escritorio */}
             <div className="max-h-[60vh] overflow-y-auto">
               {notifLoading ? (
+                <div role="status" aria-live="polite" aria-label="Cargando notificaciones">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <NotificationCardSkeleton key={i} compact />
+                  ))}
+                </div>
+              ) : notifError ? (
                 <div className="px-4 py-8 text-center">
-                  <div className="w-10 h-10 rounded-full bg-origen-crema mx-auto mb-2 animate-pulse" />
-                  <p className="text-sm text-text-subtle">Cargando...</p>
+                  <div className="w-16 h-16 rounded-full bg-feedback-danger-subtle flex items-center justify-center mx-auto mb-3">
+                    <AlertCircle className="w-8 h-8 text-feedback-danger" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">No se pudieron cargar</p>
+                  <p className="text-xs text-text-subtle mt-1">las notificaciones</p>
+                  <button
+                    onClick={() => void loadPreview()}
+                    type="button"
+                    className="mt-3 text-xs text-hoja-tinta hover:underline transition-colors font-medium"
+                  >
+                    Reintentar
+                  </button>
                 </div>
               ) : notifList.length === 0 ? (
                 <div className="px-4 py-8 text-center">
@@ -258,14 +313,24 @@ export function MobileTopBar() {
                   <p className="text-xs text-text-subtle mt-1">No hay notificaciones nuevas</p>
                 </div>
               ) : (
-                <div className="divide-y divide-border-subtle">
-                  {notifList.slice(0, 5).map(notification => (
-                    <NotificationItem
-                      key={notification.id}
-                      notification={notification}
-                      onMarkAsRead={handleMarkAsRead}
-                      onClose={closeNotifications}
-                    />
+                <div>
+                  {groupedNotifList.map((group) => (
+                    <div key={group.key}>
+                      <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                        {group.label}
+                      </div>
+                      <div className="divide-y divide-border-subtle">
+                        {group.items.map(notification => (
+                          <NotificationItem
+                            key={notification.id}
+                            notification={notification}
+                            onMarkAsRead={handleMarkAsRead}
+                            onClose={closeNotifications}
+                            compact
+                          />
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}

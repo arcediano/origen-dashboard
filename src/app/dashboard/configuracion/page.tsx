@@ -16,9 +16,9 @@ export default function ConfiguracionPage() {
     <div className="w-full">
       <PageHeader
         title="Configuraciones"
-        description="Define como quieres recibir tus avisos por canal"
+        description="Define cómo quieres recibir tus avisos por canal"
         badgeIcon={Bell}
-        badgeText="Comunicacion"
+        badgeText="Comunicación"
         tooltip="Configuraciones"
         tooltipDetailed="Configura por cada tipo de aviso si quieres recibirlo por email o por push."
       />
