@@ -162,19 +162,12 @@ export function StripeConnectOnboarding({
     onVerified();
   }, [stripeAccountId, onVerified]);
 
-  // Si no hay stripeAccountId, mostrar error
-  if (!stripeAccountId) {
-    return (
-      <div className="w-full p-4 bg-feedback-danger-subtle rounded-xl border border-feedback-danger/30 flex flex-col sm:flex-row sm:items-center gap-2">
-        <div className="flex items-start gap-2 flex-1">
-          <AlertCircle className="w-4 h-4 text-feedback-danger flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-feedback-danger-text">
-            No se pudo iniciar el onboarding de Stripe. Por favor, intenta de nuevo.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Nota: NO se exige stripeAccountId aquí -- un productor nuevo llega sin
+  // cuenta todavía. fetchClientSecret envía accountId undefined en ese caso,
+  // y POST /api/stripe/account-session crea la cuenta Express server-side
+  // (ver route.ts: "Si no viene accountId... crear cuenta nueva"). Cortar
+  // el render aquí impedía que ese flujo se disparase nunca -- bloqueaba a
+  // todo productor que aún no tuviera cuenta, el caso más común.
 
   if (!STRIPE_PUBLISHABLE_KEY) {
     return (
