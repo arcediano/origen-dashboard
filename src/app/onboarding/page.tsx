@@ -890,6 +890,9 @@ export default function OnboardingPage() {
             lastName={user?.lastName}
             businessName={formData.step2.businessName}
             website={formData.step2.website}
+            onRequestRefresh={() => {
+              void loadOnboardingData();
+            }}
           />
         );
       default:

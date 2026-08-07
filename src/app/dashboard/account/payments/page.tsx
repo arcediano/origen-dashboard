@@ -12,9 +12,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, StatGrid, StatCard, PageLoader, PageError, MobilePullRefresh, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
-import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2 } from 'lucide-react';
+import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2, X } from 'lucide-react';
 import { loadProducerProfile } from '@/lib/api/onboarding';
-import { startStripeOnboarding, openStripeDashboard } from '@/lib/stripe/connect-client';
+import { openStripeDashboard } from '@/lib/stripe/connect-client';
+import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-connect-onboarding';
 
 interface StripeStatusResponse {
   success: boolean;
@@ -31,11 +32,15 @@ export default function PaymentsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isOpeningStripe, setIsOpeningStripe] = useState(false);
+  const [showEmbeddedOnboarding, setShowEmbeddedOnboarding] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
   const [acceptedTermsAt, setAcceptedTermsAt] = useState<string | null>(null);
   const [businessName, setBusinessName] = useState<string | null>(null);
   const [website, setWebsite] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState<string | null>(null);
+  const [lastName, setLastName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // Extraer loadPaymentState a useCallback para reutilizar en múltiples efectos
@@ -51,6 +56,11 @@ export default function PaymentsPage() {
       setAcceptedTermsAt(payment?.acceptedTermsAt ?? null);
       setBusinessName(story?.businessName ?? fiscal?.businessName ?? null);
       setWebsite(story?.website ?? null);
+      // Nota: firstName, lastName, email no están disponibles en OnboardingData
+      // Se obtienen del contexto de autenticación si es necesario
+      setFirstName(null);
+      setLastName(null);
+      setUserEmail(null);
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : 'Error al cargar estado de cobros');
     }
@@ -137,20 +147,19 @@ export default function PaymentsPage() {
       : 'empty';
 
   const handleOpenStripe = async () => {
-    setIsOpeningStripe(true);
+    setShowEmbeddedOnboarding(true);
     setLoadError(null);
+  };
 
-    try {
-      await startStripeOnboarding({
-        stripeAccountId,
-        businessName: businessName ?? undefined,
-        website: website ?? undefined,
-        source: 'account_payments',
-      });
-    } catch (error) {
-      setLoadError(error instanceof Error ? error.message : 'No se pudo abrir Stripe');
-      setIsOpeningStripe(false);
-    }
+  const handleCloseEmbedded = () => {
+    setShowEmbeddedOnboarding(false);
+  };
+
+  const handleEmbeddedVerified = async () => {
+    // El componente se encargó de verificar y guardar
+    // Ahora recargamos el estado para reflejar los cambios
+    setShowEmbeddedOnboarding(false);
+    await loadPaymentState();
   };
 
   const handleOpenDashboard = async () => {
@@ -360,6 +369,37 @@ export default function PaymentsPage() {
                       <p className="text-xs sm:text-sm text-text-subtle leading-relaxed">
                         {getBankAccountHelpText()}
                       </p>
+                    )}
+
+                    {/* Componente embebido de Stripe Connect (cuando es necesario onboarding) */}
+                    {showEmbeddedOnboarding && paymentStage !== 'connected' && (
+                      <div className="space-y-4 border-t border-border-subtle pt-4 sm:pt-5">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-semibold text-origen-bosque">
+                            {paymentStage === 'pending' ? 'Continuar onboarding' : 'Crear cuenta Stripe'}
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={handleCloseEmbedded}
+                            className="text-text-subtle hover:text-text transition-colors"
+                            aria-label="Cerrar formulario de Stripe"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <StripeConnectOnboarding
+                          stripeAccountId={stripeAccountId}
+                          source="account_payments"
+                          onboardingContext={{
+                            email: userEmail ?? undefined,
+                            firstName: firstName ?? undefined,
+                            lastName: lastName ?? undefined,
+                            businessName: businessName ?? undefined,
+                            website: website ?? undefined,
+                          }}
+                          onVerified={handleEmbeddedVerified}
+                        />
+                      </div>
                     )}
                   </CardContent>
                 </Card>

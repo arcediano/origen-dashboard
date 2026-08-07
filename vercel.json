@@ -7,7 +7,11 @@
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' https://js.stripe.com https://connect-js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src https://connect-js.stripe.com https://js.stripe.com https://hooks.stripe.com; img-src 'self' data: https://storage.googleapis.com https://res.cloudinary.com https://*.cloudfront.net https://*.s3.*.amazonaws.com https://images.unsplash.com https://*.stripe.com; connect-src 'self' https://api.stripe.com https://connect-js.stripe.com"
+        }
       ]
     }
   ],

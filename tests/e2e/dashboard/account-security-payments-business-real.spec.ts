@@ -96,8 +96,8 @@ async function testPaymentStatusDisplay(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { name: /Cobros/i }).first()).toBeVisible({ timeout: 15_000 });
 
   // Debe haber algún indicador de estado de Stripe (conectado / sin conectar)
-  const connectedIndicator = page.getByText(/conectado|connected|cuenta activa/i).first();
-  const connectButton = page.getByRole('button', { name: /conectar stripe|connect stripe|configurar cobros/i }).first();
+  const connectedIndicator = page.getByText(/conectado|connected|cuenta activa|cobros activos/i).first();
+  const connectButton = page.getByRole('button', { name: /crear cuenta|continuar|modificar/i }).first();
 
   const hasConnected = await connectedIndicator.isVisible({ timeout: 10_000 }).catch(() => false);
   const hasConnectButton = await connectButton.isVisible({ timeout: 3_000 }).catch(() => false);
@@ -105,10 +105,31 @@ async function testPaymentStatusDisplay(page: Page): Promise<void> {
   // Alguno de los dos debe estar visible
   expect(hasConnected || hasConnectButton).toBe(true);
 
+  // Si hay botón de conexión, verificar que NO redirige a stripe.com
+  // (flujo embebido: debe permanecer en origen.delivery)
+  if (hasConnectButton) {
+    const currentUrl = page.url();
+    await connectButton.click({ timeout: 10_000 }).catch(() => {
+      // El click puede fallar si es una pestaña remota, lo ignoramos
+    });
+
+    // Esperar un poco y verificar que la URL no cambió a un dominio de Stripe
+    await page.waitForTimeout(1000);
+    const urlAfterClick = page.url();
+    expect(urlAfterClick).toContain('origen.delivery');
+    expect(urlAfterClick).not.toContain('stripe.com');
+    expect(urlAfterClick).not.toContain('connect.stripe.com');
+
+    // Verificar que hay un elemento embebido de Stripe (custom element o iframe)
+    const stripeEmbedded = page.locator('stripe-connect-account-onboarding, iframe[src*="connect-js.stripe.com"]').first();
+    const isEmbeddedVisible = await stripeEmbedded.isVisible({ timeout: 5_000 }).catch(() => false);
+    console.log('[payments] Stripe embedded component visible:', isEmbeddedVisible);
+  }
+
   if (hasConnected) {
     console.log('[payments] Stripe already connected');
   } else {
-    console.log('[payments] Stripe not connected — connect button visible');
+    console.log('[payments] Stripe not connected — embedded onboarding available');
   }
 }
 

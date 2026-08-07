@@ -87,42 +87,6 @@ export async function createConnectAccount(params: {
   }
 }
 
-/**
- * Crea un Account Link para el onboarding del vendedor en Stripe.
- *
- * El accountId se incluye como query param en las URLs de retorno para que
- * las páginas de destino puedan verificar el estado de la cuenta sin necesidad
- * de almacenarlo en sesión del lado del servidor.
- *
- * @param accountId ID de la cuenta de Stripe
- * @returns Link de onboarding
- */
-export async function createAccountLink(accountId: string) {
-  return createAccountLinkWithBase(accountId);
-}
-
-export async function createAccountLinkWithBase(
-  accountId: string,
-  baseUrl?: string,
-  source?: string,
-) {
-  try {
-    const base = baseUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
-    const resolvedSource = normalizeOnboardingSource(source);
-    const sourceParam = `source=${resolvedSource}`;
-    const accountLink = await stripe.accountLinks.create({
-      account: accountId,
-      refresh_url: `${base}/onboarding/stripe/refresh?accountId=${accountId}&${sourceParam}`,
-      return_url: `${base}/onboarding/stripe/complete?accountId=${accountId}&${sourceParam}`,
-      type: 'account_onboarding',
-    });
-
-    return accountLink;
-  } catch (error) {
-    console.error('Error creating account link:', error);
-    throw error;
-  }
-}
 
 /**
  * Verifica el estado de una cuenta Connect
@@ -194,6 +158,29 @@ export async function createDashboardLink(accountId: string) {
     }
   } catch (error) {
     console.error('Error creating dashboard link:', error);
+    throw error;
+  }
+}
+
+/**
+ * Crea una sesión de cuenta para Stripe Connect Embedded Components
+ * @param accountId ID de la cuenta de Stripe
+ * @returns AccountSession con client_secret
+ */
+export async function createAccountSession(accountId: string) {
+  try {
+    const accountSession = await stripe.accountSessions.create({
+      account: accountId,
+      components: {
+        account_onboarding: { enabled: true },
+      },
+    });
+
+    return {
+      clientSecret: accountSession.client_secret,
+    };
+  } catch (error) {
+    console.error('Error creating account session:', error);
     throw error;
   }
 }

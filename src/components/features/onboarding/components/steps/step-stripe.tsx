@@ -2,18 +2,19 @@
  * @file step-stripe.tsx
  * @description Paso 6 del onboarding: Configuración de pagos con Stripe Connect.
  *
- * Flujo real de conexión:
- *   1. Usuario hace clic en "Conectar con Stripe"
- *   2. Se llama a POST /api/stripe/connect → crea cuenta Express en Stripe
- *   3. Se guarda el stripeAccountId en BD (saveStep6) antes de redirigir,
- *      por si el usuario abandona el flujo de Stripe a mitad
- *   4. Se redirige a la URL de onboarding de Stripe
- *   5. Stripe redirige a /onboarding/stripe/complete?accountId=xxx al terminar
- *   6. La página complete verifica el estado y actualiza stripeConnected=true en BD
+ * Flujo de conexión embebido (Stripe Connect Embedded Components):
+ *   1. Usuario ve Card 2 con componente StripeConnectOnboarding embebido
+ *   2. Se llama a POST /api/stripe/account-session → crea AccountSession
+ *   3. El componente embebido monta el formulario de Stripe inline (sin redirección)
+ *   4. Usuario completa el onboarding dentro del iframe de Connect.js
+ *   5. Al salir (onExit), se verifica el estado real con GET /api/stripe/status
+ *   6. Se guarda con saveStep6 (SIN stripeConnected en el payload)
+ *   7. Se llama a onRequestRefresh para que el padre recargue el estado real desde el servidor
  *
  * Props opcionales:
- *   userEmail    — Pre-rellena el email en la cuenta Stripe (del perfil del usuario)
- *   businessName — Pre-rellena el nombre del negocio en Stripe (del paso 2)
+ *   userEmail       — Pre-rellena el email en la cuenta Stripe (del perfil del usuario)
+ *   businessName    — Pre-rellena el nombre del negocio en Stripe (del paso 2)
+ *   onRequestRefresh — Callback para que el padre recargue el estado (ej. loadOnboardingData)
  */
 
 'use client';
@@ -24,7 +25,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@arcediano/ux-library';
 import { Checkbox } from '@arcediano/ux-library';
 import { Spinner } from '@/components/shared';
-import { startStripeOnboarding } from '@/lib/stripe/connect-client';
+import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-connect-onboarding';
 
 import {
   CreditCard,
@@ -58,6 +59,8 @@ export interface EnhancedStep6StripeProps {
   businessName?: string;
   /** Web del negocio (paso 2) — pre-rellena Stripe */
   website?: string;
+  /** Callback para recargar el estado desde el servidor tras completar onboarding embebido */
+  onRequestRefresh?: () => void;
 }
 
 // ─── Componente ──────────────────────────────────────────────────────────────
@@ -70,38 +73,19 @@ export function EnhancedStep6Stripe({
   lastName,
   businessName,
   website,
+  onRequestRefresh,
 }: EnhancedStep6StripeProps) {
-  const [isConnecting, setIsConnecting] = React.useState(false);
-  const [connectError, setConnectError] = React.useState('');
-
   // ── Manejadores ────────────────────────────────────────────────────────────
 
   /**
-   * Inicia el flujo real de Stripe Connect:
-   *   1. Crea la cuenta Express en Stripe vía API route interna
-   *   2. Guarda el stripeAccountId en BD antes de redirigir (tolerancia a fallos)
-   *   3. Redirige a la URL de onboarding de Stripe
+   * Se llama cuando el onboarding embebido se completa.
+   * Recarga el estado real del servidor para que el padre vea los cambios.
    */
-  const handleConnect = async () => {
-    setIsConnecting(true);
-    setConnectError('');
-
-    try {
-      await startStripeOnboarding({
-        stripeAccountId: data.stripeAccountId,
-        email: userEmail,
-        firstName,
-        lastName,
-        businessName,
-        website,
-        source: 'onboarding',
-      });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error desconocido';
-      setConnectError(msg);
-      setIsConnecting(false);
+  const handleVerified = React.useCallback(() => {
+    if (onRequestRefresh) {
+      onRequestRefresh();
     }
-  };
+  }, [onRequestRefresh]);
 
   const handleDisconnect = () => {
     onChange({ stripeConnected: false, stripeAccountId: undefined, acceptTerms: false });
@@ -248,7 +232,7 @@ export function EnhancedStep6Stripe({
             </button>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col gap-4">
             {/* Aviso de qué datos necesita el productor */}
             <div className="w-full p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
               <p className="text-xs text-muted-foreground flex items-start gap-2">
@@ -261,42 +245,19 @@ export function EnhancedStep6Stripe({
               </p>
             </div>
 
-            {/* Error de conexión con reintento */}
-            {connectError && (
-              <div className="w-full p-3 bg-feedback-danger-subtle rounded-xl border border-feedback-danger/30 flex flex-col sm:flex-row sm:items-center gap-2">
-                <div className="flex items-start gap-2 flex-1">
-                  <AlertCircle className="w-4 h-4 text-feedback-danger flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-feedback-danger-text">{connectError}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setConnectError('')}
-                  className="self-end text-xs font-medium text-feedback-danger-text underline underline-offset-2 sm:self-auto"
-                >
-                  Reintentar
-                </button>
-              </div>
-            )}
-
-            <Button
-              type="button"
-              onClick={handleConnect}
-              disabled={isConnecting}
-              size="lg"
-              className="w-full sm:w-auto"
-            >
-              {isConnecting ? (
-                <span className="flex items-center gap-2">
-                  <Spinner size="sm" variant="white" />
-                  Conectando con Stripe...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  Conectar con Stripe
-                  <ArrowRight className="w-4 h-4" />
-                </span>
-              )}
-            </Button>
+            {/* Componente embebido de Stripe Connect */}
+            <StripeConnectOnboarding
+              stripeAccountId={data.stripeAccountId}
+              source="onboarding"
+              onboardingContext={{
+                email: userEmail,
+                firstName,
+                lastName,
+                businessName,
+                website,
+              }}
+              onVerified={handleVerified}
+            />
 
             <div className="flex items-center gap-2 text-xs text-text-subtle">
               <Lock className="w-3.5 h-3.5" />
@@ -304,7 +265,7 @@ export function EnhancedStep6Stripe({
             </div>
 
             <p className="text-xs text-muted-foreground text-center">
-              También puedes conectarlo después desde tu panel, pero tus pedidos quedarán en espera hasta entonces.
+              Completa el onboarding de Stripe en este formulario. Tus pedidos quedarán en espera hasta que conectes tu cuenta bancaria.
             </p>
           </div>
         )}

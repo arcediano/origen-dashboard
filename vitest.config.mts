@@ -27,6 +27,7 @@ export default defineConfig({
     env: {
       NEXT_PUBLIC_APP_URL: 'http://localhost:3001',
       NEXT_PUBLIC_API_GATEWAY_URL: 'http://localhost:3001',
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: 'pk_test_dummy',
     },
     include: ['tests/unit/**/*.test.{ts,tsx}', 'tests/integration/**/*.test.{ts,tsx}'],
     exclude: ['tests/e2e/**', 'node_modules/**'],
