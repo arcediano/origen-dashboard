@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
-import { Button, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
+import { Alert, Button } from '@arcediano/ux-library';
 import { MobileStepperBar } from '@/components/features/onboarding/components/MobileStepperBar';
 import { MobileNavBar } from '@/components/features/onboarding/components/MobileNavBar';
 import { StepValidationPanel } from '@/components/features/onboarding/components/StepValidationPanel';
@@ -57,7 +57,6 @@ import {
   Sparkles,
   Shield,
   Leaf,
-  AlertCircle,
 } from 'lucide-react';
 
 // ============================================================================
@@ -921,12 +920,15 @@ export default function OnboardingPage() {
               <img src="/origen-icon.svg" alt="" width={36} height={36} className="h-9 w-9" />
             </Link>
             
-            <div className="flex items-center gap-2">
+            {/* Solo desktop: en mobile, MobileStepperBar ya muestra "Paso X de Y"
+                justo debajo — duplicarlo aquí repite la misma cifra dos veces
+                seguidas en el mismo scroll (R10) sin aportar información nueva. */}
+            <div className="hidden lg:flex items-center gap-2">
               <span className="text-xs text-muted-foreground">
                 {currentStep + 1}/{totalSteps}
               </span>
               <div className="w-20 h-1.5 bg-surface rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-origen-pradera rounded-full transition-all duration-500"
                   style={{ width: `${progress}%` }}
                 />
@@ -942,7 +944,16 @@ export default function OnboardingPage() {
       {/* ====================================================================
           MAIN - Layout: Timeline vertical (4) + Formulario (8)
       ==================================================================== */}
-      <main className={`max-w-7xl mx-auto px-4 sm:px-6 py-4 lg:py-8 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-8`}>
+      {/* Padding inferior en mobile calculado sobre la altura REAL renderizada de
+          MobileNavBar (ActionBar de origen-UXLibrary), no sobre NAV_HEIGHT_MOBILE_DASHBOARD:
+          esta ruta no tiene BottomTabBar global (fuera de dashboard/layout.tsx), solo su
+          propio ActionBar fijo. pt-3(12)+botón primario h-12(48)+pb-3(12) = 72px con una
+          sola fila (paso 0, sin "Anterior"/"Más tarde"); +gap(8)+botón secundario h-11(44)
+          = 124px con fila secundaria (pasos 1-6). +16px de aire para no pegar el contenido
+          al botón. Nota: appShellPaddingClass()/NAV_HEIGHT_MOBILE_DASHBOARD interpolados en
+          un className vía plantilla NO generan CSS (Tailwind JIT no puede detectar el valor
+          en build-time) — usar siempre clases literales completas, como aquí. */}
+      <main className={`max-w-7xl mx-auto px-4 sm:px-6 py-4 lg:py-8 ${currentStep === 0 ? 'pb-[calc(88px+env(safe-area-inset-bottom,0px))]' : 'pb-[calc(140px+env(safe-area-inset-bottom,0px))]'} lg:pb-8`}>
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
 
           {/* ====================================================================
@@ -1125,20 +1136,23 @@ export default function OnboardingPage() {
             </AnimatePresence>
 
             {currentStep === 6 && formData.step6.acceptTerms && !formData.step6.stripeConnected && (
-              <div className="mt-4 p-3 bg-origen-pradera/10 border border-origen-pradera/30 rounded-xl text-sm text-origen-bosque">
+              <Alert variant="warning" className="mt-4">
                 Puedes finalizar el onboarding sin Stripe ahora, pero no podrás publicar productos hasta conectarlo desde tu dashboard.
-              </div>
+              </Alert>
             )}
 
             {/* ====================================================================
                 ERROR DE GUARDADO
             ==================================================================== */}
             {saveError && (
-              <div className="mt-6 p-3 bg-feedback-danger-subtle border border-red-200 rounded-xl text-sm text-red-700 flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>{saveError}</span>
-                <button type="button" onClick={() => setSaveError(null)} className="ml-auto text-feedback-danger hover:text-red-700">×</button>
-              </div>
+              <Alert
+                variant="error"
+                dismissible
+                onDismiss={() => setSaveError(null)}
+                className="mt-6"
+              >
+                {saveError}
+              </Alert>
             )}
 
             {/* ====================================================================
