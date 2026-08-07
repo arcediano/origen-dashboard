@@ -9,6 +9,7 @@
  *
  * Lógica:
  *   1. Si no viene accountId: reutilizar stripeAccountId existente si aplica, crear cuenta nueva si no.
+ *   1b. (Nuevo) Si se crea una cuenta nueva, vincularla inmediatamente en BD antes de devolver clientSecret.
  *   2. Si viene accountId: verificar que pertenece al productor autenticado (IDOR prevention).
  *   3. Generar AccountSession con components.account_onboarding.enabled = true.
  *   4. Devolver accountId y clientSecret (nunca loguear clientSecret).
@@ -112,6 +113,26 @@ export async function POST(request: NextRequest) {
         });
 
         resolvedAccountId = account.id;
+
+        // Vincular inmediatamente la cuenta recién creada en BD.
+        // Si esto falla, no devolvemos clientSecret (vería el error en la rama de catch).
+        // Esto cierra la ventana en la que un refetch de client_secret a mitad de sesión
+        // no encontraba la cuenta reconocida en BD (causaba 403).
+        const linkRes = await fetch(`${GATEWAY_URL}/api/v1/producers/onboarding/step/link-stripe-account`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({ stripeAccountId: resolvedAccountId }),
+        });
+
+        if (!linkRes.ok) {
+          // No devolver clientSecret si no se pudo vincular: dejar la cuenta sin
+          // vincular perpetuaría exactamente el bug que este endpoint corrige.
+          throw new Error('No se pudo vincular la cuenta Stripe recien creada con el productor');
+        }
       }
     }
 
