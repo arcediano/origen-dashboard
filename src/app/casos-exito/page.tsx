@@ -11,10 +11,7 @@ import {
   ArrowRight,
   Sparkles,
   CheckCircle,
-  Award,
   Star,
-  TrendingUp,
-  Users,
   ChevronRight,
 } from 'lucide-react';
 
@@ -25,8 +22,7 @@ const testimonials = [
     category: 'Quesos',
     quote:
       'Gracias a Origen hemos podido expandir nuestro negocio familiar, llegando a clientes en toda España que valoran la autenticidad de nuestros quesos manchegos.',
-    stat: '+120%',
-    statLabel: 'Aumento de ventas',
+    statLabel: 'Más ventas fuera de su zona habitual',
     initials: 'QA',
   },
   {
@@ -35,8 +31,7 @@ const testimonials = [
     category: 'Vinos',
     quote:
       'La plataforma nos ha permitido dar a conocer nuestros vinos ecológicos a un público que busca productos de proximidad y con historia.',
-    stat: '+85%',
-    statLabel: 'Nuevos clientes',
+    statLabel: 'Nuevos clientes fuera de su zona habitual',
     initials: 'VS',
   },
   {
@@ -45,8 +40,7 @@ const testimonials = [
     category: 'Miel',
     quote:
       'Nuestras mieles artesanales ahora llegan a restaurantes y consumidores finales que buscan productos naturales y de máxima calidad.',
-    stat: '×3',
-    statLabel: 'Canales de venta',
+    statLabel: 'Nuevos canales de venta',
     initials: 'MM',
   },
   {
@@ -54,9 +48,8 @@ const testimonials = [
     location: 'Logroño, La Rioja',
     category: 'Productos Ecológicos',
     quote:
-      'La venta online a través de Origen ha supuesto un aumento del 40% en nuestros ingresos, permitiéndonos mantener nuestra producción ecológica.',
-    stat: '+40%',
-    statLabel: 'Ingresos anuales',
+      'La venta online a través de Origen ha supuesto un aumento notable en nuestros ingresos, permitiéndonos mantener nuestra producción ecológica.',
+    statLabel: 'Más ingresos gracias a la venta online',
     initials: 'EN',
   },
 ];
@@ -111,7 +104,7 @@ export default function SuccessStoriesPage() {
           <div className="text-center mb-10 md:mb-16 space-y-4">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
               <Sparkles className="w-4 h-4 text-hoja-tinta" />
-              <span className="text-xs md:text-sm font-semibold text-origen-bosque">+500 productores confían en Origen</span>
+              <span className="text-xs md:text-sm font-semibold text-origen-bosque">Productores que confían en Origen</span>
             </div>
             <h1 className="text-3xl md:text-5xl font-bold text-origen-bosque">
               Casos de{' '}
@@ -120,23 +113,6 @@ export default function SuccessStoriesPage() {
             <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Descubre cómo productores artesanales han transformado sus negocios con Origen Marketplace
             </p>
-          </div>
-
-          {/* Stats globales */}
-          <div className="grid grid-cols-3 gap-4 md:gap-6 max-w-2xl mx-auto mb-12 md:mb-20">
-            {[
-              { icon: TrendingUp, value: '+40%', label: 'Crecimiento medio' },
-              { icon: Users, value: '+500', label: 'Productores activos' },
-              { icon: Award, value: '4.9★', label: 'Valoración media' },
-            ].map(({ icon: Icon, value, label }) => (
-              <div key={label} className="bg-surface-alt rounded-2xl p-4 md:p-6 border border-border shadow-sm text-center">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center mx-auto mb-2 md:mb-3">
-                  <Icon className="w-5 h-5 md:w-6 md:h-6 text-origen-bosque" />
-                </div>
-                <div className="text-xl md:text-3xl font-bold text-origen-hoja">{value}</div>
-                <div className="text-xs md:text-sm text-muted-foreground mt-1">{label}</div>
-              </div>
-            ))}
           </div>
 
           {/* Tarjetas de testimonios */}
@@ -174,15 +150,12 @@ export default function SuccessStoriesPage() {
                     "{t.quote}"
                   </blockquote>
 
-                  {/* Stat */}
+                  {/* Resultado destacado */}
                   <div className="flex items-center gap-2 pt-4 border-t border-border-subtle">
-                    <div className="w-8 h-8 rounded-lg bg-origen-hoja/10 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-origen-hoja/10 flex items-center justify-center flex-shrink-0">
                       <CheckCircle className="w-4 h-4 text-origen-hoja" />
                     </div>
-                    <div>
-                      <span className="text-lg font-bold text-origen-hoja">{t.stat}</span>
-                      <span className="text-xs text-muted-foreground ml-2">{t.statLabel}</span>
-                    </div>
+                    <span className="text-sm font-semibold text-origen-bosque">{t.statLabel}</span>
                   </div>
                 </div>
               </div>
@@ -196,7 +169,7 @@ export default function SuccessStoriesPage() {
                 ¿Listo para ser el siguiente caso de éxito?
               </h2>
               <p className="text-muted-foreground mb-6 md:mb-8">
-                Únete a más de 500 productores que ya venden en Origen Marketplace.
+                Únete a los productores que ya venden en Origen Marketplace.
               </p>
               <Link
                 href="/auth/register"

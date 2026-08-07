@@ -13,12 +13,7 @@ import {
   Sparkles,
   CheckCircle,
   Award,
-  Phone,
-  Mail,
-  Clock,
-  Zap,
   MessageCircle,
-  ChevronRight,
 } from 'lucide-react';
 
 export default function ContactPage() {
@@ -71,7 +66,7 @@ export default function ContactPage() {
           <div className="lg:hidden text-center mb-8 space-y-3">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
               <Sparkles className="w-4 h-4 text-hoja-tinta" />
-              <span className="text-xs font-semibold text-origen-bosque">Respuesta en menos de 24 horas</span>
+              <span className="text-xs font-semibold text-origen-bosque">Estamos aquí para ayudarte</span>
             </div>
             <h1 className="text-2xl font-bold text-origen-bosque">
               ¿En qué podemos{' '}
@@ -94,7 +89,7 @@ export default function ContactPage() {
               <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
                 <MessageCircle className="w-4 h-4 text-hoja-tinta" />
                 <span className="text-xs md:text-sm font-semibold text-origen-bosque">
-                  Respuesta garantizada en 24h
+                  Estamos aquí para ayudarte
                 </span>
               </div>
 
@@ -110,54 +105,6 @@ export default function ContactPage() {
                 </p>
               </div>
 
-              {/* Tarjetas de contacto */}
-              <div className="grid grid-cols-2 gap-4 pt-4">
-                {[
-                  {
-                    icon: Phone,
-                    title: 'Teléfono',
-                    line1: '+34 91 123 45 67',
-                    line2: 'Lun-Vie: 9:00 - 18:00',
-                  },
-                  {
-                    icon: Mail,
-                    title: 'Email',
-                    line1: 'info@origen.com',
-                    line2: 'soporte@origen.com',
-                  },
-                  {
-                    icon: Clock,
-                    title: 'Horario',
-                    line1: 'Lun-Vie: 9:00-18:00',
-                    line2: 'Sáb: 10:00-14:00',
-                  },
-                  {
-                    icon: Zap,
-                    title: 'Respuesta',
-                    line1: '< 24h garantizadas',
-                    line2: 'Media: 4 horas',
-                  },
-                ].map((item, index) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={index} className="group">
-                      <div className="bg-surface-alt rounded-2xl p-4 border border-border hover:scale-[1.02] hover:shadow-xl hover:border-origen-hoja transition-all duration-300">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                            <Icon className="w-5 h-5 text-origen-bosque" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="text-sm font-bold text-origen-bosque">{item.title}</div>
-                            <div className="text-xs text-foreground font-medium mt-0.5">{item.line1}</div>
-                            <div className="text-xs text-muted-foreground mt-0.5">{item.line2}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
               {/* Beneficios */}
               <div className="space-y-4 pt-4">
                 <h3 className="text-sm font-bold text-origen-bosque uppercase tracking-wider flex items-center gap-2">
@@ -170,7 +117,6 @@ export default function ContactPage() {
                     'Equipo humano, sin bots',
                     'Soporte especializado para productores',
                     'Seguimiento de tu consulta',
-                    'Resolución media en 4 horas',
                   ].map((benefit, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <div className="w-5 h-5 rounded-full bg-origen-pradera/10 flex items-center justify-center">
@@ -189,20 +135,6 @@ export default function ContactPage() {
             <div className="lg:col-span-6">
               <div className="lg:pl-8 xl:pl-12">
                 <ContactForm />
-
-                {/* Widget de ayuda */}
-                <div className="mt-8 text-center">
-                  <div className="inline-flex items-center gap-3 bg-surface-alt rounded-full px-5 py-2.5 border border-border shadow-sm hover:border-origen-pradera transition-all">
-                    <span className="text-sm text-muted-foreground">¿Prefieres llamarnos?</span>
-                    <a
-                      href="tel:+34911234567"
-                      className="text-sm font-medium text-hoja-tinta hover:underline transition-colors flex items-center gap-1"
-                    >
-                      +34 91 123 45 67
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </div>
               </div>
             </div>
 

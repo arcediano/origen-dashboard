@@ -22,7 +22,6 @@ import {
   User,
   Bell,
   Mail,
-  Phone,
   ChevronRight,
   LifeBuoy,
 } from 'lucide-react';
@@ -190,34 +189,21 @@ export default function HelpCenterPage() {
             <CardContent className="p-0 sm:p-2">
               <h2 className="text-lg font-bold text-origen-bosque mb-1">¿No encuentras lo que buscas?</h2>
               <p className="text-sm text-muted-foreground mb-5">
-                Escríbenos y te responderemos en menos de 24 horas.
+                Escríbenos desde nuestro formulario de contacto y te responderemos lo antes posible.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <a
-                  href="mailto:soporte@origen.com"
-                  className="flex items-center gap-3 rounded-xl border border-border p-4 hover:border-origen-pradera hover:bg-origen-crema/30 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-full bg-origen-crema flex items-center justify-center flex-shrink-0">
-                    <Mail className="h-5 w-5 text-hoja-tinta" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-origen-bosque">Email de soporte</p>
-                    <p className="text-sm text-muted-foreground truncate">soporte@origen.com</p>
-                  </div>
-                </a>
-                <a
-                  href="tel:+34911234567"
-                  className="flex items-center gap-3 rounded-xl border border-border p-4 hover:border-origen-pradera hover:bg-origen-crema/30 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-full bg-origen-crema flex items-center justify-center flex-shrink-0">
-                    <Phone className="h-5 w-5 text-hoja-tinta" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-origen-bosque">Teléfono</p>
-                    <p className="text-sm text-muted-foreground">+34 91 123 45 67</p>
-                  </div>
-                </a>
-              </div>
+              <Link
+                href="/contacto"
+                className="inline-flex items-center gap-2 rounded-xl border border-border p-4 hover:border-origen-pradera hover:bg-origen-crema/30 transition-colors w-full sm:w-auto"
+              >
+                <div className="w-10 h-10 rounded-full bg-origen-crema flex items-center justify-center flex-shrink-0">
+                  <Mail className="h-5 w-5 text-hoja-tinta" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-origen-bosque">Ir al formulario de contacto</p>
+                  <p className="text-sm text-muted-foreground">Cuéntanos tu duda y te respondemos</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-hoja-tinta flex-shrink-0 ml-auto" />
+              </Link>
             </CardContent>
           </Card>
 
