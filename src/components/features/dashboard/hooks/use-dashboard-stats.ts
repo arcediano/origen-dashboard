@@ -14,9 +14,7 @@
  *   - pendingOrders   → OrderStats.pending
  *   - totalRevenue    → OrderStats.totalRevenue
  *   - rating          → fetchProductStats() → ProductStats.rating.{average, total}
- *
- * Campos sin endpoint real aún (devuelven 0):
- *   - profileViews  → TODO: conectar a /api/v1/producers/me/profile-views cuando esté disponible
+ *   - profileViews    → fetchProfileViewStats() → ProfileViewStats.today
  */
 
 import { useState, useEffect } from 'react';
