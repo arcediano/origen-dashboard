@@ -62,10 +62,6 @@ export function DashboardHeader({
 
   const pageTitle = getDashboardPageTitle(pathname);
 
-  const handleLogout = () => {
-    // La lógica de logout (API call + redirect) está en UserMenu
-  };
-
   return (
     <>
       {/* Skip link — teclado y lectores de pantalla */}
@@ -99,7 +95,6 @@ export function DashboardHeader({
               userEmail={resolvedEmail}
               userInitials={resolvedInitials}
               userAvatar={userAvatar}
-              onLogout={handleLogout}
               readinessReport={readiness}
             />
           </div>

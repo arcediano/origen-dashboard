@@ -7,14 +7,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@arcediano/ux-library';
 import { HelpCircle, LogOut, X } from 'lucide-react';
 import { SidebarMenuItem } from './SidebarMenuItem';
 import { DASHBOARD_NAV_SECTIONS } from '@/constants/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
-import { logoutUser } from '@/lib/api/auth';
+import { useLogout } from '@/hooks/useLogout';
 
 interface DashboardSidebarProps {
   isMobileOpen?: boolean;
@@ -22,10 +21,9 @@ interface DashboardSidebarProps {
 }
 
 export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: DashboardSidebarProps) {
-  const router = useRouter();
-  const { clearUser, user } = useAuth();
+  const { user } = useAuth();
+  const { logout, isLoggingOut } = useLogout();
   const [mounted, setMounted] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -33,19 +31,6 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
 
   const handleItemClick = () => {
     onMobileClose?.();
-  };
-
-  const handleLogout = async () => {
-    if (isLoggingOut) return;
-    setIsLoggingOut(true);
-    try {
-      await logoutUser();
-    } catch {
-      // El logout local debe continuar aunque falle la llamada al gateway.
-    } finally {
-      clearUser();
-      router.replace('/auth/login');
-    }
   };
 
   if (!mounted) return null;
@@ -82,7 +67,7 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
         <span>Ayuda</span>
       </Link>
       <button
-        onClick={handleLogout}
+        onClick={logout}
         disabled={isLoggingOut}
         className="mt-1 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm text-red-600 transition-all hover:bg-red-50 disabled:opacity-50"
       >

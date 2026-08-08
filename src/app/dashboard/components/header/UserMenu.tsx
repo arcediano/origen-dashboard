@@ -4,13 +4,12 @@
 import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { logoutUser } from '@/lib/api/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@arcediano/ux-library';
 import { Badge } from '@arcediano/ux-library';
 import { User, LogOut, ChevronRight, HelpCircle, Settings2, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLogout } from '@/hooks/useLogout';
 import type { ProducerReadinessReport } from '@/lib/api/onboarding';
 
 interface UserMenuProps {
@@ -19,7 +18,6 @@ interface UserMenuProps {
   userInitials: string;
   userAvatar?: string;
   userType?: 'producer' | 'customer';
-  onLogout?: () => void;
   /** Informe de requisitos del productor — opcional, solo para role=PRODUCER */
   readinessReport?: ProducerReadinessReport | null;
 }
@@ -30,10 +28,9 @@ export function UserMenu({
   userInitials,
   userAvatar,
   userType = 'producer',
-  onLogout,
   readinessReport,
 }: UserMenuProps) {
-  const router = useRouter();
+  const { logout } = useLogout();
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -72,17 +69,6 @@ export function UserMenu({
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
-
-  const handleLogout = async () => {
-    setIsOpen(false);
-    try {
-      await logoutUser();
-    } catch {
-      // Continue logout flow even if API fails
-    }
-    if (onLogout) onLogout();
-    router.replace('/auth/login');
-  };
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -278,7 +264,7 @@ export function UserMenu({
             </div>
 
             <div className="py-2">
-              <button onClick={handleLogout} className="w-full px-4 py-3 hover:bg-red-50 transition-colors group" type="button" role="menuitem">
+              <button onClick={() => { setIsOpen(false); void logout(); }} className="w-full px-4 py-3 hover:bg-red-50 transition-colors group" type="button" role="menuitem">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
                     <LogOut className="w-5 h-5 text-red-500" />

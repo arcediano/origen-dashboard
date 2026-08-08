@@ -9,16 +9,15 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { logoutUser } from '@/lib/api/auth';
+import { useLogout } from '@/hooks/useLogout';
 import { Avatar, AvatarFallback, Badge, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { ChevronRight, HelpCircle, LogOut, Settings2, User } from 'lucide-react';
 
 export default function PerfilPage() {
-  const router = useRouter();
   const { user } = useAuth();
+  const { logout } = useLogout();
 
   const userName = useMemo(() => {
     const full = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
@@ -28,15 +27,6 @@ export default function PerfilPage() {
   const userInitials = useMemo(() => {
     return `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase() || 'OR';
   }, [user?.firstName, user?.lastName]);
-
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-    } catch {
-      // Continuar con logout aunque el servidor falle
-    }
-    router.replace('/auth/login');
-  };
 
   const menuItems = [
     {
@@ -121,7 +111,7 @@ export default function PerfilPage() {
         {/* ── Logout ── */}
         <div className="rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden shadow-sm">
           <button
-            onClick={() => { void handleLogout(); }}
+            onClick={() => { void logout(); }}
             className="w-full flex items-center gap-3 px-4 py-4 hover:bg-red-50 active:bg-red-100 transition-colors group"
             type="button"
           >
