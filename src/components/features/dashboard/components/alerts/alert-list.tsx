@@ -8,7 +8,8 @@
 import { useState, useCallback, memo } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Alert, AlertTitle, AlertDescription } from '@arcediano/ux-library';
+import { X } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription, Button } from '@arcediano/ux-library';
 import { itemVariants } from '../layout/dashboard-shell';
 import type { DashboardAlert } from '../../types';
 
@@ -27,31 +28,36 @@ const AlertItem = memo(function AlertItem({
   const alertVariant = alert.type === 'accent' ? 'info' : alert.type;
 
   return (
-    <div className="relative">
-      <Alert variant={alertVariant}>
-        <AlertTitle>{alert.title}</AlertTitle>
-        <AlertDescription>{alert.description}</AlertDescription>
-        {alert.action && (
-          <div className="mt-2">
-            <Link
-              href={alert.action.href}
-              className="inline-flex items-center rounded-lg bg-origen-bosque px-3 py-1.5 text-xs font-medium text-white hover:bg-origen-pino"
-            >
-              {alert.action.label}
-            </Link>
-          </div>
-        )}
-      </Alert>
-      {alert.dismissible && (
-        <button
-          onClick={() => onDismiss(alert.id)}
-          className="absolute top-2 right-2 rounded p-1 text-muted-foreground hover:text-foreground hover:bg-black/5 transition-colors"
-          aria-label="Cerrar alerta"
-        >
-          ×
-        </button>
+    <Alert
+      variant={alertVariant}
+      // No se usa el dismissible/onDismiss nativo de Alert: esconde el
+      // contenido al instante (visible interno propio), lo que cortaría la
+      // animación de salida que ya gestiona AlertList más abajo. En su lugar,
+      // el botón de cerrar va en `trailing` -- mismo componente Button,
+      // pero la visibilidad la sigue controlando el padre.
+      trailing={
+        alert.dismissible ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDismiss(alert.id)}
+            aria-label="Cerrar alerta"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        ) : undefined
+      }
+    >
+      <AlertTitle>{alert.title}</AlertTitle>
+      <AlertDescription>{alert.description}</AlertDescription>
+      {alert.action && (
+        <div className="mt-2">
+          <Button asChild variant="primary" size="sm">
+            <Link href={alert.action.href}>{alert.action.label}</Link>
+          </Button>
+        </div>
       )}
-    </div>
+    </Alert>
   );
 });
 

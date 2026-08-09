@@ -8,7 +8,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Leaf, X } from 'lucide-react';
-import { PageLoader, PageError, ToggleGroup, ToggleGroupItem } from '@arcediano/ux-library';
+import { Button, PageLoader, PageError, ToggleGroup, ToggleGroupItem } from '@arcediano/ux-library';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { DashboardFooter } from '@/app/dashboard/components/footer/DashboardFooter';
 import {
@@ -46,7 +46,7 @@ function OnboardingProgressBanner({ progress }: { progress: number }) {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
       <div className="rounded-[28px] border border-origen-pradera/25 bg-surface-alt p-4 shadow-sm sm:p-5">
-        <div className="flex items-start gap-3 sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 flex-1 gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-origen-pradera/15 flex-shrink-0">
               <Leaf className="h-5 w-5 text-hoja-tinta" />
@@ -63,21 +63,16 @@ function OnboardingProgressBanner({ progress }: { progress: number }) {
             </div>
           </div>
 
-          <div className="flex flex-shrink-0 items-start gap-2 sm:items-center">
-            <Link
-              href="/onboarding"
-              className="inline-flex items-center gap-1 rounded-2xl bg-origen-bosque px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-origen-pino sm:px-4"
-            >
-              Continuar
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-            <button
-              onClick={() => setDismissed(true)}
-              className="rounded-xl p-2 text-text-subtle transition-colors hover:bg-surface"
-              aria-label="Cerrar"
-            >
+          <div className="flex flex-shrink-0 items-center gap-2 self-end sm:self-auto">
+            <Button asChild variant="primary" size="sm">
+              <Link href="/onboarding">
+                Continuar
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setDismissed(true)} aria-label="Cerrar">
               <X className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -138,17 +133,11 @@ export default function ProducerDashboard() {
   const alerts = useMemo<DashboardAlert[]>(() => {
     const dashboardAlerts: DashboardAlert[] = [];
 
-    if (!user?.onboardingCompleted) {
-      dashboardAlerts.push({
-        id: 'onboarding-pending',
-        type: 'warning',
-        title: 'Tu tienda aún no está lista para vender',
-        description: 'Completa el onboarding para activar cobros, catálogo y visibilidad pública.',
-        dismissible: true,
-      });
-    }
-
-    if (producer && profileCompleteness < 100) {
+    // El banner de onboarding (más abajo, siempre visible mientras
+    // !user.onboardingCompleted) ya cubre este mensaje con más detalle
+    // (progreso + CTA) -- este alert solo aporta valor una vez el
+    // onboarding está completo pero el perfil aún se puede mejorar.
+    if (user?.onboardingCompleted && producer && profileCompleteness < 100) {
       dashboardAlerts.push({
         id: 'profile-incomplete',
         type: 'accent',
