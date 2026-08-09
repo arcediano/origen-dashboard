@@ -13,7 +13,6 @@ import { stripeConnectAppearance, stripeConnectFonts } from '@/lib/stripe/connec
 import { saveStep6 } from '@/lib/api/onboarding';
 
 const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3001';
 
 interface StripeConnectOnboardingProps {
   stripeAccountId?: string | null;
@@ -74,7 +73,7 @@ export function StripeConnectOnboarding({
    */
   const fetchClientSecret = React.useCallback(async (): Promise<string> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/stripe/account-session`, {
+      const response = await fetch('/api/stripe/account-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -162,7 +161,7 @@ export function StripeConnectOnboarding({
     try {
       // Paso 1: Leer el estado real de la cuenta desde Stripe (server-side check)
       const statusResponse = await fetch(
-        `${API_BASE_URL}/api/stripe/status?accountId=${encodeURIComponent(resolvedAccountId)}`,
+        `/api/stripe/status?accountId=${encodeURIComponent(resolvedAccountId)}`,
         { method: 'GET' },
       );
 
