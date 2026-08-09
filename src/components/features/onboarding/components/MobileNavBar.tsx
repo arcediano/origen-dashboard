@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { ActionBar } from '@arcediano/ux-library';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface MobileNavBarProps {
   currentStep: number;
@@ -55,13 +56,21 @@ export function MobileNavBar({
       primaryAction={{
         id: 'next',
         label: isLastStep ? 'Finalizar' : 'Continuar',
+        // No se deshabilita nativamente cuando faltan campos (!canContinue):
+        // un botón disabled no dispara onClick, así que en móvil -- donde esta
+        // barra está fija y separada del contenido con scroll -- tocar el botón
+        // no daba ningún feedback. onNext (handleNext/handleComplete en la
+        // página) ya guía al primer campo pendiente cuando el paso no es válido.
         onClick: onNext,
-        disabled: !canContinue || isSubmitting,
+        disabled: isSubmitting,
         loading: isSubmitting,
         loadingText: 'Guardando...',
         variant: 'primary',
         rightIcon: !isSubmitting && !isLastStep ? <ChevronRight className="w-4 h-4" /> : undefined,
-        className: 'text-white !text-white disabled:text-white/90',
+        className: cn(
+          'text-white !text-white disabled:text-white/90',
+          !canContinue && !isSubmitting && 'opacity-60',
+        ),
       }}
       secondaryActions={secondaryActions}
       fixed

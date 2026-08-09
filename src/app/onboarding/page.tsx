@@ -734,6 +734,13 @@ export default function OnboardingPage() {
 
   const handleNext = async () => {
     if (currentStep >= totalSteps - 1) return;
+    if (!isStepValid) {
+      // El botón ya no está nativamente disabled (no daba feedback al tocarlo
+      // en móvil, donde vive en una barra fija separada del contenido) --
+      // en vez de bloquear el tap, guiamos al usuario al primer campo que falta.
+      focusFirstIncompleteField();
+      return;
+    }
     setIsSubmitting(true);
     setSaveError(null);
     try {
@@ -769,6 +776,10 @@ export default function OnboardingPage() {
   };
 
   const handleComplete = async () => {
+    if (!isStepValid) {
+      focusFirstIncompleteField();
+      return;
+    }
     setIsSubmitting(true);
     setSaveError(null);
     try {
@@ -1226,7 +1237,10 @@ export default function OnboardingPage() {
                 {currentStep < totalSteps - 1 ? (
                   <Button
                     onClick={handleNext}
-                    disabled={!isStepValid || isSubmitting}
+                    disabled={isSubmitting}
+                    aria-disabled={!isStepValid}
+                    aria-describedby={!isStepValid ? 'onboarding-step-validation' : undefined}
+                    className={cn(!isStepValid && 'opacity-60')}
                     size="sm"
                   >
                     Continuar
@@ -1234,7 +1248,10 @@ export default function OnboardingPage() {
                 ) : (
                   <Button
                     onClick={handleComplete}
-                    disabled={!isStepValid || isSubmitting}
+                    disabled={isSubmitting}
+                    aria-disabled={!isStepValid}
+                    aria-describedby={!isStepValid ? 'onboarding-step-validation' : undefined}
+                    className={cn(!isStepValid && 'opacity-60')}
                     size="sm"
                   >
                     {isSubmitting ? (

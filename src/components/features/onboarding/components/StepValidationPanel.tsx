@@ -34,7 +34,7 @@ export function StepValidationPanel({
   }
 
   return (
-    <Alert variant="warning" className="mt-4 items-start">
+    <Alert id="onboarding-step-validation" variant="warning" className="mt-4 items-start">
       <div className="min-w-0 flex-1">
         <button
           type="button"
