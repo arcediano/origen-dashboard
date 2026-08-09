@@ -218,14 +218,17 @@ export default function EnviosPage() {
   const handleAddDeliveryOption = () => {
     const newOption: DeliveryOptionRow = {
       id: nextLocalId('option'),
-      name: 'Nuevo método de envío',
-      description: 'Describe cómo entregas tus productos',
-      price: 5.9,
-      estimatedDays: '2-3',
+      name: '',
+      description: '',
+      price: 0,
+      estimatedDays: '',
     };
     setDeliveryOptions((prev) => [...prev, newOption]);
     setEditingOptionId(newOption.id);
   };
+
+  const isDeliveryOptionIncomplete = (option: DeliveryOptionRow) =>
+    !option.name.trim() || !option.description.trim() || !option.estimatedDays.trim() || option.price <= 0;
 
   const handleDeliveryOptionChange = (id: string, field: keyof DeliveryOptionRow, value: string | number) => {
     setDeliveryOptions((prev) => prev.map((opt) => (opt.id === id ? { ...opt, [field]: value } : opt)));
@@ -266,6 +269,17 @@ export default function EnviosPage() {
   // ─── Guardado ───────────────────────────────────────────────────────────
 
   const handleSave = async () => {
+    const incompleteOption = deliveryOptions.find(isDeliveryOptionIncomplete);
+    if (incompleteOption) {
+      setSaveError('Completa nombre, descripción, precio y tiempo estimado de todos tus métodos de envío.');
+      setEditingOptionId(incompleteOption.id);
+      return;
+    }
+    if (!minOrderAmount || minOrderAmount <= 0) {
+      setSaveError('El pedido mínimo debe ser mayor que 0 €.');
+      return;
+    }
+
     setIsSaving(true);
     setSaveError(null);
     setSaveSuccess(null);
@@ -579,6 +593,7 @@ export default function EnviosPage() {
                           <Input
                             value={option.name}
                             onChange={(e) => handleDeliveryOptionChange(option.id, 'name', e.target.value)}
+                            placeholder="Ej: Envío estándar"
                             inputSize="md"
                             className="text-base font-medium"
                             aria-label="Nombre del método de envío"
@@ -586,6 +601,7 @@ export default function EnviosPage() {
                           <Input
                             value={option.description}
                             onChange={(e) => handleDeliveryOptionChange(option.id, 'description', e.target.value)}
+                            placeholder="Ej: Entrega en 2-3 días laborables"
                             inputSize="md"
                             className="text-sm"
                             aria-label="Descripción del método de envío"
@@ -598,6 +614,7 @@ export default function EnviosPage() {
                               onChange={(e) => handleDeliveryOptionChange(option.id, 'price', parseFloat(e.target.value) || 0)}
                               min={0}
                               step={0.5}
+                              placeholder="0.00"
                               inputSize="md"
                             />
                             <Input
@@ -608,6 +625,12 @@ export default function EnviosPage() {
                               inputSize="md"
                             />
                           </div>
+                          {isDeliveryOptionIncomplete(option) && (
+                            <p className="text-xs text-feedback-danger flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                              Completa nombre, descripción, precio y tiempo estimado
+                            </p>
+                          )}
                         </div>
                       ) : (
                         <>
