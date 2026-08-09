@@ -183,20 +183,15 @@ export default function PaymentsPage() {
     return 'arena';
   };
 
-  // Contenido del Alert según el estado del pago
+  // Contenido del Alert según el estado del pago. Antes había un segundo
+  // párrafo aparte (getBankAccountHelpText) que decía prácticamente lo
+  // mismo para el caso "connected" -- se fusiona en un único mensaje para
+  // no repetir el mismo aviso dos veces y ahorrar scroll en móvil.
   const getAlertContent = () => {
     if (paymentStage === 'connected') {
-      return 'Puedes editar tus datos de cobro cuando lo necesites. El acceso es seguro y siempre se genera con un enlace actualizado.';
+      return 'Si necesitas cambiar tu cuenta bancaria o actualizar datos de pago, pulsa "Modificar cuenta en Stripe" para acceder de forma segura a tu cuenta existente. Tu historial de cobros y configuración permanecerán intactos.';
     }
     return 'El botón te lleva directamente al onboarding real de Stripe. El acceso es seguro y siempre se genera con un enlace actualizado.';
-  };
-
-  // Microcopy adicional para el caso "cambiar cuenta bancaria"
-  const getBankAccountHelpText = () => {
-    if (paymentStage === 'connected') {
-      return 'Si necesitas cambiar tu cuenta bancaria o actualizar datos de pago, pulsa "Modificar cuenta en Stripe" para acceder de forma segura a tu cuenta existente y realizar los cambios. Tu historial de cobros y configuración permanecerán intactos.';
-    }
-    return null;
   };
 
   if (isFirstLoad.current && isLoading) {
@@ -349,31 +344,16 @@ export default function PaymentsPage() {
                       columns={3}
                     />
 
-                    {/* Alert con prop trailing para el estado del pago */}
-                    <Alert
-                      variant={paymentStage === 'connected' ? 'success' : 'default'}
-                      trailing={
-                        <Badge
-                          variant={paymentStage === 'connected' ? 'success' : paymentStage === 'pending' ? 'warning' : 'neutral'}
-                          size="sm"
-                          className="flex items-center gap-1.5 shrink-0"
-                        >
-                          {paymentStage === 'connected' ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> : paymentStage === 'pending' ? <CircleEllipsis className="h-3.5 w-3.5" aria-hidden="true" /> : <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />}
-                          {paymentStage === 'connected' ? 'Listo' : paymentStage === 'pending' ? 'En progreso' : 'Vacío'}
-                        </Badge>
-                      }
-                    >
+                    {/* Alert de estado del pago. Sin badge de estado propio --
+                        ese estado ya se ve en la cabecera de la página y en
+                        la primera tarjeta del StatGrid de arriba; repetirlo
+                        aquí una tercera vez solo añadía scroll sin aportar
+                        información nueva. */}
+                    <Alert variant={paymentStage === 'connected' ? 'success' : 'default'}>
                       <AlertDescription>
                         {getAlertContent()}
                       </AlertDescription>
                     </Alert>
-
-                    {/* Texto adicional para explicar el cambio de cuenta bancaria */}
-                    {getBankAccountHelpText() && (
-                      <p className="text-xs sm:text-sm text-text-subtle leading-relaxed">
-                        {getBankAccountHelpText()}
-                      </p>
-                    )}
 
                     {/* Componente embebido de Stripe Connect (cuando es necesario onboarding) */}
                     {showEmbeddedOnboarding && paymentStage !== 'connected' && (
