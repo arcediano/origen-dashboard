@@ -1,6 +1,8 @@
 'use client';
 
 import * as React from 'react';
+import { loadConnectAndInitialize } from '@stripe/connect-js';
+import type { StripeConnectInstance } from '@stripe/connect-js';
 import {
   ConnectComponentsProvider,
   ConnectAccountOnboarding,
@@ -55,6 +57,12 @@ export function StripeConnectOnboarding({
     stripeAccountId,
   );
 
+  // fetchClientSecret se captura UNA sola vez dentro de loadConnectAndInitialize
+  // (más abajo) — un ref, no el state, para que siempre lea el accountId más
+  // reciente sin necesidad de recrear la instancia de Connect en cada cambio.
+  const resolvedAccountIdRef = React.useRef(resolvedAccountId);
+  resolvedAccountIdRef.current = resolvedAccountId;
+
   React.useEffect(() => {
     if (stripeAccountId) {
       setResolvedAccountId(stripeAccountId);
@@ -70,7 +78,7 @@ export function StripeConnectOnboarding({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          accountId: resolvedAccountId ?? undefined,
+          accountId: resolvedAccountIdRef.current ?? undefined,
           email: onboardingContext.email,
           firstName: onboardingContext.firstName,
           lastName: onboardingContext.lastName,
@@ -109,7 +117,8 @@ export function StripeConnectOnboarding({
       }
       throw err;
     }
-  }, [resolvedAccountId, onboardingContext, source, onError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingContext, source, onError]);
 
   /**
    * Se dispara cuando el componente embebido carga.
@@ -195,7 +204,24 @@ export function StripeConnectOnboarding({
   // el render aquí impedía que ese flujo se disparase nunca -- bloqueaba a
   // todo productor que aún no tuviera cuenta, el caso más común.
 
-  if (!STRIPE_PUBLISHABLE_KEY) {
+  // La instancia de Connect se crea UNA vez con loadConnectAndInitialize() —
+  // no son props sueltas de ConnectComponentsProvider/ConnectAccountOnboarding
+  // (esa API no existe; ConnectComponentsProvider solo acepta `connectInstance`).
+  // Pasar publishableKey/appearance/fonts/fetchClientSecret directamente como
+  // props, como hacía la versión anterior, deja `connectInstance` undefined y
+  // el SDK revienta al intentar crear el componente embebido
+  // ("Cannot read properties of undefined (reading 'create')").
+  const connectInstanceRef = React.useRef<StripeConnectInstance | null>(null);
+  if (!connectInstanceRef.current && STRIPE_PUBLISHABLE_KEY) {
+    connectInstanceRef.current = loadConnectAndInitialize({
+      publishableKey: STRIPE_PUBLISHABLE_KEY,
+      fetchClientSecret,
+      appearance: stripeConnectAppearance,
+      fonts: stripeConnectFonts,
+    });
+  }
+
+  if (!STRIPE_PUBLISHABLE_KEY || !connectInstanceRef.current) {
     return (
       <div className="w-full p-4 bg-feedback-danger-subtle rounded-xl border border-feedback-danger/30 flex flex-col sm:flex-row sm:items-center gap-2">
         <div className="flex items-start gap-2 flex-1">
@@ -232,31 +258,17 @@ export function StripeConnectOnboarding({
         </div>
       )}
 
-      {/* Nota: Los tipos de @stripe/react-connect-js tienen restricciones.
-          Usamos `any` para pasar los props correctos según la documentación de Stripe.
-          Esta estructura es válida según la guía oficial. */}
-      {(() => {
-        const ConnectProvider = ConnectComponentsProvider as any;
-        const ConnectComponent = ConnectAccountOnboarding as any;
-        return (
-          <ConnectProvider
-            publishableKey={STRIPE_PUBLISHABLE_KEY}
-            appearance={stripeConnectAppearance}
-            fonts={stripeConnectFonts}
-          >
-            <ConnectComponent
-              onLoaderStart={handleLoaderStart}
-              onLoadError={handleLoadError}
-              onExit={handleExit}
-              collectionOptions={{
-                fields: 'currently_due',
-                futureRequirements: 'include',
-              }}
-              fetchClientSecret={fetchClientSecret}
-            />
-          </ConnectProvider>
-        );
-      })()}
+      <ConnectComponentsProvider connectInstance={connectInstanceRef.current}>
+        <ConnectAccountOnboarding
+          onLoaderStart={handleLoaderStart}
+          onLoadError={handleLoadError}
+          onExit={handleExit}
+          collectionOptions={{
+            fields: 'currently_due',
+            futureRequirements: 'include',
+          }}
+        />
+      </ConnectComponentsProvider>
     </div>
   );
 }
