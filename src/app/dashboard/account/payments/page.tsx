@@ -330,7 +330,11 @@ export default function PaymentsPage() {
                         {
                           label: 'Cuenta',
                           value: stripeAccountId ?? 'Se generará al iniciar el alta',
-                          valueClassName: 'text-base sm:text-lg lg:text-xl',
+                          // break-all: stripeAccountId es un token largo sin
+                          // espacios (acct_...) -- StatCard no lo trunca ni
+                          // envuelve por defecto, así que sin esto desborda
+                          // la tarjeta en el grid de 2 columnas de móvil.
+                          valueClassName: 'text-base sm:text-lg lg:text-xl break-all',
                           subtitle: 'Identificador técnico de Stripe asociado a tu perfil comercial.',
                           variant: getStatVariant(),
                         },
