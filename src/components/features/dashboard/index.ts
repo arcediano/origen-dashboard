@@ -15,9 +15,6 @@ export { DashboardShell, itemVariants } from './components/layout';
 // Header
 export { WelcomeHeader } from './components/header';
 
-// Profile
-export { ProducerCard } from './components/profile';
-
 // Stats
 export { StatsGrid } from './components/stats';
 

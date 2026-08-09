@@ -31,8 +31,7 @@ import {
   useProducerProfile,
 } from '@/components/features/dashboard/hooks';
 import { useAuth } from '@/contexts/AuthContext';
-import { getMyReadiness } from '@/lib/api/onboarding';
-import type { ProducerReadinessReport } from '@/lib/api/onboarding';
+import { useReadiness } from '@/contexts/ReadinessContext';
 
 // ============================================================================
 // COMPONENTE PRINCIPAL
@@ -84,8 +83,9 @@ export default function ProducerDashboard() {
   const [chartPeriod, setChartPeriod] = useState<'7d' | '6m' | '1y'>('6m');
   const { user } = useAuth();
   const isFirstLoad = useRef(true);
-  const [readiness, setReadiness] = useState<ProducerReadinessReport | null>(null);
-  const [readinessLoading, setReadinessLoading] = useState(true);
+  // Compartido con DashboardHeader/UserMenu vía ReadinessProvider (antes cada
+  // uno pedía getMyReadiness() por su cuenta, duplicando la petición).
+  const { readiness } = useReadiness();
 
   // Hooks para datos
   const {
@@ -98,23 +98,6 @@ export default function ProducerDashboard() {
   const { orders: realOrders, isLoading: ordersLoading, error: ordersError, refetch: refetchOrders } = useRecentOrders(3);
   const { products: realProducts, isLoading: productsLoading, error: productsError, refetch: refetchProducts } = useTopProducts(3);
   const { producer } = useProducerProfile();
-
-  // Obtener estado de readiness (incluyendo estado de pago)
-  useEffect(() => {
-    const fetchReadiness = async () => {
-      try {
-        const report = await getMyReadiness();
-        setReadiness(report);
-      } catch (error) {
-        console.error('Error fetching readiness:', error);
-        // No lanzar error — las alertas de Stripe simplemente no se mostrarán
-      } finally {
-        setReadinessLoading(false);
-      }
-    };
-
-    void fetchReadiness();
-  }, []);
 
   const showPageLoader = useDelayedLoading(isFirstLoad.current && statsLoading);
 

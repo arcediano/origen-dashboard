@@ -14,6 +14,7 @@ import { BottomTabBar, MobileTopBar, MobilePageTransition } from '@/components/f
 import { cn } from '@/lib/utils';
 import { type SellerStatus } from '@/types/seller';
 import { useAuth } from '@/contexts/AuthContext';
+import { ReadinessProvider } from '@/contexts/ReadinessContext';
 
 // Datos mock - @todo: GET /api/producer/status
 const MOCK_PRODUCER_STATUS = {
@@ -125,6 +126,7 @@ function DashboardContentWrapper({
   if (!isAuthenticated || !isProducer) return null;
 
     return (
+      <ReadinessProvider>
       <div className="min-h-screen bg-transparent">
       {/* Sidebar — solo desktop */}
       <DashboardSidebar
@@ -163,5 +165,6 @@ function DashboardContentWrapper({
       {/* Bottom tab bar — solo móvil */}
       <BottomTabBar />
     </div>
+    </ReadinessProvider>
   );
 }
