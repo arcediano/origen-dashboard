@@ -653,7 +653,7 @@ export default function BusinessInfoPage() {
         onBack={() => router.push('/dashboard/profile')}
       />
 
-      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8 ${isEditing ? 'lg:pb-28' : ''}`}>
+      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, isEditing ? 64 : 0)} sm:pb-8 ${isEditing ? 'lg:pb-28' : ''}`}>
         <ProfileSectionNav className="mt-3" />
 
         <div className="mt-6">
@@ -1148,7 +1148,6 @@ export default function BusinessInfoPage() {
                   <div className="space-y-2">
                     <Label htmlFor="whyOrigin">Por que Origen?</Label>
                     <Textarea id="whyOrigin" value={form.whyOrigin} onChange={(e) => setForm({ ...form, whyOrigin: e.target.value })} disabled={!isEditing} rows={3} placeholder="Cuéntanos tu motivación para unirte a Origen" />
-                    {errors.whyOrigin && <p className="text-xs text-feedback-danger">{errors.whyOrigin}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="introVideoUrl">Video de presentacion</Label>
@@ -1198,7 +1197,12 @@ export default function BusinessInfoPage() {
                       <Badge key={cat} variant="leaf" size="md" className="px-3 py-1.5">
                         {cat}
                         {isEditing && (
-                          <button className="ml-2 hover:text-feedback-danger" onClick={() => handleRemoveCategory(cat)}>
+                          <button
+                            type="button"
+                            className="ml-2 p-0.5 rounded-full hover:text-feedback-danger"
+                            onClick={() => handleRemoveCategory(cat)}
+                            aria-label={`Eliminar categoría ${cat}`}
+                          >
                             <X className="w-3 h-3" />
                           </button>
                         )}
@@ -1229,7 +1233,9 @@ export default function BusinessInfoPage() {
                         ))}
                       </ToggleGroup>
                       <div className="flex gap-2">
-                        <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="Nueva categoria" />
+                        <div className="flex-1 min-w-0">
+                          <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="Nueva categoria" />
+                        </div>
                         <Button variant="secondary" size="md" onClick={handleAddCategory}>
                           <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
                             <Plus className="w-4 h-4" />
