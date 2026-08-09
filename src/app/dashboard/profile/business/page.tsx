@@ -888,8 +888,8 @@ export default function BusinessInfoPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2 md:col-span-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2 col-span-2">
                       <Label htmlFor="businessName" className="flex items-center">
                         Nombre comercial
                         <RequiredFieldIndicator isRequired={isFieldBlocker('businessName', readinessReport)} />
@@ -962,7 +962,7 @@ export default function BusinessInfoPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="businessPhone">Telefono</Label>
                       <Input id="businessPhone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} disabled={!isEditing} />
@@ -994,7 +994,7 @@ export default function BusinessInfoPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="street">Calle</Label>
                       <Input id="street" value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} disabled={!isEditing} />
@@ -1003,7 +1003,7 @@ export default function BusinessInfoPage() {
                       <Label htmlFor="streetNumber">Numero</Label>
                       <Input id="streetNumber" value={form.streetNumber} onChange={(e) => setForm({ ...form, streetNumber: e.target.value })} disabled={!isEditing} />
                     </div>
-                    <div className="space-y-2 md:col-span-2">
+                    <div className="space-y-2 col-span-2">
                       <Label htmlFor="streetComplement">Complemento</Label>
                       <Input id="streetComplement" value={form.streetComplement} onChange={(e) => setForm({ ...form, streetComplement: e.target.value })} disabled={!isEditing} />
                     </div>
@@ -1075,7 +1075,7 @@ export default function BusinessInfoPage() {
                     />
 
                     {!form.billingAddressSameAsProduction && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="billingStreet">Calle</Label>
                           <Input id="billingStreet" value={form.billingStreet} onChange={(e) => setForm({ ...form, billingStreet: e.target.value })} disabled={!isEditing} />
@@ -1084,7 +1084,7 @@ export default function BusinessInfoPage() {
                           <Label htmlFor="billingStreetNumber">Numero</Label>
                           <Input id="billingStreetNumber" value={form.billingStreetNumber} onChange={(e) => setForm({ ...form, billingStreetNumber: e.target.value })} disabled={!isEditing} />
                         </div>
-                        <div className="space-y-2 md:col-span-2">
+                        <div className="space-y-2 col-span-2">
                           <Label htmlFor="billingStreetComplement">Complemento</Label>
                           <Input id="billingStreetComplement" value={form.billingStreetComplement} onChange={(e) => setForm({ ...form, billingStreetComplement: e.target.value })} disabled={!isEditing} />
                         </div>
