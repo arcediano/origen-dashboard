@@ -11,7 +11,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 import { FileUpload, type UploadedFile } from '@/components/shared';
-import { Button } from '@arcediano/ux-library';
+import { Button, DateInput } from '@arcediano/ux-library';
 
 import {
   FileText,
@@ -104,6 +104,8 @@ export function EnhancedStep5Documents({
   // VALIDACIÓN
   // ========================================================================
   
+  const today = new Date().toISOString().split('T')[0];
+
   const hasCif = Boolean(data.cif);
   const hasSeguro = Boolean(data.seguroRC);
   const hasManipulador = Boolean(data.manipuladorAlimentos);
@@ -242,19 +244,12 @@ export function EnhancedStep5Documents({
             ) : (
               <>
                 <div className="mb-3">
-                  <label
-                    htmlFor="cifExpiresAt"
-                    className="block text-sm font-medium text-origen-bosque mb-1"
-                  >
-                    Fecha de caducidad <span className="text-feedback-danger">*</span>
-                  </label>
-                  <input
+                  <DateInput
                     id="cifExpiresAt"
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
+                    label="Fecha de caducidad"
+                    min={today}
                     value={data.cifExpiresAt ?? ''}
                     onChange={(e) => handleInputChange('cifExpiresAt', e.target.value || undefined)}
-                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-origen-pradera"
                     required
                   />
                 </div>
@@ -299,19 +294,12 @@ export function EnhancedStep5Documents({
             ) : (
               <>
                 <div className="mb-3">
-                  <label
-                    htmlFor="seguroRcExpiresAt"
-                    className="block text-sm font-medium text-origen-bosque mb-1"
-                  >
-                    Fecha de caducidad <span className="text-feedback-danger">*</span>
-                  </label>
-                  <input
+                  <DateInput
                     id="seguroRcExpiresAt"
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
+                    label="Fecha de caducidad"
+                    min={today}
                     value={data.seguroRcExpiresAt ?? ''}
                     onChange={(e) => handleInputChange('seguroRcExpiresAt', e.target.value || undefined)}
-                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-origen-pradera"
                     required
                   />
                 </div>
@@ -356,19 +344,12 @@ export function EnhancedStep5Documents({
             ) : (
               <>
                 <div className="mb-3">
-                  <label
-                    htmlFor="manipuladorAlimentosExpiresAt"
-                    className="block text-sm font-medium text-origen-bosque mb-1"
-                  >
-                    Fecha de caducidad <span className="text-feedback-danger">*</span>
-                  </label>
-                  <input
+                  <DateInput
                     id="manipuladorAlimentosExpiresAt"
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
+                    label="Fecha de caducidad"
+                    min={today}
                     value={data.manipuladorAlimentosExpiresAt ?? ''}
                     onChange={(e) => handleInputChange('manipuladorAlimentosExpiresAt', e.target.value || undefined)}
-                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-origen-pradera"
                     required
                   />
                 </div>
