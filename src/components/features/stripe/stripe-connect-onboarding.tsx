@@ -8,7 +8,7 @@ import {
   ConnectAccountOnboarding,
 } from '@stripe/react-connect-js';
 import { Spinner } from '@/components/shared';
-import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, Button } from '@arcediano/ux-library';
 import { stripeConnectAppearance, stripeConnectFonts } from '@/lib/stripe/connect-appearance';
 import { saveStep6 } from '@/lib/api/onboarding';
 
@@ -222,14 +222,11 @@ export function StripeConnectOnboarding({
 
   if (!STRIPE_PUBLISHABLE_KEY || !connectInstanceRef.current) {
     return (
-      <div className="w-full p-4 bg-feedback-danger-subtle rounded-xl border border-feedback-danger/30 flex flex-col sm:flex-row sm:items-center gap-2">
-        <div className="flex items-start gap-2 flex-1">
-          <AlertCircle className="w-4 h-4 text-feedback-danger flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-feedback-danger-text">
-            No se pudo inicializar Stripe Connect. Por favor, recarga la página.
-          </p>
-        </div>
-      </div>
+      <Alert variant="error">
+        <AlertDescription>
+          No se pudo inicializar Stripe Connect. Por favor, recarga la página.
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -242,19 +239,14 @@ export function StripeConnectOnboarding({
       )}
 
       {error && (
-        <div className="w-full p-4 bg-feedback-danger-subtle rounded-xl border border-feedback-danger/30 flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
-          <div className="flex items-start gap-2 flex-1">
-            <AlertCircle className="w-4 h-4 text-feedback-danger flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-feedback-danger-text">{error}</p>
+        <Alert variant="error" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+          <div className="mt-2">
+            <Button variant="ghost" size="sm" onClick={() => setError('')}>
+              Reintentar
+            </Button>
           </div>
-          <button
-            type="button"
-            onClick={() => setError('')}
-            className="self-end text-xs font-medium text-feedback-danger-text underline underline-offset-2 sm:self-auto"
-          >
-            Reintentar
-          </button>
-        </div>
+        </Alert>
       )}
 
       <ConnectComponentsProvider connectInstance={connectInstanceRef.current}>

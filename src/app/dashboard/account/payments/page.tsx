@@ -272,10 +272,10 @@ export default function PaymentsPage() {
                         {paymentStage === 'connected' ? 'Cobros activos' : paymentStage === 'pending' ? 'Onboarding pendiente' : 'Sin cuenta de cobro'}
                       </Badge>
                       {acceptedTermsAt && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-surface px-3 py-1.5 text-xs font-medium text-text-subtle">
+                        <Badge variant="outline" size="sm" className="flex items-center gap-1.5">
                           <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
                           Terminos aceptados
-                        </span>
+                        </Badge>
                       )}
                       {isRefreshing && (
                         <span className="inline-flex items-center gap-1.5">
@@ -378,14 +378,14 @@ export default function PaymentsPage() {
                           <h3 className="text-sm font-semibold text-origen-bosque">
                             {paymentStage === 'pending' ? 'Continuar onboarding' : 'Crear cuenta Stripe'}
                           </h3>
-                          <button
-                            type="button"
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={handleCloseEmbedded}
-                            className="text-text-subtle hover:text-text transition-colors"
                             aria-label="Cerrar formulario de Stripe"
                           >
                             <X className="h-4 w-4" />
-                          </button>
+                          </Button>
                         </div>
                         <StripeConnectOnboarding
                           stripeAccountId={stripeAccountId}
