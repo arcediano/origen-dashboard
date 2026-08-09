@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Euro, Filter, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp, Wallet } from 'lucide-react';
+import { Euro, Megaphone, PauseCircle, Plus, RefreshCw, Trash2, TrendingUp, Wallet } from 'lucide-react';
 import { Button, DateInput, Input, Label, PageHeader, StatGrid, EmptyState, PageLoader, PageError, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Card, Badge, MobilePullRefresh, CardIconHeader, MobileCardList, SwipeableRow, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, toast } from '@arcediano/ux-library';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import type { StatGridItem } from '@arcediano/ux-library';
+import { CampanasFilters } from './components/CampanasFilters';
 import {
   createCampaign,
   deleteCampaign,
@@ -316,8 +317,8 @@ export default function CampanasPage() {
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [statusFilter, setStatusFilter] = useState<CampaignStatus | 'ALL'>('ALL');
+  const [search, setSearch] = useState('');
   const isFirstLoad = React.useRef(true);
   const showPageLoader = useDelayedLoading(isFirstLoad.current && loading);
 
@@ -398,6 +399,13 @@ export default function CampanasPage() {
     }
   };
 
+  const filteredCampaigns = search.trim()
+    ? campaigns.filter((c) => {
+        const q = search.trim().toLowerCase();
+        return (c.headline ?? '').toLowerCase().includes(q) || c.productSlug.toLowerCase().includes(q);
+      })
+    : campaigns;
+
   return (
     <div className="w-full">
       <MobilePullRefresh onRefresh={async () => { await loadCampaigns(); }}>
@@ -442,66 +450,14 @@ export default function CampanasPage() {
             />
           )}
 
-          {/* Filtros desktop — hidden en móvil */}
-          <div className="hidden lg:flex items-center gap-3">
-            <Label className="text-sm font-medium text-text-subtle shrink-0">Estado:</Label>
-            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as CampaignStatus | 'ALL')}>
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Todas</SelectItem>
-                <SelectItem value="ACTIVE">Activas</SelectItem>
-                <SelectItem value="PENDING_REVIEW">En revisión</SelectItem>
-                <SelectItem value="PAUSED">Pausadas</SelectItem>
-                <SelectItem value="ENDED">Finalizadas</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Filtros móvil */}
-          <div className="lg:hidden">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="w-full gap-2"
-              onClick={() => setShowFilters(true)}
-            >
-              <Filter className="h-4 w-4" />
-              Filtrar
-              {statusFilter !== 'ALL' && (
-                <Badge variant="leaf" size="xs">{STATUS_LABEL[statusFilter as CampaignStatus]}</Badge>
-              )}
-            </Button>
-          </div>
-
-          {/* Panel de filtros móvil — Dialog simple */}
-          {showFilters && (
-            <div className="fixed inset-0 z-50 bg-black/40 lg:hidden" onClick={() => setShowFilters(false)}>
-              <div
-                className="absolute bottom-0 left-0 right-0 rounded-t-2xl bg-surface p-6 space-y-4"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 className="font-semibold text-origen-bosque">Filtros</h3>
-                <div className="space-y-2">
-                  <Label>Estado</Label>
-                  <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as CampaignStatus | 'ALL'); setShowFilters(false); }}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ALL">Todas</SelectItem>
-                      <SelectItem value="ACTIVE">Activas</SelectItem>
-                      <SelectItem value="PENDING_REVIEW">En revisión</SelectItem>
-                      <SelectItem value="PAUSED">Pausadas</SelectItem>
-                      <SelectItem value="ENDED">Finalizadas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button variant="ghost" className="w-full" onClick={() => setShowFilters(false)}>Cerrar</Button>
-              </div>
-            </div>
-          )}
+          {/* Filtros */}
+          <CampanasFilters
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            search={search}
+            onSearchChange={setSearch}
+            totalCampaigns={filteredCampaigns.length}
+          />
 
           {/* List */}
           {isTableLoading ? (
@@ -510,13 +466,17 @@ export default function CampanasPage() {
                 <div key={i} className="h-28 animate-pulse rounded-2xl bg-origen-pastel/30" />
               ))}
             </div>
-          ) : campaigns.length === 0 ? (
+          ) : filteredCampaigns.length === 0 ? (
             <Card>
               <EmptyState
                 size="sm"
                 icon={<Megaphone className="w-6 h-6" />}
-                title="Sin campañas"
-                description="Crea tu primera campaña para empezar a promocionar tus productos."
+                title={campaigns.length === 0 ? 'Sin campañas' : 'Sin resultados'}
+                description={
+                  campaigns.length === 0
+                    ? 'Crea tu primera campaña para empezar a promocionar tus productos.'
+                    : 'No hay campañas que coincidan con la búsqueda o el filtro aplicado.'
+                }
               />
             </Card>
           ) : (
@@ -524,7 +484,7 @@ export default function CampanasPage() {
               {/* Móvil: MobileCardList con SwipeableRow para borradores */}
               <div className="lg:hidden space-y-3">
                 <MobileCardList>
-                  {campaigns.map((campaign) =>
+                  {filteredCampaigns.map((campaign) =>
                     campaign.status === 'DRAFT' ? (
                       <SwipeableRow
                         key={campaign.id}
@@ -546,7 +506,7 @@ export default function CampanasPage() {
 
               {/* Desktop: lista normal */}
               <div className="hidden lg:block space-y-3">
-                {campaigns.map((campaign) => (
+                {filteredCampaigns.map((campaign) => (
                   <CampaignCard key={campaign.id} campaign={campaign} onDeleted={() => void loadCampaigns()} showDeleteButton />
                 ))}
               </div>

@@ -9,7 +9,6 @@ import {
   Flame,
   Clock,
   CheckCircle,
-  Filter,
   Package,
   AlertTriangle,
 } from 'lucide-react';
@@ -20,18 +19,11 @@ import {
   EmptyState,
   PageLoader,
   PageError,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
   Card,
   Badge,
-  Label,
   MobilePullRefresh,
   MobileCardList,
   SwipeableRow,
-  FilterBottomSheet,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -47,6 +39,7 @@ import {
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { fetchMyFlashDeals, fetchProducts, cancelFlashDeal, type FlashDealWithProduct } from '@/lib/api/products';
 import { FlashDealForm } from '../products/components/FlashDealForm';
+import { OfertasFlashFilters } from './components/OfertasFlashFilters';
 import type { Product } from '@/types/product';
 import Link from 'next/link';
 
@@ -67,14 +60,6 @@ const STATUS_BADGE: Record<string, 'success' | 'warning' | 'neutral' | 'danger'>
   finished: 'neutral',
   cancelled: 'danger',
 };
-
-const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: 'todas', label: 'Todas las ofertas' },
-  { value: 'active', label: 'Activas' },
-  { value: 'scheduled', label: 'Programadas' },
-  { value: 'finished', label: 'Finalizadas' },
-  { value: 'cancelled', label: 'Canceladas' },
-];
 
 /** Estado calculado solo por fechas (`startsAt`/`endsAt`/`isActive`). Úsalo
  * para lógica de negocio (filtros, KPIs, acciones disponibles) — para lo que
@@ -243,7 +228,7 @@ export default function OfertasFlashPage() {
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('todas');
-  const [showFilters, setShowFilters] = useState(false);
+  const [search, setSearch] = useState('');
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>(undefined);
   const [selectedProductBasePrice, setSelectedProductBasePrice] = useState(0);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -353,6 +338,10 @@ export default function OfertasFlashPage() {
 
   const isModalOpen = showCreateModal || showEditModal;
   const showProductSelector = !selectedProductId && !editingDeal;
+
+  const filteredDeals = search.trim()
+    ? deals.filter((deal) => deal.productName.toLowerCase().includes(search.trim().toLowerCase()))
+    : deals;
 
   const columns: Column<FlashDealWithProduct>[] = [
     {
@@ -474,68 +463,14 @@ export default function OfertasFlashPage() {
           {/* KPIs */}
           <StatGrid items={stats} columns={4} />
 
-          {/* Filtros desktop — hidden en móvil */}
-          <div className="hidden lg:flex items-center gap-3">
-            <Label className="text-sm font-medium text-text-subtle shrink-0">Estado:</Label>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Filtros móvil */}
-          <div className="lg:hidden">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="w-full gap-2"
-              onClick={() => setShowFilters(true)}
-            >
-              <Filter className="h-4 w-4" />
-              Filtrar
-              {statusFilter !== 'todas' && (
-                <Badge variant="leaf" size="xs">{STATUS_LABEL[statusFilter] ?? statusFilter}</Badge>
-              )}
-            </Button>
-          </div>
-
-          {/* Panel de filtros móvil */}
-          <FilterBottomSheet
-            open={showFilters}
-            onClose={() => setShowFilters(false)}
-            title="Filtros"
-            footer={
-              <Button variant="ghost" className="w-full" onClick={() => setShowFilters(false)}>
-                Cerrar
-              </Button>
-            }
-          >
-            <div className="space-y-2">
-              <Label>Estado</Label>
-              <Select
-                value={statusFilter}
-                onValueChange={(value) => {
-                  setStatusFilter(value);
-                  setShowFilters(false);
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </FilterBottomSheet>
+          {/* Filtros */}
+          <OfertasFlashFilters
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            search={search}
+            onSearchChange={setSearch}
+            totalDeals={filteredDeals.length}
+          />
 
           {/* Modal crear/editar oferta */}
           <Dialog open={isModalOpen} onOpenChange={(open) => { if (!open) handleCloseModal(); }}>
@@ -569,13 +504,17 @@ export default function OfertasFlashPage() {
                 <div key={i} className="h-24 animate-pulse rounded-2xl bg-origen-pastel/30" />
               ))}
             </div>
-          ) : deals.length === 0 ? (
+          ) : filteredDeals.length === 0 ? (
             <Card>
               <EmptyState
                 size="sm"
                 icon={<Zap className="w-6 h-6" />}
-                title="Sin ofertas flash"
-                description="Crea tu primera oferta flash para destacar tus productos con descuentos relámpago."
+                title={deals.length === 0 ? 'Sin ofertas flash' : 'Sin resultados'}
+                description={
+                  deals.length === 0
+                    ? 'Crea tu primera oferta flash para destacar tus productos con descuentos relámpago.'
+                    : 'No hay ofertas flash que coincidan con la búsqueda o el filtro aplicado.'
+                }
               />
             </Card>
           ) : (
@@ -583,7 +522,7 @@ export default function OfertasFlashPage() {
               {/* Móvil: MobileCardList con SwipeableRow para cancelar */}
               <div className="lg:hidden">
                 <MobileCardList>
-                  {deals.map((deal) => {
+                  {filteredDeals.map((deal) => {
                     const status = getStatus(deal);
                     const isFinished = status === 'finished' || status === 'cancelled';
                     const card = <DealCard deal={deal} onEdit={handleEditDeal} />;
@@ -611,7 +550,7 @@ export default function OfertasFlashPage() {
               {/* Desktop: tabla del catálogo de componentes */}
               <div className="hidden lg:block">
                 <Table
-                  data={deals}
+                  data={filteredDeals}
                   columns={columns}
                   keyExtractor={(deal) => deal.id}
                   onRowClick={(deal) => {
