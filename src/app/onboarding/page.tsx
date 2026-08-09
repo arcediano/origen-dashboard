@@ -250,7 +250,7 @@ export default function OnboardingPage() {
       deliveryOptions: [],
       includedZones: [],
       excludedZones: [],
-      minOrderAmount: 20,
+      minOrderAmount: 0,
       sustainablePackaging: false,
       packagingDescription: ''
     },
@@ -550,6 +550,12 @@ export default function OnboardingPage() {
       case 4: {
         if (!formData.step4.isInOriginRoute && formData.step4.deliveryOptions.length < 1) {
           messages.push('Añade al menos un método de envío.');
+        }
+        const incompleteDeliveryOption = formData.step4.deliveryOptions.some(
+          (opt) => !opt.name.trim() || !opt.description.trim() || !opt.estimatedDays.trim() || opt.price <= 0,
+        );
+        if (incompleteDeliveryOption) {
+          messages.push('Completa nombre, descripción, precio y tiempo estimado de todos tus métodos de envío.');
         }
         if (formData.step4.includedZones.length < 1) messages.push('Añade al menos una zona de entrega incluida.');
         if (!formData.step4.minOrderAmount || formData.step4.minOrderAmount <= 0) messages.push('El pedido mínimo debe ser mayor que 0 €.');

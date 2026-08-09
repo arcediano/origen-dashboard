@@ -502,15 +502,18 @@ export function EnhancedStep4Capacity({
   const handleAddCustomDeliveryOption = () => {
     const newOption: DeliveryOption = {
       id: `custom-${Date.now()}`,
-      name: 'Nuevo envío',
-      description: 'Describe tu método de envío',
-      price: 5.90,
-      estimatedDays: '2-3',
+      name: '',
+      description: '',
+      price: 0,
+      estimatedDays: '',
       icon: Package
     };
     handleInputChange('deliveryOptions', [...data.deliveryOptions, newOption]);
     setEditingOption(newOption.id);
   };
+
+  const isDeliveryOptionIncomplete = (option: DeliveryOption) =>
+    !option.name.trim() || !option.description.trim() || !option.estimatedDays.trim() || option.price <= 0;
 
   const handleRemoveDeliveryOption = (optionId: string) => {
     handleInputChange('deliveryOptions', data.deliveryOptions.filter(opt => opt.id !== optionId));
@@ -720,12 +723,14 @@ export function EnhancedStep4Capacity({
                           <Input
                             value={option.name}
                             onChange={(e) => handleDeliveryOptionChange(option.id, 'name', e.target.value)}
+                            placeholder="Ej: Envío estándar"
                             inputSize="md"
                             className="text-base font-medium"
                           />
                           <Input
                             value={option.description}
                             onChange={(e) => handleDeliveryOptionChange(option.id, 'description', e.target.value)}
+                            placeholder="Ej: Entrega en 2-3 días laborables"
                             inputSize="md"
                             className="text-sm"
                           />
@@ -737,6 +742,7 @@ export function EnhancedStep4Capacity({
                               onChange={(e) => handleDeliveryOptionChange(option.id, 'price', parseFloat(e.target.value) || 0)}
                               min={0}
                               step={0.5}
+                              placeholder="0.00"
                               inputSize="md"
                             />
                             <Input
@@ -747,6 +753,12 @@ export function EnhancedStep4Capacity({
                               inputSize="md"
                             />
                           </div>
+                          {isDeliveryOptionIncomplete(option) && (
+                            <p className="text-xs text-feedback-danger-text flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                              Completa nombre, descripción, precio y tiempo estimado
+                            </p>
+                          )}
                         </div>
                       ) : (
                         <>
