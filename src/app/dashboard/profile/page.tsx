@@ -119,11 +119,6 @@ export default function ProfilePage() {
 
   if (isLoading || isReadinessLoading) return <PageLoader message="Cargando perfil..." />;
 
-  const completion = producer?.profileCompletenessPercent ?? 0;
-  const totalTrackedItems = producer?.profileCompletenessMeta.totalSteps ?? 0;
-  const completedTrackedItems = producer?.profileCompletenessMeta.completedSteps ?? 0;
-  const pendingItems = Math.max(0, totalTrackedItems - completedTrackedItems);
-
   // "Información personal" edita nombre/apellidos y teléfono del usuario
   // autenticado (ver profile/personal/page.tsx) — no del productor.
   const personalVerified = Boolean(authUser?.firstName && authUser?.lastName && authUser?.phone);
@@ -152,6 +147,16 @@ export default function ProfilePage() {
   const certificationsPending = readiness
     ? Object.values(readiness.documentChecks).filter((status) => status !== 'VERIFIED').length
     : 0;
+
+  // La barra de completitud debe reflejar exactamente las 3 secciones de
+  // abajo -- antes usaba producer.profileCompletenessPercent, una métrica
+  // de backend independiente de estos 3 checks, y podía marcar 100% con
+  // secciones realmente pendientes (p. ej. certificaciones).
+  const totalTrackedItems = 3;
+  const completedTrackedItems = [personalVerified, businessVerified, certificationsPending === 0]
+    .filter(Boolean).length;
+  const pendingItems = totalTrackedItems - completedTrackedItems;
+  const completion = Math.round((completedTrackedItems / totalTrackedItems) * 100);
 
   return (
     <div className="w-full">
