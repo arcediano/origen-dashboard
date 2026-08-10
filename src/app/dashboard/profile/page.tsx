@@ -15,6 +15,8 @@ import { Card, CardContent, CardHeader, CardTitle, PageLoader } from '@arcediano
 import { Badge, Button } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
 import { useProducerProfile } from '@/components/features/dashboard/hooks';
+import { useAuth } from '@/contexts/AuthContext';
+import { useReadiness } from '@/contexts/ReadinessContext';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -70,7 +72,7 @@ function ProfilePageSkeleton() {
           </CardContent>
         </Card>
 
-        <div className="lg:hidden rounded-2xl border border-border-subtle overflow-hidden bg-surface divide-y divide-border-subtle">
+        <div className="lg:hidden rounded-2xl border border-border-subtle overflow-hidden bg-surface-alt divide-y divide-border-subtle">
           {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="flex items-center gap-3 px-4 py-4">
               <div className="h-10 w-10 rounded-xl bg-origen-pradera/10" />
@@ -112,17 +114,44 @@ function ProfilePageSkeleton() {
 
 export default function ProfilePage() {
   const { producer, isLoading } = useProducerProfile();
+  const { user: authUser } = useAuth();
+  const { readiness, isLoading: isReadinessLoading } = useReadiness();
 
-  if (isLoading) return <PageLoader message="Cargando perfil..." />;
+  if (isLoading || isReadinessLoading) return <PageLoader message="Cargando perfil..." />;
 
   const completion = producer?.profileCompletenessPercent ?? 0;
   const totalTrackedItems = producer?.profileCompletenessMeta.totalSteps ?? 0;
   const completedTrackedItems = producer?.profileCompletenessMeta.completedSteps ?? 0;
   const pendingItems = Math.max(0, totalTrackedItems - completedTrackedItems);
 
-  const personalVerified = Boolean(producer?.name && producer?.location);
-  const businessVerified = Boolean(producer?.categories && producer.categories.length > 0);
-  const certificationsPending = pendingItems > 0 ? pendingItems : 0;
+  // "Información personal" edita nombre/apellidos y teléfono del usuario
+  // autenticado (ver profile/personal/page.tsx) — no del productor.
+  const personalVerified = Boolean(authUser?.firstName && authUser?.lastName && authUser?.phone);
+
+  // Mismos campos que exige profile/business/page.tsx (businessName, taxId,
+  // entityType, location, storyName, description, categories, logo).
+  // deliveryOption y stripeConnected quedan fuera: se gestionan en Envíos y
+  // Cobros respectivamente, no en "Mi negocio".
+  const businessChecks = readiness?.profileChecks;
+  const businessVerified = businessChecks
+    ? [
+        businessChecks.businessName,
+        businessChecks.taxId,
+        businessChecks.entityType,
+        businessChecks.location,
+        businessChecks.storyName,
+        businessChecks.description,
+        businessChecks.categories,
+        businessChecks.logo,
+      ].every((check) => check.passed)
+    : Boolean(producer?.categories && producer.categories.length > 0);
+
+  // Certificaciones/documentos legales obligatorios (CIF, SEGURO_RC,
+  // MANIPULADOR_ALIMENTOS) — cualquier estado distinto de VERIFIED cuenta
+  // como pendiente (PENDING, MISSING o REJECTED).
+  const certificationsPending = readiness
+    ? Object.values(readiness.documentChecks).filter((status) => status !== 'VERIFIED').length
+    : 0;
 
   return (
     <div className="w-full">
@@ -178,7 +207,7 @@ export default function ProfilePage() {
       </div>
 
       {/* ── Móvil: lista de navegación nativa ── */}
-      <div className="lg:hidden rounded-2xl border border-border-subtle overflow-hidden bg-surface divide-y divide-border-subtle">
+      <div className="lg:hidden rounded-2xl border border-border-subtle overflow-hidden bg-surface-alt divide-y divide-border-subtle">
 
         <Link href="/dashboard/profile/personal" className="flex items-center gap-3 px-4 py-4 active:bg-surface-alt transition-colors">
           <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">

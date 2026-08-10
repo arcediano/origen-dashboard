@@ -149,8 +149,11 @@ function DashboardContentWrapper({
           "transition-all duration-300",
           // Desktop: desplazar por sidebar
           !isMobile && "lg:ml-72",
-        // Mobile: pt para header fijo (56px); pb para BottomTabBar solo cuando no hay ActionBar propia
-        isMobile && "pt-14",
+        // Mobile: pt para header fijo. MobileTopBar mide safe-area-top + 0.875rem
+        // + fila de 44px (h-11) + pb-3 (12px) ≈ 4.375rem — pt-14 (56px) se quedaba
+        // corto y el contenido quedaba pegado/tapado bajo la cabecera sin margen.
+        // Se añade un pequeño margen extra (0.5rem) sobre la altura real medida.
+        isMobile && "pt-[calc(4.875rem+env(safe-area-inset-top,0px))]",
         isMobile && !actionBarOpen && appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0),
           !isMobile && "lg:px-4 lg:pb-6",
         )}
