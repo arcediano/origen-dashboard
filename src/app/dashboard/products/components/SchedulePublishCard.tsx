@@ -100,7 +100,7 @@ export function SchedulePublishCard({ productId, currentScheduledAt }: ScheduleP
       )}
       {currentScheduledAt && !success && (
         <p className="flex items-center gap-1.5 text-xs text-text-subtle">
-          <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+          <AlertCircle className="w-3.5 h-3.5 text-feedback-warning" />
           Programado para: {new Date(currentScheduledAt).toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' })}
         </p>
       )}

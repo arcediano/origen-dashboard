@@ -101,7 +101,7 @@ export function StepImages({
               <Label className="text-sm font-medium">
                 Galería de imágenes
               </Label>
-              <span className="text-red-500">*</span>
+              <span className="text-feedback-danger">*</span>
               {isPublishedProduct && (
                 <div className="p-2 -m-2">
                   <SensitiveFieldIndicator fieldName="gallery" />

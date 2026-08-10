@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Input, Alert } from '@arcediano/ux-library';
+import { Button, Input, Alert, SelectableCard, Label } from '@arcediano/ux-library';
 import { CurrencyInput, PercentageInput } from '@arcediano/ux-library';
 import {
   DollarSign,
@@ -8,7 +8,6 @@ import {
   Percent,
   Zap,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { z } from 'zod';
@@ -159,46 +158,31 @@ export function FlashDealForm({
           {existingDeal ? 'Editar oferta flash' : 'Nueva oferta flash'}
         </h4>
 
-        {/* Selector de tipo (2 botones: PERCENTAGE, FIXED) */}
+        {/* Selector de tipo (2 tiles: PERCENTAGE, FIXED) */}
         <div className="grid grid-cols-2 gap-2">
-          {[
-            { id: 'PERCENTAGE', icon: Percent, label: 'Porcentaje', desc: 'Descuento en %' },
-            { id: 'FIXED', icon: DollarSign, label: 'Precio fijo', desc: 'Precio especial' }
-          ].map((type) => (
-            <button
-              key={type.id}
-              onClick={() => setFormData({ ...formData, discountType: type.id as any })}
-              className={cn(
-                "flex flex-col items-center p-2 sm:p-3 rounded-lg border-2 transition-all",
-                formData.discountType === type.id
-                  ? "border-origen-mandarina bg-origen-mandarina/15"
-                  : "border-origen-mandarina/20 hover:border-origen-mandarina/40 bg-white"
-              )}
-            >
-              <type.icon
-                className={cn(
-                  "w-4 h-4 mb-1",
-                  formData.discountType === type.id && "text-origen-bosque"
-                )}
-              />
-              <span
-                className={cn(
-                  "text-xs font-semibold",
-                  formData.discountType === type.id && "text-origen-bosque"
-                )}
-              >
-                {type.label}
-              </span>
-              <span className="text-xs text-text-subtle">{type.desc}</span>
-            </button>
-          ))}
+          <SelectableCard
+            layout="detailed"
+            icon={<Percent className="h-4 w-4" />}
+            label="Porcentaje"
+            description="Descuento en %"
+            selected={formData.discountType === 'PERCENTAGE'}
+            onSelect={() => setFormData({ ...formData, discountType: 'PERCENTAGE' })}
+          />
+          <SelectableCard
+            layout="detailed"
+            icon={<DollarSign className="h-4 w-4" />}
+            label="Precio fijo"
+            description="Precio especial"
+            selected={formData.discountType === 'FIXED'}
+            onSelect={() => setFormData({ ...formData, discountType: 'FIXED' })}
+          />
         </div>
 
         {/* Campo de valor */}
         <div>
-          <label className="block text-xs font-medium text-origen-bosque mb-1.5">
+          <Label className="block text-xs font-medium text-origen-bosque mb-1.5">
             {formData.discountType === 'PERCENTAGE' ? 'Descuento (%)' : 'Precio fijo (€)'}
-          </label>
+          </Label>
           {formData.discountType === 'PERCENTAGE' ? (
             <PercentageInput
               value={formData.discountValue || 10}
@@ -220,7 +204,7 @@ export function FlashDealForm({
         {/* Campos de fecha */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-origen-bosque mb-1.5">Inicio</label>
+            <Label className="block text-xs font-medium text-origen-bosque mb-1.5">Inicio</Label>
             <Input
               type="datetime-local"
               value={formData.startsAt || ''}
@@ -229,7 +213,7 @@ export function FlashDealForm({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-origen-bosque mb-1.5">Fin</label>
+            <Label className="block text-xs font-medium text-origen-bosque mb-1.5">Fin</Label>
             <Input
               type="datetime-local"
               value={formData.endsAt || ''}

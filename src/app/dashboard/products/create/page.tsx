@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Package } from 'lucide-react';
+import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, Eye, X } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
@@ -23,7 +23,17 @@ import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
 import { useHideBottomTabBar } from '@/hooks/useHideBottomTabBar';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
-import { toast, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
+import {
+  toast,
+  appShellPaddingClass,
+  appShellBottomOffsetClass,
+  NAV_HEIGHT_MOBILE_DASHBOARD,
+  ActionBar,
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  Button,
+} from '@arcediano/ux-library';
 import { useEffect, useState } from 'react';
 
 // ─── Animaciones ──────────────────────────────────────────────────────────────
@@ -75,14 +85,42 @@ export default function CreateProductPage() {
   const stepNumber = FORM_STEPS.findIndex(s => s.id === activeTab) + 1;
   const tips = useStepTips(stepNumber, formData);
 
-  const handleTabChange = (tab: FormStepId) => setActiveTab(tab);
-
+  const [showMobileErrors, setShowMobileErrors] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  // Esta página renderiza su propia barra de navegación de pasos
-  // (CreateProductNavigation, fixed bottom-0 en móvil) — oculta el
-  // BottomTabBar global para que no se pinte encima de ella (mismo bug
-  // corregido en products/[id]/edit/page.tsx con <HideBottomTabBar />).
+  const handleTabChange = (tab: FormStepId) => {
+    setShowMobileErrors(false);
+    setActiveTab(tab);
+  };
+
+  // Navegación por pasos para el ActionBar móvil — mismo patrón que
+  // products/[id]/edit/page.tsx (CreateProductNavigation ya no reimplementa
+  // su propia barra móvil, solo el bloque de escritorio).
+  const currentIndex = FORM_STEPS.findIndex(s => s.id === activeTab);
+  const isFirstStep = currentIndex === 0;
+  const isLastStep = currentIndex === FORM_STEPS.length - 1;
+  const prevStep = !isFirstStep ? FORM_STEPS[currentIndex - 1].id as FormStepId : null;
+  const nextStep = !isLastStep ? FORM_STEPS[currentIndex + 1].id as FormStepId : null;
+  const canPublish = allStepsCompleted && (!hasCertifications || certificationsApproved);
+
+  const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing', 'inventory'];
+  const isMobileStepBlocked = BLOCKING_STEPS.includes(activeTab) && currentStepErrors.length > 0;
+
+  const handlePrev = () => {
+    setShowMobileErrors(false);
+    if (prevStep) { handleTabChange(prevStep); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  };
+  const handleNext = () => {
+    if (isMobileStepBlocked) {
+      setShowMobileErrors(true);
+      return;
+    }
+    setShowMobileErrors(false);
+    if (nextStep) { handleTabChange(nextStep); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  };
+
+  // Esta página renderiza su propia ActionBar móvil (fixed bottom-0) — oculta
+  // el BottomTabBar global para que no se pinte encima de ella.
   useHideBottomTabBar();
 
   return (
@@ -101,11 +139,22 @@ export default function CreateProductPage() {
         showBackButton
         onBack={() => setShowCancelDialog(true)}
         actions={
-          lastSaved && (
-            <span className="text-xs text-text-subtle">
-              Último guardado: {lastSaved.toLocaleTimeString()}
-            </span>
-          )
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPreview(true)}
+              leftIcon={<Eye className="w-4 h-4" aria-hidden="true" />}
+            >
+              <span className="hidden sm:inline">Vista previa</span>
+            </Button>
+            {lastSaved && (
+              <span className="text-xs text-text-subtle">
+                Último guardado: {lastSaved.toLocaleTimeString()}
+              </span>
+            )}
+          </div>
         }
       />
 
@@ -122,8 +171,8 @@ export default function CreateProductPage() {
           animate="visible"
           className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-6"
         >
-          {/* padding inferior móvil — iguala la altura de CreateProductNavigation (137px − 24px outer pb) */}
-          <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 25)} sm:pb-0`}>
+          {/* padding inferior móvil — reserva el alto del ActionBar fijo */}
+          <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} sm:pb-0`}>
             <ProductFormSteps
               activeTab={activeTab}
               formData={formData}
@@ -134,23 +183,25 @@ export default function CreateProductPage() {
               onImagesChange={handleImagesChange}
             />
 
-            <CreateProductNavigation
-              currentTab={activeTab}
-              onTabChange={handleTabChange}
-              completedTabs={completedTabs}
-              currentStepErrors={currentStepErrors}
-              onSave={handleSave}
-              isSaving={isSaving}
-              allStepsCompleted={allStepsCompleted}
-              hasCertifications={hasCertifications}
-              certificationsApproved={certificationsApproved}
-              hasPendingManualCerts={hasPendingManualCerts}
-              onPublish={handlePublish}
-              isPublishing={isPublishing}
-              publishStatus={publishStatus}
-              publishError={publishError}
-              onPreview={() => setShowPreview(true)}
-            />
+            {/* Navegación de pasos — sólo visible en ≥ sm; en móvil usa ActionBar */}
+            <div className="hidden sm:block">
+              <CreateProductNavigation
+                currentTab={activeTab}
+                onTabChange={handleTabChange}
+                completedTabs={completedTabs}
+                currentStepErrors={currentStepErrors}
+                onSave={handleSave}
+                isSaving={isSaving}
+                allStepsCompleted={allStepsCompleted}
+                hasCertifications={hasCertifications}
+                certificationsApproved={certificationsApproved}
+                hasPendingManualCerts={hasPendingManualCerts}
+                onPublish={handlePublish}
+                isPublishing={isPublishing}
+                publishStatus={publishStatus}
+                publishError={publishError}
+              />
+            </div>
           </div>
 
           <ProductFormSidebar
@@ -159,6 +210,74 @@ export default function CreateProductPage() {
           />
         </motion.div>
       </div>
+
+      {/* Panel de errores móvil — aparece sobre el ActionBar */}
+      {showMobileErrors && currentStepErrors.length > 0 && (
+        <div className={`sm:hidden fixed ${appShellBottomOffsetClass(NAV_HEIGHT_MOBILE_DASHBOARD, 40)} left-0 right-0 z-50 mx-4`}>
+          <Alert
+            variant="error"
+            className="shadow-lg"
+            trailing={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowMobileErrors(false)}
+                aria-label="Cerrar"
+              >
+                <X className="w-4 h-4" aria-hidden="true" />
+              </Button>
+            }
+          >
+            <AlertTitle>Completa los campos obligatorios</AlertTitle>
+            <AlertDescription>
+              <ul className="space-y-1 mt-1">
+                {currentStepErrors.map((err, i) => (
+                  <li key={i} className="flex items-center gap-2 text-xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-feedback-danger shrink-0" aria-hidden="true" />
+                    {err}
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* ActionBar móvil — navegación entre pasos con pulgar */}
+      <ActionBar
+        primaryAction={{
+          id: 'primary',
+          label: isLastStep ? (!canPublish ? 'Completa todos los pasos' : 'Publicar') : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
+          onClick: isLastStep ? handlePublish : handleNext,
+          disabled: isLastStep ? (isPublishing || !canPublish) : false,
+          loading: isLastStep ? isPublishing : false,
+          loadingText: 'Publicando...',
+          rightIcon: !isLastStep ? <ChevronRight className="w-4 h-4" aria-hidden="true" /> : undefined,
+          leftIcon: isLastStep ? <Send className="w-4 h-4" aria-hidden="true" /> : undefined,
+        }}
+        secondaryActions={[
+          {
+            id: 'prev',
+            label: 'Anterior',
+            onClick: handlePrev,
+            disabled: isFirstStep,
+            variant: 'secondary',
+            leftIcon: <ChevronLeft className="w-4 h-4" aria-hidden="true" />,
+          },
+          {
+            id: 'save',
+            label: isSaving ? 'Guardando...' : 'Guardar',
+            onClick: handleSave,
+            disabled: isSaving,
+            loading: isSaving,
+            variant: 'secondary',
+            leftIcon: isSaving
+              ? <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
+              : <Save className="w-4 h-4" aria-hidden="true" />,
+          },
+        ]}
+      />
 
       <CreateProductCancelDialog
         open={showCancelDialog}

@@ -303,7 +303,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
                 <div className={cn(
                   'w-2 h-2 rounded-full',
                   product.stock === 0 ? 'bg-feedback-danger' :
-                  product.lowStockThreshold && product.stock <= product.lowStockThreshold ? 'bg-amber-500' : 'bg-feedback-success'
+                  product.lowStockThreshold && product.stock <= product.lowStockThreshold ? 'bg-feedback-warning' : 'bg-feedback-success'
                 )} />
                 <span className="text-base font-semibold text-origen-bosque">{product.stock} uds</span>
               </div>

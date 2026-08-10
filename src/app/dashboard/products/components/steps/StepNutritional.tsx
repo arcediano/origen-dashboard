@@ -12,6 +12,7 @@ import {
   Checkbox,
   Textarea,
   Label,
+  Tabs, TabsList, TabsTrigger, TabsContent,
 } from '@arcediano/ux-library';
 import { Tooltip } from '@arcediano/ux-library';
 import {
@@ -225,43 +226,27 @@ export function StepNutritional({
           </div>
         </div>
 
-        {/* Pestañas de navegación */}
-        <div className="mb-6 border-b border-border overflow-x-auto">
-          <div className="flex gap-6 min-w-max">
-            {[
-              { id: 'basicos', label: 'Básicos', icon: <Scale className="w-4 h-4" /> },
-              { id: 'nutrientes', label: 'Nutrientes', icon: <Beef className="w-4 h-4" /> },
-              { id: 'alergenos', label: 'Alérgenos', icon: <AlertCircle className="w-4 h-4" /> },
-              { id: 'ausencias', label: 'Ausencias', icon: <Ban className="w-4 h-4" /> },
-              { id: 'ingredientes', label: 'Ingredientes', icon: <FileText className="w-4 h-4" /> },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "pb-3 text-sm font-medium transition-colors relative flex items-center gap-2",
-                  activeTab === tab.id
-                    ? 'text-origen-bosque border-b-2 border-origen-bosque'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          {/* Pestañas de navegación */}
+          <div className="mb-6 overflow-x-auto">
+            <TabsList className="min-w-max">
+              {[
+                { id: 'basicos', label: 'Básicos', icon: <Scale className="w-4 h-4" /> },
+                { id: 'nutrientes', label: 'Nutrientes', icon: <Beef className="w-4 h-4" /> },
+                { id: 'alergenos', label: 'Alérgenos', icon: <AlertCircle className="w-4 h-4" /> },
+                { id: 'ausencias', label: 'Ausencias', icon: <Ban className="w-4 h-4" /> },
+                { id: 'ingredientes', label: 'Ingredientes', icon: <FileText className="w-4 h-4" /> },
+              ].map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
+                  {tab.icon}
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </div>
-        </div>
 
-        <AnimatePresence mode="wait">
           {/* TAB 1: BÁSICOS */}
-          {activeTab === 'basicos' && (
-            <motion.div
-              key="basicos"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-6"
-            >
+          <TabsContent value="basicos" className="space-y-6">
               {/* Tamaño de ración */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -269,7 +254,7 @@ export function StepNutritional({
                     <Scale className="h-5 w-5 text-hoja-tinta" />
                     <span className="text-sm font-medium text-foreground">
                       Tamaño de ración
-                      <span className="text-red-500 ml-1">*</span>
+                      <span className="text-feedback-danger ml-1">*</span>
                     </span>
                     <Tooltip 
                       content="Cantidad de referencia"
@@ -325,18 +310,10 @@ export function StepNutritional({
                   />
                 </div>
               </div>
-            </motion.div>
-          )}
+          </TabsContent>
 
           {/* TAB 2: NUTRIENTES */}
-          {activeTab === 'nutrientes' && (
-            <motion.div
-              key="nutrientes"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-6"
-            >
+          <TabsContent value="nutrientes" className="space-y-6">
               {/* Macros principales */}
               <div>
                 <h3 className="text-sm font-medium text-origen-bosque mb-3">Macronutrientes (g)</h3>
@@ -456,18 +433,10 @@ export function StepNutritional({
                   </div>
                 </div>
               </div>
-            </motion.div>
-          )}
+          </TabsContent>
 
           {/* TAB 3: ALÉRGENOS */}
-          {activeTab === 'alergenos' && (
-            <motion.div
-              key="alergenos"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-6"
-            >
+          <TabsContent value="alergenos" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <div className="flex items-center gap-1.5">
@@ -546,17 +515,10 @@ export function StepNutritional({
                   </div>
                 </div>
               </div>
-            </motion.div>
-          )}
+          </TabsContent>
 
           {/* TAB 4: AUSENCIAS */}
-          {activeTab === 'ausencias' && (
-            <motion.div
-              key="ausencias"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-            >
+          <TabsContent value="ausencias">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Ban className="h-5 w-5 text-hoja-tinta" />
@@ -595,18 +557,10 @@ export function StepNutritional({
                   Estas declaraciones aparecerán como badges en la ficha del producto, ayudando a clientes con necesidades específicas.
                 </p>
               </div>
-            </motion.div>
-          )}
+          </TabsContent>
 
           {/* TAB 5: INGREDIENTES E INSTRUCCIONES */}
-          {activeTab === 'ingredientes' && (
-            <motion.div
-              key="ingredientes"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-6"
-            >
+          <TabsContent value="ingredientes" className="space-y-6">
               {/* Ingredientes */}
               <div className="space-y-2">
                 <div className="flex items-center gap-1.5">
@@ -615,7 +569,7 @@ export function StepNutritional({
                     <Label className="text-sm font-medium">
                       Ingredientes
                     </Label>
-                    <span className="text-red-500">*</span>
+                    <span className="text-feedback-danger">*</span>
                     {isPublishedProduct && (
                       <div className="p-2 -m-2">
                         <SensitiveFieldIndicator fieldName="ingredients" />
@@ -711,9 +665,8 @@ export function StepNutritional({
                   />
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </TabsContent>
+        </Tabs>
 
         {/* Badge de información */}
         <div className="mt-6 flex items-center justify-center gap-2 p-3 bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5 rounded-lg border border-origen-pradera/20">

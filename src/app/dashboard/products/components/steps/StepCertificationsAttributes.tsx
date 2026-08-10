@@ -12,10 +12,11 @@
 
 'use client';
 
-import { Button, Input, Badge, DateInput } from '@arcediano/ux-library';
+import { Button, Input, Badge, DateInput, SearchInput } from '@arcediano/ux-library';
 import {
   Card,
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  Tabs, TabsList, TabsTrigger, TabsContent,
 } from '@arcediano/ux-library';
 import { Checkbox } from '@arcediano/ux-library';
 import { DocumentUploader } from '../../components/DocumentUploader';
@@ -502,35 +503,22 @@ export function StepCertificationsAttributes({
       {/* Búsqueda + filtro de categoría */}
       <div className="px-4 sm:px-5 pb-3 shrink-0">
         <div className="flex flex-col sm:flex-row gap-2">
-          {/* Input de búsqueda — full width, font-size 16px para evitar zoom en iOS */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <input
+          {/* Input de búsqueda — full width. SearchInput ya usa text-base (16px), evita el zoom en iOS */}
+          <div className="flex-1">
+            <SearchInput
               ref={withAutoFocus ? catalogInputRef : undefined}
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus={withAutoFocus}
-              type="text"
-              inputMode="search"
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck={false}
               value={catalogSearch}
-              onChange={(e) => setCatalogSearch(e.target.value)}
+              onChange={setCatalogSearch}
               placeholder="Buscar por nombre u organismo…"
-              className="w-full h-12 pl-10 pr-10 rounded-xl border border-border bg-surface placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-colors"
-              style={{ fontSize: '16px', WebkitAppearance: 'none' }}
+              size="lg"
+              className="w-full"
             />
-            {catalogSearch && (
-              <button
-                type="button"
-                onClick={() => setCatalogSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
-                aria-label="Limpiar búsqueda"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
           </div>
 
           {/* Filtro de categoría — full width en móvil, auto en desktop */}
@@ -670,43 +658,26 @@ export function StepCertificationsAttributes({
           </div>
         </div>
 
-        {/* ── Pestañas ──────────────────────────────────────────────────────── */}
-        <div className="mb-6 border-b border-border overflow-x-auto">
-          <div className="flex gap-6 min-w-max">
-            {[
-              { id: 'certifications', label: 'Certificaciones', icon: <Award className="w-4 h-4" /> },
-              { id: 'attributes',     label: 'Atributos',        icon: <Tag   className="w-4 h-4" /> },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "pb-3 min-h-[44px] text-sm font-medium transition-colors relative flex items-center gap-2",
-                  activeTab === tab.id
-                    ? 'text-origen-bosque border-b-2 border-origen-bosque'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          {/* ── Pestañas ──────────────────────────────────────────────────────── */}
+          <div className="mb-6 overflow-x-auto">
+            <TabsList className="min-w-max">
+              {[
+                { id: 'certifications', label: 'Certificaciones', icon: <Award className="w-4 h-4" /> },
+                { id: 'attributes',     label: 'Atributos',        icon: <Tag   className="w-4 h-4" /> },
+              ].map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
+                  {tab.icon}
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </div>
-        </div>
-
-        <AnimatePresence mode="wait">
 
           {/* ================================================================ */}
           {/* TAB CERTIFICACIONES                                              */}
           {/* ================================================================ */}
-          {activeTab === 'certifications' && (
-            <motion.div
-              key="certifications"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-6"
-            >
+          <TabsContent value="certifications" className="space-y-6">
               {/* Mensaje informativo */}
               <div className="p-4 bg-origen-crema/40 rounded-xl border border-origen-pradera/20 flex items-start gap-3">
                 <Info className="w-5 h-5 text-hoja-tinta shrink-0 mt-0.5" />
@@ -721,17 +692,19 @@ export function StepCertificationsAttributes({
 
               {/* Error global — solo cuando no hay formulario abierto (delete, catálogo) */}
               {certActionError && !showCertForm && (
-                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="flex items-start gap-2 rounded-xl border border-feedback-danger/30 bg-feedback-danger-subtle px-4 py-3 text-sm text-feedback-danger-text">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span className="flex-1">{certActionError}</span>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => setCertActionError(null)}
-                    className="p-1 shrink-0"
+                    className="shrink-0"
                     aria-label="Cerrar error"
                   >
-                    <X className="w-4 h-4" />
-                  </button>
+                    <X className="w-4 h-4" aria-hidden="true" />
+                  </Button>
                 </div>
               )}
 
@@ -893,17 +866,19 @@ export function StepCertificationsAttributes({
 
                         {/* Error inline — visible sin hacer scroll */}
                         {certActionError && (
-                          <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                          <div className="flex items-start gap-2 rounded-xl border border-feedback-danger/30 bg-feedback-danger-subtle px-4 py-3 text-sm text-feedback-danger-text">
                             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                             <span className="flex-1">{certActionError}</span>
-                            <button
+                            <Button
                               type="button"
+                              variant="ghost"
+                              size="icon"
                               onClick={() => setCertActionError(null)}
-                              className="p-1 shrink-0"
+                              className="shrink-0"
                               aria-label="Cerrar error"
                             >
-                              <X className="w-4 h-4" />
-                            </button>
+                              <X className="w-4 h-4" aria-hidden="true" />
+                            </Button>
                           </div>
                         )}
 
@@ -981,7 +956,7 @@ export function StepCertificationsAttributes({
                                         <CheckCircle className="w-3 h-3" /> Verificada
                                       </span>
                                     ) : cert.status === 'under_review' || cert.status === 'UNDER_REVIEW' ? (
-                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-feedback-info-subtle text-feedback-info-text border border-feedback-info/30">
                                         <Clock className="w-3 h-3" /> En revisión
                                       </span>
                                     ) : cert.status === 'rejected' || cert.status === 'REJECTED' ? (
@@ -989,7 +964,7 @@ export function StepCertificationsAttributes({
                                         <XCircle className="w-3 h-3" /> No verificada
                                       </span>
                                     ) : (
-                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-feedback-warning-subtle text-feedback-warning-text border border-feedback-warning/30">
                                         <Clock className="w-3 h-3" /> Pendiente revisión
                                       </span>
                                     )}
@@ -1018,7 +993,7 @@ export function StepCertificationsAttributes({
                                     {cert.expiryDate && (
                                       <p className={cn(
                                         "text-xs flex items-center gap-1",
-                                        isExpired ? "text-feedback-danger font-medium" : isExpiringSoon ? "text-amber-600 font-medium" : "text-muted-foreground"
+                                        isExpired ? "text-feedback-danger font-medium" : isExpiringSoon ? "text-feedback-warning font-medium" : "text-muted-foreground"
                                       )}>
                                         <Clock className="w-3 h-3 shrink-0" />
                                         Caduca {formatDate(cert.expiryDate)}
@@ -1056,7 +1031,7 @@ export function StepCertificationsAttributes({
 
                               {/* Alerta de caducidad próxima */}
                               {isExpiringSoon && !isExpired && (
-                                <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-amber-50 border border-amber-200 px-3 py-1.5 text-xs text-amber-700">
+                                <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-feedback-warning-subtle border border-feedback-warning/30 px-3 py-1.5 text-xs text-feedback-warning-text">
                                   <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                                   Caduca en {days} {days === 1 ? 'día' : 'días'} — renueva los documentos para mantener el sello
                                 </div>
@@ -1093,20 +1068,12 @@ export function StepCertificationsAttributes({
                   </p>
                 </div>
               )}
-            </motion.div>
-          )}
+          </TabsContent>
 
           {/* ================================================================ */}
           {/* TAB ATRIBUTOS                                                    */}
           {/* ================================================================ */}
-          {activeTab === 'attributes' && (
-            <motion.div
-              key="attributes"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-6"
-            >
+          <TabsContent value="attributes" className="space-y-6">
               {/* Explicación + preview de cómo aparecen en la tienda */}
               <div className="p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
                 <div className="flex items-start gap-3">
@@ -1391,7 +1358,7 @@ export function StepCertificationsAttributes({
                           </button>
                           <button
                             onClick={() => handleDeleteAttribute(attr.id)}
-                            className="p-2.5 sm:p-2 rounded-lg text-text-subtle hover:text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors"
+                            className="p-2.5 sm:p-2 rounded-lg text-text-subtle hover:text-feedback-danger hover:bg-feedback-danger-subtle active:bg-feedback-danger-subtle transition-colors"
                             aria-label="Eliminar atributo"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -1412,9 +1379,8 @@ export function StepCertificationsAttributes({
                   </p>
                 </div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </TabsContent>
+        </Tabs>
 
         {/* ── Impacto en ventas ─────────────────────────────────────────────── */}
         <div className="mt-6 p-4 bg-gradient-to-br from-origen-crema/30 to-white rounded-xl border border-origen-pradera/20">

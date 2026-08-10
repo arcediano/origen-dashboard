@@ -8,9 +8,9 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
-import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, Eye, X } from 'lucide-react';
 
-import { Badge, ActionBar, PageLoader, PageError, Alert, AlertTitle, AlertDescription, appShellPaddingClass, appShellBottomOffsetClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
+import { Badge, Button, ActionBar, PageLoader, PageError, Alert, AlertTitle, AlertDescription, appShellPaddingClass, appShellBottomOffsetClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { PageHeader } from '../../../components/PageHeader';
 import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 
@@ -140,6 +140,15 @@ export default function EditProductPage() {
         onBack={() => setShowCancelDialog(true)}
         actions={
           <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPreview(true)}
+              leftIcon={<Eye className="w-4 h-4" aria-hidden="true" />}
+            >
+              <span className="hidden sm:inline">Vista previa</span>
+            </Button>
             {lastSaved && (
               <span className="text-xs text-text-subtle">
                 {isAutoSaving ? 'Guardando...' : `Guardado ${lastSaved.toLocaleTimeString()}`}
@@ -224,8 +233,6 @@ export default function EditProductPage() {
                 isPublishing={isPublishing}
                 publishStatus={publishStatus}
                 publishError={publishError}
-                onPreview={() => setShowPreview(true)}
-                showMobileBar={false}
               />
             </div>
 
@@ -248,29 +255,33 @@ export default function EditProductPage() {
       {/* ── Panel de errores móvil — aparece sobre el ActionBar ── */}
       {showMobileErrors && currentStepErrors.length > 0 && (
         <div className={`sm:hidden fixed ${appShellBottomOffsetClass(NAV_HEIGHT_MOBILE_DASHBOARD, 40)} left-0 right-0 z-50 mx-4`}>
-          <div className="rounded-2xl border border-red-200 bg-red-50 shadow-lg p-4">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div className="flex items-center gap-2">
-                <XCircle className="w-4 h-4 text-red-600 shrink-0" />
-                <p className="text-sm font-semibold text-red-800">Completa los campos obligatorios</p>
-              </div>
-              <button
+          <Alert
+            variant="error"
+            className="shadow-lg"
+            trailing={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => setShowMobileErrors(false)}
-                className="text-red-400 hover:text-red-600 p-1"
                 aria-label="Cerrar"
               >
-                <XCircle className="w-4 h-4" />
-              </button>
-            </div>
-            <ul className="space-y-1 pl-1">
-              {currentStepErrors.map((err, i) => (
-                <li key={i} className="flex items-center gap-2 text-xs text-red-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
-                  {err}
-                </li>
-              ))}
-            </ul>
-          </div>
+                <X className="w-4 h-4" aria-hidden="true" />
+              </Button>
+            }
+          >
+            <AlertTitle>Completa los campos obligatorios</AlertTitle>
+            <AlertDescription>
+              <ul className="space-y-1 mt-1">
+                {currentStepErrors.map((err, i) => (
+                  <li key={i} className="flex items-center gap-2 text-xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-feedback-danger shrink-0" aria-hidden="true" />
+                    {err}
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
         </div>
       )}
 

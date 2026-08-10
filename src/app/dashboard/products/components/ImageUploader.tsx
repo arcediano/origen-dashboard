@@ -227,20 +227,25 @@ export function ImageUploader({
                 </div>
               )}
 
-              {/* Overlay con acciones */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+              {/* Acciones — siempre visibles en móvil (no hay :hover en touch);
+                  en escritorio se revelan solo al pasar el ratón, como antes. */}
+              <div className="absolute top-1 right-1 flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                 {showMainBadge && !image.isMain && (
                   <button
+                    type="button"
                     onClick={() => handleSetMain(image.id)}
-                    className="p-1.5 bg-surface-alt rounded-lg hover:bg-origen-crema transition-colors"
+                    className="p-2 bg-surface-alt/95 rounded-lg shadow-subtle hover:bg-origen-crema transition-colors"
+                    aria-label="Marcar como principal"
                     title="Marcar como principal"
                   >
                     <Star className="w-4 h-4 text-muted-foreground" />
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={() => handleRemove(image.id)}
-                  className="p-1.5 bg-surface-alt rounded-lg hover:bg-feedback-danger-subtle transition-colors"
+                  className="p-2 bg-surface-alt/95 rounded-lg shadow-subtle hover:bg-feedback-danger-subtle transition-colors"
+                  aria-label="Eliminar imagen"
                   title="Eliminar"
                 >
                   <X className="w-4 h-4 text-feedback-danger" />
@@ -265,13 +270,14 @@ export function ImageUploader({
                 </div>
               )}
 
-              {/* Input para caption */}
+              {/* Input para caption — siempre visible en móvil, solo al hover en escritorio */}
               <input
                 type="text"
                 value={image.caption || ''}
                 onChange={(e) => handleCaptionChange(image.id, e.target.value)}
                 placeholder="Añadir título..."
-                className="absolute bottom-0 inset-x-0 p-1 text-[10px] bg-surface-alt/90 border-t border-border opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Título de la imagen"
+                className="absolute bottom-0 inset-x-0 p-1 text-[10px] bg-surface-alt/90 border-t border-border sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
               />
             </div>
           ))}

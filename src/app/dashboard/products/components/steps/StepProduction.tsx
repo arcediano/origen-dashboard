@@ -12,6 +12,7 @@ import { Tooltip } from '@arcediano/ux-library';
 import {
   Card, CardHeader, CardTitle, CardContent,
   Textarea,
+  Tabs, TabsList, TabsTrigger, TabsContent,
 } from '@arcediano/ux-library';
 import { RichTextEditor } from '@arcediano/ux-library';
 import {
@@ -289,42 +290,26 @@ export function StepProduction({
           </div>
         </div>
 
-        {/* Pestañas de navegación */}
-        <div className="mb-6 border-b border-border overflow-x-auto">
-          <div className="flex gap-6 min-w-max">
-            {[
-              { id: 'story', label: 'Historia', icon: <BookOpen className="w-4 h-4" /> },
-              { id: 'origin', label: 'Origen', icon: <MapPin className="w-4 h-4" /> },
-              { id: 'sustainability', label: 'Sostenibilidad', icon: <TreePine className="w-4 h-4" /> },
-              { id: 'media', label: 'Galería', icon: <Camera className="w-4 h-4" /> },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "pb-3 text-sm font-medium transition-colors relative flex items-center gap-2",
-                  activeTab === tab.id
-                    ? 'text-origen-bosque border-b-2 border-origen-bosque'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          {/* Pestañas de navegación */}
+          <div className="mb-6 overflow-x-auto">
+            <TabsList className="min-w-max">
+              {[
+                { id: 'story', label: 'Historia', icon: <BookOpen className="w-4 h-4" /> },
+                { id: 'origin', label: 'Origen', icon: <MapPin className="w-4 h-4" /> },
+                { id: 'sustainability', label: 'Sostenibilidad', icon: <TreePine className="w-4 h-4" /> },
+                { id: 'media', label: 'Galería', icon: <Camera className="w-4 h-4" /> },
+              ].map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
+                  {tab.icon}
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </div>
-        </div>
 
-        <AnimatePresence mode="wait">
           {/* TAB HISTORIA */}
-          {activeTab === 'story' && (
-            <motion.div
-              key="story"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-6"
-            >
+          <TabsContent value="story" className="space-y-6">
               <RichTextEditor
                 label="Historia del productor"
                 tooltip="Las historias auténticas conectan con los clientes."
@@ -361,17 +346,10 @@ export function StepProduction({
                 placeholder="Cria en libertad, alimentacion natural, sin antibioticos..."
                 minHeight="100px"
               />
-            </motion.div>
-          )}
+          </TabsContent>
 
           {/* TAB ORIGEN */}
-          {activeTab === 'origin' && (
-            <motion.div
-              key="origin"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-6"
+          <TabsContent value="origin" className="space-y-6"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -489,18 +467,10 @@ export function StepProduction({
                   className="h-12 rounded-xl"
                 />
               </div>
-            </motion.div>
-          )}
+          </TabsContent>
 
           {/* TAB SOSTENIBILIDAD */}
-          {activeTab === 'sustainability' && (
-            <motion.div
-              key="sustainability"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-6"
-            >
+          <TabsContent value="sustainability" className="space-y-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <TreePine className="h-5 w-5 text-hoja-tinta" />
@@ -557,16 +527,10 @@ export function StepProduction({
                 className="min-h-[100px]"
                 placeholder="Energía renovable, gestión de residuos, huella de carbono, certificaciones ambientales..."
               />
-            </motion.div>
-          )}
+          </TabsContent>
 
           {/* TAB GALERÍA - CORREGIDO */}
-          {activeTab === 'media' && (
-            <motion.div
-              key="media"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
+          <TabsContent value="media"
               className="space-y-6"
             >
               <div className="space-y-2">
@@ -592,13 +556,15 @@ export function StepProduction({
                 </div>
 
                 {!showVideoInput ? (
-                  <button
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full border-dashed"
                     onClick={() => setShowVideoInput(true)}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-origen-pradera/30 hover:border-origen-pradera hover:bg-origen-pradera/5 transition-all text-sm font-medium text-origen-bosque bg-surface-alt"
+                    leftIcon={<Film className="w-4 h-4" aria-hidden="true" />}
                   >
-                    <Film className="w-4 h-4" />
                     Añadir vídeo (YouTube/Vimeo)
-                  </button>
+                  </Button>
                 ) : (
                   <div className="p-4 bg-origen-crema/30 rounded-xl border-2 border-origen-pradera/20">
                     <Input
@@ -684,9 +650,8 @@ export function StepProduction({
                   </div>
                 )}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </TabsContent>
+        </Tabs>
       </Card>
     </motion.div>
   );

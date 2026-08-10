@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Button, Input, Badge } from '@arcediano/ux-library';
+import { Button, Input, Badge, SelectableCard } from '@arcediano/ux-library';
 import { Alert } from '@arcediano/ux-library';
 import { Tooltip } from '@arcediano/ux-library';
 import {
@@ -449,7 +449,7 @@ export function StepPricing({
               <DollarSign className="h-5 w-5 text-hoja-tinta" />
               <span className="text-sm font-medium text-foreground">
                 Precio de venta
-                <span className="text-red-500 ml-1">*</span>
+                <span className="text-feedback-danger ml-1">*</span>
               </span>
               <Tooltip
                 content="Precio de venta al público"
@@ -527,22 +527,20 @@ export function StepPricing({
               )}
             </div>
             {!flashDeals.length || !productId ? (
-              <button
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => {
                   resetFlashDealForm();
                   setShowFlashDealForm(!showFlashDealForm);
                 }}
                 disabled={!hasBasePrice}
-                className={cn(
-                  "shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-lg border-2 transition-all text-xs font-medium min-h-[36px]",
-                  hasBasePrice
-                    ? "border-origen-mandarina/30 hover:border-origen-mandarina hover:bg-origen-mandarina/10 text-origen-bosque bg-surface-alt"
-                    : "border-border bg-surface text-text-subtle cursor-not-allowed"
-                )}
+                className="shrink-0"
+                leftIcon={<Plus className="w-3 h-3 shrink-0" aria-hidden="true" />}
               >
-                <Plus className="w-3 h-3 shrink-0" />
-                <span>{showFlashDealForm ? 'Cancelar' : 'Nueva oferta'}</span>
-              </button>
+                {showFlashDealForm ? 'Cancelar' : 'Nueva oferta'}
+              </Button>
             ) : null}
           </div>
 
@@ -630,7 +628,7 @@ export function StepPricing({
                           onClick={() => handleCancelFlashDeal(deal.id)}
                           variant="ghost"
                           size="sm"
-                          className="text-xs text-red-600"
+                          className="text-xs text-feedback-danger"
                           disabled={isLoadingFlashDeal}
                         >
                           <Trash2 className="w-3 h-3" />
@@ -678,23 +676,21 @@ export function StepPricing({
               )}
             </div>
             {/* Botón siempre visible, nunca comprimido */}
-            <button
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
               onClick={() => {
                 resetForm();
                 setEditingTierId(null);
                 setShowTierForm(!showTierForm);
               }}
               disabled={!hasBasePrice}
-              className={cn(
-                "shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-lg border-2 transition-all text-xs font-medium min-h-[36px]",
-                hasBasePrice
-                  ? "border-origen-pradera/30 hover:border-origen-pradera hover:bg-origen-pradera/5 text-origen-bosque bg-surface-alt"
-                  : "border-border bg-surface text-text-subtle cursor-not-allowed"
-              )}
+              className="shrink-0"
+              leftIcon={<Plus className="w-3 h-3 shrink-0" aria-hidden="true" />}
             >
-              <Plus className="w-3 h-3 shrink-0" />
-              <span>{showTierForm ? 'Cancelar' : 'Nueva oferta'}</span>
-            </button>
+              {showTierForm ? 'Cancelar' : 'Nueva oferta'}
+            </Button>
           </div>
 
           {/* Aviso si no hay precio base */}
@@ -722,27 +718,17 @@ export function StepPricing({
                   {/* Selector de tipo */}
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { id: 'percentage', icon: Percent, label: 'Porcentaje', desc: 'Descuento en % sobre el precio' },
-                      { id: 'fixed', icon: DollarSign, label: 'Precio fijo', desc: 'Precio especial reducido' },
-                      { id: 'bundle', icon: Gift, label: 'Pack', desc: 'Lleva más, paga menos (3×2…)' }
+                      { id: 'percentage', icon: Percent, label: 'Porcentaje' },
+                      { id: 'fixed', icon: DollarSign, label: 'Precio fijo' },
+                      { id: 'bundle', icon: Gift, label: 'Pack' }
                     ].map((type) => (
-                      <button
+                      <SelectableCard
                         key={type.id}
-                        onClick={() => setNewTier({ ...newTier, type: type.id as any })}
-                        className={cn(
-                          "flex flex-col items-center p-2 sm:p-3 rounded-lg border-2 transition-all",
-                          newTier.type === type.id
-                            ? "border-origen-pradera bg-origen-pradera/5"
-                            : "border-border hover:border-border bg-surface-alt"
-                        )}
-                      >
-                        <type.icon className={cn(
-                          "w-5 h-5 mb-1",
-                          newTier.type === type.id ? "text-hoja-tinta" : "text-text-subtle"
-                        )} />
-                        <span className="text-xs font-medium text-center leading-tight">{type.label}</span>
-                        <span className="text-[10px] text-text-subtle hidden sm:block text-center mt-0.5 leading-tight">{type.desc}</span>
-                      </button>
+                        icon={<type.icon className="h-5 w-5" />}
+                        label={type.label}
+                        selected={newTier.type === type.id}
+                        onSelect={() => setNewTier({ ...newTier, type: type.id as any })}
+                      />
                     ))}
                   </div>
 
@@ -853,7 +839,7 @@ export function StepPricing({
                         </div>
                       </div>
                       {(newTier.buyQuantity || 0) > (newTier.payQuantity || 0) && (
-                        <div className="p-2 bg-amber-50 rounded-lg text-xs text-amber-700">
+                        <div className="p-2 bg-feedback-warning-subtle rounded-lg text-xs text-feedback-warning-text">
                           El cliente lleva <strong>{newTier.buyQuantity}</strong> unidades pero solo paga <strong>{newTier.payQuantity}</strong> — <strong>{(newTier.buyQuantity || 0) - (newTier.payQuantity || 0)}</strong> gratis
                         </div>
                       )}
@@ -973,7 +959,7 @@ export function StepPricing({
                         <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
                           {tier.type === 'percentage' && <Percent className="w-5 h-5 text-hoja-tinta" />}
                           {tier.type === 'fixed' && <DollarSign className="w-5 h-5 text-origen-hoja" />}
-                          {tier.type === 'bundle' && <Gift className="w-5 h-5 text-amber-500" />}
+                          {tier.type === 'bundle' && <Gift className="w-5 h-5 text-feedback-warning" />}
                         </div>
 
                         <div className="flex-1 min-w-0">
@@ -1042,14 +1028,14 @@ export function StepPricing({
                               <p className="text-[10px] text-muted-foreground">Oferta</p>
                               <p className="text-xs sm:text-sm font-bold text-origen-hoja tabular-nums">{offerPrice.toFixed(2)} €</p>
                             </div>
-                            <div className="p-2 bg-amber-50 rounded-lg">
+                            <div className="p-2 bg-feedback-warning-subtle rounded-lg">
                               <p className="text-[10px] text-muted-foreground">Ahorro</p>
-                              <p className="text-xs sm:text-sm font-bold text-amber-700 tabular-nums">{savings.toFixed(2)} €</p>
+                              <p className="text-xs sm:text-sm font-bold text-feedback-warning-text tabular-nums">{savings.toFixed(2)} €</p>
                             </div>
                           </div>
 
                           {tier.type === 'bundle' && (
-                            <div className="mt-2 p-2 bg-amber-50 rounded-lg text-xs text-amber-700">
+                            <div className="mt-2 p-2 bg-feedback-warning-subtle rounded-lg text-xs text-feedback-warning-text">
                               {tier.buyQuantity! - tier.payQuantity!} unidad{((tier.buyQuantity! - tier.payQuantity!) !== 1) ? 'es' : ''} gratis
                             </div>
                           )}
@@ -1080,7 +1066,7 @@ export function StepPricing({
                   Crear primera oferta
                 </Button>
               ) : (
-                <div className="mt-4 text-xs text-amber-600">
+                <div className="mt-4 text-xs text-feedback-warning">
                   Configura primero el precio de venta
                 </div>
               )}

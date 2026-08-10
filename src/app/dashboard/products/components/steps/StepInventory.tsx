@@ -90,7 +90,7 @@ const StockLevelIndicator = ({ current, threshold, max }: { current: number; thr
         <span className={cn(
           "font-semibold",
           status === 'success' && "text-feedback-success",
-          status === 'warning' && "text-amber-600",
+          status === 'warning' && "text-feedback-warning",
           status === 'danger' && "text-feedback-danger"
         )}>
           {current} unidades
@@ -102,11 +102,11 @@ const StockLevelIndicator = ({ current, threshold, max }: { current: number; thr
         className={cn(
           "h-2 rounded-full",
           status === 'success' ? "bg-feedback-success" :
-          status === 'warning' ? "bg-amber-500" : "bg-feedback-danger"
+          status === 'warning' ? "bg-feedback-warning" : "bg-feedback-danger"
         )} 
       />
       {current <= threshold && current > 0 && (
-        <p className="text-xs text-amber-600 flex items-center gap-1">
+        <p className="text-xs text-feedback-warning flex items-center gap-1">
           <AlertTriangle className="w-4 h-4" />
           Stock bajo (umbral: {threshold} unidades)
         </p>
