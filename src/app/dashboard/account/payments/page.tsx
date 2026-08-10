@@ -1,9 +1,10 @@
 /**
  * @page Account - Payments
- * @version 2.0.0
- * @description Panel de cobros y liquidación, rediseñado con componentes de UX Library.
- * Utiliza StatGrid + StatCard para el estado de la cuenta, Card variant="section" para secciones,
- * Alert con trailing para mensajes de estado, y soporte para Stripe dashboard link.
+ * @version 2.1.0
+ * @description Panel de cobros y liquidación, con componentes de UX Library.
+ * StatCard (en grid manual, no StatGrid -- ver comentario junto a su uso)
+ * para el estado de la cuenta, Card variant="section" para secciones,
+ * Alert para mensajes de estado, y soporte para Stripe dashboard link.
  */
 
 'use client';
@@ -11,7 +12,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, StatGrid, StatCard, PageLoader, PageError, MobilePullRefresh, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
+import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, StatCard, PageLoader, PageError, MobilePullRefresh, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2, X } from 'lucide-react';
 import { loadProducerProfile } from '@/lib/api/onboarding';
 import { openStripeDashboard } from '@/lib/stripe/connect-client';
@@ -312,37 +313,43 @@ export default function PaymentsPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4 sm:space-y-5 p-4 sm:p-5 lg:p-6">
-                    {/* StatGrid de 3 tarjetas con variante según estado - responsive móvil-first */}
-                    <StatGrid
-                      items={[
-                        {
-                          label: 'Stripe',
-                          value: paymentStage === 'connected' ? 'Operativo' : paymentStage === 'pending' ? 'Pendiente' : 'No configurado',
-                          valueClassName: 'text-base sm:text-lg lg:text-xl',
-                          subtitle: paymentStage === 'connected' ? 'Puedes seguir cobrando y editar datos cuando lo necesites.' : paymentStage === 'pending' ? 'La cuenta existe pero aún no terminó la verificación.' : 'Todavía no has iniciado el alta en Stripe.',
-                          variant: getStatVariant(),
-                        },
-                        {
-                          label: 'Cuenta',
-                          value: stripeAccountId ?? 'Se generará al iniciar el alta',
+                    {/* 3 StatCard en grid manual (no StatGrid): StatGrid fuerza
+                        grid-cols-2 en móvil sin importar el prop `columns`, así
+                        que con 3 items la 3ª tarjeta queda sola dejando medio
+                        hueco vacío. Aquí "Cuenta" (el valor más largo, el ID de
+                        Stripe) se reordena al final y ocupa las 2 columnas en
+                        móvil -- sin huecos, y además con más espacio para el
+                        ID largo. En desktop (lg:grid-cols-3) las 3 vuelven a
+                        ocupar una columna cada una, igual que antes. */}
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
+                      <StatCard
+                        label="Stripe"
+                        value={paymentStage === 'connected' ? 'Operativo' : paymentStage === 'pending' ? 'Pendiente' : 'No configurado'}
+                        valueClassName="text-base sm:text-lg lg:text-xl"
+                        subtitle={paymentStage === 'connected' ? 'Puedes seguir cobrando y editar datos cuando lo necesites.' : paymentStage === 'pending' ? 'La cuenta existe pero aún no terminó la verificación.' : 'Todavía no has iniciado el alta en Stripe.'}
+                        variant={getStatVariant()}
+                      />
+                      <StatCard
+                        label="Verificación"
+                        value={acceptedTermsAt ? new Date(acceptedTermsAt).toLocaleDateString('es-ES') : 'Pendiente'}
+                        valueClassName="text-base sm:text-lg lg:text-xl"
+                        subtitle="Fecha registrada de aceptación de términos para el alta de cobros."
+                        variant={getStatVariant()}
+                      />
+                      <div className="col-span-2 lg:col-span-1">
+                        <StatCard
+                          label="Cuenta"
+                          value={stripeAccountId ?? 'Se generará al iniciar el alta'}
                           // break-all: stripeAccountId es un token largo sin
                           // espacios (acct_...) -- StatCard no lo trunca ni
                           // envuelve por defecto, así que sin esto desborda
-                          // la tarjeta en el grid de 2 columnas de móvil.
-                          valueClassName: 'text-base sm:text-lg lg:text-xl break-all',
-                          subtitle: 'Identificador técnico de Stripe asociado a tu perfil comercial.',
-                          variant: getStatVariant(),
-                        },
-                        {
-                          label: 'Verificación',
-                          value: acceptedTermsAt ? new Date(acceptedTermsAt).toLocaleDateString('es-ES') : 'Pendiente',
-                          valueClassName: 'text-base sm:text-lg lg:text-xl',
-                          subtitle: 'Fecha registrada de aceptación de términos para el alta de cobros.',
-                          variant: getStatVariant(),
-                        },
-                      ]}
-                      columns={3}
-                    />
+                          // la tarjeta.
+                          valueClassName="text-base sm:text-lg lg:text-xl break-all"
+                          subtitle="Identificador técnico de Stripe asociado a tu perfil comercial."
+                          variant={getStatVariant()}
+                        />
+                      </div>
+                    </div>
 
                     {/* Alert de estado del pago. Sin badge de estado propio --
                         ese estado ya se ve en la cabecera de la página y en
