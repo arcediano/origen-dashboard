@@ -314,41 +314,41 @@ export default function PaymentsPage() {
                   </CardHeader>
                   <CardContent className="space-y-4 sm:space-y-5 p-4 sm:p-5 lg:p-6">
                     {/* 3 StatCard en grid manual (no StatGrid): StatGrid fuerza
-                        grid-cols-2 en móvil sin importar el prop `columns`, así
-                        que con 3 items la 3ª tarjeta queda sola dejando medio
-                        hueco vacío. Aquí "Cuenta" (el valor más largo, el ID de
-                        Stripe) se reordena al final y ocupa las 2 columnas en
-                        móvil -- sin huecos, y además con más espacio para el
-                        ID largo. En desktop (lg:grid-cols-3) las 3 vuelven a
-                        ocupar una columna cada una, igual que antes. */}
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
+                        grid-cols-2 en móvil sin importar el prop `columns`. Con
+                        2 columnas cada tarjeta tenía media pantalla de ancho y
+                        el `subtitle` (una frase completa, no un dato corto tipo
+                        "128 reseñas") se recortaba con la elipsis que StatCard
+                        aplica siempre a `subtitle`/`label` (`truncate`, sin
+                        wrap). Una columna por fila en móvil da a cada tarjeta
+                        el ancho completo, evitando el corte. En desktop
+                        (lg:grid-cols-3) las 3 vuelven a ocupar una columna cada
+                        una, igual que antes. */}
+                    <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
                       <StatCard
                         label="Stripe"
                         value={paymentStage === 'connected' ? 'Operativo' : paymentStage === 'pending' ? 'Pendiente' : 'No configurado'}
                         valueClassName="text-base sm:text-lg lg:text-xl"
-                        subtitle={paymentStage === 'connected' ? 'Puedes seguir cobrando y editar datos cuando lo necesites.' : paymentStage === 'pending' ? 'La cuenta existe pero aún no terminó la verificación.' : 'Todavía no has iniciado el alta en Stripe.'}
+                        subtitle={paymentStage === 'connected' ? 'Puedes editar tus datos cuando lo necesites.' : paymentStage === 'pending' ? 'Verificación de Stripe todavía en curso.' : 'Todavía no has iniciado el alta en Stripe.'}
                         variant={getStatVariant()}
                       />
                       <StatCard
                         label="Verificación"
                         value={acceptedTermsAt ? new Date(acceptedTermsAt).toLocaleDateString('es-ES') : 'Pendiente'}
                         valueClassName="text-base sm:text-lg lg:text-xl"
-                        subtitle="Fecha registrada de aceptación de términos para el alta de cobros."
+                        subtitle="Aceptación de términos de cobro."
                         variant={getStatVariant()}
                       />
-                      <div className="col-span-2 lg:col-span-1">
-                        <StatCard
-                          label="Cuenta"
-                          value={stripeAccountId ?? 'Se generará al iniciar el alta'}
-                          // break-all: stripeAccountId es un token largo sin
-                          // espacios (acct_...) -- StatCard no lo trunca ni
-                          // envuelve por defecto, así que sin esto desborda
-                          // la tarjeta.
-                          valueClassName="text-base sm:text-lg lg:text-xl break-all"
-                          subtitle="Identificador técnico de Stripe asociado a tu perfil comercial."
-                          variant={getStatVariant()}
-                        />
-                      </div>
+                      <StatCard
+                        label="Cuenta"
+                        value={stripeAccountId ?? 'Se generará al iniciar el alta'}
+                        // break-all: stripeAccountId es un token largo sin
+                        // espacios (acct_...) -- StatCard no lo trunca ni
+                        // envuelve por defecto, así que sin esto desborda
+                        // la tarjeta.
+                        valueClassName="text-base sm:text-lg lg:text-xl break-all"
+                        subtitle="Identificador técnico de tu cuenta Stripe."
+                        variant={getStatVariant()}
+                      />
                     </div>
 
                     {/* Alert de estado del pago. Sin badge de estado propio --
