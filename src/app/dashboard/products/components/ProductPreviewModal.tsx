@@ -75,7 +75,12 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
         showCloseButton={false}
         className="max-w-3xl w-full p-0 overflow-hidden"
       >
-        <div className="flex flex-col max-h-[90vh]">
+        {/* dvh en vez de vh: en móvil (barra de direcciones/chrome del
+            navegador) 90vh se calcula sobre el viewport más alto posible, no
+            el visible -- el pie con "Cerrar vista previa" quedaba fuera de
+            la pantalla. Mismo ajuste ya usado en el bottom sheet de
+            StepCertificationsAttributes. */}
+        <div className="flex flex-col" style={{ maxHeight: '90dvh' }}>
 
         {/* ── Banner PREVIEW ───────────────────────────────────────────────── */}
         <div className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-origen-bosque px-4 py-2.5">

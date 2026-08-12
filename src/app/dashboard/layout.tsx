@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { type SellerStatus } from '@/types/seller';
 import { useAuth } from '@/contexts/AuthContext';
 import { ReadinessProvider } from '@/contexts/ReadinessContext';
+import { useActionBarOpen } from '@/hooks/useHideBottomTabBar';
 
 // Datos mock - @todo: GET /api/producer/status
 const MOCK_PRODUCER_STATUS = {
@@ -41,7 +42,11 @@ function DashboardContentWrapper({
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [actionBarOpen, setActionBarOpen] = useState(false);
+  // Cuando una página activa su propia ActionBar, el layout cede la reserva
+  // del BottomTabBar -- useActionBarOpen() se sincroniza con el estado actual
+  // al suscribirse (ver hooks/useHideBottomTabBar.ts), así que no depende de
+  // que este efecto llegue a tiempo de un dispatch anterior.
+  const actionBarOpen = useActionBarOpen();
 
   const { isAuthenticated, isProducer, isLoading: authLoading, user } = useAuth();
 
@@ -101,14 +106,6 @@ function DashboardContentWrapper({
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Cuando una página activa su propia ActionBar, el layout cede la reserva del BottomTabBar
-  useEffect(() => {
-    const handler = (e: Event) =>
-      setActionBarOpen((e as CustomEvent<{ open: boolean }>).detail.open);
-    window.addEventListener('page-action-bar:toggle', handler);
-    return () => window.removeEventListener('page-action-bar:toggle', handler);
   }, []);
 
   // Mostrar spinner mientras se valida la autenticación

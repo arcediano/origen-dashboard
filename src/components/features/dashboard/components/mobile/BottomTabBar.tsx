@@ -12,12 +12,17 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { MOBILE_ROOT_TABS, matchesNavigationItem } from '@/constants/sidebar';
+import { useActionBarOpen } from '@/hooks/useHideBottomTabBar';
 
 export function BottomTabBar() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [actionBarOpen, setActionBarOpen] = useState(false);
+  // Esconder la barra cuando una página tiene su propia barra de acciones
+  // contextual -- useActionBarOpen() se sincroniza con el estado actual al
+  // suscribirse, así que funciona aunque la página ya haya despachado el
+  // aviso antes de que este componente montara su listener.
+  const actionBarOpen = useActionBarOpen();
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -28,15 +33,6 @@ export function BottomTabBar() {
     };
     window.addEventListener('filter-sheet:toggle', handler);
     return () => window.removeEventListener('filter-sheet:toggle', handler);
-  }, []);
-
-  // Esconder la barra cuando una página tiene su propia barra de acciones contextual
-  useEffect(() => {
-    const handler = (e: Event) => {
-      setActionBarOpen((e as CustomEvent<{ open: boolean }>).detail.open);
-    };
-    window.addEventListener('page-action-bar:toggle', handler);
-    return () => window.removeEventListener('page-action-bar:toggle', handler);
   }, []);
 
   if (!mounted) return null;
