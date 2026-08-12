@@ -635,12 +635,15 @@ export function StepCertificationsAttributes({
             </div>
           </div>
 
-          {/* Badges — simplificados en móvil para evitar 2 filas */}
+          {/* Badges — 4 en este paso (vs. 2 en el resto); igual que el resto de
+              pasos, se dejan envolver en 2 filas en móvil (flex-wrap) en vez de
+              ocultarlos, para no perder "Paso 7 de 7" justo en el paso que
+              bloquea publicar. */}
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             <Badge variant="leaf" size="sm" className="bg-origen-pradera/10">
               {certifications.length} certificaciones
             </Badge>
-            <Badge variant="info" size="sm" className="hidden sm:inline-flex bg-origen-pradera/10 text-origen-hoja border-origen-pradera/20">
+            <Badge variant="info" size="sm" className="bg-origen-pradera/10 text-origen-hoja border-origen-pradera/20">
               {attributes.filter((a) => a.visible).length} atributos
             </Badge>
             {isStepComplete ? (
@@ -652,7 +655,7 @@ export function StepCertificationsAttributes({
                 <AlertCircle className="w-3 h-3" /> Pendiente
               </Badge>
             )}
-            <Badge variant="leaf" size="sm" className="hidden sm:inline-flex items-center gap-1">
+            <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Paso 7 de 7
             </Badge>
           </div>

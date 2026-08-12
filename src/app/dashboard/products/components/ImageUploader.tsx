@@ -229,12 +229,12 @@ export function ImageUploader({
 
               {/* Acciones — siempre visibles en móvil (no hay :hover en touch);
                   en escritorio se revelan solo al pasar el ratón, como antes. */}
-              <div className="absolute top-1 right-1 flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-1 right-1 flex items-center gap-1.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                 {showMainBadge && !image.isMain && (
                   <button
                     type="button"
                     onClick={() => handleSetMain(image.id)}
-                    className="p-2 bg-surface-alt/95 rounded-lg shadow-subtle hover:bg-origen-crema transition-colors"
+                    className="p-2.5 bg-surface-alt/95 rounded-lg shadow-subtle hover:bg-origen-crema transition-colors"
                     aria-label="Marcar como principal"
                     title="Marcar como principal"
                   >
@@ -244,7 +244,7 @@ export function ImageUploader({
                 <button
                   type="button"
                   onClick={() => handleRemove(image.id)}
-                  className="p-2 bg-surface-alt/95 rounded-lg shadow-subtle hover:bg-feedback-danger-subtle transition-colors"
+                  className="p-2.5 bg-surface-alt/95 rounded-lg shadow-subtle hover:bg-feedback-danger-subtle transition-colors"
                   aria-label="Eliminar imagen"
                   title="Eliminar"
                 >

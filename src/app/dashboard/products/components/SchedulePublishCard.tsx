@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import { CalendarClock, CheckCircle2, AlertCircle } from 'lucide-react';
-import { Button } from '@arcediano/ux-library';
+import { Button, Card } from '@arcediano/ux-library';
 import { toast } from '@arcediano/ux-library';
 import { scheduleProduct } from '@/lib/api/products';
 
@@ -57,7 +57,10 @@ export function SchedulePublishCard({ productId, currentScheduledAt }: ScheduleP
   };
 
   return (
-    <div className="rounded-2xl border border-origen-pradera/20 bg-gradient-to-br from-origen-crema/40 to-white p-4 sm:p-5 space-y-3">
+    // Mismo Card que el resto de pasos del asistente (variant="elevated",
+    // padding md = p-4 sm:p-6) -- antes era un <div> a mano con degradado y
+    // radio distintos, rompía la secuencia visual del wizard.
+    <Card variant="elevated" className="space-y-3">
       {/* Cabecera */}
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 rounded-xl bg-origen-pradera/10 flex items-center justify-center shrink-0">
@@ -69,14 +72,17 @@ export function SchedulePublishCard({ productId, currentScheduledAt }: ScheduleP
         </div>
       </div>
 
-      {/* Selector de fecha */}
+      {/* Selector de fecha — no existe un DateInput de la librería con hora
+          (solo type="date"), así que sigue siendo un input nativo, pero
+          alineado al mismo tratamiento visual (bg-surface-alt, foco) que
+          usan los DateInput del resto del asistente. */}
       <div className="flex flex-col sm:flex-row gap-2">
         <input
           type="datetime-local"
           value={scheduledAt}
           min={minDatetime}
           onChange={(e) => { setScheduledAt(e.target.value); setSuccess(false); }}
-          className="flex-1 h-10 px-3 rounded-xl border border-border bg-white text-sm text-origen-bosque focus:outline-none focus:ring-2 focus:ring-origen-pradera/30 focus:border-origen-pradera transition-all"
+          className="flex-1 h-10 px-3 rounded-xl border border-border-subtle bg-surface-alt text-sm font-medium text-origen-bosque hover:border-origen-pradera/55 focus:outline-none focus:ring-2 focus:ring-origen-pradera/20 focus:border-origen-pradera transition-colors"
         />
         <Button
           variant="secondary"
@@ -104,6 +110,6 @@ export function SchedulePublishCard({ productId, currentScheduledAt }: ScheduleP
           Programado para: {new Date(currentScheduledAt).toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' })}
         </p>
       )}
-    </div>
+    </Card>
   );
 }

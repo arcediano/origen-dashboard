@@ -83,48 +83,52 @@ export function CreateProductProgress({
         {/* Barra de progreso */}
         <Progress value={progress} variant="leaf" size="sm" showLabel={false} className="mb-4 sm:mb-5" />
         
-        {/* Navegación de pasos */}
-        <div className="flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto pb-1 scrollbar-origen snap-x snap-mandatory">
-          {FORM_STEPS.map((step, index) => {
-            const isActive = step.id === currentTab;
-            const isCompleted = completedTabs[step.id];
-            const isClickable = index <= currentIndex + 1;
+        {/* Navegación de pasos — degradado a la derecha como pista de que hay
+            más pasos fuera de pantalla en móvil (7 pasos no caben a 375px) */}
+        <div className="relative">
+          <div className="flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto pb-1 scrollbar-origen snap-x snap-mandatory">
+            {FORM_STEPS.map((step, index) => {
+              const isActive = step.id === currentTab;
+              const isCompleted = completedTabs[step.id];
+              const isClickable = index <= currentIndex + 1;
 
-            return (
-              <button
-                key={step.id}
-                onClick={() => isClickable && onTabChange(step.id as FormStepId)}
-                className={cn(
-                  "group/step relative flex flex-col items-center gap-1.5 sm:gap-2 transition-all duration-300 flex-shrink-0 min-w-[52px] sm:min-w-[60px] snap-start",
-                  isClickable ? "cursor-pointer" : "cursor-not-allowed opacity-40"
-                )}
-                disabled={!isClickable}
-                aria-label={`Ir al paso ${step.label}`}
-                aria-current={isActive ? "step" : undefined}
-              >
-                <div className={cn(
-                  "relative w-11 h-11 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
-                  isActive && "border-origen-pradera bg-origen-pradera/10 shadow-lg shadow-origen-pradera/20",
-                  isCompleted && !isActive && "border-origen-bosque bg-origen-bosque text-white",
-                  !isActive && !isCompleted && "border-border bg-surface-alt text-text-subtle"
-                )}>
-                  {isCompleted && !isActive ? (
-                    <CheckCircle className="w-4 h-4" />
-                  ) : (
-                    iconMap[step.icon]
+              return (
+                <button
+                  key={step.id}
+                  onClick={() => isClickable && onTabChange(step.id as FormStepId)}
+                  className={cn(
+                    "group/step relative flex flex-col items-center gap-1.5 sm:gap-2 transition-all duration-300 flex-shrink-0 min-w-[52px] sm:min-w-[60px] snap-start",
+                    isClickable ? "cursor-pointer" : "cursor-not-allowed opacity-40"
                   )}
-                </div>
-                <span className={cn(
-                  "text-[10px] sm:text-xs font-medium text-center max-w-[52px] sm:max-w-[60px] leading-tight line-clamp-2",
-                  isActive && "text-origen-bosque",
-                  isCompleted && !isActive && "text-hoja-tinta",
-                  !isActive && !isCompleted && "text-text-subtle"
-                )}>
-                  {step.label}
-                </span>
-              </button>
-            );
-          })}
+                  disabled={!isClickable}
+                  aria-label={`Ir al paso ${step.label}`}
+                  aria-current={isActive ? "step" : undefined}
+                >
+                  <div className={cn(
+                    "relative w-11 h-11 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
+                    isActive && "border-origen-pradera bg-origen-pradera/10 shadow-lg shadow-origen-pradera/20",
+                    isCompleted && !isActive && "border-origen-bosque bg-origen-bosque text-white",
+                    !isActive && !isCompleted && "border-border bg-surface-alt text-text-subtle"
+                  )}>
+                    {isCompleted && !isActive ? (
+                      <CheckCircle className="w-4 h-4" />
+                    ) : (
+                      iconMap[step.icon]
+                    )}
+                  </div>
+                  <span className={cn(
+                    "text-[10px] sm:text-xs font-medium text-center max-w-[52px] sm:max-w-[60px] leading-tight line-clamp-2",
+                    isActive && "text-origen-bosque",
+                    isCompleted && !isActive && "text-hoja-tinta",
+                    !isActive && !isCompleted && "text-text-subtle"
+                  )}>
+                    {step.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent sm:hidden" aria-hidden="true" />
         </div>
       </Card>
     </div>

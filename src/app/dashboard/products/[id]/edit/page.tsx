@@ -164,7 +164,7 @@ export default function EditProductPage() {
         }
       />
 
-      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 lg:pb-8">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <CreateProductProgress
           currentTab={activeTab}
           completedTabs={completedTabs}
@@ -202,7 +202,7 @@ export default function EditProductPage() {
           animate="visible"
           className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-6"
         >
-          <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-0`}>
+          <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} sm:pb-0`}>
             <ProductFormSteps
               activeTab={activeTab}
               formData={formData}

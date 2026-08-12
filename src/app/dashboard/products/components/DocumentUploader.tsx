@@ -233,9 +233,10 @@ export function DocumentUploader({
                   type="button"
                   disabled={doc.uploading}
                   onClick={() => handleRemove(doc.id)}
-                  className="p-1 rounded-md text-text-subtle hover:text-feedback-danger hover:bg-feedback-danger-subtle transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label={`Eliminar ${doc.name}`}
+                  className="p-2.5 sm:p-1.5 rounded-md text-text-subtle hover:text-feedback-danger hover:bg-feedback-danger-subtle transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
             </div>

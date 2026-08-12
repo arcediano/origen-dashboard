@@ -715,8 +715,8 @@ export function StepPricing({
                     {editingTierId ? 'Editar oferta' : 'Nueva oferta por cantidad'}
                   </h4>
 
-                  {/* Selector de tipo */}
-                  <div className="grid grid-cols-3 gap-2">
+                  {/* Selector de tipo — 1 columna en móviles muy estrechos (320-360px) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {[
                       { id: 'percentage', icon: Percent, label: 'Porcentaje' },
                       { id: 'fixed', icon: DollarSign, label: 'Precio fijo' },
@@ -980,40 +980,49 @@ export function StepPricing({
                               </p>
                             </div>
 
-                            {/* Acciones */}
-                            <div className="flex items-center gap-0.5 shrink-0">
+                            {/* Acciones — más grandes en móvil (sin :hover, hace
+                                falta zona táctil real), más compactas en escritorio */}
+                            <div className="flex items-center gap-1 sm:gap-0.5 shrink-0">
                               {/* Reordenar */}
-                              <div className="flex flex-col">
+                              <div className="flex flex-col gap-1 sm:gap-0">
                                 <button
+                                  type="button"
                                   onClick={() => handleMoveTierUp(tier.id)}
                                   disabled={index === 0}
-                                  className="p-2.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  aria-label="Subir oferta"
+                                  className="p-3 sm:p-2 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                   title="Subir"
                                 >
-                                  <ChevronUp className="w-3.5 h-3.5" />
+                                  <ChevronUp className="w-4 h-4" aria-hidden="true" />
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={() => handleMoveTierDown(tier.id)}
                                   disabled={index === tiers.length - 1}
-                                  className="p-2.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  aria-label="Bajar oferta"
+                                  className="p-3 sm:p-2 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                   title="Bajar"
                                 >
-                                  <ChevronDown className="w-3.5 h-3.5" />
+                                  <ChevronDown className="w-4 h-4" aria-hidden="true" />
                                 </button>
                               </div>
                               <button
+                                type="button"
                                 onClick={() => handleEditTier(tier)}
-                                className="p-2.5 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
+                                aria-label="Editar oferta"
+                                className="p-3 sm:p-2 rounded-md text-text-subtle hover:text-origen-pradera hover:bg-origen-pradera/10 transition-colors"
                                 title="Editar"
                               >
-                                <Edit2 className="w-3.5 h-3.5" />
+                                <Edit2 className="w-4 h-4" aria-hidden="true" />
                               </button>
                               <button
+                                type="button"
                                 onClick={() => handleDeleteTier(tier.id)}
-                                className="p-2.5 rounded-md text-text-subtle hover:text-feedback-danger hover:bg-feedback-danger-subtle transition-colors"
+                                aria-label="Eliminar oferta"
+                                className="p-3 sm:p-2 rounded-md text-text-subtle hover:text-feedback-danger hover:bg-feedback-danger-subtle transition-colors"
                                 title="Eliminar"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash2 className="w-4 h-4" aria-hidden="true" />
                               </button>
                             </div>
                           </div>

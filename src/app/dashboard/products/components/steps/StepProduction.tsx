@@ -291,21 +291,25 @@ export function StepProduction({
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          {/* Pestañas de navegación */}
-          <div className="mb-6 overflow-x-auto">
-            <TabsList className="min-w-max">
-              {[
-                { id: 'story', label: 'Historia', icon: <BookOpen className="w-4 h-4" /> },
-                { id: 'origin', label: 'Origen', icon: <MapPin className="w-4 h-4" /> },
-                { id: 'sustainability', label: 'Sostenibilidad', icon: <TreePine className="w-4 h-4" /> },
-                { id: 'media', label: 'Galería', icon: <Camera className="w-4 h-4" /> },
-              ].map((tab) => (
-                <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
-                  {tab.icon}
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+          {/* Pestañas de navegación — degradado a la derecha como pista de que
+              hay más pestañas fuera de pantalla en móvil */}
+          <div className="relative mb-6">
+            <div className="overflow-x-auto">
+              <TabsList className="min-w-max">
+                {[
+                  { id: 'story', label: 'Historia', icon: <BookOpen className="w-4 h-4" /> },
+                  { id: 'origin', label: 'Origen', icon: <MapPin className="w-4 h-4" /> },
+                  { id: 'sustainability', label: 'Sostenibilidad', icon: <TreePine className="w-4 h-4" /> },
+                  { id: 'media', label: 'Galería', icon: <Camera className="w-4 h-4" /> },
+                ].map((tab) => (
+                  <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
+                    {tab.icon}
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent sm:hidden" aria-hidden="true" />
           </div>
 
           {/* TAB HISTORIA */}
@@ -628,13 +632,16 @@ export function StepProduction({
                             </div>
                           )}
 
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          {/* Eliminar — siempre visible en móvil (no hay :hover en touch); en escritorio solo al pasar el ratón */}
+                          <div className="absolute top-2 right-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                             <button
+                              type="button"
                               onClick={() => handleRemoveMedia(video.id)}
-                              className="w-10 h-10 bg-feedback-danger rounded-lg flex items-center justify-center hover:bg-feedback-danger/80 transition-colors"
+                              className="w-9 h-9 bg-feedback-danger rounded-lg flex items-center justify-center shadow-subtle hover:bg-feedback-danger/80 transition-colors"
+                              aria-label="Eliminar vídeo"
                               title="Eliminar"
                             >
-                              <Trash2 className="w-5 h-5 text-white" />
+                              <Trash2 className="w-4 h-4 text-white" aria-hidden="true" />
                             </button>
                           </div>
 

@@ -201,8 +201,9 @@ export function FlashDealForm({
           )}
         </div>
 
-        {/* Campos de fecha */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Campos de fecha — 1 columna en móvil: el widget nativo datetime-local
+            necesita más ancho del que da media columna a 375px */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Label className="block text-xs font-medium text-origen-bosque mb-1.5">Inicio</Label>
             <Input

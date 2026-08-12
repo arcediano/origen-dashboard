@@ -191,7 +191,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
 
           {/* ── Galería adicional ──────────────────────────────────────────── */}
           {gallery.length > 0 && (
-            <div className="px-5 sm:px-6 py-4 border-t border-border">
+            <div className="px-5 sm:px-6 py-4 border-t border-border relative">
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {gallery.slice(0, 6).map(img => (
                   <div key={img.id} className="shrink-0 w-16 h-16 rounded-xl overflow-hidden border border-border bg-surface-alt">
@@ -199,6 +199,7 @@ export function ProductPreviewModal({ open, onClose, formData }: ProductPreviewM
                   </div>
                 ))}
               </div>
+              <div className="pointer-events-none absolute inset-y-4 right-5 sm:right-6 w-8 bg-gradient-to-l from-surface-alt to-transparent sm:hidden" aria-hidden="true" />
             </div>
           )}
 

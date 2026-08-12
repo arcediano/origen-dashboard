@@ -227,22 +227,26 @@ export function StepNutritional({
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          {/* Pestañas de navegación */}
-          <div className="mb-6 overflow-x-auto">
-            <TabsList className="min-w-max">
-              {[
-                { id: 'basicos', label: 'Básicos', icon: <Scale className="w-4 h-4" /> },
-                { id: 'nutrientes', label: 'Nutrientes', icon: <Beef className="w-4 h-4" /> },
-                { id: 'alergenos', label: 'Alérgenos', icon: <AlertCircle className="w-4 h-4" /> },
-                { id: 'ausencias', label: 'Ausencias', icon: <Ban className="w-4 h-4" /> },
-                { id: 'ingredientes', label: 'Ingredientes', icon: <FileText className="w-4 h-4" /> },
-              ].map((tab) => (
-                <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
-                  {tab.icon}
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+          {/* Pestañas de navegación — degradado a la derecha como pista de que
+              hay más pestañas fuera de pantalla en móvil (5 no caben a 375px) */}
+          <div className="relative mb-6">
+            <div className="overflow-x-auto">
+              <TabsList className="min-w-max">
+                {[
+                  { id: 'basicos', label: 'Básicos', icon: <Scale className="w-4 h-4" /> },
+                  { id: 'nutrientes', label: 'Nutrientes', icon: <Beef className="w-4 h-4" /> },
+                  { id: 'alergenos', label: 'Alérgenos', icon: <AlertCircle className="w-4 h-4" /> },
+                  { id: 'ausencias', label: 'Ausencias', icon: <Ban className="w-4 h-4" /> },
+                  { id: 'ingredientes', label: 'Ingredientes', icon: <FileText className="w-4 h-4" /> },
+                ].map((tab) => (
+                  <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
+                    {tab.icon}
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent sm:hidden" aria-hidden="true" />
           </div>
 
           {/* TAB 1: BÁSICOS */}
@@ -454,7 +458,7 @@ export function StepNutritional({
                       size="sm"
                     />
                   </div>
-                  <div className="space-y-2 max-h-80 overflow-y-auto pr-2 border border-border rounded-xl p-3">
+                  <div className="space-y-2 border border-border rounded-xl p-3">
                     {ALLERGENS.map(allergen => {
                       const Icon = getAllergenIcon(allergen);
                       return (
@@ -492,7 +496,7 @@ export function StepNutritional({
                       size="sm"
                     />
                   </div>
-                  <div className="space-y-2 max-h-80 overflow-y-auto pr-2 border border-border rounded-xl p-3">
+                  <div className="space-y-2 border border-border rounded-xl p-3">
                     {ALLERGENS.map(allergen => {
                       const Icon = getAllergenIcon(allergen);
                       return (
