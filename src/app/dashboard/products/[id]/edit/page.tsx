@@ -207,7 +207,14 @@ export default function EditProductPage() {
           animate="visible"
           className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-6"
         >
-          <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} sm:pb-0`}>
+          {/* padding inferior móvil — reserva el alto del ActionBar fijo.
+              ActionBar (showOnDesktop=false, por defecto) solo se oculta a
+              partir de lg: (1024px) -- no de sm: -- así que el padding y el
+              wrapper de CreateProductNavigation de abajo deben cancelarse/
+              mostrarse en el MISMO breakpoint (lg:) o queda un hueco de
+              640-1023px sin espacio reservado mientras la ActionBar sigue
+              fija abajo, tapando el formulario. */}
+          <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-0`}>
             <ProductFormSteps
               activeTab={activeTab}
               formData={formData}
@@ -221,8 +228,8 @@ export default function EditProductPage() {
               isPublishedProduct={isPublishedProduct}
             />
 
-            {/* Navegación de pasos — sólo visible en ≥ sm; en móvil usa ActionBar */}
-            <div className="hidden sm:block">
+            {/* Navegación de pasos — sólo visible en ≥ lg; hasta ahí usa ActionBar */}
+            <div className="hidden lg:block">
               <CreateProductNavigation
                 currentTab={activeTab}
                 onTabChange={handleTabChange}
