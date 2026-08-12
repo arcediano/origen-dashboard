@@ -149,9 +149,13 @@ export default function CreateProductPage() {
             >
               <span className="hidden sm:inline">Vista previa</span>
             </Button>
+            {/* Oculto en móvil: PageHeader coloca `actions` en un contenedor
+                shrink-0 sin wrap junto al título -- este texto es el ancho
+                justo para desbordar/aplastar el título a 375px. El estado de
+                guardado ya se ve en el botón "Guardar" del ActionBar móvil. */}
             {lastSaved && (
-              <span className="text-xs text-text-subtle">
-                Último guardado: {lastSaved.toLocaleTimeString()}
+              <span className="hidden sm:inline text-xs text-text-subtle">
+                Último guardado: {lastSaved.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
           </div>

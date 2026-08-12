@@ -149,9 +149,14 @@ export default function EditProductPage() {
             >
               <span className="hidden sm:inline">Vista previa</span>
             </Button>
+            {/* Oculto en móvil: PageHeader coloca `actions` en un contenedor
+                shrink-0 sin wrap junto al título -- con el botón + este texto
+                + el badge de SKU, se aplastaba/desbordaba el título a 375px.
+                El estado de guardado ya se ve en el botón "Guardar" del
+                ActionBar móvil. */}
             {lastSaved && (
-              <span className="text-xs text-text-subtle">
-                {isAutoSaving ? 'Guardando...' : `Guardado ${lastSaved.toLocaleTimeString()}`}
+              <span className="hidden sm:inline text-xs text-text-subtle">
+                {isAutoSaving ? 'Guardando...' : `Guardado ${lastSaved.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`}
               </span>
             )}
             {isEditMode && formData.sku && (
