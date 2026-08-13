@@ -733,6 +733,7 @@ export default function ProductoDetallePage() {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
+    <>
     <MobilePullRefresh onRefresh={loadProduct}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 0.3 } }}>
 
@@ -948,32 +949,6 @@ export default function ProductoDetallePage() {
           </div>
         </div>
 
-        {/* ── ACTION BAR MÓVIL ── */}
-        <ActionBar
-          primaryAction={{
-            id: 'edit',
-            label: 'Editar producto',
-            leftIcon: <Edit className="w-4 h-4" />,
-            onClick: () => router.push(`/dashboard/products/${product.id}/edit`),
-          }}
-          secondaryActions={[
-            {
-              id: 'status',
-              label: 'Estado',
-              leftIcon: <Send className="w-4 h-4" />,
-              onClick: () => setShowStatusSheet(true),
-              disabled: isUpdating,
-            },
-            {
-              id: 'delete',
-              label: 'Eliminar',
-              leftIcon: <Trash2 className="w-4 h-4" />,
-              onClick: () => setShowDeleteDialog(true),
-              disabled: isDeleting,              variant: 'ghost' as const,              className: 'text-feedback-danger hover:text-feedback-danger',
-            },
-          ]}
-        />
-
         {/* ── BOTTOM SHEET ESTADO (móvil) ── */}
         <Sheet open={showStatusSheet} onOpenChange={setShowStatusSheet}>
           <SheetContent side="bottom" className="rounded-t-[28px] px-5 pb-8">
@@ -1056,5 +1031,41 @@ export default function ProductoDetallePage() {
 
       </motion.div>
     </MobilePullRefresh>
+
+    {/* ── ACTION BAR MÓVIL ──
+        Fuera de MobilePullRefresh a propósito: su motion.div interno anima
+        `y` (framer-motion siempre lo renderiza como transform, incluso en
+        y:0), y un transform en un ancestro convierte a los descendientes
+        position:fixed en position:absolute relativos a ESE ancestro en vez
+        del viewport -- dentro, la ActionBar dejaba de quedarse fija en
+        pantalla y se desplazaba con el contenido, tapando el final de la
+        página en vez de quedarse anclada abajo. */}
+    <ActionBar
+      primaryAction={{
+        id: 'edit',
+        label: 'Editar producto',
+        leftIcon: <Edit className="w-4 h-4" />,
+        onClick: () => router.push(`/dashboard/products/${product.id}/edit`),
+      }}
+      secondaryActions={[
+        {
+          id: 'status',
+          label: 'Estado',
+          leftIcon: <Send className="w-4 h-4" />,
+          onClick: () => setShowStatusSheet(true),
+          disabled: isUpdating,
+        },
+        {
+          id: 'delete',
+          label: 'Eliminar',
+          leftIcon: <Trash2 className="w-4 h-4" />,
+          onClick: () => setShowDeleteDialog(true),
+          disabled: isDeleting,
+          variant: 'ghost' as const,
+          className: 'text-feedback-danger hover:text-feedback-danger',
+        },
+      ]}
+    />
+    </>
   );
 }
