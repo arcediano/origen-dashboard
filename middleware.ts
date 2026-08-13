@@ -37,6 +37,36 @@ import { jwtVerify, importSPKI, type CryptoKey, type KeyObject } from 'jose';
 const PROTECTED_PREFIXES = ['/dashboard', '/onboarding'];
 const AUTH_PREFIXES      = ['/auth/login', '/auth/register'];
 
+// ─── CSP CON NONCE ────────────────────────────────────────────────────────────
+/**
+ * Construye el header Content-Security-Policy con nonce por request.
+ *
+ * NOTA: style-src mantiene 'unsafe-inline' porque:
+ * - next/font inyecta <style> inline con @font-face (compatible con nonce)
+ * - El proyecto usa style={{...}} directamente en 24 archivos .tsx
+ * - framer-motion y recharts escriben estilos inline en tiempo de ejecución
+ * - La directiva nonce-* en style-src NO cubre el atributo style="..."
+ *   (limitación del estándar CSP, no de Next.js)
+ * - Los valores de esos estilos son dinámicos (animaciones, gráficos), imposible
+ *   usar hashes CSP como alternativa
+ * → Mantener 'unsafe-inline' es necesario y documentado explícitamente.
+ *
+ * El script de hidratación de Next.js y los <style> de next/font serán
+ * detectados automáticamente por Next.js App Router e inyectados con el
+ * nonce, sin que sea necesario tocar el código de la app.
+ */
+function buildCspHeader(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' https://js.stripe.com https://connect-js.stripe.com`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "frame-src https://connect-js.stripe.com https://js.stripe.com https://hooks.stripe.com",
+    "img-src 'self' data: https://storage.googleapis.com https://res.cloudinary.com https://*.cloudfront.net https://*.amazonaws.com https://images.unsplash.com https://*.stripe.com",
+    "connect-src 'self' https://api.stripe.com https://connect-js.stripe.com",
+  ].join('; ');
+}
+
 // ─── CACHÉ DE CLAVE PÚBLICA ───────────────────────────────────────────────────
 // La clave pública se importa una sola vez por instancia del Edge Worker y se
 // cachea en memoria. Reimportarla en cada request sería innecesariamente costoso.
@@ -96,6 +126,18 @@ async function isValidToken(token: string): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // ─── CSP CON NONCE ────────────────────────────────────────────────────────────
+  // Generar nonce criptográfico por request (Edge Runtime tiene Web Crypto API)
+  // Usar crypto.getRandomValues() + btoa() para máxima compatibilidad con Edge Runtime
+  const nonceBuffer = crypto.getRandomValues(new Uint8Array(32));
+  const nonce = btoa(String.fromCharCode(...nonceBuffer));
+  const cspHeader = buildCspHeader(nonce);
+
+  // Preparar headers para propagar el nonce hacia Next.js App Router
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('Content-Security-Policy', cspHeader);
+  // ───────────────────────────────────────────────────────────────────────────────
+
   const accessTokenCookie = request.cookies.get('accessToken');
   const isProtected = PROTECTED_PREFIXES.some(p => pathname.startsWith(p));
   const isAuthPage  = AUTH_PREFIXES.some(p => pathname.startsWith(p));
@@ -104,7 +146,9 @@ export async function middleware(request: NextRequest) {
   if (isProtected && !accessTokenCookie) {
     const loginUrl = new URL('/auth/login', request.url);
     loginUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(loginUrl);
+    const response = NextResponse.redirect(loginUrl);
+    response.headers.set('Content-Security-Policy', cspHeader);
+    return response;
   }
 
   // ── 2. Ruta protegida con cookie → validar JWT ───────────────────────────────
@@ -122,6 +166,7 @@ export async function middleware(request: NextRequest) {
       const response = NextResponse.redirect(loginUrl);
       // Eliminar la cookie inválida para no volver a evaluarla
       response.cookies.delete('accessToken');
+      response.headers.set('Content-Security-Policy', cspHeader);
       return response;
     }
   }
@@ -130,18 +175,39 @@ export async function middleware(request: NextRequest) {
   if (isAuthPage && accessTokenCookie) {
     const valid = await isValidToken(accessTokenCookie.value);
     if (valid) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      const response = NextResponse.redirect(new URL('/dashboard', request.url));
+      response.headers.set('Content-Security-Policy', cspHeader);
+      return response;
     }
     // Token presente pero inválido: dejar pasar al login (se limpiará allí)
   }
 
-  return NextResponse.next();
+  // ─── CSP CON NONCE (continuación) ─────────────────────────────────────────────
+  // Propagar el nonce tanto en request (para que Next.js lo detecte y lo aplique
+  // a <script> y <style> que inyecta internamente) como en response (que es lo
+  // que efectivamente llega al navegador).
+  //
+  // NOTA FUTURA: Si en el futuro se añade un <script> o <style> manual en JSX,
+  // ese script/style necesitará recibir el nonce vía la prop `nonce` leyendo
+  // headers() en un Server Component y pasándolo explícitamente. Por ahora,
+  // no hay scripts/estilos manuales en el código, por lo que Next.js lo maneja
+  // automáticamente.
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+  response.headers.set('Content-Security-Policy', cspHeader);
+  return response;
+  // ───────────────────────────────────────────────────────────────────────────────
 }
 
 export const config = {
+  // Matcher ampliado para cubrir todas las rutas de páginas HTML (App Router),
+  // excluyendo assets estáticos, imágenes optimizadas y archivos internos de Next.js.
+  // Patrón recomendado por Next.js para middleware que debe ejecutarse en todas las
+  // páginas pero no en recursos estáticos.
   matcher: [
-    '/dashboard/:path*',
-    '/auth/login',
-    '/auth/register',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
   ],
 };
