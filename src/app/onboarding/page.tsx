@@ -503,14 +503,10 @@ export default function OnboardingPage() {
            !!step1.billingAddress?.streetNumber.trim() &&
            !!step1.billingAddress?.city.trim() &&
            /^\d{5}$/.test(step1.billingAddress?.postalCode ?? ''));
-        const legalRepOk = step1.entityType === 'autonomo' || !step1.entityType
-          ? true
-          : !!step1.legalRepresentativeName?.trim();
         const phoneOk = !!step1.businessPhone && /^[6789]\d{8}$/.test(step1.businessPhone);
 
         if (!step1.entityType) messages.push('Selecciona el tipo de entidad.');
         if (!validateSpanishTaxId(step1.taxId ?? '').valid) messages.push('Introduce un CIF/NIF válido.');
-        if (!legalRepOk) messages.push('Añade el representante legal para entidades jurídicas.');
         if (!phoneOk) messages.push('Introduce un teléfono válido (9 dígitos, empieza por 6, 7, 8 o 9).');
         if (!step1.street.trim()) messages.push('Completa la calle de producción.');
         if (!step1.streetNumber.trim()) messages.push('Completa el número de la dirección de producción.');
