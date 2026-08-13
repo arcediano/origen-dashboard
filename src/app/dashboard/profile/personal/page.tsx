@@ -423,7 +423,7 @@ export default function PersonalInfoPage() {
         onBack={() => router.push('/dashboard/profile')}
       />
 
-      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8 ${isEditing ? 'lg:pb-28' : ''}`}>
+      <div className={`container mx-auto px-4 py-4 sm:px-6 lg:px-8 lg:py-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, isEditing ? 64 : 0)} sm:pb-8 ${isEditing ? 'lg:pb-28' : ''}`}>
         <ProfileSectionNav className="mt-3" />
 
         <div className="mt-6">
