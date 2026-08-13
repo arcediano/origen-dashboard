@@ -25,6 +25,61 @@ function isValidStripeAccountId(accountId: string): boolean {
   return /^acct_[A-Za-z0-9]+$/.test(accountId);
 }
 
+/**
+ * Reintenta el fetch a link-stripe-account con 3 intentos totales y 300ms entre cada uno.
+ * Solo reintenta el paso de persistencia, nunca la creación de la cuenta (que ya tiene
+ * idempotency key propia en createConnectAccount).
+ *
+ * @param accessToken Token de autorización para el gateway
+ * @param stripeAccountId ID de la cuenta Stripe a vincular
+ * @returns Respuesta del endpoint link-stripe-account si éxito, lanza si 3 intentos fallan
+ */
+async function linkAccountWithRetry(
+  accessToken: string,
+  stripeAccountId: string
+): Promise<Response> {
+  const maxAttempts = 3;
+  const delayMs = 300;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const res = await fetch(
+        `${GATEWAY_URL}/api/v1/producers/onboarding/step/link-stripe-account`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({ stripeAccountId }),
+        }
+      );
+
+      if (res.ok) {
+        return res;
+      }
+
+      // Si no es ok y no es el último intento, esperar y reintentar
+      if (attempt < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    } catch (error) {
+      // Error de red u otro — reintentar si no es el último
+      if (attempt < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  // Agotó los 3 intentos sin success
+  throw new Error(
+    `linkAccountWithRetry: failed after ${maxAttempts} attempts`
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -73,9 +128,10 @@ export async function POST(request: NextRequest) {
     }
 
     const onboardingJson = await onboardingRes.json() as {
-      data?: { payment?: { stripeAccountId?: string | null } };
+      data?: { id?: string; payment?: { stripeAccountId?: string | null } };
     };
     const ownedAccountId = onboardingJson?.data?.payment?.stripeAccountId;
+    const producerId = onboardingJson?.data?.id;
 
     let resolvedAccountId: string;
 
@@ -103,8 +159,20 @@ export async function POST(request: NextRequest) {
         resolvedAccountId = ownedAccountId;
       } else {
         // Crear una cuenta Stripe nueva
+        // GUARDA: producerId debe estar disponible — es requisito para generar
+        // la idempotency key dentro de createConnectAccount
+        if (!producerId) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'No se pudo determinar el productor autenticado',
+            },
+            { status: 502 }
+          );
+        }
+
         const account = await createConnectAccount({
-          sellerId: `producer-${Date.now()}`,
+          sellerId: producerId,
           email,
           firstName,
           lastName,
@@ -118,20 +186,20 @@ export async function POST(request: NextRequest) {
         // Si esto falla, no devolvemos clientSecret (vería el error en la rama de catch).
         // Esto cierra la ventana en la que un refetch de client_secret a mitad de sesión
         // no encontraba la cuenta reconocida en BD (causaba 403).
-        const linkRes = await fetch(`${GATEWAY_URL}/api/v1/producers/onboarding/step/link-stripe-account`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({ stripeAccountId: resolvedAccountId }),
-        });
-
-        if (!linkRes.ok) {
-          // No devolver clientSecret si no se pudo vincular: dejar la cuenta sin
-          // vincular perpetuaría exactamente el bug que este endpoint corrige.
-          throw new Error('No se pudo vincular la cuenta Stripe recien creada con el productor');
+        // Reintentamos hasta 3 veces con 300ms entre intentos para cubrir
+        // blips transitorios de red en el paso de persistencia.
+        try {
+          await linkAccountWithRetry(accessToken, resolvedAccountId);
+        } catch (linkError) {
+          // La cuenta se creó en Stripe pero el vínculo en BD falló.
+          // Loguear para auditoría/reconciliación manual.
+          console.error('[stripe-idempotency] CREATE_SUCCEEDED_LINK_FAILED', {
+            stripeAccountId: resolvedAccountId,
+            attempts: 3,
+          });
+          throw new Error(
+            'No se pudo vincular la cuenta Stripe recien creada con el productor'
+          );
         }
       }
     }
