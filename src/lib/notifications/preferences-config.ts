@@ -1,5 +1,5 @@
 /**
- * Notification preferences configuration — all 24 event types.
+ * Notification preferences configuration — all 27 event types.
  * Source of truth for groups, labels, and always-active rules.
  * Consumed by NotificationsPreferencesPanel.
  */
@@ -200,8 +200,24 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
         description: 'Tu perfil de productor ha sido verificado y ya puedes vender.',
         icon:        Briefcase,
       },
-      // CERTIFICATION_PENDING no tiene entrada en EVENT_MAP del backend.
-      // Dejar comentario intacto hasta que se añada soporte futuro.
+      {
+        eventType:   'PAYMENT_ACCOUNT_ACTION_REQUIRED',
+        title:       'Tu cuenta de pagos necesita atención',
+        description: 'Stripe pide información adicional para mantener tus cobros activos.',
+        icon:        UserCheck,
+      },
+      {
+        eventType:   'PAYMENT_ACCOUNT_RESTRICTED',
+        title:       'Cobros pausados',
+        description: 'Tu cuenta de pagos ha sido restringida y no puedes recibir pagos.',
+        icon:        UserCheck,
+      },
+      {
+        eventType:   'CERTIFICATION_PENDING',
+        title:       'Certificación en revisión',
+        description: 'Confirmación de que tu certificación de producto fue enviada y está en revisión.',
+        icon:        Briefcase,
+      },
     ],
   },
 
@@ -257,9 +273,20 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
     ],
   },
 
-  // ── Marketing (soporte backend disponible) ────────────────────────────────
-  // PROMOTION_CREATED tiene soporte en el backend.
-  // Los toggles para eventos de marketing se pueden añadir en futuras iteraciones del backlog.
+  // ── Marketing (1) ─────────────────────────────────────────────────────────
+  {
+    id:    'marketing',
+    label: 'Marketing',
+    icon:  Megaphone,
+    events: [
+      {
+        eventType:   'PROMOTION_CREATED',
+        title:       'Tu campaña está activa',
+        description: 'Aviso cuando una promoción o campaña que creaste se publica en el marketplace.',
+        icon:        Megaphone,
+      },
+    ],
+  },
 ];
 
 // ─── Legacy compatibility (Sprint 24 tests) ─────────────────────────────────

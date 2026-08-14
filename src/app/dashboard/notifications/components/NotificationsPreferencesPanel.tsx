@@ -158,7 +158,7 @@ export function NotificationsPreferencesPanel() {
                     );
                   }
 
-                  const state = channels.get(event.eventType) ?? { email: false, push: false };
+                  const state = channels.get(event.eventType) ?? { email: true, push: false };
                   const emailKey = `${event.eventType}:email`;
                   const pushKey  = `${event.eventType}:push`;
 
