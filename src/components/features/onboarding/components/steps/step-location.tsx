@@ -433,13 +433,12 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           >
             <div className="pt-1">
               <Input
-                label="Nombre del representante legal"
-                required
+                label="Nombre del representante legal (opcional)"
                 value={data.legalRepresentativeName || ''}
                 onChange={(e) => handleInputChange('legalRepresentativeName', e.target.value)}
                 placeholder="Nombre y apellidos del representante"
                 inputSize="md"
-                helperText="Persona física con poderes de representación de la entidad."
+                helperText="Persona física con poderes de representación de la entidad. Puedes añadirlo más adelante desde tu perfil."
               />
             </div>
           </div>

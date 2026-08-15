@@ -55,3 +55,21 @@ describe('EnhancedStep1Location — Dirección de facturación', () => {
     expect(screen.queryByPlaceholderText(/^3º A$/i)).not.toBeInTheDocument();
   });
 });
+
+describe('EnhancedStep1Location — Representante legal opcional', () => {
+  it('no requiere el campo de representante legal cuando entityType es no autónomo', async () => {
+    function StepLocationWithSL() {
+      const [data, setData] = React.useState<EnhancedLocationData>({
+        ...buildInitialData(),
+        entityType: 'sl',
+      });
+      return <EnhancedStep1Location data={data} onChange={setData} />;
+    }
+
+    render(<StepLocationWithSL />);
+
+    const legalRepInput = screen.getByPlaceholderText(/nombre y apellidos del representante/i);
+    expect(legalRepInput).not.toHaveAttribute('required');
+    expect(screen.getByText(/nombre del representante legal \(opcional\)/i)).toBeInTheDocument();
+  });
+});
