@@ -33,13 +33,14 @@ describe('POST /api/stripe/account-session', () => {
    * 1. /api/v1/producers/onboarding/data
    * 2. /api/v1/producers/onboarding/step/link-stripe-account
    */
-  const setupFetchMockForNewAccount = (newAccountId: string) => {
+  const setupFetchMockForNewAccount = (newAccountId: string, producerId: string = 'producer-uuid-test-1') => {
     fetchMock.mockImplementation((url: string) => {
       if (url.includes('onboarding/data')) {
         return Promise.resolve({
           ok: true,
           json: async () => ({
             data: {
+              id: producerId,
               payment: {
                 stripeAccountId: null, // Productor nuevo, sin cuenta
               },
@@ -57,13 +58,14 @@ describe('POST /api/stripe/account-session', () => {
     });
   };
 
-  const setupFetchMockForExistingAccount = (accountId: string) => {
+  const setupFetchMockForExistingAccount = (accountId: string, producerId: string = 'producer-uuid-test-1') => {
     fetchMock.mockImplementation((url: string) => {
       if (url.includes('onboarding/data')) {
         return Promise.resolve({
           ok: true,
           json: async () => ({
             data: {
+              id: producerId,
               payment: {
                 stripeAccountId: accountId,
               },
@@ -143,12 +145,13 @@ describe('POST /api/stripe/account-session', () => {
 
   it('crea cuenta nueva cuando productor no tiene stripeAccountId', async () => {
     const newAccountId = 'acct_new123';
+    const producerId = 'producer-uuid-test-1';
 
     vi.mocked(cookies).mockResolvedValue({
       get: vi.fn().mockReturnValue({ value: 'valid-token' }),
     } as any);
 
-    setupFetchMockForNewAccount(newAccountId);
+    setupFetchMockForNewAccount(newAccountId, producerId);
 
     vi.mocked(createConnectAccount).mockResolvedValue({
       id: newAccountId,
@@ -176,6 +179,7 @@ describe('POST /api/stripe/account-session', () => {
     expect(data.data.accountId).toBe(newAccountId);
     expect(createConnectAccount).toHaveBeenCalledWith(
       expect.objectContaining({
+        sellerId: producerId,
         email: 'producer@example.com',
         firstName: 'Juan',
         lastName: 'Pérez',
@@ -256,7 +260,7 @@ describe('POST /api/stripe/account-session', () => {
     expect(data.error).toContain('onboarding');
   });
 
-  // ─── NUEVOS TESTS — Etapa 4 del plan ───────────────────────────────────────
+  // ─── Tests existentes (pre-idempotencia) ───────────────────────────────────────
 
   it('vincula el accountId recien creado antes de devolver el clientSecret', async () => {
     const newAccountId = 'acct_brand_new_link';
@@ -481,5 +485,190 @@ describe('POST /api/stripe/account-session', () => {
     expect(data.data.accountId).toBe(linkedAccountId);
     // createConnectAccount NO debe ser llamado porque la cuenta ya existe
     expect(createConnectAccount).not.toHaveBeenCalled();
+  });
+
+  // ─── NUEVOS TESTS — Idempotencia y resiliencia (Etapa 3 del plan) ───────────────────────────────────────
+
+  it('responde 502 y no crea cuenta si onboarding/data no trae id del productor', async () => {
+    vi.mocked(cookies).mockResolvedValue({
+      get: vi.fn().mockReturnValue({ value: 'valid-token' }),
+    } as any);
+
+    // Mock sin id en data (caso de guarda fallida)
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('onboarding/data')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            data: {
+              // Nota: sin id aquí
+              payment: {
+                stripeAccountId: null,
+              },
+            },
+          }),
+        });
+      }
+      return Promise.reject(new Error(`Unexpected URL: ${url}`));
+    });
+
+    const request = {
+      json: async () => ({
+        email: 'nouser@example.com',
+      }),
+    } as NextRequest;
+
+    const response = await POST(request);
+    const data = await response.json() as any;
+
+    expect(response.status).toBe(502);
+    expect(data.success).toBe(false);
+    expect(data.error).toMatch(/productor/i);
+    expect(createConnectAccount).not.toHaveBeenCalled();
+  });
+
+  it('reintenta el vínculo hasta que tiene éxito', async () => {
+    const newAccountId = 'acct_retry_success';
+    const producerId = 'producer-uuid-retry-1';
+
+    vi.mocked(cookies).mockResolvedValue({
+      get: vi.fn().mockReturnValue({ value: 'valid-token' }),
+    } as any);
+
+    let linkAttempts = 0;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('onboarding/data')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            data: {
+              id: producerId,
+              payment: {
+                stripeAccountId: null,
+              },
+            },
+          }),
+        });
+      }
+      if (url.includes('link-stripe-account')) {
+        linkAttempts++;
+        // 1a llamada: falla (ok: false)
+        // 2a llamada: éxito (ok: true)
+        if (linkAttempts === 1) {
+          return Promise.resolve({
+            ok: false,
+            status: 500,
+            json: async () => ({ error: 'Temporary error' }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ success: true }),
+        });
+      }
+      return Promise.reject(new Error(`Unexpected URL: ${url}`));
+    });
+
+    vi.mocked(createConnectAccount).mockResolvedValue({
+      id: newAccountId,
+    } as any);
+
+    vi.mocked(createAccountSession).mockResolvedValue({
+      clientSecret: 'cs_test_retry_success',
+    } as any);
+
+    const request = {
+      json: async () => ({
+        email: 'retry@example.com',
+      }),
+    } as NextRequest;
+
+    const response = await POST(request);
+    const data = await response.json() as any;
+
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+    expect(data.data.accountId).toBe(newAccountId);
+    // Verificar que se llamó a link-stripe-account al menos 2 veces
+    const linkCalls = fetchMock.mock.calls.filter((call: any) =>
+      call[0]?.includes('link-stripe-account')
+    );
+    expect(linkCalls.length).toBe(2);
+  });
+
+  it('agota los 3 reintentos de vínculo y responde 500 sin clientSecret', async () => {
+    const newAccountId = 'acct_retry_fail';
+    const producerId = 'producer-uuid-retry-fail';
+
+    vi.mocked(cookies).mockResolvedValue({
+      get: vi.fn().mockReturnValue({ value: 'valid-token' }),
+    } as any);
+
+    let linkAttempts = 0;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes('onboarding/data')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            data: {
+              id: producerId,
+              payment: {
+                stripeAccountId: null,
+              },
+            },
+          }),
+        });
+      }
+      if (url.includes('link-stripe-account')) {
+        linkAttempts++;
+        // Siempre falla
+        return Promise.resolve({
+          ok: false,
+          status: 500,
+          json: async () => ({ error: 'Persistent error' }),
+        });
+      }
+      return Promise.reject(new Error(`Unexpected URL: ${url}`));
+    });
+
+    vi.mocked(createConnectAccount).mockResolvedValue({
+      id: newAccountId,
+    } as any);
+
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const request = {
+      json: async () => ({
+        email: 'fail@example.com',
+      }),
+    } as NextRequest;
+
+    const response = await POST(request);
+    const data = await response.json() as any;
+
+    // Debe fallar con 500
+    expect(response.status).toBe(500);
+    expect(data.success).toBe(false);
+    expect(data.error).toMatch(/onboarding|Stripe/i);
+
+    // Verificar que se llamó a link-stripe-account exactamente 3 veces (máximo de reintentos)
+    const linkCalls = fetchMock.mock.calls.filter((call: any) =>
+      call[0]?.includes('link-stripe-account')
+    );
+    expect(linkCalls.length).toBe(3);
+
+    // Verificar que se logueó el caso especial CREATE_SUCCEEDED_LINK_FAILED
+    const specialLog = consoleErrorSpy.mock.calls.find((call: any) =>
+      String(call[0])?.includes('CREATE_SUCCEEDED_LINK_FAILED')
+    );
+    expect(specialLog).toBeDefined();
+    if (specialLog) {
+      // Verificar que la segunda parte (el objeto) contiene el stripeAccountId
+      const logObj = specialLog[1];
+      expect(logObj.stripeAccountId).toBe(newAccountId);
+      expect(logObj.attempts).toBe(3);
+    }
+
+    consoleErrorSpy.mockRestore();
   });
 });

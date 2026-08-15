@@ -28,6 +28,7 @@ function getStripe(): Stripe {
     _stripe = new Stripe(secretKey, {
       apiVersion: '2026-05-27.dahlia',
       typescript: true,
+      maxNetworkRetries: 2,
     });
   }
   return _stripe;
@@ -41,8 +42,26 @@ const stripe = new Proxy({} as Stripe, {
 });
 
 /**
+ * Construye una idempotency key determinista y estable para la creación de una cuenta Connect.
+ * La key es válida durante 24 horas en Stripe (caché incorporada).
+ *
+ * @param producerId UUID del productor (Producer.id de origen-master-microservices)
+ * @returns Idempotency key en formato `connect-account-create:{producerId}`
+ * @throws Error si producerId es undefined, null, o string vacío tras trim()
+ */
+export function buildCreateAccountIdempotencyKey(producerId: string): string {
+  if (!producerId || typeof producerId !== 'string' || !producerId.trim()) {
+    throw new Error(
+      'buildCreateAccountIdempotencyKey: producerId must be a non-empty string'
+    );
+  }
+  return `connect-account-create:${producerId}`;
+}
+
+/**
  * Crea una cuenta Connect de tipo Express para un vendedor
- * @param sellerId ID del vendedor en nuestra base de datos
+ * @param sellerId UUID del productor (Producer.id de origen-master-microservices),
+ *                 DEBE ser el id real, nunca un valor sintético
  * @param email Email del vendedor
  * @param businessName Nombre del negocio
  * @returns Cuenta de Stripe creada
@@ -57,28 +76,35 @@ export async function createConnectAccount(params: {
 }) {
   const { sellerId, email, firstName, lastName, businessName, website } = params;
 
+  // Validar que sellerId es el UUID real del productor, nunca un valor vacío
+  // Lanza si no es válido — defensa en profundidad
+  const idempotencyKey = buildCreateAccountIdempotencyKey(sellerId);
+
   try {
-    const account = await stripe.accounts.create({
-      type: 'express',
-      country: 'ES',
-      ...(email ? { email } : {}),
-      ...(businessName || website ? {
-        business_profile: {
-          ...(businessName ? { name: businessName } : {}),
-          ...(website ? { url: website } : {}),
+    const account = await stripe.accounts.create(
+      {
+        type: 'express',
+        country: 'ES',
+        ...(email ? { email } : {}),
+        ...(businessName || website ? {
+          business_profile: {
+            ...(businessName ? { name: businessName } : {}),
+            ...(website ? { url: website } : {}),
+          },
+        } : {}),
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
         },
-      } : {}),
-      capabilities: {
-        card_payments: { requested: true },
-        transfers: { requested: true },
+        metadata: {
+          sellerId,
+          platform: 'origen-marketplace',
+          ...(firstName ? { firstName } : {}),
+          ...(lastName ? { lastName } : {}),
+        },
       },
-      metadata: {
-        sellerId,
-        platform: 'origen-marketplace',
-        ...(firstName ? { firstName } : {}),
-        ...(lastName ? { lastName } : {}),
-      },
-    });
+      { idempotencyKey }
+    );
 
     return account;
   } catch (error) {
