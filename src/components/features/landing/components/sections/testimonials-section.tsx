@@ -9,7 +9,7 @@ export function TestimonialsSection() {
     {
       name: "María García",
       business: "Huerta Orgánica La Vega",
-      quote: "Desde que me uní a Origen, mis ventas han aumentado un 40%. La plataforma es intuitiva y el soporte excelente.",
+      quote: "Desde que me uní a Origen, mis ventas han crecido de forma constante. La plataforma es intuitiva y el soporte excelente.",
       category: "Hortalizas ecológicas",
       initials: "MG",
       bgColor: "from-origen-hoja/80 to-origen-hoja/60",
@@ -102,7 +102,7 @@ export function TestimonialsSection() {
           <div className="inline-flex items-center gap-3 bg-surface-alt rounded-xl px-5 py-3 md:px-8 md:py-4 shadow-lg border border-border">
             <ShieldCheck className="w-6 h-6 md:w-8 md:h-8 text-hoja-tinta" />
             <div className="text-left">
-              <p className="font-bold text-origen-bosque text-sm md:text-base">+500 productores verificados</p>
+              <p className="font-bold text-origen-bosque text-sm md:text-base">Red creciente de productores locales</p>
               <p className="text-muted-foreground text-xs md:text-sm">Comunidad en crecimiento constante</p>
             </div>
           </div>

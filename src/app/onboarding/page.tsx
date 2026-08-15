@@ -970,7 +970,7 @@ export default function OnboardingPage() {
       </header>
 
       {/* Stepper horizontal - solo mobile */}
-      <MobileStepperBar steps={STEPS} currentStep={currentStep} />
+      <MobileStepperBar steps={STEPS} currentStep={currentStep} onStepClick={handleStepClick} />
 
       {/* ====================================================================
           MAIN - Layout: Timeline vertical (4) + Formulario (8)

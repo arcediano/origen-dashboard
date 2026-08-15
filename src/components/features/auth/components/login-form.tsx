@@ -534,7 +534,7 @@ export function SimpleLogin() {
         <span className="w-1 h-1 rounded-full bg-border hidden sm:block" />
         <div className="flex items-center gap-1">
           <CheckCircle2 className="w-3 h-3 md:w-3.5 md:h-3.5 text-hoja-tinta" />
-          <span className="text-muted-foreground">+500 productores</span>
+          <span className="text-muted-foreground">Comunidad verificada de productores</span>
         </div>
         <span className="w-1 h-1 rounded-full bg-border hidden sm:block" />
         <div className="flex items-center gap-1">

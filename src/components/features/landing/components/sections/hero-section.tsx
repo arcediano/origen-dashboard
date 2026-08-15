@@ -217,7 +217,7 @@ export function HeroSection() {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm md:text-base font-bold drop-shadow-sm">
-                      +500 productores verificados
+                      Red creciente de productores locales
                     </span>
                     <span className="text-xs text-white/75">
                       confían en nuestra comunidad

@@ -59,6 +59,9 @@ export type NotificationEventType =
   | 'DISPUTE_MESSAGE'
   | 'DISPUTE_STATUS_CHANGED'
   | 'DISPUTE_RESOLVED'
+  | 'PAYMENT_ACCOUNT_ACTION_REQUIRED'
+  | 'PAYMENT_ACCOUNT_RESTRICTED'
+  | 'CERTIFICATION_PENDING'
   | string;
 
 // ─── ACTION ───────────────────────────────────────────────────────────────────
