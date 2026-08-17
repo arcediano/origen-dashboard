@@ -60,11 +60,25 @@ export function buildCreateAccountIdempotencyKey(producerId: string): string {
 
 /**
  * Crea una cuenta Connect de tipo Express para un vendedor
+ *
+ * INVARIANTE CRÍTICA: El payload protegido por idempotencyKey
+ * (`stripe.accounts.create()`) NUNCA debe contener datos que el usuario pueda editar
+ * (email, business_profile, firstName, lastName). Estos se aplican SIEMPRE vía
+ * `stripe.accounts.update()` posterior, fuera de la protección de idempotencia.
+ * Cualquier campo nuevo que se añada a esta función debe evaluarse conforme a esta regla:
+ * si es editable por el usuario, debe ir en update(), nunca en create().
+ *
+ * Violar esta invariante reabre el escenario de `idempotency_error` cuando el usuario
+ * edita su perfil entre un intento fallido y un reintento dentro de las 24h.
+ *
  * @param sellerId UUID del productor (Producer.id de origen-master-microservices),
  *                 DEBE ser el id real, nunca un valor sintético
- * @param email Email del vendedor
- * @param businessName Nombre del negocio
- * @returns Cuenta de Stripe creada
+ * @param email Email del vendedor (aplicado vía update después de creación)
+ * @param firstName Nombre del vendedor (aplicado vía update después de creación)
+ * @param lastName Apellido del vendedor (aplicado vía update después de creación)
+ * @param businessName Nombre del negocio (aplicado vía update después de creación)
+ * @param website URL del sitio web (aplicado vía update después de creación)
+ * @returns Cuenta de Stripe creada (con perfil actualizado si se proporcionaron datos)
  */
 export async function createConnectAccount(params: {
   sellerId: string;
@@ -80,18 +94,15 @@ export async function createConnectAccount(params: {
   // Lanza si no es válido — defensa en profundidad
   const idempotencyKey = buildCreateAccountIdempotencyKey(sellerId);
 
+  let account: Stripe.Account;
+
   try {
-    const account = await stripe.accounts.create(
+    // Crear la cuenta con payload INVARIABLE por sellerId (nunca campos editables)
+    // Solo: type, country, capabilities, metadata.sellerId, metadata.platform
+    account = await stripe.accounts.create(
       {
         type: 'express',
         country: 'ES',
-        ...(email ? { email } : {}),
-        ...(businessName || website ? {
-          business_profile: {
-            ...(businessName ? { name: businessName } : {}),
-            ...(website ? { url: website } : {}),
-          },
-        } : {}),
         capabilities: {
           card_payments: { requested: true },
           transfers: { requested: true },
@@ -99,18 +110,67 @@ export async function createConnectAccount(params: {
         metadata: {
           sellerId,
           platform: 'origen-marketplace',
-          ...(firstName ? { firstName } : {}),
-          ...(lastName ? { lastName } : {}),
         },
       },
       { idempotencyKey }
     );
-
-    return account;
   } catch (error) {
-    console.error('Error creating Stripe account:', error);
+    // Manejo defensivo: si ocurre idempotency_error pese a la invariante,
+    // es síntoma de una regresión (alguien añadió un campo editable sin darse cuenta).
+    // Loguear de forma distinguible para observabilidad y relanzar sin reintentar.
+    if (error && typeof error === 'object' && (error as any).type === 'idempotency_error') {
+      console.error(
+        '[stripe-idempotency] UNEXPECTED_IDEMPOTENCY_ERROR_ON_INVARIANT_PAYLOAD',
+        { sellerId }
+      );
+    } else {
+      console.error('Error creating Stripe account:', error);
+    }
     throw error;
   }
+
+  // Aplicar perfil (email, business_profile, firstName, lastName) vía update()
+  // fuera de la protección de idempotencia. No necesita su propia key porque
+  // un update con los mismos valores es inofensivo (no crea recursos).
+  const hasProfileData = email || businessName || website || firstName || lastName;
+  if (hasProfileData) {
+    try {
+      const updatePayload: Stripe.AccountUpdateParams = {
+        metadata: {
+          sellerId,
+          platform: 'origen-marketplace',
+          ...(firstName ? { firstName } : {}),
+          ...(lastName ? { lastName } : {}),
+        },
+      };
+
+      if (email) {
+        updatePayload.email = email;
+      }
+
+      if (businessName || website) {
+        updatePayload.business_profile = {
+          ...(businessName ? { name: businessName } : {}),
+          ...(website ? { url: website } : {}),
+        };
+      }
+
+      await stripe.accounts.update(account.id, updatePayload);
+    } catch (updateError) {
+      // Fallo del update no es bloqueante — loguear sin relanzar
+      // (el formulario embebido de Stripe puede solicitar los datos que falten)
+      console.error(
+        'Warning: failed to update Stripe account profile (non-blocking)',
+        {
+          accountId: account.id,
+          error: updateError instanceof Error ? updateError.message : String(updateError),
+        }
+      );
+      // No relanzar — devolvemos la cuenta creada
+    }
+  }
+
+  return account;
 }
 
 
