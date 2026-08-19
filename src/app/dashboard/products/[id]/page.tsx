@@ -816,9 +816,9 @@ export default function ProductoDetallePage() {
                           <StatusBadge status={product.status as any} />
                         </div>
                         {/* Nombre truncado — máx 2 líneas, nunca rompe la imagen */}
-                        <h1 className="text-sm font-bold text-origen-bosque leading-snug line-clamp-2 break-words mb-1">
+                        <h2 className="text-sm font-bold text-origen-bosque leading-snug line-clamp-2 break-words mb-1">
                           {product.name}
-                        </h1>
+                        </h2>
                         <p className="text-xs text-text-subtle mb-3 truncate">
                           {product.categoryName || product.categoryId}
                         </p>

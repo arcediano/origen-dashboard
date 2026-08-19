@@ -358,7 +358,7 @@ export default function OrderDetailPage() {
                         <Badge variant={status.variant} size="sm">{status.label}</Badge>
                       </div>
                       <p className="text-xs text-text-subtle uppercase tracking-widest font-semibold mb-0.5">Pedido</p>
-                      <h1 className="text-base font-bold text-origen-bosque leading-snug">{order.orderNumber}</h1>
+                      <h2 className="text-base font-bold text-origen-bosque leading-snug">{order.orderNumber}</h2>
                       <p className="text-xs text-text-subtle mt-0.5">
                         {format(order.createdAt, "dd 'de' MMMM 'de' yyyy", { locale: es })}
                       </p>
