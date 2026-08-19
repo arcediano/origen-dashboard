@@ -60,8 +60,11 @@ describe('MobileStepperBar', () => {
         />
       );
 
+      // El título va dentro del mismo <p> que "Paso X de Y" (separados por
+      // " · "), no en un elemento propio — se busca por función en vez de
+      // texto exacto para no depender de cómo el DOM trocea los nodos de texto.
       expect(screen.getByText(/Paso 4 de 7/)).toBeInTheDocument();
-      expect(screen.getByText('Verificación')).toBeInTheDocument();
+      expect(screen.getByText((_, element) => element?.tagName === 'P' && element.textContent === 'Paso 4 de 7 · Verificación')).toBeInTheDocument();
     });
   });
 
@@ -104,17 +107,19 @@ describe('MobileStepperBar', () => {
     });
 
     it('marca solo el punto activo con aria-current="step"', () => {
+      // currentStep=1 (no 0): con currentStep=0 solo el índice 0 es clicable
+      // (index <= currentStep), así que buttons[1] no existiría todavía.
       const { rerender } = render(
         <MobileStepperBar
           steps={MOCK_STEPS}
-          currentStep={0}
+          currentStep={1}
           onStepClick={vi.fn()}
         />
       );
 
       let buttons = screen.getAllByRole('button');
-      expect(buttons[0]).toHaveAttribute('aria-current', 'step');
-      expect(buttons[1]).not.toHaveAttribute('aria-current');
+      expect(buttons[1]).toHaveAttribute('aria-current', 'step');
+      expect(buttons[0]).not.toHaveAttribute('aria-current');
 
       // Cambiar al paso 2
       rerender(
@@ -192,10 +197,11 @@ describe('MobileStepperBar', () => {
 
   describe('Accessibility', () => {
     it('proporciona aria-label descriptivo para cada punto clicable', () => {
+      // currentStep=1 (no 0): con currentStep=0 solo existe buttons[0].
       render(
         <MobileStepperBar
           steps={MOCK_STEPS}
-          currentStep={0}
+          currentStep={1}
           onStepClick={vi.fn()}
         />
       );

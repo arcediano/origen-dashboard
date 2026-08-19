@@ -6,9 +6,12 @@ vi.mock('stripe', () => {
   const mockUpdate = vi.fn();
   const mockRetrieve = vi.fn();
   return {
-    default: vi.fn(() => ({
-      accounts: { create: mockCreate, update: mockUpdate, retrieve: mockRetrieve },
-    })),
+    // Función normal, no arrow — `new Stripe(...)` requiere un constructor
+    // válido; una arrow function nunca puede invocarse con `new` (limitación
+    // del lenguaje, no de vitest).
+    default: vi.fn(function () {
+      return { accounts: { create: mockCreate, update: mockUpdate, retrieve: mockRetrieve } };
+    }),
     __esModule: true,
   };
 });
@@ -77,8 +80,8 @@ describe('lib/stripe/server', () => {
         id: 'acct_test_123',
       });
 
-      vi.mocked(Stripe).mockReturnValue({
-        accounts: { create: mockCreate },
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: mockCreate } };
       } as any);
 
       const sellerId = 'uuid-test-producer-123';
@@ -101,8 +104,8 @@ describe('lib/stripe/server', () => {
         id: 'acct_test_456',
       });
 
-      vi.mocked(Stripe).mockReturnValue({
-        accounts: { create: mockCreate },
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: mockCreate } };
       } as any);
 
       const sellerId = 'uuid-real-producer-456';
@@ -140,8 +143,8 @@ describe('lib/stripe/server', () => {
       const { createConnectAccount: testFunc } = await import('@/lib/stripe/server');
 
       const mockCreate = vi.fn();
-      vi.mocked(Stripe).mockReturnValue({
-        accounts: { create: mockCreate },
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: mockCreate } };
       } as any);
 
       try {
@@ -156,25 +159,13 @@ describe('lib/stripe/server', () => {
       expect(mockCreate).not.toHaveBeenCalled();
     });
 
-    it('configura maxNetworkRetries en el constructor de Stripe', () => {
-      // Reimportar el módulo para activar la inicialización de getStripe()
-      vi.resetModules();
-
-      // Mock antes de importar
-      const mockStripeConstructor = vi.fn(() => ({
-        accounts: { create: vi.fn() },
-      }));
-
-      vi.doMock('stripe', () => ({
-        default: mockStripeConstructor,
-        __esModule: true,
-      }));
-
-      // Ejecutar una operación que force la inicialización de getStripe()
-      // (Esto es difícil de testear directamente sin importación real;
-      // verificaremos el comportamiento a través de la integración o documentación)
-      // Por ahora, confiamos en la revisión manual de que maxNetworkRetries: 2 está en el código
-    });
+    // NOTA: `maxNetworkRetries: 2` en el constructor de Stripe se verifica por
+    // revisión manual del código (línea del `new Stripe(...)` en `getStripe()`),
+    // no con un test — probar la inicialización lazy de un singleton de módulo
+    // requeriría `vi.resetModules()` + `vi.doMock()` sin limpieza posterior, lo
+    // que contamina el registro de módulos para los tests siguientes que usan
+    // `await import('@/lib/stripe/server')` (ver los tests de `createConnectAccount`
+    // más abajo, que dependen del mock hoisted al inicio del archivo).
 
     // === TESTS NUEVOS PARA REDISEÑO DE ETAPA 2 ===
 
@@ -187,8 +178,8 @@ describe('lib/stripe/server', () => {
 
       const mockUpdate = vi.fn().mockResolvedValue({});
 
-      vi.mocked(Stripe).mockReturnValue({
-        accounts: { create: mockCreate, update: mockUpdate },
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: mockCreate, update: mockUpdate } };
       } as any);
 
       const sellerId = 'uuid-invariant-test';
@@ -240,8 +231,8 @@ describe('lib/stripe/server', () => {
 
       const mockUpdate = vi.fn().mockResolvedValue({});
 
-      vi.mocked(Stripe).mockReturnValue({
-        accounts: { create: mockCreate, update: mockUpdate },
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: mockCreate, update: mockUpdate } };
       } as any);
 
       // Llamada con TODOS los campos de perfil posibles
@@ -280,8 +271,8 @@ describe('lib/stripe/server', () => {
 
       const mockUpdate = vi.fn().mockResolvedValue({});
 
-      vi.mocked(Stripe).mockReturnValue({
-        accounts: { create: mockCreate, update: mockUpdate },
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: mockCreate, update: mockUpdate } };
       } as any);
 
       const sellerId = 'uuid-update-test';
@@ -328,8 +319,8 @@ describe('lib/stripe/server', () => {
 
       const mockUpdate = vi.fn().mockResolvedValue({});
 
-      vi.mocked(Stripe).mockReturnValue({
-        accounts: { create: mockCreate, update: mockUpdate },
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: mockCreate, update: mockUpdate } };
       } as any);
 
       await testFunc({
@@ -353,8 +344,8 @@ describe('lib/stripe/server', () => {
       const updateError = new Error('Update failed: invalid email');
       const mockUpdate = vi.fn().mockRejectedValue(updateError);
 
-      vi.mocked(Stripe).mockReturnValue({
-        accounts: { create: mockCreate, update: mockUpdate },
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: mockCreate, update: mockUpdate } };
       } as any);
 
       // Llamada con datos de perfil (provocará que se intente update)
@@ -380,8 +371,8 @@ describe('lib/stripe/server', () => {
       const mockCreate = vi.fn().mockRejectedValue(idempotencyError);
       const mockUpdate = vi.fn().mockResolvedValue({});
 
-      vi.mocked(Stripe).mockReturnValue({
-        accounts: { create: mockCreate, update: mockUpdate },
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: mockCreate, update: mockUpdate } };
       } as any);
 
       // Debe relanzar el error
@@ -408,8 +399,8 @@ describe('lib/stripe/server', () => {
       const mockCreate = vi.fn().mockRejectedValue(invalidRequestError);
       const mockUpdate = vi.fn().mockResolvedValue({});
 
-      vi.mocked(Stripe).mockReturnValue({
-        accounts: { create: mockCreate, update: mockUpdate },
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: mockCreate, update: mockUpdate } };
       } as any);
 
       // Debe relanzar el error de invalid_request_error
