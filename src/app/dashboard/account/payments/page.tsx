@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, StatCard, PageLoader, PageError, MobilePullRefresh, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
+import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, StatCard, PageLoader, PageError, MobilePullRefresh, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, toast } from '@arcediano/ux-library';
 import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2, X } from 'lucide-react';
 import { loadProducerProfile } from '@/lib/api/onboarding';
 import { openStripeDashboard } from '@/lib/stripe/connect-client';
@@ -27,14 +27,23 @@ interface StripeStatusResponse {
   error?: string;
 }
 
+// Constantes de configuración del polling de dos niveles (Etapa 1, D1)
+const FAST_POLL_BASE_MS = 4000;
+const FAST_POLL_MAX_MS = 20000;
+const SLOW_POLL_BASE_MS = 60000;
+const SLOW_POLL_MAX_MS = 300000;
+const POLL_BACKOFF_FACTOR = 1.5;
+
 export default function PaymentsPage() {
   const router = useRouter();
   const isFirstLoad = useRef(true);
+  const embeddedPanelRef = useRef<HTMLDivElement>(null);
+  const prevConnectedRef = useRef<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isOpeningStripe, setIsOpeningStripe] = useState(false);
   const [showEmbeddedOnboarding, setShowEmbeddedOnboarding] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
   const [acceptedTermsAt, setAcceptedTermsAt] = useState<string | null>(null);
   const [businessName, setBusinessName] = useState<string | null>(null);
@@ -66,6 +75,12 @@ export default function PaymentsPage() {
       setLoadError(error instanceof Error ? error.message : 'Error al cargar estado de cobros');
     }
   }, []);
+
+  const paymentStage = isConnected
+    ? 'connected'
+    : stripeAccountId
+      ? 'pending'
+      : 'empty';
 
   // Efecto de montaje inicial
   useEffect(() => {
@@ -141,15 +156,74 @@ export default function PaymentsPage() {
     };
   }, [stripeAccountId, loadPaymentState]);
 
-  const paymentStage = isConnected
-    ? 'connected'
-    : stripeAccountId
-      ? 'pending'
-      : 'empty';
+  // Refresco real del estado embebido — no depende de visibilitychange.
+  // Nivel rápido mientras el panel está abierto, nivel lento (más
+  // espaciado) mientras la cuenta sigue "pending" con el panel cerrado,
+  // para cubrir verificaciones de Stripe que se completan en segundo
+  // plano. Ver D1 del plan de desarrollo para la justificación de por
+  // qué se consulta loadPaymentState() (BD) y no /api/stripe/status
+  // (Stripe en vivo) en cada tick.
+  useEffect(() => {
+    const isFastTier = showEmbeddedOnboarding && paymentStage !== 'connected';
+    const isSlowTier = !showEmbeddedOnboarding && paymentStage === 'pending';
+
+    if (!isFastTier && !isSlowTier) {
+      return;
+    }
+
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let delay = isFastTier ? FAST_POLL_BASE_MS : SLOW_POLL_BASE_MS;
+    const maxDelay = isFastTier ? FAST_POLL_MAX_MS : SLOW_POLL_MAX_MS;
+
+    const schedule = () => {
+      timeoutId = setTimeout(tick, delay);
+    };
+
+    const tick = async () => {
+      if (cancelled) return;
+      await loadPaymentState();
+      if (cancelled) return;
+      delay = Math.min(delay * POLL_BACKOFF_FACTOR, maxDelay);
+      schedule();
+    };
+
+    schedule();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [showEmbeddedOnboarding, paymentStage, loadPaymentState]);
+
+  // Aviso explícito cuando la cuenta pasa a activa mientras el usuario
+  // sigue en la página (heurística de Nielsen "visibilidad del estado
+  // del sistema") — solo en una transición real false -> true, nunca en
+  // la carga inicial (isConnected arranca en null, no en false).
+  useEffect(() => {
+    if (prevConnectedRef.current === false && isConnected === true) {
+      setShowEmbeddedOnboarding(false);
+      toast({
+        title: 'Tu cuenta de Stripe está activa',
+        description: 'Ya puedes recibir pagos en tu cuenta.',
+        variant: 'success',
+      });
+    }
+    prevConnectedRef.current = isConnected;
+  }, [isConnected]);
+
+  // Red de seguridad para scrollIntoView del panel embebido (Etapa 3, 3.3)
+  useEffect(() => {
+    if (showEmbeddedOnboarding && paymentStage !== 'connected') {
+      embeddedPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [showEmbeddedOnboarding]);
 
   const handleOpenStripe = async () => {
-    setShowEmbeddedOnboarding(true);
+    setIsOpeningStripe(true);
     setLoadError(null);
+    setShowEmbeddedOnboarding(true);
+    setIsOpeningStripe(false);
   };
 
   const handleCloseEmbedded = () => {
@@ -237,75 +311,114 @@ export default function PaymentsPage() {
           >
             <div className="space-y-4 sm:space-y-6">
               {/* Hero Section - Card variant="section" + CardIconHeader */}
-              <Card variant="section">
-                <div className="flex flex-col gap-3 sm:gap-4 lg:gap-5 lg:flex-row lg:items-end lg:justify-between p-4 sm:p-5 lg:p-6">
-                  <div className="max-w-2xl">
-                    <CardIconHeader
-                      icon={<CreditCard className="h-6 w-6 text-hoja-tinta" aria-hidden="true" />}
-                      title="Panel de cobros y liquidación"
-                      size="md"
-                    />
-                    <h2 className="mt-3 text-lg sm:text-xl lg:text-2xl font-bold text-origen-bosque leading-tight">
-                      {paymentStage === 'connected'
-                        ? 'Tu cuenta está lista para recibir pagos'
-                        : paymentStage === 'pending'
-                          ? 'Te queda un paso para activar los cobros'
-                          : 'Conecta Stripe para empezar a cobrar'}
-                    </h2>
-                    <p className="mt-2 max-w-xl text-sm sm:text-base leading-relaxed text-text-subtle">
-                      Revisa estado, verificación y acceso directo a Stripe para activar o actualizar tus datos de cobro.
-                    </p>
-                  </div>
-
-                  <div className="flex w-full flex-col gap-3 sm:w-auto lg:min-w-[300px]">
-                    <div className="flex flex-wrap gap-2 items-center">
-                      <Badge
-                        variant={paymentStage === 'connected' ? 'success' : paymentStage === 'pending' ? 'warning' : 'neutral'}
-                        size="sm"
-                        className="flex items-center gap-1.5"
-                      >
-                        {paymentStage === 'connected' ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> : paymentStage === 'pending' ? <CircleEllipsis className="h-3.5 w-3.5" aria-hidden="true" /> : <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />}
-                        {paymentStage === 'connected' ? 'Cobros activos' : paymentStage === 'pending' ? 'Onboarding pendiente' : 'Sin cuenta de cobro'}
-                      </Badge>
-                      {acceptedTermsAt && (
-                        <Badge variant="outline" size="sm" className="flex items-center gap-1.5">
-                          <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                          Terminos aceptados
-                        </Badge>
-                      )}
-                      {isRefreshing && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-hoja-tinta" aria-hidden="true" />
-                        </span>
-                      )}
+              <Card variant="section" padding="none">
+                <div className="p-4 sm:p-5 lg:p-6">
+                  <div className="flex flex-col gap-3 sm:gap-4 lg:gap-5 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="max-w-2xl">
+                      <CardIconHeader
+                        icon={<CreditCard className="h-6 w-6 text-hoja-tinta" aria-hidden="true" />}
+                        title="Panel de cobros y liquidación"
+                        size="md"
+                      />
+                      <h2 className="mt-3 text-lg sm:text-xl lg:text-2xl font-bold text-origen-bosque leading-tight">
+                        {paymentStage === 'connected'
+                          ? 'Tu cuenta está lista para recibir pagos'
+                          : paymentStage === 'pending'
+                            ? 'Te queda un paso para activar los cobros'
+                            : 'Conecta Stripe para empezar a cobrar'}
+                      </h2>
+                      <p className="mt-2 max-w-xl text-sm sm:text-base leading-relaxed text-text-subtle">
+                        Revisa estado, verificación y acceso directo a Stripe para activar o actualizar tus datos de cobro.
+                      </p>
                     </div>
 
-                    <Button
-                      onClick={paymentStage === 'connected' ? handleOpenDashboard : handleOpenStripe}
-                      disabled={isOpeningStripe}
-                      className="w-full sm:w-auto min-h-[44px]"
-                    >
-                      <span className="inline-flex items-center gap-2">
-                        {isOpeningStripe
-                          ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                          : <ArrowUpRight className="h-4 w-4" aria-hidden="true" />}
-                        <span>
-                          {isOpeningStripe
-                            ? 'Abriendo Stripe...'
-                            : paymentStage === 'connected'
-                              ? 'Modificar cuenta en Stripe'
-                              : paymentStage === 'pending'
-                                ? 'Continuar onboarding de Stripe'
-                                : 'Crear cuenta de cobro'}
+                    <div className="flex w-full flex-col gap-3 sm:w-auto lg:min-w-[300px]">
+                      <div className="flex flex-wrap gap-2 items-center">
+                        <Badge
+                          variant={paymentStage === 'connected' ? 'success' : paymentStage === 'pending' ? 'warning' : 'neutral'}
+                          size="sm"
+                          className="flex items-center gap-1.5"
+                        >
+                          {paymentStage === 'connected' ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> : paymentStage === 'pending' ? <CircleEllipsis className="h-3.5 w-3.5" aria-hidden="true" /> : <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />}
+                          {paymentStage === 'connected' ? 'Cobros activos' : paymentStage === 'pending' ? 'Onboarding pendiente' : 'Sin cuenta de cobro'}
+                        </Badge>
+                        {acceptedTermsAt && (
+                          <Badge variant="outline" size="sm" className="flex items-center gap-1.5">
+                            <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                            Terminos aceptados
+                          </Badge>
+                        )}
+                        {isRefreshing && (
+                          <span className="inline-flex items-center gap-1.5">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin text-hoja-tinta" aria-hidden="true" />
+                          </span>
+                        )}
+                      </div>
+
+                      <Button
+                        onClick={
+                          paymentStage === 'connected'
+                            ? handleOpenDashboard
+                            : showEmbeddedOnboarding
+                              ? handleCloseEmbedded
+                              : handleOpenStripe
+                        }
+                        variant={showEmbeddedOnboarding && paymentStage !== 'connected' ? 'outline' : 'primary'}
+                        disabled={isOpeningStripe}
+                        className="w-full sm:w-auto min-h-[44px]"
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          {isOpeningStripe ? (
+                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                          ) : showEmbeddedOnboarding && paymentStage !== 'connected' ? (
+                            <X className="h-4 w-4" aria-hidden="true" />
+                          ) : (
+                            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                          )}
+                          <span>
+                            {isOpeningStripe
+                              ? 'Abriendo Stripe...'
+                              : showEmbeddedOnboarding && paymentStage !== 'connected'
+                                ? 'Cerrar formulario'
+                                : paymentStage === 'connected'
+                                  ? 'Modificar cuenta en Stripe'
+                                  : paymentStage === 'pending'
+                                    ? 'Continuar onboarding de Stripe'
+                                    : 'Crear cuenta de cobro'}
+                          </span>
                         </span>
-                      </span>
-                    </Button>
+                      </Button>
+                    </div>
                   </div>
+
+                  {showEmbeddedOnboarding && paymentStage !== 'connected' && (
+                    <div
+                      ref={embeddedPanelRef}
+                      className="mt-4 sm:mt-5 lg:mt-6 border-t border-border-subtle pt-4 sm:pt-5"
+                      aria-live="polite"
+                    >
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-text-subtle">
+                        {paymentStage === 'pending' ? 'Continuar onboarding' : 'Crear cuenta Stripe'}
+                      </p>
+                      <StripeConnectOnboarding
+                        stripeAccountId={stripeAccountId}
+                        source="account_payments"
+                        onboardingContext={{
+                          email: userEmail ?? undefined,
+                          firstName: firstName ?? undefined,
+                          lastName: lastName ?? undefined,
+                          businessName: businessName ?? undefined,
+                          website: website ?? undefined,
+                        }}
+                        onVerified={handleEmbeddedVerified}
+                      />
+                    </div>
+                  )}
                 </div>
               </Card>
 
               <div className="grid gap-4 sm:gap-5 lg:gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
-                <Card className="rounded-xl sm:rounded-2xl">
+                <Card className="rounded-xl sm:rounded-2xl" padding="none">
                   <CardHeader className="p-4 sm:p-5 lg:p-6 border-b border-border-subtle">
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <Landmark className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />
@@ -361,43 +474,12 @@ export default function PaymentsPage() {
                         {getAlertContent()}
                       </AlertDescription>
                     </Alert>
-
-                    {/* Componente embebido de Stripe Connect (cuando es necesario onboarding) */}
-                    {showEmbeddedOnboarding && paymentStage !== 'connected' && (
-                      <div className="space-y-4 border-t border-border-subtle pt-4 sm:pt-5">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-semibold text-origen-bosque">
-                            {paymentStage === 'pending' ? 'Continuar onboarding' : 'Crear cuenta Stripe'}
-                          </h3>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleCloseEmbedded}
-                            aria-label="Cerrar formulario de Stripe"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <StripeConnectOnboarding
-                          stripeAccountId={stripeAccountId}
-                          source="account_payments"
-                          onboardingContext={{
-                            email: userEmail ?? undefined,
-                            firstName: firstName ?? undefined,
-                            lastName: lastName ?? undefined,
-                            businessName: businessName ?? undefined,
-                            website: website ?? undefined,
-                          }}
-                          onVerified={handleEmbeddedVerified}
-                        />
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
 
                 <div className="space-y-4 sm:space-y-5 lg:space-y-6">
                   {/* Card "Próximos pasos" - variant="section" + CardIconHeader */}
-                  <Card variant="section" className="rounded-xl sm:rounded-2xl">
+                  <Card variant="section" className="rounded-xl sm:rounded-2xl" padding="none">
                     <CardHeader className="p-4 sm:p-5 lg:p-6 border-b border-border-subtle">
                       <CardIconHeader
                         icon={<ShieldCheck className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />}
