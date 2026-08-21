@@ -63,7 +63,7 @@ export const stripeConnectAppearance = {
     badgeNeutralColorBackground: '#f3f4f6',
     badgeNeutralColorText: '#374151',
     badgeNeutralColorBorder: '#9ca3af',
-    badgeBorderRadius: '999px',
+    badgeBorderRadius: '24px',
 
     overlayBorderRadius: '16px',
     overlayBackdropColor: 'rgba(17, 39, 31, 0.4)',
