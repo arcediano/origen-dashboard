@@ -72,13 +72,6 @@ const AVAILABLE_CERTIFICATIONS = [
     description: 'Prácticas de comercio ético y justo'
   },
   {
-    id: 'denominacion_origen',
-    name: 'Denominación de Origen',
-    issuingBody: 'DOP / IGP',
-    icon: Award,
-    description: 'Producto con denominación de origen protegida'
-  },
-  {
     id: 'artesania',
     name: 'Producto Artesano',
     issuingBody: 'Junta de Andalucía / CCAA',
