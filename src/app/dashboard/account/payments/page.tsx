@@ -16,6 +16,7 @@ import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader
 import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2, X } from 'lucide-react';
 import { loadProducerProfile } from '@/lib/api/onboarding';
 import { openStripeDashboard } from '@/lib/stripe/connect-client';
+import { useStripeConnectPolling } from '@/lib/stripe/use-stripe-connect-polling';
 import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-connect-onboarding';
 
 interface StripeStatusResponse {
@@ -26,13 +27,6 @@ interface StripeStatusResponse {
   };
   error?: string;
 }
-
-// Constantes de configuración del polling de dos niveles (Etapa 1, D1)
-const FAST_POLL_BASE_MS = 4000;
-const FAST_POLL_MAX_MS = 20000;
-const SLOW_POLL_BASE_MS = 60000;
-const SLOW_POLL_MAX_MS = 300000;
-const POLL_BACKOFF_FACTOR = 1.5;
 
 export default function PaymentsPage() {
   const router = useRouter();
@@ -163,38 +157,18 @@ export default function PaymentsPage() {
   // plano. Ver D1 del plan de desarrollo para la justificación de por
   // qué se consulta loadPaymentState() (BD) y no /api/stripe/status
   // (Stripe en vivo) en cada tick.
-  useEffect(() => {
-    const isFastTier = showEmbeddedOnboarding && paymentStage !== 'connected';
-    const isSlowTier = !showEmbeddedOnboarding && paymentStage === 'pending';
+  //
+  // La mecánica vive en useStripeConnectPolling porque el paso 6 del
+  // wizard de onboarding sufre exactamente el mismo problema y usa el
+  // mismo hook (Etapa 5 del plan de desarrollo).
+  const isFastTier = showEmbeddedOnboarding && paymentStage !== 'connected';
+  const isSlowTier = !showEmbeddedOnboarding && paymentStage === 'pending';
 
-    if (!isFastTier && !isSlowTier) {
-      return;
-    }
-
-    let cancelled = false;
-    let timeoutId: ReturnType<typeof setTimeout>;
-    let delay = isFastTier ? FAST_POLL_BASE_MS : SLOW_POLL_BASE_MS;
-    const maxDelay = isFastTier ? FAST_POLL_MAX_MS : SLOW_POLL_MAX_MS;
-
-    const schedule = () => {
-      timeoutId = setTimeout(tick, delay);
-    };
-
-    const tick = async () => {
-      if (cancelled) return;
-      await loadPaymentState();
-      if (cancelled) return;
-      delay = Math.min(delay * POLL_BACKOFF_FACTOR, maxDelay);
-      schedule();
-    };
-
-    schedule();
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-    };
-  }, [showEmbeddedOnboarding, paymentStage, loadPaymentState]);
+  useStripeConnectPolling({
+    active: isFastTier || isSlowTier,
+    fastTier: isFastTier,
+    onTick: loadPaymentState,
+  });
 
   // Aviso explícito cuando la cuenta pasa a activa mientras el usuario
   // sigue en la página (heurística de Nielsen "visibilidad del estado

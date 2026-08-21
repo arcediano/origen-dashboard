@@ -296,6 +296,41 @@ export default function OnboardingPage() {
     return [];
   };
 
+  /**
+   * Refresco acotado al estado de Stripe del paso 6.
+   *
+   * Deliberadamente NO reutiliza el cargador completo del efecto de montaje:
+   * ese restaura `currentStep` desde el servidor y apaga `isLoading`, así que
+   * usarlo como refresco en segundo plano movería al productor de paso
+   * mientras rellena el formulario. Además reescribe `formData` entero, lo
+   * que pisaría ediciones sin guardar de otros pasos.
+   *
+   * Sólo toca `stripeConnected`/`stripeAccountId`, que son datos que manda el
+   * servidor (el webhook de Stripe es su única fuente de verdad). `acceptTerms`
+   * se deja intacto a propósito: es una casilla que gestiona el usuario en
+   * local y no debe revertirse por un refresco.
+   */
+  const refreshStripeState = useCallback(async () => {
+    try {
+      const res: any = await loadOnboardingData();
+      const payment = res?.data?.payment;
+      if (!payment) return;
+
+      setFormData((prev) => ({
+        ...prev,
+        step6: {
+          ...prev.step6,
+          stripeConnected: payment.stripeConnected ?? prev.step6.stripeConnected,
+          stripeAccountId: payment.stripeAccountId ?? prev.step6.stripeAccountId,
+        },
+      }));
+    } catch {
+      // Silencio deliberado: es un refresco en segundo plano. Un fallo de red
+      // puntual no debe interrumpir al productor con un error; el siguiente
+      // tick del polling reintenta.
+    }
+  }, []);
+
   useEffect(() => {
     loadOnboardingData()
       .then((res: any) => {
@@ -451,6 +486,11 @@ export default function OnboardingPage() {
           } : prev.step_products,
           step6: d.payment ? {
             stripeConnected: d.payment.stripeConnected,
+            // Necesario para que el polling del paso 6 sepa que hay una cuenta
+            // que vigilar tras recargar la página: sin esto, un productor que
+            // vuelve al wizard con la cuenta aún en verificación no vería
+            // actualizarse el estado.
+            stripeAccountId: d.payment.stripeAccountId ?? undefined,
             acceptTerms: !!d.payment.acceptedTermsAt,
           } : prev.step6,
         }));
@@ -916,9 +956,7 @@ export default function OnboardingPage() {
             lastName={user?.lastName}
             businessName={formData.step2.businessName}
             website={formData.step2.website}
-            onRequestRefresh={() => {
-              void loadOnboardingData();
-            }}
+            onRequestRefresh={refreshStripeState}
           />
         );
       default:

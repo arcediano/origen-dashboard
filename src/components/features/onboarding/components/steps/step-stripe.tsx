@@ -26,6 +26,7 @@ import { Button } from '@arcediano/ux-library';
 import { Checkbox } from '@arcediano/ux-library';
 import { Spinner } from '@/components/shared';
 import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-connect-onboarding';
+import { useStripeConnectPolling } from '@/lib/stripe/use-stripe-connect-polling';
 
 import {
   CreditCard,
@@ -59,8 +60,13 @@ export interface EnhancedStep6StripeProps {
   businessName?: string;
   /** Web del negocio (paso 2) — pre-rellena Stripe */
   website?: string;
-  /** Callback para recargar el estado desde el servidor tras completar onboarding embebido */
-  onRequestRefresh?: () => void;
+  /**
+   * Callback para recargar el estado desde el servidor tras completar
+   * onboarding embebido. Si devuelve una promesa, el polling espera a que
+   * resuelva antes de programar el siguiente tick, evitando peticiones
+   * solapadas.
+   */
+  onRequestRefresh?: () => void | Promise<void>;
 }
 
 // ─── Componente ──────────────────────────────────────────────────────────────
@@ -83,9 +89,29 @@ export function EnhancedStep6Stripe({
    */
   const handleVerified = React.useCallback(() => {
     if (onRequestRefresh) {
-      onRequestRefresh();
+      void onRequestRefresh();
     }
   }, [onRequestRefresh]);
+
+  // Mismo bug que en dashboard/account/payments: `onVerified` sólo se
+  // dispara cuando el usuario cierra el formulario embebido, que suele ser
+  // antes de que Stripe termine de verificar la cuenta. Sin este polling, un
+  // productor que se queda en el paso 6 esperando ver "¡Cuenta conectada!"
+  // nunca lo vería actualizarse.
+  //
+  // Nivel lento: aquí el formulario embebido está siempre visible mientras
+  // se esté en el paso 6, así que no hay un estado "panel abierto" que
+  // justifique el nivel rápido, y el wizard además deja terminar el
+  // onboarding sin Stripe conectado (el productor no queda bloqueado).
+  const handlePollTick = React.useCallback(async () => {
+    await onRequestRefresh?.();
+  }, [onRequestRefresh]);
+
+  useStripeConnectPolling({
+    active: Boolean(data.stripeAccountId) && !data.stripeConnected,
+    fastTier: false,
+    onTick: handlePollTick,
+  });
 
   const handleDisconnect = () => {
     onChange({ stripeConnected: false, stripeAccountId: undefined, acceptTerms: false });
