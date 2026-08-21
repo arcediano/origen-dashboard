@@ -10,7 +10,6 @@ import {
   Phone,
   CheckCircle,
   Loader2,
-  Plus,
   X,
   Edit,
   Camera,
@@ -20,6 +19,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
+import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 import {
   Alert,
   AlertDescription,
@@ -403,7 +403,6 @@ export default function BusinessInfoPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
-  const [newCategory, setNewCategory] = useState('');
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [readinessReport, setReadinessReport] = useState<ProducerReadinessReport | null>(null);
@@ -508,17 +507,6 @@ export default function BusinessInfoPage() {
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
-  };
-
-  const handleAddCategory = () => {
-    const category = newCategory.trim();
-    if (!category) return;
-    if (form.categories.some((item) => item.toLowerCase() === category.toLowerCase())) {
-      return;
-    }
-
-    setForm((prev) => ({ ...prev, categories: [...prev.categories, category] }));
-    setNewCategory('');
   };
 
   const handleRemoveCategory = (category: string) => {
@@ -1219,10 +1207,12 @@ export default function BusinessInfoPage() {
                         value={form.categories.filter((cat) => PRODUCER_CATEGORIES.some((c) => c.id === cat))}
                         onValueChange={(next) => {
                           const selected = Array.isArray(next) ? next : [next];
-                          const customCategories = form.categories.filter(
+                          // Preservar categorías de texto libre legadas (ya no se pueden añadir nuevas desde UI,
+                          // pero mantener las existentes hasta que exista una decisión de migración)
+                          const legacyFreeTextCategories = form.categories.filter(
                             (cat) => !PRODUCER_CATEGORIES.some((c) => c.id === cat)
                           );
-                          setForm((prev) => ({ ...prev, categories: [...customCategories, ...selected] }));
+                          setForm((prev) => ({ ...prev, categories: [...legacyFreeTextCategories, ...selected] }));
                         }}
                         className="gap-2 mb-3"
                       >
@@ -1232,17 +1222,6 @@ export default function BusinessInfoPage() {
                           </ToggleGroupItem>
                         ))}
                       </ToggleGroup>
-                      <div className="flex gap-2">
-                        <div className="flex-1 min-w-0">
-                          <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="Nueva categoria" />
-                        </div>
-                        <Button variant="secondary" size="md" onClick={handleAddCategory}>
-                          <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
-                            <Plus className="w-4 h-4" />
-                            Anadir
-                          </span>
-                        </Button>
-                      </div>
                     </>
                   )}
                 </CardContent>
@@ -1255,7 +1234,9 @@ export default function BusinessInfoPage() {
       {/* Barra de guardado sticky – todos los breakpoints, para no obligar a volver
           arriba al editar secciones bajas de la pantalla (Categorías, Historia, etc.) */}
       {isEditing && (
-        <div className={`fixed left-0 right-0 ${appShellBottomOffsetClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} lg:bottom-6 z-30 px-4 sm:px-6`}>
+        <>
+          <HideBottomTabBar />
+          <div className={`fixed left-0 right-0 ${appShellBottomOffsetClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} lg:bottom-6 z-30 px-4 sm:px-6`}>
           <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
             <div className="flex gap-2">
               <Button variant="ghost" size="md" className="flex-1" onClick={handleCancel}>
@@ -1273,6 +1254,7 @@ export default function BusinessInfoPage() {
             </div>
           </div>
         </div>
+        </>
       )}
     </div>
   );
