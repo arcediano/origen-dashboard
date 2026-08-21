@@ -6,6 +6,7 @@ import { User, MapPin, Camera, CheckCircle, Edit } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
+import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 import { Avatar, Card, CardContent, CardHeader, CardTitle, PageLoader } from '@arcediano/ux-library';
 import { Button, Input, Label, Badge, DateInput } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
@@ -724,7 +725,9 @@ export default function PersonalInfoPage() {
       {/* Barra de guardado sticky – todos los breakpoints, para no obligar a volver
           arriba al editar campos por debajo de la primera pantalla */}
       {isEditing && (
-        <div className={`fixed left-0 right-0 ${appShellBottomOffsetClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} lg:bottom-6 z-30 px-4 sm:px-6`}>
+        <>
+          <HideBottomTabBar />
+          <div className={`fixed left-0 right-0 ${appShellBottomOffsetClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} lg:bottom-6 z-30 px-4 sm:px-6`}>
           <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
             <div className="flex gap-2">
               <Button variant="ghost" className="flex-1" onClick={handleCancel}>Cancelar</Button>
@@ -734,6 +737,7 @@ export default function PersonalInfoPage() {
             </div>
           </div>
         </div>
+        </>
       )}
     </div>
   );
