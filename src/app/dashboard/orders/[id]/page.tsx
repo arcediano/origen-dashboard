@@ -51,7 +51,6 @@ const statusConfig: Record<Order['status'], {
   icon: React.ElementType;
   color: string;
   bandBg: string;
-  heroBg: string;
   heroBorder: string;
 }> = {
   pending: {
@@ -60,7 +59,6 @@ const statusConfig: Record<Order['status'], {
     icon: Clock,
     color: 'text-origen-bosque',
     bandBg: 'bg-origen-mandarina/10',
-    heroBg: 'bg-gradient-to-br from-origen-mandarina/20 to-origen-mandarina/8',
     heroBorder: 'border-origen-mandarina/30',
   },
   processing: {
@@ -69,7 +67,6 @@ const statusConfig: Record<Order['status'], {
     icon: Package,
     color: 'text-origen-pino',
     bandBg: 'bg-origen-pastel',
-    heroBg: 'bg-gradient-to-br from-origen-pastel to-origen-crema/60',
     heroBorder: 'border-origen-pradera/30',
   },
   shipped: {
@@ -78,7 +75,6 @@ const statusConfig: Record<Order['status'], {
     icon: Truck,
     color: 'text-origen-hoja',
     bandBg: 'bg-origen-pastel',
-    heroBg: 'bg-gradient-to-br from-origen-pastel to-origen-crema/60',
     heroBorder: 'border-origen-hoja/30',
   },
   delivered: {
@@ -87,7 +83,6 @@ const statusConfig: Record<Order['status'], {
     icon: CheckCircle,
     color: 'text-origen-bosque',
     bandBg: 'bg-origen-pastel',
-    heroBg: 'bg-gradient-to-br from-origen-bosque/10 to-origen-pastel/80',
     heroBorder: 'border-origen-bosque/20',
   },
   cancelled: {
@@ -96,7 +91,6 @@ const statusConfig: Record<Order['status'], {
     icon: XCircle,
     color: 'text-feedback-danger-text',
     bandBg: 'bg-feedback-danger-subtle',
-    heroBg: 'bg-gradient-to-br from-feedback-danger-subtle to-feedback-danger-subtle/60',
     heroBorder: 'border-feedback-danger/30',
   },
   refunded: {
@@ -105,10 +99,18 @@ const statusConfig: Record<Order['status'], {
     icon: XCircle,
     color: 'text-feedback-danger-text',
     bandBg: 'bg-feedback-danger-subtle',
-    heroBg: 'bg-gradient-to-br from-feedback-danger-subtle to-feedback-danger-subtle/60',
     heroBorder: 'border-feedback-danger/30',
   }
 };
+
+/**
+ * Radio "app nativa" (28px) usado en todas las cards de esta pantalla —
+ * mayor que el `rounded-2xl` (16px) estándar de `Card`/`AccordionCard` de
+ * la librería, decisión deliberada de esta pantalla (ver docblock del
+ * archivo). Centralizado aquí para no repetir el valor arbitrario
+ * `rounded-[28px]` suelto en el archivo (B1, auditoria-diseno-2026-08-22.md).
+ */
+const NATIVE_CARD_RADIUS = 'rounded-[28px]';
 
 // Animaciones de entrada
 const cardVariants = {
@@ -140,7 +142,7 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex justify-between items-start gap-4 py-2.5 border-b border-border-subtle last:border-0">
       <span className="text-xs text-text-subtle shrink-0">{label}</span>
-      <span className="text-xs font-semibold text-origen-bosque text-right">{value}</span>
+      <span className="text-xs font-semibold text-foreground text-right">{value}</span>
     </div>
   );
 }
@@ -161,17 +163,17 @@ function SectionAccordion({
       variants={cardVariants}
       initial="hidden"
       animate="visible"
-      className="rounded-[28px] border border-border bg-surface-alt shadow-subtle overflow-hidden"
+      className={cn(NATIVE_CARD_RADIUS, 'border border-border bg-surface-alt shadow-subtle overflow-hidden')}
     >
       <button
         onClick={() => setOpen(v => !v)}
         className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-surface-alt/50 transition-colors"
         aria-expanded={open}
       >
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-origen-pradera/15 to-origen-hoja/15 flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-origen-pastel flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-hoja-tinta" />
         </div>
-        <span className="flex-1 text-sm font-semibold text-origen-bosque">{title}</span>
+        <span className="flex-1 text-sm font-semibold text-foreground">{title}</span>
         <ChevronDown className={cn('w-4 h-4 text-text-subtle transition-transform duration-200', open && 'rotate-180')} />
       </button>
       <AnimatePresence initial={false}>
@@ -315,6 +317,18 @@ export default function OrderDetailPage() {
     STATUSES_REQUIRING_PAYMENT.includes(nextAction.next) &&
     !order.payment.paidAt;
 
+  /**
+   * M2 (auditoria-diseno-2026-08-22.md): en móvil, el `ActionBar` fijo
+   * inferior ya cubre exactamente esta misma acción bajo la misma
+   * condición (ver render de `ActionBar` más abajo) — mostrar también los
+   * botones dentro de la card "Gestión del pedido" duplica el CTA en
+   * pantalla. Solo se oculta la card en móvil cuando su contenido sería
+   * 100% redundante con el ActionBar; en el resto de casos (multi-vendedor,
+   * pago sin confirmar) la card aporta información que el ActionBar no
+   * muestra y se mantiene visible en todos los tamaños.
+   */
+  const managementActionsDuplicateActionBar = !isMultiSeller && !!nextAction && !isPaymentUnconfirmed;
+
   const handleRefresh = async () => { await loadOrder(); };
 
   return (
@@ -364,20 +378,22 @@ export default function OrderDetailPage() {
 
               {/* ── Hero card del pedido — siempre visible (mobile + desktop) ── */}
               <motion.div custom={0} variants={cardVariants}>
-                <div className="rounded-[28px] border border-origen-pradera/25 bg-gradient-to-br from-origen-crema via-surface-alt to-surface p-4 sm:p-5 shadow-sm">
-                  {/* Icono de estado + número + badge */}
+                <div className={cn(NATIVE_CARD_RADIUS, 'border border-origen-pradera/25 bg-surface-alt p-4 sm:p-5 shadow-sm')}>
+                  {/* Icono de estado + badge — el número de pedido y su fecha
+                      exacta ya viven en PageHeader (title/description); no se
+                      repiten aquí (M1, viola R26 si se duplican). Se muestra
+                      en su lugar la fecha relativa, dato que PageHeader no
+                      ofrece. */}
                   <div className="flex items-start gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-origen-pradera/15 to-origen-hoja/15 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-2xl bg-origen-pastel flex items-center justify-center shrink-0">
                       <status.icon className={cn('w-5 h-5', status.color)} />
                     </div>
                     <div className="flex-1 min-w-0 pt-0.5">
                       <div className="mb-1.5">
                         <Badge variant={status.variant} size="sm">{status.label}</Badge>
                       </div>
-                      <p className="text-xs text-text-subtle uppercase tracking-widest font-semibold mb-0.5">Pedido</p>
-                      <h2 className="text-base font-bold text-origen-bosque leading-snug">{order.orderNumber}</h2>
-                      <p className="text-xs text-text-subtle mt-0.5">
-                        {format(order.createdAt, "dd 'de' MMMM 'de' yyyy", { locale: es })}
+                      <p className="text-xs text-text-subtle">
+                        {formatDistanceToNow(order.createdAt, { addSuffix: true, locale: es })}
                       </p>
                     </div>
                   </div>
@@ -400,10 +416,20 @@ export default function OrderDetailPage() {
                 </div>
               </motion.div>
 
-              {/* ── Gestión del pedido ── */}
+              {/* ── Gestión del pedido ──
+                  M2: oculta en móvil cuando su contenido sería 100%
+                  redundante con el ActionBar fijo inferior (ver comentario
+                  de managementActionsDuplicateActionBar). En los demás
+                  casos (multi-vendedor, pago sin confirmar) se mantiene
+                  visible en todos los tamaños: no hay ActionBar equivalente
+                  con esa información. */}
               {!isTerminal ? (
-                <motion.div custom={1} variants={cardVariants}>
-                  <div className="rounded-[28px] border border-border bg-surface-alt shadow-subtle p-4 sm:p-5 space-y-2">
+                <motion.div
+                  custom={1}
+                  variants={cardVariants}
+                  className={cn(managementActionsDuplicateActionBar && 'hidden lg:block')}
+                >
+                  <div className={cn(NATIVE_CARD_RADIUS, 'border border-border bg-surface-alt shadow-subtle p-4 sm:p-5 space-y-2')}>
                     <SectionLabel>Gestión del pedido</SectionLabel>
                     {isMultiSeller ? (
                       <div className="flex items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
@@ -425,7 +451,7 @@ export default function OrderDetailPage() {
                           ) : (
                             <Button
                               variant="primary"
-                              size="sm"
+                              size="md"
                               leftIcon={<nextAction.icon className="w-4 h-4" />}
                               onClick={() => handleUpdateStatus(nextAction.next)}
                               loading={updating}
@@ -439,7 +465,7 @@ export default function OrderDetailPage() {
                         {canCancel && (
                           <Button
                             variant="destructive"
-                            size="sm"
+                            size="md"
                             leftIcon={<XCircle className="w-4 h-4" />}
                             onClick={() => setShowCancelSheet(true)}
                             disabled={updating}
@@ -454,7 +480,7 @@ export default function OrderDetailPage() {
                 </motion.div>
               ) : (
                 <motion.div custom={1} variants={cardVariants}>
-                  <div className="rounded-[28px] border border-border bg-surface-alt shadow-subtle p-4">
+                  <div className={cn(NATIVE_CARD_RADIUS, 'border border-border bg-surface-alt shadow-subtle p-4')}>
                     <p className="text-xs text-text-subtle flex items-center gap-2">
                       <Info className="w-3.5 h-3.5 shrink-0" />
                       {order.status === 'delivered' ? 'Pedido completado correctamente.' :
@@ -465,8 +491,12 @@ export default function OrderDetailPage() {
                 </motion.div>
               )}
 
-              {/* ── Cliente ── (acordeón) */}
-              <SectionAccordion title="Cliente" icon={Mail} defaultOpen index={2}>
+              {/* ── Cliente ── (acordeón)
+                  M4: cerrado por defecto (antes defaultOpen) — reduce el
+                  scroll antes de llegar a "Artículos del pedido" en móvil y
+                  unifica el comportamiento con "Pago y factura"/"Historial",
+                  que ya empezaban cerrados. */}
+              <SectionAccordion title="Cliente" icon={Mail} index={2}>
                 <div className="flex items-center gap-3 mb-3">
                   <Avatar
                     size="sm"
@@ -476,7 +506,7 @@ export default function OrderDetailPage() {
                       </span>
                     }
                   />
-                  <p className="text-sm font-semibold text-origen-bosque leading-tight">{order.customerName}</p>
+                  <p className="text-sm font-semibold text-foreground leading-tight">{order.customerName}</p>
                 </div>
                 <div className="space-y-1.5">
                   {order.customerEmail && (
@@ -556,14 +586,14 @@ export default function OrderDetailPage() {
                     </div>
                   ) : (
                     <div className="mt-3 pt-3 border-t border-border-subtle">
-                      <p className="text-xs text-text-disabled">Factura aún no disponible.</p>
+                      <p className="text-xs text-text-subtle">Factura aún no disponible.</p>
                     </div>
                   );
                 })()}
               </SectionAccordion>
 
-              {/* ── Envío ── (acordeón) */}
-              <SectionAccordion title="Dirección de envío" icon={MapPin} defaultOpen index={4}>
+              {/* ── Envío ── (acordeón) — M4: cerrado por defecto, ver nota en "Cliente" */}
+              <SectionAccordion title="Dirección de envío" icon={MapPin} index={4}>
                 {/* Layout de dos columnas en pantallas anchas (nombre / dirección completa),
                     consistente con el patrón InfoRow del resto de secciones del acordeón —
                     antes era un bloque icon+texto autodimensionado que dejaba gran parte del
@@ -628,10 +658,10 @@ export default function OrderDetailPage() {
             <div className="lg:col-span-7 flex flex-col gap-4">
 
               {/* ── Artículos del pedido ── */}
-              <motion.div custom={1} variants={cardVariants} className="rounded-[28px] border border-border bg-surface-alt shadow-subtle overflow-hidden">
+              <motion.div custom={1} variants={cardVariants} className={cn(NATIVE_CARD_RADIUS, 'border border-border bg-surface-alt shadow-subtle overflow-hidden')}>
                 <div className="px-5 py-3.5 border-b border-border-subtle flex items-center gap-2">
                   <Package className="w-4 h-4 text-hoja-tinta" />
-                  <span className="text-sm font-semibold text-origen-bosque">Artículos del pedido</span>
+                  <span className="text-sm font-semibold text-foreground">Artículos del pedido</span>
                   <span className="ml-auto text-xs text-text-subtle">{order.items.length} artículo{order.items.length !== 1 ? 's' : ''}</span>
                 </div>
 
@@ -647,20 +677,20 @@ export default function OrderDetailPage() {
                       </div>
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-origen-bosque leading-tight truncate">{item.productName}</p>
+                        <p className="text-sm font-medium text-foreground leading-tight truncate">{item.productName}</p>
                         <p className="text-xs text-text-subtle mt-0.5">
                           {item.quantity} × {item.unitPrice.toFixed(2)}€
-                          {item.discount && <span className="text-origen-hoja ml-1.5">−{item.discount}%</span>}
+                          {item.discount && <span className="text-hoja-tinta ml-1.5">−{item.discount}%</span>}
                         </p>
                         {item.commissionRate !== undefined && (
-                          <p className="text-xs text-text-disabled mt-1">
+                          <p className="text-xs text-text-subtle mt-1">
                             Comisión: {item.commissionRate}%
                             {item.commissionAmount && ` (${item.commissionAmount.toFixed(2)}€)`}
                           </p>
                         )}
                       </div>
                       {/* Precio */}
-                      <p className="text-sm font-bold text-origen-bosque flex-shrink-0 tabular-nums">{item.totalPrice.toFixed(2)}€</p>
+                      <p className="text-sm font-bold text-foreground flex-shrink-0 tabular-nums">{item.totalPrice.toFixed(2)}€</p>
                     </div>
                   ))}
                 </div>
@@ -669,33 +699,33 @@ export default function OrderDetailPage() {
                 <div className="px-5 py-4 bg-origen-nube border-t border-border-subtle space-y-1.5">
                   <div className="flex justify-between text-xs text-text-subtle">
                     <span>Subtotal</span>
-                    <span className="font-medium text-origen-bosque">{order.subtotal.toFixed(2)}€</span>
+                    <span className="font-medium text-foreground">{order.subtotal.toFixed(2)}€</span>
                   </div>
                   {order.couponCode && (
                     <div className="flex justify-between text-xs text-text-subtle">
                       <span>Cupón</span>
-                      <span className="font-medium text-origen-hoja">{order.couponCode}</span>
+                      <span className="font-medium text-hoja-tinta">{order.couponCode}</span>
                     </div>
                   )}
                   {order.discount && (
                     <div className="flex justify-between text-xs text-text-subtle">
                       <span>Descuento</span>
-                      <span className="font-medium text-origen-hoja">−{order.discount.toFixed(2)}€</span>
+                      <span className="font-medium text-hoja-tinta">−{order.discount.toFixed(2)}€</span>
                     </div>
                   )}
                   <div className="flex justify-between text-xs text-text-subtle">
                     <span>Gastos de envío</span>
-                    <span className="font-medium text-origen-bosque">{order.shipping.cost.toFixed(2)}€</span>
+                    <span className="font-medium text-foreground">{order.shipping.cost.toFixed(2)}€</span>
                   </div>
                   {order.tax && (
                     <div className="flex justify-between text-xs text-text-subtle">
                       <span>IVA</span>
-                      <span className="font-medium text-origen-bosque">{order.tax.toFixed(2)}€</span>
+                      <span className="font-medium text-foreground">{order.tax.toFixed(2)}€</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm font-bold pt-1.5 border-t border-border-subtle">
-                    <span className="text-origen-bosque">Total</span>
-                    <span className="text-origen-bosque tabular-nums">{order.total.toFixed(2)}€</span>
+                    <span className="text-foreground">Total</span>
+                    <span className="text-foreground tabular-nums">{order.total.toFixed(2)}€</span>
                   </div>
                 </div>
               </motion.div>
@@ -789,7 +819,7 @@ export default function OrderDetailPage() {
               <SheetTitle className="text-left text-origen-bosque">Actualizar estado</SheetTitle>
             </SheetHeader>
             <div className="space-y-4">
-              <div className={cn('rounded-2xl p-4 flex items-center gap-3 border', status.heroBg, status.heroBorder)}>
+              <div className={cn('rounded-2xl p-4 flex items-center gap-3 border', status.bandBg, status.heroBorder)}>
                 <status.icon className={cn('w-5 h-5 shrink-0', status.color)} />
                 <div>
                   <p className="text-xs text-text-subtle">Estado actual</p>
@@ -822,7 +852,7 @@ export default function OrderDetailPage() {
             <div className="space-y-3">
               <p className="text-sm text-text-subtle leading-relaxed">
                 ¿Seguro que quieres cancelar el pedido{' '}
-                <span className="font-semibold text-origen-bosque">{order.orderNumber}</span>?{' '}
+                <span className="font-semibold text-foreground">{order.orderNumber}</span>?{' '}
                 Esta acción no se puede deshacer.
               </p>
               <Button
