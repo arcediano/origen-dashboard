@@ -34,6 +34,17 @@ import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 import { fetchOrderById, fetchSellerOrderInvoice, updateOrderStatus } from '@/lib/api/orders';
 import type { Order } from '@/types/order';
 
+/**
+ * Espejo de STATUSES_REQUIRING_PAYMENT en el backend
+ * (origen-master-microservices/src/modules/orders/orders/orders.service.ts:45-49).
+ * Debe mantenerse sincronizado a mano si el backend cambia esta lista — no
+ * hay un paquete compartido de constantes entre repos. Usado para no
+ * mostrar el botón de avance de estado cuando el backend lo va a rechazar
+ * siempre por falta de pago confirmado (bugs-detalle-pedido-productor,
+ * 2026-08-22).
+ */
+const STATUSES_REQUIRING_PAYMENT: Order['status'][] = ['processing', 'shipped', 'delivered'];
+
 const statusConfig: Record<Order['status'], {
   variant: 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'leaf';
   label: string;
@@ -298,6 +309,12 @@ export default function OrderDetailPage() {
     null;
 
   const isTerminal = !canUpdate;
+  const isMultiSeller = order.isMultiSeller === true;
+  const isPaymentUnconfirmed =
+    !!nextAction &&
+    STATUSES_REQUIRING_PAYMENT.includes(nextAction.next) &&
+    !order.payment.paidAt;
+
   const handleRefresh = async () => { await loadOrder(); };
 
   return (
@@ -388,30 +405,50 @@ export default function OrderDetailPage() {
                 <motion.div custom={1} variants={cardVariants}>
                   <div className="rounded-[28px] border border-border bg-surface-alt shadow-subtle p-4 sm:p-5 space-y-2">
                     <SectionLabel>Gestión del pedido</SectionLabel>
-                    {nextAction && (
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        leftIcon={<nextAction.icon className="w-4 h-4" />}
-                        onClick={() => handleUpdateStatus(nextAction.next)}
-                        loading={updating}
-                        loadingText="Actualizando..."
-                        className="w-full justify-start"
-                      >
-                        {nextAction.label}
-                      </Button>
-                    )}
-                    {canCancel && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        leftIcon={<XCircle className="w-4 h-4" />}
-                        onClick={() => setShowCancelSheet(true)}
-                        disabled={updating}
-                        className="w-full justify-start"
-                      >
-                        Cancelar pedido
-                      </Button>
+                    {isMultiSeller ? (
+                      <div className="flex items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
+                        <Info className="w-4 h-4 text-origen-pino shrink-0 mt-0.5" aria-hidden />
+                        <p className="text-xs text-text-subtle leading-relaxed">
+                          Este pedido incluye productos de varios productores. La gestión del estado, incluida la cancelación, se coordina de forma centralizada y no está disponible desde el panel de un productor individual.
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {nextAction && (
+                          isPaymentUnconfirmed ? (
+                            <div className="flex items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
+                              <Info className="w-4 h-4 text-origen-pino shrink-0 mt-0.5" aria-hidden />
+                              <p className="text-xs text-text-subtle leading-relaxed">
+                                El pago de este pedido aún no se ha confirmado. Podrás avanzar su estado en cuanto se confirme el cobro.
+                              </p>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              leftIcon={<nextAction.icon className="w-4 h-4" />}
+                              onClick={() => handleUpdateStatus(nextAction.next)}
+                              loading={updating}
+                              loadingText="Actualizando..."
+                              className="w-full justify-start"
+                            >
+                              {nextAction.label}
+                            </Button>
+                          )
+                        )}
+                        {canCancel && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            leftIcon={<XCircle className="w-4 h-4" />}
+                            onClick={() => setShowCancelSheet(true)}
+                            disabled={updating}
+                            className="w-full justify-start"
+                          >
+                            Cancelar pedido
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 </motion.div>
@@ -442,15 +479,20 @@ export default function OrderDetailPage() {
                   <p className="text-sm font-semibold text-origen-bosque leading-tight">{order.customerName}</p>
                 </div>
                 <div className="space-y-1.5">
-                  <a href={`mailto:${order.customerEmail}`} className="flex items-center gap-2 text-xs text-text-subtle hover:text-origen-pradera transition-colors">
-                    <Mail className="w-3.5 h-3.5 flex-shrink-0 text-hoja-tinta" />
-                    {order.customerEmail}
-                  </a>
+                  {order.customerEmail && (
+                    <a href={`mailto:${order.customerEmail}`} className="flex items-center gap-2 text-xs text-text-subtle hover:text-origen-pradera transition-colors">
+                      <Mail className="w-3.5 h-3.5 flex-shrink-0 text-hoja-tinta" />
+                      {order.customerEmail}
+                    </a>
+                  )}
                   {order.customerPhone && (
                     <a href={`tel:${order.customerPhone}`} className="flex items-center gap-2 text-xs text-text-subtle hover:text-origen-pradera transition-colors">
                       <Phone className="w-3.5 h-3.5 flex-shrink-0 text-hoja-tinta" />
                       {order.customerPhone}
                     </a>
+                  )}
+                  {!order.customerEmail && !order.customerPhone && (
+                    <p className="text-xs text-text-disabled">Sin datos de contacto adicionales.</p>
                   )}
                 </div>
               </SectionAccordion>
@@ -658,83 +700,57 @@ export default function OrderDetailPage() {
                 </div>
               </motion.div>
 
-              {/* ── Historial del pedido ── Resumen de eventos reales */}
+              {/* ── Historial del pedido ── */}
               <SectionAccordion title="Historial del pedido" icon={Clock} index={2}>
-                <div className="space-y-4">
-                  {/* Evento: Pedido creado */}
-                  <div className="flex items-start gap-3">
-                    <div className="relative flex flex-col items-center flex-shrink-0">
-                      <div className="w-3 h-3 rounded-full mt-0.5 flex-shrink-0 bg-origen-bosque ring-4 ring-origen-bosque/15" />
-                      {(order.payment.paidAt || order.shipping.deliveredAt) && (
-                        <div className="w-0.5 h-8 bg-border-subtle mt-1" />
-                      )}
-                    </div>
-                    <div className="flex-1 pb-2">
-                      <p className="text-sm font-medium text-origen-bosque leading-tight">Pedido recibido</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-xs text-text-subtle">
-                          {format(order.createdAt, 'dd MMM · HH:mm', { locale: es })}
-                        </p>
-                        <span className="text-text-disabled text-xs">·</span>
-                        <p className="text-xs text-text-subtle">
-                          {formatDistanceToNow(order.createdAt, { addSuffix: true, locale: es })}
-                        </p>
+                {order.timeline.length > 0 ? (
+                  (() => {
+                    // order.timeline llega ordenado descendente (más reciente primero,
+                    // ver lib/api/orders.ts:246-248); se reordena aquí a ascendente
+                    // (más antiguo arriba) para preservar el sentido de lectura de la
+                    // versión anterior de esta sección, sin mutar order.timeline.
+                    const timelineAsc = [...order.timeline].sort(
+                      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+                    );
+                    return (
+                      <div className="space-y-4">
+                        {timelineAsc.map((event, idx) => {
+                          const isLast = idx === timelineAsc.length - 1;
+                          return (
+                            <div key={event.id} className="flex items-start gap-3">
+                              <div className="relative flex flex-col items-center flex-shrink-0">
+                                <div
+                                  className={cn(
+                                    'w-3 h-3 rounded-full mt-0.5 flex-shrink-0',
+                                    isLast ? 'bg-origen-bosque ring-4 ring-origen-bosque/15' : 'bg-origen-pradera/40'
+                                  )}
+                                />
+                                {!isLast && <div className="w-0.5 h-8 bg-border-subtle mt-1" />}
+                              </div>
+                              <div className="flex-1 pb-2">
+                                <p className="text-sm font-medium text-origen-bosque leading-tight">
+                                  {event.description}
+                                </p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <p className="text-xs text-text-subtle">
+                                    {format(event.createdAt, 'dd MMM · HH:mm', { locale: es })}
+                                  </p>
+                                  <span className="text-text-disabled text-xs">·</span>
+                                  <p className="text-xs text-text-subtle">
+                                    {formatDistanceToNow(event.createdAt, { addSuffix: true, locale: es })}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Evento: Pago realizado */}
-                  {order.payment.paidAt && (
-                    <div className="flex items-start gap-3">
-                      <div className="relative flex flex-col items-center flex-shrink-0">
-                        <div className="w-3 h-3 rounded-full mt-0.5 flex-shrink-0 bg-origen-pradera/40" />
-                        {order.shipping.deliveredAt && (
-                          <div className="w-0.5 h-8 bg-border-subtle mt-1" />
-                        )}
-                      </div>
-                      <div className="flex-1 pb-2">
-                        <p className="text-sm font-medium text-origen-bosque leading-tight">Pago realizado</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-xs text-text-subtle">
-                            {format(order.payment.paidAt, 'dd MMM · HH:mm', { locale: es })}
-                          </p>
-                          <span className="text-text-disabled text-xs">·</span>
-                          <p className="text-xs text-text-subtle">
-                            {formatDistanceToNow(order.payment.paidAt, { addSuffix: true, locale: es })}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Evento: Entregado */}
-                  {order.shipping.deliveredAt && (
-                    <div className="flex items-start gap-3">
-                      <div className="relative flex flex-col items-center flex-shrink-0">
-                        <div className="w-3 h-3 rounded-full mt-0.5 flex-shrink-0 bg-origen-pradera/40" />
-                      </div>
-                      <div className="flex-1 pb-2">
-                        <p className="text-sm font-medium text-origen-bosque leading-tight">Pedido entregado</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-xs text-text-subtle">
-                            {format(order.shipping.deliveredAt, 'dd MMM · HH:mm', { locale: es })}
-                          </p>
-                          <span className="text-text-disabled text-xs">·</span>
-                          <p className="text-xs text-text-subtle">
-                            {formatDistanceToNow(order.shipping.deliveredAt, { addSuffix: true, locale: es })}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Nota: Si no hay eventos reales de pago/entrega, mostrar un mensaje */}
-                  {!order.payment.paidAt && !order.shipping.deliveredAt && (
-                    <p className="text-xs text-text-subtle italic">
-                      Se mostrarán más detalles del historial según se procese el pedido.
-                    </p>
-                  )}
-                </div>
+                    );
+                  })()
+                ) : (
+                  <p className="text-xs text-text-subtle italic">
+                    Aún no hay eventos registrados para este pedido.
+                  </p>
+                )}
               </SectionAccordion>
 
             </div>
@@ -742,7 +758,7 @@ export default function OrderDetailPage() {
         </motion.div>
 
         {/* ── ActionBar móvil ── */}
-        {nextAction && (
+        {nextAction && !isMultiSeller && !isPaymentUnconfirmed && (
           <>
             {/* Oculta el BottomTabBar mientras hay acciones de estado disponibles */}
             <HideBottomTabBar />
