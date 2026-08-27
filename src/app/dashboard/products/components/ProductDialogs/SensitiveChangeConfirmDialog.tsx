@@ -41,14 +41,16 @@ export function SensitiveChangeConfirmDialog({
     }}>
       <DialogContent className="max-w-sm">
         <DialogTitle>
-          Este cambio enviará tu producto a revisión
+          Este cambio se enviará a revisión
         </DialogTitle>
 
         <DialogDescription className="space-y-3">
           <p>
-            Mientras un administrador revisa estos cambios, tu producto dejará de
-            mostrarse en el catálogo público y todas sus ofertas activas quedarán
-            pausadas. El resto de tus productos no se ve afectado.
+            Un administrador debe revisar estos cambios antes de publicarlos.
+            Mientras tanto, tu producto sigue visible en el catálogo público
+            con sus datos actuales — no se oculta ni se pausan sus ofertas
+            activas. En cuanto se apruebe la propuesta, los nuevos datos
+            sustituirán a los actuales.
           </p>
         </DialogDescription>
 
