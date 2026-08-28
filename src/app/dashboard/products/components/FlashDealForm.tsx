@@ -69,6 +69,15 @@ export function FlashDealForm({
     try {
       FlashDealSchema.parse(formData);
 
+      if (
+        formData.discountType === 'FIXED' &&
+        basePrice > 0 &&
+        (formData.discountValue || 0) >= basePrice
+      ) {
+        setError(`El precio especial debe ser menor que el precio de venta (${basePrice.toFixed(2)}€)`);
+        return;
+      }
+
       if (!productId) {
         // Modo formulario en wizard (sin guardar en BD)
         const flashDealData: FlashDealFormValue = {

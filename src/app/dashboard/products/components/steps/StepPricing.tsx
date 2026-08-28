@@ -54,7 +54,7 @@ interface StepPricingProps {
 // ESQUEMAS DE VALIDACIÓN
 // ============================================================================
 
-const TierSchema = z.object({
+const getTierSchema = (basePrice: number) => z.object({
   minQuantity: z.number().min(1, 'La cantidad mínima debe ser al menos 1 unidad'),
   maxQuantity: z.number().optional(),
   type: z.enum(['percentage', 'fixed', 'bundle']),
@@ -63,7 +63,7 @@ const TierSchema = z.object({
   payQuantity: z.number().optional(),
 }).refine((data) => {
   if (data.type === 'percentage') return data.value && data.value > 0 && data.value <= 100;
-  if (data.type === 'fixed') return data.value && data.value > 0;
+  if (data.type === 'fixed') return data.value && data.value > 0 && (!basePrice || data.value < basePrice);
   if (data.type === 'bundle') return data.buyQuantity && data.payQuantity && data.buyQuantity > data.payQuantity;
   return true;
 }, 'Valores no válidos');
@@ -84,13 +84,14 @@ const FlashDealSchema = z.object({
 // HELPERS
 // ============================================================================
 
-function getTierValidationError(tier: Partial<PriceTier>): string {
+function getTierValidationError(tier: Partial<PriceTier>, basePrice: number): string {
   if (tier.type === 'percentage') {
     if (!tier.value || tier.value <= 0) return 'Introduce un porcentaje de descuento mayor que 0%';
     if (tier.value > 100) return 'El descuento no puede superar el 100%';
   }
   if (tier.type === 'fixed') {
     if (!tier.value || tier.value <= 0) return 'El precio de oferta debe ser mayor que 0€';
+    if (basePrice && tier.value >= basePrice) return `El precio de oferta debe ser menor que el precio de venta (${basePrice.toFixed(2)}€)`;
   }
   if (tier.type === 'bundle') {
     if (!tier.buyQuantity || !tier.payQuantity) return 'Indica cuántas unidades lleva el cliente y cuántas paga';
@@ -207,7 +208,7 @@ export function StepPricing({
   const handleAddTier = () => {
     setValidationError(null);
     try {
-      TierSchema.parse(newTier);
+      getTierSchema(basePrice).parse(newTier);
       const tier: PriceTier = {
         id: `tier-${Date.now()}`,
         minQuantity: newTier.minQuantity || 2,
@@ -223,7 +224,7 @@ export function StepPricing({
       setShowTierForm(false);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setValidationError(getTierValidationError(newTier));
+        setValidationError(getTierValidationError(newTier, basePrice));
       }
     }
   };
@@ -231,7 +232,7 @@ export function StepPricing({
   const handleUpdateTier = () => {
     if (!editingTierId) return;
     try {
-      TierSchema.parse(newTier);
+      getTierSchema(basePrice).parse(newTier);
       const updatedTiers = tiers.map(tier =>
         tier.id === editingTierId
           ? { ...tier, ...newTier, label: getTierTitle(newTier) }
@@ -243,7 +244,7 @@ export function StepPricing({
       setEditingTierId(null);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setValidationError(getTierValidationError(newTier));
+        setValidationError(getTierValidationError(newTier, basePrice));
       }
     }
   };
@@ -516,9 +517,9 @@ export function StepPricing({
         <div className="space-y-4 mb-6">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
-              <div className="flex items-center gap-2 shrink-0">
-                <Zap className="w-4 h-4 text-origen-mandarina" />
-                <h3 className="text-sm font-semibold text-origen-bosque">Oferta flash</h3>
+              <div className="flex items-center gap-2 min-w-0">
+                <Zap className="w-4 h-4 text-origen-mandarina shrink-0" />
+                <h3 className="text-sm font-semibold text-origen-bosque truncate">Oferta flash</h3>
               </div>
               {flashDeals.length > 0 && (
                 <Badge variant="warning" size="sm">
@@ -536,7 +537,7 @@ export function StepPricing({
                   setShowFlashDealForm(!showFlashDealForm);
                 }}
                 disabled={!hasBasePrice}
-                className="shrink-0"
+                className="w-auto shrink-0"
                 leftIcon={<Plus className="w-3 h-3 shrink-0" aria-hidden="true" />}
               >
                 {showFlashDealForm ? 'Cancelar' : 'Nueva oferta'}
@@ -665,9 +666,9 @@ export function StepPricing({
           <div className="flex items-center gap-3 min-w-0">
             {/* Título + badge — flex-1 para que no comprima el botón */}
             <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
-              <div className="flex items-center gap-2 shrink-0">
-                <Gift className="w-4 h-4 text-hoja-tinta" />
-                <h3 className="text-sm font-semibold text-origen-bosque">Ofertas por cantidad</h3>
+              <div className="flex items-center gap-2 min-w-0">
+                <Gift className="w-4 h-4 text-hoja-tinta shrink-0" />
+                <h3 className="text-sm font-semibold text-origen-bosque truncate">Ofertas por cantidad</h3>
               </div>
               {tiers.length > 0 && (
                 <Badge variant="leaf" size="sm">
@@ -686,7 +687,7 @@ export function StepPricing({
                 setShowTierForm(!showTierForm);
               }}
               disabled={!hasBasePrice}
-              className="shrink-0"
+              className="w-auto shrink-0"
               leftIcon={<Plus className="w-3 h-3 shrink-0" aria-hidden="true" />}
             >
               {showTierForm ? 'Cancelar' : 'Nueva oferta'}
