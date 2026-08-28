@@ -38,6 +38,8 @@ export interface CreateProductNavigationProps {
   onSave: () => void;
   /** Si está guardando */
   isSaving: boolean;
+  /** Si el formulario está en modo edición (producto existente) en lugar de creación */
+  isEditMode?: boolean;
   /** Si todos los pasos están completados */
   allStepsCompleted: boolean;
   /** Si tiene certificaciones */
@@ -69,6 +71,7 @@ export function CreateProductNavigation({
   currentStepErrors = [],
   onSave,
   isSaving,
+  isEditMode = false,
   allStepsCompleted,
   hasCertifications,
   certificationsApproved,
@@ -176,7 +179,7 @@ export function CreateProductNavigation({
               disabled={isSaving}
               leftIcon={isSaving ? <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Save className="w-4 h-4" aria-hidden="true" />}
             >
-              {isSaving ? 'Guardando...' : 'Guardar borrador'}
+              {isSaving ? 'Guardando...' : (isEditMode ? 'Guardar cambios' : 'Guardar borrador')}
             </Button>
 
             {isLastStep ? (

@@ -149,16 +149,9 @@ export default function EditProductPage() {
             >
               <span className="hidden sm:inline">Vista previa</span>
             </Button>
-            {/* Oculto en móvil: PageHeader coloca `actions` en un contenedor
-                shrink-0 sin wrap junto al título -- con el botón + este texto
-                + el badge de SKU, se aplastaba/desbordaba el título a 375px.
-                El estado de guardado ya se ve en el botón "Guardar" del
-                ActionBar móvil. */}
-            {lastSaved && (
-              <span className="hidden sm:inline text-xs text-text-subtle">
-                {isAutoSaving ? 'Guardando...' : `Guardado ${lastSaved.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`}
-              </span>
-            )}
+            {/* El estado de autoguardado ya no se repite aquí (colisionaba con el
+                título a 375px, ver historial) -- ahora vive en un aviso único,
+                visible en todos los tamaños, justo debajo de la cabecera. */}
             {isEditMode && formData.sku && (
               <Badge variant="leaf" size="sm" className="hidden sm:flex items-center gap-1">
                 <Package className="w-3 h-3" />
@@ -175,6 +168,26 @@ export default function EditProductPage() {
           completedTabs={completedTabs}
           onTabChange={handleTabChange}
         />
+
+        {/* Aviso de autoguardado -- visible en todos los tamaños de pantalla.
+            Aclara explícitamente que cada cambio se guarda solo, sin depender
+            de llegar al último paso del stepper (fuente de confusión reportada). */}
+        <div className="flex items-center gap-2 text-xs text-text-subtle mt-4">
+          {isAutoSaving ? (
+            <>
+              <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" aria-hidden="true" />
+              <span>Guardando cambios...</span>
+            </>
+          ) : (
+            <>
+              <Save className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>
+                Los cambios se guardan automáticamente en cada paso, no hace falta llegar al final
+                {lastSaved && ` · último guardado ${lastSaved.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`}
+              </span>
+            </>
+          )}
+        </div>
 
         {/* Callout informativo para borradores incompletos */}
         {formData.status === 'draft' && !allStepsCompleted && (() => {
@@ -237,6 +250,7 @@ export default function EditProductPage() {
                 currentStepErrors={currentStepErrors}
                 onSave={handleSave}
                 isSaving={isSaving}
+                isEditMode={isEditMode}
                 allStepsCompleted={allStepsCompleted}
                 hasCertifications={hasCertifications}
                 certificationsApproved={certificationsApproved}
