@@ -27,14 +27,21 @@ export function ProductFormSidebar({ tips, keyFact }: ProductFormSidebarProps) {
           className="overflow-hidden border border-border shadow-sm"
         >
           <CardHeader spacing="md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
+            {/* flex-wrap + items-start evita que, en tablets grandes justo en
+                el breakpoint lg (~1024-1112px, ej. iPad Pro en horizontal),
+                la columna del sidebar sea tan estrecha que el badge de
+                conteo -- antes centrado verticalmente con items-center --
+                quede solapado sobre "Consejos útiles" al saltar éste a una
+                segunda línea. Con flex-wrap el badge simplemente baja a su
+                propia línea en vez de invadir el título. */}
+            <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
                   <Sparkles className="w-4 h-4 text-hoja-tinta" />
                 </div>
                 <CardTitle size="sm">Consejos útiles</CardTitle>
               </div>
-              <Badge variant="leaf" size="xs">
+              <Badge variant="leaf" size="xs" className="shrink-0 whitespace-nowrap">
                 {tips.length} consejos
               </Badge>
             </div>
