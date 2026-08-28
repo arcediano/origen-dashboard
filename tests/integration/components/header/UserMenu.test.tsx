@@ -67,4 +67,69 @@ describe('UserMenu', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
   });
+
+  describe('visibilidad en marketplace (readinessReport)', () => {
+    it('muestra el motivo real y legible cuando hay un campo de perfil pendiente', () => {
+      render(
+        <UserMenu
+          userName="María Martínez"
+          userEmail="maria@origen.es"
+          userInitials="MM"
+          readinessReport={{
+            canSubmitProducts: false,
+            blockers: ['MISSING_DELIVERY_OPTION'],
+            documentChecks: { CIF: 'MISSING', SEGURO_RC: 'MISSING', MANIPULADOR_ALIMENTOS: 'MISSING' },
+          } as any}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Abrir menú de usuario' }));
+
+      // No debe implicar que el motivo es "no tener productos" -- el
+      // requisito real (opción de envío) no tiene nada que ver con productos.
+      expect(screen.getByText('Perfil no visible en el marketplace')).toBeDefined();
+      expect(screen.getByText(/Añade al menos un método de envío activo/)).toBeDefined();
+      expect(screen.queryByText(/missing delivery option/i)).toBeNull();
+    });
+
+    it('muestra el motivo de estado del productor cuando es el único bloqueante (antes se ocultaba sin dar ninguna razón)', () => {
+      render(
+        <UserMenu
+          userName="María Martínez"
+          userEmail="maria@origen.es"
+          userInitials="MM"
+          readinessReport={{
+            canSubmitProducts: false,
+            blockers: ['STATUS_NOT_ACTIVE:PENDING_VERIFICATION'],
+            documentChecks: { CIF: 'MISSING', SEGURO_RC: 'MISSING', MANIPULADOR_ALIMENTOS: 'MISSING' },
+          } as any}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Abrir menú de usuario' }));
+
+      expect(
+        screen.getByText(/pendiente de revisión por nuestro equipo/),
+      ).toBeDefined();
+    });
+
+    it('muestra el estado visible cuando canSubmitProducts es true', () => {
+      render(
+        <UserMenu
+          userName="María Martínez"
+          userEmail="maria@origen.es"
+          userInitials="MM"
+          readinessReport={{
+            canSubmitProducts: true,
+            blockers: [],
+            documentChecks: { CIF: 'VERIFIED', SEGURO_RC: 'VERIFIED', MANIPULADOR_ALIMENTOS: 'VERIFIED' },
+          } as any}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Abrir menú de usuario' }));
+
+      expect(screen.getByText('Visible — productos publicados')).toBeDefined();
+    });
+  });
 });
