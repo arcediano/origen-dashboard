@@ -11,6 +11,7 @@ import { User, LogOut, ChevronRight, HelpCircle, Settings2, Eye, EyeOff, AlertTr
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLogout } from '@/hooks/useLogout';
 import type { ProducerReadinessReport } from '@/lib/api/onboarding';
+import { mapBlockerToText, splitStatusBlocker } from '@/lib/readiness-blockers';
 
 interface UserMenuProps {
   userName: string;
@@ -194,13 +195,30 @@ export function UserMenu({
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 text-feedback-danger-text">
                       <EyeOff className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span className="text-xs font-medium">Perfil oculto — productos no visibles</span>
+                      <span className="text-xs font-medium">Perfil no visible en el marketplace</span>
                     </div>
-                    {readinessReport.blockers.filter((b) => !b.startsWith('STATUS_NOT_ACTIVE')).slice(0, 2).map((blocker) => (
-                      <p key={blocker} className="text-[11px] text-text-muted pl-5">
-                        · {blocker.replace(/_/g, ' ').toLowerCase()}
-                      </p>
-                    ))}
+                    {(() => {
+                      const { statusBlocker, fieldBlockers } = splitStatusBlocker(
+                        readinessReport.blockers,
+                      );
+                      // Si el único motivo es el estado del productor (gate de
+                      // revisión manual, no un campo que pueda rellenar), se
+                      // muestra igualmente — dejar la lista vacía aquí ocultaba
+                      // el único motivo real y solo quedaba el titular genérico,
+                      // que un productor con productos activos podía confundir
+                      // con "no tienes productos".
+                      const reasons =
+                        fieldBlockers.length > 0
+                          ? fieldBlockers.slice(0, 2)
+                          : statusBlocker
+                            ? [statusBlocker]
+                            : [];
+                      return reasons.map((blocker) => (
+                        <p key={blocker} className="text-[11px] text-text-muted pl-5">
+                          · {mapBlockerToText(blocker)}
+                        </p>
+                      ));
+                    })()}
                   </div>
                 )}
                 {/* Documentos próximos a vencer */}
