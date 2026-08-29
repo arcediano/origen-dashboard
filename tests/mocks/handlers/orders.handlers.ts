@@ -21,6 +21,11 @@ function makeBackendOrder(overrides: {
     id: overrides.id,
     orderNumber: overrides.orderNumber,
     status: overrides.status,
+    // El backend (toSellerOrderResponse) nunca incluye email en
+    // shippingAddress para el endpoint de vendedor (saneado por privacidad,
+    // sanitizeSellerShippingAddress) — el email del comprador llega por
+    // contactEmail, aparte.
+    contactEmail: 'ana@ejemplo.es',
     shippingAddress: {
       fullName: 'Ana García',
       addressLine1: 'Calle Mayor 1',
@@ -28,7 +33,6 @@ function makeBackendOrder(overrides: {
       postalCode: '28001',
       country: 'España',
       phone: '600123456',
-      email: 'ana@ejemplo.es',
     },
     paymentMethod: 'card',
     subtotal: overrides.total - 4.95,
@@ -56,6 +60,8 @@ function makeBackendOrder(overrides: {
         unitPrice: 22.50,
         quantity: 2,
         subtotal: 45.00,
+        commissionRate: 15,
+        commissionAmount: 6.75,
       },
     ],
     // timeline real (order_status_history), ordenado createdAt desc — igual

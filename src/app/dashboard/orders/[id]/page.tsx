@@ -129,6 +129,11 @@ const containerVariants = {
   },
 };
 
+/** Formato de moneda es-ES (coma decimal, espacio antes del símbolo), consistente con dashboard/products/[id]/page.tsx. */
+function formatCurrency(value?: number | null): string {
+  return value == null ? '—' : `${value.toFixed(2).replace('.', ',')} €`;
+}
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider mb-3">
@@ -402,7 +407,7 @@ export default function OrderDetailPage() {
                     <div>
                       <p className="text-[10px] font-semibold text-text-subtle uppercase tracking-wider leading-none mb-1">Total</p>
                       <p className={cn('text-2xl font-extrabold tabular-nums leading-none', status.color)}>
-                        {order.total.toFixed(2)}€
+                        {formatCurrency(order.total)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -679,18 +684,23 @@ export default function OrderDetailPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground leading-tight truncate">{item.productName}</p>
                         <p className="text-xs text-text-subtle mt-0.5">
-                          {item.quantity} × {item.unitPrice.toFixed(2)}€
+                          {item.quantity} × {formatCurrency(item.unitPrice)}
                           {item.discount && <span className="text-hoja-tinta ml-1.5">−{item.discount}%</span>}
                         </p>
-                        {item.commissionRate !== undefined && (
+                        {/* commissionRate == null (no !== undefined) porque el backend distingue
+                            "sin snapshot capturado" (null, pedido legado o sin Stripe Connect) de
+                            "comisión 0% real" (0, snapshot capturado con tarifa aún no configurada) —
+                            solo el primer caso omite la línea; ambigüedad reportada en
+                            bugs-detalle-pedido-comprador, 2026-08-28. */}
+                        {item.commissionRate != null && (
                           <p className="text-xs text-text-subtle mt-1">
-                            Comisión: {item.commissionRate}%
-                            {item.commissionAmount && ` (${item.commissionAmount.toFixed(2)}€)`}
+                            Comisión de Origen: {item.commissionRate}%
+                            {item.commissionAmount != null && ` (${formatCurrency(item.commissionAmount)})`}
                           </p>
                         )}
                       </div>
                       {/* Precio */}
-                      <p className="text-sm font-bold text-foreground flex-shrink-0 tabular-nums">{item.totalPrice.toFixed(2)}€</p>
+                      <p className="text-sm font-bold text-foreground flex-shrink-0 tabular-nums">{formatCurrency(item.totalPrice)}</p>
                     </div>
                   ))}
                 </div>
@@ -699,7 +709,7 @@ export default function OrderDetailPage() {
                 <div className="px-5 py-4 bg-origen-nube border-t border-border-subtle space-y-1.5">
                   <div className="flex justify-between text-xs text-text-subtle">
                     <span>Subtotal</span>
-                    <span className="font-medium text-foreground">{order.subtotal.toFixed(2)}€</span>
+                    <span className="font-medium text-foreground">{formatCurrency(order.subtotal)}</span>
                   </div>
                   {order.couponCode && (
                     <div className="flex justify-between text-xs text-text-subtle">
@@ -710,22 +720,22 @@ export default function OrderDetailPage() {
                   {order.discount && (
                     <div className="flex justify-between text-xs text-text-subtle">
                       <span>Descuento</span>
-                      <span className="font-medium text-hoja-tinta">−{order.discount.toFixed(2)}€</span>
+                      <span className="font-medium text-hoja-tinta">−{formatCurrency(order.discount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-xs text-text-subtle">
                     <span>Gastos de envío</span>
-                    <span className="font-medium text-foreground">{order.shipping.cost.toFixed(2)}€</span>
+                    <span className="font-medium text-foreground">{formatCurrency(order.shipping.cost)}</span>
                   </div>
                   {order.tax && (
                     <div className="flex justify-between text-xs text-text-subtle">
                       <span>IVA</span>
-                      <span className="font-medium text-foreground">{order.tax.toFixed(2)}€</span>
+                      <span className="font-medium text-foreground">{formatCurrency(order.tax)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm font-bold pt-1.5 border-t border-border-subtle">
                     <span className="text-foreground">Total</span>
-                    <span className="text-foreground tabular-nums">{order.total.toFixed(2)}€</span>
+                    <span className="text-foreground tabular-nums">{formatCurrency(order.total)}</span>
                   </div>
                 </div>
               </motion.div>

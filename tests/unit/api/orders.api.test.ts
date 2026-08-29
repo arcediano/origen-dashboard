@@ -50,9 +50,30 @@ describe('fetchSellerOrders', () => {
     expect(result.data!.orders[0].customerName).toBe('Ana García');
   });
 
-  it('mapea customerEmail desde shippingAddress.email', async () => {
+  it('mapea customerEmail desde contactEmail (fuente real del backend para el vendedor)', async () => {
     const result = await fetchSellerOrders();
     expect(result.data!.orders[0].customerEmail).toBe('ana@ejemplo.es');
+  });
+
+  it('recurre a shippingAddress.email si contactEmail no viene (retrocompatibilidad)', async () => {
+    server.use(
+      http.get(`${BASE}/orders/seller`, () =>
+        HttpResponse.json({
+          items: [
+            {
+              ...mockSellerOrders[0],
+              contactEmail: undefined,
+              shippingAddress: { ...mockSellerOrders[0].shippingAddress, email: 'legado@ejemplo.es' },
+            },
+          ],
+          total: 1,
+          page: 1,
+          limit: 10,
+        }),
+      ),
+    );
+    const result = await fetchSellerOrders();
+    expect(result.data!.orders[0].customerEmail).toBe('legado@ejemplo.es');
   });
 
   it('mapea item.totalPrice desde item.subtotal del backend', async () => {
@@ -163,6 +184,49 @@ describe('fetchSellerOrderById', () => {
       unitPrice: expect.any(Number),
       totalPrice: expect.any(Number),
     });
+  });
+
+  it('mapea commissionRate/commissionAmount del item tal cual (comisión real capturada)', async () => {
+    const result = await fetchSellerOrderById('ord-sel-001');
+    const item = result.data!.items[0];
+    expect(item.commissionRate).toBe(15);
+    expect(item.commissionAmount).toBe(6.75);
+  });
+
+  it('no confunde comisión 0% real (snapshot capturado) con ausencia de snapshot (null)', async () => {
+    server.use(
+      http.get(`${BASE}/orders/seller/:id`, () =>
+        HttpResponse.json({
+          ...mockSellerOrders[0],
+          items: [
+            { ...mockSellerOrders[0].items[0], commissionRate: 0, commissionAmount: 0 },
+          ],
+        }),
+      ),
+    );
+    const result = await fetchSellerOrderById('ord-sel-001');
+    const item = result.data!.items[0];
+    // 0 es un valor real (productor con Stripe Connect activo, tarifa aún
+    // no configurada) — debe preservarse tal cual, no colapsarse a null/undefined.
+    expect(item.commissionRate).toBe(0);
+    expect(item.commissionAmount).toBe(0);
+  });
+
+  it('mapea commissionRate/commissionAmount ausentes como undefined (pedido legado sin snapshot)', async () => {
+    server.use(
+      http.get(`${BASE}/orders/seller/:id`, () =>
+        HttpResponse.json({
+          ...mockSellerOrders[0],
+          items: [
+            { ...mockSellerOrders[0].items[0], commissionRate: undefined, commissionAmount: undefined },
+          ],
+        }),
+      ),
+    );
+    const result = await fetchSellerOrderById('ord-sel-001');
+    const item = result.data!.items[0];
+    expect(item.commissionRate).toBeUndefined();
+    expect(item.commissionAmount).toBeUndefined();
   });
 
   it('devuelve error 403 como acceso denegado', async () => {

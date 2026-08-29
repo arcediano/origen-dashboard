@@ -33,8 +33,8 @@ interface BackendOrderItem {
   unitPrice: number;
   quantity: number;
   subtotal: number;
-  commissionRate?: number;
-  commissionAmount?: number;
+  commissionRate?: number | null;
+  commissionAmount?: number | null;
 }
 
 interface BackendShippingAddress {
@@ -53,6 +53,8 @@ interface BackendOrder {
   id: string;
   orderNumber: string;
   status: string;
+  /** Email de contacto capturado en el checkout, desacoplado del email de la cuenta (que puede cambiar). Fuente preferida para el email del comprador; shippingAddress.email puede venir ausente (p.ej. sanitizado en la respuesta de vendedor). */
+  contactEmail?: string | null;
   shippingAddress: BackendShippingAddress | null;
   paymentMethod: string;
   couponCode?: string;
@@ -184,7 +186,7 @@ function mapBackendOrder(o: BackendOrder): Order {
     orderNumber: o.orderNumber,
     customerId: '',
     customerName: addr.fullName ?? 'Cliente',
-    customerEmail: addr.email ?? '',
+    customerEmail: o.contactEmail ?? addr.email ?? '',
     customerPhone: addr.phone,
 
     items: o.items.map((item) => ({
