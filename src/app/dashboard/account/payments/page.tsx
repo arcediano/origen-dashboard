@@ -40,6 +40,8 @@ export default function PaymentsPage() {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
   const [acceptedTermsAt, setAcceptedTermsAt] = useState<string | null>(null);
+  const [hasDebt, setHasDebt] = useState(false);
+  const [debtAmountCents, setDebtAmountCents] = useState(0);
   const [businessName, setBusinessName] = useState<string | null>(null);
   const [website, setWebsite] = useState<string | null>(null);
   const [firstName, setFirstName] = useState<string | null>(null);
@@ -58,6 +60,8 @@ export default function PaymentsPage() {
       setIsConnected(!!payment?.stripeConnected);
       setStripeAccountId(payment?.stripeAccountId ?? null);
       setAcceptedTermsAt(payment?.acceptedTermsAt ?? null);
+      setHasDebt(!!payment?.hasDebt);
+      setDebtAmountCents(payment?.debtAmountCents ?? 0);
       setBusinessName(story?.businessName ?? fiscal?.businessName ?? null);
       setWebsite(story?.website ?? null);
       // Nota: firstName, lastName, email no están disponibles en OnboardingData
@@ -260,6 +264,17 @@ export default function PaymentsPage() {
           showBackButton
           onBack={() => router.push('/dashboard/account')}
         />
+
+        {hasDebt && !isLoading && (
+          <Alert variant="error" className="mb-4 sm:mb-6">
+            <AlertDescription>
+              Tienes un saldo negativo de <strong>{(debtAmountCents / 100).toFixed(2)}€</strong> pendiente
+              de saldar: una devolución reciente no se pudo compensar automáticamente en Stripe. Se irá
+              descontando de tus próximas transferencias hasta quedar a cero — no necesitas hacer nada,
+              solo te avisamos para que no te sorprenda un cobro más bajo de lo esperado.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {loadError && !isLoading ? (
           <PageError
@@ -496,6 +511,30 @@ export default function PaymentsPage() {
                       </div>
                     </CardContent>
                   </Card>
+
+                  {paymentStage === 'connected' && (
+                    <Card variant="section" className="rounded-xl sm:rounded-2xl" padding="none">
+                      <CardHeader className="p-4 sm:p-5 lg:p-6 border-b border-border-subtle">
+                        <CardIconHeader
+                          icon={<Landmark className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />}
+                          title="Cómo funcionan tus cobros"
+                          size="md"
+                        />
+                      </CardHeader>
+                      <CardContent className="space-y-2 p-4 sm:p-5 lg:p-6">
+                        <p className="text-sm text-text-subtle leading-relaxed">
+                          Cada venta se transfiere a tu cuenta de Stripe <strong>14 días naturales después de
+                          la entrega</strong> del pedido — el tiempo de retención que Origen usa para poder
+                          gestionar posibles devoluciones sin pedirte que adelantes ese dinero.
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Si un pedido se devuelve dentro de ese plazo, la transferencia simplemente no llega
+                          a ejecutarse. Si se devuelve después de que ya la hayas cobrado, el importe se
+                          descuenta de tu siguiente venta.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               </div>
             </div>
