@@ -61,15 +61,15 @@ export function CreateProductProgress({
 
   return (
     <div className={cn('sticky top-16 z-20 bg-gradient-to-b from-origen-crema/30 to-transparent pt-2 pb-4 -mx-4 sm:-mx-6 px-4 sm:px-6', className)}>
-      <Card variant="elevated" className="p-4 sm:p-5">
+      <Card variant="elevated" className="p-3 sm:p-5">
         {/* Cabecera con progreso */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg bg-origen-pradera/10 flex items-center justify-center">
               <TrendingUp className="w-3 h-3 text-hoja-tinta" />
             </div>
             <span className="text-xs font-medium text-origen-bosque">Progreso general</span>
-            <Tooltip 
+            <Tooltip
               content="Completa todos los pasos"
               detailed="Cada paso debe estar completado para poder publicar el producto"
               size="sm"
@@ -79,9 +79,9 @@ export function CreateProductProgress({
             {Math.round(progress)}% completado
           </Badge>
         </div>
-        
+
         {/* Barra de progreso */}
-        <Progress value={progress} variant="leaf" size="sm" showLabel={false} className="mb-4 sm:mb-5" />
+        <Progress value={progress} variant="leaf" size="sm" showLabel={false} className="mb-2 sm:mb-5" />
         
         {/* Navegación de pasos — degradado a la derecha como pista de que hay
             más pasos fuera de pantalla en móvil (7 pasos no caben a 375px) */}
@@ -97,7 +97,7 @@ export function CreateProductProgress({
                   key={step.id}
                   onClick={() => isClickable && onTabChange(step.id as FormStepId)}
                   className={cn(
-                    "group/step relative flex flex-col items-center gap-1.5 sm:gap-2 transition-all duration-300 flex-shrink-0 min-w-[52px] sm:min-w-[60px] snap-start",
+                    "group/step relative flex flex-col items-center gap-1 sm:gap-2 transition-all duration-300 flex-shrink-0 min-w-[40px] sm:min-w-[60px] snap-start",
                     isClickable ? "cursor-pointer" : "cursor-not-allowed opacity-40"
                   )}
                   disabled={!isClickable}
@@ -105,7 +105,7 @@ export function CreateProductProgress({
                   aria-current={isActive ? "step" : undefined}
                 >
                   <div className={cn(
-                    "relative w-11 h-11 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
+                    "relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
                     isActive && "border-origen-pradera bg-origen-pradera/10 shadow-lg shadow-origen-pradera/20",
                     isCompleted && !isActive && "border-origen-bosque bg-origen-bosque text-white",
                     !isActive && !isCompleted && "border-border bg-surface-alt text-text-subtle"
@@ -116,8 +116,23 @@ export function CreateProductProgress({
                       iconMap[step.icon]
                     )}
                   </div>
+                  {/* Etiqueta de texto oculta en móvil (bug-panel-progreso-movil,
+                      2026-08-29): cada paso ya muestra su propio <h2> con el
+                      nombre al entrar (p.ej. StepBasic.tsx), así que no se
+                      pierde información — solo se ahorra la fila de texto bajo
+                      cada icono, que era la principal responsable del exceso de
+                      altura en viewports de móvil. aria-label del botón cubre
+                      accesibilidad en todos los tamaños.
+                      `sr-only`/`sm:not-sr-only` en vez de `hidden`/`sm:block`:
+                      `hidden` fija `display:none`, que competía con el
+                      `display:-webkit-box` de `line-clamp-2` (misma
+                      propiedad, sin media query que las diferencie) y
+                      `line-clamp-2` ganaba por orden de generación de
+                      Tailwind — la etiqueta seguía visible en móvil pese a
+                      `hidden`. `sr-only` no toca `display`, evita el
+                      conflicto. */}
                   <span className={cn(
-                    "text-[10px] sm:text-xs font-medium text-center max-w-[52px] sm:max-w-[60px] leading-tight line-clamp-2",
+                    "sr-only sm:not-sr-only text-[10px] sm:text-xs font-medium text-center max-w-[52px] sm:max-w-[60px] leading-tight line-clamp-2",
                     isActive && "text-origen-bosque",
                     isCompleted && !isActive && "text-hoja-tinta",
                     !isActive && !isCompleted && "text-text-subtle"
