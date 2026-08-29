@@ -65,6 +65,12 @@ export interface OnboardingData {
     stripeConnected?: boolean;
     stripeAccountId?: string | null;
     acceptedTermsAt?: string | null;
+    /** Modelo A - Intermediario (Sección 3): true si hay un reembolso cuyo
+     *  Transfer ya cobrado no se pudo revertir por saldo insuficiente. */
+    hasDebt?: boolean;
+    /** Importe pendiente de saldar, en céntimos. Se descuenta automáticamente
+     *  de las próximas transferencias hasta llegar a 0. */
+    debtAmountCents?: number;
   } | null;
   certifications?: Array<{
     certificationId: string;
