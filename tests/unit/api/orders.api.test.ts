@@ -410,14 +410,22 @@ describe('updateOrderStatus', () => {
 
   // Flujo híbrido de devoluciones (2026-08-29): el productor solicita la
   // devolución con un motivo obligatorio (ver Sheet en dashboard/orders/[id]).
-  it('envía el motivo (comment) al solicitar una devolución', async () => {
-    let receivedBody: { status?: string; comment?: string } | null = null;
+  // El backend exige además `items` (ítems/cantidades) cuando status ===
+  // 'returned' (SellerChangeStatusDto en origen-master-microservices) —
+  // sin él responde 400. Bug real reportado: el botón no enviaba la
+  // solicitud porque el frontend nunca mandaba `items`.
+  it('envía el motivo (comment) y los ítems/cantidades al solicitar una devolución', async () => {
+    let receivedBody: {
+      status?: string;
+      comment?: string;
+      items?: { orderItemId: string; quantity: number }[];
+    } | null = null;
     server.use(
       http.patch(`${BASE}/orders/seller/:id/status`, async ({ request }) => {
-        receivedBody = (await request.json()) as { status?: string; comment?: string };
+        receivedBody = (await request.json()) as typeof receivedBody;
         return HttpResponse.json({
           ...mockSellerOrders[0],
-          status: receivedBody.status,
+          status: receivedBody!.status,
         });
       }),
     );
@@ -426,6 +434,7 @@ describe('updateOrderStatus', () => {
       'ord-sel-001',
       'returned',
       'El cliente dice que llegó dañado',
+      [{ orderItemId: 'item-01', quantity: 2 }],
     );
 
     expect(result.status).toBe(200);
@@ -433,7 +442,22 @@ describe('updateOrderStatus', () => {
     expect(receivedBody).toEqual({
       status: 'returned',
       comment: 'El cliente dice que llegó dañado',
+      items: [{ orderItemId: 'item-01', quantity: 2 }],
     });
+  });
+
+  it('no envía la clave "items" si no se indican ítems (evita mandar un array vacío que el backend rechaza)', async () => {
+    let receivedBody: Record<string, unknown> | null = null;
+    server.use(
+      http.patch(`${BASE}/orders/seller/:id/status`, async ({ request }) => {
+        receivedBody = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({ ...mockSellerOrders[0], status: 'shipped' });
+      }),
+    );
+
+    await updateOrderStatus('ord-sel-001', 'shipped');
+
+    expect(receivedBody).not.toHaveProperty('items');
   });
 });
 

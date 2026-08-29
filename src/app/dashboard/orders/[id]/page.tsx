@@ -21,6 +21,8 @@ import {
   ProductImage,
   Sheet, SheetContent, SheetHeader, SheetTitle,
   Textarea,
+  CheckboxWithLabel,
+  QuantitySelector,
   MobilePullRefresh,
   PageLoader,
   PageError,
@@ -225,6 +227,9 @@ export default function OrderDetailPage() {
   const [showCancelSheet, setShowCancelSheet]   = useState(false);
   const [showReturnSheet, setShowReturnSheet]   = useState(false);
   const [returnReason, setReturnReason] = useState('');
+  // orderItemId -> cantidad a devolver (0/ausente = no seleccionado). El
+  // backend exige al menos un ítem con cantidad > 0 cuando status === 'returned'.
+  const [returnQuantities, setReturnQuantities] = useState<Record<string, number>>({});
 
   const isFirstLoad = useRef(true);
 
@@ -275,16 +280,21 @@ export default function OrderDetailPage() {
     }
   };
 
+  const returnItemsPayload = Object.entries(returnQuantities)
+    .filter(([, quantity]) => quantity > 0)
+    .map(([orderItemId, quantity]) => ({ orderItemId, quantity }));
+
   const handleRequestReturn = async () => {
-    if (!order || !returnReason.trim()) return;
+    if (!order || !returnReason.trim() || returnItemsPayload.length === 0) return;
 
     setUpdating(true);
     try {
-      const response = await updateOrderStatus(order.id, 'returned', returnReason.trim());
+      const response = await updateOrderStatus(order.id, 'returned', returnReason.trim(), returnItemsPayload);
       if (response.data) {
         setOrder(response.data);
         setShowReturnSheet(false);
         setReturnReason('');
+        setReturnQuantities({});
         toast({
           title: 'Devolución solicitada',
           description: 'El equipo de Origen la revisará en breve.',
@@ -943,12 +953,20 @@ export default function OrderDetailPage() {
           </SheetContent>
         </Sheet>
 
-        {/* ── Sheet de solicitud de devolución ── */}
+        {/* ── Sheet de solicitud de devolución ──
+            Selección de ítems/cantidades (decisión del humano, 2026-08-29):
+            el backend exige al menos un ítem con cantidad > 0 en `items`
+            cuando status === 'returned' — ver SellerChangeStatusDto en
+            origen-master-microservices. Sin esto la solicitud se rechaza
+            con 400 (bug real reportado: el botón "no enviaba la solicitud"). */}
         <Sheet
           open={showReturnSheet}
           onOpenChange={(open) => {
             setShowReturnSheet(open);
-            if (!open) setReturnReason('');
+            if (!open) {
+              setReturnReason('');
+              setReturnQuantities({});
+            }
           }}
         >
           <SheetContent side="bottom" className="rounded-t-[28px] px-5 pb-8">
@@ -957,11 +975,52 @@ export default function OrderDetailPage() {
             </SheetHeader>
             <div className="space-y-3">
               <p className="text-sm text-text-subtle leading-relaxed">
-                Cuéntanos por qué el cliente quiere devolver el pedido{' '}
-                <span className="font-semibold text-foreground">{order.orderNumber}</span>.
-                El equipo de Origen revisará la solicitud y, si la aprueba, se reembolsará
-                al cliente automáticamente.
+                Selecciona qué productos del pedido{' '}
+                <span className="font-semibold text-foreground">{order.orderNumber}</span>{' '}
+                quiere devolver el cliente y cuéntanos el motivo. El equipo de Origen
+                revisará la solicitud y, si la aprueba, se reembolsará al cliente
+                automáticamente.
               </p>
+              <div className="space-y-2">
+                {order.items.map((item) => {
+                  const checked = (returnQuantities[item.id] ?? 0) > 0;
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between gap-3 p-2.5 bg-white border border-border-subtle rounded-[10px]"
+                    >
+                      <CheckboxWithLabel
+                        label={item.productName}
+                        description={`${item.quantity} ${item.quantity === 1 ? 'unidad' : 'unidades'} en el pedido`}
+                        checked={checked}
+                        disabled={updating}
+                        onCheckedChange={(next) => {
+                          setReturnQuantities((prev) => {
+                            const updated = { ...prev };
+                            if (next === true) {
+                              updated[item.id] = item.quantity;
+                            } else {
+                              delete updated[item.id];
+                            }
+                            return updated;
+                          });
+                        }}
+                      />
+                      {checked && (
+                        <QuantitySelector
+                          value={returnQuantities[item.id] ?? 1}
+                          onChange={(value) =>
+                            setReturnQuantities((prev) => ({ ...prev, [item.id]: value }))
+                          }
+                          min={1}
+                          max={item.quantity}
+                          disabled={updating}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
               <Textarea
                 value={returnReason}
                 onChange={(event) => setReturnReason(event.target.value)}
@@ -976,7 +1035,7 @@ export default function OrderDetailPage() {
                 onClick={handleRequestReturn}
                 loading={updating}
                 loadingText="Enviando solicitud..."
-                disabled={updating || !returnReason.trim()}
+                disabled={updating || !returnReason.trim() || returnItemsPayload.length === 0}
                 className="w-full"
               >
                 Enviar solicitud
