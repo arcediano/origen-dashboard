@@ -478,19 +478,30 @@ export async function fetchSellerOrderInvoice(
   }
 }
 
+export interface OrderReturnItemInput {
+  orderItemId: string;
+  quantity: number;
+}
+
 /**
  * Actualiza el estado de un pedido del productor.
  * PATCH /api/v1/orders/seller/:id/status
+ *
+ * `items` es obligatorio en el backend cuando `status === 'returned'`
+ * (decisión del humano, 2026-08-29: el productor marca ítems/cantidades
+ * concretas, no un importe libre — ver SellerChangeStatusDto en
+ * origen-master-microservices). Sin él, el backend responde 400.
  */
 export async function updateOrderStatus(
   id: string,
   status: Order['status'],
   comment?: string,
+  items?: OrderReturnItemInput[],
 ): Promise<ApiResponse<Order>> {
   try {
     const res = await gatewayClient.patch<BackendOrder>(
       `/orders/seller/${id}/status`,
-      { status, ...(comment ? { comment } : {}) },
+      { status, ...(comment ? { comment } : {}), ...(items ? { items } : {}) },
     );
     return { data: mapBackendOrder(res), status: 200 };
   } catch (err) {
