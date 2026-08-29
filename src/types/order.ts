@@ -3,12 +3,13 @@
  * @description Tipos para el sistema de pedidos
  */
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'pending'      // Pendiente de pago/confirmación
   | 'processing'   // Procesando/preparando
   | 'shipped'      // Enviado
   | 'delivered'    // Entregado
   | 'cancelled'    // Cancelado
+  | 'returned'     // Devolución solicitada por el productor, pendiente de revisión del admin
   | 'refunded';    // Reembolsado
 
 export type PaymentStatus = 

@@ -11,7 +11,7 @@ const BASE = TEST_API_BASE;
 
 // ─── Fixture de pedidos del backend ──────────────────────────────────────────
 
-function makeBackendOrder(overrides: {
+export function makeBackendOrder(overrides: {
   id: string;
   orderNumber: string;
   status: string;

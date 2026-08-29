@@ -11,7 +11,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown } from 'lucide-react';
+import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown, RotateCcw } from 'lucide-react';
 
 // Componentes UI
 import {
@@ -20,6 +20,7 @@ import {
   ActionBar,
   ProductImage,
   Sheet, SheetContent, SheetHeader, SheetTitle,
+  Textarea,
   MobilePullRefresh,
   PageLoader,
   PageError,
@@ -92,6 +93,14 @@ const statusConfig: Record<Order['status'], {
     color: 'text-feedback-danger-text',
     bandBg: 'bg-feedback-danger-subtle',
     heroBorder: 'border-feedback-danger/30',
+  },
+  returned: {
+    variant: 'warning',
+    label: 'Devolución solicitada',
+    icon: RotateCcw,
+    color: 'text-origen-mandarina',
+    bandBg: 'bg-origen-mandarina/10',
+    heroBorder: 'border-origen-mandarina/30',
   },
   refunded: {
     variant: 'danger',
@@ -214,6 +223,8 @@ export default function OrderDetailPage() {
   const [invoiceError, setInvoiceError] = useState<string | null>(null);
   const [showStatusSheet, setShowStatusSheet] = useState(false);
   const [showCancelSheet, setShowCancelSheet]   = useState(false);
+  const [showReturnSheet, setShowReturnSheet]   = useState(false);
+  const [returnReason, setReturnReason] = useState('');
 
   const isFirstLoad = useRef(true);
 
@@ -264,6 +275,32 @@ export default function OrderDetailPage() {
     }
   };
 
+  const handleRequestReturn = async () => {
+    if (!order || !returnReason.trim()) return;
+
+    setUpdating(true);
+    try {
+      const response = await updateOrderStatus(order.id, 'returned', returnReason.trim());
+      if (response.data) {
+        setOrder(response.data);
+        setShowReturnSheet(false);
+        setReturnReason('');
+        toast({
+          title: 'Devolución solicitada',
+          description: 'El equipo de Origen la revisará en breve.',
+          variant: 'success',
+        });
+      } else if (response.error) {
+        toast({ title: 'No se pudo solicitar la devolución', description: response.error, variant: 'error' });
+      }
+    } catch (err) {
+      console.error('Error solicitando devolución:', err);
+      toast({ title: 'No se pudo solicitar la devolución', description: 'Error al solicitar la devolución', variant: 'error' });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const handleDownloadInvoice = async () => {
     if (!order) return;
 
@@ -305,8 +342,11 @@ export default function OrderDetailPage() {
   }
 
   const status    = statusConfig[order.status];
-  const canUpdate = !['delivered', 'cancelled', 'refunded'].includes(order.status);
   const canCancel  = ['pending', 'processing', 'shipped'].includes(order.status);
+  // Flujo híbrido de devoluciones (2026-08-29): el productor solo puede
+  // SOLICITAR la devolución desde "delivered" — aprobarla/rechazarla (y
+  // ejecutar el reembolso real) es exclusivo del admin.
+  const canRequestReturn = order.status === 'delivered';
 
   // Acción principal según estado
   const nextAction: { label: string; next: Order['status']; icon: React.ElementType } | null =
@@ -315,7 +355,10 @@ export default function OrderDetailPage() {
     order.status === 'shipped'    ? { label: 'Marcar como entregado',  next: 'delivered',  icon: CheckCircle } :
     null;
 
-  const isTerminal = !canUpdate;
+  // "delivered" ya NO es terminal: sigue mostrando la card de "Gestión del
+  // pedido" (con la acción de solicitar devolución) en vez del mensaje fijo
+  // de pedido completado.
+  const isTerminal = ['cancelled', 'refunded', 'returned'].includes(order.status);
   const isMultiSeller = order.isMultiSeller === true;
   const isPaymentUnconfirmed =
     !!nextAction &&
@@ -479,6 +522,18 @@ export default function OrderDetailPage() {
                             Cancelar pedido
                           </Button>
                         )}
+                        {canRequestReturn && (
+                          <Button
+                            variant="outline"
+                            size="md"
+                            leftIcon={<RotateCcw className="w-4 h-4" />}
+                            onClick={() => setShowReturnSheet(true)}
+                            disabled={updating}
+                            className="w-full justify-start"
+                          >
+                            Solicitar devolución
+                          </Button>
+                        )}
                       </>
                     )}
                   </div>
@@ -488,7 +543,7 @@ export default function OrderDetailPage() {
                   <div className={cn(NATIVE_CARD_RADIUS, 'border border-border bg-surface-alt shadow-subtle p-4')}>
                     <p className="text-xs text-text-subtle flex items-center gap-2">
                       <Info className="w-3.5 h-3.5 shrink-0" />
-                      {order.status === 'delivered' ? 'Pedido completado correctamente.' :
+                      {order.status === 'returned' ? 'Devolución solicitada — el equipo de Origen la está revisando.' :
                        order.status === 'cancelled' ? 'Este pedido fue cancelado.' :
                        'Este pedido fue reembolsado.'}
                     </p>
@@ -883,6 +938,57 @@ export default function OrderDetailPage() {
                 className="w-full text-feedback-danger hover:bg-feedback-danger-subtle"
               >
                 Sí, cancelar pedido
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* ── Sheet de solicitud de devolución ── */}
+        <Sheet
+          open={showReturnSheet}
+          onOpenChange={(open) => {
+            setShowReturnSheet(open);
+            if (!open) setReturnReason('');
+          }}
+        >
+          <SheetContent side="bottom" className="rounded-t-[28px] px-5 pb-8">
+            <SheetHeader className="mb-5">
+              <SheetTitle className="text-left text-origen-bosque">Solicitar devolución</SheetTitle>
+            </SheetHeader>
+            <div className="space-y-3">
+              <p className="text-sm text-text-subtle leading-relaxed">
+                Cuéntanos por qué el cliente quiere devolver el pedido{' '}
+                <span className="font-semibold text-foreground">{order.orderNumber}</span>.
+                El equipo de Origen revisará la solicitud y, si la aprueba, se reembolsará
+                al cliente automáticamente.
+              </p>
+              <Textarea
+                value={returnReason}
+                onChange={(event) => setReturnReason(event.target.value)}
+                placeholder="Ej: el cliente dice que el producto llegó dañado"
+                rows={3}
+                disabled={updating}
+              />
+              <Button
+                variant="primary"
+                size="lg"
+                leftIcon={<RotateCcw className="w-4 h-4" />}
+                onClick={handleRequestReturn}
+                loading={updating}
+                loadingText="Enviando solicitud..."
+                disabled={updating || !returnReason.trim()}
+                className="w-full"
+              >
+                Enviar solicitud
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowReturnSheet(false)}
+                disabled={updating}
+                className="w-full"
+              >
+                Cancelar
               </Button>
             </div>
           </SheetContent>

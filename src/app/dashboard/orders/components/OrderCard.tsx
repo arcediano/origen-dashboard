@@ -23,6 +23,7 @@ import {
   CheckCircle2,
   XCircle,
   RefreshCw,
+  RotateCcw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge, SwipeableRow } from '@arcediano/ux-library';
@@ -80,6 +81,11 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; variant: 'success' | '
     label: 'Cancelado',
     variant: 'danger',
     icon: XCircle
+  },
+  returned: {
+    label: 'Devolución solicitada',
+    variant: 'warning',
+    icon: RotateCcw
   },
   refunded: {
     label: 'Reembolsado',

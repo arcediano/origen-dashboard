@@ -138,6 +138,7 @@ function mapShippingStatus(orderStatus: string): Order['shipping']['status'] {
       return 'delivered';
     case 'cancelled':
     case 'refunded':
+    case 'returned':
       return 'returned';
     default:
       return 'pending';
@@ -153,6 +154,7 @@ function mapOrderStatus(raw: string): OrderStatus {
     'shipped',
     'delivered',
     'cancelled',
+    'returned',
     'refunded',
   ];
   return valid.includes(raw as OrderStatus) ? (raw as OrderStatus) : 'pending';

@@ -12,15 +12,16 @@ import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Table, type Column } from '@arcediano/ux-library';
 import { Badge, Button } from '@arcediano/ux-library';
-import { 
-  Eye, 
-  Clock, 
-  Package, 
-  Truck, 
-  CheckCircle, 
+import {
+  Eye,
+  Clock,
+  Package,
+  Truck,
+  CheckCircle,
   XCircle,
   DollarSign,
-  ChevronRight
+  ChevronRight,
+  RotateCcw
 } from 'lucide-react';
 import type { Order } from '@/types/order';
 
@@ -57,15 +58,20 @@ const statusConfig: Record<Order['status'], {
     label: 'Entregado', 
     icon: CheckCircle 
   },
-  cancelled: { 
+  cancelled: {
     variant: 'danger',   // Rojo
-    label: 'Cancelado', 
-    icon: XCircle 
+    label: 'Cancelado',
+    icon: XCircle
   },
-  refunded: { 
+  returned: {
+    variant: 'warning',  // Ámbar — pendiente de revisión del admin
+    label: 'Devolución solicitada',
+    icon: RotateCcw
+  },
+  refunded: {
     variant: 'danger',   // Rojo
-    label: 'Reembolsado', 
-    icon: XCircle 
+    label: 'Reembolsado',
+    icon: XCircle
   }
 };
 

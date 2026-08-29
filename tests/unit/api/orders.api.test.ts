@@ -23,6 +23,7 @@ import {
   ordersEmptyHandler,
   ordersErrorHandler,
   ordersStatsErrorHandler,
+  makeBackendOrder,
 } from '../../mocks/handlers/orders.handlers';
 import { TEST_API_BASE } from '../../mocks/api-base';
 
@@ -296,6 +297,29 @@ describe('fetchOrderById', () => {
     expect(result.status).toBe(404);
     expect(result.error).toBeDefined();
   });
+
+  // Flujo híbrido de devoluciones (2026-08-29): antes de este cambio,
+  // mapOrderStatus colapsaba 'returned' a 'pending' — un pedido con
+  // devolución solicitada se veía idéntico a uno recién creado sin pagar.
+  it('mapea el estado "returned" tal cual, sin colapsarlo a "pending"', async () => {
+    server.use(
+      http.get(`${BASE}/orders/seller/:id`, () =>
+        HttpResponse.json(
+          makeBackendOrder({
+            id: 'ord-returned-01',
+            orderNumber: 'ORG-2026-00099',
+            status: 'returned',
+            total: 45,
+          }),
+        ),
+      ),
+    );
+
+    const result = await fetchOrderById('ord-returned-01');
+
+    expect(result.status).toBe(200);
+    expect(result.data?.status).toBe('returned');
+  });
 });
 
 // ── fetchSellerOrderInvoice ──────────────────────────────────────────────────
@@ -382,6 +406,34 @@ describe('updateOrderStatus', () => {
     const result = await updateOrderStatus('ord-sel-001', 'processing');
     expect(result.status).toBe(403);
     expect(result.error).toBeDefined();
+  });
+
+  // Flujo híbrido de devoluciones (2026-08-29): el productor solicita la
+  // devolución con un motivo obligatorio (ver Sheet en dashboard/orders/[id]).
+  it('envía el motivo (comment) al solicitar una devolución', async () => {
+    let receivedBody: { status?: string; comment?: string } | null = null;
+    server.use(
+      http.patch(`${BASE}/orders/seller/:id/status`, async ({ request }) => {
+        receivedBody = (await request.json()) as { status?: string; comment?: string };
+        return HttpResponse.json({
+          ...mockSellerOrders[0],
+          status: receivedBody.status,
+        });
+      }),
+    );
+
+    const result = await updateOrderStatus(
+      'ord-sel-001',
+      'returned',
+      'El cliente dice que llegó dañado',
+    );
+
+    expect(result.status).toBe(200);
+    expect(result.data?.status).toBe('returned');
+    expect(receivedBody).toEqual({
+      status: 'returned',
+      comment: 'El cliente dice que llegó dañado',
+    });
   });
 });
 
