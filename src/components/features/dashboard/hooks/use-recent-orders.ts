@@ -19,7 +19,8 @@ interface UseRecentOrdersResult {
 
 /**
  * Mapea el status completo de la API al OrderStatus reducido del dashboard.
- * 'refunded' no existe en el tipo dashboard → se trata como 'cancelled'.
+ * 'refunded' no existe en el tipo dashboard → se trata como 'cancelled'
+ * (decisión deliberada, no confundir con 'returned', que sí es un estado propio).
  */
 function mapStatus(status: string): Order['status'] {
   const valid: Order['status'][] = [
@@ -28,6 +29,7 @@ function mapStatus(status: string): Order['status'] {
     'shipped',
     'delivered',
     'cancelled',
+    'returned',
   ];
   return valid.includes(status as Order['status'])
     ? (status as Order['status'])
