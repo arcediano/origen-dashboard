@@ -84,7 +84,7 @@ export interface DashboardStats {
 // PEDIDOS
 // ============================================================================
 
-export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
 
 export interface Order {
   id: string;

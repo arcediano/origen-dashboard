@@ -9,9 +9,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { server } from '../../mocks/server';
+import { TEST_API_BASE } from '../../mocks/api-base';
 import {
   ordersEmptyHandler,
   ordersErrorHandler,
+  makeBackendOrder,
 } from '../../mocks/handlers/orders.handlers';
 import { useRecentOrders } from '@/components/features/dashboard/hooks/use-recent-orders';
 
@@ -81,10 +83,43 @@ describe('useRecentOrders', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    const validStatuses = [
+      'pending',
+      'processing',
+      'shipped',
+      'delivered',
+      'cancelled',
+      'returned',
+    ];
     for (const order of result.current.orders) {
       expect(validStatuses).toContain(order.status);
     }
+  });
+
+  it('no colapsa el status "returned" a "cancelled" (regresión: pedidos con devolución solicitada)', async () => {
+    const returnedOrder = makeBackendOrder({
+      id: 'ord-returned-1',
+      orderNumber: 'ORG-2024-00042',
+      status: 'returned',
+      total: 19.9,
+    });
+
+    server.use(
+      http.get(`${TEST_API_BASE}/orders/seller`, () =>
+        HttpResponse.json({
+          items: [returnedOrder],
+          total: 1,
+          page: 1,
+          limit: 20,
+        }),
+      ),
+    );
+
+    const { result } = renderHook(() => useRecentOrders());
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.orders[0].status).toBe('returned');
   });
 
   it('muestra lista vacía cuando la API no devuelve pedidos', async () => {

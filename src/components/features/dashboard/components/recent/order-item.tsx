@@ -15,7 +15,7 @@ interface OrderItemProps {
   customer: string;
   items: number;
   total: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
   date: string;
 }
 
@@ -63,6 +63,13 @@ export function OrderItem({
       bg: 'bg-feedback-danger-subtle',
       text: 'text-feedback-danger-text',
       border: 'border-feedback-danger-border'
+    },
+    returned: {
+      label: 'Devolución solicitada',
+      color: 'bg-feedback-warning',
+      bg: 'bg-feedback-warning-subtle',
+      text: 'text-feedback-warning-text',
+      border: 'border-feedback-warning/30'
     }
   };
 
