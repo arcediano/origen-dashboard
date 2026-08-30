@@ -509,6 +509,27 @@ export default function SecurityPage() {
                             </Alert>
                           )}
 
+                          {/* Enlace directo a la app de autenticación — solo tiene sentido en
+                              móvil: si configuras el 2FA desde el mismo teléfono que vas a usar
+                              como autenticador, es imposible escanear con la cámara un QR que
+                              está en la pantalla de ese mismo dispositivo. El sistema operativo
+                              entrega el esquema otpauth:// a la app de autenticación instalada
+                              (si hay alguna), sin escanear ni copiar nada. Si no hay ninguna app
+                              que lo capture, el enlace simplemente no hace nada — no rompe la
+                              página. */}
+                          {twoFa.setupData.otpauthUri && (
+                            <div className="sm:hidden space-y-2">
+                              <Button asChild variant="primary" className="w-full">
+                                <a href={twoFa.setupData.otpauthUri}>
+                                  Abrir en mi app de autenticación
+                                </a>
+                              </Button>
+                              <p className="text-xs text-text-subtle text-center">
+                                Se abrirá tu app de autenticación (Google Authenticator, Authy, Microsoft Authenticator…) y añadirá la cuenta automáticamente.
+                              </p>
+                            </div>
+                          )}
+
                           {/* QR Code */}
                           {twoFa.setupData.qrCodeUrl && (
                             <div className="flex justify-center">
