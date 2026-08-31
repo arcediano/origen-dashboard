@@ -44,10 +44,10 @@ export function InvoiceCard({ invoice, onPress, onDownload }: InvoiceCardProps) 
 
   return (
     <motion.button
-      whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema))' }}
+      whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema) / 0.4)' }}
       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
       onClick={() => onPress?.(invoice.orderId)}
-      className="w-full text-left flex items-center gap-3.5 px-4 py-4 border-b border-border-subtle last:border-0 focus:outline-none active:bg-surface"
+      className="w-full text-left flex items-center gap-3.5 px-4 py-4 border-b border-border-subtle last:border-0 focus:outline-none active:bg-origen-crema/40"
       aria-label={`Factura ${invoice.invoiceNumber}, pedido ${invoice.orderNumber}`}
     >
       <div className="w-11 h-11 rounded-2xl bg-origen-pastel flex items-center justify-center flex-shrink-0 shadow-subtle">
