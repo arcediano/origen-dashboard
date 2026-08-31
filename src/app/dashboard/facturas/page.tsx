@@ -6,7 +6,7 @@
  *
  * Sigue el mismo patrón de orders/page.tsx:
  * - PageHeader con información contextual
- * - Vista móvil: MobileCardList con InvoiceCard
+ * - Vista móvil: lista de cards con InvoiceCard (space-y-3, mismo patrón que orders/page.tsx)
  * - Vista desktop: Tabla con InvoicesTable
  * - Paginación
  * - Estados de error, carga y vacío
@@ -18,7 +18,7 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { FileText } from 'lucide-react';
 
 // Componentes UI
-import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, MobileCardList, EmptyState, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, toast } from '@arcediano/ux-library';
+import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, EmptyState, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, toast } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { InvoicesTable } from './components/InvoicesTable';
 import { InvoiceCard, InvoiceCardSkeleton } from './components/InvoiceCard';
@@ -217,20 +217,20 @@ export default function FacturasPage() {
             ) : (
               <>
                 {/* Móvil: lista de tarjetas */}
-                <MobileCardList
-                  className="block lg:hidden"
-                  isLoading={isTableLoading}
-                  renderSkeleton={() => <InvoiceCardSkeleton />}
-                >
-                  {invoices.map((invoice) => (
-                    <InvoiceCard
-                      key={invoice.orderId}
-                      invoice={invoice}
-                      onPress={handleViewOrder}
-                      onDownload={handleDownload}
-                    />
-                  ))}
-                </MobileCardList>
+                <div className="space-y-3 block lg:hidden" aria-busy={isTableLoading || undefined}>
+                  {isTableLoading
+                    ? Array.from({ length: 5 }).map((_, i) => (
+                        <InvoiceCardSkeleton key={i} />
+                      ))
+                    : invoices.map((invoice) => (
+                        <InvoiceCard
+                          key={invoice.orderId}
+                          invoice={invoice}
+                          onPress={handleViewOrder}
+                          onDownload={handleDownload}
+                        />
+                      ))}
+                </div>
 
                 {/* Desktop: tabla */}
                 <div className="hidden lg:block">
