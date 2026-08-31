@@ -91,6 +91,7 @@ const config: Config = {
         },
         "border-subtle": "hsl(var(--border-subtle))",
         "border-strong":  "hsl(var(--border-strong))",
+        "border-container": "hsl(var(--border-container))",
         "text-subtle":    "hsl(var(--text-subtle))",
         "text-disabled":  "hsl(var(--text-disabled))",
         "hoja-tinta":     "hsl(var(--hoja-tinta))",     // guia v6 (R4): links, valores positivos, estado activo
