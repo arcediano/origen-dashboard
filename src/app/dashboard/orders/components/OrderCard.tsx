@@ -33,7 +33,7 @@ import type { Order, PaymentStatus, OrderStatus } from '@/types/order';
 
 export function OrderCardSkeleton() {
   return (
-    <div className="flex items-center gap-3.5 px-4 py-4 border-b border-border-subtle last:border-0 animate-pulse">
+    <div className="flex items-center gap-3.5 px-4 py-4 rounded-xl sm:rounded-2xl border border-border bg-surface-alt shadow-origen animate-pulse">
       <div className="w-11 h-11 rounded-2xl bg-origen-pastel/60 flex-shrink-0" />
       <div className="flex-1 min-w-0 space-y-2">
         <div className="flex items-center justify-between gap-2">
@@ -161,62 +161,67 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
   ];
 
   return (
-    <SwipeableRow
-      actions={swipeActions}
-      className={cn('border-b border-border-subtle last:border-0', className)}
+    <div
+      className={cn(
+        'relative rounded-xl sm:rounded-2xl border border-border shadow-origen',
+        'hover:shadow-origen-lg hover:border-origen-pradera transition-all duration-300',
+        className,
+      )}
     >
-      <motion.button
-        whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema))' }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        onClick={() => onPress?.(order.id)}
-        className={cn(
-          'w-full text-left flex items-center gap-3.5 px-4 py-4',
-          'focus:outline-none active:bg-surface',
-        )}
-        aria-label={`Pedido ${order.orderNumber}`}
-      >
-      {/* Icono del pedido */}
-      <div className="w-11 h-11 rounded-2xl bg-origen-pastel flex items-center justify-center flex-shrink-0 shadow-subtle">
-        <ShoppingBag className="w-5 h-5 text-origen-pino" />
-      </div>
-
-      {/* Info principal */}
-      <div className="flex-1 min-w-0">
-        {/* Fila 1: nº pedido + estado chip */}
-        <div className="flex items-center justify-between gap-2 mb-0.5">
-          <span className="text-sm font-bold text-origen-bosque truncate">
-            {order.orderNumber}
-          </span>
-          <StatusBadge status={order.status} />
+      <SwipeableRow actions={swipeActions} className="rounded-xl sm:rounded-2xl">
+        <motion.button
+          whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema))' }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          onClick={() => onPress?.(order.id)}
+          className={cn(
+            'w-full text-left flex items-center gap-3.5 px-4 py-4',
+            'focus:outline-none active:bg-surface',
+          )}
+          aria-label={`Pedido ${order.orderNumber}`}
+        >
+        {/* Icono del pedido */}
+        <div className="w-11 h-11 rounded-2xl bg-origen-pastel flex items-center justify-center flex-shrink-0 shadow-subtle">
+          <ShoppingBag className="w-5 h-5 text-origen-pino" />
         </div>
 
-        {/* Fila 2: cliente (prominente) */}
-        <p className="text-sm font-medium text-origen-bosque truncate">{order.customerName}</p>
+        {/* Info principal */}
+        <div className="flex-1 min-w-0">
+          {/* Fila 1: nº pedido + estado chip */}
+          <div className="flex items-center justify-between gap-2 mb-0.5">
+            <span className="text-sm font-bold text-origen-bosque truncate">
+              {order.orderNumber}
+            </span>
+            <StatusBadge status={order.status} />
+          </div>
 
-        {/* Fila 3: items + fecha */}
-        <div className="flex items-center gap-1.5 mt-1.5">
-          <span className="text-[11px] text-text-subtle">
-            {itemCount} {itemCount === 1 ? 'art.' : 'arts.'}
-          </span>
-          <span className="text-border-subtle" aria-hidden>·</span>
-          <span className="text-[11px] text-text-subtle">{shortDate}</span>
+          {/* Fila 2: cliente (prominente) */}
+          <p className="text-sm font-medium text-origen-bosque truncate">{order.customerName}</p>
+
+          {/* Fila 3: items + fecha */}
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <span className="text-[11px] text-text-subtle">
+              {itemCount} {itemCount === 1 ? 'art.' : 'arts.'}
+            </span>
+            <span className="text-border-subtle" aria-hidden>·</span>
+            <span className="text-[11px] text-text-subtle">{shortDate}</span>
+          </div>
         </div>
-      </div>
 
-      {/* Importe + badge de pago */}
-      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-        <span className="text-base font-bold text-origen-bosque tabular-nums">
-          {order.total.toFixed(2)} €
-        </span>
-        <PaymentBadge status={order.payment.status} />
-        {order.invoice?.hasPdf && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-hoja-tinta font-medium">
-            <FileText className="w-2.5 h-2.5" />
-            Factura
+        {/* Importe + badge de pago */}
+        <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+          <span className="text-base font-bold text-origen-bosque tabular-nums">
+            {order.total.toFixed(2)} €
           </span>
-        )}
-      </div>
-    </motion.button>
-    </SwipeableRow>
+          <PaymentBadge status={order.payment.status} />
+          {order.invoice?.hasPdf && (
+            <span className="inline-flex items-center gap-1 text-[10px] text-hoja-tinta font-medium">
+              <FileText className="w-2.5 h-2.5" />
+              Factura
+            </span>
+          )}
+        </div>
+        </motion.button>
+      </SwipeableRow>
+    </div>
   );
 }

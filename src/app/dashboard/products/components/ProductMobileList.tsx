@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
-import { SwipeableRow, ProductImage, MobileCardList } from '@arcediano/ux-library';
+import { SwipeableRow, ProductImage } from '@arcediano/ux-library';
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
@@ -72,7 +72,7 @@ const STATUS_CONFIG: Record<
 
 function ProductRowSkeleton() {
   return (
-    <div className="flex items-center gap-3 px-4 py-3.5 animate-pulse">
+    <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl sm:rounded-2xl border border-border bg-surface-alt shadow-origen animate-pulse">
       <div className="w-14 h-14 rounded-xl bg-origen-pastel/60 flex-shrink-0" />
       <div className="flex-1 min-w-0 space-y-2">
         <div className="h-3.5 bg-origen-pastel rounded-lg w-3/4" />
@@ -158,64 +158,69 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
   ];
 
   return (
-    <SwipeableRow actions={swipeActions} className="border-b border-border-subtle last:border-0">
-      <motion.button
-        whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema))' }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        onClick={() => onView(product.id)}
-        className="flex items-center gap-3.5 px-4 py-3.5 w-full text-left active:bg-surface"
-        aria-label={`Ver ${product.name}`}
-      >
-        {/* Thumbnail */}
-        <div className="w-14 h-14 rounded-xl overflow-hidden bg-origen-pastel flex-shrink-0 shadow-subtle">
-          <ProductImage src={mainImg} alt={product.name} />
-        </div>
-
-        {/* Info — 3 líneas con jerarquía clara */}
-        <div className="flex-1 min-w-0 space-y-0.5">
-          {/* L1: nombre — línea completa sin competencia */}
-          <p className="text-sm font-semibold text-origen-bosque truncate leading-snug">
-            {product.name}
-          </p>
-
-          {/* L2: categoría (izq) + estado (der) */}
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] text-text-subtle truncate flex-1">{product.categoryName}</p>
-            <StatusBadge status={product.status} />
+    <div className={cn(
+      'relative rounded-xl sm:rounded-2xl border border-border shadow-origen',
+      'hover:shadow-origen-lg hover:border-origen-pradera transition-all duration-300',
+    )}>
+      <SwipeableRow actions={swipeActions} className="rounded-xl sm:rounded-2xl">
+        <motion.button
+          whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema))' }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          onClick={() => onView(product.id)}
+          className="flex items-center gap-3.5 px-4 py-3.5 w-full text-left active:bg-surface"
+          aria-label={`Ver ${product.name}`}
+        >
+          {/* Thumbnail */}
+          <div className="w-14 h-14 rounded-xl overflow-hidden bg-origen-pastel flex-shrink-0 shadow-subtle">
+            <ProductImage src={mainImg} alt={product.name} />
           </div>
 
-          {/* L3: precio + indicador de stock */}
-          <div className="flex items-center gap-2 pt-0.5">
-            <span className="text-sm font-bold text-origen-bosque tabular-nums">
-              {product.basePrice.toFixed(2)} €
-            </span>
-            <span className="text-border-subtle" aria-hidden>·</span>
-            {product.status === 'out_of_stock' ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-feedback-danger">
-                <span className="w-1.5 h-1.5 rounded-full bg-feedback-danger flex-shrink-0" />
-                Sin stock
-              </span>
-            ) : isLowStock ? (
-              // text-feedback-warning-text, no mandarina: mandarina como texto
-              // da ~2.1:1 (falla WCAG AA) y además está prohibido como texto
-              // por la guía. warning-text es el token semántico de aviso (7.1:1).
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-feedback-warning-text">
-                <span className="w-1.5 h-1.5 rounded-full bg-origen-mandarina flex-shrink-0" />
-                Stock: {product.stock}
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-[11px] text-text-subtle">
-                <span className="w-1.5 h-1.5 rounded-full bg-origen-pradera/60 flex-shrink-0" />
-                Stock: {product.stock}
-              </span>
-            )}
-          </div>
-        </div>
+          {/* Info — 3 líneas con jerarquía clara */}
+          <div className="flex-1 min-w-0 space-y-0.5">
+            {/* L1: nombre — línea completa sin competencia */}
+            <p className="text-sm font-semibold text-origen-bosque truncate leading-snug">
+              {product.name}
+            </p>
 
-        {/* Chevron derecha */}
-        <ChevronRight className="w-4 h-4 text-text-subtle/50 flex-shrink-0" aria-hidden />
-      </motion.button>
-    </SwipeableRow>
+            {/* L2: categoría (izq) + estado (der) */}
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[11px] text-text-subtle truncate flex-1">{product.categoryName}</p>
+              <StatusBadge status={product.status} />
+            </div>
+
+            {/* L3: precio + indicador de stock */}
+            <div className="flex items-center gap-2 pt-0.5">
+              <span className="text-sm font-bold text-origen-bosque tabular-nums">
+                {product.basePrice.toFixed(2)} €
+              </span>
+              <span className="text-border-subtle" aria-hidden>·</span>
+              {product.status === 'out_of_stock' ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-feedback-danger">
+                  <span className="w-1.5 h-1.5 rounded-full bg-feedback-danger flex-shrink-0" />
+                  Sin stock
+                </span>
+              ) : isLowStock ? (
+                // text-feedback-warning-text, no mandarina: mandarina como texto
+                // da ~2.1:1 (falla WCAG AA) y además está prohibido como texto
+                // por la guía. warning-text es el token semántico de aviso (7.1:1).
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-feedback-warning-text">
+                  <span className="w-1.5 h-1.5 rounded-full bg-origen-mandarina flex-shrink-0" />
+                  Stock: {product.stock}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[11px] text-text-subtle">
+                  <span className="w-1.5 h-1.5 rounded-full bg-origen-pradera/60 flex-shrink-0" />
+                  Stock: {product.stock}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Chevron derecha */}
+          <ChevronRight className="w-4 h-4 text-text-subtle/50 flex-shrink-0" aria-hidden />
+        </motion.button>
+      </SwipeableRow>
+    </div>
   );
 }
 
@@ -250,23 +255,22 @@ export function ProductMobileList({
   if (products.length === 0) return null;
 
   return (
-    <MobileCardList
-      isLoading={isLoading}
-      skeletonCount={skeletonCount ?? 5}
-      renderSkeleton={() => <ProductRowSkeleton />}
-      className={className}
-    >
-      {products.map((product) => (
-        <ProductRow
-          key={product.id}
-          product={product}
-          onView={onView}
-          onEdit={onEdit}
-          onAdjustStock={onAdjustStock}
-          onStatusChange={onStatusChange}
-        />
-      ))}
-    </MobileCardList>
+    <div className={cn('space-y-3', className)} aria-busy={isLoading || undefined}>
+      {isLoading
+        ? Array.from({ length: skeletonCount ?? 5 }).map((_, i) => (
+            <ProductRowSkeleton key={i} />
+          ))
+        : products.map((product) => (
+            <ProductRow
+              key={product.id}
+              product={product}
+              onView={onView}
+              onEdit={onEdit}
+              onAdjustStock={onAdjustStock}
+              onStatusChange={onStatusChange}
+            />
+          ))}
+    </div>
   );
 }
 

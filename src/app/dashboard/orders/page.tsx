@@ -12,7 +12,7 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { ShoppingBag, FileText } from 'lucide-react';
 
 // Componentes UI
-import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, MobileCardList, EmptyState, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
+import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, EmptyState, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { OrderStats } from './components/OrderStats';
 import { OrderFilters } from './components/OrderFilters';
@@ -210,19 +210,19 @@ export default function OrdersPage() {
           ) : (
             <>
               {/* Móvil: lista de tarjetas */}
-              <MobileCardList
-                className="block lg:hidden"
-                isLoading={isTableLoading}
-                renderSkeleton={() => <OrderCardSkeleton />}
-              >
-                {orders.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onPress={handleViewDetails}
-                  />
-                ))}
-              </MobileCardList>
+              <div className="space-y-3 block lg:hidden" aria-busy={isTableLoading || undefined}>
+                {isTableLoading
+                  ? Array.from({ length: 5 }).map((_, i) => (
+                      <OrderCardSkeleton key={i} />
+                    ))
+                  : orders.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        onPress={handleViewDetails}
+                      />
+                    ))}
+              </div>
 
               {/* Desktop: tabla */}
               <div className="hidden lg:block">
