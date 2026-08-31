@@ -33,7 +33,7 @@ import type { Order, PaymentStatus, OrderStatus } from '@/types/order';
 
 export function OrderCardSkeleton() {
   return (
-    <div className="flex items-center gap-3.5 px-4 py-4 border-b border-border-container last:border-0 animate-pulse">
+    <div className="flex items-center gap-3.5 px-4 py-4 border-b border-border-subtle last:border-0 animate-pulse">
       <div className="w-11 h-11 rounded-2xl bg-origen-pastel/60 flex-shrink-0" />
       <div className="flex-1 min-w-0 space-y-2">
         <div className="flex items-center justify-between gap-2">
@@ -163,7 +163,7 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
   return (
     <SwipeableRow
       actions={swipeActions}
-      className={cn('border-b border-border-container last:border-0', className)}
+      className={cn('border-b border-border-subtle last:border-0', className)}
     >
       <motion.button
         whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema))' }}
