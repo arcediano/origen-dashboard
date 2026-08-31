@@ -164,10 +164,10 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
     )}>
       <SwipeableRow actions={swipeActions} className="rounded-xl sm:rounded-2xl">
         <motion.button
-          whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema))' }}
+          whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema) / 0.4)' }}
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           onClick={() => onView(product.id)}
-          className="flex items-center gap-3.5 px-4 py-3.5 w-full text-left active:bg-surface"
+          className="flex items-center gap-3.5 px-4 py-3.5 w-full text-left active:bg-origen-crema/40"
           aria-label={`Ver ${product.name}`}
         >
           {/* Thumbnail */}
