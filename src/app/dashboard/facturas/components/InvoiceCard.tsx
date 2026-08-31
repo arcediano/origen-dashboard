@@ -19,7 +19,7 @@ import type { InvoiceListItem } from '@/lib/api/orders';
 
 export function InvoiceCardSkeleton() {
   return (
-    <div className="flex items-center gap-3.5 px-4 py-4 border-b border-border-subtle last:border-0 animate-pulse">
+    <div className="flex items-center gap-3.5 px-4 py-4 rounded-xl sm:rounded-2xl border border-border bg-surface-alt shadow-origen animate-pulse">
       <div className="w-11 h-11 rounded-2xl bg-origen-pastel/60 flex-shrink-0" />
       <div className="flex-1 min-w-0 space-y-2">
         <div className="h-3.5 bg-origen-pastel rounded-lg w-28" />
@@ -43,41 +43,48 @@ export function InvoiceCard({ invoice, onPress, onDownload }: InvoiceCardProps) 
   const cfg = INVOICE_STATUS_CONFIG[invoice.status];
 
   return (
-    <motion.button
-      whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema))' }}
-      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-      onClick={() => onPress?.(invoice.orderId)}
-      className="w-full text-left flex items-center gap-3.5 px-4 py-4 border-b border-border-subtle last:border-0 focus:outline-none active:bg-surface"
-      aria-label={`Factura ${invoice.invoiceNumber}, pedido ${invoice.orderNumber}`}
+    <div
+      className={cn(
+        'relative rounded-xl sm:rounded-2xl border border-border shadow-origen',
+        'hover:shadow-origen-lg hover:border-origen-pradera transition-all duration-300',
+      )}
     >
-      <div className="w-11 h-11 rounded-2xl bg-origen-pastel flex items-center justify-center flex-shrink-0 shadow-subtle">
-        <FileText className="w-5 h-5 text-origen-pino" />
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2 mb-0.5">
-          <span className="text-sm font-bold text-origen-bosque truncate">{invoice.invoiceNumber}</span>
-          <Badge variant={cfg.variant} size="xs">{cfg.label}</Badge>
+      <motion.button
+        whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema) / 0.4)' }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        onClick={() => onPress?.(invoice.orderId)}
+        className="w-full text-left flex items-center gap-3.5 px-4 py-4 focus:outline-none active:bg-origen-crema/40"
+        aria-label={`Factura ${invoice.invoiceNumber}, pedido ${invoice.orderNumber}`}
+      >
+        <div className="w-11 h-11 rounded-2xl bg-origen-pastel flex items-center justify-center flex-shrink-0 shadow-subtle">
+          <FileText className="w-5 h-5 text-origen-pino" />
         </div>
-        <p className="text-xs text-text-subtle truncate">Pedido {invoice.orderNumber}</p>
-        <p className="text-[11px] text-text-disabled mt-1">
-          {invoice.issuedAt ? format(new Date(invoice.issuedAt), 'dd MMM yyyy', { locale: es }) : '—'}
-        </p>
-      </div>
 
-      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-        <span className="text-base font-bold text-origen-bosque tabular-nums">{invoice.total.toFixed(2)} €</span>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          disabled={!invoice.hasPdf}
-          onClick={(e) => { e.stopPropagation(); onDownload?.(invoice.orderId); }}
-          aria-label={`Descargar factura ${invoice.invoiceNumber}`}
-          className="min-h-11 min-w-11"
-        >
-          <Download className="w-4 h-4" />
-        </Button>
-      </div>
-    </motion.button>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 mb-0.5">
+            <span className="text-sm font-bold text-origen-bosque truncate">{invoice.invoiceNumber}</span>
+            <Badge variant={cfg.variant} size="xs">{cfg.label}</Badge>
+          </div>
+          <p className="text-xs text-text-subtle truncate">Pedido {invoice.orderNumber}</p>
+          <p className="text-[11px] text-text-disabled mt-1">
+            {invoice.issuedAt ? format(new Date(invoice.issuedAt), 'dd MMM yyyy', { locale: es }) : '—'}
+          </p>
+        </div>
+
+        <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+          <span className="text-base font-bold text-origen-bosque tabular-nums">{invoice.total.toFixed(2)} €</span>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            disabled={!invoice.hasPdf}
+            onClick={(e) => { e.stopPropagation(); onDownload?.(invoice.orderId); }}
+            aria-label={`Descargar factura ${invoice.invoiceNumber}`}
+            className="min-h-11 min-w-11"
+          >
+            <Download className="w-4 h-4" />
+          </Button>
+        </div>
+      </motion.button>
+    </div>
   );
 }
