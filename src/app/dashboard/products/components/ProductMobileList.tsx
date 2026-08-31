@@ -158,7 +158,7 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
   ];
 
   return (
-    <SwipeableRow actions={swipeActions} className="border-b border-border-container last:border-0">
+    <SwipeableRow actions={swipeActions} className="border-b border-border-subtle last:border-0">
       <motion.button
         whileTap={{ scale: 0.985, backgroundColor: 'hsl(var(--crema))' }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
