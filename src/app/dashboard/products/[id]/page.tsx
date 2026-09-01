@@ -30,6 +30,7 @@ import {
 } from '@arcediano/ux-library';
 
 import { PageHeader } from '../../components/PageHeader';
+import { MoveToDraftConfirmDialog } from '../components/ProductDialogs/MoveToDraftConfirmDialog';
 
 import {
   Package, Trash2, DollarSign, Tag, CheckCircle,
@@ -401,12 +402,23 @@ function AtributosSection({ product }: { product: Product }) {
 // ============================================================================
 
 function StatusCard({
-  product, onStatusChange, onVisibilityChange, isUpdating,
+  product, onStatusChange, onVisibilityChange, isUpdating, onRequestDraftConfirm,
 }: {
   product: Product;
   onStatusChange: (s: Product['status']) => Promise<void>;
   onVisibilityChange: (v: boolean) => Promise<void>;
   isUpdating: boolean;
+  /** "Mover a borrador" (ACTIVE/INACTIVE → DRAFT) es la única transición sin
+   * aviso previo pese a ser la de mayor impacto: el producto desaparece de
+   * la tienda y hay que volver a pasar por revisión completa para
+   * publicarse de nuevo. "Retirar de revisión" también usa `to: 'draft'`
+   * pero desde PENDING_APPROVAL (el producto nunca llegó a estar visible),
+   * así que no necesita este aviso.
+   * El diálogo de confirmación vive en el componente padre (no aquí dentro)
+   * porque en la variante móvil StatusCard se renderiza dentro del Sheet
+   * "Gestionar producto" -- si el diálogo también viviera ahí, cerrar el
+   * sheet lo desmontaría a él también antes de que llegara a mostrarse. */
+  onRequestDraftConfirm: () => void;
 }) {
   const isPublic          = product.visibility === 'public';
   const isDraft           = product.status === 'draft';
@@ -522,23 +534,27 @@ function StatusCard({
 
       {transitions.length > 0 && (
         <div className="flex flex-col gap-2">
-          {transitions.map(t => (
-            <Button
-              key={t.to}
-              variant={t.variant}
-              size="sm"
-              leftIcon={<t.icon className="w-4 h-4" />}
-              onClick={() => onStatusChange(t.to)}
-              disabled={isUpdating}
-              loading={isUpdating}
-              loadingText="Actualizando..."
-              className="w-full justify-start"
-            >
-              {t.label}
-            </Button>
-          ))}
+          {transitions.map(t => {
+            const isMoveToDraft = t.to === 'draft' && (isActive || isInactive);
+            return (
+              <Button
+                key={t.to}
+                variant={t.variant}
+                size="sm"
+                leftIcon={<t.icon className="w-4 h-4" />}
+                onClick={() => (isMoveToDraft ? onRequestDraftConfirm() : onStatusChange(t.to))}
+                disabled={isUpdating}
+                loading={isUpdating}
+                loadingText="Actualizando..."
+                className="w-full justify-start"
+              >
+                {t.label}
+              </Button>
+            );
+          })}
         </div>
       )}
+
       <div className="border-t border-border-subtle pt-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -591,6 +607,7 @@ export default function ProductoDetallePage() {
   const [isDeleting, setIsDeleting]     = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showStatusSheet, setShowStatusSheet]   = useState(false);
+  const [confirmDraftOpen, setConfirmDraftOpen] = useState(false);
 
   const isFirstLoad = useRef(true);
 
@@ -890,6 +907,7 @@ export default function ProductoDetallePage() {
                     onStatusChange={handleStatusChange}
                     onVisibilityChange={handleVisibilityChange}
                     isUpdating={isUpdating}
+                    onRequestDraftConfirm={() => setConfirmDraftOpen(true)}
                   />
                 </motion.div>
 
@@ -960,9 +978,21 @@ export default function ProductoDetallePage() {
               onStatusChange={async s => { await handleStatusChange(s); setShowStatusSheet(false); }}
               onVisibilityChange={async v => { await handleVisibilityChange(v); setShowStatusSheet(false); }}
               isUpdating={isUpdating}
+              onRequestDraftConfirm={() => { setShowStatusSheet(false); setConfirmDraftOpen(true); }}
             />
           </SheetContent>
         </Sheet>
+
+        {/* ── CONFIRMAR MOVER A BORRADOR ── */}
+        <MoveToDraftConfirmDialog
+          open={confirmDraftOpen}
+          onOpenChange={setConfirmDraftOpen}
+          isLoading={isUpdating}
+          onConfirm={async () => {
+            await handleStatusChange('draft');
+            setConfirmDraftOpen(false);
+          }}
+        />
 
         {/* ── DIÁLOGO ELIMINAR ── */}
         <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
