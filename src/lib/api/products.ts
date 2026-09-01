@@ -33,6 +33,10 @@ export interface ApiResponse<T> {
   error?: string;
   message?: string;
   status: number;
+  /** Código de error estructurado del backend (ej. 'EXCLUSIVE_OFFER_CONFLICT'), si aplica */
+  errorCode?: string;
+  /** Presente cuando errorCode === 'EXCLUSIVE_OFFER_CONFLICT' — qué tipo de oferta ya activa provoca el conflicto */
+  conflictingOfferType?: 'FLASH' | 'VOLUME';
 }
 
 export interface PaginatedResponse<T> {
@@ -78,7 +82,13 @@ export interface ProductFacetsResponse {
 function handleError<T>(error: unknown, context: string): ApiResponse<T> {
   console.error(`[products] Error en ${context}:`, error);
   if (error instanceof GatewayError) {
-    return { error: error.message, status: error.status };
+    const body = error.data as { code?: string; conflictingOfferType?: 'FLASH' | 'VOLUME' } | undefined;
+    return {
+      error: error.message,
+      status: error.status,
+      errorCode: body?.code,
+      conflictingOfferType: body?.conflictingOfferType,
+    };
   }
   return { error: `Error inesperado en ${context}`, status: 500 };
 }
@@ -730,10 +740,15 @@ export async function saveProductDraft(
 export async function updateProduct(
   id: string,
   productData: Partial<Product>,
+  options?: {
+    /** Confirma el reemplazo: desactiva la oferta Flash vigente/programada y activa los `priceTiers` enviados. */
+    replaceActiveFlashDeal?: boolean;
+  },
 ): Promise<ApiResponse<Product>> {
   try {
     const normalizedProductData = await normalizePartialProductBeforeSubmit({ ...productData, id });
     const body = partialProductToApiBody(normalizedProductData);
+    if (options?.replaceActiveFlashDeal) body.replaceActiveFlashDeal = true;
     const raw  = await gatewayClient.put<ApiProduct>(`/products/${id}`, body);
     return { data: mapApiProductToProduct(raw), status: 200 };
   } catch (error) {
@@ -981,6 +996,8 @@ export async function createFlashDeal(
     discountValue: number;
     startsAt: string;
     endsAt: string;
+    /** Confirma el reemplazo: desactiva los `priceTiers` de Volumen activos y crea esta Flash. */
+    replaceActiveOffer?: boolean;
   },
 ): Promise<ApiResponse<FlashDeal>> {
   try {

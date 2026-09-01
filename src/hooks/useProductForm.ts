@@ -256,6 +256,14 @@ export function useProductForm(productId?: string) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // Conflicto 409 EXCLUSIVE_OFFER_CONFLICT al enviar priceTiers con una Flash ya activa —
+  // guarda el reintento a ejecutar (con replaceActiveFlashDeal: true) si el productor confirma.
+  const [pendingOfferConflict, setPendingOfferConflict] = useState<{
+    conflictingOfferType: 'FLASH';
+    retry: () => Promise<void>;
+  } | null>(null);
+  const [isResolvingOfferConflict, setIsResolvingOfferConflict] = useState(false);
+
   // ==========================================================================
   // CARGA INICIAL
   // ==========================================================================
@@ -422,12 +430,31 @@ export function useProductForm(productId?: string) {
         return () => {}; // Sin timer
       }
 
+      // Pausar autoguardado mientras haya un conflicto de oferta sin resolver —
+      // el usuario debe confirmar el reemplazo o quitar los tiers manualmente.
+      if (pendingOfferConflict) {
+        return () => {};
+      }
+
       const timer = setTimeout(async () => {
         setIsAutoSaving(true);
         try {
           const productData = formDataToProduct(formData);
-          await updateProduct(productId, productData);
-          setLastSaved(new Date());
+          const response = await updateProduct(productId, productData);
+          if (response.error) {
+            if (response.errorCode === 'EXCLUSIVE_OFFER_CONFLICT' && response.conflictingOfferType === 'FLASH') {
+              setPendingOfferConflict({
+                conflictingOfferType: 'FLASH',
+                retry: async () => {
+                  const retryResponse = await updateProduct(productId, productData, { replaceActiveFlashDeal: true });
+                  if (!retryResponse.error) setLastSaved(new Date());
+                },
+              });
+            }
+            // Otros errores: silencioso — no interrumpir la UX; el usuario puede guardar manualmente
+          } else {
+            setLastSaved(new Date());
+          }
         } catch {
           // Silencioso — no interrumpir la UX; el usuario puede guardar manualmente
         } finally {
@@ -436,7 +463,7 @@ export function useProductForm(productId?: string) {
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [formData, productId, isPublishedProduct, sensitiveDirtyFields]);
+  }, [formData, productId, isPublishedProduct, sensitiveDirtyFields, pendingOfferConflict]);
 
   // ==========================================================================
   // VALIDACIÓN DE PASOS
@@ -578,14 +605,29 @@ export function useProductForm(productId?: string) {
     }
 
     setIsSaving(true);
+    setError(null);
 
     try {
       if (productId) {
         // Edición: convertir y enviar a API
         const productData = formDataToProduct(formData);
         const response = await updateProduct(productId, productData);
-        if (response.error) setError(response.error);
-        else setLastSaved(new Date());
+        if (response.error) {
+          if (response.errorCode === 'EXCLUSIVE_OFFER_CONFLICT' && response.conflictingOfferType === 'FLASH') {
+            setPendingOfferConflict({
+              conflictingOfferType: 'FLASH',
+              retry: async () => {
+                const retryResponse = await updateProduct(productId, productData, { replaceActiveFlashDeal: true });
+                if (retryResponse.error) setError(retryResponse.error);
+                else setLastSaved(new Date());
+              },
+            });
+          } else {
+            setError(response.error);
+          }
+        } else {
+          setLastSaved(new Date());
+        }
       } else {
         // Creación: guardar como borrador en la API (sube imágenes y crea el producto)
         const response = await saveProductDraft(formData);
@@ -626,8 +668,25 @@ export function useProductForm(productId?: string) {
         const response = await updateProduct(productId, productData);
 
         if (response.error) {
-          setPublishStatus('error');
-          setPublishError(response.error);
+          if (response.errorCode === 'EXCLUSIVE_OFFER_CONFLICT' && response.conflictingOfferType === 'FLASH') {
+            setPendingOfferConflict({
+              conflictingOfferType: 'FLASH',
+              retry: async () => {
+                const retryResponse = await updateProduct(productId, productData, { replaceActiveFlashDeal: true });
+                if (retryResponse.error) {
+                  setPublishStatus('error');
+                  setPublishError(retryResponse.error);
+                } else {
+                  setPublishStatus('pending_approval');
+                  setShowSuccessModal(true);
+                }
+              },
+            });
+            setPublishStatus('idle');
+          } else {
+            setPublishStatus('error');
+            setPublishError(response.error);
+          }
         } else {
           setPublishStatus('pending_approval');
           setShowSuccessModal(true);
@@ -672,7 +731,22 @@ export function useProductForm(productId?: string) {
         const productData = formDataToProduct(formData);
         const response = await updateProduct(productId, productData);
         if (response.error) {
-          setError(response.error);
+          if (response.errorCode === 'EXCLUSIVE_OFFER_CONFLICT' && response.conflictingOfferType === 'FLASH') {
+            setPendingOfferConflict({
+              conflictingOfferType: 'FLASH',
+              retry: async () => {
+                const retryResponse = await updateProduct(productId, productData, { replaceActiveFlashDeal: true });
+                if (retryResponse.error) {
+                  setError(retryResponse.error);
+                } else {
+                  setLastSaved(new Date());
+                  originalProductRef.current = formData;
+                }
+              },
+            });
+          } else {
+            setError(response.error);
+          }
         } else {
           setLastSaved(new Date());
           // Resetear originalProductRef: el producto ha sido guardado con los cambios sensibles
@@ -686,6 +760,27 @@ export function useProductForm(productId?: string) {
       setIsSaving(false);
     }
   }, [formData, productId]);
+
+  /**
+   * Confirma el reemplazo tras un conflicto 409 EXCLUSIVE_OFFER_CONFLICT: ejecuta
+   * el reintento guardado (con replaceActiveFlashDeal: true) y limpia el estado.
+   */
+  const confirmOfferConflictReplace = useCallback(async () => {
+    if (!pendingOfferConflict) return;
+    const { retry } = pendingOfferConflict;
+    setIsResolvingOfferConflict(true);
+    try {
+      await retry();
+    } finally {
+      setIsResolvingOfferConflict(false);
+      setPendingOfferConflict(null);
+    }
+  }, [pendingOfferConflict]);
+
+  /** Descarta el conflicto sin reemplazar nada — los tiers quedan sin guardar. */
+  const cancelOfferConflict = useCallback(() => {
+    setPendingOfferConflict(null);
+  }, []);
 
   // ==========================================================================
   // RETURN
@@ -722,6 +817,10 @@ export function useProductForm(productId?: string) {
     isPublishedProduct,
     sensitiveDirtyFields,
     pendingSensitiveConfirmation,
+    pendingOfferConflict,
+    isResolvingOfferConflict,
+    confirmOfferConflictReplace,
+    cancelOfferConflict,
 
     // Validación por paso
     getStepErrors,

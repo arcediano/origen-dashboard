@@ -566,11 +566,15 @@ export function StepPricing({
                 basePrice={basePrice}
                 existingDeal={editingFlashDealId ? flashDeals.find(d => d.id === editingFlashDealId) : null}
                 hasTiers={tiers.length > 0}
-                onSaved={(deal) => {
+                onSaved={(deal, replacedTiers) => {
                   if (editingFlashDealId) {
                     setFlashDeals(flashDeals.map((d) => (d.id === editingFlashDealId ? deal : d)));
                   } else {
                     setFlashDeals([...flashDeals, deal]);
+                    if (replacedTiers) {
+                      // El backend desactivó los tiers de Volumen al reemplazarlos por esta Flash
+                      syncTiers([]);
+                    }
                     // Si no hay productId (modo wizard), guardar en formData
                     if (!productId) {
                       const flashDealData: FlashDealFormValue = {
