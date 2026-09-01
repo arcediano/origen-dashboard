@@ -188,10 +188,12 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
         <div className="flex-1 min-w-0">
           {/* Fila 1: nº pedido + estado chip */}
           <div className="flex items-center justify-between gap-2 mb-0.5">
-            <span className="text-sm font-bold text-origen-bosque truncate">
+            <span className="text-sm font-bold text-origen-bosque truncate min-w-0">
               {order.orderNumber}
             </span>
-            <StatusBadge status={order.status} />
+            <span className="flex-shrink-0">
+              <StatusBadge status={order.status} />
+            </span>
           </div>
 
           {/* Fila 2: cliente (prominente) */}
