@@ -559,8 +559,9 @@ export interface InvoiceListItem {
  * Obtiene el listado paginado de facturas de venta del productor autenticado.
  * GET /api/v1/orders/seller/invoices
  *
- * Nota: Solo incluye facturas emitidas de pedidos con un único vendedor.
- * Los pedidos multi-vendedor están excluidos del listado por decisión de diseño.
+ * Incluye tanto facturas de pedidos de un único vendedor como la factura
+ * propia del productor en pedidos multi-vendedor (una fila por pedido,
+ * con el importe/factura de este productor únicamente).
  */
 export async function fetchSellerInvoices(
   params?: InvoiceFilterParams,
