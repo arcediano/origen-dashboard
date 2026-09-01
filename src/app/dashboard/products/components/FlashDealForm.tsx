@@ -19,7 +19,12 @@ interface FlashDealFormProps {
   basePrice: number;
   existingDeal?: FlashDeal | null;
   hasTiers?: boolean;
-  onSaved: (deal: FlashDeal) => void;
+  /**
+   * `replacedTiers` es `true` cuando la oferta se creó reemplazando descuentos
+   * por cantidad activos (el backend ya los desactivó) — el llamador debe
+   * limpiar cualquier estado local de tiers para reflejarlo.
+   */
+  onSaved: (deal: FlashDeal, replacedTiers?: boolean) => void;
   onCancel: () => void;
 }
 
@@ -62,9 +67,13 @@ export function FlashDealForm({
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  // Conflicto 409 EXCLUSIVE_OFFER_CONFLICT (ya hay tiers de Volumen activos)
+  const [hasConflict, setHasConflict] = useState(false);
+  const [isReplacing, setIsReplacing] = useState(false);
 
   const handleSubmit = async () => {
     setError(null);
+    setHasConflict(false);
 
     try {
       FlashDealSchema.parse(formData);
@@ -131,7 +140,11 @@ export function FlashDealForm({
         });
 
         if (result.error) {
-          setError(result.error);
+          if (result.errorCode === 'EXCLUSIVE_OFFER_CONFLICT' && result.conflictingOfferType === 'VOLUME') {
+            setHasConflict(true);
+          } else {
+            setError(result.error);
+          }
         } else if (result.data) {
           onSaved(result.data);
         }
@@ -144,6 +157,33 @@ export function FlashDealForm({
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /**
+   * Confirma el reemplazo tras el conflicto 409: el backend desactiva los
+   * tiers de Volumen activos y crea la Flash en el mismo paso.
+   */
+  const handleReplaceOffer = async () => {
+    if (!productId) return;
+    setIsReplacing(true);
+    setError(null);
+
+    const result = await createFlashDeal(productId, {
+      discountType: formData.discountType || 'PERCENTAGE',
+      discountValue: formData.discountValue || 0,
+      startsAt: formData.startsAt || '',
+      endsAt: formData.endsAt || '',
+      replaceActiveOffer: true,
+    });
+
+    setIsReplacing(false);
+
+    if (result.error) {
+      setError(result.error);
+    } else if (result.data) {
+      setHasConflict(false);
+      onSaved(result.data, true);
     }
   };
 
@@ -246,11 +286,47 @@ export function FlashDealForm({
           </div>
         )}
 
-        {/* Aviso de no-acumulación con tiers */}
-        {hasTiers && (
+        {/* Aviso de exclusividad: un producto no puede tener Flash y Volumen activas a la vez */}
+        {hasTiers && !hasConflict && (
           <Alert variant="info" className="text-xs">
             <AlertCircle className="w-3 h-3 mr-1 shrink-0 mt-0.5" />
-            <p>Mientras la oferta flash esté activa, los descuentos por cantidad no se aplicarán</p>
+            <p>
+              Este producto ya tiene descuentos por cantidad activos. Un producto no puede
+              tener a la vez oferta flash y descuentos por cantidad — si creas esta oferta,
+              los descuentos por cantidad se desactivarán.
+            </p>
+          </Alert>
+        )}
+
+        {/* Conflicto 409: ya hay una oferta por Volumen activa — ofrecer reemplazo en un solo paso */}
+        {hasConflict && (
+          <Alert variant="warning" className="text-xs">
+            <AlertCircle className="w-3 h-3 mr-1 shrink-0 mt-0.5" />
+            <div className="space-y-2">
+              <p>
+                Este producto ya tiene descuentos por cantidad activos y no puede tener
+                también una oferta flash a la vez. Puedes reemplazar los descuentos por
+                cantidad por esta oferta flash en un solo paso.
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleReplaceOffer}
+                  disabled={isReplacing}
+                  variant="primary"
+                  size="sm"
+                >
+                  {isReplacing ? 'Reemplazando...' : 'Reemplazar oferta'}
+                </Button>
+                <Button
+                  onClick={() => setHasConflict(false)}
+                  variant="secondary"
+                  size="sm"
+                  disabled={isReplacing}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
           </Alert>
         )}
 
@@ -261,25 +337,27 @@ export function FlashDealForm({
           </Alert>
         )}
 
-        <div className="flex gap-2 pt-3 border-t border-border-subtle">
-          <Button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            variant="primary"
-            className="flex-1"
-            size="sm"
-          >
-            {isLoading ? 'Guardando...' : existingDeal ? 'Guardar cambios' : 'Crear oferta'}
-          </Button>
-          <Button
-            onClick={onCancel}
-            variant="secondary"
-            size="sm"
-            disabled={isLoading}
-          >
-            Cancelar
-          </Button>
-        </div>
+        {!hasConflict && (
+          <div className="flex gap-2 pt-3 border-t border-border-subtle">
+            <Button
+              onClick={handleSubmit}
+              disabled={isLoading}
+              variant="primary"
+              className="flex-1"
+              size="sm"
+            >
+              {isLoading ? 'Guardando...' : existingDeal ? 'Guardar cambios' : 'Crear oferta'}
+            </Button>
+            <Button
+              onClick={onCancel}
+              variant="secondary"
+              size="sm"
+              disabled={isLoading}
+            >
+              Cancelar
+            </Button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

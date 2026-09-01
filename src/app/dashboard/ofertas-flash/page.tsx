@@ -98,7 +98,7 @@ function formatPrice(value: number, discountType: string): string {
 // ─── Product selector ────────────────────────────────────────────────────────
 
 interface ProductSelectorProps {
-  onSelect: (productId: string, basePrice: number) => void;
+  onSelect: (productId: string, basePrice: number, hasTiers: boolean) => void;
 }
 
 function ProductSelector({ onSelect }: ProductSelectorProps) {
@@ -138,7 +138,7 @@ function ProductSelector({ onSelect }: ProductSelectorProps) {
           products.map((product) => (
             <button
               key={product.id}
-              onClick={() => onSelect(product.id, product.basePrice)}
+              onClick={() => onSelect(product.id, product.basePrice, (product.priceTiers?.length ?? 0) > 0)}
               className="w-full p-3 rounded-xl border border-border-subtle hover:border-origen-pradera/40 hover:bg-origen-crema/30 text-left transition-colors"
             >
               <div className="flex gap-3 items-center">
@@ -231,6 +231,7 @@ export default function OfertasFlashPage() {
   const [search, setSearch] = useState('');
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>(undefined);
   const [selectedProductBasePrice, setSelectedProductBasePrice] = useState(0);
+  const [selectedProductHasTiers, setSelectedProductHasTiers] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingDeal, setEditingDeal] = useState<FlashDealWithProduct | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -271,9 +272,10 @@ export default function OfertasFlashPage() {
     await loadDeals(false);
   };
 
-  const handleCreateFlashDeal = (productId: string, basePrice: number) => {
+  const handleCreateFlashDeal = (productId: string, basePrice: number, hasTiers: boolean) => {
     setSelectedProductId(productId);
     setSelectedProductBasePrice(basePrice);
+    setSelectedProductHasTiers(hasTiers);
   };
 
   const handleEditDeal = (deal: FlashDealWithProduct) => {
@@ -288,6 +290,7 @@ export default function OfertasFlashPage() {
     setShowEditModal(false);
     setEditingDeal(null);
     setSelectedProductId(undefined);
+    setSelectedProductHasTiers(false);
   };
 
   const handleCancelDeal = async (dealId: string, productId: string) => {
@@ -489,6 +492,7 @@ export default function OfertasFlashPage() {
                     productId={editingDeal ? editingDeal.productId : selectedProductId}
                     basePrice={selectedProductBasePrice}
                     existingDeal={editingDeal}
+                    hasTiers={!editingDeal && selectedProductHasTiers}
                     onSaved={handleDealSaved}
                     onCancel={handleCloseModal}
                   />
