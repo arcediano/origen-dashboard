@@ -6,7 +6,7 @@
 'use client';
 
 import React from 'react';
-import { Package, Camera, DollarSign, FlaskConical, Leaf, ShoppingBag, Award, CheckCircle, TrendingUp } from 'lucide-react';
+import { Package, Camera, DollarSign, FlaskConical, Leaf, ShoppingBag, Award, CheckCircle, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
@@ -57,7 +57,14 @@ export function CreateProductProgress({
   className,
 }: CreateProductProgressProps) {
   const currentIndex = FORM_STEPS.findIndex(s => s.id === currentTab);
+  const currentStep = FORM_STEPS[currentIndex];
   const progress = ((currentIndex + 1) / FORM_STEPS.length) * 100;
+  // Colapsado por defecto en móvil (bug-panel-progreso-movil-v2, 2026-09-01):
+  // el resumen de una línea "Paso X de N" sustituye a los 7 iconos siempre
+  // visibles, que seguían ocupando demasiada altura incluso sin etiquetas de
+  // texto. En escritorio (sm+) la navegación completa se muestra siempre,
+  // sin depender de este estado.
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
   return (
     <div className={cn('sticky top-16 z-20 bg-gradient-to-b from-origen-crema/30 to-transparent pt-2 pb-4 -mx-4 sm:-mx-6 px-4 sm:px-6', className)}>
@@ -82,10 +89,36 @@ export function CreateProductProgress({
 
         {/* Barra de progreso */}
         <Progress value={progress} variant="leaf" size="sm" showLabel={false} className="mb-2 sm:mb-5" />
-        
+
+        {/* Resumen compacto en móvil: "Paso X de N — nombre" con toggle para
+            expandir a la navegación completa (icono + etiqueta) cuando se
+            quiera saltar directamente a otro paso. En escritorio (sm+) no se
+            muestra — ahí la navegación completa está siempre visible. */}
+        <button
+          type="button"
+          onClick={() => setIsExpanded(prev => !prev)}
+          className="w-full flex items-center justify-between gap-2 mb-2 py-1 sm:hidden"
+          aria-expanded={isExpanded}
+          aria-controls="create-product-steps-nav"
+        >
+          <span className="text-xs font-medium text-origen-bosque">
+            Paso {currentIndex + 1} de {FORM_STEPS.length} — {currentStep.label}
+          </span>
+          {isExpanded ? (
+            <ChevronUp className="w-4 h-4 text-text-subtle flex-shrink-0" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-text-subtle flex-shrink-0" aria-hidden="true" />
+          )}
+        </button>
+
         {/* Navegación de pasos — degradado a la derecha como pista de que hay
-            más pasos fuera de pantalla en móvil (7 pasos no caben a 375px) */}
-        <div className="relative">
+            más pasos fuera de pantalla en móvil (7 pasos no caben a 375px).
+            En móvil, oculta salvo que `isExpanded` esté activo (toggle de
+            arriba); en escritorio (sm+) siempre visible. */}
+        <div
+          id="create-product-steps-nav"
+          className={cn('relative', !isExpanded && 'hidden sm:block')}
+        >
           <div className="flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto pb-1 scrollbar-origen snap-x snap-mandatory">
             {FORM_STEPS.map((step, index) => {
               const isActive = step.id === currentTab;
@@ -116,23 +149,22 @@ export function CreateProductProgress({
                       iconMap[step.icon]
                     )}
                   </div>
-                  {/* Etiqueta de texto oculta en móvil (bug-panel-progreso-movil,
-                      2026-08-29): cada paso ya muestra su propio <h2> con el
-                      nombre al entrar (p.ej. StepBasic.tsx), así que no se
-                      pierde información — solo se ahorra la fila de texto bajo
-                      cada icono, que era la principal responsable del exceso de
-                      altura en viewports de móvil. aria-label del botón cubre
-                      accesibilidad en todos los tamaños.
-                      `sr-only`/`sm:not-sr-only` en vez de `hidden`/`sm:block`:
-                      `hidden` fija `display:none`, que competía con el
+                  {/* Etiqueta de texto: en móvil solo visible cuando el panel
+                      está expandido (`isExpanded`, toggle "Paso X de N" de
+                      arriba); en escritorio (sm+) siempre visible. Con el
+                      panel colapsado en móvil, `MobileCardList`-style
+                      `sr-only` la mantiene disponible para lectores de
+                      pantalla sin ocupar espacio visual.
+                      `sr-only`/`not-sr-only` en vez de `hidden`/`block`:
+                      `hidden` fija `display:none`, que compite con el
                       `display:-webkit-box` de `line-clamp-2` (misma
                       propiedad, sin media query que las diferencie) y
                       `line-clamp-2` ganaba por orden de generación de
-                      Tailwind — la etiqueta seguía visible en móvil pese a
-                      `hidden`. `sr-only` no toca `display`, evita el
-                      conflicto. */}
+                      Tailwind — la etiqueta seguía visible pese a `hidden`.
+                      `sr-only` no toca `display`, evita el conflicto. */}
                   <span className={cn(
-                    "sr-only sm:not-sr-only text-[10px] sm:text-xs font-medium text-center max-w-[52px] sm:max-w-[60px] leading-tight line-clamp-2",
+                    isExpanded ? "not-sr-only" : "sr-only",
+                    "sm:not-sr-only text-[10px] sm:text-xs font-medium text-center max-w-[52px] sm:max-w-[60px] leading-tight line-clamp-2",
                     isActive && "text-origen-bosque",
                     isCompleted && !isActive && "text-hoja-tinta",
                     !isActive && !isCompleted && "text-text-subtle"
