@@ -23,7 +23,7 @@ import { ReviewHeader } from './components/ReviewHeader';
 import { ReviewFilters } from './components/ReviewFilters';
 import { ReviewsList } from './components/ReviewsList';
 import { ReviewCard, ReviewCardSkeleton } from './components/ReviewCard';
-import { MobileCardList, Pagination, MobilePullRefresh, toast, PageLoader, PageError, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
+import { Card, EmptyState, MobileCardList, Pagination, MobilePullRefresh, toast, PageLoader, PageError, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 
 // Hooks y API
 import { fetchReviews, addReviewResponse, flagReview, markReviewHelpful } from '@/lib/api/reviews';
@@ -171,6 +171,8 @@ export default function ReviewsPage() {
     setCurrentPage(1);
   };
 
+  const hasActiveFilters = Object.keys(filters).length > 0;
+
   // ── Carga inicial: PageLoader de pantalla completa ────────────────────────
   if (isFirstLoad.current && isLoading) return <PageLoader message="Cargando reseñas..." className="animate-fade-in" />;
 
@@ -215,45 +217,60 @@ export default function ReviewsPage() {
                 totalReviews={totalReviews}
               />
 
-              <div>
-                {/* Móvil (< lg): MobileCardList con skeleton */}
-                <MobileCardList
-                  className="block lg:hidden mb-4"
-                  isLoading={isTableLoading}
-                  renderSkeleton={() => <ReviewCardSkeleton />}
-                  skeletonCount={5}
-                >
-                  {reviews.map((review) => (
-                    <ReviewCard
-                      key={review.id}
-                      review={review}
-                      onRespond={handleRespond}
-                      onFlag={(id) => handleFlag(id)}
-                    />
-                  ))}
-                </MobileCardList>
-
-                {/* Desktop (>= lg): ReviewsList con isLoading skeleton */}
-                <div className="hidden lg:block">
-                  <ReviewsList
-                    reviews={reviews}
-                    onRespond={handleRespond}
-                    onFlag={handleFlag}
-                    onHelpful={handleHelpful}
+              {reviews.length === 0 ? (
+                <Card>
+                  <EmptyState
+                    size="sm"
+                    icon={<MessageSquare className="w-6 h-6" />}
+                    title={hasActiveFilters ? 'No hay reseñas' : 'Aún no tienes reseñas'}
+                    description={
+                      hasActiveFilters
+                        ? 'No se encontraron reseñas con los filtros seleccionados.'
+                        : 'Cuando tus productos reciban reseñas, aparecerán aquí.'
+                    }
+                  />
+                </Card>
+              ) : (
+                <div>
+                  {/* Móvil (< lg): MobileCardList con skeleton */}
+                  <MobileCardList
+                    className="block lg:hidden mb-4"
                     isLoading={isTableLoading}
+                    renderSkeleton={() => <ReviewCardSkeleton />}
                     skeletonCount={5}
-                  />
-                </div>
+                  >
+                    {reviews.map((review) => (
+                      <ReviewCard
+                        key={review.id}
+                        review={review}
+                        onRespond={handleRespond}
+                        onFlag={(id) => handleFlag(id)}
+                      />
+                    ))}
+                  </MobileCardList>
 
-                {totalPages > 1 && (
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                    className="mt-6"
-                  />
-                )}
-              </div>
+                  {/* Desktop (>= lg): ReviewsList con isLoading skeleton */}
+                  <div className="hidden lg:block">
+                    <ReviewsList
+                      reviews={reviews}
+                      onRespond={handleRespond}
+                      onFlag={handleFlag}
+                      onHelpful={handleHelpful}
+                      isLoading={isTableLoading}
+                      skeletonCount={5}
+                    />
+                  </div>
+
+                  {totalPages > 1 && (
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                      className="mt-6"
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
           </motion.div>
