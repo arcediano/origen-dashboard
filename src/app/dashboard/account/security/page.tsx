@@ -54,6 +54,45 @@ interface TwoFactorSetupState {
   otpauthUri?: string;
 }
 
+// El navegador puede recargar/descargar esta pestaña en segundo plano al
+// navegar a un esquema otpauth:// para entregarlo a la app de autenticación
+// (frecuente en Safari iOS, también en Android bajo presión de memoria) —
+// sin esto, `setupData.secret` se pierde y la verificación falla siempre al
+// volver. Se persiste solo mientras dura un setup en curso, nunca el 2FA
+// ya activado.
+const TWO_FA_SETUP_STORAGE_KEY = 'origen-2fa-setup-in-progress';
+const TWO_FA_SETUP_MAX_AGE_MS = 10 * 60 * 1000;
+
+function saveTwoFactorSetupState(setupData: TwoFactorSetupState) {
+  try {
+    sessionStorage.setItem(TWO_FA_SETUP_STORAGE_KEY, JSON.stringify({ setupData, savedAt: Date.now() }));
+  } catch {
+    // sessionStorage no disponible (modo privado, cuota, etc.) — el setup
+    // simplemente no sobrevive a una recarga, sin romper el flujo normal.
+  }
+}
+
+function loadTwoFactorSetupState(): TwoFactorSetupState | null {
+  try {
+    const raw = sessionStorage.getItem(TWO_FA_SETUP_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { setupData?: TwoFactorSetupState; savedAt?: number };
+    if (!parsed.setupData?.secret || typeof parsed.savedAt !== 'number') return null;
+    if (Date.now() - parsed.savedAt > TWO_FA_SETUP_MAX_AGE_MS) return null;
+    return parsed.setupData;
+  } catch {
+    return null;
+  }
+}
+
+function clearTwoFactorSetupState() {
+  try {
+    sessionStorage.removeItem(TWO_FA_SETUP_STORAGE_KEY);
+  } catch {
+    // no-op
+  }
+}
+
 type TwoFactorStateType = {
   enabled: boolean;
   isLoading: boolean;
@@ -108,6 +147,23 @@ export default function SecurityPage() {
           enabled: status.enabled,
           isLoading: false,
         }));
+
+        // Si la pestaña se recargó al volver de la app de autenticación
+        // (ver TWO_FA_SETUP_STORAGE_KEY), retomar el setup en curso en vez
+        // de perder el secret y obligar a empezar de cero — solo si 2FA
+        // sigue sin estar activado.
+        if (!status.enabled) {
+          const savedSetup = loadTwoFactorSetupState();
+          if (savedSetup) {
+            setTwoFa((prev) => ({
+              ...prev,
+              step: 'setup-qr',
+              setupData: savedSetup,
+              verifyCode: '',
+            }));
+            setTwoFaDialog(true);
+          }
+        }
       } catch (error) {
         setTwoFa((prev) => ({
           ...prev,
@@ -125,15 +181,17 @@ export default function SecurityPage() {
     try {
       setTwoFa((prev) => ({ ...prev, isLoading: true, error: null }));
       const data = await setupTwoFactor();
+      const setupData: TwoFactorSetupState = {
+        qrCodeUrl: data.qrCodeUrl,
+        secret: data.secret,
+        otpauthUri: data.otpauthUrl,
+      };
+      saveTwoFactorSetupState(setupData);
       setTwoFa((prev) => ({
         ...prev,
         isLoading: false,
         step: 'setup-qr',
-        setupData: {
-          qrCodeUrl: data.qrCodeUrl,
-          secret: data.secret,
-          otpauthUri: data.otpauthUrl,
-        },
+        setupData,
         verifyCode: '',
         error: null,
       }));
@@ -158,6 +216,7 @@ export default function SecurityPage() {
     try {
       setTwoFa((prev) => ({ ...prev, isLoading: true, error: null }));
       const response = await enableTwoFactor(twoFa.setupData.secret || '', twoFa.verifyCode);
+      clearTwoFactorSetupState();
       setTwoFa((prev) => ({
         ...prev,
         isLoading: false,
@@ -176,6 +235,7 @@ export default function SecurityPage() {
   };
 
   const handleClose2FAFlow = () => {
+    clearTwoFactorSetupState();
     setTwoFaDialog(false);
     setTwoFa((prev) => ({
       ...prev,
@@ -567,6 +627,9 @@ export default function SecurityPage() {
                           {/* TOTP Code Input */}
                           <div className="space-y-2">
                             <Label>Ingresa el código de 6 dígitos para confirmar</Label>
+                            <p className="text-xs text-text-subtle">
+                              Escribe el código que tu app de autenticación está mostrando <strong>en este momento</strong> (cambia cada 30 segundos) — no un código fijo ni uno anterior.
+                            </p>
                             <div className="flex justify-center gap-1 sm:gap-2">
                               {Array.from({ length: 6 }).map((_, i) => (
                                 <input
@@ -584,6 +647,23 @@ export default function SecurityPage() {
                                     if (e.target.value && i < 5) {
                                       const nextInput = document.querySelector(
                                         `input[data-2fa-digit="${i + 1}"]`
+                                      ) as HTMLInputElement;
+                                      nextInput?.focus();
+                                    }
+                                  }}
+                                  onPaste={(e) => {
+                                    // Pegar el código completo (habitual con gestores de
+                                    // contraseñas que también guardan TOTP) solo llenaba la
+                                    // primera casilla y perdía el resto en silencio —
+                                    // repartirlo entre las 6 casillas en su lugar.
+                                    const pasted = e.clipboardData.getData('text').replace(/\D/g, '');
+                                    if (pasted.length > 1) {
+                                      e.preventDefault();
+                                      const code = pasted.slice(0, 6);
+                                      setTwoFa((prev) => ({ ...prev, verifyCode: code }));
+                                      const lastIndex = Math.min(code.length, 6) - 1;
+                                      const nextInput = document.querySelector(
+                                        `input[data-2fa-digit="${lastIndex}"]`
                                       ) as HTMLInputElement;
                                       nextInput?.focus();
                                     }
