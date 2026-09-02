@@ -650,7 +650,7 @@ export default function OrderDetailPage() {
                       <div className="flex items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
                         <Info className="w-4 h-4 text-origen-pino shrink-0 mt-0.5" aria-hidden />
                         <p className="text-xs text-text-subtle leading-relaxed">
-                          Este pedido incluye productos de varios productores. La factura consolidada la gestiona el comprador.
+                          La factura de este productor para este pedido está en proceso de generación. Vuelve a comprobarlo en unos minutos.
                         </p>
                       </div>
                     </div>
