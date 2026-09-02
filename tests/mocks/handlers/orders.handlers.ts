@@ -108,6 +108,20 @@ function computeMockStats() {
   };
 }
 
+// ─── Cuenta atrás de cobros pendientes (payouts) ──────────────────────────────
+
+export const mockSellerPayouts = [
+  {
+    orderId: 'ord-sel-002',
+    orderNumber: 'ORG-2024-00002',
+    productName: 'Queso Manchego',
+    quantity: 2,
+    deliveredAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    transferScheduledAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
+    netAmountCents: 3825,
+  },
+];
+
 // ─── Handlers normales ────────────────────────────────────────────────────────
 
 export const ordersHandlers = [
@@ -116,6 +130,25 @@ export const ordersHandlers = [
   // confunda con una petición de detalle (mismo criterio que el backend real).
   http.get(`${BASE}/orders/seller/stats`, () => {
     return HttpResponse.json(computeMockStats());
+  }),
+
+  // GET /orders/seller/payouts — cuenta atrás de Transfers pendientes
+  // IMPORTANTE: declarado antes de /orders/seller/:id (mismo criterio que
+  // stats/invoices, y que el backend real).
+  http.get(`${BASE}/orders/seller/payouts`, ({ request }) => {
+    const url = new URL(request.url);
+    const page  = parseInt(url.searchParams.get('page')  ?? '1',  10);
+    const limit = parseInt(url.searchParams.get('limit') ?? '20', 10);
+
+    const start     = (page - 1) * limit;
+    const paginated = mockSellerPayouts.slice(start, start + limit);
+
+    return HttpResponse.json({
+      items: paginated,
+      total: mockSellerPayouts.length,
+      page,
+      limit,
+    });
   }),
 
   // GET /orders/seller — lista paginada
@@ -204,5 +237,13 @@ export const ordersStatsEmptyHandler = http.get(`${BASE}/orders/seller/stats`, (
 );
 
 export const ordersStatsErrorHandler = http.get(`${BASE}/orders/seller/stats`, () =>
+  HttpResponse.json({ message: 'Internal server error' }, { status: 500 }),
+);
+
+export const ordersPayoutsEmptyHandler = http.get(`${BASE}/orders/seller/payouts`, () =>
+  HttpResponse.json({ items: [], total: 0, page: 1, limit: 20 }),
+);
+
+export const ordersPayoutsErrorHandler = http.get(`${BASE}/orders/seller/payouts`, () =>
   HttpResponse.json({ message: 'Internal server error' }, { status: 500 }),
 );

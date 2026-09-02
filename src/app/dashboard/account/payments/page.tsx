@@ -11,10 +11,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { format, formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, StatCard, PageLoader, PageError, MobilePullRefresh, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, toast } from '@arcediano/ux-library';
-import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2, X } from 'lucide-react';
+import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2, X, Clock } from 'lucide-react';
 import { loadProducerProfile } from '@/lib/api/onboarding';
+import { fetchSellerPayouts, type SellerPayoutItem } from '@/lib/api/orders';
 import { openStripeDashboard } from '@/lib/stripe/connect-client';
 import { useStripeConnectPolling } from '@/lib/stripe/use-stripe-connect-polling';
 import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-connect-onboarding';
@@ -48,6 +51,8 @@ export default function PaymentsPage() {
   const [lastName, setLastName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [payouts, setPayouts] = useState<SellerPayoutItem[]>([]);
+  const [payoutsTotal, setPayoutsTotal] = useState(0);
 
   // Extraer loadPaymentState a useCallback para reutilizar en múltiples efectos
   const loadPaymentState = useCallback(async () => {
@@ -153,6 +158,28 @@ export default function PaymentsPage() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [stripeAccountId, loadPaymentState]);
+
+  // Cuenta atrás por pedido: solo tiene sentido con cuenta de cobro activa.
+  // Vista previa de los próximos 5 Transfers pendientes (ya vienen ordenados
+  // por fecha ascendente desde el backend) — no es una tabla paginada, solo
+  // detalle para complementar el mensaje general de "14 días tras la entrega".
+  useEffect(() => {
+    if (paymentStage !== 'connected') return;
+    let mounted = true;
+
+    void (async () => {
+      const res = await fetchSellerPayouts({ page: 1, limit: 5 });
+      if (!mounted) return;
+      if (res.data) {
+        setPayouts(res.data.items);
+        setPayoutsTotal(res.data.total);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [paymentStage]);
 
   // Refresco real del estado embebido — no depende de visibilitychange.
   // Nivel rápido mientras el panel está abierto, nivel lento (más
@@ -532,6 +559,42 @@ export default function PaymentsPage() {
                           a ejecutarse. Si se devuelve después de que ya la hayas cobrado, el importe se
                           descuenta de tu siguiente venta.
                         </p>
+
+                        {payouts.length > 0 && (
+                          <div className="mt-4 space-y-2">
+                            <p className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle">
+                              Próximos cobros
+                            </p>
+                            {payouts.map((payout) => (
+                              <button
+                                key={payout.orderId}
+                                type="button"
+                                onClick={() => router.push(`/dashboard/orders/${payout.orderId}`)}
+                                className="w-full flex items-center gap-3 rounded-xl border border-border-subtle bg-surface-alt p-3 text-left hover:border-origen-pradera/40 transition-colors min-h-11"
+                              >
+                                <Clock className="h-4 w-4 text-hoja-tinta shrink-0" aria-hidden="true" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-origen-bosque truncate">
+                                    Pedido {payout.orderNumber}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    {formatDistanceToNow(new Date(payout.transferScheduledAt), { addSuffix: true, locale: es })}
+                                    {' · '}
+                                    {format(new Date(payout.transferScheduledAt), 'dd MMM yyyy', { locale: es })}
+                                  </p>
+                                </div>
+                                <span className="text-sm font-bold text-origen-bosque tabular-nums shrink-0">
+                                  {payout.netAmount.toFixed(2)} €
+                                </span>
+                              </button>
+                            ))}
+                            {payoutsTotal > payouts.length && (
+                              <p className="text-xs text-muted-foreground text-center pt-1">
+                                +{payoutsTotal - payouts.length} pedido{payoutsTotal - payouts.length === 1 ? '' : 's'} más pendiente{payoutsTotal - payouts.length === 1 ? '' : 's'} de cobro
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   )}
