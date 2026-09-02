@@ -697,3 +697,89 @@ export async function fetchSellerPayouts(params?: {
     };
   }
 }
+
+// ─── Facturas de comisión mensuales ───────────────────────────────────────────
+
+interface BackendCommissionInvoiceItem {
+  id: string;
+  period: string;
+  invoiceNumber: string;
+  status: 'draft' | 'issued' | 'cancelled';
+  subtotal: number;
+  vatAmount: number;
+  total: number;
+  orderCount: number;
+  issuedAt: string | null;
+}
+
+interface BackendCommissionInvoicesResponse {
+  items: BackendCommissionInvoiceItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface CommissionInvoiceItem {
+  id: string;
+  period: string;
+  invoiceNumber: string;
+  status: 'draft' | 'issued' | 'cancelled';
+  subtotal: number;
+  vatAmount: number;
+  total: number;
+  orderCount: number;
+  issuedAt: string | null;
+}
+
+/**
+ * Obtiene el listado paginado de facturas de comisión mensuales (Origen
+ * al productor, Sección 4 de modelo-comision-facturacion-mensual-stripe)
+ * del productor autenticado.
+ * GET /api/v1/orders/seller/commission-invoices
+ */
+export async function fetchSellerCommissionInvoices(params?: {
+  page?: number;
+  limit?: number;
+}): Promise<ApiResponse<{ items: CommissionInvoiceItem[]; total: number; page: number; limit: number }>> {
+  try {
+    const res = await gatewayClient.get<BackendCommissionInvoicesResponse>(
+      '/orders/seller/commission-invoices',
+      {
+        params: {
+          ...(params?.page !== undefined ? { page: params.page } : {}),
+          ...(params?.limit !== undefined ? { limit: params.limit } : {}),
+        },
+      },
+    );
+
+    const items = (res.items ?? []).map((item) => ({
+      id: item.id,
+      period: item.period,
+      invoiceNumber: item.invoiceNumber,
+      status: item.status,
+      subtotal: item.subtotal,
+      vatAmount: item.vatAmount,
+      total: item.total,
+      orderCount: item.orderCount,
+      issuedAt: item.issuedAt,
+    }));
+
+    return {
+      data: {
+        items,
+        total: res.total,
+        page: res.page,
+        limit: res.limit,
+      },
+      status: 200,
+    };
+  } catch (err) {
+    console.error('[orders] fetchSellerCommissionInvoices', err);
+    const message =
+      err instanceof GatewayError ? err.message : 'Error al cargar las facturas de comisión';
+    return {
+      error: message,
+      status: err instanceof GatewayError ? err.status : 500,
+    };
+  }
+}
