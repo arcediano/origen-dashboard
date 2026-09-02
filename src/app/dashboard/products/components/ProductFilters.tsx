@@ -297,6 +297,9 @@ export function ProductFilters({
           </SelectContent>
         </Select>
 
+        {/* Separador visual antes del toggle de vista, que no es un filtro */}
+        <div className="w-px h-6 bg-border-subtle flex-shrink-0" aria-hidden="true" />
+
         {/* Toggle grid/lista */}
         {viewModeToggle}
       </div>

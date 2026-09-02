@@ -143,8 +143,9 @@ export function OrderFilters({
         Contenedor agrupador: bg-surface-alt (blanco) sobre el fondo crema
         garantiza contraste visual. Sin flex-wrap para mantener una única línea.
         El Select recibe className="w-auto" para anular el w-full del wrapper.
-        Los inputs de importe usan bg-muted/50 que sobre blanco (surface-alt)
-        contrasta bien (verde pastel sobre blanco, no sobre crema).
+        Período e importe se agrupan cada uno en su propio bloque (mismo
+        patrón que el grupo de valoración de ReviewFilters) para separar
+        visualmente los controles relacionados dentro de la barra.
       */}
       <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
         {/* Búsqueda con debounce */}
@@ -174,68 +175,78 @@ export function OrderFilters({
           </SelectContent>
         </Select>
 
-        {/* Período: desde */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          <span className="text-xs text-text-subtle whitespace-nowrap">Desde</span>
-          <DateInput
-            value={formatDate(filters.dateFrom)}
-            onChange={(e) => set('dateFrom', e.target.value ? new Date(e.target.value) : undefined)}
-            inputSize="sm"
-            className="w-[148px]"
-            aria-label="Fecha desde"
-          />
+        {/* Período: desde/hasta agrupados */}
+        <div
+          className="flex items-center gap-2 rounded-xl border border-border-subtle px-2 py-1 flex-shrink-0"
+          role="group"
+          aria-label="Filtrar por periodo"
+        >
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-text-subtle whitespace-nowrap">Desde</span>
+            <DateInput
+              value={formatDate(filters.dateFrom)}
+              onChange={(e) => set('dateFrom', e.target.value ? new Date(e.target.value) : undefined)}
+              inputSize="sm"
+              className="w-[140px]"
+              aria-label="Fecha desde"
+            />
+          </div>
+          <div className="w-px h-6 bg-border-subtle" aria-hidden="true" />
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-text-subtle whitespace-nowrap">Hasta</span>
+            <DateInput
+              value={formatDate(filters.dateTo)}
+              onChange={(e) => set('dateTo', e.target.value ? new Date(e.target.value) : undefined)}
+              inputSize="sm"
+              className="w-[140px]"
+              aria-label="Fecha hasta"
+            />
+          </div>
         </div>
 
-        {/* Período: hasta */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          <span className="text-xs text-text-subtle whitespace-nowrap">Hasta</span>
-          <DateInput
-            value={formatDate(filters.dateTo)}
-            onChange={(e) => set('dateTo', e.target.value ? new Date(e.target.value) : undefined)}
-            inputSize="sm"
-            className="w-[148px]"
-            aria-label="Fecha hasta"
-          />
-        </div>
-
-        {/* Importe mínimo */}
-        <div className="relative flex items-center flex-shrink-0 w-[100px]">
-          <span className="absolute left-3 text-sm text-text-subtle pointer-events-none select-none">€</span>
-          <input
-            type="number"
-            min={0}
-            step={0.01}
-            value={filters.minAmount ?? ''}
-            onChange={(e) => set('minAmount', e.target.value ? Number(e.target.value) : undefined)}
-            placeholder="Mín"
-            aria-label="Importe mínimo"
-            className={cn(
-              'w-full h-10 rounded-xl border bg-muted/50 border-transparent pl-7 pr-3 text-sm',
-              'placeholder:text-text-disabled text-origen-oscuro',
-              'hover:bg-muted/70 focus:outline-none focus:bg-white focus:border-origen-pradera/30 focus:ring-2 focus:ring-origen-pradera/15',
-              'transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
-            )}
-          />
-        </div>
-
-        {/* Importe máximo */}
-        <div className="relative flex items-center flex-shrink-0 w-[100px]">
-          <span className="absolute left-3 text-sm text-text-subtle pointer-events-none select-none">€</span>
-          <input
-            type="number"
-            min={0}
-            step={0.01}
-            value={filters.maxAmount ?? ''}
-            onChange={(e) => set('maxAmount', e.target.value ? Number(e.target.value) : undefined)}
-            placeholder="Máx"
-            aria-label="Importe máximo"
-            className={cn(
-              'w-full h-10 rounded-xl border bg-muted/50 border-transparent pl-7 pr-3 text-sm',
-              'placeholder:text-text-disabled text-origen-oscuro',
-              'hover:bg-muted/70 focus:outline-none focus:bg-white focus:border-origen-pradera/30 focus:ring-2 focus:ring-origen-pradera/15',
-              'transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
-            )}
-          />
+        {/* Importe: mínimo/máximo agrupados */}
+        <div
+          className="flex items-center gap-2 h-10 px-3 rounded-xl bg-muted/50 border border-transparent hover:bg-muted/70 transition-colors flex-shrink-0"
+          role="group"
+          aria-label="Filtrar por importe"
+        >
+          <div className="relative flex items-center w-[76px]">
+            <span className="absolute left-0 text-sm text-text-subtle pointer-events-none select-none">€</span>
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              value={filters.minAmount ?? ''}
+              onChange={(e) => set('minAmount', e.target.value ? Number(e.target.value) : undefined)}
+              placeholder="Mín"
+              aria-label="Importe mínimo"
+              className={cn(
+                'w-full h-6 bg-transparent border-0 pl-4 pr-0 text-sm',
+                'placeholder:text-text-disabled text-origen-oscuro',
+                'focus:outline-none',
+                '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+              )}
+            />
+          </div>
+          <span className="text-xs text-text-subtle select-none">–</span>
+          <div className="relative flex items-center w-[76px]">
+            <span className="absolute left-0 text-sm text-text-subtle pointer-events-none select-none">€</span>
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              value={filters.maxAmount ?? ''}
+              onChange={(e) => set('maxAmount', e.target.value ? Number(e.target.value) : undefined)}
+              placeholder="Máx"
+              aria-label="Importe máximo"
+              className={cn(
+                'w-full h-6 bg-transparent border-0 pl-4 pr-0 text-sm',
+                'placeholder:text-text-disabled text-origen-oscuro',
+                'focus:outline-none',
+                '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+              )}
+            />
+          </div>
         </div>
       </div>
 
