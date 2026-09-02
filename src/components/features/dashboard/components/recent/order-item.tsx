@@ -7,7 +7,8 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Clock, Package, Truck, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
+import { Badge, type BadgeVariant } from '@arcediano/ux-library';
 
 interface OrderItemProps {
   id: string;
@@ -19,6 +20,18 @@ interface OrderItemProps {
   date: string;
 }
 
+// Mismo mapeo de estado que OrderCard.tsx (lista de pedidos) — reutiliza
+// Badge de origen-UXLibrary en vez de clases de color hardcodeadas para que
+// ambas vistas de pedidos se mantengan consistentes entre sí.
+const STATUS_CONFIG: Record<OrderItemProps['status'], { label: string; variant: BadgeVariant; icon: React.ElementType }> = {
+  pending: { label: 'Pendiente', variant: 'warning', icon: Clock },
+  processing: { label: 'Procesando', variant: 'info', icon: Package },
+  shipped: { label: 'Enviado', variant: 'info', icon: Truck },
+  delivered: { label: 'Entregado', variant: 'success', icon: CheckCircle2 },
+  cancelled: { label: 'Cancelado', variant: 'danger', icon: XCircle },
+  returned: { label: 'Devolución solicitada', variant: 'warning', icon: RotateCcw },
+};
+
 export function OrderItem({
   id,
   orderNumber,
@@ -28,52 +41,8 @@ export function OrderItem({
   status,
   date
 }: OrderItemProps) {
-  const statusConfig = {
-    pending: {
-      label: 'Pendiente',
-      color: 'bg-feedback-warning',
-      bg: 'bg-feedback-warning-subtle',
-      text: 'text-feedback-warning-text',
-      border: 'border-feedback-warning/30'
-    },
-    processing: {
-      label: 'Procesando',
-      color: 'bg-origen-hoja',
-      bg: 'bg-origen-pastel',
-      text: 'text-origen-pino',
-      border: 'border-origen-hoja/30'
-    },
-    shipped: {
-      label: 'Enviado',
-      color: 'bg-origen-bosque',
-      bg: 'bg-origen-crema',
-      text: 'text-origen-bosque',
-      border: 'border-origen-bosque/20'
-    },
-    delivered: {
-      label: 'Entregado',
-      color: 'bg-feedback-success',
-      bg: 'bg-feedback-success-subtle',
-      text: 'text-feedback-success-text',
-      border: 'border-feedback-success/30'
-    },
-    cancelled: {
-      label: 'Cancelado',
-      color: 'bg-feedback-danger',
-      bg: 'bg-feedback-danger-subtle',
-      text: 'text-feedback-danger-text',
-      border: 'border-feedback-danger-border'
-    },
-    returned: {
-      label: 'Devolución solicitada',
-      color: 'bg-feedback-warning',
-      bg: 'bg-feedback-warning-subtle',
-      text: 'text-feedback-warning-text',
-      border: 'border-feedback-warning/30'
-    }
-  };
-
-  const config = statusConfig[status];
+  const config = STATUS_CONFIG[status];
+  const StatusIcon = config.icon;
 
   return (
     <Link href={`/dashboard/orders/${id}`} className="block group relative">
@@ -101,14 +70,14 @@ export function OrderItem({
                 <h3 className="font-semibold text-sm sm:text-base lg:text-lg text-origen-bosque truncate">{orderNumber}</h3>
                 <span className="text-xs text-text-subtle hidden sm:inline">{date}</span>
               </div>
-              <span className={cn(
-                "px-2 py-0.5 text-[10px] sm:text-xs font-medium rounded-full border flex-shrink-0 ml-2",
-                config.bg,
-                config.text,
-                config.border
-              )}>
+              <Badge
+                variant={config.variant}
+                size="xs"
+                icon={<StatusIcon className="w-3 h-3" />}
+                className="flex-shrink-0 ml-2"
+              >
                 {config.label}
-              </span>
+              </Badge>
             </div>
             
             <div className="flex items-center justify-between">
