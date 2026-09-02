@@ -294,6 +294,8 @@ export interface Product {
   scheduledAt?: Date;
   /** Campos que dispararon la última transición automática a PENDING_APPROVAL */
   lastReviewTriggerFields?: string[];
+  /** Producto INACTIVE sin cambios desde que se pausó -> puede reactivarse directamente sin revisión. */
+  hasUnreviewedChanges?: boolean;
   sales?: number;
   revenue?: number;
   rating?: number;

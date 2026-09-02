@@ -434,10 +434,17 @@ function StatusCard({
   if (!product.sku) missingFields.push('SKU');
   const isComplete = missingFields.length === 0;
 
-  // Puede enviar a revisión si el borrador está completo, o si fue rechazado (inactive) y lo corrigió
-  const canSubmitForReview = (isDraft || isInactive) && isComplete;
+  // Puede enviar a revisión si el borrador está completo, o si está inactivo con cambios
+  // sin revisar desde que se pausó (si no tiene cambios, la vía es reactivar directamente).
+  const canSubmitForReview =
+    (isDraft && isComplete) || (isInactive && isComplete && !!product.hasUnreviewedChanges);
+
+  // Reactivación directa: solo si está inactivo y no tiene cambios sin revisar desde que se pausó.
+  const canReactivateDirectly = isInactive && !product.hasUnreviewedChanges;
 
   const transitions = [
+    // Volver a activar directamente (INACTIVE sin cambios → ACTIVE, sin pasar por revisión)
+    { to: 'active'           as const, label: 'Volver a activar',     icon: CheckCircle, variant: 'primary'   as const, show: canReactivateDirectly },
     // Enviar a revisión (DRAFT o INACTIVE completo → PENDING_APPROVAL)
     { to: 'pending_approval' as const, label: 'Enviar a revisión',    icon: Send,        variant: 'primary'   as const, show: canSubmitForReview },
     // Retirar de revisión (PENDING_APPROVAL → DRAFT)
@@ -522,12 +529,14 @@ function StatusCard({
         </Alert>
       )}
 
-      {/* Producto inactivo — puede corregir y re-enviar */}
+      {/* Producto inactivo — reactivar directamente o, si tiene cambios, re-enviar a revisión */}
       {isInactive && isComplete && (
         <div className="rounded-2xl border border-origen-pradera/20 bg-origen-crema/40 p-3 flex items-start gap-2">
           <Info className="w-3.5 h-3.5 text-hoja-tinta shrink-0 mt-0.5" />
           <p className="text-[11px] text-origen-bosque leading-relaxed">
-            El producto está inactivo. Si realizaste correcciones, puedes volver a enviarlo a revisión.
+            {canReactivateDirectly
+              ? 'El producto está inactivo pero no tiene cambios desde que se pausó. Puedes volver a activarlo directamente.'
+              : 'El producto está inactivo y tiene cambios sin revisar desde que se pausó. Debes enviarlo a revisión para publicarlo de nuevo.'}
           </p>
         </div>
       )}
