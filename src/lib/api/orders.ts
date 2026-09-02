@@ -288,6 +288,10 @@ export interface SellerOrdersParams {
   search?: string;
   page?: number;
   limit?: number;
+  dateFrom?: string;
+  dateTo?: string;
+  minAmount?: number;
+  maxAmount?: number;
 }
 
 export interface InvoiceFilterParams {
@@ -315,6 +319,10 @@ export async function fetchSellerOrders(
         ...(params?.limit !== undefined ? { limit: params.limit } : {}),
         ...(params?.status ? { status: params.status } : {}),
         ...(params?.search ? { search: params.search } : {}),
+        ...(params?.dateFrom ? { dateFrom: params.dateFrom } : {}),
+        ...(params?.dateTo ? { dateTo: params.dateTo } : {}),
+        ...(params?.minAmount !== undefined ? { minAmount: params.minAmount } : {}),
+        ...(params?.maxAmount !== undefined ? { maxAmount: params.maxAmount } : {}),
       },
     });
 
@@ -401,6 +409,10 @@ export async function fetchOrders(params?: {
         limit: params?.limit,
         status: params?.filters?.status,
         search: params?.filters?.search,
+        dateFrom: params?.filters?.dateFrom?.toISOString(),
+        dateTo: params?.filters?.dateTo?.toISOString(),
+        minAmount: params?.filters?.minAmount,
+        maxAmount: params?.filters?.maxAmount,
       }),
       fetchSellerOrderStats(),
     ]);
