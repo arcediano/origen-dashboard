@@ -108,6 +108,32 @@ describe('fetchSellerOrders', () => {
     expect(result.status).toBeGreaterThanOrEqual(500);
   });
 
+  it('envía status, search, dateFrom, dateTo, minAmount y maxAmount como query params (regression: filtros de pedidos ignorados)', async () => {
+    let capturedParams: URLSearchParams | undefined;
+    server.use(
+      http.get(`${BASE}/orders/seller`, ({ request }) => {
+        capturedParams = new URL(request.url).searchParams;
+        return HttpResponse.json({ items: [], total: 0, page: 1, limit: 20 });
+      }),
+    );
+
+    await fetchSellerOrders({
+      status: 'pending',
+      search: 'ORG-2026',
+      dateFrom: '2026-01-01T00:00:00.000Z',
+      dateTo: '2026-01-31T00:00:00.000Z',
+      minAmount: 10,
+      maxAmount: 100,
+    });
+
+    expect(capturedParams?.get('status')).toBe('pending');
+    expect(capturedParams?.get('search')).toBe('ORG-2026');
+    expect(capturedParams?.get('dateFrom')).toBe('2026-01-01T00:00:00.000Z');
+    expect(capturedParams?.get('dateTo')).toBe('2026-01-31T00:00:00.000Z');
+    expect(capturedParams?.get('minAmount')).toBe('10');
+    expect(capturedParams?.get('maxAmount')).toBe('100');
+  });
+
   it('devuelve lista vacía cuando la API no devuelve pedidos', async () => {
     server.use(ordersEmptyHandler);
     const result = await fetchSellerOrders();
@@ -277,6 +303,30 @@ describe('fetchOrders', () => {
     expect(typeof stats.delivered).toBe('number');
     expect(typeof stats.totalRevenue).toBe('number');
     expect(typeof stats.averageOrderValue).toBe('number');
+  });
+
+  it('reenvía dateFrom, dateTo, minAmount y maxAmount desde filters (regression: filtros de pedidos ignorados)', async () => {
+    let capturedParams: URLSearchParams | undefined;
+    server.use(
+      http.get(`${BASE}/orders/seller`, ({ request }) => {
+        capturedParams = new URL(request.url).searchParams;
+        return HttpResponse.json({ items: [], total: 0, page: 1, limit: 20 });
+      }),
+    );
+
+    await fetchOrders({
+      filters: {
+        dateFrom: new Date('2026-01-01T00:00:00.000Z'),
+        dateTo: new Date('2026-01-31T00:00:00.000Z'),
+        minAmount: 10,
+        maxAmount: 100,
+      },
+    });
+
+    expect(capturedParams?.get('dateFrom')).toBe('2026-01-01T00:00:00.000Z');
+    expect(capturedParams?.get('dateTo')).toBe('2026-01-31T00:00:00.000Z');
+    expect(capturedParams?.get('minAmount')).toBe('10');
+    expect(capturedParams?.get('maxAmount')).toBe('100');
   });
 
   it('propaga el error de fetchSellerOrders', async () => {
