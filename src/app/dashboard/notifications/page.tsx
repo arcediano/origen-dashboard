@@ -403,26 +403,32 @@ export default function NotificationsPage() {
               </SelectContent>
             </Select>
 
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <span className="text-xs text-text-subtle whitespace-nowrap">Desde</span>
-              <DateInput
-                value={dateFrom}
-                onChange={(e) => applyDateFrom(e.target.value)}
-                inputSize="sm"
-                className="w-[148px]"
-                aria-label="Fecha desde"
-              />
-            </div>
-
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <span className="text-xs text-text-subtle whitespace-nowrap">Hasta</span>
-              <DateInput
-                value={dateTo}
-                onChange={(e) => applyDateTo(e.target.value)}
-                inputSize="sm"
-                className="w-[148px]"
-                aria-label="Fecha hasta"
-              />
+            <div
+              className="flex items-center gap-2 rounded-xl border border-border-subtle px-2 py-1 flex-shrink-0"
+              role="group"
+              aria-label="Filtrar por periodo"
+            >
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-text-subtle whitespace-nowrap">Desde</span>
+                <DateInput
+                  value={dateFrom}
+                  onChange={(e) => applyDateFrom(e.target.value)}
+                  inputSize="sm"
+                  className="w-[140px]"
+                  aria-label="Fecha desde"
+                />
+              </div>
+              <div className="w-px h-6 bg-border-subtle" aria-hidden="true" />
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-text-subtle whitespace-nowrap">Hasta</span>
+                <DateInput
+                  value={dateTo}
+                  onChange={(e) => applyDateTo(e.target.value)}
+                  inputSize="sm"
+                  className="w-[140px]"
+                  aria-label="Fecha hasta"
+                />
+              </div>
             </div>
           </div>
 
