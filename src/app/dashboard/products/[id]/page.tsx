@@ -546,7 +546,7 @@ function StatusCard({
                 disabled={isUpdating}
                 loading={isUpdating}
                 loadingText="Actualizando..."
-                className="w-full justify-start"
+                className="justify-start"
               >
                 {t.label}
               </Button>
