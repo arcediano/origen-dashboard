@@ -607,3 +607,81 @@ export async function fetchSellerInvoices(
     };
   }
 }
+
+// ─── Cobros: cuenta atrás por pedido ──────────────────────────────────────────
+
+interface BackendPayoutItem {
+  orderId: string;
+  orderNumber: string;
+  productName: string;
+  quantity: number;
+  deliveredAt: string | null;
+  transferScheduledAt: string;
+  netAmountCents: number;
+}
+
+interface BackendPayoutsResponse {
+  items: BackendPayoutItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface SellerPayoutItem {
+  orderId: string;
+  orderNumber: string;
+  productName: string;
+  quantity: number;
+  deliveredAt: string | null;
+  transferScheduledAt: string;
+  netAmount: number;
+}
+
+/**
+ * Obtiene el listado paginado de Transfers pendientes (aún no ejecutados)
+ * por pedido del productor autenticado, para mostrar la cuenta atrás
+ * concreta de cada cobro — no solo el mensaje general de "14 días tras la
+ * entrega".
+ * GET /api/v1/orders/seller/payouts
+ */
+export async function fetchSellerPayouts(params?: {
+  page?: number;
+  limit?: number;
+}): Promise<ApiResponse<{ items: SellerPayoutItem[]; total: number; page: number; limit: number }>> {
+  try {
+    const res = await gatewayClient.get<BackendPayoutsResponse>('/orders/seller/payouts', {
+      params: {
+        ...(params?.page !== undefined ? { page: params.page } : {}),
+        ...(params?.limit !== undefined ? { limit: params.limit } : {}),
+      },
+    });
+
+    const items = (res.items ?? []).map((item) => ({
+      orderId: item.orderId,
+      orderNumber: item.orderNumber,
+      productName: item.productName,
+      quantity: item.quantity,
+      deliveredAt: item.deliveredAt,
+      transferScheduledAt: item.transferScheduledAt,
+      netAmount: item.netAmountCents / 100,
+    }));
+
+    return {
+      data: {
+        items,
+        total: res.total,
+        page: res.page,
+        limit: res.limit,
+      },
+      status: 200,
+    };
+  } catch (err) {
+    console.error('[orders] fetchSellerPayouts', err);
+    const message =
+      err instanceof GatewayError ? err.message : 'Error al cargar los cobros pendientes';
+    return {
+      error: message,
+      status: err instanceof GatewayError ? err.status : 500,
+    };
+  }
+}

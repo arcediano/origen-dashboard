@@ -17,12 +17,16 @@ import {
   fetchSellerOrderInvoice,
   updateOrderStatus,
   fetchOrderStats,
+  fetchSellerPayouts,
 } from '@/lib/api/orders';
 import {
   mockSellerOrders,
+  mockSellerPayouts,
   ordersEmptyHandler,
   ordersErrorHandler,
   ordersStatsErrorHandler,
+  ordersPayoutsEmptyHandler,
+  ordersPayoutsErrorHandler,
   makeBackendOrder,
 } from '../../mocks/handlers/orders.handlers';
 import { TEST_API_BASE } from '../../mocks/api-base';
@@ -506,6 +510,43 @@ describe('fetchOrderStats', () => {
   it('devuelve error cuando la API responde 500', async () => {
     server.use(ordersStatsErrorHandler);
     const result = await fetchOrderStats();
+    expect(result.error).toBeDefined();
+  });
+});
+
+// ── fetchSellerPayouts ────────────────────────────────────────────────────────
+
+describe('fetchSellerPayouts', () => {
+  it('devuelve status 200 con el listado paginado', async () => {
+    const result = await fetchSellerPayouts();
+    expect(result.status).toBe(200);
+    expect(result.data).toMatchObject({
+      total: mockSellerPayouts.length,
+      page: 1,
+      limit: 20,
+    });
+    expect(result.data!.items).toHaveLength(mockSellerPayouts.length);
+  });
+
+  it('convierte netAmountCents (backend) a netAmount en euros', async () => {
+    const result = await fetchSellerPayouts();
+    expect(result.data!.items[0]).toMatchObject({
+      orderId: mockSellerPayouts[0].orderId,
+      orderNumber: mockSellerPayouts[0].orderNumber,
+      netAmount: mockSellerPayouts[0].netAmountCents / 100,
+    });
+  });
+
+  it('devuelve items vacío cuando no hay Transfers pendientes', async () => {
+    server.use(ordersPayoutsEmptyHandler);
+    const result = await fetchSellerPayouts();
+    expect(result.data!.items).toHaveLength(0);
+    expect(result.data!.total).toBe(0);
+  });
+
+  it('devuelve error cuando la API responde 500', async () => {
+    server.use(ordersPayoutsErrorHandler);
+    const result = await fetchSellerPayouts();
     expect(result.error).toBeDefined();
   });
 });
