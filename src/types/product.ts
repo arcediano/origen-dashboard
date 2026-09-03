@@ -288,10 +288,9 @@ export interface Product {
   certifications: Certification[];
   productionInfo?: ProductionInfo;
   attributes: DynamicAttribute[];
-  status: 'draft' | 'pending_approval' | 'active' | 'inactive' | 'out_of_stock' | 'scheduled';
+  status: 'draft' | 'pending_approval' | 'active' | 'inactive' | 'out_of_stock';
   visibility: 'public' | 'private' | 'password';
   publishedAt?: Date;
-  scheduledAt?: Date;
   /** Campos que dispararon la última transición automática a PENDING_APPROVAL */
   lastReviewTriggerFields?: string[];
   /** Producto INACTIVE sin cambios desde que se pausó -> puede reactivarse directamente sin revisión. */
@@ -340,7 +339,7 @@ export interface ProductFormData {
   certifications: Certification[];
   productionInfo: ProductionInfo;
   attributes: DynamicAttribute[];
-  status: 'draft' | 'pending_approval' | 'active' | 'scheduled';
+  status: 'draft' | 'pending_approval' | 'active';
   visibility: 'public' | 'private' | 'password';
 }
 

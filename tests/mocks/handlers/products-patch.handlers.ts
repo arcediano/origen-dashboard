@@ -1,6 +1,6 @@
 /**
  * @file products-patch.handlers.ts
- * @description Handlers MSW para PATCH /products/:id/status y PATCH /products/:id/schedule.
+ * @description Handlers MSW para PATCH /products/:id/status.
  *              Se usan exclusivamente en tests de products.api.test.ts (override con server.use).
  */
 
@@ -23,22 +23,5 @@ export const productPatchHandlers = [
     }
 
     return HttpResponse.json({ id, status: body.status });
-  }),
-
-  // PATCH /products/:id/schedule
-  http.patch(`${BASE}/products/:id/schedule`, async ({ params, request }) => {
-    const body = await request.json() as { scheduledAt?: string };
-    const { id } = params;
-
-    if (id === 'not-found') {
-      return HttpResponse.json({ message: 'Producto no encontrado' }, { status: 404 });
-    }
-
-    const scheduledAt = body.scheduledAt ? new Date(body.scheduledAt) : null;
-    if (!scheduledAt || scheduledAt <= new Date()) {
-      return HttpResponse.json({ message: 'La fecha de publicación debe ser futura' }, { status: 400 });
-    }
-
-    return HttpResponse.json({ id, status: 'SCHEDULED', scheduledAt: scheduledAt.toISOString() });
   }),
 ];

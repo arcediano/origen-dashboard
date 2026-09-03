@@ -1075,25 +1075,6 @@ export async function updateProductStatus(
   }
 }
 
-/**
- * Programa la publicación de un producto en una fecha futura.
- * Ruta backend: PATCH /products/:id/schedule
- */
-export async function scheduleProduct(
-  productId: string,
-  scheduledAt: Date,
-): Promise<ApiResponse<{ id: string; status: string; scheduledAt: string }>> {
-  try {
-    const raw = await gatewayClient.patch<{ id: string; status: string; scheduledAt: string }>(
-      `/products/${productId}/schedule`,
-      { scheduledAt: scheduledAt.toISOString() },
-    );
-    return { data: raw, status: 200 };
-  } catch (error) {
-    return handleError(error, 'scheduleProduct');
-  }
-}
-
 // ─── OFERTAS FLASH AGREGADAS ──────────────────────────────────────────────────
 
 /**
