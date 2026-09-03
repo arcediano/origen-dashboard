@@ -168,8 +168,11 @@ export function ReviewFilters({
         Los Select reciben className="w-auto" para anular el w-full del wrapper.
         Los bloques de StarRating y Checkboxes usan bg-muted/50 que sobre
         blanco (surface-alt) es perfectamente visible (pastel verdoso vs crema).
+        Ajuste (2026-09-03, petición del humano): barra más compacta -- menos
+        padding/gap y controles h-9 en vez de h-10 -- tras revertir el intento
+        de sidebar de 280px que rompía el responsive.
       */}
-      <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
+      <div className="hidden lg:flex items-center gap-1.5 bg-surface-alt border border-border-subtle rounded-xl px-2.5 py-1.5 shadow-sm">
         {/* Búsqueda con debounce */}
         <SearchInput
           value={localSearch}
@@ -181,12 +184,12 @@ export function ReviewFilters({
           placeholder="Buscar reseñas..."
           aria-label="Buscar reseñas"
           className="min-w-[180px] flex-1"
-          size="md"
+          size="sm"
         />
 
         {/* Estado — min-w calibrado a "Rechazadas" */}
         <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as ReviewStatus)} className="w-auto">
-          <SelectTrigger className="min-w-[130px] max-w-[150px] h-10" tone="subtle">
+          <SelectTrigger className="min-w-[130px] max-w-[150px] h-9" tone="subtle">
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
           <SelectContent>
@@ -198,7 +201,7 @@ export function ReviewFilters({
 
         {/* Valoración: StarRating interactivo con reset al pulsar la misma estrella */}
         <div
-          className="flex items-center gap-2 h-10 px-3 rounded-xl bg-muted/50 border border-transparent hover:bg-muted/70 transition-colors flex-shrink-0"
+          className="flex items-center gap-1.5 h-9 px-2.5 rounded-xl bg-muted/50 border border-transparent hover:bg-muted/70 transition-colors flex-shrink-0"
           role="group"
           aria-label="Filtrar por valoración"
         >
@@ -229,7 +232,7 @@ export function ReviewFilters({
         </div>
 
         {/* Booleanos: checkboxes inline compactos */}
-        <div className="flex items-center gap-3 h-10 px-3 rounded-xl bg-muted/50 border border-transparent flex-shrink-0">
+        <div className="flex items-center gap-2.5 h-9 px-2.5 rounded-xl bg-muted/50 border border-transparent flex-shrink-0">
           <label className="flex items-center gap-1.5 cursor-pointer select-none">
             <Checkbox
               size="sm"
