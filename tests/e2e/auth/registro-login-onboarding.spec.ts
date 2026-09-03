@@ -255,7 +255,13 @@ async function mockOnboardingApis(page: Page): Promise<void> {
       contentType: 'application/json',
       body: JSON.stringify({
         success: true,
-        data: { centralizedLogistics: true, centralizedTransport: false },
+        data: {
+          centralizedLogistics: true,
+          centralizedTransport: false,
+          pickupRouteAvailable: true,
+          pickupRouteName: 'Ruta Madrid Centro',
+          pickupWarehouseName: 'Almacén Madrid',
+        },
       }),
     });
   });
@@ -738,6 +744,15 @@ test.describe('Onboarding de productor — 7 pasos completos', () => {
     await page.locator('[data-onboarding-step-content]').waitFor({ state: 'visible', timeout: 10_000 });
     await page.waitForTimeout(400);
 
+    // Elección explícita de logística (obligatoria desde 2026-09-02, ver
+    // step-capacity.tsx) — el zone-check mockeado ofrece pickupRouteAvailable,
+    // así que se puede delegar en Origen (coherente con isInOriginRoute: true
+    // del mock de onboarding/data).
+    const delegarBtn = page.getByRole('button', { name: /delegar en origen/i });
+    await expect(delegarBtn).toBeEnabled({ timeout: 8_000 });
+    await delegarBtn.click();
+    await page.waitForTimeout(200);
+
     // Zona por provincia — tab "Provincia" es el default
     const zoneInput = page.getByPlaceholder(/ej: madrid, barcelona, sevilla/i);
     await zoneInput.waitFor({ state: 'visible', timeout: 8_000 });
@@ -951,6 +966,11 @@ async function _completeStep4Visual(page: Page): Promise<void> {
 async function _completeStep5Capacity(page: Page): Promise<void> {
   await page.locator('[data-onboarding-step-content]').waitFor({ state: 'visible', timeout: 10_000 });
   await page.waitForTimeout(400);
+  // Elección explícita de logística (obligatoria desde 2026-09-02)
+  const delegarBtn = page.getByRole('button', { name: /delegar en origen/i });
+  await expect(delegarBtn).toBeEnabled({ timeout: 8_000 });
+  await delegarBtn.click();
+  await page.waitForTimeout(200);
   const zoneInput = page.getByPlaceholder(/ej: madrid, barcelona, sevilla/i);
   await zoneInput.waitFor({ state: 'visible', timeout: 8_000 });
   await zoneInput.fill('Madrid');

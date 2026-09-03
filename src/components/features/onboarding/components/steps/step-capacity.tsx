@@ -68,6 +68,18 @@ export interface EnhancedCapacityData {
   /** Solo nivel 'transport': ¿usa el transporte concertado de Origen? */
   useCentralizedTransport?: boolean;
 
+  /**
+   * Elección EXPLÍCITA y OBLIGATORIA del productor entre delegar el envío en
+   * la ruta de recogida de Origen o gestionarlo por cuenta propia. Decisión
+   * del humano 2026-09-02: unifica lo que antes eran dos sistemas
+   * independientes (PickupRoute vs isInOriginRoute/CoveragePolicy) — este
+   * campo es el que determina de verdad shippingMode en el backend, no la
+   * cobertura calculada arriba. 'delegated' solo es válido si el backend
+   * confirma que existe una ruta de recogida activa para el CP (ver
+   * `pickupRouteAvailable`); 'own' siempre es válido.
+   */
+  deliveryChoice?: 'delegated' | 'own';
+
   // Opciones de envío (personalizadas si no está en ruta)
   deliveryOptions: DeliveryOption[];
 
@@ -414,8 +426,13 @@ export function EnhancedStep4Capacity({
   
   const [editingOption, setEditingOption] = React.useState<string | null>(null);
   const [detectingZone, setDetectingZone] = React.useState(false);
+  const [pickupRoute, setPickupRoute] = React.useState<{
+    available: boolean;
+    routeName: string | null;
+    warehouseName: string | null;
+  }>({ available: false, routeName: null, warehouseName: null });
 
-  // Detectar zona logística cuando cambia el CP del productor
+  // Detectar zona logística y disponibilidad de ruta de recogida cuando cambia el CP del productor
   React.useEffect(() => {
     const postalCode = producerLocation?.postalCode;
     if (!postalCode || postalCode.length !== 5) return;
@@ -423,7 +440,15 @@ export function EnhancedStep4Capacity({
     setDetectingZone(true);
     fetch(`/api/v1/producers/logistics/zone-check?postalCode=${postalCode}`, { credentials: 'include' })
       .then((r) => r.ok ? r.json() : Promise.reject())
-      .then((res: { data?: { centralizedLogistics: boolean; centralizedTransport: boolean } }) => {
+      .then((res: {
+        data?: {
+          centralizedLogistics: boolean;
+          centralizedTransport: boolean;
+          pickupRouteAvailable: boolean;
+          pickupRouteName: string | null;
+          pickupWarehouseName: string | null;
+        };
+      }) => {
         const d = res.data;
         if (!d) return;
         const level: LogisticsLevel = d.centralizedLogistics
@@ -431,10 +456,23 @@ export function EnhancedStep4Capacity({
           : d.centralizedTransport
             ? 'transport'
             : 'own';
+        setPickupRoute({
+          available: d.pickupRouteAvailable,
+          routeName: d.pickupRouteName,
+          warehouseName: d.pickupWarehouseName,
+        });
         onChange({
           ...data,
           isInOriginRoute: d.centralizedLogistics,
           logisticsLevel: level,
+          // Si la ruta de recogida deja de estar disponible para el CP nuevo,
+          // una elección previa de "delegated" ya no es válida — se limpia
+          // para forzar al productor a elegir de nuevo. "own" sigue siendo
+          // válido siempre, se conserva.
+          deliveryChoice:
+            data.deliveryChoice === 'delegated' && !d.pickupRouteAvailable
+              ? undefined
+              : data.deliveryChoice,
         });
       })
       .catch(() => { /* sin cambios si falla */ })
@@ -447,15 +485,16 @@ export function EnhancedStep4Capacity({
   // VALIDACIÓN
   // ========================================================================
   
+  const hasDeliveryChoice = Boolean(data.deliveryChoice);
   const hasDeliveryOptions = data.deliveryOptions?.length > 0;
   const hasIncludedZones = data.includedZones?.length > 0;
   const hasMinOrder = data.minOrderAmount > 0;
   const minOrderError = data.minOrderAmount !== undefined && data.minOrderAmount <= 0
     ? 'El pedido mínimo debe ser mayor de 0 €'
     : undefined;
-  
-  const totalSteps = 3;
-  const completedSteps = [hasDeliveryOptions, hasIncludedZones, hasMinOrder].filter(Boolean).length;
+
+  const totalSteps = 4;
+  const completedSteps = [hasDeliveryChoice, hasDeliveryOptions, hasIncludedZones, hasMinOrder].filter(Boolean).length;
   const progress = (completedSteps / totalSteps) * 100;
 
   // ========================================================================
@@ -623,7 +662,11 @@ export function EnhancedStep4Capacity({
       )}
 
       {/* ====================================================================
-          CARD 1: ESTADO DE RUTA
+          CARD 1: ELECCIÓN DE LOGÍSTICA (OBLIGATORIA)
+          Decisión del humano 2026-09-02: elección EXPLÍCITA del productor,
+          ya no se puede completar este paso sin elegir. Este campo
+          (deliveryChoice) es el que de verdad determina cómo se gestiona el
+          envío de tus pedidos — no la cobertura calculada arriba.
       ==================================================================== */}
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
 
@@ -632,53 +675,74 @@ export function EnhancedStep4Capacity({
             <Compass className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-origen-bosque">Rutas de Origen</h2>
-            <p className="text-sm text-muted-foreground">
-              {data.isInOriginRoute
-                ? '¡Tu negocio está en nuestra ruta de reparto!'
-                : 'Actualmente no estás en nuestras rutas de reparto'}
-            </p>
+            <h2 className="text-base font-semibold text-origen-bosque">¿Cómo gestionas el envío?</h2>
+            <p className="text-sm text-muted-foreground">Elige quién se encarga de la recogida y el envío de tus pedidos</p>
           </div>
         </div>
 
-        <div className={cn(
-          "p-5 rounded-xl border",
-          data.isInOriginRoute
-            ? "bg-feedback-success-subtle border-feedback-success/30"
-            : "bg-feedback-warning-subtle border-feedback-warning/30"
-        )}>
-          <div className="flex items-start gap-3">
-            {data.isInOriginRoute ? (
-              <CheckCircle2 className="w-5 h-5 text-feedback-success flex-shrink-0 mt-0.5" />
-            ) : (
-              <Info className="w-5 h-5 text-feedback-warning flex-shrink-0 mt-0.5" />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            disabled={!pickupRoute.available}
+            onClick={() => handleInputChange('deliveryChoice', 'delegated')}
+            className={cn(
+              "text-left p-4 rounded-xl border-2 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera/45",
+              !pickupRoute.available
+                ? "border-border bg-surface opacity-60 cursor-not-allowed"
+                : data.deliveryChoice === 'delegated'
+                  ? "border-origen-pradera bg-origen-pradera/5"
+                  : "border-border hover:border-origen-pradera bg-surface-alt"
             )}
-            <div>
-              <p className={cn(
-                "text-sm font-medium",
-                data.isInOriginRoute ? "text-feedback-success-text" : "text-feedback-warning-text"
-              )}>
-                {data.isInOriginRoute
-                  ? 'Envío gestionado por Origen'
-                  : 'Configura tus propios envíos'}
-              </p>
-              <p className={cn(
-                "text-xs mt-1",
-                data.isInOriginRoute ? "text-feedback-success-text/80" : "text-feedback-warning-text/80"
-              )}>
-                {data.isInOriginRoute
-                  ? 'Tus productos se entregarán a través de nuestra ruta semanal. Precio fijo: 3.90€ por pedido.'
-                  : 'Al no estar en ruta, puedes configurar tus propios métodos de envío, precios y zonas de entrega.'}
-              </p>
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Route className="w-4 h-4 text-hoja-tinta flex-shrink-0" />
+                <p className="text-sm font-semibold text-origen-bosque">Delegar en Origen</p>
+              </div>
+              {data.deliveryChoice === 'delegated' && <CheckCircle2 className="w-5 h-5 text-hoja-tinta flex-shrink-0" />}
             </div>
-          </div>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              {pickupRoute.available
+                ? `Origen recoge tus pedidos (${pickupRoute.routeName ?? 'ruta disponible'}) y gestiona la entrega. Precio fijo: 3.90€ por pedido.`
+                : 'No disponible: tu código postal no está cubierto por ninguna ruta de recogida de Origen.'}
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleInputChange('deliveryChoice', 'own')}
+            className={cn(
+              "text-left p-4 rounded-xl border-2 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera/45",
+              data.deliveryChoice === 'own'
+                ? "border-origen-pradera bg-origen-pradera/5"
+                : "border-border hover:border-origen-pradera bg-surface-alt"
+            )}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-hoja-tinta flex-shrink-0" />
+                <p className="text-sm font-semibold text-origen-bosque">Gestionar por mi cuenta</p>
+              </div>
+              {data.deliveryChoice === 'own' && <CheckCircle2 className="w-5 h-5 text-hoja-tinta flex-shrink-0" />}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Configuras tus propios métodos de envío, precios y zonas de entrega a continuación.
+            </p>
+          </button>
         </div>
+
+        {!hasDeliveryChoice && (
+          <p className="text-xs text-feedback-danger-text mt-3 flex items-center gap-1.5">
+            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+            Elige cómo vas a gestionar el envío para poder continuar
+          </p>
+        )}
       </div>
 
       {/* ====================================================================
-          CARD 2: OPCIONES DE ENVÍO (SOLO SI NO ESTÁ EN RUTA)
+          CARD 2: OPCIONES DE ENVÍO (SOLO SI NO SE DELEGA EN ORIGEN)
       ==================================================================== */}
-      {!data.isInOriginRoute && (
+      {data.deliveryChoice !== 'delegated' && (
         <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
           
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -831,7 +895,7 @@ export function EnhancedStep4Capacity({
           <div>
             <h2 className="text-base font-semibold text-origen-bosque">Zonas de entrega</h2>
             <p className="text-sm text-muted-foreground">
-              {data.isInOriginRoute
+              {data.deliveryChoice === 'delegated'
                 ? 'Tu ruta está definida por Origen, pero puedes excluir zonas'
                 : 'Selecciona dónde entregas (y opcionalmente dónde no)'}
             </p>
@@ -843,7 +907,7 @@ export function EnhancedStep4Capacity({
           excludedZones={data.excludedZones}
           onAddZone={handleAddZone}
           onRemoveZone={handleRemoveZone}
-          onToggleExclude={!data.isInOriginRoute ? handleToggleExclude : undefined}
+          onToggleExclude={data.deliveryChoice !== 'delegated' ? handleToggleExclude : undefined}
         />
 
         {!hasIncludedZones && (
@@ -855,7 +919,7 @@ export function EnhancedStep4Capacity({
           </div>
         )}
 
-        {data.isInOriginRoute && (
+        {data.deliveryChoice === 'delegated' && (
           <div className="mt-4 p-3 bg-feedback-info-subtle/60 rounded-lg border border-feedback-info/20">
             <p className="text-xs text-feedback-info-text flex items-center gap-2">
               <Info className="w-4 h-4" />
