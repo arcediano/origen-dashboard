@@ -146,8 +146,11 @@ export function OrderFilters({
         Período e importe se agrupan cada uno en su propio bloque (mismo
         patrón que el grupo de valoración de ReviewFilters) para separar
         visualmente los controles relacionados dentro de la barra.
+        Ajuste (2026-09-03, petición del humano): barra más compacta -- menos
+        padding/gap y controles h-9 en vez de h-10 -- tras revertir el intento
+        de sidebar de 280px que rompía el responsive.
       */}
-      <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
+      <div className="hidden lg:flex items-center gap-1.5 bg-surface-alt border border-border-subtle rounded-xl px-2.5 py-1.5 shadow-sm">
         {/* Búsqueda con debounce */}
         <SearchInput
           value={localSearch}
@@ -158,13 +161,13 @@ export function OrderFilters({
           debounceMs={300}
           placeholder="Buscar pedido o cliente..."
           aria-label="Buscar pedidos"
-          className="min-w-[200px] flex-1"
-          size="md"
+          className="min-w-[180px] flex-1"
+          size="sm"
         />
 
         {/* Estado — min-w calibrado a "Procesando" */}
         <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as OrderStatus)} className="w-auto">
-          <SelectTrigger className="min-w-[140px] max-w-[160px] h-10" tone="subtle">
+          <SelectTrigger className="min-w-[130px] max-w-[150px] h-9" tone="subtle">
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
           <SelectContent>
@@ -175,9 +178,12 @@ export function OrderFilters({
           </SelectContent>
         </Select>
 
-        {/* Período: desde/hasta agrupados */}
+        {/* Período: desde/hasta agrupados. Sin h-9 explícito -- DateInput
+            inputSize="sm" renderiza a h-10 internamente, así que el grupo
+            se dimensiona por su propio contenido en vez de forzar un alto
+            que recortaría el input. */}
         <div
-          className="flex items-center gap-2 rounded-xl border border-border-subtle px-2 py-1 flex-shrink-0"
+          className="flex items-center gap-1.5 rounded-xl border border-border-subtle px-2 flex-shrink-0"
           role="group"
           aria-label="Filtrar por periodo"
         >
@@ -187,18 +193,18 @@ export function OrderFilters({
               value={formatDate(filters.dateFrom)}
               onChange={(e) => set('dateFrom', e.target.value ? new Date(e.target.value) : undefined)}
               inputSize="sm"
-              className="w-[140px]"
+              className="w-[125px]"
               aria-label="Fecha desde"
             />
           </div>
-          <div className="w-px h-6 bg-border-subtle" aria-hidden="true" />
+          <div className="w-px h-5 bg-border-subtle" aria-hidden="true" />
           <div className="flex items-center gap-1">
             <span className="text-xs text-text-subtle whitespace-nowrap">Hasta</span>
             <DateInput
               value={formatDate(filters.dateTo)}
               onChange={(e) => set('dateTo', e.target.value ? new Date(e.target.value) : undefined)}
               inputSize="sm"
-              className="w-[140px]"
+              className="w-[125px]"
               aria-label="Fecha hasta"
             />
           </div>
@@ -206,11 +212,11 @@ export function OrderFilters({
 
         {/* Importe: mínimo/máximo agrupados */}
         <div
-          className="flex items-center gap-2 h-10 px-3 rounded-xl bg-muted/50 border border-transparent hover:bg-muted/70 transition-colors flex-shrink-0"
+          className="flex items-center gap-1.5 h-9 px-2.5 rounded-xl bg-muted/50 border border-transparent hover:bg-muted/70 transition-colors flex-shrink-0"
           role="group"
           aria-label="Filtrar por importe"
         >
-          <div className="relative flex items-center w-[76px]">
+          <div className="relative flex items-center w-[68px]">
             <span className="absolute left-0 text-sm text-text-subtle pointer-events-none select-none">€</span>
             <input
               type="number"
@@ -229,7 +235,7 @@ export function OrderFilters({
             />
           </div>
           <span className="text-xs text-text-subtle select-none">–</span>
-          <div className="relative flex items-center w-[76px]">
+          <div className="relative flex items-center w-[68px]">
             <span className="absolute left-0 text-sm text-text-subtle pointer-events-none select-none">€</span>
             <input
               type="number"

@@ -192,7 +192,7 @@ export function ProductFilters({
 
   // ── Toggle de vista (desktop y móvil, siempre a la derecha) ─────────────────
   const viewModeToggle = (
-    <div className="flex items-center gap-0.5 border border-border rounded-xl p-0.5 bg-surface-alt h-10 flex-shrink-0">
+    <div className="flex items-center gap-0.5 border border-border rounded-xl p-0.5 bg-surface-alt h-9 flex-shrink-0">
       <button
         onClick={() => onViewModeChange('list')}
         className={cn(
@@ -233,8 +233,11 @@ export function ProductFilters({
         "barra de filtros" sin jerarquía de sección.
         No se usa flex-wrap: todos los controles deben caber en una sola línea.
         Los Select reciben className="w-auto" para anular el w-full del wrapper.
+        Ajuste (2026-09-03, petición del humano): barra más compacta -- menos
+        padding/gap y controles h-9 en vez de h-10 -- tras revertir el intento
+        de sidebar de 280px que rompía el responsive.
       */}
-      <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
+      <div className="hidden lg:flex items-center gap-1.5 bg-surface-alt border border-border-subtle rounded-xl px-2.5 py-1.5 shadow-sm">
         {/* Búsqueda */}
         <SearchInput
           value={localSearch}
@@ -242,12 +245,12 @@ export function ProductFilters({
           placeholder="Buscar por nombre o SKU..."
           aria-label="Buscar productos"
           className="min-w-[200px] flex-1"
-          size="md"
+          size="sm"
         />
 
         {/* Categoría — min-w calibrado al texto más largo ("Embutidos") */}
         <Select value={selectedCategory} onValueChange={onCategoryChange} className="w-auto">
-          <SelectTrigger className="min-w-[140px] max-w-[160px] h-10" tone="subtle">
+          <SelectTrigger className="min-w-[140px] max-w-[160px] h-9" tone="subtle">
             <SelectValue placeholder="Categoría" />
           </SelectTrigger>
           <SelectContent>
@@ -260,7 +263,7 @@ export function ProductFilters({
 
         {/* Estado — min-w calibrado a "Borradores" */}
         <Select value={selectedStatus} onValueChange={onStatusChange} className="w-auto">
-          <SelectTrigger className="min-w-[130px] max-w-[150px] h-10" tone="subtle">
+          <SelectTrigger className="min-w-[130px] max-w-[150px] h-9" tone="subtle">
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
           <SelectContent>
@@ -273,7 +276,7 @@ export function ProductFilters({
 
         {/* Stock — min-w calibrado a "Stock bajo" */}
         <Select value={selectedStock} onValueChange={onStockChange} className="w-auto">
-          <SelectTrigger className="min-w-[120px] max-w-[140px] h-10" tone="subtle">
+          <SelectTrigger className="min-w-[120px] max-w-[140px] h-9" tone="subtle">
             <SelectValue placeholder="Stock" />
           </SelectTrigger>
           <SelectContent>
@@ -286,7 +289,7 @@ export function ProductFilters({
 
         {/* Ordenar — min-w calibrado a "Más vendidos" */}
         <Select value={sortBy} onValueChange={onSortChange} className="w-auto">
-          <SelectTrigger className="min-w-[150px] max-w-[170px] h-10" tone="subtle">
+          <SelectTrigger className="min-w-[150px] max-w-[170px] h-9" tone="subtle">
             <SelectValue placeholder="Ordenar" />
           </SelectTrigger>
           <SelectContent>
@@ -298,7 +301,7 @@ export function ProductFilters({
         </Select>
 
         {/* Separador visual antes del toggle de vista, que no es un filtro */}
-        <div className="w-px h-6 bg-border-subtle flex-shrink-0" aria-hidden="true" />
+        <div className="w-px h-5 bg-border-subtle flex-shrink-0" aria-hidden="true" />
 
         {/* Toggle grid/lista */}
         {viewModeToggle}
