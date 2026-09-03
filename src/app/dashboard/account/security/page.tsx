@@ -46,7 +46,32 @@ function getPasswordFieldErrors(password: { current: string; new: string; confir
 
 // ─── TWO-FACTOR AUTHENTICATION STATE ──────────────────────────────────────────
 
-type TwoFactorStep = 'idle' | 'setup-qr' | 'setup-verify' | 'recovery-codes' | 'disable-confirm';
+type TwoFactorStep = 'idle' | 'setup-choose-app' | 'setup-qr' | 'setup-verify' | 'recovery-codes' | 'disable-confirm';
+
+// Apps de autenticación recomendadas para quien no tiene ninguna instalada
+// todavía (paso 1 del asistente de configuración) — nombres de paquete/ID de
+// App Store estables y bien conocidos, sin depender de detectar iOS/Android
+// en el navegador (evita adivinar mal la plataforma).
+const RECOMMENDED_AUTH_APPS = [
+  {
+    name: 'Google Authenticator',
+    ios: 'https://apps.apple.com/app/google-authenticator/id388497605',
+    android: 'https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2',
+    gradient: 'from-[#4285F4] to-[#34A853]',
+  },
+  {
+    name: 'Microsoft Authenticator',
+    ios: 'https://apps.apple.com/app/microsoft-authenticator/id983156458',
+    android: 'https://play.google.com/store/apps/details?id=com.azure.authenticator',
+    gradient: 'from-[#0078D4] to-[#00BCF2]',
+  },
+  {
+    name: 'Authy',
+    ios: 'https://apps.apple.com/app/authy/id494168017',
+    android: 'https://play.google.com/store/apps/details?id=com.authy.authy',
+    gradient: 'from-[#EF5350] to-[#F06292]',
+  },
+] as const;
 
 interface TwoFactorSetupState {
   qrCodeUrl?: string;
@@ -124,6 +149,10 @@ export default function SecurityPage() {
 
   // 2FA State
   const [twoFaDialog, setTwoFaDialog] = useState(false);
+  // Paso 1 del asistente ("¿ya tienes una app de autenticación?"): solo
+  // controla si se despliega la lista de apps recomendadas -- no bloquea
+  // nada, es únicamente para orientar a quien no sabe qué instalar.
+  const [showAuthAppRecommendations, setShowAuthAppRecommendations] = useState(false);
   const [twoFa, setTwoFa] = useState<TwoFactorStateType>({
     enabled: false,
     isLoading: true,
@@ -176,6 +205,16 @@ export default function SecurityPage() {
   }, []);
 
   // ─── 2FA HANDLERS ─────────────────────────────────────────────────────────
+
+  // Abre el asistente en el paso 1 ("¿ya tienes una app de autenticación?")
+  // -- todavía no llama a la API ni genera el QR/secret, eso ocurre al
+  // confirmar ese paso (handleStart2FASetup). Separarlo evita generar un
+  // secret nuevo en el backend si el usuario abre el diálogo y lo cierra
+  // sin llegar a avanzar.
+  const handleOpenSetupWizard = () => {
+    setShowAuthAppRecommendations(false);
+    setTwoFa((prev) => ({ ...prev, step: 'setup-choose-app', error: null }));
+  };
 
   const handleStart2FASetup = async () => {
     try {
@@ -237,6 +276,7 @@ export default function SecurityPage() {
   const handleClose2FAFlow = () => {
     clearTwoFactorSetupState();
     setTwoFaDialog(false);
+    setShowAuthAppRecommendations(false);
     setTwoFa((prev) => ({
       ...prev,
       step: 'idle',
@@ -545,17 +585,137 @@ export default function SecurityPage() {
                       <Dialog open={twoFaDialog} onOpenChange={setTwoFaDialog}>
                         <DialogTrigger asChild>
                           <Button
-                            onClick={handleStart2FASetup}
+                            onClick={handleOpenSetupWizard}
                             disabled={twoFa.isLoading}
                           >
                             {twoFa.isLoading ? 'Cargando...' : 'Activar'}
                           </Button>
                         </DialogTrigger>
 
-                    {/* Setup QR Step */}
+                    {/* Paso 1 de 3: ¿ya tienes una app de autenticación? */}
+                    {twoFa.step === 'setup-choose-app' && (
+                      <DialogContent>
+                        <DialogHeader>
+                          <div className="mb-3 flex gap-1.5">
+                            <span className="h-1 flex-1 rounded-full bg-origen-pradera" />
+                            <span className="h-1 flex-1 rounded-full bg-border-subtle" />
+                            <span className="h-1 flex-1 rounded-full bg-border-subtle" />
+                          </div>
+                          <DialogTitle>¿Ya tienes una app de autenticación en tu móvil?</DialogTitle>
+                          <DialogDescription>
+                            La necesitas para generar el código de seguridad cada vez que inicies sesión.
+                          </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="px-6 py-4 space-y-3">
+                          {twoFa.error && (
+                            <Alert variant="error">
+                              <AlertDescription>{twoFa.error}</AlertDescription>
+                            </Alert>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => setShowAuthAppRecommendations(false)}
+                            className={`flex w-full items-center gap-3 rounded-2xl border-2 p-4 text-left transition-colors ${
+                              !showAuthAppRecommendations
+                                ? 'border-origen-bosque bg-origen-pastel'
+                                : 'border-border-subtle bg-surface-alt'
+                            }`}
+                          >
+                            <span
+                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                                !showAuthAppRecommendations ? 'bg-origen-bosque text-white' : 'bg-origen-pastel text-hoja-tinta'
+                              }`}
+                            >
+                              <Check className="h-5 w-5" />
+                            </span>
+                            <span>
+                              <span className="block text-sm font-semibold text-origen-bosque">Sí, ya la tengo instalada</span>
+                              <span className="block text-xs text-text-subtle">Google Authenticator, Authy, etc.</span>
+                            </span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setShowAuthAppRecommendations(true)}
+                            className={`flex w-full items-center gap-3 rounded-2xl border-2 p-4 text-left transition-colors ${
+                              showAuthAppRecommendations
+                                ? 'border-origen-bosque bg-origen-pastel'
+                                : 'border-border-subtle bg-surface-alt'
+                            }`}
+                          >
+                            <span
+                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                                showAuthAppRecommendations ? 'bg-origen-bosque text-white' : 'bg-origen-pastel text-hoja-tinta'
+                              }`}
+                            >
+                              <Smartphone className="h-5 w-5" />
+                            </span>
+                            <span>
+                              <span className="block text-sm font-semibold text-origen-bosque">No, ayúdame a instalar una</span>
+                              <span className="block text-xs text-text-subtle">Es gratis y tarda un minuto</span>
+                            </span>
+                          </button>
+
+                          {showAuthAppRecommendations && (
+                            <div className="space-y-2 pt-1">
+                              {RECOMMENDED_AUTH_APPS.map((app) => (
+                                <div
+                                  key={app.name}
+                                  className="flex items-center gap-3 rounded-xl border border-border-subtle bg-origen-crema/40 px-3 py-2.5"
+                                >
+                                  <span className={`h-7 w-7 shrink-0 rounded-lg bg-gradient-to-br ${app.gradient}`} />
+                                  <span className="flex-1 text-sm font-medium text-origen-bosque">{app.name}</span>
+                                  <a
+                                    href={app.ios}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-xs font-semibold text-hoja-tinta underline underline-offset-2"
+                                  >
+                                    iOS
+                                  </a>
+                                  <a
+                                    href={app.android}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-xs font-semibold text-hoja-tinta underline underline-offset-2"
+                                  >
+                                    Android
+                                  </a>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <DialogFooter>
+                          <Button
+                            variant="secondary"
+                            onClick={() => handleClose2FAFlow()}
+                            disabled={twoFa.isLoading}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            onClick={handleStart2FASetup}
+                            disabled={twoFa.isLoading}
+                          >
+                            {twoFa.isLoading ? 'Cargando...' : 'Ya la instalé, continuar'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    )}
+
+                    {/* Paso 2 de 3: escanear o copiar el código */}
                     {twoFa.step === 'setup-qr' && (
                       <DialogContent>
                         <DialogHeader>
+                          <div className="mb-3 flex gap-1.5">
+                            <span className="h-1 flex-1 rounded-full bg-origen-pradera" />
+                            <span className="h-1 flex-1 rounded-full bg-origen-pradera" />
+                            <span className="h-1 flex-1 rounded-full bg-border-subtle" />
+                          </div>
                           <DialogTitle>Configurar verificación en dos pasos</DialogTitle>
                           <DialogDescription>
                             Escanea el código QR con tu aplicación de autenticación (Google Authenticator, Authy, Microsoft Authenticator, etc.).
@@ -624,6 +784,48 @@ export default function SecurityPage() {
                             </div>
                           )}
 
+                        </div>
+
+                        <DialogFooter>
+                          <Button
+                            variant="secondary"
+                            onClick={() => setTwoFa((prev) => ({ ...prev, step: 'setup-choose-app', error: null }))}
+                            disabled={twoFa.isLoading}
+                          >
+                            Atrás
+                          </Button>
+                          <Button
+                            onClick={() => setTwoFa((prev) => ({ ...prev, step: 'setup-verify', error: null }))}
+                            disabled={twoFa.isLoading}
+                          >
+                            Continuar
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    )}
+
+                    {/* Paso 3 de 3: confirmar el código generado */}
+                    {twoFa.step === 'setup-verify' && (
+                      <DialogContent>
+                        <DialogHeader>
+                          <div className="mb-3 flex gap-1.5">
+                            <span className="h-1 flex-1 rounded-full bg-origen-pradera" />
+                            <span className="h-1 flex-1 rounded-full bg-origen-pradera" />
+                            <span className="h-1 flex-1 rounded-full bg-origen-pradera" />
+                          </div>
+                          <DialogTitle>Confirma que quedó bien configurado</DialogTitle>
+                          <DialogDescription>
+                            Escribe el código de 6 dígitos que tu app de autenticación está mostrando ahora mismo.
+                          </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="px-6 py-4 space-y-4">
+                          {twoFa.error && (
+                            <Alert variant="error">
+                              <AlertDescription>{twoFa.error}</AlertDescription>
+                            </Alert>
+                          )}
+
                           {/* TOTP Code Input */}
                           <div className="space-y-2">
                             <Label>Ingresa el código de 6 dígitos para confirmar</Label>
@@ -681,10 +883,10 @@ export default function SecurityPage() {
                         <DialogFooter>
                           <Button
                             variant="secondary"
-                            onClick={() => handleClose2FAFlow()}
+                            onClick={() => setTwoFa((prev) => ({ ...prev, step: 'setup-qr', error: null }))}
                             disabled={twoFa.isLoading}
                           >
-                            Cancelar
+                            Atrás
                           </Button>
                           <Button
                             onClick={handleVerify2FACode}
