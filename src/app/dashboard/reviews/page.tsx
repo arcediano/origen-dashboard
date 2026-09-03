@@ -208,12 +208,15 @@ export default function ReviewsPage() {
 
           {/* Contenido principal: filtros + lista */}
           <motion.div variants={itemVariants}>
-            <ReviewFilters
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              onClearFilters={handleClearFilters}
-              totalReviews={totalReviews}
-            >
+            <div className="space-y-5 sm:space-y-6">
+
+              <ReviewFilters
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onClearFilters={handleClearFilters}
+                totalReviews={totalReviews}
+              />
+
               {reviews.length === 0 ? (
                 <Card>
                   <EmptyState
@@ -268,7 +271,8 @@ export default function ReviewsPage() {
                   )}
                 </div>
               )}
-            </ReviewFilters>
+            </div>
+
           </motion.div>
         </motion.div>
       </>
