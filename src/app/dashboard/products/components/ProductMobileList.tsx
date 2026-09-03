@@ -12,12 +12,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  AlertCircle,
-  CheckCircle2,
-  Clock,
   FileEdit,
   Eye,
-  XCircle,
   BarChart2,
   ChevronRight,
   Send,
@@ -25,48 +21,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
-import { SwipeableRow, ProductImage } from '@arcediano/ux-library';
-
-// ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
-
-type ProductStatus = Product['status'];
-
-const STATUS_CONFIG: Record<
-  ProductStatus,
-  { label: string; icon: React.ElementType; chip: string }
-> = {
-  active: {
-    label: 'Activo',
-    icon: CheckCircle2,
-    chip: 'bg-origen-pastel text-origen-bosque border-origen-pradera/30',
-  },
-  draft: {
-    label: 'Borrador',
-    icon: FileEdit,
-    chip: 'bg-surface-alt text-text-subtle border-border-subtle',
-  },
-  inactive: {
-    label: 'Inactivo',
-    icon: XCircle,
-    // text-feedback-warning-text, no mandarina: mandarina como texto falla WCAG AA (~2.1:1).
-    chip: 'bg-origen-mandarina/10 text-feedback-warning-text border-origen-mandarina/30',
-  },
-  out_of_stock: {
-    label: 'Agotado',
-    icon: AlertCircle,
-    chip: 'bg-feedback-danger-subtle text-feedback-danger-text border-feedback-danger/30',
-  },
-  pending_approval: {
-    label: 'En revisión',
-    icon: AlertCircle,
-    chip: 'bg-feedback-warning-subtle text-feedback-warning border-feedback-warning/30',
-  },
-  scheduled: {
-    label: 'Programado',
-    icon: Clock,
-    chip: 'bg-origen-pradera/10 text-origen-pino border-origen-pradera/30',
-  },
-};
+import { SwipeableRow, ProductImage, StatusBadge } from '@arcediano/ux-library';
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────
 
@@ -87,25 +42,6 @@ function ProductRowSkeleton() {
       </div>
       <div className="w-4 h-4 bg-origen-pastel/40 rounded flex-shrink-0" />
     </div>
-  );
-}
-
-// ─── BADGE ────────────────────────────────────────────────────────────────────
-
-function StatusBadge({ status }: { status: ProductStatus }) {
-  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.draft;
-  const Icon = cfg.icon;
-
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border',
-        cfg.chip,
-      )}
-    >
-      <Icon className="w-3 h-3" />
-      {cfg.label}
-    </span>
   );
 }
 
@@ -185,7 +121,7 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
             {/* L2: categoría (izq) + estado (der) */}
             <div className="flex items-center justify-between gap-2">
               <p className="text-[11px] text-text-subtle truncate flex-1">{product.categoryName}</p>
-              <StatusBadge status={product.status} />
+              <StatusBadge status={product.status} size="xs" />
             </div>
 
             {/* L3: precio + indicador de stock */}
