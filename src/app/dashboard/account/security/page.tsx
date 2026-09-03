@@ -579,13 +579,13 @@ export default function SecurityPage() {
                               página. */}
                           {twoFa.setupData.otpauthUri && (
                             <div className="sm:hidden space-y-2">
-                              <Button asChild variant="primary" className="w-full">
+                              <Button asChild variant="secondary" className="w-full">
                                 <a href={twoFa.setupData.otpauthUri}>
-                                  Abrir en mi app de autenticación
+                                  Probar acceso directo a mi app de autenticación
                                 </a>
                               </Button>
                               <p className="text-xs text-text-subtle text-center">
-                                Se abrirá tu app de autenticación (Google Authenticator, Authy, Microsoft Authenticator…) y añadirá la cuenta automáticamente.
+                                Puede abrir tu app de autenticación (Google Authenticator, Authy, Microsoft Authenticator…) directamente. Si se abre otra app distinta, o no pasa nada, no te preocupes: usa el código QR o el código manual de abajo, que funcionan siempre.
                               </p>
                             </div>
                           )}
