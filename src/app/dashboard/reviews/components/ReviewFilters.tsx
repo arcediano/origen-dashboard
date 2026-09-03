@@ -1,15 +1,15 @@
 /**
  * @component ReviewFilters
- * @description Filtros de reseñas — patrón "Bosque Comercial" v5.5.
+ * @description Filtros de reseñas — patrón "Bosque Comercial" v6 (Opción B,
+ * decisión del humano en vivo 2026-09-03: panel bajo demanda también en
+ * escritorio, ver claude-agile/proyectos/origen-dashboard/tareas-completadas.md).
  *
- * Desktop (≥lg): controles siempre visibles en línea — búsqueda (debounce
- * 300ms) + Select de estado + Select de tipo + StarRating interactivo para
- * valoración + Checkbox con label para los tres booleanos.
+ * Todos los breakpoints: `FilterToolbar` (búsqueda + botón "Filtros" con
+ * badge contador) + `FilterPanel` — bottom sheet en móvil/tablet (<lg),
+ * panel deslizante ("drawer") desde el borde derecho en escritorio (≥lg).
  *
- * Móvil/tablet (<lg): `FilterToolbar` con botón "Filtros" (badge contador)
- * + `FilterPanel` (bottom sheet) con las mismas secciones.
- *
- * Los filtros activos aparecen como chips bajo la barra en ambos breakpoints.
+ * Los filtros activos aparecen como chips bajo la barra en todos los
+ * breakpoints.
  */
 
 'use client';
@@ -20,15 +20,6 @@ import {
   FilterToolbar,
   FilterPanel,
   ActiveFilterChips,
-  SearchInput,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  StarRating,
-  Checkbox,
-  useIsMobile,
   type ActiveFilterChip,
   type FilterSection,
 } from '@arcediano/ux-library';
@@ -72,7 +63,6 @@ export function ReviewFilters({
   totalReviews,
   className,
 }: ReviewFiltersProps) {
-  const isMobile = useIsMobile(1024);
   const [panelOpen, setPanelOpen] = React.useState(false);
   const filtersButtonRef = React.useRef<HTMLButtonElement>(null);
   const [localSearch, setLocalSearch] = React.useState(filters.search ?? '');
@@ -161,121 +151,17 @@ export function ReviewFilters({
   return (
     <div className={cn('space-y-2', className)}>
 
-      {/* ── Desktop (≥lg): controles inline siempre visibles ─────────────────── */}
-      {/*
-        Contenedor agrupador: bg-surface-alt (blanco) sobre el fondo crema
-        garantiza contraste visual. Sin flex-wrap para mantener una única línea.
-        Los Select reciben className="w-auto" para anular el w-full del wrapper.
-        Los bloques de StarRating y Checkboxes usan bg-muted/50 que sobre
-        blanco (surface-alt) es perfectamente visible (pastel verdoso vs crema).
-        Ajuste (2026-09-03, petición del humano): barra más compacta -- menos
-        padding/gap y controles h-9 en vez de h-10 -- tras revertir el intento
-        de sidebar de 280px que rompía el responsive.
-      */}
-      <div className="hidden lg:flex items-center gap-1.5 bg-surface-alt border border-border-subtle rounded-xl px-2.5 py-1.5 shadow-sm">
-        {/* Búsqueda con debounce */}
-        <SearchInput
-          value={localSearch}
-          onChange={(v) => {
-            setLocalSearch(v);
-          }}
-          onDebouncedChange={(v) => onFilterChange({ search: v || undefined } as ReviewFiltersType)}
-          debounceMs={300}
-          placeholder="Buscar reseñas..."
-          aria-label="Buscar reseñas"
-          className="min-w-[180px] flex-1"
-          size="sm"
-        />
-
-        {/* Estado — min-w calibrado a "Rechazadas" */}
-        <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as ReviewStatus)} className="w-auto">
-          <SelectTrigger className="min-w-[130px] max-w-[150px] h-9" tone="subtle">
-            <SelectValue placeholder="Estado" />
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Valoración: StarRating interactivo con reset al pulsar la misma estrella */}
-        <div
-          className="flex items-center gap-1.5 h-9 px-2.5 rounded-xl bg-muted/50 border border-transparent hover:bg-muted/70 transition-colors flex-shrink-0"
-          role="group"
-          aria-label="Filtrar por valoración"
-        >
-          <span className="text-xs text-text-subtle whitespace-nowrap flex-shrink-0">Val.:</span>
-          <StarRating
-            value={filters.rating ?? 0}
-            onChange={(v) => {
-              // Pulsar la misma estrella activa limpia el filtro
-              if (v === filters.rating) {
-                onFilterChange({ ...filters, rating: undefined });
-              } else {
-                onFilterChange({ ...filters, rating: v as ReviewFiltersType['rating'] });
-              }
-            }}
-            size="sm"
-            label="Valoración mínima"
-          />
-          {filters.rating ? (
-            <button
-              type="button"
-              onClick={() => onFilterChange({ ...filters, rating: undefined })}
-              className="text-[10px] text-text-subtle hover:text-origen-bosque transition-colors underline underline-offset-2 whitespace-nowrap"
-              aria-label="Quitar filtro de valoración"
-            >
-              Quitar
-            </button>
-          ) : null}
-        </div>
-
-        {/* Booleanos: checkboxes inline compactos */}
-        <div className="flex items-center gap-2.5 h-9 px-2.5 rounded-xl bg-muted/50 border border-transparent flex-shrink-0">
-          <label className="flex items-center gap-1.5 cursor-pointer select-none">
-            <Checkbox
-              size="sm"
-              variant="forest"
-              checked={filters.verifiedOnly ?? false}
-              onCheckedChange={(v) => onFilterChange({ ...filters, verifiedOnly: v === true ? true : undefined })}
-            />
-            <span className="text-xs text-origen-bosque whitespace-nowrap">Verificadas</span>
-          </label>
-          <label className="flex items-center gap-1.5 cursor-pointer select-none">
-            <Checkbox
-              size="sm"
-              variant="forest"
-              checked={filters.hasResponse ?? false}
-              onCheckedChange={(v) => onFilterChange({ ...filters, hasResponse: v === true ? true : undefined })}
-            />
-            <span className="text-xs text-origen-bosque whitespace-nowrap">Con resp.</span>
-          </label>
-          <label className="flex items-center gap-1.5 cursor-pointer select-none">
-            <Checkbox
-              size="sm"
-              variant="forest"
-              checked={filters.hasImages ?? false}
-              onCheckedChange={(v) => onFilterChange({ ...filters, hasImages: v === true ? true : undefined })}
-            />
-            <span className="text-xs text-origen-bosque whitespace-nowrap">Con imgs.</span>
-          </label>
-        </div>
-      </div>
-
-      {/* ── Móvil/tablet (<lg): barra con botón "Filtros" ────────────────────── */}
-      <div className="lg:hidden">
-        <FilterToolbar
-          searchValue={localSearch}
-          onSearchChange={setLocalSearch}
-          onSearchDebouncedChange={(value) => onFilterChange({ search: value || undefined } as ReviewFiltersType)}
-          searchDebounceMs={300}
-          searchPlaceholder="Buscar reseñas..."
-          activeFilterCount={activeCount}
-          onOpenFilters={() => setPanelOpen(true)}
-          filtersButtonRef={filtersButtonRef}
-        />
-      </div>
+      {/* ── Búsqueda + botón "Filtros" — mismo componente en todos los breakpoints ── */}
+      <FilterToolbar
+        searchValue={localSearch}
+        onSearchChange={setLocalSearch}
+        onSearchDebouncedChange={(value) => onFilterChange({ search: value || undefined } as ReviewFiltersType)}
+        searchDebounceMs={300}
+        searchPlaceholder="Buscar reseñas..."
+        activeFilterCount={activeCount}
+        onOpenFilters={() => setPanelOpen(true)}
+        filtersButtonRef={filtersButtonRef}
+      />
 
       {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
       {activeChips.length > 0 && (
@@ -287,18 +173,17 @@ export function ReviewFilters({
         </div>
       )}
 
-      {/* ── Panel de filtros: solo bottom sheet (<lg) ────────────────────────── */}
-      {isMobile && (
-        <FilterPanel
-          isOpen={panelOpen}
-          onClose={() => setPanelOpen(false)}
-          triggerRef={filtersButtonRef}
-          sections={sections}
-          onClearAll={onClearFilters}
-          resultCount={totalReviews}
-          resultLabel="reseñas"
-        />
-      )}
+      {/* ── Panel de filtros: bottom sheet (<lg) / drawer deslizante (≥lg) ────── */}
+      <FilterPanel
+        isOpen={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        triggerRef={filtersButtonRef}
+        sections={sections}
+        onClearAll={onClearFilters}
+        resultCount={totalReviews}
+        resultLabel="reseñas"
+        variant="drawer"
+      />
     </div>
   );
 }

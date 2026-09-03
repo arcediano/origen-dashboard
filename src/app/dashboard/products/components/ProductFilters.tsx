@@ -1,14 +1,16 @@
 /**
  * @file ProductFilters.tsx
- * @description Filtros de productos — patrón "Bosque Comercial" v5.5.
+ * @description Filtros de productos — patrón "Bosque Comercial" v6 (Opción
+ * B, decisión del humano en vivo 2026-09-03: panel bajo demanda también en
+ * escritorio, ver claude-agile/proyectos/origen-dashboard/tareas-completadas.md).
  *
- * Desktop (≥lg): controles de filtro siempre visibles en línea —
- * búsqueda + Selects (categoría, estado, stock, ordenar) + toggle vista.
+ * Todos los breakpoints: `FilterToolbar` (búsqueda + botón "Filtros" con
+ * badge contador + toggle de vista grid/lista) + `FilterPanel` — bottom
+ * sheet en móvil/tablet (<lg), panel deslizante ("drawer") desde el borde
+ * derecho en escritorio (≥lg).
  *
- * Móvil/tablet (<lg): `FilterToolbar` con botón "Filtros" (badge contador)
- * + `FilterPanel` (bottom sheet).
- *
- * Los filtros activos aparecen como chips bajo la barra en ambos breakpoints.
+ * Los filtros activos aparecen como chips bajo la barra en todos los
+ * breakpoints.
  */
 
 'use client';
@@ -20,13 +22,6 @@ import {
   FilterToolbar,
   FilterPanel,
   ActiveFilterChips,
-  SearchInput,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  useIsMobile,
   type ActiveFilterChip,
   type FilterSection,
 } from '@arcediano/ux-library';
@@ -102,20 +97,9 @@ export function ProductFilters({
   categories = DEFAULT_CATEGORIES,
   className,
 }: ProductFiltersProps) {
-  const isMobile = useIsMobile(1024);
   const [panelOpen, setPanelOpen] = React.useState(false);
   const filtersButtonRef = React.useRef<HTMLButtonElement>(null);
   const [localSearch, setLocalSearch] = React.useState(searchQuery ?? '');
-
-  // Debounce para búsqueda
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      if (localSearch !== (searchQuery ?? '')) {
-        onSearchChange(localSearch || '');
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [localSearch, searchQuery, onSearchChange]);
 
   // Sincronizar cuando se limpian filtros externamente
   React.useEffect(() => {
@@ -225,101 +209,19 @@ export function ProductFilters({
   return (
     <div className={cn('space-y-2', className)}>
 
-      {/* ── Desktop (≥lg): controles inline siempre visibles ─────────────────── */}
-      {/*
-        Contenedor agrupador: bg-surface-alt (blanco) sobre el fondo crema
-        de la página garantiza contraste visual. No se usa Card porque añade
-        demasiado peso visual compitiendo con la tabla; este div actúa como
-        "barra de filtros" sin jerarquía de sección.
-        No se usa flex-wrap: todos los controles deben caber en una sola línea.
-        Los Select reciben className="w-auto" para anular el w-full del wrapper.
-        Ajuste (2026-09-03, petición del humano): barra más compacta -- menos
-        padding/gap y controles h-9 en vez de h-10 -- tras revertir el intento
-        de sidebar de 280px que rompía el responsive.
-      */}
-      <div className="hidden lg:flex items-center gap-1.5 bg-surface-alt border border-border-subtle rounded-xl px-2.5 py-1.5 shadow-sm">
-        {/* Búsqueda */}
-        <SearchInput
-          value={localSearch}
-          onChange={(value: string) => setLocalSearch(value)}
-          placeholder="Buscar por nombre o SKU..."
-          aria-label="Buscar productos"
-          className="min-w-[200px] flex-1"
-          size="sm"
-        />
-
-        {/* Categoría — min-w calibrado al texto más largo ("Embutidos") */}
-        <Select value={selectedCategory} onValueChange={onCategoryChange} className="w-auto">
-          <SelectTrigger className="min-w-[140px] max-w-[160px] h-9" tone="subtle">
-            <SelectValue placeholder="Categoría" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todas</SelectItem>
-            {categories.map((c) => (
-              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Estado — min-w calibrado a "Borradores" */}
-        <Select value={selectedStatus} onValueChange={onStatusChange} className="w-auto">
-          <SelectTrigger className="min-w-[130px] max-w-[150px] h-9" tone="subtle">
-            <SelectValue placeholder="Estado" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todos</SelectItem>
-            {STATUS_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Stock — min-w calibrado a "Stock bajo" */}
-        <Select value={selectedStock} onValueChange={onStockChange} className="w-auto">
-          <SelectTrigger className="min-w-[120px] max-w-[140px] h-9" tone="subtle">
-            <SelectValue placeholder="Stock" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Todo</SelectItem>
-            {STOCK_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Ordenar — min-w calibrado a "Más vendidos" */}
-        <Select value={sortBy} onValueChange={onSortChange} className="w-auto">
-          <SelectTrigger className="min-w-[150px] max-w-[170px] h-9" tone="subtle">
-            <SelectValue placeholder="Ordenar" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Por defecto</SelectItem>
-            {SORT_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Separador visual antes del toggle de vista, que no es un filtro */}
-        <div className="w-px h-5 bg-border-subtle flex-shrink-0" aria-hidden="true" />
-
-        {/* Toggle grid/lista */}
-        {viewModeToggle}
-      </div>
-
-      {/* ── Móvil/tablet (<lg): barra con botón "Filtros" ────────────────────── */}
-      <div className="lg:hidden">
-        <FilterToolbar
-          searchValue={searchQuery}
-          onSearchChange={onSearchChange}
-          searchPlaceholder="Buscar por nombre o SKU..."
-          searchAriaLabel="Buscar productos"
-          activeFilterCount={activeCount}
-          onOpenFilters={() => setPanelOpen(true)}
-          filtersButtonRef={filtersButtonRef}
-          actions={viewModeToggle}
-        />
-      </div>
+      {/* ── Búsqueda + botón "Filtros" — mismo componente en todos los breakpoints ── */}
+      <FilterToolbar
+        searchValue={localSearch}
+        onSearchChange={setLocalSearch}
+        onSearchDebouncedChange={onSearchChange}
+        searchDebounceMs={300}
+        searchPlaceholder="Buscar por nombre o SKU..."
+        searchAriaLabel="Buscar productos"
+        activeFilterCount={activeCount}
+        onOpenFilters={() => setPanelOpen(true)}
+        filtersButtonRef={filtersButtonRef}
+        actions={viewModeToggle}
+      />
 
       {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
       {activeChips.length > 0 && (
@@ -331,18 +233,17 @@ export function ProductFilters({
         </div>
       )}
 
-      {/* ── Panel de filtros: solo bottom sheet (<lg) ────────────────────────── */}
-      {isMobile && (
-        <FilterPanel
-          isOpen={panelOpen}
-          onClose={() => setPanelOpen(false)}
-          triggerRef={filtersButtonRef}
-          sections={sections}
-          onClearAll={onClearFilters}
-          resultCount={totalProducts}
-          resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
-        />
-      )}
+      {/* ── Panel de filtros: bottom sheet (<lg) / drawer deslizante (≥lg) ────── */}
+      <FilterPanel
+        isOpen={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        triggerRef={filtersButtonRef}
+        sections={sections}
+        onClearAll={onClearFilters}
+        resultCount={totalProducts}
+        resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
+        variant="drawer"
+      />
     </div>
   );
 }

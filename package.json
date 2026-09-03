@@ -11,7 +11,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@arcediano/ux-library": "^0.23.11",
+    "@arcediano/ux-library": "^0.25.0",
     "@hookform/resolvers": "^3.9.1",
     "@stripe/connect-js": "^3.4.6",
     "@stripe/react-connect-js": "^3.4.4",
