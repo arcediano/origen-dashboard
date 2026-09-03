@@ -14,7 +14,6 @@ import { useHideBottomTabBar } from '@/hooks/useHideBottomTabBar';
 import {
   Button, Badge, StatusBadge,
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle,
-  Switch,
   Sheet, SheetContent, SheetHeader, SheetTitle,
   ActionBar,
   toast,
@@ -37,7 +36,7 @@ import {
   AlertCircle, FileText, Award, Leaf, FlaskConical, Droplet, Milk,
   Info, AlertTriangle, Wheat, Bean, Nut, Egg, Fish,
   Shell, Sprout, Edit, ChevronDown, Thermometer, Archive,
-  Globe, Lock, PauseCircle, Send,
+  PauseCircle, Send,
 } from 'lucide-react';
 
 import { type Product } from '@/types/product';
@@ -402,11 +401,10 @@ function AtributosSection({ product }: { product: Product }) {
 // ============================================================================
 
 function StatusCard({
-  product, onStatusChange, onVisibilityChange, isUpdating, onRequestDraftConfirm,
+  product, onStatusChange, isUpdating, onRequestDraftConfirm,
 }: {
   product: Product;
   onStatusChange: (s: Product['status']) => Promise<void>;
-  onVisibilityChange: (v: boolean) => Promise<void>;
   isUpdating: boolean;
   /** "Mover a borrador" (ACTIVE/INACTIVE → DRAFT) es la única transición sin
    * aviso previo pese a ser la de mayor impacto: el producto desaparece de
@@ -420,7 +418,6 @@ function StatusCard({
    * sheet lo desmontaría a él también antes de que llegara a mostrarse. */
   onRequestDraftConfirm: () => void;
 }) {
-  const isPublic          = product.visibility === 'public';
   const isDraft           = product.status === 'draft';
   const isActive          = product.status === 'active';
   const isInactive        = product.status === 'inactive';
@@ -564,35 +561,6 @@ function StatusCard({
         </div>
       )}
 
-      <div className="border-t border-border-subtle pt-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            {isPublic
-              ? <Globe className="w-4 h-4 text-hoja-tinta shrink-0" />
-              : <Lock  className="w-4 h-4 text-text-subtle shrink-0" />}
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-origen-bosque">
-                {isPublic ? 'Visible en marketplace' : 'Oculto en marketplace'}
-              </p>
-              <p className="text-xs text-text-subtle mt-0.5">
-                {isPublic ? 'Los compradores pueden verlo' : 'Solo visible para ti'}
-              </p>
-            </div>
-          </div>
-          <Switch
-            checked={isPublic}
-            onCheckedChange={onVisibilityChange}
-            disabled={isUpdating || isDraft}
-            trackCheckedColor="bg-origen-bosque"
-          />
-        </div>
-        {isDraft && (
-          <p className="text-[11px] text-text-subtle mt-2 flex items-center gap-1">
-            <Info className="w-3 h-3 shrink-0" />
-            Publica el producto para hacerlo visible.
-          </p>
-        )}
-      </div>
     </div>
   );
 }
@@ -656,23 +624,6 @@ export default function ProductoDetallePage() {
       }
     } catch {
       toast({ title: 'Error', description: 'No se pudo actualizar.', variant: 'error' });
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const handleVisibilityChange = async (visible: boolean) => {
-    if (!product) return;
-    setIsUpdating(true);
-    try {
-      const res = await updateProduct(product.id, { visibility: visible ? 'public' : 'private' });
-      if (res.error) toast({ title: 'Error', description: res.error, variant: 'error' });
-      else if (res.data) {
-        setProduct(res.data);
-        toast({ title: visible ? 'Producto visible' : 'Producto oculto' });
-      }
-    } catch {
-      toast({ title: 'Error', description: 'No se pudo cambiar la visibilidad.', variant: 'error' });
     } finally {
       setIsUpdating(false);
     }
@@ -875,21 +826,6 @@ export default function ProductoDetallePage() {
                         </div>
                       </div>
                     </div>
-
-                    {/* Visibilidad */}
-                    <div className="flex items-center justify-between gap-3 pt-3 border-t border-border-subtle">
-                      <div className="flex items-center gap-2">
-                        {product.visibility === 'public'
-                          ? <Globe className="w-3.5 h-3.5 text-hoja-tinta" />
-                          : <Lock  className="w-3.5 h-3.5 text-text-subtle" />}
-                        <span className="text-xs text-text-subtle">
-                          {product.visibility === 'public' ? 'Visible en marketplace' : 'Oculto en marketplace'}
-                        </span>
-                      </div>
-                      {product.visibility === 'public' && (
-                        <Badge variant="leaf" size="sm">Publicado</Badge>
-                      )}
-                    </div>
                   </div>
                 </motion.div>
 
@@ -914,7 +850,6 @@ export default function ProductoDetallePage() {
                   <StatusCard
                     product={product}
                     onStatusChange={handleStatusChange}
-                    onVisibilityChange={handleVisibilityChange}
                     isUpdating={isUpdating}
                     onRequestDraftConfirm={() => setConfirmDraftOpen(true)}
                   />
@@ -985,7 +920,6 @@ export default function ProductoDetallePage() {
             <StatusCard
               product={product}
               onStatusChange={async s => { await handleStatusChange(s); setShowStatusSheet(false); }}
-              onVisibilityChange={async v => { await handleVisibilityChange(v); setShowStatusSheet(false); }}
               isUpdating={isUpdating}
               onRequestDraftConfirm={() => { setShowStatusSheet(false); setConfirmDraftOpen(true); }}
             />

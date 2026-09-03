@@ -162,7 +162,6 @@ const productToFormData = (product: Product): ProductFormData => {
   productionInfo: product.productionInfo || defaultFormData.productionInfo,
   attributes: product.attributes || [],
   status: product.status === 'active' ? 'active' : 'draft',
-  visibility: product.visibility || 'public',
   });
 };
 
@@ -205,7 +204,6 @@ const formDataToProduct = (formData: ProductFormData): Partial<Product> => {
     productionInfo: formData.productionInfo,
     attributes: formData.attributes,
     status: statusMap[formData.status] || 'draft',
-    visibility: formData.visibility,
   };
 };
 
