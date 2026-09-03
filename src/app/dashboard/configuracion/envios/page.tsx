@@ -141,6 +141,13 @@ export default function EnviosPage() {
   const [logisticsLevel, setLogisticsLevel] = useState<LogisticsLevel>('own');
   const [profilePubliclyReady, setProfilePubliclyReady] = useState(false);
 
+  // Elección EXPLÍCITA de logística (delegar en Origen / gestión propia) —
+  // decisión del humano 2026-09-02: es el campo que de verdad determina
+  // shippingMode, obligatorio desde el paso 4 del onboarding en adelante.
+  const [deliveryChoice, setDeliveryChoice] = useState<'delegated' | 'own' | null>(null);
+  const [pickupRouteAvailable, setPickupRouteAvailable] = useState(false);
+  const [pickupRouteName, setPickupRouteName] = useState<string | null>(null);
+
   // Pickup assignment — elección de ruta de recogida (si aplica)
   const [pickupAssignment, setPickupAssignment] = useState<{ id: string; state: 'ACTIVE' | 'PENDING_CHOICE'; routeName: string | null; warehouseName: string | null } | null>(null);
   const [respondingPickupChoice, setRespondingPickupChoice] = useState(false);
@@ -171,6 +178,7 @@ export default function EnviosPage() {
       setIsInOriginRoute(Boolean(logistics?.isInOriginRoute));
       setLogisticsLevel((logistics?.logisticsLevel as LogisticsLevel) ?? 'own');
       setPickupAssignment(response?.data?.pickupAssignment ?? null);
+      setDeliveryChoice(logistics?.deliveryChoice ?? null);
       setUseCentralizedTransport(logistics?.useCentralizedTransport ?? true);
       setMinOrderAmount(Number(logistics?.minOrderAmount ?? 0));
       setSustainablePackaging(Boolean(logistics?.sustainablePackaging));
@@ -193,6 +201,20 @@ export default function EnviosPage() {
           isExcluded: Boolean(zone.isExcluded),
         })),
       );
+
+      const postalCode = response?.data?.location?.postalCode;
+      if (postalCode && /^\d{5}$/.test(postalCode)) {
+        try {
+          const zoneCheckRes = await fetch(`/api/v1/producers/logistics/zone-check?postalCode=${postalCode}`, { credentials: 'include' });
+          if (zoneCheckRes.ok) {
+            const zoneCheck: { data?: { pickupRouteAvailable: boolean; pickupRouteName: string | null } } = await zoneCheckRes.json();
+            setPickupRouteAvailable(Boolean(zoneCheck.data?.pickupRouteAvailable));
+            setPickupRouteName(zoneCheck.data?.pickupRouteName ?? null);
+          }
+        } catch {
+          // sin cambios si falla — la opción "delegar" simplemente no se ofrece
+        }
+      }
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : 'No se pudo cargar tu configuración de logística.');
     } finally {
@@ -269,6 +291,10 @@ export default function EnviosPage() {
   // ─── Guardado ───────────────────────────────────────────────────────────
 
   const handleSave = async () => {
+    if (!deliveryChoice) {
+      setSaveError('Elige cómo vas a gestionar el envío: delegar en Origen o gestionarlo por tu cuenta.');
+      return;
+    }
     const incompleteOption = deliveryOptions.find(isDeliveryOptionIncomplete);
     if (incompleteOption) {
       setSaveError('Completa nombre, descripción, precio y tiempo estimado de todos tus métodos de envío.');
@@ -304,6 +330,7 @@ export default function EnviosPage() {
       isInOriginRoute,
       logisticsLevel,
       useCentralizedTransport: logisticsLevel === 'transport' ? useCentralizedTransport : undefined,
+      deliveryChoice,
       deliveryOptions: deliveryOptions.map(toOnboardingDeliveryOption),
       includedZones: shippingZones.filter((z) => !z.isExcluded).map(toOnboardingZone),
       excludedZones: shippingZones.filter((z) => z.isExcluded).map(toOnboardingZone),
@@ -438,6 +465,74 @@ export default function EnviosPage() {
             </div>
           </div>
         </Card>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            ELECCIÓN EXPLÍCITA DE LOGÍSTICA — decisión del humano 2026-09-02:
+            unifica lo que antes eran dos sistemas separados (PickupRoute vs
+            isInOriginRoute/CoveragePolicy). Se omite mientras haya una
+            asignación de ruta PENDING_CHOICE (tarjeta de abajo), que cubre
+            la misma elección en ese caso puntual.
+        ══════════════════════════════════════════════════════════════════ */}
+        {pickupAssignment?.state !== 'PENDING_CHOICE' && (
+          <Card variant="section" padding="md">
+            <CardIconHeader
+              icon={<Route className="h-5 w-5" />}
+              title="¿Cómo gestionas el envío?"
+              description="Elige quién se encarga de la recogida y el envío de tus pedidos"
+            />
+            <CardContent>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  disabled={!pickupRouteAvailable}
+                  onClick={() => setDeliveryChoice('delegated')}
+                  className={
+                    !pickupRouteAvailable
+                      ? 'text-left p-4 rounded-xl border-2 border-border-subtle bg-surface opacity-60 cursor-not-allowed'
+                      : deliveryChoice === 'delegated'
+                        ? 'text-left p-4 rounded-xl border-2 border-origen-pradera bg-origen-pradera/5 transition-all'
+                        : 'text-left p-4 rounded-xl border-2 border-border-subtle hover:border-origen-pradera bg-surface-alt transition-all'
+                  }
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-semibold text-origen-bosque">Delegar en Origen</p>
+                    {deliveryChoice === 'delegated' && <CheckCircle2 className="h-5 w-5 text-hoja-tinta flex-shrink-0" />}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    {pickupRouteAvailable
+                      ? `Origen recoge tus pedidos (${pickupRouteName ?? 'ruta disponible'}) y gestiona la entrega.`
+                      : 'No disponible: tu código postal no está cubierto por ninguna ruta de recogida de Origen.'}
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDeliveryChoice('own')}
+                  className={
+                    deliveryChoice === 'own'
+                      ? 'text-left p-4 rounded-xl border-2 border-origen-pradera bg-origen-pradera/5 transition-all'
+                      : 'text-left p-4 rounded-xl border-2 border-border-subtle hover:border-origen-pradera bg-surface-alt transition-all'
+                  }
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-semibold text-origen-bosque">Gestionar por mi cuenta</p>
+                    {deliveryChoice === 'own' && <CheckCircle2 className="h-5 w-5 text-hoja-tinta flex-shrink-0" />}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    Configuras tus propios métodos de envío, precios y zonas de entrega.
+                  </p>
+                </button>
+              </div>
+
+              {!deliveryChoice && (
+                <p className="text-xs text-feedback-danger mt-3 flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  Elige cómo vas a gestionar el envío para poder guardar
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* ══════════════════════════════════════════════════════════════════
             ASIGNACIÓN DE RUTA DE RECOGIDA — si aplica

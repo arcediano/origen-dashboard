@@ -247,6 +247,7 @@ export default function OnboardingPage() {
     },
     step4: {
       isInOriginRoute: false,
+      deliveryChoice: undefined,
       deliveryOptions: [],
       includedZones: [],
       excludedZones: [],
@@ -442,6 +443,7 @@ export default function OnboardingPage() {
             isInOriginRoute: d.logistics.isInOriginRoute,
             logisticsLevel: d.logistics.logisticsLevel ?? prev.step4.logisticsLevel,
             useCentralizedTransport: d.logistics.useCentralizedTransport ?? prev.step4.useCentralizedTransport,
+            deliveryChoice: d.logistics.deliveryChoice ?? prev.step4.deliveryChoice,
             minOrderAmount: Number.isFinite(Number(d.logistics.minOrderAmount))
               ? Number(d.logistics.minOrderAmount)
               : prev.step4.minOrderAmount,
@@ -584,7 +586,10 @@ export default function OnboardingPage() {
         break;
       }
       case 4: {
-        if (!formData.step4.isInOriginRoute && formData.step4.deliveryOptions.length < 1) {
+        if (!formData.step4.deliveryChoice) {
+          messages.push('Elige cómo vas a gestionar el envío: delegar en Origen o gestionarlo por tu cuenta.');
+        }
+        if (formData.step4.deliveryChoice !== 'delegated' && formData.step4.deliveryOptions.length < 1) {
           messages.push('Añade al menos un método de envío.');
         }
         const incompleteDeliveryOption = formData.step4.deliveryOptions.some(
