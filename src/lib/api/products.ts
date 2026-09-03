@@ -389,9 +389,14 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
     if (product[key] !== undefined) body[key] = product[key];
   }
 
-  // Los productores solo pueden enviar DRAFT o PENDING_APPROVAL en un PUT.
-  // ACTIVE y OUT_OF_STOCK los gestiona el backend automáticamente (por stock).
-  const PRODUCER_PUT_ALLOWED_STATUSES = ['draft', 'pending_approval', 'inactive'];
+  // Transiciones que un productor puede iniciar por PUT: DRAFT, PENDING_APPROVAL,
+  // INACTIVE, y ACTIVE (reactivación directa de un producto pausado sin cambios
+  // sin revisar -- botón "Volver a activar" de StatusCard, product/[id]/page.tsx).
+  // El backend es quien valida la transición real (ProductsService.update(),
+  // allowedFrom + comprobación de hasUnreviewedChanges): esta lista solo evita
+  // enviar basura obvia, no sustituye esa validación. OUT_OF_STOCK lo gestiona
+  // el backend automáticamente (por stock), nunca lo envía el frontend.
+  const PRODUCER_PUT_ALLOWED_STATUSES = ['draft', 'pending_approval', 'inactive', 'active'];
   if (product.status !== undefined && PRODUCER_PUT_ALLOWED_STATUSES.includes(product.status)) {
     body.status = mapStatusToApi(product.status);
   }
