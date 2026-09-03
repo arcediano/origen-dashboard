@@ -22,7 +22,6 @@ import {
   mapApiProductToProduct,
   mapApiProducts,
   mapStatusToApi,
-  mapVisibilityToApi,
   type ProductStats,
 } from './products-mapper';
 
@@ -365,8 +364,7 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
       description: attribute.description,
     })),
 
-    status:     mapStatusToApi(formData.status),
-    visibility: mapVisibilityToApi(formData.visibility),
+    status: mapStatusToApi(formData.status),
   };
 }
 
@@ -400,7 +398,13 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
   if (product.status !== undefined && PRODUCER_PUT_ALLOWED_STATUSES.includes(product.status)) {
     body.status = mapStatusToApi(product.status);
   }
-  if (product.visibility !== undefined) body.visibility = mapVisibilityToApi(product.visibility);
+  // El productor ya no controla `visibility` directamente (se retiró el toggle
+  // manual del detalle de producto, redundante con status -- decisión del
+  // humano, 2026-09-03: activar/pausar ya determina si el producto es visible
+  // en el marketplace). El backend sigue gestionando el campo por su cuenta
+  // (aprobar/rechazar/suspender un producto, y la reactivación directa
+  // INACTIVE->ACTIVE, que ahora restaura visibility a PUBLIC igual que
+  // approveProduct()).
 
   // Imágenes S3
   if (product.mainImage !== undefined) {

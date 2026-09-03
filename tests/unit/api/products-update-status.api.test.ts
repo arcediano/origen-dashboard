@@ -73,4 +73,19 @@ describe('updateProduct() — campo status en el body del PUT', () => {
     expect(capturedBody).not.toBeNull();
     expect(capturedBody!.status).toBeUndefined();
   });
+
+  it('nunca envía visibility (toggle manual retirado, redundante con status -- decisión del humano 2026-09-03)', async () => {
+    let capturedBody: Record<string, unknown> | null = null;
+    server.use(
+      http.put(`${BASE}/products/:id`, async ({ request }) => {
+        capturedBody = await request.json() as Record<string, unknown>;
+        return HttpResponse.json({ success: true, data: buildProduct({ id: 1 }) });
+      }),
+    );
+
+    await updateProduct('1', { status: 'active', name: 'Nuevo nombre' });
+
+    expect(capturedBody).not.toBeNull();
+    expect(capturedBody).not.toHaveProperty('visibility');
+  });
 });

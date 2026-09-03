@@ -528,15 +528,3 @@ export function mapStatusToApi(status: Product['status'] | string): string {
   };
   return map[status] ?? 'DRAFT';
 }
-
-/**
- * Convierte la visibilidad del frontend al formato del backend.
- */
-export function mapVisibilityToApi(visibility: Product['visibility'] | string): string {
-  const map: Record<string, string> = {
-    public:   'PUBLIC',
-    private:  'PRIVATE',
-    password: 'PASSWORD',
-  };
-  return map[visibility] ?? 'PRIVATE';
-}

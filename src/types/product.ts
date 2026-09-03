@@ -340,7 +340,6 @@ export interface ProductFormData {
   productionInfo: ProductionInfo;
   attributes: DynamicAttribute[];
   status: 'draft' | 'pending_approval' | 'active';
-  visibility: 'public' | 'private' | 'password';
 }
 
 // ============================================================================
@@ -433,7 +432,6 @@ export const defaultFormData: ProductFormData = {
   productionInfo: defaultProductionInfo,
   attributes: [],
   status: 'draft',
-  visibility: 'private',
 };
 
 // ============================================================================
