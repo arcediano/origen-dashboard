@@ -1,26 +1,35 @@
 /**
  * @file ProductFilters.tsx
- * @description Filtros de productos — patrón "Bosque Comercial" v6 (Opción
- * B, decisión del humano en vivo 2026-09-03: panel bajo demanda también en
- * escritorio, ver claude-agile/proyectos/origen-dashboard/tareas-completadas.md).
+ * @description Filtros de productos — patrón "Bosque Comercial" v7 (Opción
+ * A, decisión del humano en vivo 2026-09-03: "Ordenar" separado de los
+ * filtros, ver claude-agile/proyectos/origen-dashboard/tareas-completadas.md).
  *
  * Todos los breakpoints: `FilterToolbar` (búsqueda + botón "Filtros" con
- * badge contador + toggle de vista grid/lista) + `FilterPanel` — bottom
- * sheet en móvil/tablet (<lg), panel deslizante ("drawer") desde el borde
- * derecho en escritorio (≥lg).
+ * badge contador) + botón "Ordenar" propio (su propio bottom sheet, sin
+ * relación con `FilterPanel`) + `FilterPanel` — bottom sheet en móvil/tablet
+ * (<lg), panel deslizante ("drawer") desde el borde derecho en escritorio
+ * (≥lg). El toggle de vista grid/lista se oculta en `<lg`: en móvil/tablet
+ * el listado siempre usa `ProductMobileList`, así que alternar la vista no
+ * cambia nada visible ahí.
+ *
+ * `compact` en `FilterToolbar`: con dos botones junto a la búsqueda
+ * ("Filtros" + "Ordenar"), la búsqueda no baja a su propia fila y ambos
+ * botones se muestran solo con icono en `<sm` — así la barra cabe en una
+ * sola línea también en el móvil más estrecho.
  *
  * Los filtros activos aparecen como chips bajo la barra en todos los
- * breakpoints.
+ * breakpoints — el orden ya no es uno de ellos.
  */
 
 'use client';
 
 import React from 'react';
-import { Grid3x3, List } from 'lucide-react';
+import { Grid3x3, List, ArrowUpDown, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   FilterToolbar,
   FilterPanel,
+  FilterBottomSheet,
   ActiveFilterChips,
   type ActiveFilterChip,
   type FilterSection,
@@ -98,6 +107,7 @@ export function ProductFilters({
   className,
 }: ProductFiltersProps) {
   const [panelOpen, setPanelOpen] = React.useState(false);
+  const [sortOpen, setSortOpen] = React.useState(false);
   const filtersButtonRef = React.useRef<HTMLButtonElement>(null);
   const [localSearch, setLocalSearch] = React.useState(searchQuery ?? '');
 
@@ -123,14 +133,10 @@ export function ProductFilters({
       label: STOCK_OPTIONS.find(o => o.value === selectedStock)?.label ?? selectedStock,
       onRemove: () => onStockChange(''),
     }] : []),
-    ...(sortBy ? [{
-      id: 'sort',
-      label: SORT_OPTIONS.find(o => o.value === sortBy)?.label ?? sortBy,
-      onRemove: () => onSortChange(''),
-    }] : []),
   ];
 
   const activeCount = activeChips.length;
+  const sortLabel = SORT_OPTIONS.find((o) => o.value === sortBy)?.label;
 
   // ── Secciones del panel móvil ────────────────────────────────────────────────
   const sections: FilterSection[] = [
@@ -163,20 +169,33 @@ export function ProductFilters({
       value: selectedStock,
       onChange: onStockChange,
     },
-    {
-      type: 'chips', id: 'sort', title: 'Ordenar por',
-      options: [
-        { label: 'Por defecto', value: '' },
-        ...SORT_OPTIONS,
-      ],
-      value: sortBy,
-      onChange: onSortChange,
-    },
   ];
 
-  // ── Toggle de vista (desktop y móvil, siempre a la derecha) ─────────────────
+  // ── Botón "Ordenar" — separado de "Filtros", su propio bottom sheet ─────────
+  const sortButton = (
+    <div className="relative flex-shrink-0">
+      <button
+        type="button"
+        onClick={() => setSortOpen(true)}
+        aria-haspopup="dialog"
+        aria-label={sortLabel ? `Ordenar (${sortLabel})` : 'Ordenar'}
+        className={cn(
+          'relative flex items-center gap-1.5 h-10 w-10 justify-center px-0 sm:w-auto sm:justify-start sm:px-3.5 rounded-xl border text-sm font-medium transition-colors',
+          sortBy
+            ? 'bg-origen-bosque border-origen-bosque text-white'
+            : 'bg-surface-alt border-border text-origen-bosque',
+        )}
+      >
+        <ArrowUpDown className="w-4 h-4" />
+        <span className="hidden sm:inline">Ordenar</span>
+      </button>
+    </div>
+  );
+
+  // ── Toggle de vista — solo tiene efecto en escritorio (≥lg); en móvil/
+  // tablet el listado siempre usa ProductMobileList sin importar viewMode ──
   const viewModeToggle = (
-    <div className="flex items-center gap-0.5 border border-border rounded-xl p-0.5 bg-surface-alt h-9 flex-shrink-0">
+    <div className="hidden lg:flex items-center gap-0.5 border border-border rounded-xl p-0.5 bg-surface-alt h-9 flex-shrink-0">
       <button
         onClick={() => onViewModeChange('list')}
         className={cn(
@@ -209,7 +228,7 @@ export function ProductFilters({
   return (
     <div className={cn('space-y-2', className)}>
 
-      {/* ── Búsqueda + botón "Filtros" — mismo componente en todos los breakpoints ── */}
+      {/* ── Búsqueda + "Filtros" + "Ordenar" — mismo componente en todos los breakpoints ── */}
       <FilterToolbar
         searchValue={localSearch}
         onSearchChange={setLocalSearch}
@@ -220,7 +239,13 @@ export function ProductFilters({
         activeFilterCount={activeCount}
         onOpenFilters={() => setPanelOpen(true)}
         filtersButtonRef={filtersButtonRef}
-        actions={viewModeToggle}
+        compact
+        actions={(
+          <>
+            {sortButton}
+            {viewModeToggle}
+          </>
+        )}
       />
 
       {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
@@ -244,6 +269,37 @@ export function ProductFilters({
         resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
         variant="drawer"
       />
+
+      {/* ── "Ordenar" — hoja propia, independiente de "Filtros"; selección
+             inmediata (sin borrador/Aplicar, es un único valor) ────────────── */}
+      <FilterBottomSheet
+        open={sortOpen}
+        onClose={() => setSortOpen(false)}
+        title="Ordenar por"
+      >
+        <div className="flex flex-col gap-1">
+          {[{ value: '', label: 'Por defecto' }, ...SORT_OPTIONS].map((opt) => {
+            const active = sortBy === opt.value;
+            return (
+              <button
+                key={opt.value || 'default'}
+                type="button"
+                onClick={() => {
+                  onSortChange(opt.value);
+                  setSortOpen(false);
+                }}
+                className={cn(
+                  'flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-colors min-h-[44px]',
+                  active ? 'bg-origen-nube text-origen-bosque' : 'text-origen-oscuro hover:bg-surface',
+                )}
+              >
+                <span>{opt.label}</span>
+                {active && <Check className="w-4 h-4 text-origen-bosque flex-shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+      </FilterBottomSheet>
     </div>
   );
 }
