@@ -734,9 +734,18 @@ export default function SecurityPage() {
                               como autenticador, es imposible escanear con la cámara un QR que
                               está en la pantalla de ese mismo dispositivo. El sistema operativo
                               entrega el esquema otpauth:// a la app de autenticación instalada
-                              (si hay alguna), sin escanear ni copiar nada. Si no hay ninguna app
-                              que lo capture, el enlace simplemente no hace nada — no rompe la
-                              página. */}
+                              (si hay alguna), sin escanear ni copiar nada.
+                              En iPhone, iOS/Safari intercepta otpauth:// para su propia app
+                              Contraseñas desde iOS 15 — de forma sistemática, no ocasional — y
+                              las apps de terceros (Google Authenticator, Authy, Microsoft
+                              Authenticator...) normalmente no pueden registrarse para capturarlo
+                              en su lugar, así que si el usuario tiene una app distinta instalada
+                              es virtualmente seguro que este enlace no la abrirá a ella. En
+                              Android sí es habitual que el sistema ofrezca elegir entre las apps
+                              instaladas que sepan abrirlo. Por eso el texto de abajo lo explica
+                              en vez de dejarlo como una posibilidad vaga ("puede pasar cualquier
+                              cosa") — para alguien sin conocimientos técnicos, no es un fallo de
+                              esta página ni de su app, es así como Apple diseñó el sistema. */}
                           {twoFa.setupData.otpauthUri && (
                             <div className="sm:hidden space-y-2">
                               <Button asChild variant="secondary" className="w-full">
@@ -745,7 +754,7 @@ export default function SecurityPage() {
                                 </a>
                               </Button>
                               <p className="text-xs text-text-subtle text-center">
-                                Puede abrir tu app de autenticación (Google Authenticator, Authy, Microsoft Authenticator…) directamente. Si se abre otra app distinta, o no pasa nada, no te preocupes: usa el código QR o el código manual de abajo, que funcionan siempre.
+                                En iPhone, esto suele abrir la app <strong>Contraseñas</strong> de Apple en vez de tu app de autenticación instalada — es el propio sistema del teléfono, no un fallo de esta página. En Android puede ofrecerte elegir la app correcta. Si no abre la app que buscabas, usa el código QR o el código manual de abajo: funcionan siempre, con cualquier app de autenticación.
                               </p>
                             </div>
                           )}
