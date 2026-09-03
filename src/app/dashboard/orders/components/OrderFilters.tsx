@@ -1,15 +1,12 @@
 /**
  * @file OrderFilters.tsx
- * @description Filtros de pedidos — patrón "Bosque Comercial" v5.6.
+ * @description Filtros de pedidos — patrón "Bosque Comercial" v5.5.
  *
- * Escritorio (≥lg): layout de 2 columnas — `FilterSidebarPanel` (columna
- * lateral fija con draft + "Aplicar filtros", igual patrón que
- * `FilterSidebar` de origen-web para catálogos públicos, pero con el
- * modelo de interacción de `FilterPanel`) + el contenido principal
- * (`children`, que el consumidor pasa: la tabla/lista de pedidos).
+ * Desktop (≥lg): controles siempre visibles en línea — búsqueda (debounce
+ * 300ms) + Select de estado + DateInput para período + inputs de importe.
  *
  * Móvil/tablet (<lg): `FilterToolbar` con botón "Filtros" (badge contador)
- * + `FilterPanel` (bottom sheet) con las mismas secciones que el sidebar.
+ * + `FilterPanel` (bottom sheet) con las mismas secciones.
  *
  * Los filtros activos aparecen como chips bajo la barra en ambos breakpoints.
  */
@@ -19,11 +16,16 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import {
-  FilterSidebarPanel,
   FilterToolbar,
   FilterPanel,
   ActiveFilterChips,
   SearchInput,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  DateInput,
   useIsMobile,
   type ActiveFilterChip,
   type FilterSection,
@@ -44,8 +46,6 @@ export interface OrderFiltersProps {
   onClearFilters: () => void;
   totalOrders: number;
   className?: string;
-  /** Contenido principal (lista móvil / tabla de pedidos) — columna derecha del layout de 2 columnas en escritorio. */
-  children: React.ReactNode;
 }
 
 export function OrderFilters({
@@ -54,7 +54,6 @@ export function OrderFilters({
   onClearFilters,
   totalOrders,
   className,
-  children,
 }: OrderFiltersProps) {
   const isMobile = useIsMobile(1024);
   const [panelOpen, setPanelOpen] = React.useState(false);
@@ -104,7 +103,7 @@ export function OrderFilters({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ].filter((v: any) => v !== undefined && v !== '' && v !== null).length;
 
-  // ── Secciones — compartidas entre el sidebar de escritorio y el bottom sheet móvil ──
+  // ── Secciones del panel móvil ────────────────────────────────────────────────
   const sections: FilterSection[] = [
     {
       type: 'chips', id: 'status', title: 'Estado',
@@ -136,57 +135,144 @@ export function OrderFilters({
     },
   ];
 
-  const resultLabel = totalOrders === 1 ? 'pedido' : 'pedidos';
-
   return (
-    <div className={cn('lg:grid lg:grid-cols-[280px_1fr] lg:gap-6 lg:items-start', className)}>
+    <div className={cn('space-y-2', className)}>
 
-      {/* ── Escritorio (≥lg): sidebar de filtros siempre visible, con draft + Aplicar ── */}
-      <FilterSidebarPanel
-        className="hidden lg:flex lg:sticky lg:top-24"
-        sections={sections}
-        onClearAll={onClearFilters}
-        resultCount={totalOrders}
-        resultLabel={resultLabel}
-      >
+      {/* ── Desktop (≥lg): controles inline siempre visibles ─────────────────── */}
+      {/*
+        Contenedor agrupador: bg-surface-alt (blanco) sobre el fondo crema
+        garantiza contraste visual. Sin flex-wrap para mantener una única línea.
+        El Select recibe className="w-auto" para anular el w-full del wrapper.
+        Período e importe se agrupan cada uno en su propio bloque (mismo
+        patrón que el grupo de valoración de ReviewFilters) para separar
+        visualmente los controles relacionados dentro de la barra.
+      */}
+      <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
+        {/* Búsqueda con debounce */}
         <SearchInput
           value={localSearch}
-          onChange={setLocalSearch}
+          onChange={(v) => {
+            setLocalSearch(v);
+          }}
           onDebouncedChange={(v) => onFilterChange({ search: v || undefined } as OrderFiltersType)}
           debounceMs={300}
           placeholder="Buscar pedido o cliente..."
           aria-label="Buscar pedidos"
+          className="min-w-[200px] flex-1"
           size="md"
         />
-      </FilterSidebarPanel>
 
-      <div className="space-y-2 min-w-0">
-        {/* ── Móvil/tablet (<lg): barra con botón "Filtros" ────────────────────── */}
-        <div className="lg:hidden">
-          <FilterToolbar
-            searchValue={localSearch}
-            onSearchChange={setLocalSearch}
-            onSearchDebouncedChange={(value) => onFilterChange({ search: value || undefined } as OrderFiltersType)}
-            searchDebounceMs={300}
-            searchPlaceholder="Buscar pedido o cliente..."
-            activeFilterCount={activeCount}
-            onOpenFilters={() => setPanelOpen(true)}
-            filtersButtonRef={filtersButtonRef}
-          />
+        {/* Estado — min-w calibrado a "Procesando" */}
+        <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as OrderStatus)} className="w-auto">
+          <SelectTrigger className="min-w-[140px] max-w-[160px] h-10" tone="subtle">
+            <SelectValue placeholder="Estado" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todos</SelectItem>
+            {STATUS_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Período: desde/hasta agrupados */}
+        <div
+          className="flex items-center gap-2 rounded-xl border border-border-subtle px-2 py-1 flex-shrink-0"
+          role="group"
+          aria-label="Filtrar por periodo"
+        >
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-text-subtle whitespace-nowrap">Desde</span>
+            <DateInput
+              value={formatDate(filters.dateFrom)}
+              onChange={(e) => set('dateFrom', e.target.value ? new Date(e.target.value) : undefined)}
+              inputSize="sm"
+              className="w-[140px]"
+              aria-label="Fecha desde"
+            />
+          </div>
+          <div className="w-px h-6 bg-border-subtle" aria-hidden="true" />
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-text-subtle whitespace-nowrap">Hasta</span>
+            <DateInput
+              value={formatDate(filters.dateTo)}
+              onChange={(e) => set('dateTo', e.target.value ? new Date(e.target.value) : undefined)}
+              inputSize="sm"
+              className="w-[140px]"
+              aria-label="Fecha hasta"
+            />
+          </div>
         </div>
 
-        {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
-        {activeChips.length > 0 && (
-          <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
-              Activos:
-            </span>
-            <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
+        {/* Importe: mínimo/máximo agrupados */}
+        <div
+          className="flex items-center gap-2 h-10 px-3 rounded-xl bg-muted/50 border border-transparent hover:bg-muted/70 transition-colors flex-shrink-0"
+          role="group"
+          aria-label="Filtrar por importe"
+        >
+          <div className="relative flex items-center w-[76px]">
+            <span className="absolute left-0 text-sm text-text-subtle pointer-events-none select-none">€</span>
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              value={filters.minAmount ?? ''}
+              onChange={(e) => set('minAmount', e.target.value ? Number(e.target.value) : undefined)}
+              placeholder="Mín"
+              aria-label="Importe mínimo"
+              className={cn(
+                'w-full h-6 bg-transparent border-0 pl-4 pr-0 text-sm',
+                'placeholder:text-text-disabled text-origen-oscuro',
+                'focus:outline-none',
+                '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+              )}
+            />
           </div>
-        )}
-
-        {children}
+          <span className="text-xs text-text-subtle select-none">–</span>
+          <div className="relative flex items-center w-[76px]">
+            <span className="absolute left-0 text-sm text-text-subtle pointer-events-none select-none">€</span>
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              value={filters.maxAmount ?? ''}
+              onChange={(e) => set('maxAmount', e.target.value ? Number(e.target.value) : undefined)}
+              placeholder="Máx"
+              aria-label="Importe máximo"
+              className={cn(
+                'w-full h-6 bg-transparent border-0 pl-4 pr-0 text-sm',
+                'placeholder:text-text-disabled text-origen-oscuro',
+                'focus:outline-none',
+                '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+              )}
+            />
+          </div>
+        </div>
       </div>
+
+      {/* ── Móvil/tablet (<lg): barra con botón "Filtros" ────────────────────── */}
+      <div className="lg:hidden">
+        <FilterToolbar
+          searchValue={localSearch}
+          onSearchChange={setLocalSearch}
+          onSearchDebouncedChange={(value) => onFilterChange({ search: value || undefined } as OrderFiltersType)}
+          searchDebounceMs={300}
+          searchPlaceholder="Buscar pedido o cliente..."
+          activeFilterCount={activeCount}
+          onOpenFilters={() => setPanelOpen(true)}
+          filtersButtonRef={filtersButtonRef}
+        />
+      </div>
+
+      {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
+      {activeChips.length > 0 && (
+        <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
+            Activos:
+          </span>
+          <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
+        </div>
+      )}
 
       {/* ── Panel de filtros: solo bottom sheet (<lg) ────────────────────────── */}
       {isMobile && (
@@ -197,7 +283,7 @@ export function OrderFilters({
           sections={sections}
           onClearAll={onClearFilters}
           resultCount={totalOrders}
-          resultLabel={resultLabel}
+          resultLabel={totalOrders === 1 ? 'pedido' : 'pedidos'}
         />
       )}
     </div>
