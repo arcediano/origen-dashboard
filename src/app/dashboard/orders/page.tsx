@@ -186,64 +186,62 @@ export default function OrdersPage() {
           </motion.div>
         )}
 
-        {/* Filtros */}
+        {/* Filtros + contenido principal (layout de 2 columnas en escritorio) */}
         <motion.div variants={itemVariants}>
           <OrderFilters
             filters={filters}
             onFilterChange={handleFilterChange}
             onClearFilters={handleClearFilters}
             totalOrders={totalOrders}
-          />
-        </motion.div>
-
-        {/* Lista móvil / Tabla desktop */}
-        <motion.div variants={itemVariants}>
-          {orders.length === 0 ? (
-            <Card>
-              <EmptyState
-                size="sm"
-                icon={<ShoppingBag className="w-6 h-6" />}
-                title="Sin pedidos"
-                description="Aún no tienes pedidos con los filtros seleccionados."
-              />
-            </Card>
-          ) : (
-            <>
-              {/* Móvil: lista de tarjetas */}
-              <div className="space-y-3 block lg:hidden" aria-busy={isTableLoading || undefined}>
-                {isTableLoading
-                  ? Array.from({ length: 5 }).map((_, i) => (
-                      <OrderCardSkeleton key={i} />
-                    ))
-                  : orders.map((order) => (
-                      <OrderCard
-                        key={order.id}
-                        order={order}
-                        onPress={handleViewDetails}
-                      />
-                    ))}
-              </div>
-
-              {/* Desktop: tabla */}
-              <div className="hidden lg:block">
-                <OrdersTable
-                  orders={orders}
-                  onViewDetails={handleViewDetails}
-                  isLoading={isTableLoading}
+          >
+            {/* Lista móvil / Tabla desktop */}
+            {orders.length === 0 ? (
+              <Card>
+                <EmptyState
+                  size="sm"
+                  icon={<ShoppingBag className="w-6 h-6" />}
+                  title="Sin pedidos"
+                  description="Aún no tienes pedidos con los filtros seleccionados."
                 />
-              </div>
+              </Card>
+            ) : (
+              <>
+                {/* Móvil: lista de tarjetas */}
+                <div className="space-y-3 block lg:hidden" aria-busy={isTableLoading || undefined}>
+                  {isTableLoading
+                    ? Array.from({ length: 5 }).map((_, i) => (
+                        <OrderCardSkeleton key={i} />
+                      ))
+                    : orders.map((order) => (
+                        <OrderCard
+                          key={order.id}
+                          order={order}
+                          onPress={handleViewDetails}
+                        />
+                      ))}
+                </div>
 
-              {/* Paginación */}
-              {totalPages > 1 && (
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                  className="mt-6"
-                />
-              )}
-            </>
-          )}
+                {/* Desktop: tabla */}
+                <div className="hidden lg:block">
+                  <OrdersTable
+                    orders={orders}
+                    onViewDetails={handleViewDetails}
+                    isLoading={isTableLoading}
+                  />
+                </div>
+
+                {/* Paginación */}
+                {totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    className="mt-6"
+                  />
+                )}
+              </>
+            )}
+          </OrderFilters>
         </motion.div>
       </motion.div>
     </>

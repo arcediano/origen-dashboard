@@ -1,15 +1,20 @@
 /**
  * @component ReviewFilters
- * @description Filtros de reseñas — patrón "Bosque Comercial" v5.5.
+ * @description Filtros de reseñas — patrón "Bosque Comercial" v5.6.
  *
- * Desktop (≥lg): controles siempre visibles en línea — búsqueda (debounce
- * 300ms) + Select de estado + Select de tipo + StarRating interactivo para
- * valoración + Checkbox con label para los tres booleanos.
+ * Escritorio (≥lg): layout de 2 columnas — `FilterSidebarPanel` (columna
+ * lateral fija con draft + "Aplicar filtros") + el contenido principal
+ * (`children`, que el consumidor pasa: la lista/tabla de reseñas).
  *
  * Móvil/tablet (<lg): `FilterToolbar` con botón "Filtros" (badge contador)
- * + `FilterPanel` (bottom sheet) con las mismas secciones.
+ * + `FilterPanel` (bottom sheet) con las mismas secciones que el sidebar.
  *
  * Los filtros activos aparecen como chips bajo la barra en ambos breakpoints.
+ *
+ * Nota: la valoración se filtra como sección `chips` (★5..★1) tanto en el
+ * sidebar de escritorio como en el bottom sheet — sustituye al `StarRating`
+ * interactivo que tenía la barra ad-hoc anterior solo en escritorio, para
+ * que ambos breakpoints compartan exactamente el mismo motor de filtros.
  */
 
 'use client';
@@ -17,17 +22,11 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import {
+  FilterSidebarPanel,
   FilterToolbar,
   FilterPanel,
   ActiveFilterChips,
   SearchInput,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  StarRating,
-  Checkbox,
   useIsMobile,
   type ActiveFilterChip,
   type FilterSection,
@@ -61,6 +60,8 @@ export interface ReviewFiltersProps {
   onClearFilters: () => void;
   totalReviews: number;
   className?: string;
+  /** Contenido principal (lista/tabla de reseñas) — columna derecha del layout de 2 columnas en escritorio. */
+  children: React.ReactNode;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -71,6 +72,7 @@ export function ReviewFilters({
   onClearFilters,
   totalReviews,
   className,
+  children,
 }: ReviewFiltersProps) {
   const isMobile = useIsMobile(1024);
   const [panelOpen, setPanelOpen] = React.useState(false);
@@ -118,7 +120,7 @@ export function ReviewFilters({
     filters.hasImages,
   ].filter(Boolean).length;
 
-  // ── Secciones del panel móvil ─────────────────────────────────────────────
+  // ── Secciones — compartidas entre el sidebar de escritorio y el bottom sheet móvil ──
 
   const sections: FilterSection[] = [
     {
@@ -159,130 +161,54 @@ export function ReviewFilters({
   ];
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('lg:grid lg:grid-cols-[280px_1fr] lg:gap-6 lg:items-start', className)}>
 
-      {/* ── Desktop (≥lg): controles inline siempre visibles ─────────────────── */}
-      {/*
-        Contenedor agrupador: bg-surface-alt (blanco) sobre el fondo crema
-        garantiza contraste visual. Sin flex-wrap para mantener una única línea.
-        Los Select reciben className="w-auto" para anular el w-full del wrapper.
-        Los bloques de StarRating y Checkboxes usan bg-muted/50 que sobre
-        blanco (surface-alt) es perfectamente visible (pastel verdoso vs crema).
-      */}
-      <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
-        {/* Búsqueda con debounce */}
+      {/* ── Escritorio (≥lg): sidebar de filtros siempre visible, con draft + Aplicar ── */}
+      <FilterSidebarPanel
+        className="hidden lg:flex lg:sticky lg:top-24"
+        sections={sections}
+        onClearAll={onClearFilters}
+        resultCount={totalReviews}
+        resultLabel="reseñas"
+      >
         <SearchInput
           value={localSearch}
-          onChange={(v) => {
-            setLocalSearch(v);
-          }}
+          onChange={setLocalSearch}
           onDebouncedChange={(v) => onFilterChange({ search: v || undefined } as ReviewFiltersType)}
           debounceMs={300}
           placeholder="Buscar reseñas..."
           aria-label="Buscar reseñas"
-          className="min-w-[180px] flex-1"
           size="md"
         />
+      </FilterSidebarPanel>
 
-        {/* Estado — min-w calibrado a "Rechazadas" */}
-        <Select value={filters.status ?? ''} onValueChange={(v) => set('status', v as ReviewStatus)} className="w-auto">
-          <SelectTrigger className="min-w-[130px] max-w-[150px] h-10" tone="subtle">
-            <SelectValue placeholder="Estado" />
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Valoración: StarRating interactivo con reset al pulsar la misma estrella */}
-        <div
-          className="flex items-center gap-2 h-10 px-3 rounded-xl bg-muted/50 border border-transparent hover:bg-muted/70 transition-colors flex-shrink-0"
-          role="group"
-          aria-label="Filtrar por valoración"
-        >
-          <span className="text-xs text-text-subtle whitespace-nowrap flex-shrink-0">Val.:</span>
-          <StarRating
-            value={filters.rating ?? 0}
-            onChange={(v) => {
-              // Pulsar la misma estrella activa limpia el filtro
-              if (v === filters.rating) {
-                onFilterChange({ ...filters, rating: undefined });
-              } else {
-                onFilterChange({ ...filters, rating: v as ReviewFiltersType['rating'] });
-              }
-            }}
-            size="sm"
-            label="Valoración mínima"
+      <div className="space-y-2 min-w-0">
+        {/* ── Móvil/tablet (<lg): barra con botón "Filtros" ────────────────────── */}
+        <div className="lg:hidden">
+          <FilterToolbar
+            searchValue={localSearch}
+            onSearchChange={setLocalSearch}
+            onSearchDebouncedChange={(value) => onFilterChange({ search: value || undefined } as ReviewFiltersType)}
+            searchDebounceMs={300}
+            searchPlaceholder="Buscar reseñas..."
+            activeFilterCount={activeCount}
+            onOpenFilters={() => setPanelOpen(true)}
+            filtersButtonRef={filtersButtonRef}
           />
-          {filters.rating ? (
-            <button
-              type="button"
-              onClick={() => onFilterChange({ ...filters, rating: undefined })}
-              className="text-[10px] text-text-subtle hover:text-origen-bosque transition-colors underline underline-offset-2 whitespace-nowrap"
-              aria-label="Quitar filtro de valoración"
-            >
-              Quitar
-            </button>
-          ) : null}
         </div>
 
-        {/* Booleanos: checkboxes inline compactos */}
-        <div className="flex items-center gap-3 h-10 px-3 rounded-xl bg-muted/50 border border-transparent flex-shrink-0">
-          <label className="flex items-center gap-1.5 cursor-pointer select-none">
-            <Checkbox
-              size="sm"
-              variant="forest"
-              checked={filters.verifiedOnly ?? false}
-              onCheckedChange={(v) => onFilterChange({ ...filters, verifiedOnly: v === true ? true : undefined })}
-            />
-            <span className="text-xs text-origen-bosque whitespace-nowrap">Verificadas</span>
-          </label>
-          <label className="flex items-center gap-1.5 cursor-pointer select-none">
-            <Checkbox
-              size="sm"
-              variant="forest"
-              checked={filters.hasResponse ?? false}
-              onCheckedChange={(v) => onFilterChange({ ...filters, hasResponse: v === true ? true : undefined })}
-            />
-            <span className="text-xs text-origen-bosque whitespace-nowrap">Con resp.</span>
-          </label>
-          <label className="flex items-center gap-1.5 cursor-pointer select-none">
-            <Checkbox
-              size="sm"
-              variant="forest"
-              checked={filters.hasImages ?? false}
-              onCheckedChange={(v) => onFilterChange({ ...filters, hasImages: v === true ? true : undefined })}
-            />
-            <span className="text-xs text-origen-bosque whitespace-nowrap">Con imgs.</span>
-          </label>
-        </div>
+        {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
+        {activeChips.length > 0 && (
+          <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
+              Activos:
+            </span>
+            <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
+          </div>
+        )}
+
+        {children}
       </div>
-
-      {/* ── Móvil/tablet (<lg): barra con botón "Filtros" ────────────────────── */}
-      <div className="lg:hidden">
-        <FilterToolbar
-          searchValue={localSearch}
-          onSearchChange={setLocalSearch}
-          onSearchDebouncedChange={(value) => onFilterChange({ search: value || undefined } as ReviewFiltersType)}
-          searchDebounceMs={300}
-          searchPlaceholder="Buscar reseñas..."
-          activeFilterCount={activeCount}
-          onOpenFilters={() => setPanelOpen(true)}
-          filtersButtonRef={filtersButtonRef}
-        />
-      </div>
-
-      {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
-      {activeChips.length > 0 && (
-        <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
-            Activos:
-          </span>
-          <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
-        </div>
-      )}
 
       {/* ── Panel de filtros: solo bottom sheet (<lg) ────────────────────────── */}
       {isMobile && (

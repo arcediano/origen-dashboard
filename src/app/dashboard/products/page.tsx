@@ -276,7 +276,7 @@ export default function ProductosPage() {
           animate="visible"
           className={`container mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6 lg:space-y-8 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} sm:pb-8`}
         >
-          {/* Filtros */}
+          {/* Filtros + resultados */}
           <motion.div variants={itemVariants}>
             <ProductFilters
               searchQuery={searchQuery}
@@ -294,81 +294,78 @@ export default function ProductosPage() {
               totalProducts={totalProducts}
               onClearFilters={clearFilters}
               categories={categoryOptions}
-            />
-          </motion.div>
-
-          {/* Resultados */}
-          <motion.div variants={itemVariants}>
-            {products.length === 0 ? (
-              hasFilters ? (
-                <Card>
-                  <EmptyState
-                    size="sm"
-                    icon={<Package className="w-6 h-6" />}
-                    title="No hay productos"
-                    description="No se encontraron productos con los filtros seleccionados."
-                  />
-                </Card>
+            >
+              {products.length === 0 ? (
+                hasFilters ? (
+                  <Card>
+                    <EmptyState
+                      size="sm"
+                      icon={<Package className="w-6 h-6" />}
+                      title="No hay productos"
+                      description="No se encontraron productos con los filtros seleccionados."
+                    />
+                  </Card>
+                ) : (
+                  <Card>
+                    <EmptyState
+                      size="sm"
+                      icon={<Package className="w-6 h-6" />}
+                      title="Aún no tienes productos"
+                      description="Crea tu primer producto para empezar a vender."
+                    />
+                  </Card>
+                )
               ) : (
-                <Card>
-                  <EmptyState
-                    size="sm"
-                    icon={<Package className="w-6 h-6" />}
-                    title="Aún no tienes productos"
-                    description="Crea tu primer producto para empezar a vender."
+                <>
+                  {/* ── MOBILE list (< lg) ── */}
+                  <ProductMobileList
+                    products={products}
+                    onView={handleView}
+                    onEdit={handleEdit}
+                    onAdjustStock={handleAdjustStock}
+                    onStatusChange={handleStatusChange}
+                    isLoading={isTableLoading}
+                    className="block lg:hidden"
                   />
-                </Card>
-              )
-            ) : (
-              <>
-                {/* ── MOBILE list (< lg) ── */}
-                <ProductMobileList
-                  products={products}
-                  onView={handleView}
-                  onEdit={handleEdit}
-                  onAdjustStock={handleAdjustStock}
-                  onStatusChange={handleStatusChange}
-                  isLoading={isTableLoading}
-                  className="block lg:hidden"
-                />
 
-                {/* ── DESKTOP: grid / table (≥ lg) ── */}
-                {viewMode === 'grid' ? (
-                  <div className="hidden lg:grid grid-cols-3 xl:grid-cols-4 gap-4">
-                    {products.map((product) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
+                  {/* ── DESKTOP: grid / table (≥ lg) ── */}
+                  {viewMode === 'grid' ? (
+                    <div className="hidden lg:grid grid-cols-3 xl:grid-cols-4 gap-4">
+                      {products.map((product) => (
+                        <ProductCard
+                          key={product.id}
+                          product={product}
+                          onAdjustStock={handleAdjustStock}
+                          onView={handleView}
+                          onEdit={handleEdit}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="hidden lg:block">
+                      <ProductTable
+                        products={products}
                         onAdjustStock={handleAdjustStock}
                         onView={handleView}
                         onEdit={handleEdit}
+                        onStatusChange={handleStatusChange}
+                        isLoading={isTableLoading}
                       />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="hidden lg:block">
-                    <ProductTable
-                      products={products}
-                      onAdjustStock={handleAdjustStock}
-                      onView={handleView}
-                      onEdit={handleEdit}
-                      onStatusChange={handleStatusChange}
-                      isLoading={isTableLoading}
-                    />
-                  </div>
-                )}
+                    </div>
+                  )}
 
-                {/* Paginación */}
-                {serverTotalPages > 1 && (
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={serverTotalPages}
-                    onPageChange={setCurrentPage}
-                    className="mt-6"
-                  />
-                )}
-              </>
-            )}
+                  {/* Paginación */}
+                  {serverTotalPages > 1 && (
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={serverTotalPages}
+                      onPageChange={setCurrentPage}
+                      className="mt-6"
+                    />
+                  )}
+                </>
+              )}
+            </ProductFilters>
           </motion.div>
         </motion.div>
 
