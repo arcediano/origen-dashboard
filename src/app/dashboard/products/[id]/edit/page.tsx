@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
-import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, Eye, X } from 'lucide-react';
+import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, X } from 'lucide-react';
 
 import { Badge, Button, ActionBar, PageLoader, PageError, Alert, AlertTitle, AlertDescription, appShellPaddingClass, appShellBottomOffsetClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { PageHeader } from '../../../components/PageHeader';
@@ -19,13 +19,11 @@ import {
   CreateProductNavigation,
   CreateProductCancelDialog,
   SuccessPublishModal,
-  ProductPreviewModal,
   SensitiveChangeConfirmDialog,
   OfferConflictDialog,
 } from '../../components';
 import { ProductFormSteps } from '../../components/ProductFormSteps';
 import { ProductFormSidebar } from '../../components/ProductFormSidebar';
-import { SchedulePublishCard } from '../../components/SchedulePublishCard';
 
 import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
@@ -107,7 +105,6 @@ export default function EditProductPage() {
 
   // Estado para el panel de errores del ActionBar móvil
   const [showMobileErrors, setShowMobileErrors] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
 
   const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing', 'inventory'];
   const isMobileStepBlocked = BLOCKING_STEPS.includes(activeTab) && currentStepErrors.length > 0;
@@ -145,15 +142,6 @@ export default function EditProductPage() {
         onBack={() => setShowCancelDialog(true)}
         actions={
           <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowPreview(true)}
-              leftIcon={<Eye className="w-4 h-4" aria-hidden="true" />}
-            >
-              <span className="hidden sm:inline">Vista previa</span>
-            </Button>
             {/* El estado de autoguardado ya no se repite aquí (colisionaba con el
                 título a 375px, ver historial) -- ahora vive en un aviso único,
                 visible en todos los tamaños, justo debajo de la cabecera. */}
@@ -266,14 +254,6 @@ export default function EditProductPage() {
                 publishError={publishError}
               />
             </div>
-
-            {/* Programar publicación — solo en edición, solo si los pasos están completos */}
-            {allStepsCompleted && ['draft', 'scheduled'].includes(formData.status ?? '') && (
-              <SchedulePublishCard
-                productId={productId}
-                currentScheduledAt={(formData as any).scheduledAt ?? null}
-              />
-            )}
           </div>
 
           <ProductFormSidebar
@@ -361,12 +341,6 @@ export default function EditProductPage() {
         open={showSuccessModal}
         onOpenChange={setShowSuccessModal}
         productName={formData.name || 'Producto'}
-      />
-
-      <ProductPreviewModal
-        open={showPreview}
-        onClose={() => setShowPreview(false)}
-        formData={formData}
       />
 
       <SensitiveChangeConfirmDialog

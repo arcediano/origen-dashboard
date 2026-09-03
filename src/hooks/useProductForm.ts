@@ -175,7 +175,6 @@ const formDataToProduct = (formData: ProductFormData): Partial<Product> => {
     'draft': 'draft',
     'active': 'active',
     'pending_approval': 'pending_approval',
-    'scheduled': 'draft',
   };
 
   return {

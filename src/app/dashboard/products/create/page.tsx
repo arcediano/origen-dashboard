@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, Eye, X } from 'lucide-react';
+import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, X } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
@@ -14,7 +14,6 @@ import {
   CreateProductNavigation,
   CreateProductCancelDialog,
   SuccessPublishModal,
-  ProductPreviewModal,
 } from '@/app/dashboard/products/components';
 import { ProductFormSteps } from '@/app/dashboard/products/components/ProductFormSteps';
 import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductFormSidebar';
@@ -86,7 +85,6 @@ export default function CreateProductPage() {
   const tips = useStepTips(stepNumber, formData);
 
   const [showMobileErrors, setShowMobileErrors] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
 
   const handleTabChange = (tab: FormStepId) => {
     setShowMobileErrors(false);
@@ -140,15 +138,6 @@ export default function CreateProductPage() {
         onBack={() => setShowCancelDialog(true)}
         actions={
           <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowPreview(true)}
-              leftIcon={<Eye className="w-4 h-4" aria-hidden="true" />}
-            >
-              <span className="hidden sm:inline">Vista previa</span>
-            </Button>
             {/* Oculto en móvil: PageHeader coloca `actions` en un contenedor
                 shrink-0 sin wrap junto al título -- este texto es el ancho
                 justo para desbordar/aplastar el título a 375px. El estado de
@@ -301,11 +290,6 @@ export default function CreateProductPage() {
         productName={formData.name || 'Producto'}
       />
 
-      <ProductPreviewModal
-        open={showPreview}
-        onClose={() => setShowPreview(false)}
-        formData={formData}
-      />
     </div>
   );
 }

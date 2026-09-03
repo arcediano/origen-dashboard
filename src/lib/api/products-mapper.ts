@@ -10,8 +10,7 @@
  *
  * Reglas de mapeo:
  *   status:     ACTIVE → active | DRAFT → draft | INACTIVE → inactive |
- *               OUT_OF_STOCK → out_of_stock | PENDING_APPROVAL → draft |
- *               SCHEDULED → draft
+ *               OUT_OF_STOCK → out_of_stock | PENDING_APPROVAL → draft
  *   visibility: PUBLIC → public | PRIVATE → private | PASSWORD → password
  *   mainImage:  { key, url } → ProductImage | null
  *   gallery:    { key, url }[] → ProductImage[]
@@ -182,7 +181,7 @@ export interface ApiProduct {
   dimensions?: { length?: number; width?: number; height?: number; unit?: string };
   shippingClass?: string;
   // Estado
-  status: string;     // 'ACTIVE' | 'DRAFT' | 'INACTIVE' | 'OUT_OF_STOCK' | 'PENDING_APPROVAL' | 'SCHEDULED'
+  status: string;     // 'ACTIVE' | 'DRAFT' | 'INACTIVE' | 'OUT_OF_STOCK' | 'PENDING_APPROVAL'
   visibility: string; // 'PUBLIC' | 'PRIVATE' | 'PASSWORD'
   publishedAt?: string;
   /** Producto INACTIVE sin cambios desde que se pausó -> puede reactivarse directamente sin revisión. */
@@ -236,7 +235,6 @@ const STATUS_MAP: Record<string, Product['status']> = {
   INACTIVE:         'inactive',
   OUT_OF_STOCK:     'out_of_stock',
   PENDING_APPROVAL: 'pending_approval',
-  SCHEDULED:        'draft',    // Tratado como borrador en el dashboard
 };
 
 /**

@@ -14,7 +14,6 @@ export { ProductMobileList } from './ProductMobileList';
 export { CreateProductProgress } from './CreateProductProgress';
 export { CreateProductNavigation } from './CreateProductNavigation';
 export { CreateProductCancelDialog } from './ProductDialogs/CreateProductCancelDialog';
-export { ProductPreviewModal } from './ProductPreviewModal';
 
 
 // Diálogos
