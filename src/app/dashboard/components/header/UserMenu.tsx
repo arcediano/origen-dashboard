@@ -267,7 +267,7 @@ export function UserMenu({
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-origen-bosque">Configuraciones</p>
-                    <p className="text-xs text-muted-foreground">Preferencias de notificaciones por email y push</p>
+                    <p className="text-xs text-muted-foreground">Notificaciones y métodos de envío</p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-border group-hover:text-origen-pradera" />
                 </div>

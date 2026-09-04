@@ -80,6 +80,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/account/payments': 'Cobros',
   '/dashboard/notifications': 'Notificaciones',
   '/dashboard/configuracion': 'Configuraciones',
+  '/dashboard/configuracion/notificaciones': 'Notificaciones',
   '/dashboard/configuracion/envios': 'Envios',
   '/dashboard/configuracion/pagos': 'Cobros',
   '/dashboard/configuracion/perfil': 'Ajustes de perfil',
@@ -104,6 +105,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   notifications: 'Notificaciones',
   security: 'Seguridad',
   configuracion: 'Configuraciones',
+  notificaciones: 'Notificaciones',
   envios: 'Envios',
   pagos: 'Cobros',
 };

@@ -4,7 +4,8 @@
  *
  * Cubre:
  *   - Sección /dashboard/account: render, navegación a sub-secciones
- *   - Sección /dashboard/configuracion: preferencias de notificación
+ *   - Sección /dashboard/configuracion: hub de subsecciones (Notificaciones, Métodos de envío)
+ *   - Sección /dashboard/configuracion/notificaciones: preferencias de notificación
  *   - Sección /dashboard/security: cambio de contraseña, validaciones, auditoría
  *   - Sección /dashboard/configuracion/pagos: estados Stripe (empty/pending/connected)
  *   - Sección /dashboard/configuracion/envios: página de logística (stub)
@@ -251,10 +252,46 @@ test.describe('/dashboard/account (Mi Cuenta)', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SUITE 2 — /dashboard/configuracion (preferencias de notificación)
+// SUITE 1B — /dashboard/configuracion (hub de subsecciones)
 // ─────────────────────────────────────────────────────────────────────────────
 
-test.describe('/dashboard/configuracion (preferencias de notificación)', () => {
+test.describe('/dashboard/configuracion (hub)', () => {
+  test.beforeEach(async ({ page }) => {
+    await authenticatePage(page);
+    await mockSession(page);
+    await mockNotificationsUnread(page);
+    await navigateTo(page, '/dashboard/configuracion');
+  });
+
+  test('renderiza el encabezado "Configuraciones"', async ({ page }) => {
+    await expect(page.locator('#main-content').getByRole('heading', { name: /configuraciones/i })).toBeVisible();
+  });
+
+  test('muestra los dos accesos: Notificaciones y Métodos de envío', async ({ page }) => {
+    await expect(page.locator('#main-content').getByText('Notificaciones', { exact: true })).toBeVisible();
+    await expect(page.locator('#main-content').getByText('Métodos de envío', { exact: true })).toBeVisible();
+  });
+
+  test('el enlace Notificaciones navega a /dashboard/configuracion/notificaciones', async ({ page }) => {
+    await expect(primaryAccountLink(page, '/dashboard/configuracion/notificaciones')).toHaveAttribute(
+      'href',
+      '/dashboard/configuracion/notificaciones',
+    );
+  });
+
+  test('el enlace Métodos de envío navega a /dashboard/configuracion/envios', async ({ page }) => {
+    await expect(primaryAccountLink(page, '/dashboard/configuracion/envios')).toHaveAttribute(
+      'href',
+      '/dashboard/configuracion/envios',
+    );
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUITE 2 — /dashboard/configuracion/notificaciones (preferencias de notificación)
+// ─────────────────────────────────────────────────────────────────────────────
+
+test.describe('/dashboard/configuracion/notificaciones (preferencias de notificación)', () => {
   test.beforeEach(async ({ page }) => {
     await authenticatePage(page);
     await mockSession(page);
@@ -268,9 +305,9 @@ test.describe('/dashboard/configuracion (preferencias de notificación)', () => 
     );
   });
 
-  test('renderiza el encabezado "Configuraciones"', async ({ page }) => {
-    await navigateTo(page, '/dashboard/configuracion');
-    await expect(page.locator('#main-content').getByRole('heading', { name: /configuraciones/i })).toBeVisible();
+  test('renderiza el encabezado "Notificaciones"', async ({ page }) => {
+    await navigateTo(page, '/dashboard/configuracion/notificaciones');
+    await expect(page.locator('#main-content').getByRole('heading', { name: /notificaciones/i })).toBeVisible();
   });
 
   test('muestra el skeleton de carga brevemente', async ({ page }) => {
@@ -283,7 +320,7 @@ test.describe('/dashboard/configuracion (preferencias de notificación)', () => 
         body: JSON.stringify(MOCK_PREFERENCES_RESPONSE),
       });
     });
-    await page.goto('/dashboard/configuracion', { waitUntil: 'domcontentloaded' });
+    await page.goto('/dashboard/configuracion/notificaciones', { waitUntil: 'domcontentloaded' });
     const skeleton = page.locator('[aria-busy="true"]');
     const hasSkeleton = await skeleton.isVisible().catch(() => false);
     // El skeleton puede haberse ido muy rápido; solo verificamos que no crashea
@@ -291,18 +328,18 @@ test.describe('/dashboard/configuracion (preferencias de notificación)', () => 
   });
 
   test('muestra grupos de notificaciones tras cargar', async ({ page }) => {
-    await navigateTo(page, '/dashboard/configuracion');
+    await navigateTo(page, '/dashboard/configuracion/notificaciones');
     // Al menos un grupo de pedidos debe estar visible
     await expect(page.getByText(/pedidos/i).first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('los eventos always-active no tienen switch interactivo', async ({ page }) => {
-    await navigateTo(page, '/dashboard/configuracion');
+    await navigateTo(page, '/dashboard/configuracion/notificaciones');
     await expect(page.getByText(/siempre activo/i).first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('muestra nota de seguridad sobre eventos siempre activos', async ({ page }) => {
-    await navigateTo(page, '/dashboard/configuracion');
+    await navigateTo(page, '/dashboard/configuracion/notificaciones');
     await expect(
       page.getByText(/eventos de seguridad.*siempre se envían por email/i),
     ).toBeVisible({ timeout: 10_000 });
@@ -333,7 +370,7 @@ test.describe('/dashboard/configuracion (preferencias de notificación)', () => 
       });
     });
 
-    await navigateTo(page, '/dashboard/configuracion');
+    await navigateTo(page, '/dashboard/configuracion/notificaciones');
     const emailToggle = page.getByLabel('Activar email para Nuevo pedido recibido').first();
     await expect(emailToggle).toHaveAttribute('aria-pressed', 'true');
     await emailToggle.click();
@@ -354,7 +391,7 @@ test.describe('/dashboard/configuracion (preferencias de notificación)', () => 
       });
     });
 
-    await navigateTo(page, '/dashboard/configuracion');
+    await navigateTo(page, '/dashboard/configuracion/notificaciones');
     const firstToggle = page.locator('button[aria-label*="email para"], button[aria-label*="push para"]').first();
     await expect(firstToggle).toBeVisible();
     const initialPressed = await firstToggle.getAttribute('aria-pressed');
@@ -371,7 +408,7 @@ test.describe('/dashboard/configuracion (preferencias de notificación)', () => 
     await page.route('**/api/v1/notifications/preferences', (route) =>
       route.fulfill({ status: 500, body: '' }),
     );
-    await navigateTo(page, '/dashboard/configuracion');
+    await navigateTo(page, '/dashboard/configuracion/notificaciones');
     await expect(
       page.getByText(/no se pudieron cargar las preferencias/i),
     ).toBeVisible({ timeout: 10_000 });

@@ -268,7 +268,7 @@ export function MobileTopBar() {
                   className="text-text-subtle hover:text-origen-bosque"
                 >
                   <Link
-                    href="/dashboard/configuracion"
+                    href="/dashboard/configuracion/notificaciones"
                     onClick={closeNotifications}
                     aria-label="Preferencias de notificaciones"
                     title="Preferencias de notificaciones"
