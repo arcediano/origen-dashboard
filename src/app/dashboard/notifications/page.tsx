@@ -484,12 +484,12 @@ export default function NotificationsPage() {
                       size="icon"
                       className="sm:hidden text-hoja-tinta hover:text-origen-bosque"
                     >
-                      <Link href="/dashboard/configuracion" aria-label="Preferencias de notificaciones" title="Preferencias de notificaciones">
+                      <Link href="/dashboard/configuracion/notificaciones" aria-label="Preferencias de notificaciones" title="Preferencias de notificaciones">
                         <Settings className="w-4 h-4" />
                       </Link>
                     </Button>
                     <Link
-                      href="/dashboard/configuracion"
+                      href="/dashboard/configuracion/notificaciones"
                       className="hidden sm:inline-flex items-center gap-1.5 text-sm text-hoja-tinta hover:underline transition-colors font-medium whitespace-nowrap"
                     >
                       <Settings className="w-3.5 h-3.5" aria-hidden />

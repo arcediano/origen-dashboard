@@ -57,7 +57,7 @@ const QUICK_LINKS = [
   { icon: Package, title: 'Catálogo', description: 'Publica y gestiona tus productos', href: '/dashboard/products' },
   { icon: ShoppingCart, title: 'Pedidos', description: 'Consulta y procesa tus ventas', href: '/dashboard/orders' },
   { icon: User, title: 'Mi cuenta', description: 'Seguridad, cobros y perfil comercial', href: '/dashboard/account' },
-  { icon: Bell, title: 'Notificaciones', description: 'Preferencias de avisos', href: '/dashboard/configuracion' },
+  { icon: Bell, title: 'Notificaciones', description: 'Preferencias de avisos', href: '/dashboard/configuracion/notificaciones' },
 ] as const;
 
 function FaqAccordionItem({ item }: { item: (typeof FAQ_ITEMS)[number] }) {

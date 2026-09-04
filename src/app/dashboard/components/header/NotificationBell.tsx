@@ -313,7 +313,7 @@ export function NotificationBell({ initialNotifications = [] }: NotificationBell
                     className="text-text-subtle hover:text-origen-bosque"
                   >
                     <Link
-                      href="/dashboard/configuracion"
+                      href="/dashboard/configuracion/notificaciones"
                       onClick={close}
                       aria-label="Preferencias de notificaciones"
                       title="Preferencias de notificaciones"
