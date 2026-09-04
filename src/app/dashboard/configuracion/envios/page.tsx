@@ -39,6 +39,7 @@ import {
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { loadOnboardingData, saveStep4, respondPickupAssignmentChoice } from '@/lib/api/onboarding';
+import { formatEstimatedDelivery, DELIVERY_TIME_UNIT_OPTIONS, type DeliveryTimeUnit } from '@/lib/format-estimated-delivery';
 import type {
   DeliveryOption as OnboardingDeliveryOption,
   ShippingZone as OnboardingShippingZone,
@@ -77,7 +78,9 @@ interface DeliveryOptionRow {
   name: string;
   description: string;
   price: number;
-  estimatedDays: string;
+  /** Tiempo estimado como valor + unidad (decisión del humano, 2026-09-04). Null = aún sin fijar. */
+  estimatedDaysValue: number | null;
+  estimatedDaysUnit: DeliveryTimeUnit;
 }
 
 interface ShippingZoneRow {
@@ -118,9 +121,9 @@ const LEVEL_CONFIG: Record<
   },
 };
 
-function pickDeliveryIcon(option: { price: number; estimatedDays: string }) {
+function pickDeliveryIcon(option: { price: number; estimatedDaysValue: number | null; estimatedDaysUnit: DeliveryTimeUnit }) {
   if (option.price === 0) return Store;
-  if (/^1$|24/.test(option.estimatedDays)) return Zap;
+  if (option.estimatedDaysUnit === 'HOURS' || (option.estimatedDaysUnit === 'DAYS' && (option.estimatedDaysValue ?? 0) <= 1)) return Zap;
   return Truck;
 }
 
@@ -190,7 +193,8 @@ export default function EnviosPage() {
           name: opt.name,
           description: opt.description ?? '',
           price: Number(opt.price),
-          estimatedDays: String(opt.estimatedDays),
+          estimatedDaysValue: opt.estimatedDaysValue,
+          estimatedDaysUnit: opt.estimatedDaysUnit,
         })),
       );
       setShippingZones(
@@ -244,16 +248,17 @@ export default function EnviosPage() {
       name: '',
       description: '',
       price: 0,
-      estimatedDays: '',
+      estimatedDaysValue: null,
+      estimatedDaysUnit: 'DAYS',
     };
     setDeliveryOptions((prev) => [...prev, newOption]);
     setEditingOptionId(newOption.id);
   };
 
   const isDeliveryOptionIncomplete = (option: DeliveryOptionRow) =>
-    !option.name.trim() || !option.description.trim() || !option.estimatedDays.trim() || option.price <= 0;
+    !option.name.trim() || !option.description.trim() || option.estimatedDaysValue === null || option.price <= 0;
 
-  const handleDeliveryOptionChange = (id: string, field: keyof DeliveryOptionRow, value: string | number) => {
+  const handleDeliveryOptionChange = (id: string, field: keyof DeliveryOptionRow, value: string | number | null) => {
     setDeliveryOptions((prev) => prev.map((opt) => (opt.id === id ? { ...opt, [field]: value } : opt)));
   };
 
@@ -316,7 +321,9 @@ export default function EnviosPage() {
       name: opt.name,
       description: opt.description,
       price: opt.price,
-      estimatedDays: opt.estimatedDays,
+      // isDeliveryOptionIncomplete ya garantizó que no es null antes de llegar aquí.
+      estimatedDaysValue: opt.estimatedDaysValue ?? 0,
+      estimatedDaysUnit: opt.estimatedDaysUnit,
       icon: pickDeliveryIcon(opt),
     });
 
@@ -713,13 +720,41 @@ export default function EnviosPage() {
                               placeholder="0.00"
                               inputSize="md"
                             />
-                            <Input
-                              label="Tiempo estimado"
-                              value={option.estimatedDays}
-                              onChange={(e) => handleDeliveryOptionChange(option.id, 'estimatedDays', e.target.value)}
-                              placeholder="2-3 días"
-                              inputSize="md"
-                            />
+                            <div className="flex items-end gap-2">
+                              <Input
+                                label="Tiempo estimado"
+                                type="number"
+                                value={option.estimatedDaysValue !== null ? option.estimatedDaysValue : ''}
+                                onChange={(e) =>
+                                  handleDeliveryOptionChange(
+                                    option.id,
+                                    'estimatedDaysValue',
+                                    e.target.value === '' ? null : Math.max(0, parseInt(e.target.value, 10) || 0),
+                                  )
+                                }
+                                min={0}
+                                step={1}
+                                placeholder="2"
+                                inputSize="md"
+                                className="flex-1"
+                                aria-label="Valor del tiempo estimado"
+                              />
+                              <Select
+                                value={option.estimatedDaysUnit}
+                                onValueChange={(value) => handleDeliveryOptionChange(option.id, 'estimatedDaysUnit', value as DeliveryTimeUnit)}
+                              >
+                                <SelectTrigger className="flex-1" aria-label="Unidad del tiempo estimado">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {DELIVERY_TIME_UNIT_OPTIONS.map((unitOption) => (
+                                    <SelectItem key={unitOption.value} value={unitOption.value}>
+                                      {unitOption.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
                           {isDeliveryOptionIncomplete(option) && (
                             <p className="text-xs text-feedback-danger flex items-center gap-1">
@@ -734,20 +769,18 @@ export default function EnviosPage() {
                             Opción A del canvas de propuestas (decisión del
                             humano en vivo, 2026-09-04): el tiempo de entrega
                             se separa de la descripción y pasa a ser un chip
-                            corto junto al nombre, en vez de una tercera línea
-                            "Entrega: {estimatedDays} días" que concatenaba un
-                            sufijo fijo -- ese sufijo duplicaba la unidad
-                            cuando el productor ya la incluía en su propio
-                            texto (ej. "2,3 días" -> "2,3 días días"). El chip
-                            muestra tal cual lo que escribió el productor, sin
-                            añadir nada.
+                            corto junto al nombre. El chip formatea valor +
+                            unidad estructurados (decisión del humano,
+                            2026-09-04), que sustituyen el texto libre que
+                            antes podía duplicar la unidad (ej. "2,3 días" ->
+                            "2,3 días días").
                           */}
                           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex flex-wrap items-center gap-2 min-w-0">
                               <h3 className="text-base font-semibold text-origen-bosque sm:text-lg">{option.name}</h3>
-                              {option.estimatedDays.trim() && (
+                              {option.estimatedDaysValue !== null && (
                                 <Badge variant="leaf" size="sm" icon={<Clock className="w-3 h-3" />}>
-                                  {option.estimatedDays}
+                                  {formatEstimatedDelivery(option.estimatedDaysValue, option.estimatedDaysUnit)}
                                 </Badge>
                               )}
                             </div>

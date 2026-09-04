@@ -451,7 +451,7 @@ export default function OnboardingPage() {
             packagingDescription: d.logistics.packagingDescription ?? '',
             deliveryOptions: (Array.isArray(d.logistics.deliveryOptions) ? d.logistics.deliveryOptions : []).map((o: any) => ({
               id: o.id, name: o.name, description: o.description ?? '',
-              price: Number(o.price), estimatedDays: o.estimatedDays,
+              price: Number(o.price), estimatedDaysValue: o.estimatedDaysValue, estimatedDaysUnit: o.estimatedDaysUnit ?? 'DAYS',
               icon: Package,
             })),
             includedZones: (Array.isArray(d.logistics.shippingZones) ? d.logistics.shippingZones : []).filter((z: any) => !z.isExcluded)
@@ -593,7 +593,7 @@ export default function OnboardingPage() {
           messages.push('Añade al menos un método de envío.');
         }
         const incompleteDeliveryOption = formData.step4.deliveryOptions.some(
-          (opt) => !opt.name.trim() || !opt.description.trim() || !opt.estimatedDays.trim() || opt.price <= 0,
+          (opt) => !opt.name.trim() || !opt.description.trim() || opt.estimatedDaysValue === null || opt.price <= 0,
         );
         if (incompleteDeliveryOption) {
           messages.push('Completa nombre, descripción, precio y tiempo estimado de todos tus métodos de envío.');
