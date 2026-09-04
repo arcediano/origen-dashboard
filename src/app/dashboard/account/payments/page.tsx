@@ -14,8 +14,8 @@ import { useRouter } from 'next/navigation';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, StatCard, PageLoader, PageError, MobilePullRefresh, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, toast } from '@arcediano/ux-library';
-import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2, X, Clock } from 'lucide-react';
+import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, PageLoader, PageError, MobilePullRefresh, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, toast } from '@arcediano/ux-library';
+import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2, X, Clock, ChevronDown } from 'lucide-react';
 import { loadProducerProfile } from '@/lib/api/onboarding';
 import { fetchSellerPayouts, type SellerPayoutItem } from '@/lib/api/orders';
 import { openStripeDashboard } from '@/lib/stripe/connect-client';
@@ -256,13 +256,6 @@ export default function PaymentsPage() {
     }
   };
 
-  // Determinar variante de color para StatCard según estado
-  const getStatVariant = (): 'bosque' | 'hoja' | 'arena' => {
-    if (paymentStage === 'connected') return 'bosque';
-    if (paymentStage === 'pending') return 'hoja';
-    return 'arena';
-  };
-
   // Contenido del Alert según el estado del pago. Antes había un segundo
   // párrafo aparte (getBankAccountHelpText) que decía prácticamente lo
   // mismo para el caso "connected" -- se fusiona en un único mensaje para
@@ -433,7 +426,57 @@ export default function PaymentsPage() {
                 </div>
               </Card>
 
-              <div className="grid gap-4 sm:gap-5 lg:gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
+              {/*
+                Opción C del canvas de design (decisión del humano en vivo,
+                2026-09-04): franja de ancho completo con "Próximos cobros"
+                justo debajo del hero (lo primero que se ve tras el estado
+                general), y debajo un grid de 2 columnas ahora simétrico
+                (antes 1.7fr/1fr) para estado de cuenta / próximos pasos, con
+                la explicación de cómo funcionan los cobros colapsada dentro
+                de "Próximos pasos" en vez de ser su propia card aparte.
+              */}
+              {paymentStage === 'connected' && payouts.length > 0 && (
+                <div>
+                  <div className="mb-2.5 flex items-center justify-between px-0.5">
+                    <span className="flex items-center gap-2 text-sm font-bold text-origen-bosque">
+                      <Clock className="h-4 w-4 text-hoja-tinta" aria-hidden="true" />
+                      Próximos cobros
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {payouts.slice(0, 3).map((payout, index) => (
+                      <button
+                        key={payout.orderId}
+                        type="button"
+                        onClick={() => router.push(`/dashboard/orders/${payout.orderId}`)}
+                        className={`rounded-2xl border p-3.5 text-left transition-colors hover:border-origen-pradera/50 min-h-11 ${
+                          index === 0
+                            ? 'border-origen-pradera bg-gradient-to-b from-white to-origen-crema'
+                            : 'border-border-subtle bg-surface-alt'
+                        }`}
+                      >
+                        <p className="text-xs font-semibold text-text-subtle truncate">Pedido {payout.orderNumber}</p>
+                        <p className="mt-1 text-xl font-extrabold text-origen-bosque tabular-nums">
+                          {payout.netAmount.toFixed(2)} €
+                        </p>
+                        <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
+                          <Clock className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                          {formatDistanceToNow(new Date(payout.transferScheduledAt), { addSuffix: true, locale: es })}
+                          {' · '}
+                          {format(new Date(payout.transferScheduledAt), 'dd MMM yyyy', { locale: es })}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                  {payoutsTotal > Math.min(payouts.length, 3) && (
+                    <p className="mt-2 text-center text-xs text-muted-foreground">
+                      +{payoutsTotal - Math.min(payouts.length, 3)} pedido{payoutsTotal - Math.min(payouts.length, 3) === 1 ? '' : 's'} más pendiente{payoutsTotal - Math.min(payouts.length, 3) === 1 ? '' : 's'} de cobro
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6 lg:items-start">
                 <Card className="rounded-xl sm:rounded-2xl" padding="none">
                   <CardHeader className="p-4 sm:p-5 lg:p-6 border-b border-border-subtle">
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
@@ -441,51 +484,47 @@ export default function PaymentsPage() {
                       Estado de la cuenta de cobro
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4 sm:space-y-5 p-4 sm:p-5 lg:p-6">
-                    {/* 3 StatCard en grid manual (no StatGrid): StatGrid fuerza
-                        grid-cols-2 en móvil sin importar el prop `columns`. Con
-                        2 columnas cada tarjeta tenía media pantalla de ancho y
-                        el `subtitle` (una frase completa, no un dato corto tipo
-                        "128 reseñas") se recortaba con la elipsis que StatCard
-                        aplica siempre a `subtitle`/`label` (`truncate`, sin
-                        wrap). Una columna por fila en móvil da a cada tarjeta
-                        el ancho completo, evitando el corte. En desktop
-                        (lg:grid-cols-3) las 3 vuelven a ocupar una columna cada
-                        una, igual que antes. */}
-                    <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
-                      <StatCard
-                        label="Stripe"
-                        value={paymentStage === 'connected' ? 'Operativo' : paymentStage === 'pending' ? 'Pendiente' : 'No configurado'}
-                        valueClassName="text-base sm:text-lg lg:text-xl"
-                        subtitle={paymentStage === 'connected' ? 'Puedes editar tus datos cuando lo necesites.' : paymentStage === 'pending' ? 'Verificación de Stripe todavía en curso.' : 'Todavía no has iniciado el alta en Stripe.'}
-                        variant={getStatVariant()}
-                      />
-                      <StatCard
-                        label="Verificación"
-                        value={acceptedTermsAt ? new Date(acceptedTermsAt).toLocaleDateString('es-ES') : 'Pendiente'}
-                        valueClassName="text-base sm:text-lg lg:text-xl"
-                        subtitle="Aceptación de términos de cobro."
-                        variant={getStatVariant()}
-                      />
-                      <StatCard
-                        label="Cuenta"
-                        value={stripeAccountId ?? 'Se generará al iniciar el alta'}
-                        // break-all: stripeAccountId es un token largo sin
-                        // espacios (acct_...) -- StatCard no lo trunca ni
-                        // envuelve por defecto, así que sin esto desborda
-                        // la tarjeta.
-                        valueClassName="text-base sm:text-lg lg:text-xl break-all"
-                        subtitle="Identificador técnico de tu cuenta Stripe."
-                        variant={getStatVariant()}
-                      />
+                  <CardContent className="p-4 sm:p-5 lg:p-6">
+                    {/*
+                      Filas compactas (text-sm/text-xs, patrón de
+                      security/page.tsx) en vez de StatCard: 3 datos de
+                      estado/identificador no son KPIs -- ni el componente
+                      ni su tamaño tipográfico encajaban con ningún patrón
+                      real del resto de la sección "Cuenta".
+                    */}
+                    <div className="divide-y divide-border-subtle">
+                      <div className="flex items-center justify-between gap-3 py-3 first:pt-0">
+                        <span className="text-sm font-medium text-text-subtle">Stripe</span>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-origen-bosque">
+                            {paymentStage === 'connected' ? 'Operativo' : paymentStage === 'pending' ? 'Pendiente' : 'No configurado'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {paymentStage === 'connected' ? 'Puedes editar tus datos cuando lo necesites.' : paymentStage === 'pending' ? 'Verificación todavía en curso.' : 'Todavía no has iniciado el alta.'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-3 py-3">
+                        <span className="text-sm font-medium text-text-subtle">Verificación</span>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-origen-bosque">
+                            {acceptedTermsAt ? new Date(acceptedTermsAt).toLocaleDateString('es-ES') : 'Pendiente'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Aceptación de términos de cobro.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-3 py-3 last:pb-0">
+                        <span className="text-sm font-medium text-text-subtle shrink-0">Cuenta</span>
+                        <div className="text-right min-w-0">
+                          <p className="text-sm font-bold text-origen-bosque break-all">
+                            {stripeAccountId ?? 'Se generará al iniciar el alta'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Identificador técnico de tu cuenta Stripe.</p>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Alert de estado del pago. Sin badge de estado propio --
-                        ese estado ya se ve en la cabecera de la página y en
-                        la primera tarjeta del StatGrid de arriba; repetirlo
-                        aquí una tercera vez solo añadía scroll sin aportar
-                        información nueva. */}
-                    <Alert variant={paymentStage === 'connected' ? 'success' : 'default'}>
+                    <Alert variant={paymentStage === 'connected' ? 'success' : 'default'} className="mt-4">
                       <AlertDescription>
                         {getAlertContent()}
                       </AlertDescription>
@@ -493,112 +532,72 @@ export default function PaymentsPage() {
                   </CardContent>
                 </Card>
 
-                <div className="space-y-4 sm:space-y-5 lg:space-y-6">
-                  {/* Card "Próximos pasos" - variant="section" + CardIconHeader */}
-                  <Card variant="section" className="rounded-xl sm:rounded-2xl" padding="none">
-                    <CardHeader className="p-4 sm:p-5 lg:p-6 border-b border-border-subtle">
-                      <CardIconHeader
-                        icon={<ShieldCheck className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />}
-                        title="Próximos pasos"
-                        size="md"
-                      />
-                    </CardHeader>
-                    <CardContent className="space-y-3 p-4 sm:p-5 lg:p-6">
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between rounded-xl border border-border-subtle bg-surface-alt p-4 min-h-[44px] sm:min-h-auto">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-origen-bosque">{paymentStage === 'empty' ? 'Inicia tu cuenta Stripe' : paymentStage === 'pending' ? 'Completa la verificacion pendiente' : 'Mantén tus datos al dia'}</p>
-                          <p className="mt-1 text-xs text-muted-foreground">{paymentStage === 'empty' ? 'Sin cuenta activa no podrás recibir liquidaciones.' : paymentStage === 'pending' ? 'Finaliza el alta para habilitar cobros.' : 'Actualiza datos fiscales o bancarios cuando cambien.'}</p>
-                        </div>
-                        <Badge
-                          variant={paymentStage === 'empty' ? 'neutral' : paymentStage === 'pending' ? 'warning' : 'success'}
-                          size="xs"
-                          className="shrink-0 w-fit"
-                        >
-                          {paymentStage === 'empty' ? 'Pendiente' : paymentStage === 'pending' ? 'En progreso' : 'Hecho'}
-                        </Badge>
+                <Card variant="section" className="rounded-xl sm:rounded-2xl" padding="none">
+                  <CardHeader className="p-4 sm:p-5 lg:p-6 border-b border-border-subtle">
+                    <CardIconHeader
+                      icon={<ShieldCheck className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />}
+                      title="Próximos pasos"
+                      size="md"
+                    />
+                  </CardHeader>
+                  <CardContent className="space-y-3 p-4 sm:p-5 lg:p-6">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between rounded-xl border border-border-subtle bg-surface-alt p-4 min-h-[44px] sm:min-h-auto">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-origen-bosque">{paymentStage === 'empty' ? 'Inicia tu cuenta Stripe' : paymentStage === 'pending' ? 'Completa la verificacion pendiente' : 'Mantén tus datos al dia'}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{paymentStage === 'empty' ? 'Sin cuenta activa no podrás recibir liquidaciones.' : paymentStage === 'pending' ? 'Finaliza el alta para habilitar cobros.' : 'Actualiza datos fiscales o bancarios cuando cambien.'}</p>
                       </div>
+                      <Badge
+                        variant={paymentStage === 'empty' ? 'neutral' : paymentStage === 'pending' ? 'warning' : 'success'}
+                        size="xs"
+                        className="shrink-0 w-fit"
+                      >
+                        {paymentStage === 'empty' ? 'Pendiente' : paymentStage === 'pending' ? 'En progreso' : 'Hecho'}
+                      </Badge>
+                    </div>
 
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between rounded-xl border border-border-subtle bg-surface-alt p-4 min-h-[44px] sm:min-h-auto">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-origen-bosque">Documentacion y verificacion</p>
-                          <p className="mt-1 text-xs text-muted-foreground">Ten a mano documentación fiscal y bancaria para evitar pausas de pago.</p>
-                        </div>
-                        <Badge
-                          variant={paymentStage === 'connected' ? 'success' : 'neutral'}
-                          size="xs"
-                          className="shrink-0 w-fit"
-                        >
-                          {paymentStage === 'connected' ? 'Hecho' : 'Pendiente'}
-                        </Badge>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between rounded-xl border border-border-subtle bg-surface-alt p-4 min-h-[44px] sm:min-h-auto">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-origen-bosque">Documentacion y verificacion</p>
+                        <p className="mt-1 text-xs text-muted-foreground">Ten a mano documentación fiscal y bancaria para evitar pausas de pago.</p>
                       </div>
+                      <Badge
+                        variant={paymentStage === 'connected' ? 'success' : 'neutral'}
+                        size="xs"
+                        className="shrink-0 w-fit"
+                      >
+                        {paymentStage === 'connected' ? 'Hecho' : 'Pendiente'}
+                      </Badge>
+                    </div>
 
-                      <div className="rounded-xl border border-border-subtle bg-surface-alt p-4">
-                        <p className="text-sm font-medium text-origen-bosque">Acceso directo y seguro</p>
-                        <p className="mt-1 text-xs text-muted-foreground">Siempre entrarás con un enlace temporal válido generado para tu cuenta.</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <div className="rounded-xl border border-border-subtle bg-surface-alt p-4">
+                      <p className="text-sm font-medium text-origen-bosque">Acceso directo y seguro</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Siempre entrarás con un enlace temporal válido generado para tu cuenta.</p>
+                    </div>
 
-                  {paymentStage === 'connected' && (
-                    <Card variant="section" className="rounded-xl sm:rounded-2xl" padding="none">
-                      <CardHeader className="p-4 sm:p-5 lg:p-6 border-b border-border-subtle">
-                        <CardIconHeader
-                          icon={<Landmark className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />}
-                          title="Cómo funcionan tus cobros"
-                          size="md"
-                        />
-                      </CardHeader>
-                      <CardContent className="space-y-2 p-4 sm:p-5 lg:p-6">
-                        <p className="text-sm text-text-subtle leading-relaxed">
-                          Cada venta se transfiere a tu cuenta de Stripe <strong>14 días naturales después de
-                          la entrega</strong> del pedido — el tiempo de retención que Origen usa para poder
-                          gestionar posibles devoluciones sin pedirte que adelantes ese dinero.
+                    {/*
+                      details/summary nativo: la explicación de cómo
+                      funcionan los cobros (antes su propia Card en la
+                      columna derecha) pasa a disclosure colapsado dentro
+                      de "Próximos pasos", Opción C del canvas.
+                    */}
+                    <details className="group border-t border-border-subtle pt-3">
+                      <summary className="flex cursor-pointer list-none items-center justify-between text-xs font-semibold text-text-subtle [&::-webkit-details-marker]:hidden">
+                        Cómo funcionan tus cobros
+                        <ChevronDown className="h-3.5 w-3.5 text-text-subtle transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+                      </summary>
+                      <div className="mt-2 space-y-2 text-xs leading-relaxed text-muted-foreground">
+                        <p>
+                          Cada venta se transfiere a tu cuenta de Stripe <strong className="text-origen-bosque">14 días naturales después de la entrega</strong> del
+                          pedido — el tiempo de retención que Origen usa para poder gestionar posibles devoluciones sin pedirte que adelantes ese dinero.
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          Si un pedido se devuelve dentro de ese plazo, la transferencia simplemente no llega
-                          a ejecutarse. Si se devuelve después de que ya la hayas cobrado, el importe se
-                          descuenta de tu siguiente venta.
+                        <p>
+                          Si un pedido se devuelve dentro de ese plazo, la transferencia simplemente no llega a ejecutarse. Si se devuelve después de que ya la
+                          hayas cobrado, el importe se descuenta de tu siguiente venta.
                         </p>
-
-                        {payouts.length > 0 && (
-                          <div className="mt-4 space-y-2">
-                            <p className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle">
-                              Próximos cobros
-                            </p>
-                            {payouts.map((payout) => (
-                              <button
-                                key={payout.orderId}
-                                type="button"
-                                onClick={() => router.push(`/dashboard/orders/${payout.orderId}`)}
-                                className="w-full flex items-center gap-3 rounded-xl border border-border-subtle bg-surface-alt p-3 text-left hover:border-origen-pradera/40 transition-colors min-h-11"
-                              >
-                                <Clock className="h-4 w-4 text-hoja-tinta shrink-0" aria-hidden="true" />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-origen-bosque truncate">
-                                    Pedido {payout.orderNumber}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground truncate">
-                                    {formatDistanceToNow(new Date(payout.transferScheduledAt), { addSuffix: true, locale: es })}
-                                    {' · '}
-                                    {format(new Date(payout.transferScheduledAt), 'dd MMM yyyy', { locale: es })}
-                                  </p>
-                                </div>
-                                <span className="text-sm font-bold text-origen-bosque tabular-nums shrink-0">
-                                  {payout.netAmount.toFixed(2)} €
-                                </span>
-                              </button>
-                            ))}
-                            {payoutsTotal > payouts.length && (
-                              <p className="text-xs text-muted-foreground text-center pt-1">
-                                +{payoutsTotal - payouts.length} pedido{payoutsTotal - payouts.length === 1 ? '' : 's'} más pendiente{payoutsTotal - payouts.length === 1 ? '' : 's'} de cobro
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
+                      </div>
+                    </details>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </MobilePullRefresh>
