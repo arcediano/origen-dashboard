@@ -48,6 +48,7 @@ import {
   AlertCircle,
   Check,
   CheckCircle2,
+  Clock,
   Euro,
   Info,
   Leaf,
@@ -729,14 +730,32 @@ export default function EnviosPage() {
                         </div>
                       ) : (
                         <>
+                          {/*
+                            Opción A del canvas de propuestas (decisión del
+                            humano en vivo, 2026-09-04): el tiempo de entrega
+                            se separa de la descripción y pasa a ser un chip
+                            corto junto al nombre, en vez de una tercera línea
+                            "Entrega: {estimatedDays} días" que concatenaba un
+                            sufijo fijo -- ese sufijo duplicaba la unidad
+                            cuando el productor ya la incluía en su propio
+                            texto (ej. "2,3 días" -> "2,3 días días"). El chip
+                            muestra tal cual lo que escribió el productor, sin
+                            añadir nada.
+                          */}
                           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <h3 className="text-base font-semibold text-origen-bosque sm:text-lg">{option.name}</h3>
+                            <div className="flex flex-wrap items-center gap-2 min-w-0">
+                              <h3 className="text-base font-semibold text-origen-bosque sm:text-lg">{option.name}</h3>
+                              {option.estimatedDays.trim() && (
+                                <Badge variant="leaf" size="sm" icon={<Clock className="w-3 h-3" />}>
+                                  {option.estimatedDays}
+                                </Badge>
+                              )}
+                            </div>
                             {/* text-origen-bosque, no pradera: pradera como texto está prohibido
                                 por la guía (contraste insuficiente, ~1.87:1 sobre fondo claro). */}
                             <span className="text-lg font-bold text-origen-bosque sm:text-xl">{option.price.toFixed(2)}€</span>
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">{option.description}</p>
-                          <p className="text-xs text-muted-foreground mt-1">Entrega: {option.estimatedDays} días</p>
                         </>
                       )}
                     </div>

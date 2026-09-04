@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input, InputAffixField, Button, Checkbox } from '@arcediano/ux-library';
+import { Input, InputAffixField, Button, Checkbox, Badge } from '@arcediano/ux-library';
 
 import {
   Truck,
@@ -826,12 +826,26 @@ export function EnhancedStep4Capacity({
                         </div>
                       ) : (
                         <>
+                          {/*
+                            Opción A del canvas de propuestas (decisión del
+                            humano en vivo, 2026-09-04, misma tarea que
+                            /dashboard/configuracion/envios): chip de tiempo
+                            junto al nombre en vez de una línea "Entrega: X
+                            días" que duplicaba la unidad cuando el productor
+                            ya la incluía en su propio texto.
+                          */}
                           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <h3 className="text-base font-semibold text-origen-bosque sm:text-lg">{option.name}</h3>
+                            <div className="flex flex-wrap items-center gap-2 min-w-0">
+                              <h3 className="text-base font-semibold text-origen-bosque sm:text-lg">{option.name}</h3>
+                              {option.estimatedDays.trim() && (
+                                <Badge variant="leaf" size="sm" icon={<Clock className="w-3 h-3" />}>
+                                  {option.estimatedDays}
+                                </Badge>
+                              )}
+                            </div>
                             <span className="text-lg font-bold text-hoja-tinta sm:text-xl">{option.price.toFixed(2)}€</span>
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">{option.description}</p>
-                          <p className="text-xs text-muted-foreground mt-1">Entrega: {option.estimatedDays} días</p>
                         </>
                       )}
                     </div>
