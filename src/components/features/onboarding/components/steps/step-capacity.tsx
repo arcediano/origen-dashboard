@@ -10,7 +10,19 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-import { Input, InputAffixField, Button, Checkbox, Badge } from '@arcediano/ux-library';
+import {
+  Input,
+  InputAffixField,
+  Button,
+  Checkbox,
+  Badge,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@arcediano/ux-library';
+import { formatEstimatedDelivery, DELIVERY_TIME_UNIT_OPTIONS, type DeliveryTimeUnit } from '@/lib/format-estimated-delivery';
 
 import {
   Truck,
@@ -51,7 +63,9 @@ export interface DeliveryOption {
   name: string;
   description: string;
   price: number;
-  estimatedDays: string;
+  /** Tiempo estimado como valor + unidad (decisión del humano, 2026-09-04). Null = aún sin fijar. */
+  estimatedDaysValue: number | null;
+  estimatedDaysUnit: DeliveryTimeUnit;
   icon: React.ComponentType<{ className?: string }>;
 }
 
@@ -114,29 +128,32 @@ export interface EnhancedStep4CapacityProps {
 
 // Opciones de envío predeterminadas para productores fuera de ruta
 const DEFAULT_DELIVERY_OPTIONS: DeliveryOption[] = [
-  { 
-    id: 'standard', 
-    name: 'Envío estándar', 
+  {
+    id: 'standard',
+    name: 'Envío estándar',
     description: 'Entrega en 2-3 días laborables',
-    price: 5.90, 
-    estimatedDays: '2-3',
-    icon: Truck 
+    price: 5.90,
+    estimatedDaysValue: 3,
+    estimatedDaysUnit: 'DAYS',
+    icon: Truck
   },
-  { 
-    id: 'express', 
-    name: 'Envío exprés', 
+  {
+    id: 'express',
+    name: 'Envío exprés',
     description: 'Entrega en 24 horas',
-    price: 8.90, 
-    estimatedDays: '1',
-    icon: Zap 
+    price: 8.90,
+    estimatedDaysValue: 24,
+    estimatedDaysUnit: 'HOURS',
+    icon: Zap
   },
-  { 
-    id: 'pickup', 
-    name: 'Recogida en local', 
+  {
+    id: 'pickup',
+    name: 'Recogida en local',
     description: 'Sin coste de envío',
-    price: 0, 
-    estimatedDays: 'Mismo día',
-    icon: Store 
+    price: 0,
+    estimatedDaysValue: 0,
+    estimatedDaysUnit: 'DAYS',
+    icon: Store
   }
 ];
 
@@ -544,7 +561,8 @@ export function EnhancedStep4Capacity({
       name: '',
       description: '',
       price: 0,
-      estimatedDays: '',
+      estimatedDaysValue: null,
+      estimatedDaysUnit: 'DAYS',
       icon: Package
     };
     handleInputChange('deliveryOptions', [...data.deliveryOptions, newOption]);
@@ -552,7 +570,7 @@ export function EnhancedStep4Capacity({
   };
 
   const isDeliveryOptionIncomplete = (option: DeliveryOption) =>
-    !option.name.trim() || !option.description.trim() || !option.estimatedDays.trim() || option.price <= 0;
+    !option.name.trim() || !option.description.trim() || option.estimatedDaysValue === null || option.price <= 0;
 
   const handleRemoveDeliveryOption = (optionId: string) => {
     handleInputChange('deliveryOptions', data.deliveryOptions.filter(opt => opt.id !== optionId));
@@ -809,13 +827,40 @@ export function EnhancedStep4Capacity({
                               placeholder="0.00"
                               inputSize="md"
                             />
-                            <Input
-                              label="Tiempo estimado"
-                              value={option.estimatedDays}
-                              onChange={(e) => handleDeliveryOptionChange(option.id, 'estimatedDays', e.target.value)}
-                              placeholder="2-3 días"
-                              inputSize="md"
-                            />
+                            <div className="flex items-end gap-2">
+                              <Input
+                                label="Tiempo estimado"
+                                type="number"
+                                value={option.estimatedDaysValue !== null ? option.estimatedDaysValue : ''}
+                                onChange={(e) =>
+                                  handleDeliveryOptionChange(
+                                    option.id,
+                                    'estimatedDaysValue',
+                                    e.target.value === '' ? null : Math.max(0, parseInt(e.target.value, 10) || 0),
+                                  )
+                                }
+                                min={0}
+                                step={1}
+                                placeholder="2"
+                                inputSize="md"
+                                className="flex-1"
+                              />
+                              <Select
+                                value={option.estimatedDaysUnit}
+                                onValueChange={(value) => handleDeliveryOptionChange(option.id, 'estimatedDaysUnit', value as DeliveryTimeUnit)}
+                              >
+                                <SelectTrigger className="flex-1" aria-label="Unidad del tiempo estimado">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {DELIVERY_TIME_UNIT_OPTIONS.map((unitOption) => (
+                                    <SelectItem key={unitOption.value} value={unitOption.value}>
+                                      {unitOption.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
                           {isDeliveryOptionIncomplete(option) && (
                             <p className="text-xs text-feedback-danger-text flex items-center gap-1">
@@ -831,15 +876,16 @@ export function EnhancedStep4Capacity({
                             humano en vivo, 2026-09-04, misma tarea que
                             /dashboard/configuracion/envios): chip de tiempo
                             junto al nombre en vez de una línea "Entrega: X
-                            días" que duplicaba la unidad cuando el productor
-                            ya la incluía en su propio texto.
+                            días". El chip ahora formatea valor + unidad
+                            estructurados (decisión del humano, 2026-09-04),
+                            así que ya no puede duplicar la unidad.
                           */}
                           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex flex-wrap items-center gap-2 min-w-0">
                               <h3 className="text-base font-semibold text-origen-bosque sm:text-lg">{option.name}</h3>
-                              {option.estimatedDays.trim() && (
+                              {option.estimatedDaysValue !== null && (
                                 <Badge variant="leaf" size="sm" icon={<Clock className="w-3 h-3" />}>
-                                  {option.estimatedDays}
+                                  {formatEstimatedDelivery(option.estimatedDaysValue, option.estimatedDaysUnit)}
                                 </Badge>
                               )}
                             </div>

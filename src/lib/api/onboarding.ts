@@ -111,8 +111,9 @@ export interface OnboardingData {
       name: string;
       description?: string | null;
       price: number;
-      /** Texto libre, p. ej. "1", "2-3", "Mismo día" — nunca un número puro (ver schema.prisma DeliveryOption.estimatedDays). */
-      estimatedDays: string;
+      /** Valor + unidad seleccionable (decisión del humano, 2026-09-04, sustituye el texto libre anterior). */
+      estimatedDaysValue: number;
+      estimatedDaysUnit: 'HOURS' | 'DAYS' | 'WEEKS';
     }>;
     shippingZones?: Array<{
       type: 'PROVINCE' | 'POSTAL' | 'CUSTOM';
@@ -234,7 +235,10 @@ export async function saveStep4(data: EnhancedCapacityData): Promise<StepSaveRes
       name: opt.name,
       description: opt.description || undefined,
       price: opt.price,
-      estimatedDays: opt.estimatedDays,
+      // La validación de cada paso (step-capacity.tsx / onboarding/page.tsx)
+      // ya bloquea el envío mientras exista una opción sin valor fijado.
+      estimatedDaysValue: opt.estimatedDaysValue ?? 0,
+      estimatedDaysUnit: opt.estimatedDaysUnit,
     })),
     includedZones: data.includedZones.map((z) => ({
       type: z.type.toUpperCase() as 'PROVINCE' | 'POSTAL' | 'CUSTOM',
