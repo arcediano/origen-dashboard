@@ -11,7 +11,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown, RotateCcw } from 'lucide-react';
+import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown, RotateCcw, Wallet } from 'lucide-react';
 
 // Componentes UI
 import {
@@ -803,6 +803,27 @@ export default function OrderDetailPage() {
                     <span className="text-foreground tabular-nums">{formatCurrency(order.total)}</span>
                   </div>
                 </div>
+
+                {/* Importe neto a recibir — deliberadamente separado del
+                    "Total" de arriba (lo que paga el comprador) con su
+                    propio bloque, color y borde, para que nunca se
+                    confundan. Decisión del humano (2026-09-10): en pedidos
+                    con envío propio del productor, el envío se suma
+                    íntegro a este importe; la comisión de Origen se
+                    descuenta solo de los productos, nunca del envío. */}
+                {order.sellerNetAmount != null && (
+                  <div className="mx-5 mb-4 rounded-2xl border border-origen-pradera bg-gradient-to-b from-white to-origen-crema px-4 py-3.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex items-center gap-2 text-xs font-semibold text-text-subtle">
+                        <Wallet className="w-3.5 h-3.5 text-hoja-tinta" aria-hidden="true" />
+                        Vas a recibir
+                      </span>
+                      <span className="text-lg font-extrabold text-origen-bosque tabular-nums">
+                        {formatCurrency(order.sellerNetAmount)}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </motion.div>
 
               {/* ── Historial del pedido ── */}

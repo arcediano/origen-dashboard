@@ -39,6 +39,10 @@ export function makeBackendOrder(overrides: {
     shippingCost: 4.95,
     discountAmount: 0,
     total: overrides.total,
+    // Pedido centralized (por defecto en este fixture, sin basketType propio
+    // de envío directo): neto = subtotal - comisión del único item, sin
+    // envío (lo gestiona Origen). Ver OrdersService.toSellerOrderResponse.
+    sellerNetAmount: overrides.total - 4.95 - 6.75,
     estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
