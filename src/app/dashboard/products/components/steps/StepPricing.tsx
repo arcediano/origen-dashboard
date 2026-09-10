@@ -527,7 +527,8 @@ export function StepPricing({
                 </Badge>
               )}
             </div>
-            {!flashDeals.length || !productId ? (
+            {/* Oculto cuando el estado vacío de abajo ya muestra su propio botón "Crear oferta flash" — evita 2 botones con la misma finalidad a la vez */}
+            {(!flashDeals.length || !productId) && !(!showFlashDealForm && !flashDeals.length && hasBasePrice) ? (
               <Button
                 type="button"
                 variant="outline"
@@ -680,22 +681,24 @@ export function StepPricing({
                 </Badge>
               )}
             </div>
-            {/* Botón siempre visible, nunca comprimido */}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                resetForm();
-                setEditingTierId(null);
-                setShowTierForm(!showTierForm);
-              }}
-              disabled={!hasBasePrice}
-              className="w-auto shrink-0"
-              leftIcon={<Plus className="w-3 h-3 shrink-0" aria-hidden="true" />}
-            >
-              {showTierForm ? 'Cancelar' : 'Nueva oferta por cantidad'}
-            </Button>
+            {/* Oculto cuando el estado vacío de abajo ya muestra su propio botón "Crear primera oferta" — evita 2 botones con la misma finalidad a la vez */}
+            {!(tiers.length === 0 && !showTierForm) && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  resetForm();
+                  setEditingTierId(null);
+                  setShowTierForm(!showTierForm);
+                }}
+                disabled={!hasBasePrice}
+                className="w-auto shrink-0"
+                leftIcon={<Plus className="w-3 h-3 shrink-0" aria-hidden="true" />}
+              >
+                {showTierForm ? 'Cancelar' : 'Nueva oferta por cantidad'}
+              </Button>
+            )}
           </div>
 
           {/* Aviso si no hay precio base */}

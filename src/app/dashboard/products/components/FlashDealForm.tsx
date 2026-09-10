@@ -9,7 +9,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { z } from 'zod';
 import type { FlashDeal, FlashDealFormValue } from '@/types/product';
 import { createFlashDeal, updateFlashDeal } from '@/lib/api/products';
@@ -26,6 +26,29 @@ interface FlashDealFormProps {
    */
   onSaved: (deal: FlashDeal, replacedTiers?: boolean) => void;
   onCancel: () => void;
+}
+
+/**
+ * Divide un valor `datetime-local` (`yyyy-mm-ddThh:mm`) en sus partes de
+ * fecha y hora para renderizarlas como 2 inputs nativos separados
+ * (`type="date"` + `type="time"`) en vez de un único `datetime-local`.
+ *
+ * Motivo: el widget nativo combinado de `datetime-local` no respeta bien el
+ * ancho de su contenedor en navegadores/WebViews móviles (desborda la
+ * pantalla con el formato largo en español), un problema conocido del
+ * control del sistema operativo, no del CSS del contenedor. Separar en 2
+ * campos más estrechos evita el desbordamiento sin depender de un
+ * componente nuevo de la librería UX.
+ */
+function splitDateTime(value: string | undefined): { date: string; time: string } {
+  if (!value) return { date: '', time: '' };
+  const [date = '', time = ''] = value.split('T');
+  return { date, time };
+}
+
+function combineDateTime(date: string, time: string): string {
+  if (!date) return '';
+  return `${date}T${time || '00:00'}`;
 }
 
 const FlashDealSchema = z.object({
@@ -253,26 +276,67 @@ export function FlashDealForm({
           )}
         </div>
 
-        {/* Campos de fecha — 1 columna en móvil: el widget nativo datetime-local
-            necesita más ancho del que da media columna a 375px */}
+        {/* Campos de fecha — fecha y hora en inputs nativos separados (no
+            datetime-local combinado) para evitar el desbordamiento del
+            widget nativo en móvil; 1 columna en móvil entre Inicio/Fin */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Label className="block text-xs font-medium text-origen-bosque mb-1.5">Inicio</Label>
-            <Input
-              type="datetime-local"
-              value={formData.startsAt || ''}
-              onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
-              className="h-10 w-full rounded-lg text-sm"
-            />
+            <div className="grid grid-cols-[1.3fr_1fr] gap-2">
+              <Input
+                type="date"
+                value={splitDateTime(formData.startsAt).date}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({
+                    ...formData,
+                    startsAt: combineDateTime(e.target.value, splitDateTime(formData.startsAt).time),
+                  })
+                }
+                className="h-10 w-full rounded-lg text-sm"
+                aria-label="Fecha de inicio"
+              />
+              <Input
+                type="time"
+                value={splitDateTime(formData.startsAt).time}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({
+                    ...formData,
+                    startsAt: combineDateTime(splitDateTime(formData.startsAt).date, e.target.value),
+                  })
+                }
+                className="h-10 w-full rounded-lg text-sm"
+                aria-label="Hora de inicio"
+              />
+            </div>
           </div>
           <div>
             <Label className="block text-xs font-medium text-origen-bosque mb-1.5">Fin</Label>
-            <Input
-              type="datetime-local"
-              value={formData.endsAt || ''}
-              onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
-              className="h-10 w-full rounded-lg text-sm"
-            />
+            <div className="grid grid-cols-[1.3fr_1fr] gap-2">
+              <Input
+                type="date"
+                value={splitDateTime(formData.endsAt).date}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({
+                    ...formData,
+                    endsAt: combineDateTime(e.target.value, splitDateTime(formData.endsAt).time),
+                  })
+                }
+                className="h-10 w-full rounded-lg text-sm"
+                aria-label="Fecha de fin"
+              />
+              <Input
+                type="time"
+                value={splitDateTime(formData.endsAt).time}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({
+                    ...formData,
+                    endsAt: combineDateTime(splitDateTime(formData.endsAt).date, e.target.value),
+                  })
+                }
+                className="h-10 w-full rounded-lg text-sm"
+                aria-label="Hora de fin"
+              />
+            </div>
           </div>
         </div>
 
