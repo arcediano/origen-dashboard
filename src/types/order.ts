@@ -107,6 +107,14 @@ export interface Order {
   shippingCost: number;
   tax?: number;
   total: number;
+  /**
+   * Importe neto que el productor va a ingresar por este pedido: subtotal de
+   * SUS productos - comisión de Origen (nunca del envío) + su propio envío
+   * si lo gestiona él (pedidos 'direct'). Mismo cálculo que el Transfer real
+   * de Stripe Connect — decisión del humano, 2026-09-10. Distinto de `total`
+   * (lo que paga el comprador).
+   */
+  sellerNetAmount?: number;
 
   status: OrderStatus;
   payment: OrderPayment;

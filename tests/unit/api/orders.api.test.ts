@@ -270,6 +270,28 @@ describe('fetchSellerOrderById', () => {
     expect(result.status).toBe(403);
     expect(result.error).toContain('Acceso denegado');
   });
+
+  // sellerNetAmount: decisión del humano (2026-09-10) -- el productor recibe
+  // subtotal de sus productos - comisión + su propio envío si es 'direct'.
+
+  it('mapea sellerNetAmount tal cual desde el backend', async () => {
+    const result = await fetchSellerOrderById('ord-sel-001');
+    // ord-sel-001 total=49.95 -> fixture: sellerNetAmount = total - 4.95 - 6.75 = 38.25
+    expect(result.data?.sellerNetAmount).toBe(38.25);
+  });
+
+  it('sellerNetAmount queda undefined si el backend no lo incluye (retrocompatibilidad)', async () => {
+    server.use(
+      http.get(`${BASE}/orders/seller/:id`, () =>
+        HttpResponse.json({
+          ...mockSellerOrders[0],
+          sellerNetAmount: undefined,
+        }),
+      ),
+    );
+    const result = await fetchSellerOrderById('ord-sel-001');
+    expect(result.data?.sellerNetAmount).toBeUndefined();
+  });
 });
 
 // ── fetchOrders (wrapper) ─────────────────────────────────────────────────────

@@ -62,6 +62,8 @@ interface BackendOrder {
   shippingCost: number;
   discountAmount: number;
   total: number;
+  /** Importe neto que el productor va a ingresar por este pedido (ver Order['sellerNetAmount']). */
+  sellerNetAmount?: number;
   estimatedDelivery?: string;
   createdAt: string;
   updatedAt: string;
@@ -207,6 +209,7 @@ function mapBackendOrder(o: BackendOrder): Order {
     shippingCost: o.shippingCost,
     discount: o.discountAmount > 0 ? o.discountAmount : undefined,
     total: o.total,
+    sellerNetAmount: o.sellerNetAmount,
     couponCode: o.couponCode,
 
     status,
