@@ -540,7 +540,7 @@ export function StepPricing({
                 className="w-auto shrink-0"
                 leftIcon={<Plus className="w-3 h-3 shrink-0" aria-hidden="true" />}
               >
-                {showFlashDealForm ? 'Cancelar' : 'Nueva oferta'}
+                {showFlashDealForm ? 'Cancelar' : 'Nueva oferta flash'}
               </Button>
             ) : null}
           </div>
@@ -694,7 +694,7 @@ export function StepPricing({
               className="w-auto shrink-0"
               leftIcon={<Plus className="w-3 h-3 shrink-0" aria-hidden="true" />}
             >
-              {showTierForm ? 'Cancelar' : 'Nueva oferta'}
+              {showTierForm ? 'Cancelar' : 'Nueva oferta por cantidad'}
             </Button>
           </div>
 
