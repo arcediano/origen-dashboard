@@ -5,7 +5,6 @@
 
 import {
   CreditCard,
-  FileText,
   LayoutDashboard,
   Megaphone,
   Package,
@@ -66,7 +65,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/perfil': 'Perfil',
   '/dashboard': 'Inicio',
   '/dashboard/orders': 'Pedidos',
-  '/dashboard/facturas': 'Facturas',
+  '/dashboard/facturas': 'Facturas de venta',
   '/dashboard/products': 'Productos',
   '/dashboard/products/create': 'Nuevo producto',
   '/dashboard/reviews': 'Resenas',
@@ -78,6 +77,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/account': 'Cuenta',
   '/dashboard/account/security': 'Seguridad',
   '/dashboard/account/payments': 'Cobros',
+  '/dashboard/account/facturacion': 'Facturación',
   '/dashboard/notifications': 'Notificaciones',
   '/dashboard/configuracion': 'Configuraciones',
   '/dashboard/configuracion/notificaciones': 'Notificaciones',
@@ -92,7 +92,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   'ofertas-flash': 'Ofertas flash',
   dashboard: 'Inicio',
   orders: 'Pedidos',
-  facturas: 'Facturas',
+  facturas: 'Facturas de venta',
   products: 'Productos',
   create: 'Nuevo producto',
   reviews: 'Resenas',
@@ -127,13 +127,6 @@ const OPERATIONS_ITEMS: MenuItem[] = [
     icon: ShoppingBag,
     href: '/dashboard/orders',
     matchPaths: ['/dashboard/orders*'],
-  },
-  {
-    id: 'facturas',
-    label: 'Facturas',
-    icon: FileText,
-    href: '/dashboard/facturas',
-    matchPaths: ['/dashboard/facturas*'],
   },
   {
     id: 'productos',

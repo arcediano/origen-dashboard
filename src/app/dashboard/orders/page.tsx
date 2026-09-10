@@ -165,8 +165,12 @@ export default function OrdersPage() {
         tooltipDetailed="Gestiona todos los pedidos, su estado y seguimiento."
       />
 
-      {/* Acceso a facturas — visible en móvil */}
-      <div className="lg:hidden px-4 sm:px-6">
+      {/* Acceso a facturas de venta — antes solo visible en móvil (el ítem
+          "Facturas" del sidebar de escritorio cubría el mismo acceso); ahora
+          es la única entrada a facturas de venta en cualquier tamaño de
+          pantalla (decisión del humano, 2026-09-09: se elimina el ítem de
+          menú principal, ver sidebar.ts). */}
+      <div className="px-4 sm:px-6 lg:px-8">
         <Link href="/dashboard/facturas" className="inline-flex items-center gap-1.5 text-sm font-medium text-hoja-tinta hover:underline transition-colors">
           <FileText className="h-4 w-4" /> Ver facturas de venta
         </Link>
