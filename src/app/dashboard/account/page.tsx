@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import Link from 'next/link';
-import { ChevronRight, CreditCard, HelpCircle, KeyRound, MonitorCog, Settings2, Store } from 'lucide-react';
+import { ChevronRight, CreditCard, HelpCircle, KeyRound, MonitorCog, Receipt, Settings2, Store } from 'lucide-react';
 import { appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, Card, CardContent, CardHeader, CardTitle, CardIconHeader } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 
@@ -20,6 +20,13 @@ export default function AccountPage() {
       href: '/dashboard/account/payments',
       icon: CreditCard,
       meta: 'Pagos',
+    },
+    {
+      title: 'Facturación',
+      description: 'Consulta y descarga tus facturas de comisión mensual.',
+      href: '/dashboard/account/facturacion',
+      icon: Receipt,
+      meta: 'Facturación',
     },
     {
       title: 'Perfil comercial',
