@@ -207,8 +207,11 @@ export function FlashDealForm({
           {existingDeal ? 'Editar oferta flash' : 'Nueva oferta flash'}
         </h4>
 
-        {/* Selector de tipo (2 tiles: PERCENTAGE, FIXED) */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* Selector de tipo (2 tiles: PERCENTAGE, FIXED) — 1 columna en móvil:
+            mismo motivo que el grid de fechas justo debajo, a 375px cada
+            SelectableCard "detailed" (icono+título+descripción) no tiene
+            ancho suficiente en media columna. */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <SelectableCard
             layout="detailed"
             icon={<Percent className="h-4 w-4" />}
