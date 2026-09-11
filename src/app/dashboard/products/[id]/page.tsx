@@ -431,18 +431,24 @@ function StatusCard({
   if (!product.sku) missingFields.push('SKU');
   const isComplete = missingFields.length === 0;
 
-  // Puede enviar a revisión si el borrador está completo, o si está inactivo con cambios
-  // sin revisar desde que se pausó (si no tiene cambios, la vía es reactivar directamente).
-  const canSubmitForReview =
-    (isDraft && isComplete) || (isInactive && isComplete && !!product.hasUnreviewedChanges);
+  // Enviar a revisión: solo aplica a un borrador completo en su primera
+  // publicación. Un producto INACTIVE ya no pasa por aquí -- reactivar
+  // siempre está disponible (ver canReactivateDirectly) y cualquier cambio
+  // sensible hecho mientras estaba pausado ya quedó registrado como
+  // ProductPendingRevision por el propio backend al guardar, sin necesidad
+  // de una acción manual de "enviar a revisión" aparte.
+  const canSubmitForReview = isDraft && isComplete;
 
-  // Reactivación directa: solo si está inactivo y no tiene cambios sin revisar desde que se pausó.
-  const canReactivateDirectly = isInactive && !product.hasUnreviewedChanges;
+  // Reactivación directa: siempre disponible desde INACTIVE. El backend
+  // conserva la última versión aprobada intacta (ver hasPendingRevision más
+  // abajo) aunque haya cambios sensibles pendientes de revisar -- ya no hace
+  // falta pasar por una revisión completa del producto para reactivarlo.
+  const canReactivateDirectly = isInactive;
 
   const transitions = [
-    // Volver a activar directamente (INACTIVE sin cambios → ACTIVE, sin pasar por revisión)
+    // Volver a activar directamente (INACTIVE → ACTIVE, siempre disponible -- ver canReactivateDirectly)
     { to: 'active'           as const, label: 'Volver a activar',     icon: CheckCircle, variant: 'primary'   as const, show: canReactivateDirectly },
-    // Enviar a revisión (DRAFT o INACTIVE completo → PENDING_APPROVAL)
+    // Enviar a revisión (borrador completo, primera publicación → PENDING_APPROVAL)
     { to: 'pending_approval' as const, label: 'Enviar a revisión',    icon: Send,        variant: 'primary'   as const, show: canSubmitForReview },
     // Retirar de revisión (PENDING_APPROVAL → DRAFT)
     { to: 'draft'            as const, label: 'Retirar de revisión',  icon: FileText,    variant: 'ghost'     as const, show: isPendingApproval },
@@ -526,14 +532,24 @@ function StatusCard({
         </Alert>
       )}
 
-      {/* Producto inactivo — reactivar directamente o, si tiene cambios, re-enviar a revisión */}
-      {isInactive && isComplete && (
+      {/* Producto inactivo con una revisión sensible pendiente -- misma versión aprobada al reactivar */}
+      {isInactive && product.hasPendingRevision && (
+        <Alert variant="warning">
+          <AlertTitle>Tienes cambios pendientes de revisión</AlertTitle>
+          <AlertDescription>
+            Editaste información sensible mientras el producto estaba pausado. Al reactivarlo
+            se mostrará tu última versión aprobada; tus cambios recientes se aplicarán en cuanto
+            el equipo de Origen los revise.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Producto inactivo sin revisión pendiente -- reactivar directamente */}
+      {isInactive && !product.hasPendingRevision && (
         <div className="rounded-2xl border border-origen-pradera/20 bg-origen-crema/40 p-3 flex items-start gap-2">
           <Info className="w-3.5 h-3.5 text-hoja-tinta shrink-0 mt-0.5" />
           <p className="text-[11px] text-origen-bosque leading-relaxed">
-            {canReactivateDirectly
-              ? 'El producto está inactivo pero no tiene cambios desde que se pausó. Puedes volver a activarlo directamente.'
-              : 'El producto está inactivo y tiene cambios sin revisar desde que se pausó. Debes enviarlo a revisión para publicarlo de nuevo.'}
+            El producto está inactivo. Puedes volver a activarlo directamente cuando quieras.
           </p>
         </div>
       )}

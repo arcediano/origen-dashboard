@@ -184,8 +184,10 @@ export interface ApiProduct {
   status: string;     // 'ACTIVE' | 'DRAFT' | 'INACTIVE' | 'OUT_OF_STOCK' | 'PENDING_APPROVAL'
   visibility: string; // 'PUBLIC' | 'PRIVATE' | 'PASSWORD'
   publishedAt?: string;
-  /** Producto INACTIVE sin cambios desde que se pausó -> puede reactivarse directamente sin revisión. */
+  /** Legacy, no usar -- el backend ya no lo actualiza. Ver hasPendingRevision. */
   hasUnreviewedChanges?: boolean;
+  /** Propuesta de cambios sensibles pendiente de aprobación por un admin. */
+  hasPendingRevision?: boolean;
   // Estadísticas
   rating: number;
   reviewCount: number;
@@ -454,6 +456,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     visibility:  VISIBILITY_MAP[api.visibility] ?? 'private',
     publishedAt: api.publishedAt ? new Date(api.publishedAt) : undefined,
     hasUnreviewedChanges: api.hasUnreviewedChanges,
+    hasPendingRevision: api.hasPendingRevision,
 
     sales:       api.sales,
     revenue:     api.revenue,
