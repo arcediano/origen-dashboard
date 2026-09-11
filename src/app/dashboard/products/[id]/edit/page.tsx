@@ -258,6 +258,7 @@ export default function EditProductPage() {
                 onSave={handleSave}
                 isSaving={isSaving}
                 isEditMode={isEditMode}
+                isPublishedProduct={isPublishedProduct}
                 allStepsCompleted={allStepsCompleted}
                 hasCertifications={hasCertifications}
                 certificationsApproved={certificationsApproved}
@@ -312,16 +313,31 @@ export default function EditProductPage() {
 
       {/* ── ActionBar móvil — navegación entre pasos con pulgar ── */}      {/* Oculta el BottomTabBar global mientras el ActionBar está activo */}
       <HideBottomTabBar />      <ActionBar
-        primaryAction={{
-          id: 'primary',
-          label: isLastStep ? 'Publicar' : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
-          onClick: isLastStep ? handlePublish : handleNext,
-          disabled: isLastStep ? (isPublishing || !canPublish) : false,
-          loading: isLastStep ? isPublishing : false,
-          loadingText: isPublishing ? 'Publicando...' : undefined,
-          rightIcon: !isLastStep ? <ChevronRight className="w-4 h-4" /> : undefined,
-          leftIcon: isLastStep ? <Send className="w-4 h-4" /> : undefined,
-        }}
+        primaryAction={
+          // Producto ya ACTIVE/OUT_OF_STOCK: no hay nada que "publicar" en el
+          // último paso -- solo guardar cambios (igual que en cualquier otro
+          // paso). "Publicar" aquí llevaría el producto a PENDING_APPROVAL y
+          // lo sacaría del catálogo público sin que el productor lo pidiera.
+          isLastStep && isPublishedProduct
+            ? {
+                id: 'primary',
+                label: isSaving ? 'Guardando...' : 'Guardar cambios',
+                onClick: handleSave,
+                disabled: isSaving,
+                loading: isSaving,
+                leftIcon: <Save className="w-4 h-4" />,
+              }
+            : {
+                id: 'primary',
+                label: isLastStep ? 'Publicar' : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
+                onClick: isLastStep ? handlePublish : handleNext,
+                disabled: isLastStep ? (isPublishing || !canPublish) : false,
+                loading: isLastStep ? isPublishing : false,
+                loadingText: isPublishing ? 'Publicando...' : undefined,
+                rightIcon: !isLastStep ? <ChevronRight className="w-4 h-4" /> : undefined,
+                leftIcon: isLastStep ? <Send className="w-4 h-4" /> : undefined,
+              }
+        }
         secondaryActions={[
           {
             id: 'prev',

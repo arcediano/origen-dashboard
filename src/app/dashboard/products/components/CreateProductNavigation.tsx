@@ -40,6 +40,8 @@ export interface CreateProductNavigationProps {
   isSaving: boolean;
   /** Si el formulario está en modo edición (producto existente) en lugar de creación */
   isEditMode?: boolean;
+  /** Si el producto ya está ACTIVE/OUT_OF_STOCK -- ya está publicado, "Publicar" no aplica */
+  isPublishedProduct?: boolean;
   /** Si todos los pasos están completados */
   allStepsCompleted: boolean;
   /** Si tiene certificaciones */
@@ -72,6 +74,7 @@ export function CreateProductNavigation({
   onSave,
   isSaving,
   isEditMode = false,
+  isPublishedProduct = false,
   allStepsCompleted,
   hasCertifications,
   certificationsApproved,
@@ -182,7 +185,14 @@ export function CreateProductNavigation({
               {isSaving ? 'Guardando...' : (isEditMode ? 'Guardar cambios' : 'Guardar borrador')}
             </Button>
 
-            {isLastStep ? (
+            {isLastStep && isPublishedProduct ? (
+              // Producto ya ACTIVE/OUT_OF_STOCK: no hay nada que "publicar" en
+              // el último paso -- el botón "Guardar cambios" de la izquierda
+              // (onSave) ya cubre esta acción; no se repite aquí. "Publicar"
+              // llevaría el producto a PENDING_APPROVAL y lo sacaría del
+              // catálogo público sin que el productor lo pidiera.
+              null
+            ) : isLastStep ? (
               <Button
                 variant="primary"
                 onClick={onPublish}
