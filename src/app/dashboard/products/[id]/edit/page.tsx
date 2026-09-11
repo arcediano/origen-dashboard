@@ -201,8 +201,22 @@ export default function EditProductPage() {
         {formData.status === 'draft' && allStepsCompleted && (
           <Alert variant="success" className="mt-4">
             <AlertTitle>¡Todo completado!</AlertTitle>
-            <AlertDescription>
-              Llega al último paso y pulsa &ldquo;Publicar&rdquo; para que sea visible en el marketplace.
+            <AlertDescription className="space-y-3">
+              <p>
+                Ya tiene todos los datos necesarios — no hace falta llegar al último paso
+                para publicarlo, puedes hacerlo ya mismo desde aquí.
+              </p>
+              <Button
+                variant="primary"
+                size="sm"
+                leftIcon={<Send className="w-4 h-4" />}
+                onClick={handlePublish}
+                disabled={isPublishing || !canPublish}
+                loading={isPublishing}
+                loadingText="Publicando..."
+              >
+                Publicar
+              </Button>
             </AlertDescription>
           </Alert>
         )}

@@ -166,16 +166,32 @@ const productToFormData = (product: Product): ProductFormData => {
 };
 
 /**
- * Convierte ProductFormData a Partial<Product> para enviar a la API
+ * Convierte ProductFormData a Partial<Product> para enviar a la API en un
+ * guardado ORDINARIO de contenido de un producto ya existente (autoguardado,
+ * "Guardar cambios", confirmación de cambios sensibles) -- nunca incluye
+ * `status`.
+ *
+ * `ProductFormData.status` solo distingue 'draft'/'active' a efectos de la
+ * UI del wizard (ver productToFormData más arriba: INACTIVE/OUT_OF_STOCK/
+ * PENDING_APPROVAL colapsan a 'draft' al cargar) -- NO es una fuente fiable
+ * del status real del producto, y enviarlo en cada guardado tenía 2 efectos
+ * no deseados confirmados por código: (1) `dto.status` siempre presente
+ * desactivaba `deferSensitive` en el backend (`!dto.status` nunca era
+ * cierto), así que una edición sensible de un producto ya publicado se
+ * aplicaba de inmediato en vez de diferirse a ProductPendingRevision para
+ * revisión del admin -- pese a que la UI mostraba un diálogo de confirmación
+ * dando a entender que sí pasaría por revisión; (2) en un producto INACTIVE
+ * (formData.status colapsado a 'draft'), cada autoguardado reenviaba
+ * `status: 'draft'`, una transición realmente permitida
+ * (`INACTIVE → DRAFT`) -- el producto pasaba a borrador solo por editar un
+ * campo, sin que el productor lo pidiera.
+ *
+ * Cambiar el status de un producto existente debe pasar siempre por una
+ * acción explícita: `StatusCard` (Pausar/Volver a activar/Retirar de
+ * revisión) o `handlePublish` (primera publicación, que ya fija `status`
+ * explícitamente después de este objeto -- ver más abajo).
  */
-const formDataToProduct = (formData: ProductFormData): Partial<Product> => {
-  // Mapeo de estados del formulario a estados del producto
-  const statusMap: Record<string, 'draft' | 'pending_approval' | 'active' | 'inactive' | 'out_of_stock'> = {
-    'draft': 'draft',
-    'active': 'active',
-    'pending_approval': 'pending_approval',
-  };
-
+export const formDataToProduct = (formData: ProductFormData): Partial<Product> => {
   return {
     name: formData.name,
     shortDescription: formData.shortDescription,
@@ -203,7 +219,6 @@ const formDataToProduct = (formData: ProductFormData): Partial<Product> => {
     certifications: formData.certifications,
     productionInfo: formData.productionInfo,
     attributes: formData.attributes,
-    status: statusMap[formData.status] || 'draft',
   };
 };
 
