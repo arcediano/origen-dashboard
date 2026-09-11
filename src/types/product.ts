@@ -293,8 +293,10 @@ export interface Product {
   publishedAt?: Date;
   /** Campos que dispararon la última transición automática a PENDING_APPROVAL */
   lastReviewTriggerFields?: string[];
-  /** Producto INACTIVE sin cambios desde que se pausó -> puede reactivarse directamente sin revisión. */
+  /** Legacy, no usar -- el backend ya no lo actualiza. Ver hasPendingRevision. */
   hasUnreviewedChanges?: boolean;
+  /** Propuesta de cambios sensibles pendiente de aprobación por un admin (ProductPendingRevision). Aplica tanto a un producto ACTIVE/OUT_OF_STOCK editado como a uno INACTIVE que ya estuvo publicado antes. */
+  hasPendingRevision?: boolean;
   sales?: number;
   revenue?: number;
   rating?: number;
