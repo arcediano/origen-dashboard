@@ -12,7 +12,7 @@
 export const stripeConnectAppearance = {
   overlays: 'drawer' as const,
   variables: {
-    fontFamily: 'Manrope, "Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif',
+    fontFamily: '"Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif',
     fontSizeBase: '16px',
     spacingUnit: '8px',
     borderRadius: '12px',
@@ -74,13 +74,13 @@ export const stripeConnectAppearance = {
  * Configuración de fuentes para Stripe Connect.
  *
  * Connect.js no hereda de `next/font` (self-hosted), así que requiere
- * una URL explícita a Google Fonts para Manrope.
+ * una URL explícita a Google Fonts para Plus Jakarta Sans.
  *
  * Esta es una dependencia de red externa acotada a los componentes embebidos
  * de Connect.js, no afecta al resto de la app.
  */
 export const stripeConnectFonts = [
   {
-    cssSrc: 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap',
+    cssSrc: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap',
   },
 ];
