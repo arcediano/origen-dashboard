@@ -224,7 +224,7 @@ export function SalesChart({ period = '6m' }: SalesChartProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border-subtle))" />
               <XAxis dataKey="day" tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: 'hsl(var(--text-subtle))', fontSize: 12 }} axisLine={false} tickLine={false} width={36} />
-              <Tooltip formatter={(value: number, name: string) => [`${value}€`, name]} />
+              <Tooltip formatter={(value, name) => [`${value}€`, name]} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               <Bar dataKey="currentPeriod" name="Periodo actual" fill="hsl(var(--hoja))" radius={[6, 6, 0, 0]} />
               <Line
