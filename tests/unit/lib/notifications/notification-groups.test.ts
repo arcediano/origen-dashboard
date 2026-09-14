@@ -1,7 +1,7 @@
 /**
  * @file notification-groups.test.ts
  * @description Tests para verificar que NOTIFICATION_GROUPS contiene
- * exactamente 27 eventos (incluyendo los 3 nuevos de P4/P5),
+ * exactamente 28 eventos (incluyendo los 3 nuevos de P4/P5),
  * que ninguno de los nuevos tiene alwaysActive: true,
  * y que PROMOTION_CREATED está en el grupo 'marketing'.
  */
@@ -46,9 +46,10 @@ describe('NOTIFICATION_GROUPS — P4/P5 nuevos eventos', () => {
     expect(promotionEvent?.title).toBe('Tu campaña está activa');
   });
 
-  it('debe contener exactamente 27 eventos en total (6 grupos)', () => {
+  it('debe contener exactamente 28 eventos en total (7 grupos)', () => {
     const totalEvents = NOTIFICATION_GROUPS.reduce((sum, g) => sum + g.events.length, 0);
-    expect(totalEvents).toBe(27);
+    expect(totalEvents).toBe(28);
+    expect(NOTIFICATION_GROUPS.length).toBe(7);
   });
 
   it('PAYMENT_ACCOUNT_ACTION_REQUIRED no debe estar en ALWAYS_ACTIVE_EVENTS', () => {
