@@ -272,9 +272,10 @@ export function StepNutritional({
                       value={nutritionalInfo.servingSizeValue}
                       onChange={(e) => handleChange('servingSizeValue', parseFloat(e.target.value) || 100)}
                       className={cn(
-                        "h-12 flex-1 rounded-xl",
+                        "h-12 rounded-xl",
                         (touched.servingSizeValue && localErrors.servingSizeValue) && "border-feedback-danger"
                       )}
+                      containerClassName="flex-1"
                       min={1}
                       step={1}
                     />
@@ -591,13 +592,14 @@ export function StepNutritional({
                       value={ingredientInput}
                       onChange={(e) => setIngredientInput(e.target.value)}
                       placeholder="Ej: Leche de oveja pasteurizada"
-                      className="h-11 flex-1 rounded-xl"
+                      className="h-11 rounded-xl"
+                      containerClassName="flex-1"
                       onKeyDown={(e) => e.key === 'Enter' && addIngredient()}
                     />
                     <Button
                       onClick={addIngredient}
                       disabled={!ingredientInput.trim()}
-                      className="shrink-0"
+                      className="w-auto shrink-0"
                     >
                       Añadir
                     </Button>
