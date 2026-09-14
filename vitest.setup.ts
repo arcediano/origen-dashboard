@@ -101,6 +101,77 @@ vi.mock('@arcediano/ux-library', () => {
 	const TagsInput = passthrough('input');
 	const StatusBadge = passthrough('span');
 
+	// Añadidos (2026-09-14) — exports usados en src/ que faltaban en este mock
+	// manual, encontrados al auditar la deuda de tests preexistente (ver
+	// claude-agile/proyectos/origen-dashboard/tareas-completadas.md). Mismo
+	// patrón `passthrough`/`forwardRef` ya usado arriba — solo necesitan no
+	// romper el árbol de render, no replicar el comportamiento visual real.
+	const ActionBar = passthrough('div');
+	const ActiveFilterChips = passthrough('div');
+	const AuthFooter = passthrough('div');
+	const CardIconHeader = passthrough('div');
+	const ConfirmDialog = passthrough('div');
+	const CurrencyInput = passthrough('input');
+	const DateInput = passthrough('input');
+	const DialogTrigger = passthrough('button');
+	const EmptyState = passthrough('div');
+	const FilterBottomSheet = passthrough('div');
+	const FilterPanel = passthrough('div');
+	const FilterToolbar = passthrough('div');
+	const MobileCardList = passthrough('div');
+	const MobilePullRefresh = passthrough('div');
+	const MobileScrollSlider = passthrough('div');
+	const MobileTopBar = passthrough('div');
+	const NotificationCard = passthrough('div');
+	const NotificationCardSkeleton = passthrough('div');
+	const PageError = passthrough('div');
+	const PageHeader = passthrough('div');
+	const PageLoader = passthrough('div');
+	const PasswordStrengthIndicator = passthrough('div');
+	const PercentageInput = passthrough('input');
+	const QuantitySelector = passthrough('div');
+	const ReviewSummary = passthrough('div');
+	const RichTextEditor = passthrough('div');
+	const ScrollChipFilter = passthrough('div');
+	const SearchInput = passthrough('input');
+	const SelectableCard = passthrough('div');
+	const Sheet = passthrough('div');
+	const SheetContent = passthrough('div');
+	const SheetHeader = passthrough('div');
+	const SheetTitle = passthrough('h2');
+	const Spinner = passthrough('div');
+	const StarRating = passthrough('div');
+	const StatCard = passthrough('div');
+	const StatGrid = passthrough('div');
+	const StatHighlightCard = passthrough('div');
+	const SwipeableRow = passthrough('div');
+	const ToggleGroup = passthrough('div');
+	const ToggleGroupItem = passthrough('button');
+
+	// Mismo patrón que Checkbox (arriba): no traduce onCheckedChange -> onChange,
+	// solo evita que el render explote.
+	const Switch = React.forwardRef<any, any>(({ children, ...props }, ref) =>
+		React.createElement('input', { ref, type: 'checkbox', ...props }, children)
+	);
+
+	// Hook (no componente) — asume escritorio por defecto; ningún test actual
+	// depende de la rama móvil de este hook a través del mock global.
+	const useIsMobile = () => false;
+
+	// Utilidades puras de app-shell-padding.ts — misma fórmula de fallback que
+	// el código real (safe-area-inset-bottom), sin replicar la tabla estática
+	// de clases pre-generadas (solo importa para el JIT de Tailwind en build
+	// real, no para lo que estos tests verifican).
+	const NAV_HEIGHT_MOBILE_DASHBOARD = 88;
+	const appShellSafeAreaOffset = (base: number, extra = 0) =>
+		`calc(${base + extra}px+env(safe-area-inset-bottom,0px))`;
+	const appShellPaddingClass = (base: number, extra = 0) =>
+		`pb-[${appShellSafeAreaOffset(base, extra)}]`;
+	const appShellBottomOffsetClass = (base: number, extra = 0) =>
+		`bottom-[${appShellSafeAreaOffset(base, extra)}]`;
+
+	const toast = vi.fn();
+
 	return {
 		Button,
 		Input,
@@ -147,6 +218,53 @@ vi.mock('@arcediano/ux-library', () => {
 		TagsInput,
 		StatusBadge,
 		buttonVariants: () => '',
+		ActionBar,
+		ActiveFilterChips,
+		AuthFooter,
+		CardIconHeader,
+		ConfirmDialog,
+		CurrencyInput,
+		DateInput,
+		DialogTrigger,
+		EmptyState,
+		FilterBottomSheet,
+		FilterPanel,
+		FilterToolbar,
+		MobileCardList,
+		MobilePullRefresh,
+		MobileScrollSlider,
+		MobileTopBar,
+		NotificationCard,
+		NotificationCardSkeleton,
+		PageError,
+		PageHeader,
+		PageLoader,
+		PasswordStrengthIndicator,
+		PercentageInput,
+		QuantitySelector,
+		ReviewSummary,
+		RichTextEditor,
+		ScrollChipFilter,
+		SearchInput,
+		SelectableCard,
+		Sheet,
+		SheetContent,
+		SheetHeader,
+		SheetTitle,
+		Spinner,
+		StarRating,
+		StatCard,
+		StatGrid,
+		StatHighlightCard,
+		SwipeableRow,
+		Switch,
+		ToggleGroup,
+		ToggleGroupItem,
+		useIsMobile,
+		NAV_HEIGHT_MOBILE_DASHBOARD,
+		appShellPaddingClass,
+		appShellBottomOffsetClass,
+		toast,
 	};
 });
 
