@@ -1,13 +1,14 @@
 /**
  * Tests unitarios para useInactivityTimeout.
- * Cubre: timeout de 15 minutos, reinicio con eventos de actividad, cleanup.
+ * Cubre: timeout de 30 minutos, reinicio con eventos de actividad, cleanup.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 
-const FIFTEEN_MINUTES = 15 * 60 * 1000;
+// Debe coincidir con INACTIVITY_TIMEOUT_MS en src/hooks/useInactivityTimeout.ts (30 min)
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000;
 
 describe('useInactivityTimeout', () => {
   beforeEach(() => {
@@ -20,20 +21,20 @@ describe('useInactivityTimeout', () => {
 
   // ── Comportamiento del timeout ────────────────────────────────────────────
 
-  it('llama a onTimeout tras exactamente 15 minutos de inactividad', () => {
+  it('llama a onTimeout tras exactamente 30 minutos de inactividad', () => {
     const onTimeout = vi.fn();
     renderHook(() => useInactivityTimeout(onTimeout));
 
-    vi.advanceTimersByTime(FIFTEEN_MINUTES);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT);
 
     expect(onTimeout).toHaveBeenCalledTimes(1);
   });
 
-  it('NO llama a onTimeout antes de los 15 minutos', () => {
+  it('NO llama a onTimeout antes de los 30 minutos', () => {
     const onTimeout = vi.fn();
     renderHook(() => useInactivityTimeout(onTimeout));
 
-    vi.advanceTimersByTime(FIFTEEN_MINUTES - 1);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 1);
 
     expect(onTimeout).not.toHaveBeenCalled();
   });
@@ -42,9 +43,9 @@ describe('useInactivityTimeout', () => {
     const onTimeout = vi.fn();
     renderHook(() => useInactivityTimeout(onTimeout));
 
-    // Simular actividad cada 14 minutos durante 60 minutos
+    // Simular actividad cada 29 minutos durante 116 minutos
     for (let i = 0; i < 4; i++) {
-      vi.advanceTimersByTime(FIFTEEN_MINUTES - 60_000);
+      vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 60_000);
       window.dispatchEvent(new Event('mousemove'));
     }
 
@@ -57,9 +58,9 @@ describe('useInactivityTimeout', () => {
     const onTimeout = vi.fn();
     renderHook(() => useInactivityTimeout(onTimeout));
 
-    vi.advanceTimersByTime(FIFTEEN_MINUTES - 1000);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 1000);
     window.dispatchEvent(new Event('mousemove'));
-    vi.advanceTimersByTime(FIFTEEN_MINUTES - 1000); // aún no han pasado 15 min desde el reset
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 1000); // aún no han pasado 30 min desde el reset
 
     expect(onTimeout).not.toHaveBeenCalled();
   });
@@ -68,9 +69,9 @@ describe('useInactivityTimeout', () => {
     const onTimeout = vi.fn();
     renderHook(() => useInactivityTimeout(onTimeout));
 
-    vi.advanceTimersByTime(FIFTEEN_MINUTES - 1000);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 1000);
     window.dispatchEvent(new Event('keydown'));
-    vi.advanceTimersByTime(FIFTEEN_MINUTES - 1000);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 1000);
 
     expect(onTimeout).not.toHaveBeenCalled();
   });
@@ -79,9 +80,9 @@ describe('useInactivityTimeout', () => {
     const onTimeout = vi.fn();
     renderHook(() => useInactivityTimeout(onTimeout));
 
-    vi.advanceTimersByTime(FIFTEEN_MINUTES - 1000);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 1000);
     window.dispatchEvent(new Event('click'));
-    vi.advanceTimersByTime(FIFTEEN_MINUTES - 1000);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 1000);
 
     expect(onTimeout).not.toHaveBeenCalled();
   });
@@ -90,9 +91,9 @@ describe('useInactivityTimeout', () => {
     const onTimeout = vi.fn();
     renderHook(() => useInactivityTimeout(onTimeout));
 
-    vi.advanceTimersByTime(FIFTEEN_MINUTES - 1000);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 1000);
     window.dispatchEvent(new Event('touchstart'));
-    vi.advanceTimersByTime(FIFTEEN_MINUTES - 1000);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 1000);
 
     expect(onTimeout).not.toHaveBeenCalled();
   });
@@ -101,23 +102,23 @@ describe('useInactivityTimeout', () => {
     const onTimeout = vi.fn();
     renderHook(() => useInactivityTimeout(onTimeout));
 
-    vi.advanceTimersByTime(FIFTEEN_MINUTES - 1000);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 1000);
     window.dispatchEvent(new Event('scroll'));
-    vi.advanceTimersByTime(FIFTEEN_MINUTES - 1000);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT - 1000);
 
     expect(onTimeout).not.toHaveBeenCalled();
   });
 
-  it('tras el reinicio, el timeout se dispara 15 min después de la última actividad', () => {
+  it('tras el reinicio, el timeout se dispara 30 min después de la última actividad', () => {
     const onTimeout = vi.fn();
     renderHook(() => useInactivityTimeout(onTimeout));
 
-    // Actividad a los 10 min
-    vi.advanceTimersByTime(10 * 60 * 1000);
+    // Actividad a los 20 min
+    vi.advanceTimersByTime(20 * 60 * 1000);
     window.dispatchEvent(new Event('click'));
 
-    // 15 min después del click → debe disparar
-    vi.advanceTimersByTime(FIFTEEN_MINUTES);
+    // 30 min después del click → debe disparar
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT);
 
     expect(onTimeout).toHaveBeenCalledTimes(1);
   });
@@ -140,7 +141,7 @@ describe('useInactivityTimeout', () => {
     const { unmount } = renderHook(() => useInactivityTimeout(onTimeout));
 
     unmount();
-    vi.advanceTimersByTime(FIFTEEN_MINUTES * 2);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT * 2);
 
     expect(onTimeout).not.toHaveBeenCalled();
   });
@@ -158,7 +159,7 @@ describe('useInactivityTimeout', () => {
 
     // Actualizar el callback antes del timeout
     rerender({ cb: cb2 });
-    vi.advanceTimersByTime(FIFTEEN_MINUTES);
+    vi.advanceTimersByTime(INACTIVITY_TIMEOUT);
 
     // Solo debe llamarse el callback más reciente
     expect(cb1).not.toHaveBeenCalled();

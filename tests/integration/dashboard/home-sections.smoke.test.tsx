@@ -6,6 +6,14 @@ import { render, screen } from '../../helpers/render';
 import DashboardHomePage from '@/app/dashboard/page';
 import { DASHBOARD_SMOKE_ROUTES } from '../../shared/dashboard-smoke-routes';
 
+// ProducerDashboard usa useReadiness() -- en la app real lo provee
+// ReadinessProvider desde dashboard/layout.tsx, que este test no monta
+// (renderiza page.tsx en aislado). Sin este mock, useReadiness lanza
+// "debe usarse dentro de un ReadinessProvider".
+vi.mock('@/contexts/ReadinessContext', () => ({
+  useReadiness: () => ({ readiness: null, isLoading: false, refetch: vi.fn() }),
+}));
+
 vi.mock('@/app/dashboard/components/footer/DashboardFooter', () => ({
   DashboardFooter: () => <footer data-testid="dashboard-footer">Footer</footer>,
 }));
