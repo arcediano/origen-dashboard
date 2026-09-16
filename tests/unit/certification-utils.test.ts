@@ -14,8 +14,11 @@ describe('certification-utils', () => {
   });
 
   it('detecta si existe referencia de documento para abrir o descargar', () => {
-    expect(hasDocumentReference('doc-1', null)).toBe(true);
+    // isValidDocumentRef exige una URL absoluta o una clave S3 real del
+    // media-service — rechaza identificadores legacy/seed como 'doc-1' a propósito.
+    expect(hasDocumentReference('producers/prod-1/documents/foo.pdf', null)).toBe(true);
     expect(hasDocumentReference(null, 'https://cdn.example.com/doc.pdf')).toBe(true);
+    expect(hasDocumentReference('doc-1', null)).toBe(false);
     expect(hasDocumentReference(null, null)).toBe(false);
   });
 

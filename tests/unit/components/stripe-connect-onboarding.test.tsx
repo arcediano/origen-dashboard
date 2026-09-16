@@ -49,7 +49,10 @@ describe('StripeConnectOnboarding', () => {
     expect(screen.getByText('Trigger onExit')).toBeInTheDocument();
   });
 
-  it('muestra error si stripeAccountId no es válido', () => {
+  it('renderiza el flujo normalmente con stripeAccountId=null (productor nuevo sin cuenta todavía)', () => {
+    // stripeAccountId puede ser null legítimamente: fetchClientSecret envía
+    // accountId undefined y el backend crea la cuenta Stripe server-side
+    // (ver comentario en stripe-connect-onboarding.tsx). No debe bloquear el render.
     render(
       <StripeConnectOnboarding
         {...defaultProps}
@@ -57,7 +60,7 @@ describe('StripeConnectOnboarding', () => {
       />
     );
 
-    expect(screen.getByText(/No se pudo iniciar/)).toBeInTheDocument();
+    expect(screen.getByText('Trigger onExit')).toBeInTheDocument();
   });
 
   it('onExit no incluye stripeConnected en el payload (crítico para G2 fix)', async () => {

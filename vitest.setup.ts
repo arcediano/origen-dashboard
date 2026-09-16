@@ -52,7 +52,34 @@ vi.mock('@arcediano/ux-library', () => {
 	const AvatarImage = passthrough('img');
 	const AvatarFallback = passthrough('span');
 	const Progress = passthrough('progress');
-	const Toggle = passthrough('button');
+	// Mock fiel al contrato real de Toggle (ver dist/index.js del paquete):
+	// es un <button type="button" aria-pressed> -- nunca un role="checkbox"/
+	// "switch" -- que traduce checked/onCheckedChange (o pressed/onPressedChange)
+	// a aria-pressed. El passthrough genérico dejaba `checked`/`onCheckedChange`
+	// como atributos DOM crudos (warnings de React) sin ningún aria-pressed real.
+	const Toggle = React.forwardRef<any, any>(
+		({ children, checked, defaultChecked, onCheckedChange, pressed, defaultPressed, onPressedChange, disabled, loading, onClick, ...props }, ref) => {
+			const isPressed = pressed ?? checked ?? defaultPressed ?? defaultChecked ?? false;
+			return React.createElement(
+				'button',
+				{
+					ref,
+					type: 'button',
+					'aria-pressed': isPressed,
+					disabled: disabled || loading,
+					onClick: (event: any) => {
+						onClick?.(event);
+						if (event.defaultPrevented || disabled || loading) return;
+						onPressedChange?.(!isPressed);
+						onCheckedChange?.(!isPressed);
+					},
+					...props,
+				},
+				children,
+			);
+		},
+	);
+	Toggle.displayName = 'Toggle';
 	const Tooltip = passthrough('div');
 	const ProductImage = passthrough('img');
 
@@ -122,7 +149,33 @@ vi.mock('@arcediano/ux-library', () => {
 	const MobilePullRefresh = passthrough('div');
 	const MobileScrollSlider = passthrough('div');
 	const MobileTopBar = passthrough('div');
-	const NotificationCard = passthrough('div');
+	// Mock fiel al contrato real de NotificationCard (ver dist/index.js del
+	// paquete): título/descripción como texto visible, y un botón "Marcar
+	// como leída" solo cuando !compact && !read && hay onMarkAsRead -- antes
+	// era un passthrough genérico que no renderizaba ningún texto/hijo real
+	// (notification se pasaba como atributo DOM plano), así que ningún test
+	// que buscara el título o el botón podía encontrar nada.
+	const NotificationCard = ({ notification, onMarkAsRead, compact }: any) => {
+		const { id, title, description, read } = notification;
+		const showMarkAsRead = !compact && !read && !!onMarkAsRead;
+		return React.createElement(
+			'div',
+			{ role: 'listitem' },
+			React.createElement('p', null, title),
+			React.createElement('p', null, description),
+			showMarkAsRead
+				? React.createElement('button', {
+					type: 'button',
+					'aria-label': 'Marcar como leída',
+					onClick: (event: any) => {
+						event.stopPropagation();
+						onMarkAsRead(id);
+					},
+				})
+				: null,
+		);
+	};
+	NotificationCard.displayName = 'NotificationCard';
 	const NotificationCardSkeleton = passthrough('div');
 	const PageError = passthrough('div');
 	const PageHeader = passthrough('div');

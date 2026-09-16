@@ -319,6 +319,7 @@ describe('POST /api/stripe/account-session', () => {
           ok: true,
           json: async () => ({
             data: {
+              id: 'producer-uuid-test-1',
               payment: {
                 stripeAccountId: null,
               },
@@ -382,6 +383,7 @@ describe('POST /api/stripe/account-session', () => {
             ok: true,
             json: async () => ({
               data: {
+                id: 'producer-uuid-test-1',
                 payment: {
                   stripeAccountId: null,
                 },
@@ -393,6 +395,7 @@ describe('POST /api/stripe/account-session', () => {
             ok: true,
             json: async () => ({
               data: {
+                id: 'producer-uuid-test-1',
                 payment: {
                   stripeAccountId: newAccountId,
                 },
