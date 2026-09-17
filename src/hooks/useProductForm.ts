@@ -122,7 +122,7 @@ const REQUIRED_STEPS_FOR_PUBLISH: FormStepId[] = [
 /**
  * Convierte un Product de API a ProductFormData para el formulario
  */
-const productToFormData = (product: Product): ProductFormData => {
+export const productToFormData = (product: Product): ProductFormData => {
   // Si el producto es un borrador de onboarding, gallery[] llega vacío aunque
   // mainImage sí existe. En ese caso la inyectamos para que el paso Imágenes
   // no aparezca siempre como pendiente.
@@ -147,6 +147,7 @@ const productToFormData = (product: Product): ProductFormData => {
   basePrice: product.basePrice,
   comparePrice: product.comparePrice,
   priceTiers: product.priceTiers || [],
+  flashDeal: product.flashDeal,
   sku: product.sku,
   barcode: product.barcode,
   stock: product.stock,

@@ -692,7 +692,7 @@ export function StepPricing({
                   setEditingTierId(null);
                   setShowTierForm(!showTierForm);
                 }}
-                disabled={!hasBasePrice}
+                disabled={!hasBasePrice || flashDeals.length > 0}
                 className="w-auto shrink-0"
                 leftIcon={<Plus className="w-3 h-3 shrink-0" aria-hidden="true" />}
               >
@@ -706,6 +706,14 @@ export function StepPricing({
             <Alert variant="warning" className="mb-4">
               <AlertCircle className="w-4 h-4 mr-2" />
               Configura primero el precio de venta para poder crear ofertas
+            </Alert>
+          )}
+
+          {/* Aviso si ya hay una oferta flash activa — Flash y Volumen son excluyentes */}
+          {hasBasePrice && flashDeals.length > 0 && (
+            <Alert variant="warning" className="mb-4">
+              <AlertCircle className="w-4 h-4 mr-2" />
+              Ya tienes una oferta flash activa. Cancélala o espera a que expire antes de crear una oferta por cantidad.
             </Alert>
           )}
 
