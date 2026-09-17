@@ -822,6 +822,16 @@ export default function OrderDetailPage() {
                         {formatCurrency(order.sellerNetAmount)}
                       </span>
                     </div>
+                    {/* Petición del humano (2026-09-17): informar de la comisión
+                        ya descontada del total, a modo de transparencia para el
+                        productor -- order.total aquí ya es el total propio del
+                        productor (ver comentario arriba), no el global del pedido. */}
+                    {order.total > order.sellerNetAmount && (
+                      <p className="mt-1 text-right text-[11px] text-text-subtle">
+                        de un total de {formatCurrency(order.total)}, se ha descontado{' '}
+                        {formatCurrency(order.total - order.sellerNetAmount)} de comisión
+                      </p>
+                    )}
                   </div>
                 )}
               </motion.div>
