@@ -327,6 +327,7 @@ export interface ProductFormData {
   basePrice?: number;
   comparePrice?: number;
   priceTiers: PriceTier[];
+  flashDeal?: FlashDeal;
   sku: string;
   barcode?: string;
   stock: number;
