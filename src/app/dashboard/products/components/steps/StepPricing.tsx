@@ -1081,7 +1081,15 @@ export function StepPricing({
               <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">
                 Las ofertas por cantidad ayudan a aumentar el ticket medio y fidelizar clientes
               </p>
-              {hasBasePrice ? (
+              {!hasBasePrice ? (
+                <div className="mt-4 text-xs text-feedback-warning">
+                  Configura primero el precio de venta
+                </div>
+              ) : flashDeals.length > 0 ? (
+                <div className="mt-4 text-xs text-feedback-warning">
+                  Ya tienes una oferta flash activa — cancélala o espera a que expire
+                </div>
+              ) : (
                 <Button
                   size="sm"
                   className="mt-4"
@@ -1090,10 +1098,6 @@ export function StepPricing({
                 >
                   Crear primera oferta
                 </Button>
-              ) : (
-                <div className="mt-4 text-xs text-feedback-warning">
-                  Configura primero el precio de venta
-                </div>
               )}
             </div>
           )}
