@@ -628,8 +628,6 @@ export async function fetchSellerInvoices(
 interface BackendPayoutItem {
   orderId: string;
   orderNumber: string;
-  productName: string;
-  quantity: number;
   deliveredAt: string | null;
   transferScheduledAt: string;
   netAmountCents: number;
@@ -645,8 +643,6 @@ interface BackendPayoutsResponse {
 export interface SellerPayoutItem {
   orderId: string;
   orderNumber: string;
-  productName: string;
-  quantity: number;
   deliveredAt: string | null;
   transferScheduledAt: string;
   netAmount: number;
@@ -656,7 +652,10 @@ export interface SellerPayoutItem {
  * Obtiene el listado paginado de Transfers pendientes (aún no ejecutados)
  * por pedido del productor autenticado, para mostrar la cuenta atrás
  * concreta de cada cobro — no solo el mensaje general de "14 días tras la
- * entrega".
+ * entrega". Una fila por pedido (agrupa los items del mismo pedido) con el
+ * importe real que se transferirá (subtotal - comisión + envío propio si
+ * aplica - deuda pendiente si aplica), igual que el Transfer real que
+ * ejecuta el backend.
  * GET /api/v1/orders/seller/payouts
  */
 export async function fetchSellerPayouts(params?: {
@@ -674,8 +673,6 @@ export async function fetchSellerPayouts(params?: {
     const items = (res.items ?? []).map((item) => ({
       orderId: item.orderId,
       orderNumber: item.orderNumber,
-      productName: item.productName,
-      quantity: item.quantity,
       deliveredAt: item.deliveredAt,
       transferScheduledAt: item.transferScheduledAt,
       netAmount: item.netAmountCents / 100,
