@@ -12,12 +12,15 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLogout } from '@/hooks/useLogout';
+import { useReadiness } from '@/contexts/ReadinessContext';
+import { mapBlockerToText, splitStatusBlocker } from '@/lib/readiness-blockers';
 import { Avatar, AvatarFallback, Badge, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
-import { ChevronRight, HelpCircle, LogOut, Settings2, User } from 'lucide-react';
+import { AlertTriangle, ChevronRight, Eye, EyeOff, HelpCircle, LogOut, Settings2, User } from 'lucide-react';
 
 export default function PerfilPage() {
   const { user } = useAuth();
   const { logout } = useLogout();
+  const { readiness: readinessReport } = useReadiness();
 
   const userName = useMemo(() => {
     const full = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
@@ -81,6 +84,61 @@ export default function PerfilPage() {
             </div>
           </div>
         </div>
+
+        {/* ── Visibilidad en marketplace ──
+            Equivalente móvil del bloque de UserMenu.tsx (cabecera desktop,
+            líneas ~183-245) — mismo dato (readinessReport de
+            useReadiness()) y mismos helpers de readiness-blockers.ts, para
+            que un productor sin visibilidad en el marketplace tenga el
+            mismo aviso persistente en móvil que ya tenía en escritorio. */}
+        {readinessReport && (
+          <div className="rounded-2xl border border-border-subtle bg-surface-alt p-4 shadow-sm">
+            <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-2">
+              Visibilidad en marketplace
+            </p>
+            {readinessReport.canSubmitProducts ? (
+              <div className="flex items-center gap-2 text-feedback-success-text">
+                <Eye className="w-3.5 h-3.5 flex-shrink-0" />
+                <span className="text-xs font-medium">Visible — productos publicados</span>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 text-feedback-danger-text">
+                  <EyeOff className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="text-xs font-medium">Perfil no visible en el marketplace</span>
+                </div>
+                {(() => {
+                  const { statusBlocker, fieldBlockers } = splitStatusBlocker(
+                    readinessReport.blockers,
+                  );
+                  // Si el único motivo es el estado del productor (gate de
+                  // revisión manual, no un campo que pueda rellenar), se
+                  // muestra igualmente — ver misma nota en UserMenu.tsx.
+                  const reasons =
+                    fieldBlockers.length > 0
+                      ? fieldBlockers.slice(0, 2)
+                      : statusBlocker
+                        ? [statusBlocker]
+                        : [];
+                  return reasons.map((blocker) => (
+                    <p key={blocker} className="text-[11px] text-text-muted pl-5">
+                      · {mapBlockerToText(blocker)}
+                    </p>
+                  ));
+                })()}
+              </div>
+            )}
+            {readinessReport.blockers.some((b) => b.startsWith('DOCUMENT_EXPIRED') || b.startsWith('DOCUMENT_MISSING') || b.startsWith('DOCUMENT_REJECTED')) && (
+              <Link
+                href="/dashboard/profile/certifications"
+                className="mt-2 flex items-center gap-1.5 text-[11px] text-hoja-tinta hover:underline"
+              >
+                <AlertTriangle className="w-3 h-3" />
+                Revisar documentos requeridos →
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* ── Navigation options ── */}
         <div className="rounded-2xl border border-border-subtle bg-surface-alt overflow-hidden shadow-sm">
