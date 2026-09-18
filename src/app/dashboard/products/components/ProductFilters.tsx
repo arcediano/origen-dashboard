@@ -24,7 +24,7 @@
 'use client';
 
 import React from 'react';
-import { Grid3x3, List, ArrowUpDown, Check } from 'lucide-react';
+import { Grid3x3, List, ArrowUpDown, Check, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   FilterToolbar,
@@ -51,6 +51,8 @@ export interface ProductFiltersProps {
   totalProducts: number;
   onClearFilters: () => void;
   categories?: Array<{ value: string; label: string }>;
+  /** Callback del botón "Nuevo producto" -- ver nota en el propio botón */
+  onNewProduct: () => void;
   className?: string;
 }
 
@@ -104,6 +106,7 @@ export function ProductFilters({
   totalProducts,
   onClearFilters,
   categories = DEFAULT_CATEGORIES,
+  onNewProduct,
   className,
 }: ProductFiltersProps) {
   const [panelOpen, setPanelOpen] = React.useState(false);
@@ -192,6 +195,22 @@ export function ProductFilters({
     </div>
   );
 
+  // ── Botón "Nuevo producto" — movido desde PageHeader.actions (hallazgo
+  // del humano: un botón con texto ahí partía la cabecera en 2 columnas
+  // desconectadas en móvil). Mismo patrón "solo icono en <sm" que "Filtros"
+  // y "Ordenar" en este mismo FilterToolbar (ya en modo compact). ──────────
+  const newProductButton = (
+    <button
+      type="button"
+      onClick={onNewProduct}
+      aria-label="Nuevo producto"
+      className="flex items-center gap-1.5 h-10 w-10 justify-center px-0 sm:w-auto sm:justify-start sm:px-3.5 rounded-xl bg-origen-bosque text-white text-sm font-medium transition-colors hover:bg-origen-pino flex-shrink-0"
+    >
+      <Plus className="w-4 h-4" />
+      <span className="hidden sm:inline">Nuevo producto</span>
+    </button>
+  );
+
   // ── Toggle de vista — solo tiene efecto en escritorio (≥lg); en móvil/
   // tablet el listado siempre usa ProductMobileList sin importar viewMode ──
   const viewModeToggle = (
@@ -244,6 +263,7 @@ export function ProductFilters({
           <>
             {sortButton}
             {viewModeToggle}
+            {newProductButton}
           </>
         )}
       />
