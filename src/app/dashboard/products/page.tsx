@@ -8,10 +8,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
-import { Package } from 'lucide-react';
+import { Package, Plus, RefreshCw } from 'lucide-react';
 
 // Componentes UI
-import { toast, Pagination, MobilePullRefresh, PageLoader, PageError, EmptyState, Card, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
+import { Button, toast, Pagination, MobilePullRefresh, PageLoader, PageError, EmptyState, Card, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProductFilters, ProductTable, ProductCard, ProductMobileList } from './components';
 import { AdjustStockDialog } from './components/ProductDialogs/AdjustStockDialog';
@@ -247,6 +247,26 @@ export default function ProductosPage() {
           badgeText="Gestión de productos"
           tooltip="Catálogo de productos"
           tooltipDetailed="Administra todos tus productos, su stock y visibilidad desde esta sección."
+          actions={
+            <>
+              {/* Desktop: botón completo con texto */}
+              <Button
+                onClick={handleNewProduct}
+                leftIcon={<Plus className="w-4 h-4" />}
+                className="hidden sm:inline-flex"
+              >
+                Nuevo producto
+              </Button>
+              {/* Móvil: icon-only, sin solapamiento con la lista */}
+              <button
+                onClick={handleNewProduct}
+                aria-label="Nuevo producto"
+                className="sm:hidden w-10 h-10 rounded-xl bg-origen-bosque flex items-center justify-center active:scale-95 transition-transform shadow-sm"
+              >
+                <Plus className="w-5 h-5 text-white" />
+              </button>
+            </>
+          }
         />
 
         {/* Contenido principal */}
@@ -274,7 +294,6 @@ export default function ProductosPage() {
               totalProducts={totalProducts}
               onClearFilters={clearFilters}
               categories={categoryOptions}
-              onNewProduct={handleNewProduct}
             />
           </motion.div>
 

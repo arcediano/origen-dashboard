@@ -27,7 +27,7 @@ import { SwipeableRow, ProductImage, StatusBadge } from '@arcediano/ux-library';
 
 function ProductRowSkeleton() {
   return (
-    <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl sm:rounded-2xl border border-border-subtle bg-surface-alt shadow-subtle animate-pulse">
+    <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl sm:rounded-2xl border border-border bg-surface-alt shadow-origen animate-pulse">
       <div className="w-14 h-14 rounded-xl bg-origen-pastel/60 flex-shrink-0" />
       <div className="flex-1 min-w-0 space-y-2">
         <div className="h-3.5 bg-origen-pastel rounded-lg w-3/4" />
@@ -95,13 +95,8 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
 
   return (
     <div className={cn(
-      // Reposo: shadow-subtle/border-border-subtle (sombra por defecto de
-      // card, guia-diseno-ux.md §8.2/§11.2) -- shadow-origen es la variante
-      // "elevada"/hover, no el estado de reposo de una card compacta de
-      // lista (hallazgo del humano: las cards se veian "separadas"/flotando
-      // frente al patron ya usado en /admin/categories).
-      'relative rounded-xl sm:rounded-2xl border border-border-subtle shadow-subtle',
-      'hover:shadow-origen hover:border-origen-pradera transition-all duration-300',
+      'relative rounded-xl sm:rounded-2xl border border-border shadow-origen',
+      'hover:shadow-origen-lg hover:border-origen-pradera transition-all duration-300',
     )}>
       <SwipeableRow actions={swipeActions} className="rounded-xl sm:rounded-2xl">
         <motion.button
