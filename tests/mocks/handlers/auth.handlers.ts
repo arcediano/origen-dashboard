@@ -81,6 +81,20 @@ export const authHandlers = [
     return HttpResponse.json({ success: true, message: 'Email enviado' });
   }),
 
+  // Reset password
+  http.post(`${BASE}/auth/reset-password`, async ({ request }) => {
+    const body = (await request.json()) as { token: string; newPassword: string };
+
+    if (body.token === 'token-invalido') {
+      return HttpResponse.json(
+        { success: false, message: 'Token inválido o expirado' },
+        { status: 400 },
+      );
+    }
+
+    return HttpResponse.json({ success: true, message: 'Contraseña restablecida correctamente' });
+  }),
+
   // Change password
   http.patch(`${BASE}/auth/change-password`, async ({ request }) => {
     const body = await request.json() as Record<string, string>;
