@@ -1,5 +1,5 @@
 /**
- * Notification preferences configuration — all 27 event types.
+ * Notification preferences configuration — all 31 event types.
  * Source of truth for groups, labels, and always-active rules.
  * Consumed by NotificationsPreferencesPanel.
  */
@@ -48,10 +48,10 @@ export const ALWAYS_ACTIVE_EVENTS = new Set([
   'DOCUMENT_EXPIRED',
 ]);
 
-// ─── Groups (6 groups, 24 events total) ───────────────────────────────────────
+// ─── Groups (7 groups, 31 events total) ───────────────────────────────────────
 
 export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
-  // ── Pedidos (4) ────────────────────────────────────────────────────────────
+  // ── Pedidos (2) ────────────────────────────────────────────────────────────
   {
     id:    'orders',
     label: 'Pedidos',
@@ -64,18 +64,6 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
         icon:        ShoppingCart,
       },
       {
-        eventType:   'ORDER_STATUS_CHANGED',
-        title:       'Cambio de estado de pedido',
-        description: 'Transiciones de estado: preparando, enviado, en camino.',
-        icon:        ShoppingCart,
-      },
-      {
-        eventType:   'ORDER_DELIVERED',
-        title:       'Pedido entregado',
-        description: 'Confirmación cuando el pedido llega al destino.',
-        icon:        ShoppingCart,
-      },
-      {
         eventType:   'ORDER_CANCELLED',
         title:       'Pedido cancelado',
         description: 'Alerta cuando un pedido es cancelado por el cliente o el sistema.',
@@ -84,7 +72,7 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
     ],
   },
 
-  // ── Reseñas (2) ────────────────────────────────────────────────────────────
+  // ── Reseñas (3) ────────────────────────────────────────────────────────────
   {
     id:    'reviews',
     label: 'Reseñas',
@@ -102,10 +90,16 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
         description: 'El productor ha respondido a una reseña que escribiste.',
         icon:        Star,
       },
+      {
+        eventType:   'REVIEW_REQUEST',
+        title:       'Solicitud de reseña',
+        description: 'Recordatorio automático a los 3 días de la entrega pidiendo tu valoración del pedido.',
+        icon:        Star,
+      },
     ],
   },
 
-  // ── Productos (3) ──────────────────────────────────────────────────────────
+  // ── Productos (6) ──────────────────────────────────────────────────────────
   {
     id:    'products',
     label: 'Productos',
@@ -129,10 +123,28 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
         description: 'Notificación con motivo cuando un producto no supera la revisión.',
         icon:        Package,
       },
+      {
+        eventType:   'PRODUCT_REVISION_APPROVED',
+        title:       'Cambios de producto aprobados',
+        description: 'Los cambios que propusiste sobre un producto ya publicado han sido aprobados.',
+        icon:        Package,
+      },
+      {
+        eventType:   'PRODUCT_REVISION_REJECTED',
+        title:       'Cambios de producto no aprobados',
+        description: 'Los cambios que propusiste no han sido aprobados; el producto sigue publicado con sus datos anteriores.',
+        icon:        Package,
+      },
+      {
+        eventType:   'PRODUCT_AUTO_UNPUBLISHED',
+        title:       'Producto despublicado automáticamente',
+        description: 'Un producto ya publicado deja de cumplir los criterios mínimos de moderación y se despublica.',
+        icon:        Package,
+      },
     ],
   },
 
-  // ── Cuenta y Productor (11) ────────────────────────────────────────────────
+  // ── Cuenta y Productor (14) ────────────────────────────────────────────────
   {
     id:    'account',
     label: 'Cuenta y Productor',
@@ -217,6 +229,12 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
         title:       'Certificación en revisión',
         description: 'Confirmación de que tu certificación de producto fue enviada y está en revisión.',
         icon:        Briefcase,
+      },
+      {
+        eventType:   'PRODUCER_DEBT_PENDING',
+        title:       'Saldo negativo por una devolución',
+        description: 'Tu saldo en Stripe no cubrió una devolución y se te generó una deuda pendiente que se descuenta automáticamente de tus próximas ventas.',
+        icon:        UserCheck,
       },
     ],
   },

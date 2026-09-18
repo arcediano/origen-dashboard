@@ -1,7 +1,10 @@
 /**
  * @file notification-groups.test.ts
  * @description Tests para verificar que NOTIFICATION_GROUPS contiene
- * exactamente 28 eventos (incluyendo los 3 nuevos de P4/P5),
+ * exactamente 31 eventos (incluyendo los 3 nuevos de P4/P5, y tras eliminar
+ * ORDER_STATUS_CHANGED/ORDER_DELIVERED y añadir REVIEW_REQUEST,
+ * PRODUCT_REVISION_APPROVED/REJECTED, PRODUCT_AUTO_UNPUBLISHED y
+ * PRODUCER_DEBT_PENDING),
  * que ninguno de los nuevos tiene alwaysActive: true,
  * y que PROMOTION_CREATED está en el grupo 'marketing'.
  */
@@ -46,10 +49,30 @@ describe('NOTIFICATION_GROUPS — P4/P5 nuevos eventos', () => {
     expect(promotionEvent?.title).toBe('Tu campaña está activa');
   });
 
-  it('debe contener exactamente 28 eventos en total (7 grupos)', () => {
+  it('debe contener exactamente 31 eventos en total (7 grupos)', () => {
     const totalEvents = NOTIFICATION_GROUPS.reduce((sum, g) => sum + g.events.length, 0);
-    expect(totalEvents).toBe(28);
+    expect(totalEvents).toBe(31);
     expect(NOTIFICATION_GROUPS.length).toBe(7);
+  });
+
+  it('no debe contener ORDER_STATUS_CHANGED ni ORDER_DELIVERED (decisión del humano: el productor cambia el estado él mismo)', () => {
+    const eventTypes = NOTIFICATION_GROUPS.flatMap(g => g.events).map(e => e.eventType);
+    expect(eventTypes).not.toContain('ORDER_STATUS_CHANGED');
+    expect(eventTypes).not.toContain('ORDER_DELIVERED');
+  });
+
+  it.each([
+    'REVIEW_REQUEST',
+    'PRODUCT_REVISION_APPROVED',
+    'PRODUCT_REVISION_REJECTED',
+    'PRODUCT_AUTO_UNPUBLISHED',
+    'PRODUCER_DEBT_PENDING',
+  ])('debe contener una entrada toggleable para %s', (eventType) => {
+    const event = NOTIFICATION_GROUPS
+      .flatMap(g => g.events)
+      .find(e => e.eventType === eventType);
+    expect(event).toBeDefined();
+    expect(event?.alwaysActive).not.toBe(true);
   });
 
   it('PAYMENT_ACCOUNT_ACTION_REQUIRED no debe estar en ALWAYS_ACTIVE_EVENTS', () => {
