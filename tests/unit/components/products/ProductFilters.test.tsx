@@ -72,6 +72,7 @@ const baseProps = {
   onViewModeChange: vi.fn(),
   totalProducts: 5,
   onClearFilters: vi.fn(),
+  onNewProduct: vi.fn(),
 };
 
 describe('ProductFilters — Ordenar separado de Filtros', () => {
