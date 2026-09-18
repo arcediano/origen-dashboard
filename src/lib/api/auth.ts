@@ -167,7 +167,14 @@ export async function setActiveRole(payload: SetActiveRolePayload): Promise<Auth
  * Por seguridad, la respuesta es siempre 200 aunque el email no exista.
  */
 export async function requestPasswordReset(email: string): Promise<void> {
-  await gatewayClient.post('/auth/forgot-password', { email });
+  await gatewayClient.post('/auth/forgot-password', { email, app: 'dashboard' });
+}
+
+/**
+ * Restablece la contraseña usando el token recibido por email.
+ */
+export async function resetPassword(payload: { token: string; newPassword: string }): Promise<void> {
+  await gatewayClient.post('/auth/reset-password', payload);
 }
 
 // ─── TWO-FACTOR AUTHENTICATION (2FA) ──────────────────────────────────────────
