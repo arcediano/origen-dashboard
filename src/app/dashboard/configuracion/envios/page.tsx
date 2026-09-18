@@ -736,7 +736,7 @@ export default function EnviosPage() {
                                 step={1}
                                 placeholder="2"
                                 inputSize="md"
-                                className="flex-1"
+                                containerClassName="flex-1"
                                 aria-label="Valor del tiempo estimado"
                               />
                               <Select
