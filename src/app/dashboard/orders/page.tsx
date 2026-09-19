@@ -15,7 +15,7 @@ import { ShoppingBag, FileText } from 'lucide-react';
 import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, EmptyState, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { OrderStats } from './components/OrderStats';
-import { OrderFilters } from './components/OrderFilters';
+import { OrderFilters, type OrderSortBy } from './components/OrderFilters';
 import { OrdersTable } from './components/OrdersTable';
 import { OrderCard, OrderCardSkeleton } from './components/OrderCard';
 
@@ -64,6 +64,7 @@ export default function OrdersPage() {
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<OrderFiltersType>({});
+  const [sortBy, setSortBy] = useState<OrderSortBy>('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
@@ -132,6 +133,26 @@ export default function OrdersPage() {
     setCurrentPage(1);
   };
 
+  // Orden aplicado sobre la página actual — el backend no expone todavía un
+  // parámetro de orden para /orders/seller (limitación ya existente en las
+  // columnas ordenables de OrdersTable, aquí solo se extiende a móvil).
+  const sortedOrders = React.useMemo(() => {
+    const sorted = [...orders];
+    switch (sortBy) {
+      case 'oldest':
+        return sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      case 'amount-desc':
+        return sorted.sort((a, b) => b.total - a.total);
+      case 'amount-asc':
+        return sorted.sort((a, b) => a.total - b.total);
+      case 'customer-asc':
+        return sorted.sort((a, b) => a.customerName.localeCompare(b.customerName));
+      case 'newest':
+      default:
+        return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+  }, [orders, sortBy]);
+
   // ==========================================================================
   // RENDER
   // ==========================================================================
@@ -197,6 +218,8 @@ export default function OrdersPage() {
             onFilterChange={handleFilterChange}
             onClearFilters={handleClearFilters}
             totalOrders={totalOrders}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
           />
         </motion.div>
 
@@ -219,7 +242,7 @@ export default function OrdersPage() {
                   ? Array.from({ length: 5 }).map((_, i) => (
                       <OrderCardSkeleton key={i} />
                     ))
-                  : orders.map((order) => (
+                  : sortedOrders.map((order) => (
                       <OrderCard
                         key={order.id}
                         order={order}
@@ -231,7 +254,7 @@ export default function OrdersPage() {
               {/* Desktop: tabla */}
               <div className="hidden lg:block">
                 <OrdersTable
-                  orders={orders}
+                  orders={sortedOrders}
                   onViewDetails={handleViewDetails}
                   isLoading={isTableLoading}
                 />
