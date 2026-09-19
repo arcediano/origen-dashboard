@@ -27,7 +27,7 @@ import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, EmptyState,
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { InvoicesTable } from './components/InvoicesTable';
 import { InvoiceCard, InvoiceCardSkeleton } from './components/InvoiceCard';
-import { InvoiceFilters } from './components/InvoiceFilters';
+import { InvoiceFilters, type InvoiceSortBy } from './components/InvoiceFilters';
 
 // API
 import { fetchSellerInvoices, type InvoiceListItem, type InvoiceFilterParams } from '@/lib/api/orders';
@@ -75,6 +75,7 @@ export default function FacturasPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalInvoices, setTotalInvoices] = useState(0);
   const [filters, setFilters] = useState<InvoiceFilterParams>({ status: 'issued' });
+  const [sortBy, setSortBy] = useState<InvoiceSortBy>('newest');
 
   // ==========================================================================
   // CARGA DE DATOS
@@ -150,6 +151,24 @@ export default function FacturasPage() {
     setCurrentPage(1);
   };
 
+  // Orden aplicado sobre la página actual — el backend no expone todavía un
+  // parámetro de orden para /orders/seller/invoices (misma limitación ya
+  // documentada para /dashboard/orders).
+  const sortedInvoices = React.useMemo(() => {
+    const sorted = [...invoices];
+    switch (sortBy) {
+      case 'oldest':
+        return sorted.sort((a, b) => new Date(a.issuedAt ?? 0).getTime() - new Date(b.issuedAt ?? 0).getTime());
+      case 'amount-desc':
+        return sorted.sort((a, b) => b.total - a.total);
+      case 'amount-asc':
+        return sorted.sort((a, b) => a.total - b.total);
+      case 'newest':
+      default:
+        return sorted.sort((a, b) => new Date(b.issuedAt ?? 0).getTime() - new Date(a.issuedAt ?? 0).getTime());
+    }
+  }, [invoices, sortBy]);
+
   const handleRefresh = async () => {
     await loadInvoices();
   };
@@ -199,6 +218,8 @@ export default function FacturasPage() {
               onFilterChange={handleFilterChange}
               onClearFilters={handleClearFilters}
               totalInvoices={totalInvoices}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
             />
           </motion.div>
 
@@ -229,7 +250,7 @@ export default function FacturasPage() {
                     ? Array.from({ length: 5 }).map((_, i) => (
                         <InvoiceCardSkeleton key={i} />
                       ))
-                    : invoices.map((invoice) => (
+                    : sortedInvoices.map((invoice) => (
                         <InvoiceCard
                           key={invoice.orderId}
                           invoice={invoice}
@@ -242,7 +263,7 @@ export default function FacturasPage() {
                 {/* Desktop: tabla */}
                 <div className="hidden lg:block">
                   <InvoicesTable
-                    invoices={invoices}
+                    invoices={sortedInvoices}
                     onDownload={handleDownload}
                     isLoading={isTableLoading}
                   />
