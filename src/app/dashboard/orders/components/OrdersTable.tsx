@@ -11,24 +11,24 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Table, type Column } from '@arcediano/ux-library';
-import { Badge, Button } from '@arcediano/ux-library';
+import { Badge, Button, toast } from '@arcediano/ux-library';
 import {
   Eye,
+  Download,
   Clock,
   Package,
   Truck,
   CheckCircle,
   XCircle,
-  DollarSign,
   ChevronRight,
   RotateCcw
 } from 'lucide-react';
+import { fetchSellerOrderInvoice } from '@/lib/api/orders';
 import type { Order } from '@/types/order';
 
 interface OrdersTableProps {
   orders: Order[];
   onViewDetails?: (id: string) => void;
-  onUpdateStatus?: (id: string, status: Order['status']) => void;
   className?: string;
   isLoading?: boolean;
 }
@@ -78,11 +78,31 @@ const statusConfig: Record<Order['status'], {
 export function OrdersTable({
   orders,
   onViewDetails,
-  onUpdateStatus,
   className,
   isLoading = false
 }: OrdersTableProps) {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [downloadingInvoiceId, setDownloadingInvoiceId] = useState<string | null>(null);
+
+  const handleDownloadInvoice = async (orderId: string) => {
+    setDownloadingInvoiceId(orderId);
+    try {
+      const response = await fetchSellerOrderInvoice(orderId);
+      if (response.data?.downloadUrl) {
+        window.open(response.data.downloadUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        toast({
+          title: 'No se pudo descargar la factura',
+          description: response.error ?? 'La factura aún no tiene PDF disponible',
+          variant: 'error',
+        });
+      }
+    } catch {
+      toast({ title: 'No se pudo descargar la factura', description: 'Error al descargar la factura', variant: 'error' });
+    } finally {
+      setDownloadingInvoiceId(null);
+    }
+  };
 
   const columns: Column<Order>[] = [
     {
@@ -166,10 +186,12 @@ export function OrdersTable({
       key: 'acciones',
       header: '',
       accessor: (item) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-1">
           <Button
             variant="ghost"
             size="icon-sm"
+            title="Ver detalle"
+            aria-label="Ver detalle"
             onClick={(e) => {
               e.stopPropagation();
               onViewDetails?.(item.id);
@@ -177,6 +199,21 @@ export function OrdersTable({
           >
             <Eye className="w-4 h-4" />
           </Button>
+          {item.invoice?.hasPdf && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              title="Descargar factura"
+              aria-label="Descargar factura"
+              disabled={downloadingInvoiceId === item.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                void handleDownloadInvoice(item.id);
+              }}
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       ),
       className: 'text-right'

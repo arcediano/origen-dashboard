@@ -19,10 +19,12 @@
 'use client';
 
 import React from 'react';
+import { ArrowUpDown, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   FilterToolbar,
   FilterPanel,
+  FilterBottomSheet,
   ActiveFilterChips,
   type ActiveFilterChip,
   type FilterSection,
@@ -37,11 +39,23 @@ const STATUS_OPTIONS = [
   { value: 'cancelled',  label: 'Cancelados' },
 ];
 
+export type OrderSortBy = 'newest' | 'oldest' | 'amount-desc' | 'amount-asc' | 'customer-asc';
+
+export const ORDER_SORT_OPTIONS: Array<{ value: OrderSortBy; label: string }> = [
+  { value: 'newest',       label: 'Más recientes' },
+  { value: 'oldest',       label: 'Más antiguos' },
+  { value: 'amount-desc',  label: 'Importe ↓' },
+  { value: 'amount-asc',   label: 'Importe ↑' },
+  { value: 'customer-asc', label: 'Cliente A-Z' },
+];
+
 export interface OrderFiltersProps {
   filters: OrderFiltersType;
   onFilterChange: (filters: OrderFiltersType) => void;
   onClearFilters: () => void;
   totalOrders: number;
+  sortBy: OrderSortBy;
+  onSortChange: (value: OrderSortBy) => void;
   className?: string;
 }
 
@@ -50,11 +64,15 @@ export function OrderFilters({
   onFilterChange,
   onClearFilters,
   totalOrders,
+  sortBy,
+  onSortChange,
   className,
 }: OrderFiltersProps) {
   const [panelOpen, setPanelOpen] = React.useState(false);
+  const [sortOpen, setSortOpen] = React.useState(false);
   const filtersButtonRef = React.useRef<HTMLButtonElement>(null);
   const [localSearch, setLocalSearch] = React.useState(filters.search ?? '');
+  const sortLabel = ORDER_SORT_OPTIONS.find((o) => o.value === sortBy)?.label;
 
   const set = (key: keyof OrderFiltersType, value: unknown) =>
     onFilterChange({ [key]: value || undefined } as OrderFiltersType);
@@ -134,7 +152,7 @@ export function OrderFilters({
   return (
     <div className={cn('space-y-2', className)}>
 
-      {/* ── Búsqueda + botón "Filtros" — mismo componente en todos los breakpoints ── */}
+      {/* ── Búsqueda + botón "Filtros" + "Ordenar" — mismo componente en todos los breakpoints ── */}
       <FilterToolbar
         searchValue={localSearch}
         onSearchChange={setLocalSearch}
@@ -144,6 +162,24 @@ export function OrderFilters({
         activeFilterCount={activeCount}
         onOpenFilters={() => setPanelOpen(true)}
         filtersButtonRef={filtersButtonRef}
+        compact
+        actions={(
+          <button
+            type="button"
+            onClick={() => setSortOpen(true)}
+            aria-haspopup="dialog"
+            aria-label={sortLabel ? `Ordenar (${sortLabel})` : 'Ordenar'}
+            className={cn(
+              'relative flex items-center gap-1.5 h-10 w-10 justify-center px-0 sm:w-auto sm:justify-start sm:px-3.5 rounded-xl border text-sm font-medium transition-colors flex-shrink-0',
+              sortBy !== 'newest'
+                ? 'bg-origen-bosque border-origen-bosque text-white'
+                : 'bg-surface-alt border-border text-origen-bosque',
+            )}
+          >
+            <ArrowUpDown className="w-4 h-4" />
+            <span className="hidden sm:inline">Ordenar</span>
+          </button>
+        )}
       />
 
       {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
@@ -167,6 +203,36 @@ export function OrderFilters({
         resultLabel={totalOrders === 1 ? 'pedido' : 'pedidos'}
         variant="drawer"
       />
+
+      {/* ── "Ordenar" — hoja propia, independiente de "Filtros"; selección inmediata ── */}
+      <FilterBottomSheet
+        open={sortOpen}
+        onClose={() => setSortOpen(false)}
+        title="Ordenar por"
+      >
+        <div className="flex flex-col gap-1">
+          {ORDER_SORT_OPTIONS.map((opt) => {
+            const active = sortBy === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onSortChange(opt.value);
+                  setSortOpen(false);
+                }}
+                className={cn(
+                  'flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-colors min-h-[44px]',
+                  active ? 'bg-origen-nube text-origen-bosque' : 'text-origen-oscuro hover:bg-surface',
+                )}
+              >
+                <span>{opt.label}</span>
+                {active && <Check className="w-4 h-4 text-origen-bosque flex-shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+      </FilterBottomSheet>
     </div>
   );
 }
