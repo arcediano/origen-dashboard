@@ -423,18 +423,27 @@ export default function OfertasFlashPage() {
         const isFinished = status === 'finished' || status === 'cancelled';
         if (isFinished) return null;
         return (
-          <div className="flex justify-end gap-1">
-            <Button variant="ghost" size="sm" onClick={() => handleEditDeal(deal)} aria-label="Editar oferta">
-              <Edit2 className="w-4 h-4" />
+          <div className="flex items-center justify-end gap-1 pr-2">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => handleEditDeal(deal)}
+              title="Editar oferta"
+              aria-label="Editar oferta"
+              className="min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 text-origen-pradera hover:text-origen-pradera hover:bg-origen-pastel/40"
+            >
+              <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Button>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={() => void handleCancelDeal(deal.id, deal.productId)}
               disabled={deleting}
+              title="Cancelar oferta"
               aria-label="Cancelar oferta"
+              className="min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 text-feedback-danger hover:text-feedback-danger hover:bg-feedback-danger-subtle"
             >
-              <Trash2 className="w-4 h-4 text-feedback-danger" />
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Button>
           </div>
         );

@@ -2,13 +2,11 @@
  * @file OfertasFlashFilters.tsx
  * @description Filtros de ofertas flash — patrón "Bosque Comercial" v5.5.
  *
- * Desktop (≥lg): controles siempre visibles en línea — búsqueda por producto
- * + Select de estado.
+ * `FilterToolbar` (búsqueda + botón "Filtros" con badge contador) en todos
+ * los breakpoints + `FilterPanel` (bottom sheet en móvil, panel lateral en
+ * escritorio) con las mismas secciones — mismo patrón que `/dashboard/products`.
  *
- * Móvil/tablet (<lg): `FilterToolbar` con botón "Filtros" (badge contador)
- * + `FilterPanel` (bottom sheet) con las mismas secciones.
- *
- * Los filtros activos aparecen como chips bajo la barra en ambos breakpoints.
+ * Los filtros activos aparecen como chips bajo la barra.
  */
 
 'use client';
@@ -19,13 +17,6 @@ import {
   FilterToolbar,
   FilterPanel,
   ActiveFilterChips,
-  SearchInput,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  useIsMobile,
   type ActiveFilterChip,
   type FilterSection,
 } from '@arcediano/ux-library';
@@ -55,7 +46,6 @@ export function OfertasFlashFilters({
   totalDeals,
   className,
 }: OfertasFlashFiltersProps) {
-  const isMobile = useIsMobile(1024);
   const [panelOpen, setPanelOpen] = React.useState(false);
   const filtersButtonRef = React.useRef<HTMLButtonElement>(null);
 
@@ -83,42 +73,17 @@ export function OfertasFlashFilters({
   return (
     <div className={cn('space-y-2', className)}>
 
-      {/* ── Desktop (≥lg): controles inline siempre visibles ─────────────────── */}
-      <div className="hidden lg:flex items-center gap-2 bg-surface-alt border border-border-subtle rounded-xl px-3 py-2 shadow-sm">
-        <SearchInput
-          value={search}
-          onChange={onSearchChange}
-          placeholder="Buscar por producto..."
-          aria-label="Buscar ofertas flash"
-          className="min-w-[240px] flex-1"
-          size="md"
-        />
-        <Select value={statusFilter} onValueChange={onStatusChange} className="w-auto">
-          <SelectTrigger className="min-w-[160px] max-w-[200px] h-10" tone="subtle">
-            <SelectValue placeholder="Estado" />
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <FilterToolbar
+        searchValue={search}
+        onSearchChange={onSearchChange}
+        searchPlaceholder="Buscar por producto..."
+        searchAriaLabel="Buscar ofertas flash"
+        activeFilterCount={activeCount}
+        onOpenFilters={() => setPanelOpen(true)}
+        filtersButtonRef={filtersButtonRef}
+        compact
+      />
 
-      {/* ── Móvil/tablet (<lg): barra con botón "Filtros" ────────────────────── */}
-      <div className="lg:hidden">
-        <FilterToolbar
-          searchValue={search}
-          onSearchChange={onSearchChange}
-          searchPlaceholder="Buscar por producto..."
-          searchAriaLabel="Buscar ofertas flash"
-          activeFilterCount={activeCount}
-          onOpenFilters={() => setPanelOpen(true)}
-          filtersButtonRef={filtersButtonRef}
-        />
-      </div>
-
-      {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
       {activeChips.length > 0 && (
         <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
           <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
@@ -128,18 +93,16 @@ export function OfertasFlashFilters({
         </div>
       )}
 
-      {/* ── Panel de filtros: solo bottom sheet (<lg) ────────────────────────── */}
-      {isMobile && (
-        <FilterPanel
-          isOpen={panelOpen}
-          onClose={() => setPanelOpen(false)}
-          triggerRef={filtersButtonRef}
-          sections={sections}
-          onClearAll={() => onStatusChange('todas')}
-          resultCount={totalDeals}
-          resultLabel={totalDeals === 1 ? 'oferta' : 'ofertas'}
-        />
-      )}
+      <FilterPanel
+        isOpen={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        triggerRef={filtersButtonRef}
+        sections={sections}
+        onClearAll={() => onStatusChange('todas')}
+        resultCount={totalDeals}
+        resultLabel={totalDeals === 1 ? 'oferta' : 'ofertas'}
+        variant="drawer"
+      />
     </div>
   );
 }
