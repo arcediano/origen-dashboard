@@ -114,8 +114,7 @@ export function OrderFilters({
     filters.dateTo,
     filters.minAmount,
     filters.maxAmount,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ].filter((v: any) => v !== undefined && v !== '' && v !== null).length;
+  ].filter((v: unknown) => v !== undefined && v !== '' && v !== null).length;
 
   // ── Secciones del panel móvil ────────────────────────────────────────────────
   const sections: FilterSection[] = [

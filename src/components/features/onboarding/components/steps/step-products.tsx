@@ -571,7 +571,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
             {!product.noAllergens && product.allergens.length === 0 && product.mayContain.length === 0 && (
               <p className="text-xs text-feedback-warning-text flex items-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                Indica los alérgenos o marca "Sin alérgenos" para continuar
+                Indica los alérgenos o marca &quot;Sin alérgenos&quot; para continuar
               </p>
             )}
           </div>
@@ -730,7 +730,7 @@ export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete
         </div>
         <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
           <Info className="w-3.5 h-3.5 text-hoja-tinta" />
-          Este paso es opcional. Puedes añadir hasta 5 productos ahora o completarlo más tarde desde "Mi catálogo".
+          Este paso es opcional. Puedes añadir hasta 5 productos ahora o completarlo más tarde desde &quot;Mi catálogo&quot;.
         </p>
       </div>
 
@@ -741,7 +741,7 @@ export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete
           <p className="text-sm font-semibold text-feedback-info-text">Este paso es opcional</p>
           <p className="text-xs text-feedback-info-text/80 mt-0.5">
             Puedes añadir tus productos ahora o hacerlo más tarde desde{' '}
-            <span className="font-medium">"Mi catálogo"</span> en tu dashboard.
+            <span className="font-medium">&quot;Mi catálogo&quot;</span> en tu dashboard.
             Los productos que añadas aquí se guardarán como borradores privados listos para publicar.
           </p>
         </div>

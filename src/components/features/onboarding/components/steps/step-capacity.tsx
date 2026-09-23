@@ -324,7 +324,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
         {zoneType === 'named' && (
           <p className="text-xs text-muted-foreground flex items-start gap-1">
             <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-hoja-tinta" />
-            <span>Asigna un nombre a la zona y los códigos postales que cubre. Ej: nombre <em>"Cuenca"</em>, CPs <em>16001, 160*</em></span>
+            <span>Asigna un nombre a la zona y los códigos postales que cubre. Ej: nombre <em>&quot;Cuenca&quot;</em>, CPs <em>16001, 160*</em></span>
           </p>
         )}
 

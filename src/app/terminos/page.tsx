@@ -41,7 +41,7 @@ export default function TermsOfServicePage() {
 
         <h2 className="text-xl font-semibold text-foreground mt-6 mb-3">5. Limitación de Responsabilidad</h2>
         <p className="text-foreground mb-4">
-          La plataforma se proporciona "tal cual". No garantizamos que esté libre de errores ni que cumpla con sus expectativas.
+          La plataforma se proporciona &quot;tal cual&quot;. No garantizamos que esté libre de errores ni que cumpla con sus expectativas.
         </p>
 
         <h2 className="text-xl font-semibold text-foreground mt-6 mb-3">6. Modificaciones de los Términos</h2>
