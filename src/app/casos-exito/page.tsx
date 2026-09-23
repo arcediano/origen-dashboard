@@ -147,7 +147,7 @@ export default function SuccessStoriesPage() {
 
                   {/* Quote */}
                   <blockquote className="text-sm md:text-base text-muted-foreground leading-relaxed mb-5 italic">
-                    "{t.quote}"
+                    &quot;{t.quote}&quot;
                   </blockquote>
 
                   {/* Resultado destacado */}

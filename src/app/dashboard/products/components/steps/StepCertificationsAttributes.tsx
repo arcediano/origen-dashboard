@@ -1090,7 +1090,7 @@ export function StepCertificationsAttributes({
                     {/* Mini preview de cómo se ven en la ficha */}
                     <div className="mt-3 p-3 bg-surface rounded-lg border border-border">
                       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                        Así se ven en la ficha del producto (sección "Características"):
+                        Así se ven en la ficha del producto (sección &quot;Características&quot;):
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {[
@@ -1288,7 +1288,7 @@ export function StepCertificationsAttributes({
                               Visible en la ficha del producto
                             </label>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                              Aparecerá en la sección "Características" de tu producto en la tienda
+                              Aparecerá en la sección &quot;Características&quot; de tu producto en la tienda
                             </p>
                           </div>
                         </div>
