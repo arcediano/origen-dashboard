@@ -149,6 +149,14 @@ function mapShippingStatus(orderStatus: string): Order['shipping']['status'] {
 
 function mapOrderStatus(raw: string): OrderStatus {
   if (raw === 'confirmed') return 'processing';
+  // 'awaiting_payment' (backend, Opción A Fase 1): pedido creado antes de
+  // que el cobro se confirme — mismo tratamiento que 'pending' desde la
+  // perspectiva del productor (sin acción disponible, esperando pago).
+  if (raw === 'awaiting_payment') return 'pending';
+  // 'payment_error': el cobro se confirmó en Stripe pero el pedido no pudo
+  // confirmarse (webhook perdido/guardia de precio) — debe verse también el
+  // productor, no colapsar a 'pending' (decisión del humano, 2026-09-25).
+  if (raw === 'payment_error') return 'payment_error';
 
   const valid: OrderStatus[] = [
     'pending',
@@ -172,6 +180,7 @@ function mapOrderStatus(raw: string): OrderStatus {
  */
 const TIMELINE_STATUS_LABELS: Record<string, string> = {
   pending: 'Pedido creado',
+  awaiting_payment: 'Pedido creado, esperando confirmación de pago',
   confirmed: 'Pago confirmado',
   processing: 'En preparación',
   shipped: 'Enviado',
@@ -179,6 +188,7 @@ const TIMELINE_STATUS_LABELS: Record<string, string> = {
   cancelled: 'Cancelado',
   returned: 'Devuelto',
   refunded: 'Reembolsado',
+  payment_error: 'Error al confirmar el pago',
 };
 
 function mapBackendOrder(o: BackendOrder): Order {

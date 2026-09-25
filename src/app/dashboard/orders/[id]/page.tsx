@@ -11,7 +11,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown, RotateCcw, Wallet } from 'lucide-react';
+import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown, RotateCcw, Wallet, AlertTriangle } from 'lucide-react';
 
 // Componentes UI
 import {
@@ -108,6 +108,14 @@ const statusConfig: Record<Order['status'], {
     variant: 'danger',
     label: 'Reembolsado',
     icon: XCircle,
+    color: 'text-feedback-danger-text',
+    bandBg: 'bg-feedback-danger-subtle',
+    heroBorder: 'border-feedback-danger/30',
+  },
+  payment_error: {
+    variant: 'danger',
+    label: 'Error de pago',
+    icon: AlertTriangle,
     color: 'text-feedback-danger-text',
     bandBg: 'bg-feedback-danger-subtle',
     heroBorder: 'border-feedback-danger/30',
@@ -368,7 +376,11 @@ export default function OrderDetailPage() {
   // "delivered" ya NO es terminal: sigue mostrando la card de "Gestión del
   // pedido" (con la acción de solicitar devolución) en vez del mensaje fijo
   // de pedido completado.
-  const isTerminal = ['cancelled', 'refunded', 'returned'].includes(order.status);
+  // 'payment_error' se trata como terminal aquí: no hay ninguna acción que
+  // el productor pueda tomar (la incidencia de cobro la gestiona el equipo
+  // de Origen) — mismo criterio que cancelled/refunded/returned, muestra el
+  // mensaje fijo en vez de la card de "Gestión del pedido".
+  const isTerminal = ['cancelled', 'refunded', 'returned', 'payment_error'].includes(order.status);
   const isMultiSeller = order.isMultiSeller === true;
   const isPaymentUnconfirmed =
     !!nextAction &&
@@ -552,9 +564,14 @@ export default function OrderDetailPage() {
                 <motion.div custom={1} variants={cardVariants}>
                   <div className={cn(NATIVE_CARD_RADIUS, 'border border-border bg-surface-alt shadow-subtle p-4')}>
                     <p className="text-xs text-text-subtle flex items-center gap-2">
-                      <Info className="w-3.5 h-3.5 shrink-0" />
+                      {order.status === 'payment_error' ? (
+                        <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-feedback-danger-text" aria-hidden />
+                      ) : (
+                        <Info className="w-3.5 h-3.5 shrink-0" />
+                      )}
                       {order.status === 'returned' ? 'Devolución solicitada — el equipo de Origen la está revisando.' :
                        order.status === 'cancelled' ? 'Este pedido fue cancelado.' :
+                       order.status === 'payment_error' ? 'Hubo un problema al confirmar el pago de este pedido. El equipo de Origen está revisando la incidencia — te avisaremos si necesitamos algo de tu parte.' :
                        'Este pedido fue reembolsado.'}
                     </p>
                   </div>

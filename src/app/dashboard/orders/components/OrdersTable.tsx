@@ -21,7 +21,8 @@ import {
   CheckCircle,
   XCircle,
   ChevronRight,
-  RotateCcw
+  RotateCcw,
+  AlertTriangle
 } from 'lucide-react';
 import { fetchSellerOrderInvoice } from '@/lib/api/orders';
 import type { Order } from '@/types/order';
@@ -72,6 +73,11 @@ const statusConfig: Record<Order['status'], {
     variant: 'danger',   // Rojo
     label: 'Reembolsado',
     icon: XCircle
+  },
+  payment_error: {
+    variant: 'danger',   // Rojo
+    label: 'Error de pago',
+    icon: AlertTriangle
   }
 };
 

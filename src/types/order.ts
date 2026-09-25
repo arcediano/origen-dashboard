@@ -10,7 +10,8 @@ export type OrderStatus =
   | 'delivered'    // Entregado
   | 'cancelled'    // Cancelado
   | 'returned'     // Devolución solicitada por el productor, pendiente de revisión del admin
-  | 'refunded';    // Reembolsado
+  | 'refunded'     // Reembolsado
+  | 'payment_error'; // El cobro se confirmó en Stripe pero el pedido no pudo confirmarse — visible también al productor (decisión del humano, 2026-09-25)
 
 export type PaymentStatus = 
   | 'pending'      // Pendiente de pago

@@ -24,6 +24,7 @@ import {
   XCircle,
   RefreshCw,
   RotateCcw,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge, SwipeableRow } from '@arcediano/ux-library';
@@ -91,6 +92,11 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; variant: 'success' | '
     label: 'Reembolsado',
     variant: 'danger',
     icon: RefreshCw
+  },
+  payment_error: {
+    label: 'Error de pago',
+    variant: 'danger',
+    icon: AlertTriangle
   }
 };
 
