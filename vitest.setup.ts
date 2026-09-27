@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { afterAll, afterEach, beforeAll } from 'vitest';
 import { vi } from 'vitest';
-import React from 'react';
+import React, { type JSX } from 'react';
 import { server } from './tests/mocks/server';
 
 vi.mock('@arcediano/ux-library', () => {

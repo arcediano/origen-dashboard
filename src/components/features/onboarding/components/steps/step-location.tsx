@@ -85,7 +85,7 @@ const Select: React.FC<SelectProps> = ({
       const option = React.Children.toArray(children).find(
         (child: any) => child.props?.value === value
       );
-      if (option && React.isValidElement(option)) {
+      if (option && React.isValidElement<{ children?: React.ReactNode }>(option)) {
         setSelectedLabel(option.props.children as string);
       }
     } else {

@@ -187,7 +187,7 @@ const ProductSelect: React.FC<ProductSelectProps> = ({ value, onValueChange, pla
     if (value) {
       const allItems = React.Children.toArray(children);
       const option = allItems.find((child: any) => child.props?.value === value);
-      if (option && React.isValidElement(option)) {
+      if (option && React.isValidElement<{ children?: React.ReactNode }>(option)) {
         setSelectedLabel(option.props.children as string);
       }
     } else {
