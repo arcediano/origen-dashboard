@@ -18,9 +18,11 @@ interface UseRecentOrdersResult {
 }
 
 /**
- * Mapea el status completo de la API al OrderStatus reducido del dashboard.
- * 'refunded' no existe en el tipo dashboard → se trata como 'cancelled'
- * (decisión deliberada, no confundir con 'returned', que sí es un estado propio).
+ * Mapea el status de la API al OrderStatus del dashboard (mismo conjunto que
+ * el canónico, `@/types/order`). Corregido (2026-09-27): antes 'refunded' y
+ * 'payment_error' no estaban en la lista y caían en 'cancelled' — provocaba
+ * que el widget de "pedidos recientes" mostrara un pedido reembolsado como
+ * cancelado (ORG-2026-00056), inconsistente con el resto del panel.
  */
 function mapStatus(status: string): Order['status'] {
   const valid: Order['status'][] = [
@@ -30,6 +32,8 @@ function mapStatus(status: string): Order['status'] {
     'delivered',
     'cancelled',
     'returned',
+    'refunded',
+    'payment_error',
   ];
   return valid.includes(status as Order['status'])
     ? (status as Order['status'])

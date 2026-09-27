@@ -7,7 +7,7 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { ShoppingBag, Clock, Package, Truck, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
+import { ShoppingBag, Clock, Package, Truck, CheckCircle2, XCircle, RotateCcw, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Badge, type BadgeVariant } from '@arcediano/ux-library';
 
 interface OrderItemProps {
@@ -16,13 +16,16 @@ interface OrderItemProps {
   customer: string;
   items: number;
   total: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned' | 'refunded' | 'payment_error';
   date: string;
 }
 
-// Mismo mapeo de estado que OrderCard.tsx (lista de pedidos) — reutiliza
-// Badge de origen-UXLibrary en vez de clases de color hardcodeadas para que
-// ambas vistas de pedidos se mantengan consistentes entre sí.
+// Mismo mapeo de estado (label/variant/icon) que OrderCard.tsx (lista de
+// pedidos) — reutiliza Badge de origen-UXLibrary en vez de clases de color
+// hardcodeadas para que ambas vistas de pedidos se mantengan consistentes
+// entre sí. 'refunded'/'payment_error' añadidos (2026-09-27, ver
+// ORG-2026-00056 en claude-agile) — antes faltaban aquí y el hook que
+// alimenta este componente los colapsaba a 'cancelled'.
 const STATUS_CONFIG: Record<OrderItemProps['status'], { label: string; variant: BadgeVariant; icon: React.ElementType }> = {
   pending: { label: 'Pendiente', variant: 'warning', icon: Clock },
   processing: { label: 'Procesando', variant: 'info', icon: Package },
@@ -30,6 +33,8 @@ const STATUS_CONFIG: Record<OrderItemProps['status'], { label: string; variant: 
   delivered: { label: 'Entregado', variant: 'success', icon: CheckCircle2 },
   cancelled: { label: 'Cancelado', variant: 'danger', icon: XCircle },
   returned: { label: 'Devolución solicitada', variant: 'warning', icon: RotateCcw },
+  refunded: { label: 'Reembolsado', variant: 'danger', icon: RefreshCw },
+  payment_error: { label: 'Error de pago', variant: 'danger', icon: AlertTriangle },
 };
 
 export function OrderItem({
