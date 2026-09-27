@@ -84,7 +84,19 @@ export interface DashboardStats {
 // PEDIDOS
 // ============================================================================
 
-export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
+// Mismo conjunto que el OrderStatus canónico (`@/types/order`) — antes se
+// quedaba corto (sin 'refunded'/'payment_error'), lo que hacía que
+// use-recent-orders.ts colapsara ambos estados a 'cancelled' (ver hallazgo
+// ORG-2026-00056 en claude-agile/proyectos/origen-dashboard/tareas-pendientes.md).
+export type OrderStatus =
+  | 'pending'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
+  | 'returned'
+  | 'refunded'
+  | 'payment_error';
 
 export interface Order {
   id: string;
@@ -165,16 +177,6 @@ export interface QuickActionCardProps {
   gradient?: string;
   badge?: string | number;
   className?: string;
-}
-
-export interface OrderItemProps {
-  id: string;
-  orderNumber: string;
-  customer: string;
-  items: number;
-  total: number;
-  status: OrderStatus;
-  date: string;
 }
 
 export interface ProductItemProps {
