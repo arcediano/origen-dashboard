@@ -84,7 +84,7 @@ export function MobileStatCard({
   return (
     <div
       className={cn(
-        'p-3 rounded-xl bg-gradient-to-br',
+        'p-3 rounded-xl bg-linear-to-br',
         styles.bg,
         'border border-border-subtle border-l-4',
         styles.border,
@@ -93,7 +93,7 @@ export function MobileStatCard({
     >
       {/* Icono + etiqueta */}
       <div className="flex items-center gap-1.5 mb-2">
-        <Icon className={cn('w-4 h-4 flex-shrink-0', styles.icon)} />
+        <Icon className={cn('w-4 h-4 shrink-0', styles.icon)} />
         <span className="text-[11px] font-medium text-text-subtle leading-tight truncate">
           {label}
         </span>

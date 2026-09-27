@@ -101,10 +101,10 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         {/* Icono */}
         <div
           className={cn(
-            'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all',
+            'w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all',
             isSelected
               ? 'bg-origen-bosque text-white shadow-md'
-              : 'bg-gradient-to-br from-origen-crema to-origen-pastel text-origen-bosque group-hover:scale-110',
+              : 'bg-linear-to-br from-origen-crema to-origen-pastel text-origen-bosque group-hover:scale-110',
           )}
         >
           <IconComponent className="w-6 h-6" />

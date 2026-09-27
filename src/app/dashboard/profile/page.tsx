@@ -176,7 +176,7 @@ export default function ProfilePage() {
 
         {/* Móvil: fila compacta */}
         <div className="lg:hidden flex items-center gap-3 p-4 rounded-2xl bg-surface-alt border border-border-subtle">
-          <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center shrink-0">
             <User className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div className="flex-1 min-w-0">
@@ -215,42 +215,42 @@ export default function ProfilePage() {
       <div className="lg:hidden rounded-2xl border border-border-subtle overflow-hidden bg-surface-alt divide-y divide-border-subtle">
 
         <Link href="/dashboard/profile/personal" className="flex items-center gap-3 px-4 py-4 active:bg-surface-alt transition-colors">
-          <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center shrink-0">
             <User className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[15px] font-semibold text-origen-bosque leading-tight">Información personal</p>
             <p className="text-xs text-text-subtle mt-0.5">Datos personales, contacto y dirección</p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <Badge variant={personalVerified ? 'success' : 'warning'} size="xs">{personalVerified ? 'Verificado' : 'Pendiente'}</Badge>
             <ChevronRight className="w-4 h-4 text-text-subtle" />
           </div>
         </Link>
 
         <Link href="/dashboard/profile/business" className="flex items-center gap-3 px-4 py-4 active:bg-surface-alt transition-colors">
-          <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center shrink-0">
             <Store className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[15px] font-semibold text-origen-bosque leading-tight">Mi negocio</p>
             <p className="text-xs text-text-subtle mt-0.5">Empresa, ubicación y datos comerciales</p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <Badge variant={businessVerified ? 'success' : 'warning'} size="xs">{businessVerified ? 'Verificado' : 'Pendiente'}</Badge>
             <ChevronRight className="w-4 h-4 text-text-subtle" />
           </div>
         </Link>
 
         <Link href="/dashboard/profile/certifications" className="flex items-center gap-3 px-4 py-4 active:bg-surface-alt transition-colors">
-          <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-origen-pradera/10 flex items-center justify-center shrink-0">
             <FileBadge className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[15px] font-semibold text-origen-bosque leading-tight">Certificaciones</p>
             <p className="text-xs text-text-subtle mt-0.5">Certificaciones de calidad y documentos legales</p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <Badge variant={certificationsPending > 0 ? 'warning' : 'success'} size="xs">
               {certificationsPending > 0 ? `${certificationsPending} pendientes` : 'Al día'}
             </Badge>

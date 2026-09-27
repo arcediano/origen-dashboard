@@ -91,12 +91,12 @@ export function BottomTabBar() {
                     className={cn(
                       'relative w-[54px] h-[54px] rounded-[16px] flex items-center justify-center',
                       active
-                        ? 'bg-gradient-to-br from-origen-bosque via-origen-pino to-origen-hoja'
-                        : 'bg-gradient-to-br from-origen-pino to-origen-bosque',
+                        ? 'bg-linear-to-br from-origen-bosque via-origen-pino to-origen-hoja'
+                        : 'bg-linear-to-br from-origen-pino to-origen-bosque',
                     )}
                   >
                     {/* Brillo interior */}
-                    <div className="absolute inset-0 rounded-[16px] bg-gradient-to-b from-white/20 to-transparent" />
+                    <div className="absolute inset-0 rounded-[16px] bg-linear-to-b from-white/20 to-transparent" />
 
                     <motion.div
                       animate={{ rotate: active ? 0 : 0, scale: active ? 1.1 : 1 }}

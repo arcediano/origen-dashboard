@@ -116,7 +116,7 @@ export default function CookiePolicyPage() {
           {/* Cabecera */}
           <div className="mb-8 md:mb-10">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
+              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
                 <Cookie className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -132,7 +132,7 @@ export default function CookiePolicyPage() {
           {/* Sección 1 */}
           <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm mb-6">
             <h2 className="text-base md:text-lg font-bold text-origen-bosque mb-3 pb-2 border-b border-border-subtle flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-hoja-tinta text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
+              <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-hoja-tinta text-xs font-bold flex items-center justify-center shrink-0">1</span>
               {sections[0].title}
             </h2>
             <p className="text-muted-foreground text-sm leading-relaxed">{sections[0].content}</p>
@@ -141,7 +141,7 @@ export default function CookiePolicyPage() {
           {/* Tipos de cookies */}
           <div className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm mb-6">
             <h2 className="text-base md:text-lg font-bold text-origen-bosque mb-5 pb-2 border-b border-border-subtle flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-hoja-tinta text-xs font-bold flex items-center justify-center flex-shrink-0">2</span>
+              <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-hoja-tinta text-xs font-bold flex items-center justify-center shrink-0">2</span>
               Cookies que usamos
             </h2>
             <div className="space-y-5">
@@ -155,7 +155,7 @@ export default function CookiePolicyPage() {
                   <ul className="space-y-1.5">
                     {ct.examples.map((ex, j) => (
                       <li key={j} className="flex items-start gap-2 text-xs text-muted-foreground">
-                        <div className="w-4 h-4 rounded-full bg-origen-hoja/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-4 h-4 rounded-full bg-origen-hoja/10 flex items-center justify-center shrink-0 mt-0.5">
                           <CheckCircle className="w-2.5 h-2.5 text-origen-hoja" />
                         </div>
                         {ex}
@@ -171,7 +171,7 @@ export default function CookiePolicyPage() {
           {sections.slice(1).map(section => (
             <div key={section.number} className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm mb-6">
               <h2 className="text-base md:text-lg font-bold text-origen-bosque mb-3 pb-2 border-b border-border-subtle flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-hoja-tinta text-xs font-bold flex items-center justify-center flex-shrink-0">
+                <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-hoja-tinta text-xs font-bold flex items-center justify-center shrink-0">
                   {section.number}
                 </span>
                 {section.title}
@@ -181,7 +181,7 @@ export default function CookiePolicyPage() {
                 <ul className="space-y-2">
                   {section.items.map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <div className="w-4 h-4 rounded-full bg-origen-hoja/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="w-4 h-4 rounded-full bg-origen-hoja/10 flex items-center justify-center shrink-0 mt-0.5">
                         <CheckCircle className="w-2.5 h-2.5 text-origen-hoja" />
                       </div>
                       {item}
@@ -205,7 +205,7 @@ export default function CookiePolicyPage() {
 
           {/* Info RGPD */}
           <div className="flex items-start gap-3 p-4 bg-origen-crema/50 border border-origen-pradera/30 rounded-xl">
-            <Info className="w-5 h-5 text-hoja-tinta flex-shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 text-hoja-tinta shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
               Esta política cumple con el Reglamento (UE) 2016/679 (RGPD), la Directiva ePrivacy y la Ley 34/2002 de Servicios de la Sociedad de la Información.
             </p>

@@ -102,7 +102,7 @@ export default function SuccessStoriesPage() {
 
           {/* Cabecera */}
           <div className="text-center mb-10 md:mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
+            <div className="inline-flex items-center gap-2 bg-linear-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
               <Sparkles className="w-4 h-4 text-hoja-tinta" />
               <span className="text-xs md:text-sm font-semibold text-origen-bosque">Productores que confían en Origen</span>
             </div>
@@ -119,13 +119,13 @@ export default function SuccessStoriesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             {testimonials.map((t, index) => (
               <div key={index} className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-origen-bosque/4 to-origen-hoja/5 rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
+                <div className="absolute inset-0 bg-linear-to-br from-origen-bosque/4 to-origen-hoja/5 rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
                 <div className="relative bg-surface-alt rounded-2xl p-6 md:p-8 shadow-lg border border-border group-hover:border-origen-hoja group-hover:shadow-xl transition-all duration-300">
 
                   {/* Cabecera tarjeta */}
                   <div className="flex items-start justify-between mb-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                      <div className="w-12 h-12 rounded-xl bg-linear-to-br from-origen-crema to-origen-pastel flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
                         <span className="text-sm font-bold text-origen-bosque">{t.initials}</span>
                       </div>
                       <div>
@@ -133,7 +133,7 @@ export default function SuccessStoriesPage() {
                         <p className="text-xs text-muted-foreground mt-0.5">{t.location}</p>
                       </div>
                     </div>
-                    <span className="inline-flex items-center bg-origen-pastel text-origen-bosque rounded-full px-3 py-1 text-xs font-semibold border border-origen-hoja/30 flex-shrink-0 ml-2">
+                    <span className="inline-flex items-center bg-origen-pastel text-origen-bosque rounded-full px-3 py-1 text-xs font-semibold border border-origen-hoja/30 shrink-0 ml-2">
                       {t.category}
                     </span>
                   </div>
@@ -152,7 +152,7 @@ export default function SuccessStoriesPage() {
 
                   {/* Resultado destacado */}
                   <div className="flex items-center gap-2 pt-4 border-t border-border-subtle">
-                    <div className="w-8 h-8 rounded-lg bg-origen-hoja/10 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-origen-hoja/10 flex items-center justify-center shrink-0">
                       <CheckCircle className="w-4 h-4 text-origen-hoja" />
                     </div>
                     <span className="text-sm font-semibold text-origen-bosque">{t.statLabel}</span>

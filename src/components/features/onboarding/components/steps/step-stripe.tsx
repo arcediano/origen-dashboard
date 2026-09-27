@@ -132,7 +132,7 @@ export function EnhancedStep6Stripe({
       {!data.stripeConnected && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-feedback-warning-subtle border border-feedback-warning/30 rounded-2xl">
           <div className="flex items-start gap-3 flex-1">
-            <AlertCircle className="w-5 h-5 text-feedback-warning flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-feedback-warning shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-feedback-warning-text">
                 Necesitas conectar Stripe para cobrar tus pedidos
@@ -155,7 +155,7 @@ export function EnhancedStep6Stripe({
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm">
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
             <CreditCard className="w-6 h-6 text-hoja-tinta" />
           </div>
           <div>
@@ -186,7 +186,7 @@ export function EnhancedStep6Stripe({
                 key={item.step}
                 className="flex sm:flex-col items-start sm:items-center sm:text-center gap-3 p-4 bg-origen-crema/20 rounded-xl border border-border-subtle"
               >
-                <div className="w-10 h-10 rounded-full bg-origen-bosque text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-origen-bosque text-white flex items-center justify-center text-sm font-bold shrink-0">
                   {item.step}
                 </div>
                 <div>
@@ -218,7 +218,7 @@ export function EnhancedStep6Stripe({
             'w-12 h-12 rounded-xl flex items-center justify-center',
             data.stripeConnected
               ? 'bg-feedback-success-subtle'
-              : 'bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20',
+              : 'bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20',
           )}>
             {data.stripeConnected
               ? <CheckCircle2 className="w-6 h-6 text-feedback-success" />
@@ -240,7 +240,7 @@ export function EnhancedStep6Stripe({
         {data.stripeConnected ? (
           <div className="space-y-4">
             <div className="p-4 bg-feedback-success-subtle rounded-xl border border-feedback-success/30 flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-feedback-success flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-5 h-5 text-feedback-success shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-feedback-success-text">Cuenta Stripe conectada correctamente</p>
                 <p className="text-xs text-feedback-success-text/80 mt-1">
@@ -262,7 +262,7 @@ export function EnhancedStep6Stripe({
             {/* Aviso de qué datos necesita el productor */}
             <div className="w-full p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
               <p className="text-xs text-muted-foreground flex items-start gap-2">
-                <Info className="w-4 h-4 text-hoja-tinta flex-shrink-0 mt-0.5" />
+                <Info className="w-4 h-4 text-hoja-tinta shrink-0 mt-0.5" />
                 <span>
                   ¿No tienes cuenta Stripe?{' '}
                   <span className="font-medium">La crearás durante el proceso, es gratis</span>.
@@ -306,7 +306,7 @@ export function EnhancedStep6Stripe({
             id="accept-terms"
             checked={data.acceptTerms}
             onCheckedChange={handleTermsChange}
-            className="h-5 w-5 rounded-md border-2 mt-0.5 flex-shrink-0"
+            className="h-5 w-5 rounded-md border-2 mt-0.5 shrink-0"
           />
           <div className="flex-1">
             <label htmlFor="accept-terms" className="text-sm font-medium text-origen-bosque cursor-pointer">
@@ -341,7 +341,7 @@ export function EnhancedStep6Stripe({
       {data.stripeConnected && data.acceptTerms && (
         <div className="bg-feedback-success-subtle rounded-2xl border border-feedback-success/30 p-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-feedback-success/15 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-full bg-feedback-success/15 flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-6 h-6 text-feedback-success" />
             </div>
             <div>

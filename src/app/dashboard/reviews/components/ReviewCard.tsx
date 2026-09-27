@@ -55,7 +55,7 @@ export function ReviewCardSkeleton() {
     <div className="px-4 py-3.5 border-b border-border-subtle last:border-0 animate-pulse">
       {/* Línea 1: avatar + nombre + estado */}
       <div className="flex items-center gap-2.5 mb-2">
-        <div className="w-8 h-8 rounded-full bg-origen-pastel/60 flex-shrink-0" />
+        <div className="w-8 h-8 rounded-full bg-origen-pastel/60 shrink-0" />
         <div className="flex-1 flex items-center justify-between gap-2">
           <div className="h-3.5 bg-origen-pastel rounded-lg w-1/3" />
           <div className="h-4 bg-origen-pastel/60 rounded-full w-16" />
@@ -130,7 +130,7 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
         >
           {/* ── Fila 1: Avatar + nombre + badge estado ── */}
           <div className="flex items-center gap-2.5 mb-1.5">
-            <Avatar className="w-8 h-8 flex-shrink-0">
+            <Avatar className="w-8 h-8 shrink-0">
               <AvatarImage src={review.authorAvatar} alt={review.authorName} />
               <AvatarFallback className="bg-origen-pastel text-origen-bosque text-xs font-semibold">
                 {review.authorName.charAt(0).toUpperCase()}
@@ -141,7 +141,7 @@ export function ReviewCard({ review, onRespond, onFlag, className }: ReviewCardP
               <span className="text-sm font-semibold text-origen-bosque truncate">
                 {review.authorName}
               </span>
-              <Badge variant={STATUS_CONFIG[review.status]?.variant || 'neutral'} size="xs" className="flex-shrink-0">
+              <Badge variant={STATUS_CONFIG[review.status]?.variant || 'neutral'} size="xs" className="shrink-0">
                 {STATUS_CONFIG[review.status]?.label || 'Pendiente'}
               </Badge>
             </div>

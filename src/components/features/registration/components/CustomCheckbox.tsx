@@ -28,7 +28,7 @@ export const CustomCheckbox: React.FC<CustomCheckboxProps> = ({
   return (
     <div className={cn('space-y-1', className)}>
       <div className="flex items-start gap-3">
-        <div className="relative flex items-center justify-center mt-0.5 flex-shrink-0">
+        <div className="relative flex items-center justify-center mt-0.5 shrink-0">
           <button
             type="button"
             id={checkboxId}

@@ -68,7 +68,7 @@ export default function PerfilPage() {
         {/* ── User header card ── */}
         <div className="rounded-2xl border border-origen-pradera/20 bg-surface-alt p-5 shadow-sm">
           <div className="flex items-center gap-4">
-            <Avatar className="w-16 h-16 ring-2 ring-white shadow-lg flex-shrink-0">
+            <Avatar className="w-16 h-16 ring-2 ring-white shadow-lg shrink-0">
               <AvatarFallback className="bg-origen-bosque text-white text-xl font-semibold">
                 {userInitials}
               </AvatarFallback>
@@ -98,13 +98,13 @@ export default function PerfilPage() {
             </p>
             {readinessReport.canSubmitProducts ? (
               <div className="flex items-center gap-2 text-feedback-success-text">
-                <Eye className="w-3.5 h-3.5 flex-shrink-0" />
+                <Eye className="w-3.5 h-3.5 shrink-0" />
                 <span className="text-xs font-medium">Visible — productos publicados</span>
               </div>
             ) : (
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-feedback-danger-text">
-                  <EyeOff className="w-3.5 h-3.5 flex-shrink-0" />
+                  <EyeOff className="w-3.5 h-3.5 shrink-0" />
                   <span className="text-xs font-medium">Perfil no visible en el marketplace</span>
                 </div>
                 {(() => {
@@ -153,14 +153,14 @@ export default function PerfilPage() {
                   index > 0 && 'border-t border-border-subtle',
                 )}
               >
-                <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10 transition-colors flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center group-hover:bg-origen-pradera/10 transition-colors shrink-0">
                   <Icon className="w-5 h-5 text-text-subtle group-hover:text-origen-pradera transition-colors" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-origen-bosque">{item.label}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-border group-hover:text-origen-pradera transition-colors flex-shrink-0" />
+                <ChevronRight className="w-4 h-4 text-border group-hover:text-origen-pradera transition-colors shrink-0" />
               </Link>
             );
           })}
@@ -173,7 +173,7 @@ export default function PerfilPage() {
             className="w-full flex items-center gap-3 px-4 py-4 hover:bg-red-50 active:bg-red-100 transition-colors group"
             type="button"
           >
-            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors shrink-0">
               <LogOut className="w-5 h-5 text-red-500" />
             </div>
             <div className="flex-1 text-left">

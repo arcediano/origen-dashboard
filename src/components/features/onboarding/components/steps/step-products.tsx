@@ -252,7 +252,7 @@ const ProductSelectItem: React.FC<ProductSelectItemProps> = ({ value, children, 
     )}
   >
     <span className="flex-1 text-left">{children}</span>
-    {isSelected && <CheckCircle2 className="h-4 w-4 text-hoja-tinta flex-shrink-0" />}
+    {isSelected && <CheckCircle2 className="h-4 w-4 text-hoja-tinta shrink-0" />}
   </button>
 );
 
@@ -314,7 +314,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
         aria-expanded={isExpanded}
       >
         {/* Miniatura foto o placeholder */}
-        <div className="w-14 h-14 rounded-xl bg-origen-crema/60 border border-border flex-shrink-0 overflow-hidden flex items-center justify-center">
+        <div className="w-14 h-14 rounded-xl bg-origen-crema/60 border border-border shrink-0 overflow-hidden flex items-center justify-center">
           {product.photo?.preview
             ? <img src={product.photo.preview} alt="" className="w-full h-full object-cover" />
             : <Camera className="w-6 h-6 text-muted-foreground/40" />
@@ -342,7 +342,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {isExpanded
             ? <ChevronUp className="w-4 h-4 text-muted-foreground" />
             : <ChevronDown className="w-4 h-4 text-muted-foreground" />
@@ -451,7 +451,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
             )}
             {!product.categoryId && productCategories.length > 0 && (
               <p className="text-xs text-feedback-warning-text flex items-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 Asigna una categoría al producto para continuar
               </p>
             )}
@@ -570,7 +570,7 @@ function ProductCard({ product, index, isExpanded, onToggle, onChange, onRemove,
 
             {!product.noAllergens && product.allergens.length === 0 && product.mayContain.length === 0 && (
               <p className="text-xs text-feedback-warning-text flex items-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 Indica los alérgenos o marca &quot;Sin alérgenos&quot; para continuar
               </p>
             )}
@@ -736,7 +736,7 @@ export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete
 
       {/* Aviso opcional */}
       <div className="p-4 bg-feedback-info-subtle border border-feedback-info/30 rounded-2xl flex items-start gap-3">
-        <Info className="w-5 h-5 text-feedback-info flex-shrink-0 mt-0.5" />
+        <Info className="w-5 h-5 text-feedback-info shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-feedback-info-text">Este paso es opcional</p>
           <p className="text-xs text-feedback-info-text/80 mt-0.5">
@@ -785,7 +785,7 @@ export function EnhancedStepProducts({ data, onChange, autoExpandFirstIncomplete
 
       {/* Trust badge */}
       <div className="flex items-start gap-2 p-3 bg-origen-crema/20 rounded-xl border border-border-subtle">
-        <Info className="w-4 h-4 text-hoja-tinta flex-shrink-0 mt-0.5" />
+        <Info className="w-4 h-4 text-hoja-tinta shrink-0 mt-0.5" />
         <p className="text-xs text-muted-foreground">
           La información de alérgenos es obligatoria por el{' '}
           <span className="font-medium">Reglamento UE 1169/2011</span>.

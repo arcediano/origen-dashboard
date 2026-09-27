@@ -60,7 +60,7 @@ export function NotificationToggleRow({
     >
       {/* ── Icono + texto (fila 1 — texto libre para wrappear) ── */}
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-lg bg-origen-pastel flex items-center justify-center flex-shrink-0 mt-0.5">
+        <div className="w-8 h-8 rounded-lg bg-origen-pastel flex items-center justify-center shrink-0 mt-0.5">
           <Icon className="w-4 h-4 text-origen-pino" aria-hidden="true" />
         </div>
         <div className="min-w-0">
@@ -82,7 +82,7 @@ export function NotificationToggleRow({
         <div className="mt-3 pl-11 flex items-center gap-5">
           {email && (
             <label className="flex items-center gap-2 cursor-pointer select-none">
-              <Mail className="w-3.5 h-3.5 text-text-subtle flex-shrink-0" aria-hidden="true" />
+              <Mail className="w-3.5 h-3.5 text-text-subtle shrink-0" aria-hidden="true" />
               <span className="text-xs text-text-subtle whitespace-nowrap">Email</span>
               <Toggle
                 checked={email.checked}
@@ -94,7 +94,7 @@ export function NotificationToggleRow({
           )}
           {push && (
             <label className="flex items-center gap-2 cursor-pointer select-none">
-              <Bell className="w-3.5 h-3.5 text-text-subtle flex-shrink-0" aria-hidden="true" />
+              <Bell className="w-3.5 h-3.5 text-text-subtle shrink-0" aria-hidden="true" />
               <span className="text-xs text-text-subtle whitespace-nowrap">Push</span>
               <Toggle
                 checked={push.checked}

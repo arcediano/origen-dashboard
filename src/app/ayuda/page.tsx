@@ -73,7 +73,7 @@ function FaqAccordionItem({ item }: { item: (typeof FAQ_ITEMS)[number] }) {
       >
         <span className="text-sm font-semibold text-origen-bosque">{item.question}</span>
         <ChevronDown
-          className={`w-4 h-4 text-text-subtle flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-text-subtle shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
       {open && (
@@ -140,7 +140,7 @@ export default function HelpCenterPage() {
 
           {/* Hero */}
           <div className="text-center mb-10 md:mb-12 space-y-3">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
+            <div className="inline-flex items-center gap-2 bg-linear-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
               <Sparkles className="w-4 h-4 text-hoja-tinta" />
               <span className="text-xs md:text-sm font-semibold text-origen-bosque">Centro de ayuda</span>
             </div>
@@ -195,14 +195,14 @@ export default function HelpCenterPage() {
                 href="/contacto"
                 className="inline-flex items-center gap-2 rounded-xl border border-border p-4 hover:border-origen-pradera hover:bg-origen-crema/30 transition-colors w-full sm:w-auto"
               >
-                <div className="w-10 h-10 rounded-full bg-origen-crema flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-origen-crema flex items-center justify-center shrink-0">
                   <Mail className="h-5 w-5 text-hoja-tinta" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-origen-bosque">Ir al formulario de contacto</p>
                   <p className="text-sm text-muted-foreground">Cuéntanos tu duda y te respondemos</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-hoja-tinta flex-shrink-0 ml-auto" />
+                <ChevronRight className="w-4 h-4 text-hoja-tinta shrink-0 ml-auto" />
               </Link>
             </CardContent>
           </Card>

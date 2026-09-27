@@ -53,7 +53,7 @@ export default function LoginPage() {
             <div className="hidden lg:block lg:col-span-6 space-y-8 lg:pr-8 xl:pr-12">
 
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
+              <div className="inline-flex items-center gap-2 bg-linear-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
                 <Sparkles className="w-4 h-4 text-hoja-tinta" />
                 <span className="text-xs md:text-sm font-semibold text-origen-bosque">
                   Espacio exclusivo para productores
@@ -97,7 +97,7 @@ export default function LoginPage() {
                     <div key={index} className="group">
                       <div className="bg-surface-alt rounded-xl p-4 border border-border hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-origen-hoja/50 transition-all duration-300 group-hover:border-origen-hoja">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-origen-pradera/15 flex items-center justify-center flex-shrink-0">
+                          <div className="w-10 h-10 rounded-lg bg-origen-pradera/15 flex items-center justify-center shrink-0">
                             <Icon className="w-5 h-5 text-hoja-tinta" />
                           </div>
                           <p className="text-xs font-medium text-origen-bosque leading-snug">{item.label}</p>

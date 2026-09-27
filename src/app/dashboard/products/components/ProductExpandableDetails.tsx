@@ -122,7 +122,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
       {/* Grid de métricas clave */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Ventas */}
-        <div className="p-4 bg-gradient-to-br from-origen-pradera/5 to-transparent rounded-xl border border-origen-pradera/10">
+        <div className="p-4 bg-linear-to-br from-origen-pradera/5 to-transparent rounded-xl border border-origen-pradera/10">
           <div className="flex items-center gap-2 mb-2">
             <ShoppingBag className="w-5 h-5 text-hoja-tinta" />
             <span className="text-xs font-medium text-muted-foreground">Ventas</span>
@@ -132,7 +132,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         </div>
 
         {/* Ingresos */}
-        <div className="p-4 bg-gradient-to-br from-origen-crema/40 to-transparent rounded-xl border border-origen-pradera/10">
+        <div className="p-4 bg-linear-to-br from-origen-crema/40 to-transparent rounded-xl border border-origen-pradera/10">
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-5 h-5 text-hoja-tinta" />
             <span className="text-xs font-medium text-muted-foreground">Ingresos</span>
@@ -142,7 +142,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         </div>
 
         {/* Vistas */}
-        <div className="p-4 bg-gradient-to-br from-origen-crema/20 to-transparent rounded-xl border border-border-subtle">
+        <div className="p-4 bg-linear-to-br from-origen-crema/20 to-transparent rounded-xl border border-border-subtle">
           <div className="flex items-center gap-2 mb-2">
             <Eye className="w-5 h-5 text-origen-bosque" />
             <span className="text-xs font-medium text-muted-foreground">Vistas (7 días)</span>
@@ -154,7 +154,7 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         </div>
 
         {/* Conversión */}
-        <div className="p-4 bg-gradient-to-br from-origen-hoja/5 to-transparent rounded-xl border border-origen-hoja/10">
+        <div className="p-4 bg-linear-to-br from-origen-hoja/5 to-transparent rounded-xl border border-origen-hoja/10">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-5 h-5 text-origen-hoja" />
             <span className="text-xs font-medium text-muted-foreground">Conversión</span>

@@ -151,7 +151,7 @@ export function MobileTopBar() {
               transition={{ duration: 0.2, ease: 'easeOut' }}
               className="flex items-center gap-2"
             >
-              <img src="/origen-icon.svg" alt="" width={28} height={28} className="h-7 w-7 flex-shrink-0" />
+              <img src="/origen-icon.svg" alt="" width={28} height={28} className="h-7 w-7 shrink-0" />
               <div className="min-w-0">
                 <span className="block text-[17px] font-semibold text-origen-bosque tracking-tight">
                   Origen.
@@ -174,7 +174,7 @@ export function MobileTopBar() {
               <motion.button
                 whileTap={{ scale: 0.82 }}
                 onClick={handleBackNavigation}
-                className="w-11 h-11 rounded-full flex items-center justify-center bg-surface-alt/80 hover:bg-origen-pradera/10 transition-colors text-origen-bosque border border-border-subtle flex-shrink-0"
+                className="w-11 h-11 rounded-full flex items-center justify-center bg-surface-alt/80 hover:bg-origen-pradera/10 transition-colors text-origen-bosque border border-border-subtle shrink-0"
                 type="button"
                 aria-label="Volver"
               >

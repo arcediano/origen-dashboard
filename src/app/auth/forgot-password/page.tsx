@@ -24,7 +24,7 @@ import {
 
 export default function RecuperarPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-origen-crema/30">
+    <div className="min-h-screen bg-linear-to-b from-white to-origen-crema/30">
       <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 lg:py-16 xl:py-20">
         {/* Logo mínimo — solo móvil */}
         <div className="flex justify-center pb-6 lg:hidden">
@@ -47,7 +47,7 @@ export default function RecuperarPage() {
             <div className="hidden lg:block lg:col-span-6 space-y-8 lg:pr-8 xl:pr-12">
 
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
+              <div className="inline-flex items-center gap-2 bg-linear-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
                 <ShieldCheck className="w-4 h-4 text-hoja-tinta" />
                 <span className="text-xs md:text-sm font-semibold text-origen-bosque">
                   Recuperación segura de cuenta
@@ -92,7 +92,7 @@ export default function RecuperarPage() {
                     },
                   ].map((item) => (
                     <div key={item.step} className="flex items-start gap-4 bg-surface-alt rounded-xl p-4 border border-border hover:border-origen-pradera transition-all hover:shadow-sm">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-origen-pradera/60 to-origen-hoja/60 flex items-center justify-center shadow-sm flex-shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-linear-to-br from-origen-pradera/60 to-origen-hoja/60 flex items-center justify-center shadow-sm shrink-0">
                         <span className="text-white text-sm font-bold">{item.step}</span>
                       </div>
                       <div>

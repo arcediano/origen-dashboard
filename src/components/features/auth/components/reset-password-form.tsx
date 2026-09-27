@@ -31,7 +31,7 @@ function SuccessState() {
       animate={{ opacity: 1, scale: 1 }}
       className="text-center space-y-6"
     >
-      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center border border-origen-pradera/20">
+      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-2xl bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center border border-origen-pradera/20">
         <CheckCircle2 className="w-8 h-8 md:w-10 md:h-10 text-hoja-tinta" />
       </div>
 
@@ -140,7 +140,7 @@ export function ResetPasswordForm() {
             >
               {/* Header */}
               <div className="text-center mb-6 md:mb-8">
-                <div className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 rounded-2xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
+                <div className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 rounded-2xl bg-linear-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
                   <KeyRound className="w-7 h-7 md:w-8 md:h-8 text-white" />
                 </div>
                 <h2 className="text-xl md:text-2xl font-bold text-origen-bosque mb-1">

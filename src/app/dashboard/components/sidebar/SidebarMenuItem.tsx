@@ -81,7 +81,7 @@ export function SidebarMenuItem({
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {/* Icono solo en primer nivel */}
             <Icon className={cn(
-              'w-5 h-5 flex-shrink-0 transition-colors',
+              'w-5 h-5 shrink-0 transition-colors',
               (isActive || hasActiveChild)
                 ? 'text-hoja-tinta'
                 : 'text-text-subtle group-hover:text-origen-pradera'
@@ -96,7 +96,7 @@ export function SidebarMenuItem({
             </span>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {badge && (
               <Badge variant="neutral" className="min-w-[1.2rem] h-5 text-xs px-1.5 py-0">
                 {badge > 99 ? '99+' : badge}
@@ -162,7 +162,7 @@ export function SidebarMenuItem({
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <Icon className={cn(
-          'w-5 h-5 flex-shrink-0 transition-colors',
+          'w-5 h-5 shrink-0 transition-colors',
           isActive ? 'text-hoja-tinta' : 'text-text-subtle group-hover:text-origen-pradera'
         )} aria-hidden="true" />
         <span className={cn(

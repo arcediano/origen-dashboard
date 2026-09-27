@@ -1386,7 +1386,7 @@ export function StepCertificationsAttributes({
         </Tabs>
 
         {/* ── Impacto en ventas ─────────────────────────────────────────────── */}
-        <div className="mt-6 p-4 bg-gradient-to-br from-origen-crema/30 to-white rounded-xl border border-origen-pradera/20">
+        <div className="mt-6 p-4 bg-linear-to-br from-origen-crema/30 to-white rounded-xl border border-origen-pradera/20">
           <div className="flex items-center gap-2 mb-1.5">
             <TrendingUp className="w-4 h-4 text-hoja-tinta" />
             <span className="text-xs font-semibold text-origen-bosque">Impacto en ventas</span>

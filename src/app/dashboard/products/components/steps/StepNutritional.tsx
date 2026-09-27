@@ -246,7 +246,7 @@ export function StepNutritional({
                 ))}
               </TabsList>
             </div>
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent sm:hidden" aria-hidden="true" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-white to-transparent sm:hidden" aria-hidden="true" />
           </div>
 
           {/* TAB 1: BÁSICOS */}
@@ -675,7 +675,7 @@ export function StepNutritional({
         </Tabs>
 
         {/* Badge de información */}
-        <div className="mt-6 flex items-center justify-center gap-2 p-3 bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5 rounded-lg border border-origen-pradera/20">
+        <div className="mt-6 flex items-center justify-center gap-2 p-3 bg-linear-to-br from-origen-pradera/5 to-origen-hoja/5 rounded-lg border border-origen-pradera/20">
           <Heart className="h-4 w-4 text-hoja-tinta" />
           <span className="text-xs text-muted-foreground">
             La información nutricional completa genera confianza en tus clientes

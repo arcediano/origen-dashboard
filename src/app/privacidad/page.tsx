@@ -113,7 +113,7 @@ export default function PrivacyPolicyPage() {
           {/* Cabecera */}
           <div className="mb-8 md:mb-10">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
+              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -131,7 +131,7 @@ export default function PrivacyPolicyPage() {
             {sections.map(section => (
               <div key={section.number} className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm">
                 <h2 className="text-base md:text-lg font-bold text-origen-bosque mb-3 pb-2 border-b border-border-subtle flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-hoja-tinta text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-hoja-tinta text-xs font-bold flex items-center justify-center shrink-0">
                     {section.number}
                   </span>
                   {section.title}
@@ -141,7 +141,7 @@ export default function PrivacyPolicyPage() {
                   <ul className="space-y-2">
                     {section.items.map((item, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <div className="w-4 h-4 rounded-full bg-origen-hoja/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-4 h-4 rounded-full bg-origen-hoja/10 flex items-center justify-center shrink-0 mt-0.5">
                           <CheckCircle className="w-2.5 h-2.5 text-origen-hoja" />
                         </div>
                         {item}

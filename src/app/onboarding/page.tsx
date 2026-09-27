@@ -1057,14 +1057,14 @@ export default function OnboardingPage() {
                           className={cn(
                             "absolute left-5 top-10 w-0.5 h-[calc(100%-1.5rem)]",
                             index < currentStep 
-                              ? "bg-gradient-to-b from-origen-pradera to-origen-pradera/40" 
+                              ? "bg-linear-to-b from-origen-pradera to-origen-pradera/40" 
                               : "bg-border"
                           )}
                         />
                       )}
                       
                       {/* Indicador del paso */}
-                      <div className="relative z-10 flex-shrink-0">
+                      <div className="relative z-10 shrink-0">
                         <div className={cn(
                           "w-10 h-10 rounded-full flex items-center justify-center transition-all",
                           isCompleted && "bg-origen-bosque text-white shadow-sm",

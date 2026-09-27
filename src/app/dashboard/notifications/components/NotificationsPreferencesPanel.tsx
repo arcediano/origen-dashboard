@@ -190,7 +190,7 @@ export function NotificationsPreferencesPanel() {
 
       {/* Nota de seguridad */}
       <div className="flex items-start gap-2 rounded-[16px] border border-origen-pradera/20 bg-origen-pastel/40 px-4 py-3">
-        <Bell className="w-3.5 h-3.5 text-hoja-tinta mt-0.5 flex-shrink-0" aria-hidden="true" />
+        <Bell className="w-3.5 h-3.5 text-hoja-tinta mt-0.5 shrink-0" aria-hidden="true" />
         <p className="text-xs text-text-subtle">
           Los eventos de seguridad (cambio de contraseña, cuenta suspendida) siempre se
           envían por email independientemente de esta configuración.

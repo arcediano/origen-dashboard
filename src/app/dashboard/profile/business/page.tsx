@@ -660,7 +660,7 @@ export default function BusinessInfoPage() {
 
           <div className="mb-6">
             <Card variant="elevated" className="overflow-hidden">
-              <div className="h-40 sm:h-48 bg-gradient-to-r from-origen-pradera to-origen-hoja relative">
+              <div className="h-40 sm:h-48 bg-linear-to-r from-origen-pradera to-origen-hoja relative">
                 {form.banner ? (
                   <img src={form.banner} alt="Banner" className="w-full h-full object-cover" />
                 ) : (
@@ -791,7 +791,7 @@ export default function BusinessInfoPage() {
               transition={{ duration: 0.3 }}
             >
               {/* Progress indicator */}
-              <Card className="border-origen-pradera/20 bg-gradient-to-r from-origen-pradera/5 to-transparent">
+              <Card className="border-origen-pradera/20 bg-linear-to-r from-origen-pradera/5 to-transparent">
                 <CardContent className="pt-6">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">

@@ -27,12 +27,12 @@ function formatPeriod(period: string): string {
 export function CommissionInvoiceCardSkeleton() {
   return (
     <div className="flex items-center gap-3.5 px-4 py-4 rounded-xl sm:rounded-2xl border border-border bg-surface-alt shadow-origen animate-pulse">
-      <div className="w-11 h-11 rounded-2xl bg-origen-pastel/60 flex-shrink-0" />
+      <div className="w-11 h-11 rounded-2xl bg-origen-pastel/60 shrink-0" />
       <div className="flex-1 min-w-0 space-y-2">
         <div className="h-3.5 bg-origen-pastel rounded-lg w-28" />
         <div className="h-3.5 bg-origen-pastel rounded-lg w-2/5" />
       </div>
-      <div className="flex flex-col items-end gap-2 flex-shrink-0">
+      <div className="flex flex-col items-end gap-2 shrink-0">
         <div className="h-4 bg-origen-pastel rounded-lg w-16" />
         <div className="h-4 bg-origen-pastel/60 rounded-full w-14" />
       </div>
@@ -55,7 +55,7 @@ export function CommissionInvoiceCard({ invoice, onDownload }: CommissionInvoice
         'px-4 py-4 flex items-center gap-3.5',
       )}
     >
-      <div className="w-11 h-11 rounded-2xl bg-origen-pastel flex items-center justify-center flex-shrink-0 shadow-subtle">
+      <div className="w-11 h-11 rounded-2xl bg-origen-pastel flex items-center justify-center shrink-0 shadow-subtle">
         <Receipt className="w-5 h-5 text-origen-pino" />
       </div>
 
@@ -72,7 +72,7 @@ export function CommissionInvoiceCard({ invoice, onDownload }: CommissionInvoice
         </p>
       </div>
 
-      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+      <div className="flex flex-col items-end gap-1.5 shrink-0">
         <span className="text-base font-bold text-origen-bosque tabular-nums">{invoice.total.toFixed(2)} €</span>
         <Button
           variant="ghost"

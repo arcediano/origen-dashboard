@@ -35,7 +35,7 @@ import type { Order, PaymentStatus, OrderStatus } from '@/types/order';
 export function OrderCardSkeleton() {
   return (
     <div className="flex items-center gap-3.5 px-4 py-4 rounded-xl sm:rounded-2xl border border-border bg-surface-alt shadow-origen animate-pulse">
-      <div className="w-11 h-11 rounded-2xl bg-origen-pastel/60 flex-shrink-0" />
+      <div className="w-11 h-11 rounded-2xl bg-origen-pastel/60 shrink-0" />
       <div className="flex-1 min-w-0 space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="h-3.5 bg-origen-pastel rounded-lg w-28" />
@@ -47,7 +47,7 @@ export function OrderCardSkeleton() {
           <div className="h-2.5 bg-origen-pastel/40 rounded-lg w-20" />
         </div>
       </div>
-      <div className="flex flex-col items-end gap-2 flex-shrink-0">
+      <div className="flex flex-col items-end gap-2 shrink-0">
         <div className="h-4 bg-origen-pastel rounded-lg w-16" />
         <div className="h-4 bg-origen-pastel/60 rounded-full w-14" />
       </div>
@@ -186,7 +186,7 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
           aria-label={`Pedido ${order.orderNumber}`}
         >
         {/* Icono del pedido */}
-        <div className="w-11 h-11 rounded-2xl bg-origen-pastel flex items-center justify-center flex-shrink-0 shadow-subtle">
+        <div className="w-11 h-11 rounded-2xl bg-origen-pastel flex items-center justify-center shrink-0 shadow-subtle">
           <ShoppingBag className="w-5 h-5 text-origen-pino" />
         </div>
 
@@ -197,7 +197,7 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
             <span className="text-sm font-bold text-origen-bosque truncate min-w-0">
               {order.orderNumber}
             </span>
-            <span className="flex-shrink-0">
+            <span className="shrink-0">
               <StatusBadge status={order.status} />
             </span>
           </div>
@@ -216,7 +216,7 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
         </div>
 
         {/* Importe + badge de pago */}
-        <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
           <span className="text-base font-bold text-origen-bosque tabular-nums">
             {order.total.toFixed(2)} €
           </span>

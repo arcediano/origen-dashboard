@@ -80,7 +80,7 @@ function SessionBanner() {
           : 'bg-feedback-danger-subtle border-red-200 text-red-700',
       )}
     >
-      <span className="flex-shrink-0 mt-0.5">{isInactivity ? '⏰' : '🔒'}</span>
+      <span className="shrink-0 mt-0.5">{isInactivity ? '⏰' : '🔒'}</span>
       <span>{decodeURIComponent(message)}</span>
     </div>
   );
@@ -274,7 +274,7 @@ export function SimpleLogin() {
             "w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 rounded-2xl flex items-center justify-center shadow-md",
             requiresTwoFactor
               ? 'bg-origen-bosque'
-              : 'bg-gradient-to-br from-origen-bosque to-origen-pino'
+              : 'bg-linear-to-br from-origen-bosque to-origen-pino'
           )}>
             {requiresTwoFactor ? (
               <Smartphone className="w-7 h-7 md:w-8 md:h-8 text-white" />
@@ -306,7 +306,7 @@ export function SimpleLogin() {
               exit={{ opacity: 0 }}
               className="mb-5 md:mb-6 p-3 bg-feedback-danger-subtle border border-red-200 rounded-lg flex items-start gap-2 text-red-600"
             >
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span className="text-xs">{errors.general || errors.twoFactor}</span>
             </motion.div>
           )}

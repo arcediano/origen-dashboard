@@ -309,7 +309,7 @@ export function StepProduction({
                 ))}
               </TabsList>
             </div>
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent sm:hidden" aria-hidden="true" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-white to-transparent sm:hidden" aria-hidden="true" />
           </div>
 
           {/* TAB HISTORIA */}
@@ -618,7 +618,7 @@ export function StepProduction({
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
-                          className="relative aspect-video bg-gradient-to-br from-origen-crema to-origen-pastel/30 rounded-lg border border-border overflow-hidden group"
+                          className="relative aspect-video bg-linear-to-br from-origen-crema to-origen-pastel/30 rounded-lg border border-border overflow-hidden group"
                         >
                           {video.thumbnail ? (
                             <img

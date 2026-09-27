@@ -312,10 +312,10 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
             onClick={handleAddZone}
             disabled={zoneType === 'named' ? (!zoneName.trim() || !zoneValue.trim()) : !zoneValue.trim()}
             variant="primary"
-            className="w-full sm:w-auto sm:flex-shrink-0 whitespace-nowrap"
+            className="w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
           >
             <span className="inline-flex items-center gap-1.5">
-              <Plus className="w-4 h-4 flex-shrink-0" />
+              <Plus className="w-4 h-4 shrink-0" />
               Añadir zona
             </span>
           </Button>
@@ -323,7 +323,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
 
         {zoneType === 'named' && (
           <p className="text-xs text-muted-foreground flex items-start gap-1">
-            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-hoja-tinta" />
+            <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-hoja-tinta" />
             <span>Asigna un nombre a la zona y los códigos postales que cubre. Ej: nombre <em>&quot;Cuenca&quot;</em>, CPs <em>16001, 160*</em></span>
           </p>
         )}
@@ -337,7 +337,7 @@ const ZoneSelector: React.FC<ZoneSelectorProps> = ({
 
         {(zoneType === 'postal' || zoneType === 'named') && !parseError && (
           <p className="text-xs text-muted-foreground flex items-start gap-1">
-            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-hoja-tinta" />
+            <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-hoja-tinta" />
             <span>
               <strong>Formatos CP:</strong> individual <code className="bg-surface px-1 rounded">28001</code>,
               comodín <code className="bg-surface px-1 rounded">280*</code>,
@@ -610,7 +610,7 @@ export function EnhancedStep4Capacity({
       ==================================================================== */}
       {detectingZone && (
         <div className="flex items-center gap-3 p-4 bg-origen-crema/40 border border-border rounded-2xl animate-pulse">
-          <Compass className="w-5 h-5 text-hoja-tinta flex-shrink-0" />
+          <Compass className="w-5 h-5 text-hoja-tinta shrink-0" />
           <p className="text-sm text-muted-foreground">Detectando disponibilidad logística para tu zona...</p>
         </div>
       )}
@@ -618,7 +618,7 @@ export function EnhancedStep4Capacity({
       {!detectingZone && data.logisticsLevel === 'centralized' && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-feedback-success-subtle border border-feedback-success/30 rounded-2xl">
           <div className="flex items-start gap-3 flex-1">
-            <Route className="w-5 h-5 text-feedback-success flex-shrink-0 mt-0.5" />
+            <Route className="w-5 h-5 text-feedback-success shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-feedback-success-text">Logística centralizada disponible</p>
               <p className="text-xs text-feedback-success-text/80 mt-0.5">
@@ -635,7 +635,7 @@ export function EnhancedStep4Capacity({
       {!detectingZone && data.logisticsLevel === 'transport' && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-feedback-info-subtle border border-feedback-info/30 rounded-2xl">
           <div className="flex items-start gap-3 flex-1">
-            <Truck className="w-5 h-5 text-feedback-info flex-shrink-0 mt-0.5" />
+            <Truck className="w-5 h-5 text-feedback-info shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-feedback-info-text">Transporte concertado disponible en tu zona</p>
               <p className="text-xs text-feedback-info-text/80 mt-0.5">
@@ -665,7 +665,7 @@ export function EnhancedStep4Capacity({
       {!detectingZone && data.logisticsLevel === 'own' && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-origen-crema/50 border border-border rounded-2xl">
           <div className="flex items-start gap-3 flex-1">
-            <Package className="w-5 h-5 text-origen-bosque flex-shrink-0 mt-0.5" />
+            <Package className="w-5 h-5 text-origen-bosque shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-origen-bosque">Gestión propia de envíos</p>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -689,7 +689,7 @@ export function EnhancedStep4Capacity({
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
 
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
             <Compass className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
@@ -714,10 +714,10 @@ export function EnhancedStep4Capacity({
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Route className="w-4 h-4 text-hoja-tinta flex-shrink-0" />
+                <Route className="w-4 h-4 text-hoja-tinta shrink-0" />
                 <p className="text-sm font-semibold text-origen-bosque">Delegar en Origen</p>
               </div>
-              {data.deliveryChoice === 'delegated' && <CheckCircle2 className="w-5 h-5 text-hoja-tinta flex-shrink-0" />}
+              {data.deliveryChoice === 'delegated' && <CheckCircle2 className="w-5 h-5 text-hoja-tinta shrink-0" />}
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
               {pickupRoute.available
@@ -738,10 +738,10 @@ export function EnhancedStep4Capacity({
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Package className="w-4 h-4 text-hoja-tinta flex-shrink-0" />
+                <Package className="w-4 h-4 text-hoja-tinta shrink-0" />
                 <p className="text-sm font-semibold text-origen-bosque">Gestionar por mi cuenta</p>
               </div>
-              {data.deliveryChoice === 'own' && <CheckCircle2 className="w-5 h-5 text-hoja-tinta flex-shrink-0" />}
+              {data.deliveryChoice === 'own' && <CheckCircle2 className="w-5 h-5 text-hoja-tinta shrink-0" />}
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
               Configuras tus propios métodos de envío, precios y zonas de entrega a continuación.
@@ -751,7 +751,7 @@ export function EnhancedStep4Capacity({
 
         {!hasDeliveryChoice && (
           <p className="text-xs text-feedback-danger-text mt-3 flex items-center gap-1.5">
-            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
             Elige cómo vas a gestionar el envío para poder continuar
           </p>
         )}
@@ -765,7 +765,7 @@ export function EnhancedStep4Capacity({
           
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
                 <Truck className="w-5 h-5 text-hoja-tinta" />
               </div>
               <div>
@@ -795,7 +795,7 @@ export function EnhancedStep4Capacity({
                   className="rounded-xl border-2 border-border bg-surface-alt p-4 transition-all hover:border-origen-pradera/50"
                 >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                    <div className="w-9 h-9 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                    <div className="w-9 h-9 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
                       <Icon className="w-5 h-5 text-hoja-tinta" />
                     </div>
                     
@@ -864,7 +864,7 @@ export function EnhancedStep4Capacity({
                           </div>
                           {isDeliveryOptionIncomplete(option) && (
                             <p className="text-xs text-feedback-danger-text flex items-center gap-1">
-                              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                               Completa nombre, descripción, precio y tiempo estimado
                             </p>
                           )}
@@ -935,7 +935,7 @@ export function EnhancedStep4Capacity({
                 Define cómo vas a entregar tus pedidos: precio, tiempo estimado y descripción.
               </p>
               <p className="text-xs text-feedback-danger-text flex items-center justify-center gap-1.5">
-                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 Añade al menos un método para poder continuar
               </p>
             </div>
@@ -949,7 +949,7 @@ export function EnhancedStep4Capacity({
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
             <MapPin className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
@@ -995,7 +995,7 @@ export function EnhancedStep4Capacity({
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
             <Euro className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
@@ -1033,7 +1033,7 @@ export function EnhancedStep4Capacity({
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
             <Recycle className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>

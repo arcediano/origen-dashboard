@@ -67,7 +67,7 @@ export function CreateProductProgress({
   const [isExpanded, setIsExpanded] = React.useState(false);
 
   return (
-    <div className={cn('sticky top-16 z-20 bg-gradient-to-b from-origen-crema/30 to-transparent pt-2 pb-4 -mx-4 sm:-mx-6 px-4 sm:px-6', className)}>
+    <div className={cn('sticky top-16 z-20 bg-linear-to-b from-origen-crema/30 to-transparent pt-2 pb-4 -mx-4 sm:-mx-6 px-4 sm:px-6', className)}>
       <Card variant="elevated" className="p-3 sm:p-5">
         {/* Cabecera con progreso */}
         <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -105,9 +105,9 @@ export function CreateProductProgress({
             Paso {currentIndex + 1} de {FORM_STEPS.length} — {currentStep.label}
           </span>
           {isExpanded ? (
-            <ChevronUp className="w-4 h-4 text-text-subtle flex-shrink-0" aria-hidden="true" />
+            <ChevronUp className="w-4 h-4 text-text-subtle shrink-0" aria-hidden="true" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-text-subtle flex-shrink-0" aria-hidden="true" />
+            <ChevronDown className="w-4 h-4 text-text-subtle shrink-0" aria-hidden="true" />
           )}
         </button>
 
@@ -130,7 +130,7 @@ export function CreateProductProgress({
                   key={step.id}
                   onClick={() => isClickable && onTabChange(step.id as FormStepId)}
                   className={cn(
-                    "group/step relative flex flex-col items-center gap-1 sm:gap-2 transition-all duration-300 flex-shrink-0 min-w-[40px] sm:min-w-[60px] snap-start",
+                    "group/step relative flex flex-col items-center gap-1 sm:gap-2 transition-all duration-300 shrink-0 min-w-[40px] sm:min-w-[60px] snap-start",
                     isClickable ? "cursor-pointer" : "cursor-not-allowed opacity-40"
                   )}
                   disabled={!isClickable}
@@ -175,7 +175,7 @@ export function CreateProductProgress({
               );
             })}
           </div>
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent sm:hidden" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-white to-transparent sm:hidden" aria-hidden="true" />
         </div>
       </Card>
     </div>

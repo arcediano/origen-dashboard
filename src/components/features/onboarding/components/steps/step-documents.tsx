@@ -185,7 +185,7 @@ export function EnhancedStep5Documents({
           />
         </div>
         <div className="flex items-center gap-2 mt-3 p-2.5 bg-feedback-warning-subtle rounded-lg border border-feedback-warning/30">
-          <Clock className="w-3.5 h-3.5 text-feedback-warning flex-shrink-0" />
+          <Clock className="w-3.5 h-3.5 text-feedback-warning shrink-0" />
           <p className="text-xs text-feedback-warning-text font-medium">
             Verificación: 24-48h hábiles tras recibir los documentos
           </p>
@@ -198,7 +198,7 @@ export function EnhancedStep5Documents({
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
             <FileText className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
@@ -214,7 +214,7 @@ export function EnhancedStep5Documents({
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Shield className="w-4 h-4 text-hoja-tinta flex-shrink-0" />
+                  <Shield className="w-4 h-4 text-hoja-tinta shrink-0" />
                   <h3 className="font-medium text-origen-bosque">CIF / NIF</h3>
                   <span className="text-xs text-feedback-danger-text bg-feedback-danger-subtle px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
                   {data.cif?.status === 'verified' && (
@@ -229,7 +229,7 @@ export function EnhancedStep5Documents({
             {data.cif ? (
               <div className="flex items-center justify-between p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
                     <FileText className="w-5 h-5 text-hoja-tinta" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -237,7 +237,7 @@ export function EnhancedStep5Documents({
                     <p className="text-xs text-muted-foreground">{(data.cif.size / 1024).toFixed(1)} KB · Pendiente de verificación</p>
                   </div>
                 </div>
-                <Button type="button" variant="ghost" size="icon" onClick={() => handleDeleteRequired('cif')} className="h-11 w-11 text-text-subtle hover:text-foreground flex-shrink-0" aria-label="Eliminar documento CIF/NIF">
+                <Button type="button" variant="ghost" size="icon" onClick={() => handleDeleteRequired('cif')} className="h-11 w-11 text-text-subtle hover:text-foreground shrink-0" aria-label="Eliminar documento CIF/NIF">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
@@ -264,7 +264,7 @@ export function EnhancedStep5Documents({
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Shield className="w-4 h-4 text-hoja-tinta flex-shrink-0" />
+                  <Shield className="w-4 h-4 text-hoja-tinta shrink-0" />
                   <h3 className="font-medium text-origen-bosque">Seguro RC</h3>
                   <span className="text-xs text-feedback-danger-text bg-feedback-danger-subtle px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
                   {data.seguroRC?.status === 'verified' && (
@@ -279,7 +279,7 @@ export function EnhancedStep5Documents({
             {data.seguroRC ? (
               <div className="flex items-center justify-between p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
                     <FileText className="w-5 h-5 text-hoja-tinta" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -287,7 +287,7 @@ export function EnhancedStep5Documents({
                     <p className="text-xs text-muted-foreground">{(data.seguroRC.size / 1024).toFixed(1)} KB · Pendiente de verificación</p>
                   </div>
                 </div>
-                <Button type="button" variant="ghost" size="icon" onClick={() => handleDeleteRequired('seguroRC')} className="h-11 w-11 text-text-subtle hover:text-foreground flex-shrink-0" aria-label="Eliminar documento de seguro RC">
+                <Button type="button" variant="ghost" size="icon" onClick={() => handleDeleteRequired('seguroRC')} className="h-11 w-11 text-text-subtle hover:text-foreground shrink-0" aria-label="Eliminar documento de seguro RC">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
@@ -314,7 +314,7 @@ export function EnhancedStep5Documents({
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Shield className="w-4 h-4 text-hoja-tinta flex-shrink-0" />
+                  <Shield className="w-4 h-4 text-hoja-tinta shrink-0" />
                   <h3 className="font-medium text-origen-bosque">Manipulador de alimentos</h3>
                   <span className="text-xs text-feedback-danger-text bg-feedback-danger-subtle px-2 py-0.5 rounded-full font-medium">Obligatorio</span>
                   {data.manipuladorAlimentos?.status === 'verified' && (
@@ -329,7 +329,7 @@ export function EnhancedStep5Documents({
             {data.manipuladorAlimentos ? (
               <div className="flex items-center justify-between p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-origen-pradera/10 flex items-center justify-center shrink-0">
                     <FileText className="w-5 h-5 text-hoja-tinta" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -337,7 +337,7 @@ export function EnhancedStep5Documents({
                     <p className="text-xs text-muted-foreground">{(data.manipuladorAlimentos.size / 1024).toFixed(1)} KB · Pendiente de verificación</p>
                   </div>
                 </div>
-                <Button type="button" variant="ghost" size="icon" onClick={() => handleDeleteRequired('manipuladorAlimentos')} className="h-11 w-11 text-text-subtle hover:text-foreground flex-shrink-0" aria-label="Eliminar documento de manipulador de alimentos">
+                <Button type="button" variant="ghost" size="icon" onClick={() => handleDeleteRequired('manipuladorAlimentos')} className="h-11 w-11 text-text-subtle hover:text-foreground shrink-0" aria-label="Eliminar documento de manipulador de alimentos">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
@@ -368,7 +368,7 @@ export function EnhancedStep5Documents({
           <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
           
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
               <Award className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
