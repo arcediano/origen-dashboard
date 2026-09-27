@@ -328,7 +328,7 @@ export function FileUpload({
         {/* Contenido del área de subida */}
         <div className="text-center">
           {/* Icono de subida con gradiente de marca */}
-          <div className="mx-auto mb-4 w-16 h-16 rounded-xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
+          <div className="mx-auto mb-4 w-16 h-16 rounded-xl bg-linear-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
             <Upload className="w-8 h-8 text-white" />
           </div>
 
@@ -388,7 +388,7 @@ export function FileUpload({
             >
               {/* Preview o icono */}
               {file.preview && showPreview ? (
-                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-surface">
+                <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface">
                   <img
                     src={file.preview}
                     alt={file.name}
@@ -396,7 +396,7 @@ export function FileUpload({
                   />
                 </div>
               ) : (
-                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center flex-shrink-0">
+                <div className="w-16 h-16 rounded-lg bg-linear-to-br from-origen-crema to-origen-pastel flex items-center justify-center shrink-0">
                   {isImageFile(file.type) ? (
                     <ImageIcon className="w-8 h-8 text-origen-bosque" />
                   ) : (

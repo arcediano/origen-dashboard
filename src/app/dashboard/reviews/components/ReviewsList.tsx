@@ -73,7 +73,7 @@ function ReviewsListSkeleton({ count = 5 }: { count?: number }) {
         >
           {/* Cabecera */}
           <div className="flex items-start gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-origen-pastel/60 flex-shrink-0" />
+            <div className="w-10 h-10 rounded-full bg-origen-pastel/60 shrink-0" />
             <div className="flex-1 space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="h-4 bg-origen-pastel rounded-lg w-1/4" />
@@ -182,7 +182,7 @@ export function ReviewsList({
               {/* ── Cabecera: avatar + autor + meta ── */}
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-start gap-3 min-w-0">
-                  <Avatar className="w-9 h-9 flex-shrink-0">
+                  <Avatar className="w-9 h-9 shrink-0">
                     <AvatarImage src={review.authorAvatar} alt={review.authorName} />
                     <AvatarFallback className="bg-origen-pastel text-origen-bosque text-sm font-semibold">
                       {review.authorName.charAt(0).toUpperCase()}
@@ -211,7 +211,7 @@ export function ReviewsList({
                 </div>
 
                 {/* Badge estado — esquina superior derecha */}
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <Badge variant={statusCfg.variant} size="sm" icon={<StatusIcon className="w-3 h-3" />}>
                     {statusCfg.label}
                   </Badge>
@@ -258,7 +258,7 @@ export function ReviewsList({
                   {review.images.map((imgSrc, idx) => (
                     <div
                       key={idx}
-                      className="w-16 h-16 rounded-lg bg-origen-crema/50 border border-border-subtle flex items-center justify-center overflow-hidden flex-shrink-0"
+                      className="w-16 h-16 rounded-lg bg-origen-crema/50 border border-border-subtle flex items-center justify-center overflow-hidden shrink-0"
                       aria-label={`Imagen ${idx + 1} de la reseña`}
                     >
                       {imgSrc.startsWith('http') ? (
@@ -275,7 +275,7 @@ export function ReviewsList({
               {review.response && (
                 <div className="mt-3 p-3 bg-origen-nube border border-origen-pradera/15 rounded-xl">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <div className="w-5 h-5 rounded-full bg-origen-pastel flex items-center justify-center flex-shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-origen-pastel flex items-center justify-center shrink-0">
                       <MessageCircle className="w-3 h-3 text-origen-pino" aria-hidden />
                     </div>
                     <span className="text-xs font-semibold text-origen-bosque">

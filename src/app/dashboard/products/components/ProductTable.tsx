@@ -36,7 +36,7 @@ export interface ProductTableProps {
 function ProductCell({ item }: { item: Product }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-origen-crema to-origen-crema/30 overflow-hidden shrink-0">
+      <div className="w-8 h-8 rounded-lg bg-linear-to-br from-origen-crema to-origen-crema/30 overflow-hidden shrink-0">
         <ProductImage src={item.mainImage?.url} alt={item.mainImage?.alt || item.name} />
       </div>
       <div className="min-w-0">

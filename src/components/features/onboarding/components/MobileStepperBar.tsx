@@ -46,7 +46,7 @@ export function MobileStepperBar({ steps, currentStep, onStepClick }: MobileStep
           const dotContent = (
             <div
               className={cn(
-                'rounded-full flex items-center justify-center transition-all duration-300 flex-shrink-0',
+                'rounded-full flex items-center justify-center transition-all duration-300 shrink-0',
                 isCompleted && 'w-11 h-11 bg-origen-hoja',
                 isActive && 'w-11 h-11 bg-origen-pradera ring-2 ring-origen-pradera/30 ring-offset-2 ring-offset-surface-alt',
                 !isCompleted && !isActive && 'w-2.5 h-2.5 bg-border',

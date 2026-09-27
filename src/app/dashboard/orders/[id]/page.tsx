@@ -598,13 +598,13 @@ export default function OrderDetailPage() {
                 <div className="space-y-1.5">
                   {order.customerEmail && (
                     <a href={`mailto:${order.customerEmail}`} className="flex items-center gap-2 text-xs text-text-subtle hover:text-origen-pradera transition-colors">
-                      <Mail className="w-3.5 h-3.5 flex-shrink-0 text-hoja-tinta" />
+                      <Mail className="w-3.5 h-3.5 shrink-0 text-hoja-tinta" />
                       {order.customerEmail}
                     </a>
                   )}
                   {order.customerPhone && (
                     <a href={`tel:${order.customerPhone}`} className="flex items-center gap-2 text-xs text-text-subtle hover:text-origen-pradera transition-colors">
-                      <Phone className="w-3.5 h-3.5 flex-shrink-0 text-hoja-tinta" />
+                      <Phone className="w-3.5 h-3.5 shrink-0 text-hoja-tinta" />
                       {order.customerPhone}
                     </a>
                   )}
@@ -755,7 +755,7 @@ export default function OrderDetailPage() {
                 <div className="divide-y divide-border-subtle">
                   {order.items.map((item) => (
                     <div key={item.id} className="flex items-center gap-3 px-5 py-4">
-                      <div className="w-14 h-14 rounded-2xl bg-origen-crema/60 flex-shrink-0 border border-border-subtle overflow-hidden">
+                      <div className="w-14 h-14 rounded-2xl bg-origen-crema/60 shrink-0 border border-border-subtle overflow-hidden">
                         <ProductImage
                           src={item.productImage}
                           alt={item.productName}
@@ -782,7 +782,7 @@ export default function OrderDetailPage() {
                         )}
                       </div>
                       {/* Precio */}
-                      <p className="text-sm font-bold text-foreground flex-shrink-0 tabular-nums">{formatCurrency(item.totalPrice)}</p>
+                      <p className="text-sm font-bold text-foreground shrink-0 tabular-nums">{formatCurrency(item.totalPrice)}</p>
                     </div>
                   ))}
                 </div>
@@ -829,7 +829,7 @@ export default function OrderDetailPage() {
                     íntegro a este importe; la comisión de Origen se
                     descuenta solo de los productos, nunca del envío. */}
                 {order.sellerNetAmount != null && (
-                  <div className="mx-5 mb-4 rounded-2xl border border-origen-pradera bg-gradient-to-b from-white to-origen-crema px-4 py-3.5">
+                  <div className="mx-5 mb-4 rounded-2xl border border-origen-pradera bg-linear-to-b from-white to-origen-crema px-4 py-3.5">
                     <div className="flex items-center justify-between gap-3">
                       <span className="flex items-center gap-2 text-xs font-semibold text-text-subtle">
                         <Wallet className="w-3.5 h-3.5 text-hoja-tinta" aria-hidden="true" />
@@ -870,10 +870,10 @@ export default function OrderDetailPage() {
                           const isLast = idx === timelineAsc.length - 1;
                           return (
                             <div key={event.id} className="flex items-start gap-3">
-                              <div className="relative flex flex-col items-center flex-shrink-0">
+                              <div className="relative flex flex-col items-center shrink-0">
                                 <div
                                   className={cn(
-                                    'w-3 h-3 rounded-full mt-0.5 flex-shrink-0',
+                                    'w-3 h-3 rounded-full mt-0.5 shrink-0',
                                     isLast ? 'bg-origen-bosque ring-4 ring-origen-bosque/15' : 'bg-origen-pradera/40'
                                   )}
                                 />

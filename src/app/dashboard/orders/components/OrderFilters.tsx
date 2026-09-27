@@ -169,7 +169,7 @@ export function OrderFilters({
             aria-haspopup="dialog"
             aria-label={sortLabel ? `Ordenar (${sortLabel})` : 'Ordenar'}
             className={cn(
-              'relative flex items-center gap-1.5 h-10 w-10 justify-center px-0 sm:w-auto sm:justify-start sm:px-3.5 rounded-xl border text-sm font-medium transition-colors flex-shrink-0',
+              'relative flex items-center gap-1.5 h-10 w-10 justify-center px-0 sm:w-auto sm:justify-start sm:px-3.5 rounded-xl border text-sm font-medium transition-colors shrink-0',
               sortBy !== 'newest'
                 ? 'bg-origen-bosque border-origen-bosque text-white'
                 : 'bg-surface-alt border-border text-origen-bosque',
@@ -184,7 +184,7 @@ export function OrderFilters({
       {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
       {activeChips.length > 0 && (
         <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap shrink-0">
             Activos:
           </span>
           <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
@@ -226,7 +226,7 @@ export function OrderFilters({
                 )}
               >
                 <span>{opt.label}</span>
-                {active && <Check className="w-4 h-4 text-origen-bosque flex-shrink-0" />}
+                {active && <Check className="w-4 h-4 text-origen-bosque shrink-0" />}
               </button>
             );
           })}

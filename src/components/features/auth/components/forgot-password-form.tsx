@@ -37,7 +37,7 @@ function SuccessState({ email }: { email: string }) {
       animate={{ opacity: 1, scale: 1 }}
       className="text-center space-y-6"
     >
-      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-2xl bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center border border-origen-pradera/20">
+      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-2xl bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center border border-origen-pradera/20">
         <CheckCircle2 className="w-8 h-8 md:w-10 md:h-10 text-hoja-tinta" />
       </div>
 
@@ -53,15 +53,15 @@ function SuccessState({ email }: { email: string }) {
         <p className="text-xs font-semibold text-origen-bosque">¿No ves el email?</p>
         <ul className="text-xs text-muted-foreground space-y-1">
           <li className="flex items-center gap-1.5">
-            <span className="w-1 h-1 rounded-full bg-origen-pradera flex-shrink-0" />
+            <span className="w-1 h-1 rounded-full bg-origen-pradera shrink-0" />
             Revisa la carpeta de spam o correo no deseado
           </li>
           <li className="flex items-center gap-1.5">
-            <span className="w-1 h-1 rounded-full bg-origen-pradera flex-shrink-0" />
+            <span className="w-1 h-1 rounded-full bg-origen-pradera shrink-0" />
             El enlace expira en 30 minutos
           </li>
           <li className="flex items-center gap-1.5">
-            <span className="w-1 h-1 rounded-full bg-origen-pradera flex-shrink-0" />
+            <span className="w-1 h-1 rounded-full bg-origen-pradera shrink-0" />
             Comprueba que el email introducido es correcto
           </li>
         </ul>
@@ -134,7 +134,7 @@ export function SimpleForgotPassword() {
             >
               {/* Header */}
               <div className="text-center mb-6 md:mb-8">
-                <div className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 rounded-2xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
+                <div className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 rounded-2xl bg-linear-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
                   <Lock className="w-7 h-7 md:w-8 md:h-8 text-white" />
                 </div>
                 <h2 className="text-xl md:text-2xl font-bold text-origen-bosque mb-1">

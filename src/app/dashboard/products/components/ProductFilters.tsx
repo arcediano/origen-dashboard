@@ -173,7 +173,7 @@ export function ProductFilters({
 
   // ── Botón "Ordenar" — separado de "Filtros", su propio bottom sheet ─────────
   const sortButton = (
-    <div className="relative flex-shrink-0">
+    <div className="relative shrink-0">
       <button
         type="button"
         onClick={() => setSortOpen(true)}
@@ -195,7 +195,7 @@ export function ProductFilters({
   // ── Toggle de vista — solo tiene efecto en escritorio (≥lg); en móvil/
   // tablet el listado siempre usa ProductMobileList sin importar viewMode ──
   const viewModeToggle = (
-    <div className="hidden lg:flex items-center gap-0.5 border border-border rounded-xl p-0.5 bg-surface-alt h-9 flex-shrink-0">
+    <div className="hidden lg:flex items-center gap-0.5 border border-border rounded-xl p-0.5 bg-surface-alt h-9 shrink-0">
       <button
         onClick={() => onViewModeChange('list')}
         className={cn(
@@ -251,7 +251,7 @@ export function ProductFilters({
       {/* ── Chips de filtros activos — solo cuando hay filtros activos ───────── */}
       {activeChips.length > 0 && (
         <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap shrink-0">
             Activos:
           </span>
           <ActiveFilterChips chips={activeChips} onClearAll={onClearFilters} />
@@ -294,7 +294,7 @@ export function ProductFilters({
                 )}
               >
                 <span>{opt.label}</span>
-                {active && <Check className="w-4 h-4 text-origen-bosque flex-shrink-0" />}
+                {active && <Check className="w-4 h-4 text-origen-bosque shrink-0" />}
               </button>
             );
           })}

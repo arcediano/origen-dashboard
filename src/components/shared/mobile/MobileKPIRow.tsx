@@ -44,7 +44,7 @@ const ACCENT_MAP: Record<StatCardAccent, { icon: string; bg: string; border: str
 
 function KpiSkeleton() {
   return (
-    <div className="flex-shrink-0 w-[130px] p-3 rounded-xl border border-border-subtle bg-surface-alt animate-pulse">
+    <div className="shrink-0 w-[130px] p-3 rounded-xl border border-border-subtle bg-surface-alt animate-pulse">
       <div className="flex items-center gap-1.5 mb-2">
         <div className="w-6 h-6 rounded-lg bg-origen-pastel" />
         <div className="w-14 h-2.5 rounded bg-origen-pastel" />
@@ -93,7 +93,7 @@ export function MobileKPIRow({
           <div
             key={idx}
             className={cn(
-              'flex-shrink-0 w-[130px] p-3 rounded-xl bg-gradient-to-br',
+              'shrink-0 w-[130px] p-3 rounded-xl bg-linear-to-br',
               styles.bg,
               'border',
               styles.border,
@@ -101,7 +101,7 @@ export function MobileKPIRow({
           >
             {/* Icono + etiqueta */}
             <div className="flex items-center gap-1.5 mb-2">
-              <div className={cn('w-6 h-6 rounded-lg bg-white/60 flex items-center justify-center flex-shrink-0')}>
+              <div className={cn('w-6 h-6 rounded-lg bg-white/60 flex items-center justify-center shrink-0')}>
                 <Icon className={cn('w-3.5 h-3.5', styles.icon)} />
               </div>
               <span className="text-[11px] font-medium text-text-subtle truncate leading-tight">

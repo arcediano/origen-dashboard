@@ -238,7 +238,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
       {/* Spinner overlay — centrado en pantalla, no dismissible */}
       <AnimatePresence>
         {submitStatus === 'submitting' && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-9999 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -252,7 +252,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="relative w-full max-w-xs bg-surface-alt rounded-2xl shadow-2xl border border-border-subtle overflow-hidden"
             >
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-origen-bosque via-origen-pino to-origen-hoja" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-origen-bosque via-origen-pino to-origen-hoja" />
               <div className="p-8 flex flex-col items-center text-center gap-4">
                 <div className="relative w-16 h-16 flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full bg-origen-hoja/10 animate-ping" />
@@ -275,7 +275,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
       {/* Error modal — centrado en pantalla */}
       <AnimatePresence>
         {submitStatus === 'error' && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-9999 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -290,7 +290,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="relative w-full max-w-sm bg-surface-alt rounded-2xl shadow-2xl border border-border-subtle overflow-hidden"
             >
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-feedback-danger to-red-400" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-feedback-danger to-red-400" />
               <div className="p-6 flex flex-col items-center text-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-feedback-danger-subtle flex items-center justify-center">
                   <AlertCircle className="w-7 h-7 text-feedback-danger" />

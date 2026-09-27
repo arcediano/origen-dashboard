@@ -451,7 +451,7 @@ export default function PaymentsPage() {
                         onClick={() => router.push(`/dashboard/orders/${payout.orderId}`)}
                         className={`rounded-2xl border p-3.5 text-left transition-colors hover:border-origen-pradera/50 min-h-11 ${
                           index === 0
-                            ? 'border-origen-pradera bg-gradient-to-b from-white to-origen-crema'
+                            ? 'border-origen-pradera bg-linear-to-b from-white to-origen-crema'
                             : 'border-border-subtle bg-surface-alt'
                         }`}
                       >

@@ -53,7 +53,7 @@ export function StepValidationPanel({
           <ul className="space-y-1 text-xs">
             {messages.map((message) => (
               <li key={message} className="flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current/70" />
+                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-current/70" />
                 <span>{message}</span>
               </li>
             ))}

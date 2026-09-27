@@ -32,7 +32,7 @@ export function QuickActionCard({
     <Link href={href} className="block group relative">
       <div className={cn(
         "absolute inset-0 rounded-2xl transition-transform duration-300",
-        "bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5",
+        "bg-linear-to-br from-origen-pradera/5 to-origen-hoja/5",
         "group-hover:scale-[1.02]"
       )}></div>
       
@@ -44,7 +44,7 @@ export function QuickActionCard({
       )}>
         <div className="flex items-center gap-3 sm:gap-4">
           <div className={cn(
-            "flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br shadow-subtle sm:h-14 sm:w-14 sm:rounded-xl",
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br shadow-subtle sm:h-14 sm:w-14 sm:rounded-xl",
             gradient
           )}>
             <Icon className="h-5 w-5 text-white sm:h-7 sm:w-7" />

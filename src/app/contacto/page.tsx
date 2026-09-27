@@ -64,7 +64,7 @@ export default function ContactPage() {
 
           {/* Hero compacto — solo móvil */}
           <div className="lg:hidden text-center mb-8 space-y-3">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
+            <div className="inline-flex items-center gap-2 bg-linear-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
               <Sparkles className="w-4 h-4 text-hoja-tinta" />
               <span className="text-xs font-semibold text-origen-bosque">Estamos aquí para ayudarte</span>
             </div>
@@ -86,7 +86,7 @@ export default function ContactPage() {
             <div className="hidden lg:block lg:col-span-6 space-y-8 lg:pr-8 xl:pr-12">
 
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
+              <div className="inline-flex items-center gap-2 bg-linear-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
                 <MessageCircle className="w-4 h-4 text-hoja-tinta" />
                 <span className="text-xs md:text-sm font-semibold text-origen-bosque">
                   Estamos aquí para ayudarte

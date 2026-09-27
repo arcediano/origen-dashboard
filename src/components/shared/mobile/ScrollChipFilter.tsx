@@ -78,7 +78,7 @@ export function ScrollChipFilter({
     return {
       id: chip.value,
       label,
-      icon: chip.icon ? <chip.icon className="h-3 w-3 flex-shrink-0" /> : undefined,
+      icon: chip.icon ? <chip.icon className="h-3 w-3 shrink-0" /> : undefined,
     };
   });
 

@@ -62,7 +62,7 @@ export function ContactForm() {
 
       {/* Cabecera */}
       <div className="flex items-center gap-4 mb-6 md:mb-8">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md flex-shrink-0">
+        <div className="w-12 h-12 rounded-xl bg-linear-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md shrink-0">
           <Send className="w-6 h-6 text-white" />
         </div>
         <div>
@@ -80,7 +80,7 @@ export function ContactForm() {
             exit={{ opacity: 0 }}
             className="mb-5 p-3 bg-feedback-danger-subtle border border-red-200 rounded-lg flex items-start gap-2 text-red-600"
           >
-            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span className="text-xs">{errors.general}</span>
           </motion.div>
         )}
@@ -199,7 +199,7 @@ export function ContactForm() {
               aria-checked={form.privacy}
               onClick={() => { setForm(p => ({ ...p, privacy: !p.privacy })); clearError('privacy'); }}
               className={cn(
-                "mt-0.5 w-4 h-4 rounded border transition-all flex-shrink-0",
+                "mt-0.5 w-4 h-4 rounded border transition-all shrink-0",
                 "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
                 form.privacy
                   ? "bg-origen-bosque border-origen-bosque"
@@ -264,7 +264,7 @@ export function ContactForm() {
               exit={{ opacity: 0 }}
               className="flex items-start gap-3 p-4 bg-origen-crema/50 border border-origen-pradera/30 rounded-xl"
             >
-              <div className="w-8 h-8 rounded-full bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-origen-pradera/10 flex items-center justify-center shrink-0">
                 <CheckCircle className="w-4 h-4 text-hoja-tinta" />
               </div>
               <div>

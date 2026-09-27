@@ -102,7 +102,7 @@ function SectionAccordion({
         className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-surface-alt/50 transition-colors"
         aria-expanded={open}
       >
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-origen-pradera/15 to-origen-hoja/15 flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-linear-to-br from-origen-pradera/15 to-origen-hoja/15 flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-hoja-tinta" />
         </div>
         <span className="flex-1 text-sm font-semibold text-origen-bosque">{title}</span>
@@ -794,7 +794,7 @@ export default function ProductoDetallePage() {
 
                 {/* ── Tarjeta del producto (hero) — estilo onboarding ── */}
                 <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
-                  <div className="rounded-[28px] border border-origen-pradera/25 bg-gradient-to-br from-origen-crema via-surface-alt to-surface p-4 sm:p-5 shadow-sm">
+                  <div className="rounded-[28px] border border-origen-pradera/25 bg-linear-to-br from-origen-crema via-surface-alt to-surface p-4 sm:p-5 shadow-sm">
 
                     {/* Imagen + nombre + KPIs */}
                     <div className="flex items-start gap-4 mb-4">

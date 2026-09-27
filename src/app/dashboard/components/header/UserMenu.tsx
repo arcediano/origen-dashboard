@@ -188,13 +188,13 @@ export function UserMenu({
                 </p>
                 {readinessReport.canSubmitProducts ? (
                   <div className="flex items-center gap-2 text-feedback-success-text">
-                    <Eye className="w-3.5 h-3.5 flex-shrink-0" />
+                    <Eye className="w-3.5 h-3.5 shrink-0" />
                     <span className="text-xs font-medium">Visible — productos publicados</span>
                   </div>
                 ) : (
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 text-feedback-danger-text">
-                      <EyeOff className="w-3.5 h-3.5 flex-shrink-0" />
+                      <EyeOff className="w-3.5 h-3.5 shrink-0" />
                       <span className="text-xs font-medium">Perfil no visible en el marketplace</span>
                     </div>
                     {(() => {

@@ -625,7 +625,7 @@ export default function CertificationsPage() {
                     >
                       <div className="flex flex-col gap-4 h-full">
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                          <div className="w-12 h-12 rounded-xl bg-origen-pradera/10 flex items-center justify-center shrink-0">
                             <FileBadge className="w-6 h-6 text-hoja-tinta" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -800,7 +800,7 @@ export default function CertificationsPage() {
                     >
                       <div className="flex flex-col gap-4 h-full">
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-origen-pradera/10 flex items-center justify-center flex-shrink-0">
+                          <div className="w-12 h-12 rounded-xl bg-origen-pradera/10 flex items-center justify-center shrink-0">
                             <Award className="w-6 h-6 text-hoja-tinta" />
                           </div>
                           <div className="flex-1 min-w-0">

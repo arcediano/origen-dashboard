@@ -62,14 +62,14 @@ export default function ConfiguracionPage() {
                 href={section.href}
                 className={`flex items-center gap-4 p-4 hover:bg-surface-alt transition-colors ${index > 0 ? 'border-t border-border-subtle' : ''}`}
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-origen-pradera/10 flex-shrink-0">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-origen-pradera/10 shrink-0">
                   <Icon className="h-5 w-5 text-hoja-tinta" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-origen-bosque">{section.title}</p>
                   <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{section.description}</p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-text-subtle flex-shrink-0" />
+                <ChevronRight className="h-5 w-5 text-text-subtle shrink-0" />
               </Link>
             );
           })}

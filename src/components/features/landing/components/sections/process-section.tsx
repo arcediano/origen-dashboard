@@ -44,7 +44,7 @@ export function ProcessSection() {
                 <span className="text-xs md:text-sm font-bold text-origen-bosque">0{step.number}</span>
               </div>
             </div>
-            <div className="w-14 h-14 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center mx-auto mb-3 md:mb-6">
+            <div className="w-14 h-14 md:w-20 md:h-20 rounded-2xl bg-linear-to-br from-origen-crema to-origen-pastel flex items-center justify-center mx-auto mb-3 md:mb-6">
               <Icon className="w-7 h-7 md:w-10 md:h-10 text-origen-bosque" />
             </div>
           </div>

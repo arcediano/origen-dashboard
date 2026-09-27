@@ -665,7 +665,7 @@ export default function SecurityPage() {
                                   key={app.name}
                                   className="flex items-center gap-3 rounded-xl border border-border-subtle bg-origen-crema/40 px-3 py-2.5"
                                 >
-                                  <span className={`h-7 w-7 shrink-0 rounded-lg bg-gradient-to-br ${app.gradient}`} />
+                                  <span className={`h-7 w-7 shrink-0 rounded-lg bg-linear-to-br ${app.gradient}`} />
                                   <span className="flex-1 text-sm font-medium text-origen-bosque">{app.name}</span>
                                   <a
                                     href={app.ios}

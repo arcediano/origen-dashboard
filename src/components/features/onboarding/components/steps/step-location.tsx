@@ -394,7 +394,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
 
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
             <Building2 className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
@@ -496,7 +496,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
             <Home className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
@@ -507,7 +507,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
 
         {/* Helper contextual */}
         <div className="flex items-start gap-2 p-2.5 bg-origen-crema/40 rounded-lg border border-origen-pradera/20 mb-4">
-          <Info className="w-4 h-4 text-hoja-tinta flex-shrink-0 mt-0.5" />
+          <Info className="w-4 h-4 text-hoja-tinta shrink-0 mt-0.5" />
           <p className="text-xs text-muted-foreground">
             Esta información nos ayuda a conectarte con compradores de tu zona y a verificar tu identidad como productor.
           </p>
@@ -631,7 +631,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       ==================================================================== */}
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-bosque/10 to-origen-hoja/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-bosque/10 to-origen-hoja/10 flex items-center justify-center shrink-0">
             <FileText className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
@@ -731,7 +731,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
             <Store className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
@@ -753,7 +753,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
 
         {!hasCategories && (
           <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-feedback-danger/30 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-feedback-danger flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-feedback-danger shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-feedback-danger-text">
                 Selecciona al menos una categoría
@@ -776,7 +776,7 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
           className="w-full flex items-center justify-between p-4 md:p-5 text-left"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
               <Camera className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>

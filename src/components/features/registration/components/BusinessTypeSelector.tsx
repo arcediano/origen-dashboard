@@ -53,10 +53,10 @@ export const BusinessTypeSelector: React.FC<BusinessTypeSelectorProps> = ({ valu
             <div className="flex flex-col items-center text-center gap-2">
               <div className={cn(
                 'rounded-xl flex items-center justify-center transition-all',
-                'w-12 h-12 flex-shrink-0',
+                'w-12 h-12 shrink-0',
                 isSelected
                   ? 'bg-origen-bosque text-white shadow-md'
-                  : 'bg-gradient-to-br from-origen-crema to-origen-pastel text-origen-bosque group-hover:scale-110',
+                  : 'bg-linear-to-br from-origen-crema to-origen-pastel text-origen-bosque group-hover:scale-110',
               )}>
                 <Icon className="w-6 h-6" />
               </div>

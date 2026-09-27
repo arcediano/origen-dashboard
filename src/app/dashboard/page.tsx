@@ -47,7 +47,7 @@ function OnboardingProgressBanner({ progress }: { progress: number }) {
       <div className="rounded-[28px] border border-origen-pradera/25 bg-surface-alt p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 flex-1 gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-origen-pradera/15 flex-shrink-0">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-origen-pradera/15 shrink-0">
               <Leaf className="h-5 w-5 text-hoja-tinta" />
             </div>
             <div className="min-w-0">
@@ -62,7 +62,7 @@ function OnboardingProgressBanner({ progress }: { progress: number }) {
             </div>
           </div>
 
-          <div className="flex flex-shrink-0 items-center gap-2 self-end sm:self-auto">
+          <div className="flex shrink-0 items-center gap-2 self-end sm:self-auto">
             <Button asChild variant="primary" size="sm">
               <Link href="/onboarding">
                 Continuar

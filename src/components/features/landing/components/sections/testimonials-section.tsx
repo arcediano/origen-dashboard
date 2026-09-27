@@ -34,7 +34,7 @@ export function TestimonialsSection() {
 
   const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] }) => (
     <div className="group relative h-full">
-      <div className="absolute inset-0 bg-gradient-to-br from-origen-bosque/4 to-transparent rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
+      <div className="absolute inset-0 bg-linear-to-br from-origen-bosque/4 to-transparent rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
       <div className="relative bg-surface-alt rounded-2xl p-5 md:p-8 shadow-lg md:shadow-xl border border-border group-hover:border-origen-hoja/50 transition-all h-full flex flex-col">
         <div className="flex items-center mb-3 md:mb-6">
           {[...Array(5)].map((_, i) => (
@@ -45,7 +45,7 @@ export function TestimonialsSection() {
           &ldquo;{testimonial.quote}&rdquo;
         </p>
         <div className="flex items-center gap-3 pt-3 md:pt-6 border-t border-border-subtle">
-          <div className={`w-10 h-10 md:w-16 md:h-16 bg-gradient-to-br ${testimonial.bgColor} rounded-xl md:rounded-2xl flex items-center justify-center text-white text-sm md:text-2xl font-bold shadow-md flex-shrink-0`}>
+          <div className={`w-10 h-10 md:w-16 md:h-16 bg-linear-to-br ${testimonial.bgColor} rounded-xl md:rounded-2xl flex items-center justify-center text-white text-sm md:text-2xl font-bold shadow-md shrink-0`}>
             {testimonial.initials}
           </div>
           <div className="min-w-0">

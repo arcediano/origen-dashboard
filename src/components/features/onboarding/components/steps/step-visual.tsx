@@ -141,7 +141,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
         
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
               <ImageIcon className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
@@ -159,7 +159,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
 
         {data.logo ? (
           <div className="flex items-center gap-4 p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
-            <div className="w-16 h-16 rounded-lg bg-surface-alt border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-16 h-16 rounded-lg bg-surface-alt border border-border flex items-center justify-center overflow-hidden shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={data.logo.preview ?? (data.logo.file ? URL.createObjectURL(data.logo.file) : '')}
@@ -206,7 +206,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
         
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
               <Camera className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
@@ -279,7 +279,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
           className="w-full flex items-center justify-between p-4 md:p-5 text-left"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
               <Video className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
@@ -291,7 +291,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
               <p className="text-xs text-muted-foreground">+80% de visitas con video</p>
             </div>
           </div>
-          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform flex-shrink-0", videoExpanded && "rotate-180")} />
+          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0", videoExpanded && "rotate-180")} />
         </button>
         {videoExpanded && (
           <div className="px-4 pb-4 md:px-5 md:pb-5 border-t border-border-subtle">
@@ -320,7 +320,7 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
           )}
 
           <div className="flex items-start gap-2 p-3 bg-origen-crema/30 rounded-lg">
-            <Sparkles className="w-4 h-4 text-hoja-tinta flex-shrink-0 mt-0.5" />
+            <Sparkles className="w-4 h-4 text-hoja-tinta shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
               <span className="font-medium">Consejo:</span> Un video auténtico genera más confianza que uno muy editado.
             </p>

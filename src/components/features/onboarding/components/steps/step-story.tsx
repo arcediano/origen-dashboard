@@ -260,7 +260,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
             <Building className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
@@ -329,7 +329,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
             <BookOpen className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
@@ -394,7 +394,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           className="w-full flex items-center justify-between p-4 md:p-5 text-left"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
               <Sprout className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
@@ -408,7 +408,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           </div>
           <ChevronDown
             className={cn(
-              "w-4 h-4 text-muted-foreground transition-transform flex-shrink-0",
+              "w-4 h-4 text-muted-foreground transition-transform shrink-0",
               filosofiaExpanded && "rotate-180"
             )}
           />
@@ -451,7 +451,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
       <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
         
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
             <Heart className="w-5 h-5 text-hoja-tinta" />
           </div>
           <div>
@@ -474,7 +474,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                   "hover:shadow-lg hover:scale-[1.02]",
                   "focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
                   isSelected
-                    ? "border-origen-pradera bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5 shadow-md"
+                    ? "border-origen-pradera bg-linear-to-br from-origen-pradera/5 to-origen-hoja/5 shadow-md"
                     : "border-border hover:border-origen-pradera"
                 )}
               >
@@ -508,7 +508,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
 
         {!hasValues && (
           <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-feedback-danger/30 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-feedback-danger flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-feedback-danger shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-feedback-danger-text">
                 Selecciona al menos un valor
@@ -531,7 +531,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           className="w-full flex items-center justify-between p-4 md:p-5 text-left"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
               <FileBadge className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
@@ -545,7 +545,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
               <p className="text-xs text-muted-foreground">Sellos de calidad que verificamos en el Paso 6</p>
             </div>
           </div>
-          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform flex-shrink-0", certificacionesExpanded && "rotate-180")} />
+          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0", certificacionesExpanded && "rotate-180")} />
         </button>
         {certificacionesExpanded && (
           <div className="px-4 pb-4 md:px-5 md:pb-5 border-t border-border-subtle">
@@ -562,12 +562,12 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                       "relative flex items-start gap-3 p-3.5 rounded-xl border-2 transition-all text-left",
                       "hover:shadow-md focus:outline-none focus:ring-2 focus:ring-origen-pradera/50",
                       isSelected
-                        ? "border-origen-pradera bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5"
+                        ? "border-origen-pradera bg-linear-to-br from-origen-pradera/5 to-origen-hoja/5"
                         : "border-border hover:border-origen-pradera bg-surface-alt"
                     )}
                   >
                     <div className={cn(
-                      "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
+                      "w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all",
                       isSelected
                         ? "bg-origen-bosque text-white"
                         : "bg-origen-crema text-origen-bosque"
@@ -579,7 +579,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
                       <p className="text-xs text-muted-foreground">{cert.issuingBody}</p>
                     </div>
                     {isSelected && (
-                      <CheckCircle2 className="w-4 h-4 text-hoja-tinta flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-4 h-4 text-hoja-tinta shrink-0 mt-0.5" />
                     )}
                   </button>
                 );
@@ -599,7 +599,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
           className="w-full flex items-center justify-between p-4 md:p-5 text-left"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
               <Camera className="w-5 h-5 text-hoja-tinta" />
             </div>
             <div>
@@ -613,7 +613,7 @@ export function EnhancedStep2Story({ data, onChange }: EnhancedStep2StoryProps) 
               <p className="text-xs text-muted-foreground">Los perfiles con fotos reciben +40% visitas</p>
             </div>
           </div>
-          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform flex-shrink-0", fotosExpanded && "rotate-180")} />
+          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0", fotosExpanded && "rotate-180")} />
         </button>
         {fotosExpanded && (
           <div className="px-4 pb-4 md:px-5 md:pb-5 border-t border-border-subtle">

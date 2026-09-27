@@ -200,7 +200,7 @@ export function HeroSection() {
                 <Button
                   variant="primary"
                   size="lg"
-                  rightIcon={<ArrowRight className="w-5 h-5 flex-shrink-0" />}
+                  rightIcon={<ArrowRight className="w-5 h-5 shrink-0" />}
                   className="h-auto text-sm sm:text-base md:text-lg px-5 sm:px-8 md:px-10 py-3 sm:py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 w-full sm:w-auto font-semibold border-2 border-white/30 whitespace-nowrap"
                   onClick={() => document.getElementById('registration-form')?.scrollIntoView({ behavior: 'smooth' })}
                 >
@@ -238,8 +238,8 @@ export function HeroSection() {
                   {/* Encabezado de la tarjeta */}
                   <div className="text-center mb-5 md:mb-6">
                     <div className="inline-flex items-center justify-center w-16 h-16 md:w-18 md:h-18 mx-auto mb-3 md:mb-4 relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-origen-bosque to-origen-pino rounded-full animate-pulse opacity-20"></div>
-                      <div className="relative w-full h-full bg-gradient-to-br from-origen-bosque to-origen-pino rounded-full flex items-center justify-center shadow-lg">
+                      <div className="absolute inset-0 bg-linear-to-br from-origen-bosque to-origen-pino rounded-full animate-pulse opacity-20"></div>
+                      <div className="relative w-full h-full bg-linear-to-br from-origen-bosque to-origen-pino rounded-full flex items-center justify-center shadow-lg">
                         <CheckCircle className="w-8 h-8 md:w-9 md:h-9 text-white" />
                       </div>
                     </div>
@@ -314,7 +314,7 @@ export function HeroSection() {
                   </div>
 
                   {/* Información de comisión */}
-                  <div className="bg-gradient-to-r from-origen-crema to-white rounded-xl p-4 md:p-5 border border-origen-hoja/30">
+                  <div className="bg-linear-to-r from-origen-crema to-white rounded-xl p-4 md:p-5 border border-origen-hoja/30">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-3">
                       <div className="text-center md:text-left">
                         <p className="text-xs text-origen-hoja mb-1">Comisión por venta</p>

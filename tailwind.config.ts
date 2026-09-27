@@ -24,7 +24,7 @@ import type { Config } from "tailwindcss";
  */
 
 const config: Config = {
-  darkMode: ["class"],
+  darkMode: "class",
   
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -324,7 +324,7 @@ const config: Config = {
   },
   
   // Plugins necesarios
-  plugins: [require("tailwindcss-animate")],
+  plugins: [],
 };
 
 export default config;

@@ -442,7 +442,7 @@ export default function PersonalInfoPage() {
                   size="sm"
                   variant="secondary"
                   onClick={() => retryPartialLoad(section)}
-                  className="ml-4 flex-shrink-0"
+                  className="ml-4 shrink-0"
                 >
                   Reintentar
                 </Button>
@@ -465,7 +465,7 @@ export default function PersonalInfoPage() {
               <Card className="border border-border shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-6">
-                    <div className="relative group flex-shrink-0">
+                    <div className="relative group shrink-0">
                       <Avatar
                         src={form.avatar ?? undefined}
                         alt={form.name}
@@ -518,7 +518,7 @@ export default function PersonalInfoPage() {
                         </div>
 
                         {!isEditing && (
-                          <div className="flex gap-2 flex-shrink-0">
+                          <div className="flex gap-2 shrink-0">
                             <Button onClick={() => setIsEditing(true)} size="sm" variant="secondary" disabled={isLoading}>
                               <span className="flex items-center gap-1">
                                 <Edit className="w-3.5 h-3.5" />

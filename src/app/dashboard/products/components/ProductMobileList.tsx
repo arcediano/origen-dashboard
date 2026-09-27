@@ -28,7 +28,7 @@ import { SwipeableRow, ProductImage, StatusBadge } from '@arcediano/ux-library';
 function ProductRowSkeleton() {
   return (
     <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl sm:rounded-2xl border border-border bg-surface-alt shadow-origen animate-pulse">
-      <div className="w-14 h-14 rounded-xl bg-origen-pastel/60 flex-shrink-0" />
+      <div className="w-14 h-14 rounded-xl bg-origen-pastel/60 shrink-0" />
       <div className="flex-1 min-w-0 space-y-2">
         <div className="h-3.5 bg-origen-pastel rounded-lg w-3/4" />
         <div className="flex items-center justify-between gap-2">
@@ -40,7 +40,7 @@ function ProductRowSkeleton() {
           <div className="h-2.5 bg-origen-pastel/60 rounded-lg w-16" />
         </div>
       </div>
-      <div className="w-4 h-4 bg-origen-pastel/40 rounded flex-shrink-0" />
+      <div className="w-4 h-4 bg-origen-pastel/40 rounded shrink-0" />
     </div>
   );
 }
@@ -107,7 +107,7 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
           aria-label={`Ver ${product.name}`}
         >
           {/* Thumbnail */}
-          <div className="w-14 h-14 rounded-xl overflow-hidden bg-origen-pastel flex-shrink-0 shadow-subtle">
+          <div className="w-14 h-14 rounded-xl overflow-hidden bg-origen-pastel shrink-0 shadow-subtle">
             <ProductImage src={mainImg} alt={product.name} />
           </div>
 
@@ -132,7 +132,7 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
               <span className="text-border-subtle" aria-hidden>·</span>
               {product.status === 'out_of_stock' ? (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-feedback-danger">
-                  <span className="w-1.5 h-1.5 rounded-full bg-feedback-danger flex-shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-feedback-danger shrink-0" />
                   Sin stock
                 </span>
               ) : isLowStock ? (
@@ -140,12 +140,12 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
                 // da ~2.1:1 (falla WCAG AA) y además está prohibido como texto
                 // por la guía. warning-text es el token semántico de aviso (7.1:1).
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-feedback-warning-text">
-                  <span className="w-1.5 h-1.5 rounded-full bg-origen-mandarina flex-shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-origen-mandarina shrink-0" />
                   Stock: {product.stock}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-[11px] text-text-subtle">
-                  <span className="w-1.5 h-1.5 rounded-full bg-origen-pradera/60 flex-shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-origen-pradera/60 shrink-0" />
                   Stock: {product.stock}
                 </span>
               )}
@@ -153,7 +153,7 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
           </div>
 
           {/* Chevron derecha */}
-          <ChevronRight className="w-4 h-4 text-text-subtle/50 flex-shrink-0" aria-hidden />
+          <ChevronRight className="w-4 h-4 text-text-subtle/50 shrink-0" aria-hidden />
         </motion.button>
       </SwipeableRow>
     </div>

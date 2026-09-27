@@ -88,10 +88,10 @@ function StepCard({ step }: { step: typeof producerSteps[0] }) {
   const Icon = step.icon;
   return (
     <div className="group relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-origen-bosque/4 to-origen-hoja/5 rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
+      <div className="absolute inset-0 bg-linear-to-br from-origen-bosque/4 to-origen-hoja/5 rounded-2xl transform group-hover:scale-[1.02] transition-transform duration-300" />
       <div className="relative bg-surface-alt rounded-2xl p-5 md:p-8 shadow-lg border border-border group-hover:border-origen-hoja group-hover:shadow-xl transition-all duration-300">
         <div className="flex items-start gap-4 mb-4">
-          <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+          <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-linear-to-br from-origen-crema to-origen-pastel flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
             <Icon className="w-5 h-5 md:w-7 md:h-7 text-origen-bosque" />
           </div>
           <div className="flex-1 min-w-0">
@@ -103,7 +103,7 @@ function StepCard({ step }: { step: typeof producerSteps[0] }) {
         <div className="space-y-2">
           {step.features.map((feature, idx) => (
             <div key={idx} className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-origen-hoja/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-4 h-4 rounded-full bg-origen-hoja/10 flex items-center justify-center shrink-0">
                 <CheckCircle className="w-2.5 h-2.5 text-origen-hoja" />
               </div>
               <span className="text-xs md:text-sm text-foreground">{feature}</span>
@@ -163,7 +163,7 @@ export default function HowItWorksPage() {
 
           {/* Cabecera */}
           <div className="text-center mb-10 md:mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
+            <div className="inline-flex items-center gap-2 bg-linear-to-r from-origen-pradera/10 to-origen-hoja/10 rounded-full px-4 py-2 border border-origen-pradera/30">
               <Sparkles className="w-4 h-4 text-hoja-tinta" />
               <span className="text-xs md:text-sm font-semibold text-origen-bosque">Simple, transparente y sin sorpresas</span>
             </div>
@@ -182,7 +182,7 @@ export default function HowItWorksPage() {
             {/* Productores */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 pb-2 border-b border-border">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-linear-to-br from-origen-crema to-origen-pastel flex items-center justify-center">
                   <Store className="w-5 h-5 text-origen-bosque" />
                 </div>
                 <h2 className="text-xl md:text-2xl font-bold text-origen-bosque">Para productores</h2>
@@ -197,7 +197,7 @@ export default function HowItWorksPage() {
             {/* Compradores */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 pb-2 border-b border-border">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-origen-crema to-origen-pastel flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-linear-to-br from-origen-crema to-origen-pastel flex items-center justify-center">
                   <Search className="w-5 h-5 text-origen-bosque" />
                 </div>
                 <h2 className="text-xl md:text-2xl font-bold text-origen-bosque">Para compradores</h2>

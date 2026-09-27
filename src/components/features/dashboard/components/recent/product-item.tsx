@@ -44,7 +44,7 @@ export function ProductItem({
       {/* EFECTO EXACTO DE BENEFITSSECTION */}
       <div className={cn(
         "absolute inset-0 rounded-2xl transition-transform duration-300",
-        "bg-gradient-to-br from-origen-pradera/5 to-origen-hoja/5",
+        "bg-linear-to-br from-origen-pradera/5 to-origen-hoja/5",
         "group-hover:scale-[1.02]"
       )}></div>
       
@@ -55,12 +55,12 @@ export function ProductItem({
       )}>
         <div className="flex items-center gap-3 sm:gap-4">
           {/* Imagen del producto */}
-          <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-subtle bg-origen-crema/50 border border-border-subtle">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl overflow-hidden shrink-0 shadow-subtle bg-origen-crema/50 border border-border-subtle">
             <ProductImage
               src={imageUrl}
               alt={name}
               fallback={
-                <div className="w-full h-full bg-gradient-to-br from-origen-pino to-origen-hoja flex items-center justify-center">
+                <div className="w-full h-full bg-linear-to-br from-origen-pino to-origen-hoja flex items-center justify-center">
                   <Package className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
               }
@@ -70,7 +70,7 @@ export function ProductItem({
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
               <h3 className="font-semibold text-sm sm:text-base lg:text-lg text-origen-bosque truncate max-w-[130px] sm:max-w-[200px]">{name}</h3>
-              <span className="text-[10px] sm:text-sm text-text-subtle flex-shrink-0 ml-2">SKU: {sku}</span>
+              <span className="text-[10px] sm:text-sm text-text-subtle shrink-0 ml-2">SKU: {sku}</span>
             </div>
             
             <div className="flex items-center justify-between">
@@ -81,7 +81,7 @@ export function ProductItem({
                 
                 <div className="flex items-center gap-1">
                   <span className={cn(
-                    "w-2 h-2 rounded-full flex-shrink-0",
+                    "w-2 h-2 rounded-full shrink-0",
                     stockConfig[stockStatus].color
                   )} />
                   <span className="text-xs sm:text-sm text-text-subtle">

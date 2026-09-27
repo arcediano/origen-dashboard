@@ -404,7 +404,7 @@ export default function NotificationsPage() {
             </Select>
 
             <div
-              className="flex items-center gap-2 rounded-xl border border-border-subtle px-2 py-1 flex-shrink-0"
+              className="flex items-center gap-2 rounded-xl border border-border-subtle px-2 py-1 shrink-0"
               role="group"
               aria-label="Filtrar por periodo"
             >
@@ -448,7 +448,7 @@ export default function NotificationsPage() {
           {/* Chips de filtros activos — ambos breakpoints */}
           {activeChips.length > 0 && (
             <div className="flex items-center gap-2 bg-origen-nube border border-dashed border-origen-bosque/20 rounded-xl px-3 py-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap flex-shrink-0">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-text-subtle whitespace-nowrap shrink-0">
                 Activos:
               </span>
               <ActiveFilterChips chips={activeChips} onClearAll={clearFilters} />

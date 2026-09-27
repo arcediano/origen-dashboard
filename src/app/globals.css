@@ -15,9 +15,138 @@
  *   --pastel   #D8F3DC  Verde Pastel    · Fondos suaves
  */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@config '../../tailwind.config.ts';
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility highlight-box {
+  /* Solo mantenemos los componentes más simples que no justifican un archivo propio */
+  background-color: hsl(var(--pastel));
+  border-left: 4px solid hsl(var(--menta));
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 0 8px 8px 0;
+}
+
+@utility logo-showcase {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  background-color: hsl(var(--crema));
+  border-radius: 8px;
+  margin: 2rem 0;
+}
+
+/* === UTILIDADES PERSONALIZADAS === */
+
+@utility scrollbar-hide {
+  /* Ocultar scrollbar (slider móvil) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@utility focus-origen {
+  /* === UTILIDADES DE ACCESIBILIDAD === */
+  &:focus-visible {
+    outline: 2px solid hsl(var(--menta));
+    outline-offset: 2px;
+  }
+}
+
+@utility text-over-menta {
+  /* Texto sobre colores */
+  color: white;
+  font-weight: 700;
+}
+
+@utility text-over-pradera {
+  color: hsl(var(--oscuro));
+}
+
+@utility text-over-bosque {
+  color: white;
+}
+
+@utility scrollbar-origen {
+  /* === SCROLLBAR PERSONALIZADO === */
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: hsl(var(--crema));
+    border-radius: 9999px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--pradera));
+    border-radius: 9999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--hoja));
+  }
+}
+
+@utility safe-area-top {
+  /* === SAFE-AREA (PWA / iPhone notch / home indicator) === */
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@utility safe-area-left {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+@utility safe-area-right {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+@utility pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+@utility touch-highlight-none {
+  /* === MOBILE NATIVE TOUCH FEEDBACK === */
+  -webkit-tap-highlight-color: transparent;
+}
+
+@utility no-select {
+  /* Prevenir selección de texto en elementos de UI táctil */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@utility animate-fade-in {
+  animation: fade-in 0.15s ease-out both;
+}
 
 @layer base {
   :root {
@@ -121,145 +250,79 @@
 
 }
 
-/* === JERARQUÍA TIPOGRÁFICA (Manual Sección 4.2) — solo dentro de .prose-origen === */
-/* Usar esta clase en páginas de contenido editorial (landing, legal, blog) */
-/* NO aplicar en dashboard o componentes de UI */
-.prose-origen h1, .prose-origen .h1 {
-  font-family: var(--font-serif);
-  color: hsl(var(--bosque));
-  font-size: 2.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-  border-bottom: 4px solid hsl(var(--menta));
-  padding-bottom: 0.5rem;
-  margin-bottom: 2rem;
-}
-
-.prose-origen h2, .prose-origen .h2 {
-  font-family: var(--font-serif);
-  color: hsl(var(--pino));
-  font-size: 1.8rem;
-  font-weight: 700;
-  line-height: 1.3;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
-.prose-origen h3, .prose-origen .h3 {
-  color: hsl(var(--hoja));
-  font-size: 1.3rem;
-  font-weight: 600;
-  line-height: 1.4;
-  margin-top: 1.5rem;
-  margin-bottom: 0.8rem;
-}
-
-.prose-origen p, .prose-origen .text-body {
-  color: hsl(var(--oscuro));
-  font-size: 1rem;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-  opacity: 0.9;
-}
-
-.prose-origen .text-small {
-  font-size: 0.875rem;
-  color: hsl(var(--muted-foreground));
-  line-height: 1.5;
-}
-
-.prose-origen a {
-  color: hsl(var(--hoja));
-  transition: color 0.2s ease;
-  text-decoration: none;
-}
-
-.prose-origen a:hover {
-  color: hsl(var(--bosque));
-  text-decoration: underline;
-}
-
-.prose-origen a:focus-visible {
-  outline: 2px solid hsl(var(--menta));
-  outline-offset: 2px;
-}
-
-/* === COMPONENTES BÁSICOS (solo los más simples) === */
-@layer components {
-  /* Solo mantenemos los componentes más simples que no justifican un archivo propio */
-  .highlight-box {
-    background-color: hsl(var(--pastel));
-    border-left: 4px solid hsl(var(--menta));
-    padding: 1.5rem;
-    margin: 1.5rem 0;
-    border-radius: 0 8px 8px 0;
-  }
-
-  .logo-showcase {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 3rem;
-    background-color: hsl(var(--crema));
-    border-radius: 8px;
-    margin: 2rem 0;
-  }
-}
-
-/* === UTILIDADES PERSONALIZADAS === */
 @layer utilities {
-  /* Ocultar scrollbar (slider móvil) */
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  /* === JERARQUÍA TIPOGRÁFICA (Manual Sección 4.2) — solo dentro de .prose-origen === */
+  /* Usar esta clase en páginas de contenido editorial (landing, legal, blog) */
+  /* NO aplicar en dashboard o componentes de UI */
+  .prose-origen h1,
+  .prose-origen .h1 {
+    font-family: var(--font-serif);
+    color: hsl(var(--bosque));
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    border-bottom: 4px solid hsl(var(--menta));
+    padding-bottom: 0.5rem;
+    margin-bottom: 2rem;
   }
 
-  /* === UTILIDADES DE ACCESIBILIDAD === */
-  .focus-origen:focus-visible {
+  .prose-origen h2,
+  .prose-origen .h2 {
+    font-family: var(--font-serif);
+    color: hsl(var(--pino));
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .prose-origen h3,
+  .prose-origen .h3 {
+    color: hsl(var(--hoja));
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .prose-origen p,
+  .prose-origen .text-body {
+    color: hsl(var(--oscuro));
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+  }
+
+  .prose-origen .text-small {
+    font-size: 0.875rem;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.5;
+  }
+
+  .prose-origen a {
+    color: hsl(var(--hoja));
+    transition: color 0.2s ease;
+    text-decoration: none;
+  }
+
+  .prose-origen a:hover {
+    color: hsl(var(--bosque));
+    text-decoration: underline;
+  }
+
+  .prose-origen a:focus-visible {
     outline: 2px solid hsl(var(--menta));
     outline-offset: 2px;
   }
 
-  /* Texto sobre colores */
-  .text-over-menta {
-    color: white;
-    font-weight: 700;
-  }
-
-  .text-over-pradera {
-    color: hsl(var(--oscuro));
-  }
-
-  .text-over-bosque {
-    color: white;
-  }
-
-  /* === SCROLLBAR PERSONALIZADO === */
-  .scrollbar-origen::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  .scrollbar-origen::-webkit-scrollbar-track {
-    background-color: hsl(var(--crema));
-    border-radius: 9999px;
-  }
-
-  .scrollbar-origen::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--pradera));
-    border-radius: 9999px;
-  }
-
-  .scrollbar-origen::-webkit-scrollbar-thumb:hover {
-    background-color: hsl(var(--hoja));
-  }
-
+  /* === COMPONENTES BÁSICOS (solo los más simples) === */
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════════
+@layer utilities {
+  /* ═══════════════════════════════════════════════════════════════════════════════
    PREVENIR AUTO-ZOOM EN iOS / ANDROID — fuera de @layer para máxima especificidad
    ═══════════════════════════════════════════════════════════════════════════════
    Debe estar FUERA de @layer utilities para sobrescribir text-xs y text-sm
@@ -271,49 +334,19 @@
 
    Excluimos checkbox, radio, range y file porque esos no muestran teclado.
    ─────────────────────────────────────────────────────────────────────────── */
-@media (hover: none) and (pointer: coarse) {
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
-  select,
-  textarea {
-    font-size: 16px !important;
+  @media (hover: none) and (pointer: coarse) {
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not(
+        [type='file']
+      ),
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
+
+  /* Re-abrimos @layer utilities para no romper el orden de capas de Tailwind */
 }
-
-/* Re-abrimos @layer utilities para no romper el orden de capas de Tailwind */
 @layer utilities {
-
-  /* === SAFE-AREA (PWA / iPhone notch / home indicator) === */
-  .safe-area-top {
-    padding-top: env(safe-area-inset-top, 0px);
-  }
-
-  .safe-area-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-
-  .safe-area-left {
-    padding-left: env(safe-area-inset-left, 0px);
-  }
-
-  .safe-area-right {
-    padding-right: env(safe-area-inset-right, 0px);
-  }
-
-  .pb-safe {
-    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
-  }
-
-  /* === MOBILE NATIVE TOUCH FEEDBACK === */
-  .touch-highlight-none {
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  /* Prevenir selección de texto en elementos de UI táctil */
-  .no-select {
-    -webkit-user-select: none;
-    user-select: none;
-  }
-
   /* ── PREVENIR AUTO-ZOOM EN iOS / ANDROID AL ENFOCAR INPUTS ─────────────────
      iOS Safari y Chrome en iOS hacen zoom automático cuando un input tiene
      font-size < 16px. El media query (hover:none + pointer:coarse) identifica
@@ -327,10 +360,6 @@
      ──────────────────────────────────────────────────────────────────────── */
   .no-zoom-fix {
     /* placeholder — la regla real está fuera de @layer para mayor especificidad */
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.15s ease-out both;
   }
 }
 
