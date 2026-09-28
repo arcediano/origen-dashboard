@@ -8,7 +8,7 @@ vi.mock('@/lib/api/client', async (importOriginal) => {
 });
 
 import { GatewayError } from '@/lib/api/client';
-import { AiAssistError, getAiAssistQuota, readLabel } from '@/lib/api/ai-assist';
+import { AiAssistError, getAiAssistQuota, improveText, readLabel } from '@/lib/api/ai-assist';
 
 describe('ai-assist API', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -27,6 +27,16 @@ describe('ai-assist API', () => {
       '/ai-assist/label-reading',
       { assistKey: 'clave-12345', images },
       { timeoutMs: 90_000 },
+    );
+  });
+
+  it('improveText envía assistKey + borrador con su timeout', async () => {
+    postMock.mockResolvedValue({ proposal: {} });
+    await improveText('clave-12345', { name: 'Miel' });
+    expect(postMock).toHaveBeenCalledWith(
+      '/ai-assist/text-improvement',
+      { assistKey: 'clave-12345', name: 'Miel' },
+      { timeoutMs: 60_000 },
     );
   });
 

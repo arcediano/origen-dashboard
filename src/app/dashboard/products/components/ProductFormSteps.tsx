@@ -83,6 +83,9 @@ export function ProductFormSteps({
             onInputChange={onInputChange}
             completed={completedTabs.basic}
             isPublishedProduct={isPublishedProduct}
+            aiAssistKey={aiAssistKey ?? productId ?? null}
+            onAiAssistUsed={onAiAssistUsed}
+            aiAssistUnlimited={!!productId}
           />
         )}
 
