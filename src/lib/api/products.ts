@@ -242,6 +242,8 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
     // Imágenes S3 — el frontend almacena la key en ProductImage.id
     mainImageUrl:      formData.mainImage?.url,
     mainImageKey:      formData.mainImage?.id,
+    mainImageFocusX:   formData.mainImage?.focusX,
+    mainImageFocusY:   formData.mainImage?.focusY,
     galleryImageUrls:  formData.gallery.map(img => img.url),
     galleryImageKeys:  formData.gallery.map(img => img.id),
 
@@ -409,6 +411,10 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
   if (product.mainImage !== undefined) {
     body.mainImageUrl = product.mainImage?.url ?? null;
     body.mainImageKey = product.mainImage?.id  ?? null;
+    if (product.mainImage) {
+      body.mainImageFocusX = product.mainImage.focusX ?? 50;
+      body.mainImageFocusY = product.mainImage.focusY ?? 50;
+    }
   }
   if (product.gallery !== undefined) {
     body.galleryImageUrls = product.gallery.map(img => img.url);

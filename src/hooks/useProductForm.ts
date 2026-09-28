@@ -107,6 +107,10 @@ const SENSITIVE_FIELDS = {
   ],
 };
 
+/** Replacer de `JSON.stringify` que ignora el punto focal de las imágenes. */
+const omitImageFocus = (key: string, value: unknown) =>
+  key === 'focusX' || key === 'focusY' ? undefined : value;
+
 // Pasos que el productor DEBE completar para poder publicar.
 // Los pasos opcionales (nutritional, production, certifications) no bloquean la publicación.
 const REQUIRED_STEPS_FOR_PUBLISH: FormStepId[] = [
@@ -129,7 +133,12 @@ export const productToFormData = (product: Product): ProductFormData => {
   // no aparezca siempre como pendiente.
   const gallery: ProductFormData['gallery'] =
     product.gallery.length > 0
-      ? product.gallery
+      ? product.gallery.map((img) =>
+          // El backend solo devuelve el punto focal en `mainImage`, no en cada elemento de la galería
+          product.mainImage && img.id === product.mainImage.id
+            ? { ...img, focusX: product.mainImage.focusX, focusY: product.mainImage.focusY }
+            : img,
+        )
       : product.mainImage
         ? [{ ...product.mainImage, isMain: true, sortOrder: 0 }]
         : [];
@@ -369,7 +378,8 @@ export function useProductForm(productId?: string) {
       const currentVal = formData[field as keyof ProductFormData];
       const originalVal = original[field as keyof ProductFormData];
 
-      if (JSON.stringify(currentVal) !== JSON.stringify(originalVal)) {
+      // El punto focal es cosmético (el backend no lo trata como cambio sensible)
+      if (JSON.stringify(currentVal, omitImageFocus) !== JSON.stringify(originalVal, omitImageFocus)) {
         dirty.push(field);
       }
     }

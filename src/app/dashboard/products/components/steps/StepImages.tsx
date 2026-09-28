@@ -7,6 +7,7 @@
 
 import { Card } from '@arcediano/ux-library';
 import { ImageUploader } from '../../components/ImageUploader';
+import { ImageFocusPicker } from '../../components/ImageFocusPicker';
 import { Badge } from '@arcediano/ux-library';
 import { Label } from '@arcediano/ux-library';
 import { Tooltip } from '@arcediano/ux-library';
@@ -51,7 +52,16 @@ export function StepImages({
   completed,
   isPublishedProduct = false,
 }: StepImagesProps) {
-  
+  // La imagen principal es la marcada `isMain` (o la primera de la galería)
+  const mainImage = gallery.find((img) => img.isMain) ?? gallery[0];
+  const canSetFocus = !!mainImage?.url && !mainImage.uploading && !mainImage.error;
+
+  const handleFocusChange = (focusX: number, focusY: number) => {
+    onImagesChange(
+      gallery.map((img) => (img.id === mainImage?.id ? { ...img, focusX, focusY } : img)),
+    );
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -124,6 +134,13 @@ export function StepImages({
             qualityRequirement={IMAGE_QUALITY_PRESETS.productImage}
           />
         </div>
+
+        {/* Punto focal de la imagen principal (recorte de las tarjetas) */}
+        {canSetFocus && mainImage && (
+          <div className="mt-6 border-t border-border pt-6">
+            <ImageFocusPicker image={mainImage} onChange={handleFocusChange} />
+          </div>
+        )}
       </Card>
     </motion.div>
   );

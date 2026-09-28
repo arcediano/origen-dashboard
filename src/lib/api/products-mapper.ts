@@ -36,6 +36,8 @@ import {
 export interface ApiProductImage {
   key: string;
   url: string;
+  focusX?: number;
+  focusY?: number;
 }
 
 export interface ApiPriceTier {
@@ -269,6 +271,8 @@ function mapApiImage(
     alt: productName,
     isMain,
     sortOrder,
+    ...(typeof img.focusX === 'number' && { focusX: img.focusX }),
+    ...(typeof img.focusY === 'number' && { focusY: img.focusY }),
   };
 }
 
