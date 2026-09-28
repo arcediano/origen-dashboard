@@ -269,21 +269,22 @@ export function StepNutritional({
                   <div className="flex gap-2">
                     <Input
                       type="number"
-                      value={nutritionalInfo.servingSizeValue}
-                      onChange={(e) => handleChange('servingSizeValue', parseFloat(e.target.value) || 100)}
+                      value={nutritionalInfo.servingSizeValue || ''}
+                      onChange={(e) => handleChange('servingSizeValue', parseFloat(e.target.value) || 0)}
                       className={cn(
                         "h-12 rounded-xl",
                         (touched.servingSizeValue && localErrors.servingSizeValue) && "border-feedback-danger"
                       )}
-                      containerClassName="flex-1"
+                      containerClassName="min-w-0 flex-1"
                       min={1}
                       step={1}
                     />
                     <Select
+                      className="w-24 shrink-0"
                       value={nutritionalInfo.servingSizeUnit}
                       onValueChange={(v) => handleChange('servingSizeUnit', v as 'g' | 'ml')}
                     >
-                      <SelectTrigger className="h-12 w-24 shrink-0 rounded-xl">
+                      <SelectTrigger className="h-12 rounded-xl">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
