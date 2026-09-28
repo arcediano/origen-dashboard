@@ -39,6 +39,9 @@ export interface ProductImage {
   height?: number;
   size?: number;
   type?: string;
+  /** Punto focal (% 0-100) del recorte de la imagen principal; ausente = centro. */
+  focusX?: number;
+  focusY?: number;
 }
 
 // ============================================================================
