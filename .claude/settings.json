@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Write(src/modules/products/ai-assist/**)",
+      "Edit(src/modules/products/ai-assist/**)",
+      "Bash(npx jest:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm test:*)"
+    ]
+  }
+}
