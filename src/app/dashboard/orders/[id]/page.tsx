@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, differenceInCalendarDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,6 +47,15 @@ import type { Order } from '@/types/order';
  * 2026-08-22).
  */
 const STATUSES_REQUIRING_PAYMENT: Order['status'][] = ['processing', 'shipped', 'delivered'];
+
+/**
+ * Espejo de RETURN_REQUEST_WINDOW_DAYS en el backend
+ * (origen-master-microservices/src/modules/orders/orders/orders.service.ts) —
+ * gate duro de 12 días naturales desde `deliveredAt` para poder solicitar
+ * una devolución. Mismo motivo de duplicación que STATUSES_REQUIRING_PAYMENT
+ * de arriba: sin paquete de constantes compartido entre repos.
+ */
+const RETURN_REQUEST_WINDOW_DAYS = 12;
 
 const statusConfig: Record<Order['status'], {
   variant: 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'leaf';
@@ -361,10 +370,23 @@ export default function OrderDetailPage() {
 
   const status    = statusConfig[order.status];
   const canCancel  = ['pending', 'processing', 'shipped'].includes(order.status);
+  // Plazo de 12 días naturales desde la entrega para solicitar una
+  // devolución (petición del humano, 2026-09-25/27) — el backend ya lo hace
+  // cumplir como gate duro (changeStatusBySeller rechaza pasado el plazo);
+  // esto solo refleja el mismo límite en la UI para no dejar que el
+  // productor intente una solicitud que el backend va a rechazar sin más
+  // contexto, y para mostrar la cuenta atrás mientras el plazo sigue abierto.
+  const daysSinceDelivery = order.shipping.deliveredAt
+    ? differenceInCalendarDays(new Date(), order.shipping.deliveredAt)
+    : null;
+  const returnWindowDaysLeft = daysSinceDelivery == null
+    ? null
+    : RETURN_REQUEST_WINDOW_DAYS - daysSinceDelivery;
+  const returnWindowExpired = returnWindowDaysLeft != null && returnWindowDaysLeft <= 0;
   // Flujo híbrido de devoluciones (2026-08-29): el productor solo puede
   // SOLICITAR la devolución desde "delivered" — aprobarla/rechazarla (y
   // ejecutar el reembolso real) es exclusivo del admin.
-  const canRequestReturn = order.status === 'delivered';
+  const canRequestReturn = order.status === 'delivered' && !returnWindowExpired;
 
   // Acción principal según estado
   const nextAction: { label: string; next: Order['status']; icon: React.ElementType } | null =
@@ -545,16 +567,33 @@ export default function OrderDetailPage() {
                           </Button>
                         )}
                         {canRequestReturn && (
-                          <Button
-                            variant="outline"
-                            size="md"
-                            leftIcon={<RotateCcw className="w-4 h-4" />}
-                            onClick={() => setShowReturnSheet(true)}
-                            disabled={updating}
-                            className="w-full justify-start"
-                          >
-                            Solicitar devolución
-                          </Button>
+                          <>
+                            <Button
+                              variant="outline"
+                              size="md"
+                              leftIcon={<RotateCcw className="w-4 h-4" />}
+                              onClick={() => setShowReturnSheet(true)}
+                              disabled={updating}
+                              className="w-full justify-start"
+                            >
+                              Solicitar devolución
+                            </Button>
+                            {returnWindowDaysLeft != null && (
+                              <p className="text-[11px] text-text-subtle text-center">
+                                {returnWindowDaysLeft === 1
+                                  ? 'Queda 1 día para solicitar una devolución'
+                                  : `Quedan ${returnWindowDaysLeft} días para solicitar una devolución`}
+                              </p>
+                            )}
+                          </>
+                        )}
+                        {order.status === 'delivered' && returnWindowExpired && (
+                          <div className="flex items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
+                            <Info className="w-4 h-4 text-origen-pino shrink-0 mt-0.5" aria-hidden />
+                            <p className="text-xs text-text-subtle leading-relaxed">
+                              El plazo de {RETURN_REQUEST_WINDOW_DAYS} días naturales desde la entrega para solicitar una devolución ya ha vencido.
+                            </p>
+                          </div>
                         )}
                       </>
                     )}
