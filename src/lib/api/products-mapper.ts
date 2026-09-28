@@ -159,7 +159,6 @@ export interface ApiProduct {
   categoryName?: string;
   subcategoryId?: string;
   subcategoryName?: string;
-  tags: string[];
   basePrice: number;
   comparePrice?: number;
   sku: string;
@@ -425,7 +424,6 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     categoryName:     api.categoryName ?? '',
     subcategoryId:    api.subcategoryId,
     subcategoryName:  api.subcategoryName,
-    tags:             api.tags ?? [],
 
     mainImage,
     gallery,

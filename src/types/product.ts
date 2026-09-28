@@ -266,7 +266,6 @@ export interface Product {
   categoryName: string;
   subcategoryId?: string;
   subcategoryName?: string;
-  tags: string[];
   mainImage?: ProductImage;
   gallery: ProductImage[];
   basePrice: number;
@@ -321,7 +320,6 @@ export interface ProductFormData {
   categoryName: string;
   subcategoryId?: string;
   subcategoryName?: string;
-  tags: string[];
   mainImage?: ProductImage;
   gallery: ProductImage[];
   basePrice?: number;
@@ -414,7 +412,6 @@ export const defaultFormData: ProductFormData = {
   categoryId: '',
   categoryName: '',
   subcategoryId: '',
-  tags: [],
   mainImage: undefined,
   gallery: [],
   basePrice: undefined,

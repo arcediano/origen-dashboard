@@ -21,7 +21,6 @@ const makeProduct = (overrides: Partial<Product> = {}): Product => ({
   fullDescription: 'Descripción completa',
   categoryId: 'cat-1',
   categoryName: 'General',
-  tags: [],
   gallery: [],
   basePrice: 1000,
   priceTiers: [],
