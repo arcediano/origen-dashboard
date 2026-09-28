@@ -73,6 +73,9 @@ export default function CreateProductPage() {
     handleSave,
     handlePublish,
     handleCancel,
+    aiAssistKey,
+    aiAssistUsedUnsaved,
+    markAiAssistUsed,
   } = useProductForm();
 
   useEffect(() => {
@@ -80,6 +83,19 @@ export default function CreateProductPage() {
       toast({ title: 'Error al guardar', description: error, variant: 'error' });
     }
   }, [error]);
+
+  // Si el productor ha usado el asistente de IA en un producto que aún no ha
+  // guardado y cierra/recarga la pestaña, el navegador pide confirmación (el
+  // texto lo pone el navegador; el aviso detallado va en el diálogo de cancelar).
+  useEffect(() => {
+    if (!aiAssistUsedUnsaved) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [aiAssistUsedUnsaved]);
 
   const stepNumber = FORM_STEPS.findIndex(s => s.id === activeTab) + 1;
   const tips = useStepTips(stepNumber, formData);
@@ -178,6 +194,8 @@ export default function CreateProductPage() {
               completedTabs={completedTabs}
               onInputChange={handleInputChange}
               onNestedChange={handleNestedChange}
+              aiAssistKey={aiAssistKey}
+              onAiAssistUsed={markAiAssistUsed}
               onPriceTiersChange={handlePriceTiersChange}
               onImagesChange={handleImagesChange}
             />
@@ -282,6 +300,7 @@ export default function CreateProductPage() {
         open={showCancelDialog}
         onOpenChange={setShowCancelDialog}
         onConfirm={handleCancel}
+        aiAssistUsed={aiAssistUsedUnsaved}
       />
 
       <SuccessPublishModal

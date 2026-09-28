@@ -44,6 +44,10 @@ interface ProductFormStepsProps {
   productId?: string;
   /** Indica si el producto está publicado (ACTIVE u OUT_OF_STOCK). Usado para mostrar indicadores de campos sensibles. */
   isPublishedProduct?: boolean;
+  /** Clave de cupo del asistente de IA en modo creación (en edición se usa `productId`). */
+  aiAssistKey?: string | null;
+  /** Notifica que el asistente de IA ha consumido cupo en este producto. */
+  onAiAssistUsed?: () => void;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -59,6 +63,8 @@ export function ProductFormSteps({
   skuSuggestion,
   productId,
   isPublishedProduct,
+  aiAssistKey,
+  onAiAssistUsed,
 }: ProductFormStepsProps) {
   return (
     <AnimatePresence mode="wait">
@@ -106,6 +112,9 @@ export function ProductFormSteps({
             onNestedChange={onNestedChange}
             completed={completedTabs.nutritional}
             isPublishedProduct={isPublishedProduct}
+            aiAssistKey={aiAssistKey ?? productId ?? null}
+            onAiAssistUsed={onAiAssistUsed}
+            aiAssistUnlimited={!!productId}
           />
         )}
 
