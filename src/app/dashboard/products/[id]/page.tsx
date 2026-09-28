@@ -139,13 +139,6 @@ function DescripcionSection({ product }: { product: Product }) {
       {product.fullDescription && (
         <p className="text-sm text-text-subtle leading-relaxed whitespace-pre-line">{product.fullDescription}</p>
       )}
-      {product.tags?.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-2">
-          {product.tags.map(tag => (
-            <Badge key={tag} variant="leaf" size="sm" icon={<Tag className="w-3 h-3" />}>{tag}</Badge>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

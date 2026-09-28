@@ -13,8 +13,7 @@ import {
   Eye,
   Star,
   Calendar,
-  Package,
-  Sparkles
+  Package
 } from 'lucide-react';
 import {
   Bar,
@@ -327,18 +326,6 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
           </div>
         </div>
       </div>
-
-      {/* Badges de atributos */}
-      {product.tags && product.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 pt-2">
-          {product.tags.map((tag) => (
-            <span key={tag} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-origen-pradera/10 text-hoja-tinta rounded-full border border-origen-pradera/30">
-              <Sparkles className="w-3 h-3" />
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
 
       {/* Fecha de última actualización */}
       <div className="text-xs text-text-subtle text-right pt-2">

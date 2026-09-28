@@ -238,7 +238,6 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
     fullDescription:   formData.fullDescription || undefined,
     categoryId:        formData.categoryId,
     subcategoryId:     formData.subcategoryId || undefined,
-    tags:              formData.tags,
 
     // Imágenes S3 — el frontend almacena la key en ProductImage.id
     mainImageUrl:      formData.mainImage?.url,
@@ -378,7 +377,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
 
   const scalar: Array<keyof Product> = [
     'name', 'shortDescription', 'fullDescription', 'categoryId', 'subcategoryId',
-    'tags', 'basePrice', 'comparePrice', 'sku', 'barcode', 'stock',
+    'basePrice', 'comparePrice', 'sku', 'barcode', 'stock',
     'lowStockThreshold', 'trackInventory', 'allowBackorders',
     'weight', 'weightUnit', 'dimensions', 'shippingClass',
   ];
@@ -795,7 +794,6 @@ export async function duplicateProduct(id: string): Promise<ApiResponse<Product>
       fullDescription:   original.fullDescription,
       categoryId:        original.categoryId,
       subcategoryId:     original.subcategoryId,
-      tags:              original.tags,
       basePrice:         original.basePrice,
       comparePrice:      original.comparePrice,
       stock:             original.stock,

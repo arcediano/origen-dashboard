@@ -24,7 +24,6 @@ function buildApiProduct(overrides: {
     categoryId: 'quesos',
     categoryName: 'Quesos',
     subcategoryId: undefined,
-    tags: [],
     basePrice: overrides.basePrice,
     comparePrice: undefined,
     sku: overrides.sku,

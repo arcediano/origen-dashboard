@@ -7,7 +7,7 @@
 
 import { Card } from '@arcediano/ux-library';
 import { Input } from '@arcediano/ux-library';
-import { Textarea, TagsInput } from '@arcediano/ux-library';
+import { Textarea } from '@arcediano/ux-library';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@arcediano/ux-library';
 import { Badge } from '@arcediano/ux-library';
 import { Tooltip } from '@arcediano/ux-library';
@@ -74,7 +74,7 @@ function SensitiveFieldIndicator({ fieldName }: { fieldName: string }) {
 }
 
 export function StepBasic({
-  formData = { name: '', shortDescription: '', fullDescription: '', categoryId: '', subcategoryId: '', tags: [] },
+  formData = { name: '', shortDescription: '', fullDescription: '', categoryId: '', subcategoryId: '' },
   errors = {},
   touched = {},
   onInputChange,
@@ -351,22 +351,6 @@ export function StepBasic({
                 Recomendado mínimo 300 caracteres ({fullDescLength}/300)
               </Badge>
             )}
-          </div>
-
-          {/* Tags */}
-          <div className="space-y-1.5">
-            <TagsInput
-              label="Etiquetas"
-              tooltip="Pulsa Enter para añadir cada etiqueta. Incluye sinónimos, variedades y palabras clave. Máximo 10 etiquetas."
-              value={formData?.tags || []}
-              onChange={(tags) => handleChange('tags', tags)}
-              placeholder="Escribe y pulsa Enter..."
-              maxTags={10}
-              suggestions={[
-                "artesano", "ecológico", "premiado", "tradicional", "gourmet",
-                "kilómetro cero", "edición limitada", "familiar", "slow food"
-              ]}
-            />
           </div>
         </div>
       </Card>
