@@ -42,6 +42,9 @@ const nextConfig = {
     ];
   },
   experimental: {
+    // El proxy de rewrites corta a los 30 s por defecto; la lectura de etiqueta
+    // con IA (visión, hasta 90 s en el gateway) necesita más margen.
+    proxyTimeout: 90_000,
     serverActions: {
       bodySizeLimit: "10mb",
     },

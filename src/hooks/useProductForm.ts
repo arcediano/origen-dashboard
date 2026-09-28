@@ -31,6 +31,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useAiAssistKey, clearAiAssistDraft } from '@/hooks/useAiAssistKey';
 import { useRouter } from 'next/navigation';
 import { toast } from '@arcediano/ux-library';
 import type { 
@@ -229,6 +230,8 @@ export const formDataToProduct = (formData: ProductFormData): Partial<Product> =
 
 export function useProductForm(productId?: string) {
   const router = useRouter();
+  const { assistKey: aiAssistKey, assistUsedUnsaved: aiAssistUsedUnsaved, markUsed: markAiAssistUsed } =
+    useAiAssistKey(productId);
   
   // ==========================================================================
   // ESTADO
@@ -649,6 +652,7 @@ export function useProductForm(productId?: string) {
         } else {
           // Borrador guardado correctamente: limpiar localStorage y navegar a la lista
           localStorage.removeItem(STORAGE_KEY);
+          clearAiAssistDraft();
           router.push('/dashboard/products');
         }
       }
@@ -714,6 +718,7 @@ export function useProductForm(productId?: string) {
         } else {
           setPublishStatus('pending_approval');
           localStorage.removeItem(STORAGE_KEY);
+          clearAiAssistDraft();
           setShowSuccessModal(true);
         }
       }
@@ -811,6 +816,9 @@ export function useProductForm(productId?: string) {
     error,
     isSaving,
     isAutoSaving,
+    aiAssistKey,
+    aiAssistUsedUnsaved,
+    markAiAssistUsed,
     lastSaved,
     isPublishing,
     publishStatus,

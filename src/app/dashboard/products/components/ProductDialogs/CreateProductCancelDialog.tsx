@@ -21,6 +21,11 @@ export interface CreateProductCancelDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Función para confirmar cancelación */
   onConfirm: () => void;
+  /**
+   * El productor ha usado el asistente de IA en este producto sin guardarlo:
+   * salir sin guardar consume igualmente una de sus plazas de producto con IA.
+   */
+  aiAssistUsed?: boolean;
 }
 
 // ============================================================================
@@ -34,6 +39,7 @@ export function CreateProductCancelDialog({
   open,
   onOpenChange,
   onConfirm,
+  aiAssistUsed = false,
 }: CreateProductCancelDialogProps) {
   return (
     <ConfirmDialog
@@ -42,7 +48,11 @@ export function CreateProductCancelDialog({
       icon={<AlertCircle className="w-7 h-7" />}
       title="¿Cancelar creación?"
       description="Los datos no guardados se perderán."
-      body="Si cancelas ahora, perderás todos los cambios que no hayas guardado. ¿Estás seguro de que quieres salir?"
+      body={
+        aiAssistUsed
+          ? 'Si cancelas ahora, perderás todos los cambios que no hayas guardado. Además, ya has usado el asistente de IA en este producto: si no lo guardas, perderás una de tus plazas de productos con IA sin conservar el producto. ¿Estás seguro de que quieres salir?'
+          : 'Si cancelas ahora, perderás todos los cambios que no hayas guardado. ¿Estás seguro de que quieres salir?'
+      }
       confirmVariant="danger"
       confirmLabel="Descartar"
       cancelLabel="Continuar"

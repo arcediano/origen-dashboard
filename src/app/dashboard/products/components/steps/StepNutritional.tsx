@@ -51,12 +51,18 @@ import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import type { NutritionalInfo } from '@/types/product';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
+import { LabelReaderCard } from './LabelReaderCard';
+import type { FieldPatch } from '@/lib/ai-assist/label-proposal';
 
 interface StepNutritionalProps {
   nutritionalInfo?: NutritionalInfo;
   onNestedChange: (section: string, field: string, value: any) => void;
   completed?: boolean;
   isPublishedProduct?: boolean;
+  /** Clave de cupo del asistente de IA (productId al editar, clave del borrador al crear). */
+  aiAssistKey?: string | null;
+  /** Se llama cuando el asistente de IA consume cupo en este producto. */
+  onAiAssistUsed?: () => void;
 }
 
 // Helper para renderizar indicador de campo sensible
@@ -133,6 +139,8 @@ export function StepNutritional({
   onNestedChange,
   completed,
   isPublishedProduct = false,
+  aiAssistKey = null,
+  onAiAssistUsed,
 }: StepNutritionalProps) {
   
   const [ingredientInput, setIngredientInput] = useState('');
@@ -168,6 +176,10 @@ export function StepNutritional({
       handleChange('ingredients', newIngredients);
       setIngredientInput('');
     }
+  };
+
+  const applyLabelPatches = (patches: FieldPatch[]) => {
+    patches.forEach(({ field, value }) => handleChange(field, value));
   };
 
   const removeIngredient = (index: number) => {
@@ -225,6 +237,15 @@ export function StepNutritional({
             </Badge>
           </div>
         </div>
+
+        {aiAssistKey && (
+          <LabelReaderCard
+            assistKey={aiAssistKey}
+            nutritionalInfo={nutritionalInfo}
+            onApply={applyLabelPatches}
+            onUsed={onAiAssistUsed}
+          />
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {/* Pestañas de navegación — degradado a la derecha como pista de que

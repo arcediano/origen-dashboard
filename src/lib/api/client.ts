@@ -91,6 +91,12 @@ async function tryRefreshToken(): Promise<boolean> {
 
 export interface RequestOptions {
   /**
+   * Timeout de la petición en ms (por defecto 20 s). Solo para llamadas
+   * legítimamente lentas, p. ej. la lectura de etiqueta con IA.
+   */
+  timeoutMs?: number;
+
+  /**
    * Headers extra a incluir en la petición.
    * 'Content-Type' y 'Accept' ya están establecidos por defecto.
    */
@@ -169,7 +175,7 @@ async function request<T>(
 
   // Crear un AbortController para timeout explícito (~20 segundos)
   const controller = new AbortController();
-  const REQUEST_TIMEOUT_MS = 20000; // 20 segundos
+  const REQUEST_TIMEOUT_MS = options.timeoutMs ?? 20000; // 20 segundos por defecto
   const timeoutHandle = setTimeout(() => {
     controller.abort();
   }, REQUEST_TIMEOUT_MS);
