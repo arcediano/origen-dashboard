@@ -63,6 +63,8 @@ interface StepNutritionalProps {
   aiAssistKey?: string | null;
   /** Se llama cuando el asistente de IA consume cupo en este producto. */
   onAiAssistUsed?: () => void;
+  /** Edición de un producto existente: el asistente no tiene límite de cupo. */
+  aiAssistUnlimited?: boolean;
 }
 
 // Helper para renderizar indicador de campo sensible
@@ -141,6 +143,7 @@ export function StepNutritional({
   isPublishedProduct = false,
   aiAssistKey = null,
   onAiAssistUsed,
+  aiAssistUnlimited = false,
 }: StepNutritionalProps) {
   
   const [ingredientInput, setIngredientInput] = useState('');
@@ -244,6 +247,7 @@ export function StepNutritional({
             nutritionalInfo={nutritionalInfo}
             onApply={applyLabelPatches}
             onUsed={onAiAssistUsed}
+            unlimited={aiAssistUnlimited}
           />
         )}
 

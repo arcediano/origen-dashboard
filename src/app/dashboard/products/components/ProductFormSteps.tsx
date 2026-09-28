@@ -114,6 +114,7 @@ export function ProductFormSteps({
             isPublishedProduct={isPublishedProduct}
             aiAssistKey={aiAssistKey ?? productId ?? null}
             onAiAssistUsed={onAiAssistUsed}
+            aiAssistUnlimited={!!productId}
           />
         )}
 

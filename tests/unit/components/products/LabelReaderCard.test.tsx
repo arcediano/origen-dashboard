@@ -56,6 +56,16 @@ describe('LabelReaderCard', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it('en edición no muestra el contador de cupo y avisa de que no hay límite', async () => {
+    quotaMock.mockResolvedValue({ enabled: true, used: 5, total: 5 });
+    render(
+      <LabelReaderCard assistKey="prod-abc12345" nutritionalInfo={current} onApply={vi.fn()} unlimited />,
+    );
+    await screen.findByText(/Leer etiqueta con IA/);
+    expect(screen.getByText(/no hay límite de uso del asistente/)).toBeInTheDocument();
+    expect(screen.queryByText(/5 de 5 productos/)).not.toBeInTheDocument();
+  });
+
   it('no se muestra si la consulta de cupo falla (p. ej. sin permiso)', async () => {
     quotaMock.mockRejectedValue(new AiAssistError('403', null, 403));
     const { container } = render(
@@ -87,6 +97,7 @@ describe('LabelReaderCard', () => {
 
     await screen.findByText(/Leer etiqueta con IA/);
     expect(screen.getByText(/1 de 5 productos/)).toBeInTheDocument();
+    expect(screen.queryByText(/no hay límite/)).not.toBeInTheDocument();
 
     await pickPhoto(container);
     await userEvent.click(screen.getByRole('button', { name: /^Leer etiqueta$/ }));

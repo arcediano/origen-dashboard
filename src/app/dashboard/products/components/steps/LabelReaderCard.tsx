@@ -37,6 +37,8 @@ interface LabelReaderCardProps {
   onApply: (patches: FieldPatch[]) => void;
   /** Avisa de que este producto ya ha consumido cupo (para el aviso al abandonar). */
   onUsed?: () => void;
+  /** Edición de un producto existente: sin límite de cupo (solo aplica a la creación). */
+  unlimited?: boolean;
 }
 
 export function LabelReaderCard({
@@ -44,6 +46,7 @@ export function LabelReaderCard({
   nutritionalInfo,
   onApply,
   onUsed,
+  unlimited = false,
 }: LabelReaderCardProps) {
   const [quota, setQuota] = useState<AiAssistQuota | null>(null);
   const [files, setFiles] = useState<File[]>([]);
@@ -117,9 +120,9 @@ export function LabelReaderCard({
             rellenamos este paso por ti. Tú revisas y confirmas siempre.
           </p>
           <p className="text-xs text-muted-foreground mt-2">
-            Has usado el asistente en {quota.used} de {quota.total} productos. Cada
-            producto en el que lo uses cuenta como uno; puedes repetir la lectura
-            en el mismo producto sin gastar más.
+            {unlimited
+              ? 'Al editar un producto que ya tienes guardado no hay límite de uso del asistente.'
+              : `Has usado el asistente en ${quota.used} de ${quota.total} productos. Cada producto nuevo en el que lo uses cuenta como uno; puedes repetir la lectura en el mismo producto sin gastar más.`}
           </p>
         </div>
       </div>
