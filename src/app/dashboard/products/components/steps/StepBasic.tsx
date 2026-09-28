@@ -25,6 +25,7 @@ import { motion } from 'framer-motion';
 import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
+import { TextImproverCard } from './TextImproverCard';
 
 // ============================================================================
 // TIPOS
@@ -37,6 +38,12 @@ interface StepBasicProps {
   onInputChange: (field: string, value: any) => void;
   completed?: boolean;
   isPublishedProduct?: boolean;
+  /** Clave de cupo del asistente de IA (creación: clave del borrador; edición: productId). */
+  aiAssistKey?: string | null;
+  /** Notifica que el asistente de IA ha consumido cupo en este producto. */
+  onAiAssistUsed?: () => void;
+  /** Edición de un producto existente: sin límite de cupo. */
+  aiAssistUnlimited?: boolean;
 }
 
 // ============================================================================
@@ -80,6 +87,9 @@ export function StepBasic({
   onInputChange,
   completed,
   isPublishedProduct = false,
+  aiAssistKey = null,
+  onAiAssistUsed,
+  aiAssistUnlimited = false,
 }: StepBasicProps) {
   
   const [localTouched, setLocalTouched] = useState<Record<string, boolean>>({});
@@ -169,6 +179,28 @@ export function StepBasic({
             </Badge>
           </div>
         </div>
+
+        {aiAssistKey && (
+          <div className="mb-6">
+            <TextImproverCard
+              assistKey={aiAssistKey}
+              current={{
+                name: formData?.name,
+                categoryName: formData?.categoryName,
+                subcategoryName: formData?.subcategoryName,
+                shortDescription: formData?.shortDescription,
+                fullDescription: formData?.fullDescription,
+              }}
+              onApply={(proposal) => {
+                handleChange('name', proposal.name);
+                handleChange('shortDescription', proposal.shortDescription);
+                handleChange('fullDescription', proposal.fullDescription);
+              }}
+              onUsed={onAiAssistUsed}
+              unlimited={aiAssistUnlimited}
+            />
+          </div>
+        )}
 
         {/* Formulario */}
         <div className="space-y-6">
