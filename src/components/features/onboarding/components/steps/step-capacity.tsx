@@ -14,7 +14,6 @@ import {
   Input,
   InputAffixField,
   Button,
-  Checkbox,
   Badge,
   Select,
   SelectTrigger,
@@ -42,7 +41,6 @@ import {
   Plus,
   X,
   Recycle,
-  Users,
   Check,
   Pencil
 } from 'lucide-react';
@@ -69,24 +67,15 @@ export interface DeliveryOption {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-/** Nivel logístico detectado por CP */
-export type LogisticsLevel = 'centralized' | 'transport' | 'own';
-
 export interface EnhancedCapacityData {
-  // ¿Está en ruta de Origen?
+  // ¿Delega en Origen? (refleja deliveryChoice === 'delegated')
   isInOriginRoute: boolean;
-
-  /** Nivel logístico detectado: centralizado / transporte concertado / propio */
-  logisticsLevel?: LogisticsLevel;
-
-  /** Solo nivel 'transport': ¿usa el transporte concertado de Origen? */
-  useCentralizedTransport?: boolean;
 
   /**
    * Elección EXPLÍCITA y OBLIGATORIA del productor entre delegar el envío en
    * la ruta de recogida de Origen o gestionarlo por cuenta propia. Decisión
    * del humano 2026-09-02: unifica lo que antes eran dos sistemas
-   * independientes (PickupRoute vs isInOriginRoute/CoveragePolicy) — este
+   * independientes (PickupRoute vs isInOriginRoute/CoveragePolicy, esta última ya retirada) — este
    * campo es el que determina de verdad shippingMode en el backend, no la
    * cobertura calculada arriba. 'delegated' solo es válido si el backend
    * confirma que existe una ruta de recogida activa para el CP (ver
@@ -459,8 +448,6 @@ export function EnhancedStep4Capacity({
       .then((r) => r.ok ? r.json() : Promise.reject())
       .then((res: {
         data?: {
-          centralizedLogistics: boolean;
-          centralizedTransport: boolean;
           pickupRouteAvailable: boolean;
           pickupRouteName: string | null;
           pickupWarehouseName: string | null;
@@ -468,11 +455,6 @@ export function EnhancedStep4Capacity({
       }) => {
         const d = res.data;
         if (!d) return;
-        const level: LogisticsLevel = d.centralizedLogistics
-          ? 'centralized'
-          : d.centralizedTransport
-            ? 'transport'
-            : 'own';
         setPickupRoute({
           available: d.pickupRouteAvailable,
           routeName: d.pickupRouteName,
@@ -480,8 +462,7 @@ export function EnhancedStep4Capacity({
         });
         onChange({
           ...data,
-          isInOriginRoute: d.centralizedLogistics,
-          logisticsLevel: level,
+          isInOriginRoute: data.deliveryChoice === 'delegated' && d.pickupRouteAvailable,
           // Si la ruta de recogida deja de estar disponible para el CP nuevo,
           // una elección previa de "delegated" ya no es válida — se limpia
           // para forzar al productor a elegir de nuevo. "own" sigue siendo
@@ -606,76 +587,12 @@ export function EnhancedStep4Capacity({
       </div>
 
       {/* ====================================================================
-          BANNER LOGÍSTICO — nivel detectado por CP (mobile-first)
+          DETECCIÓN — disponibilidad de ruta de recogida para el CP
       ==================================================================== */}
       {detectingZone && (
         <div className="flex items-center gap-3 p-4 bg-origen-crema/40 border border-border rounded-2xl animate-pulse">
           <Compass className="w-5 h-5 text-hoja-tinta shrink-0" />
           <p className="text-sm text-muted-foreground">Detectando disponibilidad logística para tu zona...</p>
-        </div>
-      )}
-
-      {!detectingZone && data.logisticsLevel === 'centralized' && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-feedback-success-subtle border border-feedback-success/30 rounded-2xl">
-          <div className="flex items-start gap-3 flex-1">
-            <Route className="w-5 h-5 text-feedback-success shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-feedback-success-text">Logística centralizada disponible</p>
-              <p className="text-xs text-feedback-success-text/80 mt-0.5">
-                Origen recoge los pedidos en tu dirección de producción y gestiona la entrega al comprador. No necesitas configurar transportistas.
-              </p>
-            </div>
-          </div>
-          <span className="self-start sm:self-center text-xs font-medium bg-feedback-success-subtle text-feedback-success-text px-2.5 py-1 rounded-full border border-feedback-success/30">
-            Nivel 1 · Ruta Origen
-          </span>
-        </div>
-      )}
-
-      {!detectingZone && data.logisticsLevel === 'transport' && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-feedback-info-subtle border border-feedback-info/30 rounded-2xl">
-          <div className="flex items-start gap-3 flex-1">
-            <Truck className="w-5 h-5 text-feedback-info shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-feedback-info-text">Transporte concertado disponible en tu zona</p>
-              <p className="text-xs text-feedback-info-text/80 mt-0.5">
-                Tu zona no tiene logística centralizada, pero puedes usar nuestro transportista concertado. Tú preparas el pedido, nosotros lo enviamos.
-              </p>
-              {/* Toggle para usar transporte concertado */}
-              <div className="flex items-center gap-2 mt-3">
-                <Checkbox
-                  id="use-centralized-transport"
-                  size="sm"
-                  variant="forest"
-                  checked={data.useCentralizedTransport ?? true}
-                  onCheckedChange={(checked) => onChange({ ...data, useCentralizedTransport: checked === true })}
-                />
-                <label htmlFor="use-centralized-transport" className="text-xs font-medium text-feedback-info-text cursor-pointer">
-                  Usar el transportista concertado de Origen
-                </label>
-              </div>
-            </div>
-          </div>
-          <span className="self-start sm:self-center text-xs font-medium bg-feedback-info-subtle text-feedback-info-text px-2.5 py-1 rounded-full border border-feedback-info/30">
-            Nivel 2 · Transporte
-          </span>
-        </div>
-      )}
-
-      {!detectingZone && data.logisticsLevel === 'own' && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-origen-crema/50 border border-border rounded-2xl">
-          <div className="flex items-start gap-3 flex-1">
-            <Package className="w-5 h-5 text-origen-bosque shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-origen-bosque">Gestión propia de envíos</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Tu zona no tiene cobertura de logística o transporte de Origen. Configura tus propias opciones de envío a continuación.
-              </p>
-            </div>
-          </div>
-          <span className="self-start sm:self-center text-xs font-medium bg-surface text-muted-foreground px-2.5 py-1 rounded-full border border-border">
-            Nivel 3 · Propio
-          </span>
         </div>
       )}
 

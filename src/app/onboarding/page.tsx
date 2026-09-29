@@ -441,8 +441,6 @@ export default function OnboardingPage() {
           step4: d.logistics ? {
             ...prev.step4,
             isInOriginRoute: d.logistics.isInOriginRoute,
-            logisticsLevel: d.logistics.logisticsLevel ?? prev.step4.logisticsLevel,
-            useCentralizedTransport: d.logistics.useCentralizedTransport ?? prev.step4.useCentralizedTransport,
             deliveryChoice: d.logistics.deliveryChoice ?? prev.step4.deliveryChoice,
             minOrderAmount: Number.isFinite(Number(d.logistics.minOrderAmount))
               ? Number(d.logistics.minOrderAmount)

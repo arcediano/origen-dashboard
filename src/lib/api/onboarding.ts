@@ -100,8 +100,6 @@ export interface OnboardingData {
   }> | null;
   logistics?: {
     isInOriginRoute?: boolean;
-    logisticsLevel?: 'centralized' | 'transport' | 'own';
-    useCentralizedTransport?: boolean | null;
     /** Elección explícita del productor (delegar en Origen / gestión propia) — determina shippingMode. */
     deliveryChoice?: 'delegated' | 'own' | null;
     minOrderAmount?: number;
@@ -225,8 +223,6 @@ export async function saveStep3(keys: {
 export async function saveStep4(data: EnhancedCapacityData): Promise<StepSaveResponse> {
   return gatewayClient.post('/producers/onboarding/step/4', {
     isInOriginRoute: data.isInOriginRoute,
-    logisticsLevel: data.logisticsLevel,
-    useCentralizedTransport: data.useCentralizedTransport,
     deliveryChoice: data.deliveryChoice,
     minOrderAmount: data.minOrderAmount,
     sustainablePackaging: data.sustainablePackaging ?? false,
