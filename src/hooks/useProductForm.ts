@@ -81,7 +81,6 @@ const SENSITIVE_FIELDS = {
   // Campos atomicos
   atomic: [
     'name',
-    'shortDescription',
     'fullDescription',
     'mainImage',
     'gallery',
@@ -145,7 +144,6 @@ export const productToFormData = (product: Product): ProductFormData => {
 
   return ({
   name: product.name,
-  shortDescription: product.shortDescription,
   fullDescription: product.fullDescription,
   categoryId: product.categoryId,
   categoryName: product.categoryName,
@@ -204,7 +202,6 @@ export const productToFormData = (product: Product): ProductFormData => {
 export const formDataToProduct = (formData: ProductFormData): Partial<Product> => {
   return {
     name: formData.name,
-    shortDescription: formData.shortDescription,
     fullDescription: formData.fullDescription,
     categoryId: formData.categoryId,
     categoryName: formData.categoryName,
@@ -567,8 +564,8 @@ export function useProductForm(productId?: string) {
           errors.push('Nombre del producto (mínimo 5 caracteres)');
         if (!formData.categoryId)
           errors.push('Categoría del producto');
-        if (!formData.shortDescription || formData.shortDescription.trim().length < 20)
-          errors.push('Descripción corta (mínimo 20 caracteres)');
+        if (!formData.fullDescription || formData.fullDescription.trim().length < 100)
+          errors.push('Descripción (mínimo 100 caracteres)');
         break;
       case 'images':
         if (!formData.gallery || formData.gallery.length === 0)

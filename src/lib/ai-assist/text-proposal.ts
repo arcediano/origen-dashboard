@@ -1,7 +1,7 @@
 /**
  * Lógica pura de la mejora de textos con IA (asistente de IA, F2).
  *
- * La IA solo PROPONE nombre y descripciones: el productor las revisa y decide
+ * La IA solo PROPONE nombre y descripción: el productor las revisa y decide
  * si aplicarlas al formulario.
  */
 
@@ -10,14 +10,12 @@ export interface TextDraft {
   name?: string;
   categoryName?: string;
   subcategoryName?: string;
-  shortDescription?: string;
   fullDescription?: string;
   notes?: string;
 }
 
 export interface TextProposal {
   name: string;
-  shortDescription: string;
   fullDescription: string;
 }
 
@@ -31,11 +29,10 @@ export interface TextImprovementResponse {
 /** Campos del formulario que la propuesta sustituye al aplicarla. */
 export const TEXT_FIELD_LABELS: Record<keyof TextProposal, string> = {
   name: 'Nombre',
-  shortDescription: 'Descripción corta',
-  fullDescription: 'Descripción detallada',
+  fullDescription: 'Descripción',
 };
 
-/** Quita claves vacías: el backend exige al menos nombre, notas o descripción corta. */
+/** Quita claves vacías: el backend exige al menos nombre o notas. */
 export function buildTextDraft(input: TextDraft): TextDraft {
   const draft: TextDraft = {};
   for (const [key, value] of Object.entries(input) as [keyof TextDraft, string | undefined][]) {
@@ -47,7 +44,7 @@ export function buildTextDraft(input: TextDraft): TextDraft {
 
 /** ¿Hay algo que mejorar? (mismo criterio que valida el backend). */
 export function hasDraftContent(draft: TextDraft): boolean {
-  return Boolean(draft.name || draft.notes || draft.shortDescription);
+  return Boolean(draft.name || draft.notes);
 }
 
 /** Campos que la propuesta va a sobrescribir porque ya tienen texto en el formulario. */

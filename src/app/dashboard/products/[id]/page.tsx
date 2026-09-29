@@ -135,9 +135,8 @@ function SectionAccordion({
 function DescripcionSection({ product }: { product: Product }) {
   return (
     <div className="space-y-3 pt-3">
-      <p className="text-sm text-foreground leading-relaxed">{product.shortDescription}</p>
       {product.fullDescription && (
-        <p className="text-sm text-text-subtle leading-relaxed whitespace-pre-line">{product.fullDescription}</p>
+        <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{product.fullDescription}</p>
       )}
     </div>
   );
