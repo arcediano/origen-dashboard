@@ -52,7 +52,7 @@ export function ImageFocusPicker({ image, onChange }: ImageFocusPickerProps) {
         {/* Foto completa con marcador */}
         <div
           ref={areaRef}
-          className="relative touch-none select-none overflow-hidden rounded-xl border border-border bg-origen-pastel cursor-crosshair"
+          className="relative w-fit max-w-full self-start touch-none select-none overflow-hidden rounded-xl border border-border bg-origen-pastel cursor-crosshair"
           onPointerDown={(e) => {
             draggingRef.current = true;
             e.currentTarget.setPointerCapture(e.pointerId);
@@ -73,7 +73,7 @@ export function ImageFocusPicker({ image, onChange }: ImageFocusPickerProps) {
             src={image.url}
             alt="Imagen principal del producto"
             draggable={false}
-            className="block h-auto max-h-96 w-full object-contain"
+            className="block h-auto max-h-96 w-auto max-w-full"
           />
           <span
             aria-hidden="true"
