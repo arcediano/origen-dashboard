@@ -12,10 +12,6 @@ export const SENSITIVE_FIELD_LABELS: Record<
     label: 'Nombre del producto',
     short: 'el nombre',
   },
-  shortDescription: {
-    label: 'Descripción corta',
-    short: 'la descripción corta',
-  },
   fullDescription: {
     label: 'Descripción completa',
     short: 'la descripción completa',

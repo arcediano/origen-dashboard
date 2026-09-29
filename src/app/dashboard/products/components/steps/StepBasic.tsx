@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Card } from '@arcediano/ux-library';
+import { StepShell } from './StepShell';
 import { Input } from '@arcediano/ux-library';
 import { Textarea } from '@arcediano/ux-library';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@arcediano/ux-library';
@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { fetchCategoriesTree, type CategoryTree } from '@/lib/api/categories';
-import { motion } from 'framer-motion';
 import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
@@ -37,6 +36,8 @@ interface StepBasicProps {
   touched?: Record<string, boolean>;
   onInputChange: (field: string, value: any) => void;
   completed?: boolean;
+  /** Dentro de la pantalla de revisión del onboarding con IA: sin tarjeta ni cabecera propias. */
+  embedded?: boolean;
   isPublishedProduct?: boolean;
   /** Clave de cupo del asistente de IA (creación: clave del borrador; edición: productId). */
   aiAssistKey?: string | null;
@@ -55,9 +56,9 @@ const BasicProductSchema = z.object({
     .min(5, 'Mínimo 5 caracteres')
     .max(100, 'Máximo 100 caracteres')
     .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s\-_,.]+$/, 'Caracteres no válidos'),
-  shortDescription: z.string()
-    .min(20, 'Mínimo 20 caracteres')
-    .max(160, 'Máximo 160 caracteres'),
+  fullDescription: z.string()
+    .min(100, 'Mínimo 100 caracteres')
+    .max(3000, 'Máximo 3000 caracteres'),
   categoryId: z.string().min(1, 'Selecciona una categoría'),
 });
 
@@ -81,11 +82,12 @@ function SensitiveFieldIndicator({ fieldName }: { fieldName: string }) {
 }
 
 export function StepBasic({
-  formData = { name: '', shortDescription: '', fullDescription: '', categoryId: '', subcategoryId: '' },
+  formData = { name: '', fullDescription: '', categoryId: '', subcategoryId: '' },
   errors = {},
   touched = {},
   onInputChange,
   completed,
+  embedded = false,
   isPublishedProduct = false,
   aiAssistKey = null,
   onAiAssistUsed,
@@ -140,13 +142,8 @@ export function StepBasic({
   const fullDescLength = formData?.fullDescription?.length || 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <Card variant="elevated" className="p-4 sm:p-6">
-        {/* Cabecera */}
+    <StepShell embedded={embedded}>
+        {!embedded && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
             <div className={cn(
@@ -179,6 +176,7 @@ export function StepBasic({
             </Badge>
           </div>
         </div>
+        )}
 
         {aiAssistKey && (
           <div className="mb-6">
@@ -188,12 +186,10 @@ export function StepBasic({
                 name: formData?.name,
                 categoryName: formData?.categoryName,
                 subcategoryName: formData?.subcategoryName,
-                shortDescription: formData?.shortDescription,
                 fullDescription: formData?.fullDescription,
               }}
               onApply={(proposal) => {
                 handleChange('name', proposal.name);
-                handleChange('shortDescription', proposal.shortDescription);
                 handleChange('fullDescription', proposal.fullDescription);
               }}
               onUsed={onAiAssistUsed}
@@ -328,40 +324,14 @@ export function StepBasic({
             </Badge>
           )}
 
-          {/* Descripción corta */}
-          <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <Label htmlFor="short-desc" className="text-sm font-medium">
-                Descripción corta
-              </Label>
-              <span className="text-feedback-danger">*</span>
-              {isPublishedProduct && (
-                <div className="p-2 -m-2">
-                  <SensitiveFieldIndicator fieldName="shortDescription" />
-                </div>
-              )}
-            </div>
-            <Textarea
-              id="short-desc"
-              required
-              tooltip="Aparece en búsquedas y vista previa. Incluye los beneficios principales. Máximo 160 caracteres."
-              value={formData?.shortDescription || ''}
-              onChange={(e) => handleChange('shortDescription', e.target.value)}
-              className="min-h-[80px]"
-              placeholder="Describe tu producto en 2-3 líneas destacando sus características principales..."
-              maxLength={160}
-              showCharCount
-              error={allTouched?.shortDescription ? errors?.shortDescription : undefined}
-            />
-          </div>
-
           {/* Descripción detallada */}
           <div className="space-y-2">
             <div>
               <div className="flex items-center gap-1.5 mb-2">
                 <Label htmlFor="full-desc" className="text-sm font-medium">
-                  Descripción detallada
+                  Descripción
                 </Label>
+                <span className="text-feedback-danger">*</span>
                 {isPublishedProduct && (
                   <div className="p-2 -m-2">
                     <SensitiveFieldIndicator fieldName="fullDescription" />
@@ -370,11 +340,14 @@ export function StepBasic({
               </div>
               <Textarea
                 id="full-desc"
-                tooltip="Mejora el SEO y la conversión. Incluye características, proceso de elaboración, historia, maridajes y usos recomendados. Mínimo recomendado: 300 caracteres."
+                tooltip="Es el texto que verán tus clientes y el que usan los buscadores. Incluye características, proceso de elaboración, historia, maridajes y usos recomendados. Mínimo 100 caracteres (recomendado 300)."
                 value={formData?.fullDescription || ''}
                 onChange={(e) => handleChange('fullDescription', e.target.value)}
-                className="min-h-[100px]"
-                placeholder="Describe tu producto con detalle: características, proceso de elaboración, maridajes, historia del productor..."
+                className="min-h-[140px]"
+                placeholder="Describe tu producto: características, proceso de elaboración, maridajes, historia del productor..."
+                maxLength={3000}
+                showCharCount
+                error={allTouched?.fullDescription ? errors?.fullDescription : undefined}
               />
             </div>
             {fullDescLength < 300 && fullDescLength > 0 && (
@@ -385,8 +358,7 @@ export function StepBasic({
             )}
           </div>
         </div>
-      </Card>
-    </motion.div>
+    </StepShell>
   );
 }
 

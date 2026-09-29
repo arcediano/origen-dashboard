@@ -25,9 +25,9 @@ export function useStepTips(
         { description: 'Incluye variedad, tiempo de curación o características únicas' },
         {
           description:
-            formData?.shortDescription && formData.shortDescription.length < 100
-              ? 'La descripción corta es lo primero que ven en búsquedas. La tuya es demasiado corta.'
-              : 'La descripción corta es lo primero que ven en búsquedas',
+            formData?.fullDescription && formData.fullDescription.length < 300
+              ? 'Una descripción de al menos 300 caracteres convierte mejor. La tuya es todavía corta.'
+              : 'Una descripción clara y completa mejora la conversión y el posicionamiento',
         },
         { description: 'Las categorías ayudan a los clientes a encontrarte' },
       ];

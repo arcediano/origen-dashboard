@@ -17,7 +17,6 @@ import { TextImproverCard } from '@/app/dashboard/products/components/steps/Text
 
 const proposal = {
   name: 'Queso Manchego Curado 12 meses',
-  shortDescription: 'Queso manchego curado de leche de oveja.',
   fullDescription: 'Elaborado de forma artesanal.',
 };
 
@@ -60,7 +59,7 @@ describe('TextImproverCard', () => {
     expect(await screen.findByText(proposal.name)).toBeInTheDocument();
     expect(improveMock).toHaveBeenCalledWith('clave-12345', { name: 'queso manchego', fullDescription: 'viejo' });
     expect(screen.getByText('Falta el origen')).toBeInTheDocument();
-    expect(screen.getByText(/se sustituirá tu nombre, descripción detallada actual/)).toBeInTheDocument();
+    expect(screen.getByText(/se sustituirá tu nombre, descripción actual/)).toBeInTheDocument();
     expect(onApply).not.toHaveBeenCalled();
     expect(onUsed).toHaveBeenCalled();
     expect(screen.getByText(/2 de 5 productos/)).toBeInTheDocument();

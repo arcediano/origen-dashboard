@@ -17,7 +17,6 @@ const makeProduct = (overrides: Partial<Product> = {}): Product => ({
   producerId: 'prod-1',
   name: 'Producto Test',
   slug: 'producto-test',
-  shortDescription: 'Descripción',
   fullDescription: 'Descripción completa',
   categoryId: 'cat-1',
   categoryName: 'General',

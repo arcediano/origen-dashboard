@@ -155,7 +155,6 @@ export interface ApiProduct {
   producerId: string;
   name: string;
   slug: string;
-  shortDescription: string;
   fullDescription: string;
   categoryId: string;
   categoryName?: string;
@@ -422,7 +421,6 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     producerId:       api.producerId,
     name:             api.name,
     slug:             api.slug,
-    shortDescription: api.shortDescription,
     fullDescription:  api.fullDescription,
     categoryId:       api.categoryId,
     categoryName:     api.categoryName ?? '',
