@@ -18,6 +18,7 @@ import { Pagination, PageError, EmptyState, Card, appShellPaddingClass, NAV_HEIG
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { CommissionInvoicesTable } from '../../facturas/components/CommissionInvoicesTable';
 import { CommissionInvoiceCard, CommissionInvoiceCardSkeleton } from '../../facturas/components/CommissionInvoiceCard';
+import { CommissionCreditNotesSection } from './CommissionCreditNotesSection';
 import { fetchSellerCommissionInvoices, type CommissionInvoiceItem } from '@/lib/api/orders';
 
 export default function FacturacionPage() {
@@ -129,6 +130,8 @@ export default function FacturacionPage() {
             )}
           </>
         )}
+
+        {!isLoading && !error && <CommissionCreditNotesSection />}
       </div>
     </div>
   );

@@ -793,3 +793,56 @@ export async function fetchSellerCommissionInvoices(params?: {
     };
   }
 }
+
+// ─── Facturas de comisión rectificativas (reembolsos aprobados) ───────────────
+
+/** Importes en negativo: la rectificativa resta comisión ya facturada ("por diferencias"). */
+export interface CommissionCreditNoteItem {
+  id: string;
+  creditNoteNumber: string;
+  period: string;
+  orderNumber: string;
+  originalInvoiceNumber: string;
+  originalPeriod: string;
+  subtotal: number;
+  vatAmount: number;
+  total: number;
+  reason: string | null;
+  issuedAt: string;
+}
+
+/**
+ * Listado paginado de facturas de comisión rectificativas del productor.
+ * GET /api/v1/orders/seller/commission-credit-notes
+ */
+export async function fetchSellerCommissionCreditNotes(params?: {
+  page?: number;
+  limit?: number;
+}): Promise<ApiResponse<{ items: CommissionCreditNoteItem[]; total: number; page: number; limit: number }>> {
+  try {
+    const res = await gatewayClient.get<{
+      items: CommissionCreditNoteItem[];
+      total: number;
+      page: number;
+      limit: number;
+    }>('/orders/seller/commission-credit-notes', {
+      params: {
+        ...(params?.page !== undefined ? { page: params.page } : {}),
+        ...(params?.limit !== undefined ? { limit: params.limit } : {}),
+      },
+    });
+
+    return {
+      data: { items: res.items ?? [], total: res.total, page: res.page, limit: res.limit },
+      status: 200,
+    };
+  } catch (err) {
+    console.error('[orders] fetchSellerCommissionCreditNotes', err);
+    const message =
+      err instanceof GatewayError ? err.message : 'Error al cargar las facturas rectificativas';
+    return {
+      error: message,
+      status: err instanceof GatewayError ? err.status : 500,
+    };
+  }
+}
