@@ -234,7 +234,6 @@ function mapAttributeType(type: string): string {
 function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
   return {
     name:              formData.name,
-    shortDescription:  formData.shortDescription,
     fullDescription:   formData.fullDescription || undefined,
     categoryId:        formData.categoryId,
     subcategoryId:     formData.subcategoryId || undefined,
@@ -378,7 +377,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
   const body: Record<string, unknown> = {};
 
   const scalar: Array<keyof Product> = [
-    'name', 'shortDescription', 'fullDescription', 'categoryId', 'subcategoryId',
+    'name', 'fullDescription', 'categoryId', 'subcategoryId',
     'basePrice', 'comparePrice', 'sku', 'barcode', 'stock',
     'lowStockThreshold', 'trackInventory', 'allowBackorders',
     'weight', 'weightUnit', 'dimensions', 'shippingClass',
@@ -511,10 +510,10 @@ export const validateProductForm = (formData: ProductFormData): ValidationRespon
     errors.push({ field: 'name', message: 'El nombre no puede tener más de 100 caracteres' });
   }
 
-  if (!formData.shortDescription || formData.shortDescription.trim().length < 20) {
-    errors.push({ field: 'shortDescription', message: 'La descripción corta debe tener al menos 20 caracteres' });
-  } else if (formData.shortDescription.length > 160) {
-    errors.push({ field: 'shortDescription', message: 'La descripción corta no puede tener más de 160 caracteres' });
+  if (!formData.fullDescription || formData.fullDescription.trim().length < 100) {
+    errors.push({ field: 'fullDescription', message: 'La descripción debe tener al menos 100 caracteres' });
+  } else if (formData.fullDescription.length > 3000) {
+    errors.push({ field: 'fullDescription', message: 'La descripción no puede tener más de 3000 caracteres' });
   }
 
   if (!formData.categoryId) {
@@ -796,7 +795,6 @@ export async function duplicateProduct(id: string): Promise<ApiResponse<Product>
 
     const duplicateBody = {
       name:              `${original.name} (copia)`,
-      shortDescription:  original.shortDescription,
       fullDescription:   original.fullDescription,
       categoryId:        original.categoryId,
       subcategoryId:     original.subcategoryId,

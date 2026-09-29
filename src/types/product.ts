@@ -263,7 +263,6 @@ export interface Product {
   producerId: string;
   name: string;
   slug: string;
-  shortDescription: string;
   fullDescription: string;
   categoryId: string;
   categoryName: string;
@@ -317,7 +316,6 @@ export interface Product {
 
 export interface ProductFormData {
   name: string;
-  shortDescription: string;
   fullDescription: string;
   categoryId: string;
   categoryName: string;
@@ -410,7 +408,6 @@ export const defaultProductionInfo: ProductionInfo = {
 
 export const defaultFormData: ProductFormData = {
   name: '',
-  shortDescription: '',
   fullDescription: '',
   categoryId: '',
   categoryName: '',
