@@ -19,7 +19,6 @@ function buildApiProduct(overrides: {
     producerId: 'producer-test-01',
     name: overrides.name,
     slug: overrides.name.toLowerCase().replace(/\s+/g, '-'),
-    shortDescription: `${overrides.name} artesanal de calidad`,
     fullDescription: 'Descripción completa del producto de prueba.',
     categoryId: 'quesos',
     categoryName: 'Quesos',

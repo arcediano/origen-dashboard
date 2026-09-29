@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Card } from '@arcediano/ux-library';
+import { StepShell } from './StepShell';
 import { ImageUploader } from '../../components/ImageUploader';
 import { ImageFocusPicker } from '../../components/ImageFocusPicker';
 import { Badge } from '@arcediano/ux-library';
@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
-import { motion } from 'framer-motion';
 import type { ProductImage } from '@/types/product';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
 
@@ -28,6 +27,8 @@ interface StepImagesProps {
   gallery?: ProductImage[];
   onImagesChange: (images: ProductImage[]) => void;
   completed?: boolean;
+  /** Dentro de la pantalla de revisión del onboarding con IA: sin tarjeta ni cabecera propias. */
+  embedded?: boolean;
   isPublishedProduct?: boolean;
 }
 
@@ -50,6 +51,7 @@ export function StepImages({
   gallery = [],
   onImagesChange,
   completed,
+  embedded = false,
   isPublishedProduct = false,
 }: StepImagesProps) {
   // La imagen principal es la marcada `isMain` (o la primera de la galería)
@@ -63,13 +65,8 @@ export function StepImages({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <Card variant="elevated" className="p-4 sm:p-6">
-        {/* Cabecera */}
+    <StepShell embedded={embedded}>
+        {!embedded && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
             <div className={cn(
@@ -102,6 +99,7 @@ export function StepImages({
             </Badge>
           </div>
         </div>
+        )}
 
         {/* Uploader */}
         <div className="space-y-2">
@@ -141,8 +139,7 @@ export function StepImages({
             <ImageFocusPicker image={mainImage} onChange={handleFocusChange} />
           </div>
         )}
-      </Card>
-    </motion.div>
+    </StepShell>
   );
 }
 

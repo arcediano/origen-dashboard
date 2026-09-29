@@ -11,12 +11,15 @@ import type {
   LabelReadingResponse,
 } from '@/lib/ai-assist/label-proposal';
 import type { TextDraft, TextImprovementResponse } from '@/lib/ai-assist/text-proposal';
+import type { ProductDraftResponse } from '@/lib/ai-assist/product-draft';
 import type { LabelImagePayload } from '@/lib/ai-assist/resize-label-image';
 
 /** Lectura con visión: hasta ~90 s en el gateway. */
 const LABEL_READING_TIMEOUT_MS = 90_000;
 /** Redacción de textos: hasta ~60 s en el gateway. */
 const TEXT_IMPROVEMENT_TIMEOUT_MS = 60_000;
+/** Onboarding completo (foto + etiquetas con Opus): hasta ~120 s en el gateway. */
+const PRODUCT_DRAFT_TIMEOUT_MS = 125_000;
 
 export type AiAssistErrorCode =
   | 'AI_DISABLED'
@@ -26,7 +29,9 @@ export type AiAssistErrorCode =
   | 'AI_PRODUCER_QUOTA_EXCEEDED'
   | 'AI_CALL_FAILED'
   | 'AI_LABEL_UNREADABLE'
-  | 'AI_TEXT_UNUSABLE';
+  | 'AI_TEXT_UNUSABLE'
+  | 'AI_DRAFT_UNUSABLE'
+  | 'AI_DRAFT_NO_CATEGORIES';
 
 /** Error de la API con el código estable del backend (mensaje ya en español). */
 export class AiAssistError extends Error {
@@ -85,6 +90,28 @@ export async function improveText(
       '/ai-assist/text-improvement',
       { assistKey, ...draft },
       { timeoutMs: TEXT_IMPROVEMENT_TIMEOUT_MS },
+    );
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+export interface ProductDraftInput {
+  text: string;
+  productImage: LabelImagePayload;
+  labelImages?: LabelImagePayload[];
+}
+
+/** Onboarding: foto + texto (+ etiquetas) → borrador completo. Imputa 1 unidad de cupo. */
+export async function draftProduct(
+  assistKey: string,
+  input: ProductDraftInput,
+): Promise<ProductDraftResponse> {
+  try {
+    return await gatewayClient.post<ProductDraftResponse>(
+      '/ai-assist/product-draft',
+      { assistKey, ...input },
+      { timeoutMs: PRODUCT_DRAFT_TIMEOUT_MS },
     );
   } catch (error) {
     throw toAiAssistError(error);

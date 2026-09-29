@@ -1,7 +1,7 @@
 /**
  * @component TextImproverCard
- * @description Asistente de IA (F2): propone nombre, descripción corta y
- *              descripción detallada a partir de lo que el productor ya ha
+ * @description Asistente de IA (F2): propone nombre y descripción a partir
+ *              de lo que el productor ya ha
  *              escrito (más unas notas opcionales). La IA solo propone: nada se
  *              cambia hasta que el productor pulsa "Aplicar propuesta".
  *              Se oculta si el asistente no está disponible (apagado, sin clave
