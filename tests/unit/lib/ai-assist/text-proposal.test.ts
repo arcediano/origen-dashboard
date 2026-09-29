@@ -8,11 +8,11 @@ import {
 describe('text-proposal', () => {
   it('buildTextDraft quita claves vacías o en blanco y recorta', () => {
     expect(
-      buildTextDraft({ name: '  Miel  ', categoryName: '', shortDescription: '   ', notes: undefined }),
+      buildTextDraft({ name: '  Miel  ', categoryName: '', fullDescription: '   ', notes: undefined }),
     ).toEqual({ name: 'Miel' });
   });
 
-  it('hasDraftContent exige nombre, notas o descripción corta (no basta la categoría)', () => {
+  it('hasDraftContent exige nombre o notas (no basta la categoría ni la descripción)', () => {
     expect(hasDraftContent({ categoryName: 'Quesos' })).toBe(false);
     expect(hasDraftContent({ fullDescription: 'algo' })).toBe(false);
     expect(hasDraftContent({ name: 'Miel' })).toBe(true);
@@ -21,7 +21,7 @@ describe('text-proposal', () => {
 
   it('overwrittenFields lista solo los campos que ya tienen texto', () => {
     expect(
-      overwrittenFields({ name: 'Miel', shortDescription: '  ', fullDescription: 'x' }),
+      overwrittenFields({ name: 'Miel', fullDescription: 'x' }),
     ).toEqual(['name', 'fullDescription']);
   });
 });

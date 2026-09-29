@@ -16,12 +16,14 @@ import {
   SuccessPublishModal,
 } from '@/app/dashboard/products/components';
 import { ProductFormSteps } from '@/app/dashboard/products/components/ProductFormSteps';
+import { AiProductIntake, type IntakeResult } from '@/app/dashboard/products/components/ai-onboarding/AiProductIntake';
+import { AiProductReview } from '@/app/dashboard/products/components/ai-onboarding/AiProductReview';
 import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductFormSidebar';
 
 import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
 import { useHideBottomTabBar } from '@/hooks/useHideBottomTabBar';
-import { FORM_STEPS, type FormStepId } from '@/types/product';
+import { FORM_STEPS, defaultNutritionalInfo, type FormStepId, type ProductImage } from '@/types/product';
 import {
   toast,
   appShellPaddingClass,
@@ -33,7 +35,11 @@ import {
   AlertDescription,
   Button,
 } from '@arcediano/ux-library';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { getAiAssistQuota } from '@/lib/api/ai-assist';
+import { fetchCategoriesTree } from '@/lib/api/categories';
+import { draftToPatches, type ProductDraftResponse } from '@/lib/ai-assist/product-draft';
+import type { AiAssistQuota } from '@/lib/ai-assist/label-proposal';
 
 // ─── Animaciones ──────────────────────────────────────────────────────────────
 
@@ -41,6 +47,12 @@ const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
 };
+
+/**
+ * Cómo se crea el producto: con el asistente de IA (pantalla de entrada +
+ * pantalla única de revisión, opción B) o a mano con el wizard de 7 pasos.
+ */
+type CreateMode = 'loading' | 'ai-intake' | 'ai-review' | 'wizard';
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
@@ -77,6 +89,64 @@ export default function CreateProductPage() {
     aiAssistUsedUnsaved,
     markAiAssistUsed,
   } = useProductForm();
+
+  const [mode, setMode] = useState<CreateMode>('loading');
+  const [quota, setQuota] = useState<AiAssistQuota | null>(null);
+  const [draft, setDraft] = useState<ProductDraftResponse | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getAiAssistQuota()
+      .then((q) => !cancelled && setQuota(q))
+      // Sin permiso o servicio caído: alta manual, como siempre
+      .catch(() => !cancelled && setQuota({ enabled: false, used: 0, total: 0 }));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Con el cupo cargado se decide el modo inicial: asistente de IA si está
+  // disponible y no hay ya un borrador a medias; si no, el wizard de siempre.
+  useEffect(() => {
+    if (mode !== 'loading' || !quota) return;
+    const hasDraft = !!formData.name || formData.gallery.length > 0;
+    const aiAvailable = quota.enabled && (quota.used < quota.total || aiAssistUsedUnsaved);
+    setMode(!hasDraft && aiAvailable ? 'ai-intake' : 'wizard');
+  }, [mode, quota, formData.name, formData.gallery.length, aiAssistUsedUnsaved]);
+
+  const handleAiDraft = useCallback(
+    async ({ response, productPhoto }: IntakeResult) => {
+      let categories: Awaited<ReturnType<typeof fetchCategoriesTree>> = [];
+      try {
+        categories = await fetchCategoriesTree();
+      } catch {
+        /* sin nombres de categoría: se aplica el id y el productor puede reelegir */
+      }
+      const patches = draftToPatches(response, categories, defaultNutritionalInfo);
+      for (const patch of patches) {
+        if (patch.kind === 'field') handleInputChange(patch.field, patch.value);
+        else handleNestedChange(patch.section, patch.field, patch.value);
+      }
+      const photo: ProductImage = {
+        id: `temp-${Date.now()}-0-${Math.random().toString(36).substring(2, 7)}`,
+        url: URL.createObjectURL(productPhoto),
+        file: productPhoto,
+        isMain: true,
+        sortOrder: 0,
+        uploading: false,
+        progress: 0,
+        size: productPhoto.size,
+        type: productPhoto.type,
+      };
+      handleImagesChange([photo]);
+      markAiAssistUsed();
+      setQuota((q) => (q ? { ...q, used: response.quota.used, total: response.quota.total } : q));
+      setDraft(response);
+      setMode('ai-review');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [handleInputChange, handleNestedChange, handleImagesChange, markAiAssistUsed],
+  );
 
   useEffect(() => {
     if (error) {
@@ -145,7 +215,13 @@ export default function CreateProductPage() {
 
       <PageHeader
         title="Crear producto"
-        description="Completa los pasos para publicar tu producto"
+        description={
+          mode === 'ai-intake'
+            ? 'Con ayuda del asistente de IA'
+            : mode === 'ai-review'
+              ? 'Revisa la ficha y publícala'
+              : 'Completa los pasos para publicar tu producto'
+        }
         badgeIcon={Package}
         badgeText="Nuevo producto"
         tooltip="Creación de producto"
@@ -168,68 +244,106 @@ export default function CreateProductPage() {
       />
 
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <CreateProductProgress
-          currentTab={activeTab}
-          completedTabs={completedTabs}
-          onTabChange={handleTabChange}
-        />
-
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-6"
-        >
-          {/* padding inferior móvil — reserva el alto del ActionBar fijo.
-              ActionBar (showOnDesktop=false, por defecto) solo se oculta a
-              partir de lg: (1024px) -- no de sm: -- así que el padding y el
-              wrapper de CreateProductNavigation de abajo deben cancelarse/
-              mostrarse en el MISMO breakpoint (lg:) o queda un hueco de
-              640-1023px sin espacio reservado mientras la ActionBar sigue
-              fija abajo, tapando el formulario. */}
-          <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-0`}>
-            <ProductFormSteps
-              activeTab={activeTab}
-              formData={formData}
-              completedTabs={completedTabs}
-              onInputChange={handleInputChange}
-              onNestedChange={handleNestedChange}
-              aiAssistKey={aiAssistKey}
-              onAiAssistUsed={markAiAssistUsed}
-              onPriceTiersChange={handlePriceTiersChange}
-              onImagesChange={handleImagesChange}
-            />
-
-            {/* Navegación de pasos — sólo visible en ≥ lg; hasta ahí usa ActionBar */}
-            <div className="hidden lg:block">
-              <CreateProductNavigation
-                currentTab={activeTab}
-                onTabChange={handleTabChange}
-                completedTabs={completedTabs}
-                currentStepErrors={currentStepErrors}
-                onSave={handleSave}
-                isSaving={isSaving}
-                allStepsCompleted={allStepsCompleted}
-                hasCertifications={hasCertifications}
-                certificationsApproved={certificationsApproved}
-                hasPendingManualCerts={hasPendingManualCerts}
-                onPublish={handlePublish}
-                isPublishing={isPublishing}
-                publishStatus={publishStatus}
-                publishError={publishError}
-              />
-            </div>
+        {mode === 'loading' && (
+          <div className="mx-auto max-w-2xl space-y-4" aria-busy="true" aria-label="Cargando">
+            <div className="mx-auto h-8 w-2/3 animate-pulse rounded-xl bg-origen-pastel" />
+            <div className="h-64 animate-pulse rounded-2xl bg-origen-pastel/70" />
           </div>
+        )}
 
-          <ProductFormSidebar
-            tips={tips}
-            keyFact={KEY_FACTS_BY_STEP[stepNumber]}
+        {mode === 'ai-intake' && (
+          <AiProductIntake
+            assistKey={aiAssistKey}
+            quota={quota && quota.enabled ? { used: quota.used, total: quota.total } : null}
+            onDraft={handleAiDraft}
+            onManual={() => setMode('wizard')}
           />
-        </motion.div>
+        )}
+
+        {mode === 'ai-review' && draft && (
+          <AiProductReview
+            formData={formData}
+            draft={draft}
+            completedTabs={completedTabs}
+            onInputChange={handleInputChange}
+            onNestedChange={handleNestedChange}
+            onImagesChange={handleImagesChange}
+            onSave={handleSave}
+            isSaving={isSaving}
+            onPublish={handlePublish}
+            isPublishing={isPublishing}
+            publishError={publishError}
+            canPublish={allStepsCompleted}
+            onOpenWizard={() => setMode('wizard')}
+          />
+        )}
+
+        {mode === 'wizard' && (
+          <>
+          <CreateProductProgress
+            currentTab={activeTab}
+            completedTabs={completedTabs}
+            onTabChange={handleTabChange}
+          />
+
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-6"
+          >
+            {/* padding inferior móvil — reserva el alto del ActionBar fijo.
+                ActionBar (showOnDesktop=false, por defecto) solo se oculta a
+                partir de lg: (1024px) -- no de sm: -- así que el padding y el
+                wrapper de CreateProductNavigation de abajo deben cancelarse/
+                mostrarse en el MISMO breakpoint (lg:) o queda un hueco de
+                640-1023px sin espacio reservado mientras la ActionBar sigue
+                fija abajo, tapando el formulario. */}
+            <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-0`}>
+              <ProductFormSteps
+                activeTab={activeTab}
+                formData={formData}
+                completedTabs={completedTabs}
+                onInputChange={handleInputChange}
+                onNestedChange={handleNestedChange}
+                aiAssistKey={aiAssistKey}
+                onAiAssistUsed={markAiAssistUsed}
+                onPriceTiersChange={handlePriceTiersChange}
+                onImagesChange={handleImagesChange}
+              />
+
+              {/* Navegación de pasos — sólo visible en ≥ lg; hasta ahí usa ActionBar */}
+              <div className="hidden lg:block">
+                <CreateProductNavigation
+                  currentTab={activeTab}
+                  onTabChange={handleTabChange}
+                  completedTabs={completedTabs}
+                  currentStepErrors={currentStepErrors}
+                  onSave={handleSave}
+                  isSaving={isSaving}
+                  allStepsCompleted={allStepsCompleted}
+                  hasCertifications={hasCertifications}
+                  certificationsApproved={certificationsApproved}
+                  hasPendingManualCerts={hasPendingManualCerts}
+                  onPublish={handlePublish}
+                  isPublishing={isPublishing}
+                  publishStatus={publishStatus}
+                  publishError={publishError}
+                />
+              </div>
+            </div>
+
+            <ProductFormSidebar
+              tips={tips}
+              keyFact={KEY_FACTS_BY_STEP[stepNumber]}
+            />
+          </motion.div>
+          </>
+        )}
       </div>
 
       {/* Panel de errores móvil — aparece sobre el ActionBar */}
-      {showMobileErrors && currentStepErrors.length > 0 && (
+      {mode === 'wizard' && showMobileErrors && currentStepErrors.length > 0 && (
         <div className={`sm:hidden fixed ${appShellBottomOffsetClass(NAV_HEIGHT_MOBILE_DASHBOARD, 40)} left-0 right-0 z-50 mx-4`}>
           <Alert
             variant="error"
@@ -262,6 +376,7 @@ export default function CreateProductPage() {
       )}
 
       {/* ActionBar móvil — navegación entre pasos con pulgar */}
+      {mode === 'wizard' && (
       <ActionBar
         primaryAction={{
           id: 'primary',
@@ -295,6 +410,7 @@ export default function CreateProductPage() {
           },
         ]}
       />
+      )}
 
       <CreateProductCancelDialog
         open={showCancelDialog}

@@ -5,6 +5,7 @@
 
 'use client';
 
+import { StepShell } from './StepShell';
 import { Button, Input, Badge } from '@arcediano/ux-library';
 import {
   Card, CardHeader, CardTitle, CardContent,
@@ -58,6 +59,8 @@ interface StepNutritionalProps {
   nutritionalInfo?: NutritionalInfo;
   onNestedChange: (section: string, field: string, value: any) => void;
   completed?: boolean;
+  /** Dentro de la pantalla de revisión del onboarding con IA: sin tarjeta ni cabecera propias. */
+  embedded?: boolean;
   isPublishedProduct?: boolean;
   /** Clave de cupo del asistente de IA (productId al editar, clave del borrador al crear). */
   aiAssistKey?: string | null;
@@ -140,6 +143,7 @@ export function StepNutritional({
   },
   onNestedChange,
   completed,
+  embedded = false,
   isPublishedProduct = false,
   aiAssistKey = null,
   onAiAssistUsed,
@@ -201,13 +205,8 @@ export function StepNutritional({
   ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <Card variant="elevated" className="p-4 sm:p-6">
-        {/* Cabecera */}
+    <StepShell embedded={embedded}>
+        {!embedded && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
             <div className={cn(
@@ -240,6 +239,7 @@ export function StepNutritional({
             </Badge>
           </div>
         </div>
+        )}
 
         {aiAssistKey && (
           <LabelReaderCard
@@ -707,8 +707,7 @@ export function StepNutritional({
             La información nutricional completa genera confianza en tus clientes
           </span>
         </div>
-      </Card>
-    </motion.div>
+    </StepShell>
   );
 }
 

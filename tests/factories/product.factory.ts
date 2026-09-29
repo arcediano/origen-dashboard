@@ -6,7 +6,6 @@
 export interface MockProduct {
   id: number;
   name: string;
-  shortDescription: string;
   fullDescription: string;
   basePrice: number;
   comparePrice: number | null;
@@ -33,7 +32,6 @@ export function buildProduct(overrides: Partial<MockProduct> = {}): MockProduct 
   return {
     id,
     name: `Producto Test ${id}`,
-    shortDescription: 'Descripción corta de prueba para el producto de test',
     fullDescription: 'Descripción completa de prueba. Este es un producto de ejemplo para los tests automatizados del panel de gestión.',
     basePrice: 12.5,
     comparePrice: 15.0,

@@ -43,8 +43,9 @@ const nextConfig = {
   },
   experimental: {
     // El proxy de rewrites corta a los 30 s por defecto; la lectura de etiqueta
-    // con IA (visión, hasta 90 s en el gateway) necesita más margen.
-    proxyTimeout: 90_000,
+    // con IA (visión, hasta 90 s en el gateway) y el onboarding de producto con
+    // IA (foto + etiquetas, hasta 120 s en el gateway) necesitan más margen.
+    proxyTimeout: 130_000,
     serverActions: {
       bodySizeLimit: "10mb",
     },

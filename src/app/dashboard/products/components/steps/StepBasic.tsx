@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Card } from '@arcediano/ux-library';
+import { StepShell } from './StepShell';
 import { Input } from '@arcediano/ux-library';
 import { Textarea } from '@arcediano/ux-library';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@arcediano/ux-library';
@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { fetchCategoriesTree, type CategoryTree } from '@/lib/api/categories';
-import { motion } from 'framer-motion';
 import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
@@ -37,6 +36,8 @@ interface StepBasicProps {
   touched?: Record<string, boolean>;
   onInputChange: (field: string, value: any) => void;
   completed?: boolean;
+  /** Dentro de la pantalla de revisión del onboarding con IA: sin tarjeta ni cabecera propias. */
+  embedded?: boolean;
   isPublishedProduct?: boolean;
   /** Clave de cupo del asistente de IA (creación: clave del borrador; edición: productId). */
   aiAssistKey?: string | null;
@@ -86,6 +87,7 @@ export function StepBasic({
   touched = {},
   onInputChange,
   completed,
+  embedded = false,
   isPublishedProduct = false,
   aiAssistKey = null,
   onAiAssistUsed,
@@ -140,13 +142,8 @@ export function StepBasic({
   const fullDescLength = formData?.fullDescription?.length || 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <Card variant="elevated" className="p-4 sm:p-6">
-        {/* Cabecera */}
+    <StepShell embedded={embedded}>
+        {!embedded && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
             <div className={cn(
@@ -179,6 +176,7 @@ export function StepBasic({
             </Badge>
           </div>
         </div>
+        )}
 
         {aiAssistKey && (
           <div className="mb-6">
@@ -360,8 +358,7 @@ export function StepBasic({
             )}
           </div>
         </div>
-      </Card>
-    </motion.div>
+    </StepShell>
   );
 }
 
