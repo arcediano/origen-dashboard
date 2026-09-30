@@ -12,8 +12,9 @@ import { Button, Input, Label, Badge, DateInput } from '@arcediano/ux-library';
 import { Alert, AlertDescription } from '@arcediano/ux-library';
 import { appShellPaddingClass, appShellBottomOffsetClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
 import { getCurrentUser, updateCurrentUser, type AuthUser } from '@/lib/api/auth';
-import { loadOnboardingData, loadProducerProfile, saveStep1, saveStep2, type OnboardingData } from '@/lib/api/onboarding';
-import { getProducerProfile, updateProducerProfile, type ProducerProfileData } from '@/lib/api/producers';
+import { loadOnboardingData, saveStep1, type OnboardingData } from '@/lib/api/onboarding';
+import type { EntityType, LocationData } from '@/lib/onboarding/types';
+import { getProducerProfile, updateProducerProfile } from '@/lib/api/producers';
 import { uploadFile } from '@/lib/api/media';
 
 type PersonalFormState = {
@@ -67,14 +68,6 @@ const containerVariants: Variants = {
   },
 };
 
-function mapTeamSizeFromApi(value?: string | null): '1-2' | '3-5' | '6-10' | '11+' | undefined {
-  if (value === 'ONE_TWO' || value === '1-2') return '1-2';
-  if (value === 'THREE_FIVE' || value === '3-5') return '3-5';
-  if (value === 'SIX_TEN' || value === '6-10') return '6-10';
-  if (value === 'ELEVEN_PLUS' || value === '11+') return '11+';
-  return undefined;
-}
-
 function splitName(fullName: string): { firstName: string; lastName: string } {
   const trimmed = fullName.trim();
   if (!trimmed) return { firstName: '', lastName: '' };
@@ -104,7 +97,6 @@ export default function PersonalInfoPage() {
   const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(null);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [avatarKey, setAvatarKey] = useState<string | null>(null);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [partialLoadErrors, setPartialLoadErrors] = useState<Record<string, string>>({});
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -273,7 +265,6 @@ export default function PersonalInfoPage() {
   const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setIsUploadingAvatar(true);
     setSaveError(null);
     try {
       const { key, url } = await uploadFile(file, 'visual/logo');
@@ -282,7 +273,6 @@ export default function PersonalInfoPage() {
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Error al subir la imagen de avatar.');
     } finally {
-      setIsUploadingAvatar(false);
       e.target.value = '';
     }
   };
@@ -300,24 +290,12 @@ export default function PersonalInfoPage() {
       return;
     }
 
-    const businessName = (onboardingData.story?.businessName ?? onboardingData.fiscal?.businessName ?? '').trim();
-    if (!businessName) {
-      setSaveError('No se puede guardar sin nombre comercial. Completa primero tu perfil de negocio.');
-      return;
-    }
-
-    const descriptionBase = (onboardingData.story?.description ?? '').trim();
-    if (descriptionBase.length < 50) {
-      setSaveError('No se puede guardar mientras falte una descripcion comercial valida en onboarding.');
-      return;
-    }
-
     const addressParts = form.address.trim().split(/\s+/);
     const streetNumber = onboardingData.location?.streetNumber ?? addressParts.pop() ?? 'S/N';
     const street = onboardingData.location?.street ?? (addressParts.join(' ') || form.address.trim());
 
-    const step1Payload: Parameters<typeof saveStep1>[0] = {
-      entityType: onboardingData.fiscal?.entityType as Parameters<typeof saveStep1>[0]['entityType'],
+    const step1Payload: LocationData = {
+      entityType: onboardingData.fiscal?.entityType as EntityType | undefined,
       legalRepresentativeName: onboardingData.fiscal?.legalRepresentativeName ?? '',
       businessPhone: form.phone.replace(/\s+/g, ''),
       taxId,
@@ -339,23 +317,7 @@ export default function PersonalInfoPage() {
           }
         : undefined,
       categories: onboardingData.fiscal?.categories ?? [],
-      foundedYear: onboardingData.location?.foundedYear ?? undefined,
-      teamSize: mapTeamSizeFromApi(onboardingData.location?.teamSize),
       locationImages: [],
-    };
-
-    const step2Payload: Parameters<typeof saveStep2>[0] = {
-      businessName,
-      tagline: form.bio.trim().slice(0, 200),
-      description: descriptionBase,
-      productionPhilosophy: onboardingData.story?.productionPhilosophy ?? '',
-      values: onboardingData.story?.values?.length
-        ? onboardingData.story.values
-        : ['Calidad', 'Proximidad'],
-      website: onboardingData.story?.website ?? '',
-      instagramHandle: onboardingData.story?.instagramHandle ?? '',
-      certifications: [],
-      photos: [],
     };
 
     setIsSaving(true);
@@ -363,10 +325,15 @@ export default function PersonalInfoPage() {
     setSaveSuccess(null);
 
     try {
-      const updates: Array<Promise<unknown>> = [
-        saveStep1(step1Payload, []),
-        saveStep2(step2Payload, []),
-      ];
+      // Sin segundo argumento: `locationImageKeys` omitido = no tocar las fotos del local
+      // (pasar `[]` las borraría todas). La historia/tagline ya no viaja por el onboarding.
+      const updates: Array<Promise<unknown>> = [saveStep1(step1Payload)];
+
+      // La bio de esta pantalla es el tagline del perfil comercial (máx. 150 caracteres).
+      const bio = form.bio.trim();
+      if (bio && bio !== initialForm.bio.trim()) {
+        updates.push(updateProducerProfile({ tagline: bio.slice(0, 150) }));
+      }
 
       if (authUser) {
         const authUserPayload: Parameters<typeof updateCurrentUser>[0] = {};
@@ -698,11 +665,12 @@ export default function PersonalInfoPage() {
                       onChange={(e) => setForm({ ...form, bio: e.target.value })}
                       disabled={!isEditing}
                       rows={4}
+                      maxLength={150}
                       className="w-full p-3 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-hoja-tinta focus:border-hoja-tinta disabled:bg-surface"
                       placeholder="Cuentanos algo sobre ti..."
                     />
                     <p className="text-xs text-muted-foreground">
-                      Esta informacion se sincroniza con el tagline comercial de tu perfil.
+                      Esta informacion se sincroniza con el tagline comercial de tu perfil (máx. 150 caracteres).
                     </p>
                   </div>
                 </CardContent>

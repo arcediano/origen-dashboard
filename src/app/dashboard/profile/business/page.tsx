@@ -449,8 +449,11 @@ export default function BusinessInfoPage() {
     if (form.website.trim() && !/^https?:\/\//i.test(form.website.trim())) {
       nextErrors.website = 'Incluye URL valida (http:// o https://)';
     }
+    if (form.businessName.trim().length < 3) {
+      nextErrors.businessName = 'El nombre del negocio es obligatorio (mínimo 3 caracteres)';
+    }
     if (form.description.trim() && form.description.trim().length < 50) {
-      nextErrors.description = 'La descripcion debe tener al menos 50 caracteres';
+      nextErrors.description = 'Si añades una descripcion, debe tener al menos 50 caracteres';
     }
     if (form.tagline.trim() && form.tagline.trim().length < 3) {
       nextErrors.tagline = 'El tagline debe tener al menos 3 caracteres';
@@ -653,7 +656,7 @@ export default function BusinessInfoPage() {
                 form.categories.length === 0 && (
                   <Alert variant="organic" className="mb-6">
                     <AlertDescription>
-                      Aun no hay datos de negocio cargados. Empieza por completar nombre, historia y ubicacion.
+                      Aun no hay datos de negocio cargados. Empieza por completar nombre y ubicacion; la historia de tu marca es opcional.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -834,6 +837,7 @@ export default function BusinessInfoPage() {
                         <RequiredFieldIndicator isRequired={isFieldBlocker('businessName', readinessReport)} />
                       </Label>
                       <Input id="businessName" value={form.businessName} onChange={(e) => setForm({ ...form, businessName: e.target.value })} disabled={!isEditing} />
+                      {errors.businessName && <p className="text-xs text-feedback-danger">{errors.businessName}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="legalName">Razon social</Label>
@@ -908,12 +912,12 @@ export default function BusinessInfoPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="website">Sitio web</Label>
-                      <Input id="website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} disabled={!isEditing} placeholder="https://..." />
+                      <Input id="website" maxLength={300} value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} disabled={!isEditing} placeholder="https://..." />
                       {errors.website && <p className="text-xs text-feedback-danger">{errors.website}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="instagram">Instagram</Label>
-                      <Input id="instagram" value={form.instagram} onChange={(e) => setForm({ ...form, instagram: e.target.value.replace(/^@/, '') })} disabled={!isEditing} placeholder="@usuario" />
+                      <Input id="instagram" maxLength={100} value={form.instagram} onChange={(e) => setForm({ ...form, instagram: e.target.value.replace(/^@/, '') })} disabled={!isEditing} placeholder="@usuario" />
                     </div>
                   </div>
                 </CardContent>
@@ -1054,12 +1058,13 @@ export default function BusinessInfoPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card id="historia" className="scroll-mt-24">
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <FileText className="w-5 h-5 text-hoja-tinta" />
                       Historia y valores
+                      <Badge variant="neutral" size="xs">Opcional</Badge>
                     </CardTitle>
                     <SectionStatusBadge 
                       isComplete={sectionCompleteness.story.isComplete}
@@ -1071,17 +1076,15 @@ export default function BusinessInfoPage() {
                   <div className="space-y-2">
                     <Label htmlFor="tagline" className="flex items-center">
                       Tagline
-                      <RequiredFieldIndicator isRequired={isFieldBlocker('storyName', readinessReport)} />
                     </Label>
-                    <Input id="tagline" value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} disabled={!isEditing} />
+                    <Input id="tagline" maxLength={150} value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} disabled={!isEditing} />
                     {errors.tagline && <p className="text-xs text-feedback-danger">{errors.tagline}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="businessDescription" className="flex items-center">
                       Descripcion
-                      <RequiredFieldIndicator isRequired={isFieldBlocker('description', readinessReport)} />
                     </Label>
-                    <Textarea id="businessDescription" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} disabled={!isEditing} rows={5} />
+                    <Textarea id="businessDescription" maxLength={2000} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} disabled={!isEditing} rows={5} />
                     {errors.description && <p className="text-xs text-feedback-danger">{errors.description}</p>}
                   </div>
                   <div className="space-y-2">
@@ -1090,11 +1093,11 @@ export default function BusinessInfoPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="introVideoUrl">Video de presentacion</Label>
-                    <Input id="introVideoUrl" value={form.introVideoUrl} onChange={(e) => setForm({ ...form, introVideoUrl: e.target.value })} disabled={!isEditing} placeholder="https://youtube.com/watch?v=..." />
+                    <Input id="introVideoUrl" maxLength={500} value={form.introVideoUrl} onChange={(e) => setForm({ ...form, introVideoUrl: e.target.value })} disabled={!isEditing} placeholder="https://youtube.com/watch?v=..." />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="productionPhilosophy">Filosofia de produccion</Label>
-                    <Textarea id="productionPhilosophy" value={form.productionPhilosophy} onChange={(e) => setForm({ ...form, productionPhilosophy: e.target.value })} disabled={!isEditing} rows={4} />
+                    <Textarea id="productionPhilosophy" maxLength={1000} value={form.productionPhilosophy} onChange={(e) => setForm({ ...form, productionPhilosophy: e.target.value })} disabled={!isEditing} rows={4} />
                   </div>
                   <div className="space-y-2">
                     <Label>Valores</Label>

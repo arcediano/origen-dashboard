@@ -10,7 +10,7 @@ import {
 import { Spinner } from '@/components/shared';
 import { Alert, AlertDescription, Button } from '@arcediano/ux-library';
 import { stripeConnectAppearance, stripeConnectFonts } from '@/lib/stripe/connect-appearance';
-import { saveStep6 } from '@/lib/api/onboarding';
+import { saveStep5 } from '@/lib/api/onboarding';
 
 const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
@@ -146,7 +146,7 @@ export function StripeConnectOnboarding({
    *
    * CRÍTICO (G2 fix - punto 6 del encargo):
    *   1. Leer el estado real de Stripe vía GET /api/stripe/status
-   *   2. Guardar con saveStep6 PERO SIN incluir stripeConnected: true
+   *   2. Guardar con saveStep5 PERO SIN incluir stripeConnected: true
    *   3. Llamar a onVerified() para que el padre recargue el estado real
    *
    * El campo stripeConnected debe seguir derivándose ÚNICAMENTE del webhook,
@@ -174,10 +174,10 @@ export function StripeConnectOnboarding({
           data?: { detailsSubmitted?: boolean; chargesEnabled?: boolean };
         };
 
-        // Paso 2: Guardar step6 CON acceptTerms: true, PERO SIN stripeConnected
-        // (ver tipo EnhancedStep6StripeData - stripeConnected es opcional)
+        // Paso 2: Guardar el paso 5 CON acceptTerms: true, PERO SIN stripeConnected
+        // (ver tipo StripeData - stripeConnected nunca se envía al backend)
         if (statusData.data?.detailsSubmitted) {
-          await saveStep6({
+          await saveStep5({
             stripeAccountId: resolvedAccountId,
             acceptTerms: true,
             // IMPORTANTE: NO incluir stripeConnected aquí

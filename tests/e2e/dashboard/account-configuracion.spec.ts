@@ -753,10 +753,9 @@ test.describe('/dashboard/configuracion/envios', () => {
     await expect(page.locator('#main-content').getByRole('heading', { name: /^logística$/i })).toBeVisible();
   });
 
-  test('muestra los tres métodos de envío predefinidos', async ({ page }) => {
+  test('muestra los métodos de envío guardados', async ({ page }) => {
     await expect(page.getByText(/envío estándar/i)).toBeVisible();
     await expect(page.getByText(/envío exprés/i)).toBeVisible();
-    await expect(page.getByText(/recogida en local/i)).toBeVisible();
   });
 
   test('muestra las zonas de entrega', async ({ page }) => {

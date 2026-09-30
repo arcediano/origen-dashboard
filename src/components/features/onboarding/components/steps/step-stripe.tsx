@@ -1,77 +1,52 @@
 /**
  * @file step-stripe.tsx
- * @description Paso 6 del onboarding: Configuración de pagos con Stripe Connect.
+ * @description Paso 5 del onboarding: configuración de pagos con Stripe Connect.
  *
  * Flujo de conexión embebido (Stripe Connect Embedded Components):
- *   1. Usuario ve Card 2 con componente StripeConnectOnboarding embebido
- *   2. Se llama a POST /api/stripe/account-session → crea AccountSession
- *   3. El componente embebido monta el formulario de Stripe inline (sin redirección)
- *   4. Usuario completa el onboarding dentro del iframe de Connect.js
- *   5. Al salir (onExit), se verifica el estado real con GET /api/stripe/status
- *   6. Se guarda con saveStep6 (SIN stripeConnected en el payload)
- *   7. Se llama a onRequestRefresh para que el padre recargue el estado real desde el servidor
+ *   1. El productor ve el componente StripeConnectOnboarding embebido.
+ *   2. Se llama a POST /api/stripe/account-session → crea AccountSession.
+ *   3. El componente monta el formulario de Stripe inline (sin redirección).
+ *   4. Al salir (onExit), se verifica el estado real con GET /api/stripe/status
+ *      y se vincula la cuenta con `saveStep5` (SIN `stripeConnected`: solo lo escribe el webhook).
+ *   5. Se llama a `onRequestRefresh` para que el padre recargue el estado real del servidor.
  *
- * Props opcionales:
- *   userEmail       — Pre-rellena el email en la cuenta Stripe (del perfil del usuario)
- *   businessName    — Pre-rellena el nombre del negocio en Stripe (del paso 2)
- *   onRequestRefresh — Callback para que el padre recargue el estado (ej. loadOnboardingData)
+ * Props opcionales (precargan Stripe): `userEmail`, `firstName`, `lastName`,
+ * `businessName` (del registro) y `website` (del Perfil comercial).
  */
 
 'use client';
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
-
-import { Button } from '@arcediano/ux-library';
-import { Checkbox } from '@arcediano/ux-library';
-import { Spinner } from '@/components/shared';
+import { Alert, Checkbox } from '@arcediano/ux-library';
 import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-connect-onboarding';
 import { useStripeConnectPolling } from '@/lib/stripe/use-stripe-connect-polling';
+import type { StripeData } from '@/lib/onboarding/types';
+import { AlertCircle, CheckCircle2, CreditCard, Info, Lock, Shield, Zap } from 'lucide-react';
+import { FieldError } from '../FormBits';
+import { StepSection } from '../StepSection';
 
-import {
-  CreditCard,
-  Shield,
-  CheckCircle2,
-  Lock,
-  Zap,
-  Info,
-  ArrowRight,
-  AlertCircle,
-} from 'lucide-react';
+export type { StripeData as EnhancedStripeData };
 
-// ─── Tipos ───────────────────────────────────────────────────────────────────
-
-export interface EnhancedStep6StripeData {
-  stripeConnected?: boolean; // ⚠️ G2 FIX: Ahora opcional (no se persiste desde el cliente)
-  stripeAccountId?: string;
-  acceptTerms: boolean;
-}
-
-export interface EnhancedStep6StripeProps {
-  data: EnhancedStep6StripeData;
-  onChange: (data: EnhancedStep6StripeData) => void;
-  /** Email del usuario — pre-rellena la cuenta Stripe */
+export interface EnhancedStep5PaymentsProps {
+  data: StripeData;
+  onChange: (data: StripeData) => void;
   userEmail?: string;
-  /** Nombre del usuario */
   firstName?: string;
-  /** Apellidos del usuario */
   lastName?: string;
-  /** Nombre del negocio (paso 2) — pre-rellena Stripe */
+  /** Nombre del negocio (del registro) — precarga Stripe. */
   businessName?: string;
-  /** Web del negocio (paso 2) — pre-rellena Stripe */
+  /** Web del negocio (Perfil comercial) — precarga Stripe. */
   website?: string;
   /**
-   * Callback para recargar el estado desde el servidor tras completar
-   * onboarding embebido. Si devuelve una promesa, el polling espera a que
-   * resuelva antes de programar el siguiente tick, evitando peticiones
-   * solapadas.
+   * Recarga el estado desde el servidor tras completar el onboarding embebido.
+   * Si devuelve una promesa, el polling espera a que resuelva antes del
+   * siguiente tick, evitando peticiones solapadas.
    */
   onRequestRefresh?: () => void | Promise<void>;
+  errors?: Record<string, string>;
 }
 
-// ─── Componente ──────────────────────────────────────────────────────────────
-
-export function EnhancedStep6Stripe({
+export function EnhancedStep5Payments({
   data,
   onChange,
   userEmail,
@@ -80,29 +55,17 @@ export function EnhancedStep6Stripe({
   businessName,
   website,
   onRequestRefresh,
-}: EnhancedStep6StripeProps) {
-  // ── Manejadores ────────────────────────────────────────────────────────────
-
-  /**
-   * Se llama cuando el onboarding embebido se completa.
-   * Recarga el estado real del servidor para que el padre vea los cambios.
-   */
+  errors = {},
+}: EnhancedStep5PaymentsProps) {
   const handleVerified = React.useCallback(() => {
-    if (onRequestRefresh) {
-      void onRequestRefresh();
-    }
+    if (onRequestRefresh) void onRequestRefresh();
   }, [onRequestRefresh]);
 
-  // Mismo bug que en dashboard/account/payments: `onVerified` sólo se
-  // dispara cuando el usuario cierra el formulario embebido, que suele ser
+  // `onVerified` solo se dispara al cerrar el formulario embebido, normalmente
   // antes de que Stripe termine de verificar la cuenta. Sin este polling, un
-  // productor que se queda en el paso 6 esperando ver "¡Cuenta conectada!"
-  // nunca lo vería actualizarse.
-  //
-  // Nivel lento: aquí el formulario embebido está siempre visible mientras
-  // se esté en el paso 6, así que no hay un estado "panel abierto" que
-  // justifique el nivel rápido, y el wizard además deja terminar el
-  // onboarding sin Stripe conectado (el productor no queda bloqueado).
+  // productor que espera ver "¡Cuenta conectada!" nunca lo vería actualizarse.
+  // Nivel lento: el formulario está siempre visible y el wizard permite
+  // terminar sin Stripe conectado.
   const handlePollTick = React.useCallback(async () => {
     await onRequestRefresh?.();
   }, [onRequestRefresh]);
@@ -113,263 +76,128 @@ export function EnhancedStep6Stripe({
     onTick: handlePollTick,
   });
 
-  const handleDisconnect = () => {
-    onChange({ stripeConnected: false, stripeAccountId: undefined, acceptTerms: false });
-  };
-
-  const handleTermsChange = (checked: boolean | 'indeterminate') => {
-    onChange({ ...data, acceptTerms: checked === true });
-  };
-
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const connected = data.stripeConnected;
 
   return (
-    <div className="space-y-6">
-
-      {/* ──────────────────────────────────────────────────────────────────────
-          BANNER DE IMPACTO — mobile-first, siempre visible si no conectado
-      ────────────────────────────────────────────────────────────────────── */}
-      {!data.stripeConnected && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-feedback-warning-subtle border border-feedback-warning/30 rounded-2xl">
-          <div className="flex items-start gap-3 flex-1">
-            <AlertCircle className="w-5 h-5 text-feedback-warning shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-feedback-warning-text">
-                Necesitas conectar Stripe para cobrar tus pedidos
-              </p>
-              <p className="text-xs text-feedback-warning-text/80 mt-0.5">
-                Sin cuenta de pagos, los pedidos que recibas quedarán en espera y no podrás procesarlos.
-                Puedes conectarlo ahora o después desde tu panel, pero hasta entonces no podrás operar.
-              </p>
-            </div>
-          </div>
-          <span className="self-start sm:self-center text-xs font-medium bg-feedback-warning-subtle text-feedback-warning-text px-2.5 py-1 rounded-full border border-feedback-warning/30">
-            Pendiente de configurar
+    <div className="space-y-4">
+      {!connected && (
+        <Alert variant="warning" className="items-start">
+          <span className="flex items-start gap-2">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>
+              <span className="block font-semibold">Necesitas conectar Stripe para cobrar tus pedidos</span>
+              <span className="mt-0.5 block text-sm">
+                Puedes hacerlo ahora o más tarde desde tu panel, pero hasta entonces no podrás publicar productos ni cobrar pedidos.
+              </span>
+            </span>
           </span>
-        </div>
+        </Alert>
       )}
 
-      {/* ──────────────────────────────────────────────────────────────────────
-          CARD 1: CÓMO FUNCIONAN LOS PAGOS
-      ────────────────────────────────────────────────────────────────────── */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm">
-
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center">
-            <CreditCard className="w-6 h-6 text-hoja-tinta" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-origen-bosque sm:text-xl">¿Cómo funcionan los pagos?</h2>
-            <p className="text-sm text-muted-foreground">Stripe es nuestro proveedor de pagos certificado</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <StepSection
+        icon={<CreditCard className="h-5 w-5" />}
+        title="¿Cómo funcionan los pagos?"
+        description="Stripe es nuestro proveedor de pagos certificado."
+      >
+        <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
-            {
-              title: 'Conecta',
-              desc: 'Vincula tu cuenta bancaria a través de Stripe en menos de 5 minutos',
-              step: '1',
-            },
-            {
-              title: 'Vende',
-              desc: 'Tus clientes pagan con tarjeta de forma segura',
-              step: '2',
-            },
-            {
-              title: 'Cobra',
-              desc: 'El dinero llega a tu cuenta en 1-2 días laborables automáticamente',
-              step: '3',
-            },
-          ].map((item) => (
-              <div
-                key={item.step}
-                className="flex sm:flex-col items-start sm:items-center sm:text-center gap-3 p-4 bg-origen-crema/20 rounded-xl border border-border-subtle"
-              >
-                <div className="w-10 h-10 rounded-full bg-origen-bosque text-white flex items-center justify-center text-sm font-bold shrink-0">
-                  {item.step}
-                </div>
-                <div>
-                  <p className="font-semibold text-origen-bosque text-sm">{item.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
-                </div>
-              </div>
-          ))}
-        </div>
-
-        <div className="mt-5 flex justify-center">
-          <div className="inline-flex items-center gap-1.5 text-xs text-feedback-success-text bg-feedback-success-subtle px-3 py-1.5 rounded-full border border-feedback-success/30">
-            <Shield className="w-3.5 h-3.5" />
-            Pagos seguros · PCI-DSS compliant
-          </div>
-        </div>
-      </div>
-
-      {/* ──────────────────────────────────────────────────────────────────────
-          CARD 2: CONECTAR CUENTA
-      ────────────────────────────────────────────────────────────────────── */}
-      <div className={cn(
-        'bg-surface-alt rounded-2xl border p-4 md:p-5 shadow-sm transition-all',
-        data.stripeConnected ? 'border-feedback-success/40' : 'border-border hover:border-origen-pradera/30',
-      )}>
-
-        <div className="flex items-center gap-3 mb-6">
-          <div className={cn(
-            'w-12 h-12 rounded-xl flex items-center justify-center',
-            data.stripeConnected
-              ? 'bg-feedback-success-subtle'
-              : 'bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20',
-          )}>
-            {data.stripeConnected
-              ? <CheckCircle2 className="w-6 h-6 text-feedback-success" />
-              : <Zap className="w-6 h-6 text-hoja-tinta" />
-            }
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-origen-bosque sm:text-xl">
-              {data.stripeConnected ? '¡Cuenta conectada!' : 'Conectar cuenta de cobro'}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {data.stripeConnected
-                ? 'Stripe está configurado y listo para procesar pagos'
-                : 'Necesitarás email, IBAN y DNI/CIF'}
-            </p>
-          </div>
-        </div>
-
-        {data.stripeConnected ? (
-          <div className="space-y-4">
-            <div className="p-4 bg-feedback-success-subtle rounded-xl border border-feedback-success/30 flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-feedback-success shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-feedback-success-text">Cuenta Stripe conectada correctamente</p>
-                <p className="text-xs text-feedback-success-text/80 mt-1">
-                  Tu cuenta bancaria está lista para recibir los pagos de tus pedidos.
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleDisconnect}
-              className="text-xs text-text-subtle hover:text-muted-foreground underline underline-offset-2"
+            { title: 'Conecta', desc: 'Vincula tu cuenta bancaria con Stripe en menos de 5 minutos.' },
+            { title: 'Vende', desc: 'Tus clientes pagan con tarjeta de forma segura.' },
+            { title: 'Cobra', desc: 'El dinero llega a tu cuenta en 1-2 días laborables.' },
+          ].map((item, i) => (
+            <li
+              key={item.title}
+              className="flex items-start gap-3 rounded-xl border border-border-subtle bg-origen-crema/20 p-3 sm:flex-col sm:items-center sm:text-center"
             >
-              Cambiar cuenta
-            </button>
-          </div>
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-origen-bosque text-sm font-bold text-white" aria-hidden="true">
+                {i + 1}
+              </span>
+              <span>
+                <span className="block text-sm font-semibold text-origen-bosque">{item.title}</span>
+                <span className="mt-0.5 block text-xs text-text-subtle">{item.desc}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-4 flex items-center justify-center gap-1.5 text-xs text-feedback-success-text">
+          <Shield className="h-3.5 w-3.5" aria-hidden="true" /> Pagos seguros · PCI-DSS
+        </p>
+      </StepSection>
+
+      <StepSection
+        icon={connected ? <CheckCircle2 className="h-5 w-5" /> : <Zap className="h-5 w-5" />}
+        title={connected ? '¡Cuenta conectada!' : 'Conectar cuenta de cobro'}
+        description={
+          connected
+            ? 'Stripe está configurado y listo para procesar pagos.'
+            : 'Necesitarás tu email, IBAN y DNI/CIF.'
+        }
+        className={connected ? 'border-feedback-success/40' : undefined}
+      >
+        {connected ? (
+          <Alert variant="success">
+            Tu cuenta bancaria está lista para recibir los pagos de tus pedidos.
+          </Alert>
         ) : (
           <div className="flex flex-col gap-4">
-            {/* Aviso de qué datos necesita el productor */}
-            <div className="w-full p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
-              <p className="text-xs text-muted-foreground flex items-start gap-2">
-                <Info className="w-4 h-4 text-hoja-tinta shrink-0 mt-0.5" />
-                <span>
-                  ¿No tienes cuenta Stripe?{' '}
-                  <span className="font-medium">La crearás durante el proceso, es gratis</span>.
-                  Solo necesitas un email y tus datos bancarios.
-                </span>
-              </p>
-            </div>
+            <p className="flex items-start gap-2 rounded-xl border border-origen-pradera/20 bg-origen-crema/30 p-3 text-xs text-text-subtle">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-hoja-tinta" aria-hidden="true" />
+              <span>
+                ¿No tienes cuenta de Stripe? <span className="font-medium">La creas durante el proceso, es gratis</span>: solo hace falta un email y tus datos bancarios.
+              </span>
+            </p>
 
-            {/* Componente embebido de Stripe Connect */}
             <StripeConnectOnboarding
               stripeAccountId={data.stripeAccountId}
               source="onboarding"
-              onboardingContext={{
-                email: userEmail,
-                firstName,
-                lastName,
-                businessName,
-                website,
-              }}
+              onboardingContext={{ email: userEmail, firstName, lastName, businessName, website }}
               onVerified={handleVerified}
             />
 
-            <div className="flex items-center gap-2 text-xs text-text-subtle">
-              <Lock className="w-3.5 h-3.5" />
-              <span>Conexión segura · Cifrado SSL · Datos protegidos</span>
-            </div>
-
-            <p className="text-xs text-muted-foreground text-center">
-              Completa el onboarding de Stripe en este formulario. Tus pedidos quedarán en espera hasta que conectes tu cuenta bancaria.
+            <p className="flex items-center gap-2 text-xs text-text-subtle">
+              <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+              Conexión segura · Cifrado SSL · Datos protegidos
             </p>
           </div>
         )}
-      </div>
+      </StepSection>
 
-      {/* ──────────────────────────────────────────────────────────────────────
-          CARD 3: TÉRMINOS
-      ────────────────────────────────────────────────────────────────────── */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:border-origen-pradera/30 transition-all">
-        <div className="flex items-start gap-4">
+      <StepSection
+        icon={<Shield className="h-5 w-5" />}
+        title="Términos y condiciones"
+        description="Necesario para finalizar."
+      >
+        <div className="flex items-start gap-3">
           <Checkbox
             id="accept-terms"
             checked={data.acceptTerms}
-            onCheckedChange={handleTermsChange}
-            className="h-5 w-5 rounded-md border-2 mt-0.5 shrink-0"
+            onCheckedChange={(c) => onChange({ ...data, acceptTerms: c === true })}
+            className="mt-0.5 h-5 w-5 shrink-0 rounded-md border-2"
+            aria-describedby={errors['accept-terms'] ? 'accept-terms-error' : undefined}
           />
-          <div className="flex-1">
-            <label htmlFor="accept-terms" className="text-sm font-medium text-origen-bosque cursor-pointer">
+          <div className="min-w-0 flex-1">
+            <label htmlFor="accept-terms" className="block min-h-6 cursor-pointer text-sm font-medium text-origen-bosque">
               He leído y acepto los términos y condiciones de Stripe y de Origen
             </label>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+            <p className="mt-1 text-xs leading-relaxed text-text-subtle">
               Al operar en Origen aceptas los{' '}
-              <a
-                href="https://stripe.com/es/legal"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-hoja-tinta hover:underline underline underline-offset-2"
-              >
+              <a href="https://stripe.com/es/legal" target="_blank" rel="noopener noreferrer" className="text-hoja-tinta underline underline-offset-2">
                 Términos de Stripe
-              </a>{' '}y la{' '}
-              <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className="text-hoja-tinta hover:underline underline underline-offset-2"
-              >
+              </a>{' '}
+              y la{' '}
+              <a href="#" onClick={(e) => e.preventDefault()} className="text-hoja-tinta underline underline-offset-2">
                 Política de privacidad de Origen
-              </a>.
-              Puedes leerlos antes de conectar tu cuenta.
+              </a>
+              .
             </p>
+            <div className="mt-2"><FieldError id="accept-terms-error">{errors['accept-terms']}</FieldError></div>
           </div>
         </div>
-      </div>
-
-      {/* ──────────────────────────────────────────────────────────────────────
-          RESUMEN FINAL
-      ────────────────────────────────────────────────────────────────────── */}
-      {data.stripeConnected && data.acceptTerms && (
-        <div className="bg-feedback-success-subtle rounded-2xl border border-feedback-success/30 p-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-feedback-success/15 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-6 h-6 text-feedback-success" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-feedback-success-text">¡Todo listo para finalizar!</h3>
-              <p className="text-sm text-feedback-success-text/80 mt-0.5">
-                Tu cuenta de cobro está conectada y los términos aceptados.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Trust badges */}
-      <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground border-t border-border">
-        <div className="flex items-center gap-1.5">
-          <Shield className="w-3.5 h-3.5 text-hoja-tinta" />
-          <span>Pagos seguros</span>
-        </div>
-        <span className="w-1 h-1 rounded-full bg-border" />
-        <div className="flex items-center gap-1.5">
-          <Lock className="w-3.5 h-3.5 text-hoja-tinta" />
-          <span>Protección contra fraude</span>
-        </div>
-      </div>
+      </StepSection>
     </div>
   );
 }
 
-EnhancedStep6Stripe.displayName = 'EnhancedStep6Stripe';
-export default EnhancedStep6Stripe;
+EnhancedStep5Payments.displayName = 'EnhancedStep5Payments';
 
+export default EnhancedStep5Payments;

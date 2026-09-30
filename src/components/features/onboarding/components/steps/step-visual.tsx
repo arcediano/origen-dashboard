@@ -1,265 +1,100 @@
-// 📁 /src/components/onboarding/steps/EnhancedStep3Visual.tsx
 /**
- * @file EnhancedStep3Visual.tsx
- * @description Paso 3: Perfil Visual + Video
- * @version 4.0.0 - CORREGIDO: imports, manejadores y tipos
+ * @file step-visual.tsx
+ * @description Paso 2 del onboarding: perfil visual (logo, cabecera, fotos del equipo y vídeo).
  */
 
 'use client';
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
+import { Input } from '@arcediano/ux-library';
+import { FileUpload } from '@/components/shared';
 import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
+import { getVideoEmbedUrl, isValidVideoUrl } from '@/lib/onboarding/video';
+import type { VisualData } from '@/lib/onboarding/types';
+import { cn } from '@/lib/utils';
+import { Camera, ChevronDown, Image as ImageIcon, Users, Video } from 'lucide-react';
+import { FieldError, FileRow, OptionalBadge } from '../FormBits';
+import { StepSection } from '../StepSection';
 
-import { Input, Button } from '@arcediano/ux-library';
-import { FileUpload, type UploadedFile } from '@/components/shared';
+export type { VisualData as EnhancedVisualData };
 
-import {
-  Camera,
-  Image as ImageIcon,
-  CheckCircle2,
-  Info,
-  X,
-  Video,
-  Sparkles,
-  ChevronDown,
-} from 'lucide-react';
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
-function getVideoEmbedUrl(url: string): string | null {
-  try {
-    const parsed = new URL(url);
-    if (parsed.hostname.includes('youtube.com')) {
-      const videoId = parsed.searchParams.get('v');
-      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
-    }
-    if (parsed.hostname.includes('youtu.be')) {
-      const videoId = parsed.pathname.slice(1);
-      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
-    }
-    if (parsed.hostname.includes('vimeo.com')) {
-      const videoId = parsed.pathname.split('/').filter(Boolean)[0];
-      return videoId ? `https://player.vimeo.com/video/${videoId}` : null;
-    }
-    return null;
-  } catch {
-    return null;
-  }
+export interface EnhancedStep2VisualProps {
+  data: VisualData;
+  onChange: (data: VisualData) => void;
+  errors?: Record<string, string>;
 }
 
-function isValidVideoUrl(url: string): boolean {
-  return /(youtube\.com|youtu\.be|vimeo\.com)/.test(url);
-}
+const kb = (size: number) => (size > 0 ? `${(size / 1024).toFixed(1)} KB` : undefined);
 
-// ============================================================================
-// TIPOS
-// ============================================================================
-
-export interface EnhancedVisualData {
-  logo: UploadedFile | null;
-  banner: UploadedFile | null;
-  introVideo?: string;
-}
-
-export interface EnhancedStep3VisualProps {
-  data: EnhancedVisualData;
-  onChange: (data: EnhancedVisualData) => void;
-}
-
-// ============================================================================
-// COMPONENTE PRINCIPAL
-// ============================================================================
-
-export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps) {
-
-  // ========================================================================
-  // VALIDACIÓN
-  // ========================================================================
-  
-  const hasLogo = Boolean(data.logo);
-  const hasBanner = Boolean(data.banner);
-
-  const totalSteps = 3;
-  const completedSteps = [hasLogo, hasBanner].filter(Boolean).length;
-  const progress = (completedSteps / totalSteps) * 100;
-
-  // ========================================================================
-  // MANEJADORES
-  // ========================================================================
-  
-  const handleInputChange = (field: keyof EnhancedVisualData, value: any) => {
-    onChange({ ...data, [field]: value });
-  };
-
-  const handleDeleteLogo = () => {
-    onChange({ ...data, logo: null });
-  };
-
-  const handleDeleteBanner = () => {
-    onChange({ ...data, banner: null });
-  };
-
+export function EnhancedStep2Visual({ data, onChange, errors = {} }: EnhancedStep2VisualProps) {
   const [videoExpanded, setVideoExpanded] = React.useState(Boolean(data.introVideo));
+  const update = (patch: Partial<VisualData>) => onChange({ ...data, ...patch });
 
-  // ========================================================================
-  // RENDER
-  // ========================================================================
-  
+  const video = data.introVideo?.trim() ?? '';
+  const videoValid = video !== '' && isValidVideoUrl(video);
+  const embedUrl = videoValid ? getVideoEmbedUrl(video) : null;
+
   return (
     <div className="space-y-4">
-      
-      {/* ====================================================================
-          PROGRESS BAR
-      ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-3 md:p-4 shadow-sm hover:shadow-md transition-all">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
-            <span className="text-sm font-medium text-hoja-tinta">Perfil visual</span>
-          </div>
-          <span className="text-sm font-semibold text-hoja-tinta">{completedSteps}/{totalSteps}</span>
-        </div>
-        <div className="h-2.5 bg-origen-crema rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-origen-pradera rounded-full transition-all duration-700"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-          <Info className="w-3.5 h-3.5 text-hoja-tinta" />
-          Las imágenes generan confianza. Un perfil completo multiplica las visitas.
-        </p>
-      </div>
-
-      {/* ====================================================================
-          CARD 1: LOGO DEL NEGOCIO (OBLIGATORIO)
-      ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
-              <ImageIcon className="w-5 h-5 text-hoja-tinta" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-origen-bosque">Logo del negocio</h2>
-              <p className="text-xs text-muted-foreground">PNG, JPG, WebP o GIF • Fondo transparente ideal</p>
-            </div>
-          </div>
-          {hasLogo && (
-            <span className="text-xs text-feedback-success-text flex items-center gap-1 bg-feedback-success-subtle px-3 py-1.5 rounded-full">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Subido
-            </span>
-          )}
-        </div>
-
-        {data.logo ? (
-          <div className="flex items-center gap-4 p-4 bg-origen-crema/20 rounded-xl border border-origen-pradera/30">
-            <div className="w-16 h-16 rounded-lg bg-surface-alt border border-border flex items-center justify-center overflow-hidden shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={data.logo.preview ?? (data.logo.file ? URL.createObjectURL(data.logo.file) : '')}
-                alt="Logo preview"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-origen-bosque truncate">{data.logo.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{(data.logo.size / 1024).toFixed(1)} KB</p>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={handleDeleteLogo}
-              className="text-text-subtle hover:text-foreground"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        ) : (
-          <FileUpload
-            value={[]}
-            onChange={async (files) => {
-              if (files.length > 0) {
-                handleInputChange('logo', files[0]);
+      {/* ── Logo (obligatorio) ──────────────────────────────────────────── */}
+      <StepSection
+        icon={<ImageIcon className="h-5 w-5" />}
+        title="Logo del negocio"
+        description="Obligatorio. Un fondo transparente queda mejor."
+      >
+        <div id="onb-logo" tabIndex={-1} className="space-y-2 focus:outline-hidden">
+          {data.logo ? (
+            <FileRow
+              name={data.logo.name}
+              meta={kb(data.logo.size)}
+              removeLabel="Quitar el logo"
+              onRemove={() => update({ logo: null })}
+              leading={
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={data.logo.preview ?? data.logo.url ?? ''} alt="Vista previa del logo" className="h-full w-full object-contain" />
               }
-            }}
-            helperText="Arrastra tu logo o haz clic para subir"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            multiple={false}
-            maxSize={2}
-            qualityRequirement={IMAGE_QUALITY_PRESETS.businessLogo}
-            dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.businessLogo)}
-          />
-        )}
-      </div>
-
-      {/* ====================================================================
-          CARD 2: IMAGEN DE CABECERA (OPCIONAL)
-      ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
-              <Camera className="w-5 h-5 text-hoja-tinta" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold text-origen-bosque">Imagen de cabecera</h2>
-                <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-0.5 rounded-full">Opcional</span>
-              </div>
-              <p className="text-xs text-muted-foreground">Imagen amplia y nítida para la cabecera</p>
-            </div>
-          </div>
-          {hasBanner && (
-            <span className="text-xs text-feedback-success-text flex items-center gap-1 bg-feedback-success-subtle px-3 py-1.5 rounded-full">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Subido
-            </span>
+            />
+          ) : (
+            <FileUpload
+              value={[]}
+              onChange={(files) => files[0] && update({ logo: files[0] })}
+              helperText="Arrastra tu logo o toca para subirlo"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              multiple={false}
+              maxSize={2}
+              qualityRequirement={IMAGE_QUALITY_PRESETS.businessLogo}
+              dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.businessLogo)}
+            />
           )}
+          <FieldError>{errors['onb-logo']}</FieldError>
         </div>
+      </StepSection>
 
+      {/* ── Cabecera (opcional) ─────────────────────────────────────────── */}
+      <StepSection
+        icon={<Camera className="h-5 w-5" />}
+        title="Imagen de cabecera"
+        description="Una foto amplia y nítida para la parte superior de tu tienda."
+        badge={<OptionalBadge />}
+      >
         {data.banner ? (
           <div className="space-y-3">
-            <div className="w-full h-28 rounded-xl overflow-hidden border border-border bg-surface">
+            <div className="h-28 w-full overflow-hidden rounded-xl border border-border bg-surface sm:h-36">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={data.banner.preview ?? (data.banner.file ? URL.createObjectURL(data.banner.file) : '')}
-                alt="Banner preview"
-                className="w-full h-full object-cover"
-              />
+              <img src={data.banner.preview ?? data.banner.url ?? ''} alt="Vista previa de la cabecera" className="h-full w-full object-cover" />
             </div>
-            <div className="flex items-center gap-3 px-1">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-origen-bosque truncate">{data.banner.name}</p>
-                <p className="text-xs text-muted-foreground">{(data.banner.size / 1024).toFixed(1)} KB</p>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleDeleteBanner}
-                className="text-text-subtle hover:text-foreground"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+            <FileRow
+              name={data.banner.name}
+              meta={kb(data.banner.size)}
+              removeLabel="Quitar la imagen de cabecera"
+              onRemove={() => update({ banner: null })}
+            />
           </div>
         ) : (
           <FileUpload
             value={[]}
-            onChange={async (files) => {
-              if (files.length > 0) {
-                handleInputChange('banner', files[0]);
-              }
-            }}
-            helperText="Arrastra tu imagen de cabecera o haz clic para subir"
+            onChange={(files) => files[0] && update({ banner: files[0] })}
+            helperText="Arrastra tu imagen o toca para subirla"
             accept="image/jpeg,image/png,image/webp"
             multiple={false}
             maxSize={5}
@@ -267,86 +102,74 @@ export function EnhancedStep3Visual({ data, onChange }: EnhancedStep3VisualProps
             dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.profileBanner)}
           />
         )}
-      </div>
+      </StepSection>
 
-      {/* ====================================================================
-          CARD 3: VIDEO DE PRESENTACIÓN (colapsable)
-      ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all overflow-hidden">
+      {/* ── Fotos del equipo (opcional) ─────────────────────────────────── */}
+      <StepSection
+        icon={<Users className="h-5 w-5" />}
+        title="Fotos del equipo"
+        description="Enseña a las personas detrás de tus productos. Generan confianza."
+        badge={<OptionalBadge />}
+      >
+        <FileUpload
+          value={data.teamPhotos}
+          onChange={(files) => update({ teamPhotos: files })}
+          helperText="Arrastra imágenes o toca para subir (hasta 10)"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          maxFiles={10}
+          maxSize={5}
+          qualityRequirement={IMAGE_QUALITY_PRESETS.profileGallery}
+          dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.profileGallery)}
+        />
+      </StepSection>
+
+      {/* ── Vídeo de presentación (opcional, plegado) ───────────────────── */}
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface-alt shadow-xs">
         <button
           type="button"
-          onClick={() => setVideoExpanded(e => !e)}
-          className="w-full flex items-center justify-between p-4 md:p-5 text-left"
+          onClick={() => setVideoExpanded((e) => !e)}
+          aria-expanded={videoExpanded}
+          aria-controls="onb-video-panel"
+          className="flex min-h-11 w-full items-center justify-between gap-3 p-4 text-left sm:p-5"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
-              <Video className="w-5 h-5 text-hoja-tinta" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold text-origen-bosque">Video de presentación</h2>
-                <span className="text-xs bg-origen-crema/80 text-muted-foreground px-2 py-0.5 rounded-full">Recomendado</span>
-                {data.introVideo && isValidVideoUrl(data.introVideo) && <CheckCircle2 className="w-3.5 h-3.5 text-feedback-success" />}
-              </div>
-              <p className="text-xs text-muted-foreground">+80% de visitas con video</p>
-            </div>
-          </div>
-          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0", videoExpanded && "rotate-180")} />
+          <span className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 text-hoja-tinta">
+              <Video className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <span>
+              <span className="flex flex-wrap items-center gap-2">
+                <span className="text-lg font-semibold leading-tight text-origen-bosque">Vídeo de presentación</span>
+                <OptionalBadge />
+              </span>
+              <span className="block text-xs text-text-subtle sm:text-sm">Enlace de YouTube o Vimeo.</span>
+            </span>
+          </span>
+          <ChevronDown className={cn('h-4 w-4 shrink-0 text-text-subtle transition-transform', videoExpanded && 'rotate-180')} />
         </button>
         {videoExpanded && (
-          <div className="px-4 pb-4 md:px-5 md:pb-5 border-t border-border-subtle">
-            <div className="pt-4 space-y-3">
-          <Input
-            value={data.introVideo || ''}
-            onChange={(e) => handleInputChange('introVideo', e.target.value)}
-            placeholder="https://youtube.com/watch?v=... o https://vimeo.com/..."
-            inputSize="md"
-            error={data.introVideo && !isValidVideoUrl(data.introVideo) ? 'Introduce una URL válida de YouTube o Vimeo' : undefined}
-            className={cn(
-              data.introVideo && isValidVideoUrl(data.introVideo) && "border-feedback-success focus:border-feedback-success"
+          <div id="onb-video-panel" className="space-y-3 border-t border-border-subtle p-4 sm:p-5">
+            <Input
+              id="onb-video"
+              label="Enlace del vídeo"
+              value={data.introVideo || ''}
+              onChange={(e) => update({ introVideo: e.target.value })}
+              placeholder="https://youtube.com/watch?v=… o https://vimeo.com/…"
+              inputMode="url"
+              error={video && !videoValid ? 'Introduce un enlace válido de YouTube o Vimeo.' : errors['onb-video']}
+            />
+            {embedUrl && (
+              <div className="aspect-video overflow-hidden rounded-xl border border-border bg-black">
+                <iframe src={embedUrl} className="h-full w-full" allowFullScreen title="Vista previa del vídeo" />
+              </div>
             )}
-          />
-
-          {/* Embed preview */}
-          {data.introVideo && isValidVideoUrl(data.introVideo) && getVideoEmbedUrl(data.introVideo) && (
-            <div className="rounded-xl overflow-hidden border border-feedback-success/30 bg-black aspect-video">
-              <iframe
-                src={getVideoEmbedUrl(data.introVideo)!}
-                className="w-full h-full"
-                allowFullScreen
-                title="Video preview"
-              />
-            </div>
-          )}
-
-          <div className="flex items-start gap-2 p-3 bg-origen-crema/30 rounded-lg">
-            <Sparkles className="w-4 h-4 text-hoja-tinta shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground">
-              <span className="font-medium">Consejo:</span> Un video auténtico genera más confianza que uno muy editado.
-            </p>
-          </div>
-            </div>
           </div>
         )}
-      </div>
-
-      {/* ====================================================================
-          TRUST BADGES
-      ==================================================================== */}
-      <div className="flex items-center gap-4 pt-2 text-xs text-muted-foreground border-t border-border">
-        <div className="flex items-center gap-1.5">
-          <span>✅ {hasLogo ? 'Logo subido' : 'Logo pendiente'}</span>
-        </div>
-        <span className="w-1 h-1 rounded-full bg-border" />
-        <div className="flex items-center gap-1.5">
-          <span>🖼️ {hasBanner ? 'Cabecera subida' : 'Cabecera opcional'}</span>
-        </div>
       </div>
     </div>
   );
 }
 
-EnhancedStep3Visual.displayName = 'EnhancedStep3Visual';
+EnhancedStep2Visual.displayName = 'EnhancedStep2Visual';
 
-export default EnhancedStep3Visual;
-
+export default EnhancedStep2Visual;

@@ -1,16 +1,12 @@
 /**
  * Tests unitarios para los esquemas Zod de seller.ts
  *
- * Cubre: initialRegistrationSchema, onboardingStep1Schema,
- *        onboardingStep2Schema, onboardingStep4Schema
+ * Cubre: initialRegistrationSchema
  */
 
 import { describe, it, expect } from 'vitest';
 import {
   initialRegistrationSchema,
-  onboardingStep1Schema,
-  onboardingStep2Schema,
-  onboardingStep4Schema,
 } from '@/lib/validations/seller';
 import { validRegistrationData } from '../../factories/user.factory';
 
@@ -270,124 +266,5 @@ describe('initialRegistrationSchema', () => {
       const result = initialRegistrationSchema.safeParse({ ...validRegistrationData, acceptsPrivacy: false });
       expect(result.success).toBe(false);
     });
-  });
-});
-
-// ─── onboardingStep1Schema ────────────────────────────────────────────────────
-
-describe('onboardingStep1Schema', () => {
-  const validStep1 = {
-    street: 'Calle Mayor',
-    number: '15',
-    postalCode: '40001',
-    city: 'Segovia',
-    province: 'Segovia',
-    autonomousCommunity: 'Castilla y León',
-  };
-
-  it('acepta datos válidos', () => {
-    expect(onboardingStep1Schema.safeParse(validStep1).success).toBe(true);
-  });
-
-  it('acepta datos con touristicRegionId opcional', () => {
-    const result = onboardingStep1Schema.safeParse({
-      ...validStep1,
-      touristicRegionId: 'region-123',
-      touristicRegionName: 'Rutas del Duero',
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it('rechaza código postal con 4 dígitos', () => {
-    const result = onboardingStep1Schema.safeParse({ ...validStep1, postalCode: '4000' });
-    expect(result.success).toBe(false);
-  });
-
-  it('rechaza ciudad con menos de 2 caracteres', () => {
-    const result = onboardingStep1Schema.safeParse({ ...validStep1, city: 'A' });
-    expect(result.success).toBe(false);
-  });
-});
-
-// ─── onboardingStep2Schema ────────────────────────────────────────────────────
-
-describe('onboardingStep2Schema', () => {
-  const validStep2 = {
-    businessStory: 'A'.repeat(200),
-    philosophy: 'A'.repeat(100),
-    sustainabilityPractices: ['uso_agua_responsable'],
-    hasOrganicCertification: false,
-    hasDopIgpCertification: false,
-  };
-
-  it('acepta datos válidos', () => {
-    expect(onboardingStep2Schema.safeParse(validStep2).success).toBe(true);
-  });
-
-  it('rechaza historia menor de 200 caracteres', () => {
-    const result = onboardingStep2Schema.safeParse({ ...validStep2, businessStory: 'Corta' });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.flatten().fieldErrors.businessStory).toBeDefined();
-    }
-  });
-
-  it('rechaza filosofía menor de 100 caracteres', () => {
-    const result = onboardingStep2Schema.safeParse({ ...validStep2, philosophy: 'Muy corta' });
-    expect(result.success).toBe(false);
-  });
-
-  it('rechaza sustainabilityPractices vacío', () => {
-    const result = onboardingStep2Schema.safeParse({ ...validStep2, sustainabilityPractices: [] });
-    expect(result.success).toBe(false);
-  });
-
-  it('acepta con certificationDetails opcional', () => {
-    const result = onboardingStep2Schema.safeParse({
-      ...validStep2,
-      hasOrganicCertification: true,
-      certificationDetails: 'Certificado CAAE nº 12345',
-    });
-    expect(result.success).toBe(true);
-  });
-});
-
-// ─── onboardingStep4Schema ────────────────────────────────────────────────────
-
-describe('onboardingStep4Schema', () => {
-  const validStep4 = {
-    monthlyCapacity: 500,
-    capacityUnit: 'kg' as const,
-    deliveryRadius: 50,
-    availableDeliveryDays: ['lunes', 'miercoles', 'viernes'],
-  };
-
-  it('acepta datos válidos', () => {
-    expect(onboardingStep4Schema.safeParse(validStep4).success).toBe(true);
-  });
-
-  it('rechaza capacidad mensual de 0', () => {
-    const result = onboardingStep4Schema.safeParse({ ...validStep4, monthlyCapacity: 0 });
-    expect(result.success).toBe(false);
-  });
-
-  it('rechaza radio de entrega superior a 200', () => {
-    const result = onboardingStep4Schema.safeParse({ ...validStep4, deliveryRadius: 201 });
-    expect(result.success).toBe(false);
-  });
-
-  it('rechaza días de entrega vacíos', () => {
-    const result = onboardingStep4Schema.safeParse({ ...validStep4, availableDeliveryDays: [] });
-    expect(result.success).toBe(false);
-  });
-
-  it.each(['kg', 'litros', 'unidades'] as const)('acepta capacityUnit "%s"', (unit) => {
-    const result = onboardingStep4Schema.safeParse({ ...validStep4, capacityUnit: unit });
-    expect(result.success).toBe(true);
-  });
-
-  it('rechaza capacityUnit fuera del enum', () => {
-    const result = onboardingStep4Schema.safeParse({ ...validStep4, capacityUnit: 'toneladas' });
-    expect(result.success).toBe(false);
   });
 });

@@ -7,24 +7,28 @@ import { cn } from '@/lib/utils';
 
 interface MobileNavBarProps {
   currentStep: number;
-  totalSteps: number;
   onBack: () => void;
   onNext: () => void;
-  onSkip: () => void;
   canContinue: boolean;
   isSubmitting: boolean;
   isLastStep: boolean;
+  /** Etiqueta del botón principal del último paso. */
+  finishLabel?: string;
 }
 
+/**
+ * Barra de acciones fija en móvil (`ActionBar` de la librería): botón principal
+ * siempre accesible y "Anterior" debajo. "Guardar y continuar más tarde" vive en
+ * la cabecera de la página para que la barra ocupe lo mínimo.
+ */
 export function MobileNavBar({
   currentStep,
-  totalSteps: _totalSteps,
   onBack,
   onNext,
-  onSkip,
   canContinue,
   isSubmitting,
   isLastStep,
+  finishLabel = 'Finalizar',
 }: MobileNavBarProps) {
   const secondaryActions = [];
 
@@ -35,19 +39,8 @@ export function MobileNavBar({
       onClick: onBack,
       disabled: isSubmitting,
       variant: 'outline' as const,
-      leftIcon: <ChevronLeft className="w-4 h-4" />,
+      leftIcon: <ChevronLeft className="h-4 w-4" />,
       className: 'border-border text-origen-bosque',
-    });
-  }
-
-  if (currentStep >= 1 && !isLastStep) {
-    secondaryActions.push({
-      id: 'skip',
-      label: isSubmitting ? 'Guardando...' : 'Guardar y salir',
-      onClick: onSkip,
-      disabled: isSubmitting,
-      variant: 'ghost' as const,
-      className: 'text-sm text-muted-foreground hover:text-foreground',
     });
   }
 
@@ -55,22 +48,17 @@ export function MobileNavBar({
     <ActionBar
       primaryAction={{
         id: 'next',
-        label: isLastStep ? 'Finalizar' : 'Continuar',
-        // No se deshabilita nativamente cuando faltan campos (!canContinue):
-        // un botón disabled no dispara onClick, así que en móvil -- donde esta
-        // barra está fija y separada del contenido con scroll -- tocar el botón
-        // no daba ningún feedback. onNext (handleNext/handleComplete en la
-        // página) ya guía al primer campo pendiente cuando el paso no es válido.
+        label: isLastStep ? finishLabel : 'Continuar',
+        // No se deshabilita nativamente cuando faltan campos: un botón disabled no
+        // dispara onClick y en móvil (barra fija separada del contenido) no daría
+        // ningún feedback. `onNext` ya guía al primer campo pendiente.
         onClick: onNext,
         disabled: isSubmitting,
         loading: isSubmitting,
         loadingText: 'Guardando...',
         variant: 'primary',
-        rightIcon: !isSubmitting && !isLastStep ? <ChevronRight className="w-4 h-4" /> : undefined,
-        className: cn(
-          'text-white !text-white disabled:text-white/90',
-          !canContinue && !isSubmitting && 'opacity-60',
-        ),
+        rightIcon: !isSubmitting && !isLastStep ? <ChevronRight className="h-4 w-4" /> : undefined,
+        className: cn('text-white !text-white disabled:text-white/90', !canContinue && !isSubmitting && 'opacity-60'),
       }}
       secondaryActions={secondaryActions}
       fixed
@@ -81,4 +69,3 @@ export function MobileNavBar({
 
 MobileNavBar.displayName = 'MobileNavBar';
 export default MobileNavBar;
-
