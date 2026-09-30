@@ -11,6 +11,9 @@
 
 export const MAINTENANCE_CODE = 'MAINTENANCE';
 
+/** Ruta de la pantalla de mantenimiento (fuera del panel, sin navegación). */
+export const MAINTENANCE_PATH = '/mantenimiento';
+
 export const DEFAULT_MAINTENANCE_MESSAGE =
   'Estamos realizando tareas de mantenimiento. Volveremos en breve.';
 
@@ -55,7 +58,7 @@ export function parseSiteStatus(body: unknown): SiteStatus | null {
   };
 }
 
-// ─── Estado en cliente (store mínimo para useSyncExternalStore) ──────────────
+// ─── Estado en cliente ────────────────────────────────────────────────────────
 
 export interface MaintenanceState {
   active: boolean;
@@ -64,21 +67,9 @@ export interface MaintenanceState {
 
 const INACTIVE: MaintenanceState = { active: false, message: '' };
 let state: MaintenanceState = INACTIVE;
-const listeners = new Set<() => void>();
 
 export function getMaintenanceState(): MaintenanceState {
   return state;
-}
-
-export function getServerMaintenanceState(): MaintenanceState {
-  return INACTIVE;
-}
-
-export function subscribeMaintenance(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
 }
 
 /** Marca el modo mantenimiento como activo en el cliente. Idempotente. */
@@ -86,17 +77,37 @@ export function activateMaintenance(message?: string): void {
   const next = message?.trim() || DEFAULT_MAINTENANCE_MESSAGE;
   if (state.active && state.message === next) return;
   state = { active: true, message: next };
-  listeners.forEach((l) => l());
 }
 
 /** Solo para tests. */
 export function resetMaintenanceState(): void {
   state = INACTIVE;
-  listeners.forEach((l) => l());
+}
+
+const REDIRECT_KEY = 'origen:maintenance-redirect-at';
+const REDIRECT_COOLDOWN_MS = 5000;
+
+/**
+ * Navega (replace, sin dejar la ruta rota en el historial) a /mantenimiento.
+ * No cierra sesión ni refresca token. Anti-bucle: no navega si ya estamos en
+ * /mantenimiento ni si hubo otra navegación por mantenimiento hace <5 s
+ * (p. ej. el servidor devolvió al panel porque /site-status dice lo contrario).
+ */
+export function redirectToMaintenance(): void {
+  if (typeof window === 'undefined') return;
+  if (window.location.pathname === MAINTENANCE_PATH) return;
+  try {
+    const last = Number(window.sessionStorage.getItem(REDIRECT_KEY) ?? 0);
+    if (Date.now() - last < REDIRECT_COOLDOWN_MS) return;
+    window.sessionStorage.setItem(REDIRECT_KEY, String(Date.now()));
+  } catch {
+    // sessionStorage no disponible: navegar igualmente
+  }
+  window.location.replace(MAINTENANCE_PATH);
 }
 
 /**
- * Si la respuesta es el 503 MAINTENANCE del gateway, activa la pantalla.
+ * Si la respuesta es el 503 MAINTENANCE del gateway, activa el estado y navega a /mantenimiento.
  * Usa clone() para no consumir el cuerpo que leerá el llamante.
  * @returns true si era una respuesta de mantenimiento.
  */
@@ -106,6 +117,7 @@ export async function detectMaintenanceResponse(response: Response): Promise<boo
     const data: unknown = await response.clone().json();
     if (isMaintenanceResponse(response.status, data)) {
       activateMaintenance(getMaintenanceMessage(data));
+      redirectToMaintenance();
       return true;
     }
   } catch {
@@ -119,7 +131,7 @@ const GUARD_MARK = '__maintenanceGuard';
 /**
  * Red de seguridad global: envuelve window.fetch para que CUALQUIER petición del
  * cliente (gatewayClient, subidas, rutas /api de Next, …) que reciba el 503
- * MAINTENANCE muestre la pantalla. No altera la respuesta ni reintenta.
+ * MAINTENANCE lleve a /mantenimiento. No altera la respuesta ni reintenta.
  * Idempotente y tolerante: si window.fetch no es reasignable, no hace nada
  * (gatewayClient sigue detectando el 503 por sí mismo).
  */

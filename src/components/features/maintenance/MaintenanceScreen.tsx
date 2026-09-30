@@ -1,7 +1,9 @@
 /**
  * MaintenanceScreen — pantalla completa de modo mantenimiento
  *
+ * Se sirve en la ruta /mantenimiento (noindex por metadata de la página).
  * Sin navegación ni enlaces a la app: el gateway responde 503 a todo lo demás.
+ * "Reintentar" recarga: si el modo ya está desactivado, el servidor redirige al inicio.
  * Sigue guia-diseno-ux.md: fondo crema (bg-background), card blanca
  * (bg-surface-alt + border-border-subtle + shadow-subtle, radio de hero
  * rounded-[28px]), icono sobre círculo pradera/10 con texto hoja-tinta,
@@ -27,9 +29,6 @@ export function MaintenanceScreen({ message }: MaintenanceScreenProps) {
       className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-8 sm:px-6"
       aria-labelledby="maintenance-title"
     >
-      {/* Robots: la pantalla no debe indexarse (React 19 lo eleva a <head>) */}
-      <meta name="robots" content="noindex, nofollow" />
-
       <div className="w-full max-w-lg rounded-2xl border border-border-subtle bg-surface-alt p-6 text-center shadow-subtle sm:rounded-[28px] sm:p-10">
         <div className="mb-6 flex items-center justify-center gap-2">
           <img src="/origen-icon.svg" alt="" width={36} height={36} className="h-9 w-9" />

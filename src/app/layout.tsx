@@ -4,11 +4,13 @@
  */
 
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Plus_Jakarta_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
-import { MaintenanceScreen } from "@/components/features/maintenance/MaintenanceScreen";
 import { fetchSiteStatus } from "@/lib/maintenance-server";
+import { MAINTENANCE_PATH } from "@/lib/maintenance";
 
 const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-sans", weight: ["400", "500", "600", "700", "800"] });
 const cormorant = Cormorant_Garamond({ subsets: ["latin"], variable: "--font-serif", weight: ["400", "500", "600", "700"] });
@@ -40,19 +42,23 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Modo mantenimiento (fail-open: si /site-status falla, la app funciona normal)
+  // Modo mantenimiento (fail-open: si /site-status falla, la app funciona normal).
+  // El middleware pasa la ruta en x-pathname para evitar bucles:
+  //   - modo activo y ruta != /mantenimiento → redirect a /mantenimiento
+  //   - /mantenimiento con el modo desactivado (o /site-status caído) → redirect a /
   const siteStatus = await fetchSiteStatus();
+  const pathname = (await headers()).get("x-pathname") ?? "";
+  const onMaintenancePage = pathname === MAINTENANCE_PATH;
+  const maintenanceMode = siteStatus?.maintenanceMode === true;
+
+  if (maintenanceMode && !onMaintenancePage) redirect(MAINTENANCE_PATH);
+  if (!maintenanceMode && onMaintenancePage) redirect("/");
 
   return (
     <html lang="es">
       <body className={`${plusJakartaSans.variable} ${cormorant.variable} font-sans`}>
-        {siteStatus?.maintenanceMode ? (
-          <MaintenanceScreen message={siteStatus.maintenanceMessage} />
-        ) : (
-          <Providers>
-            {children}
-          </Providers>
-        )}
+        {/* /mantenimiento: sin Providers (no hay sesión que cargar) ni navegación del panel */}
+        {onMaintenancePage ? children : <Providers>{children}</Providers>}
       </body>
     </html>
   );

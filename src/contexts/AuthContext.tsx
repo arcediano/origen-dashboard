@@ -105,7 +105,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return;
         }
 
-        // Modo mantenimiento: la pantalla ya se muestra (gatewayClient) — sin reintentos
+        // Modo mantenimiento: ya se navega a /mantenimiento (gatewayClient) — sin reintentos
         if (getMaintenanceState().active) {
           setUser(null);
           setIsLoading(false);

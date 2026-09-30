@@ -32,6 +32,7 @@ import {
   getMaintenanceMessage,
   getMaintenanceState,
   isMaintenanceResponse,
+  redirectToMaintenance,
 } from '@/lib/maintenance';
 
 // Browser: usa siempre el origen actual del navegador para que dominios custom
@@ -222,10 +223,13 @@ async function request<T>(
   }
 
   if (!response.ok) {
-    // Modo mantenimiento: NUNCA es una sesión caducada → pantalla de mantenimiento,
+    // Modo mantenimiento: NUNCA es una sesión caducada → navega a /mantenimiento,
     // sin refresco de token, sin dispatchSessionExpired y sin reintentos.
     if (isMaintenanceResponse(response.status, data)) {
-      if (typeof window !== 'undefined') activateMaintenance(getMaintenanceMessage(data));
+      if (typeof window !== 'undefined') {
+        activateMaintenance(getMaintenanceMessage(data));
+        redirectToMaintenance();
+      }
       throw new GatewayError(503, getMaintenanceMessage(data), data);
     }
 
@@ -257,6 +261,7 @@ async function request<T>(
           }
           if (isMaintenanceResponse(retryResponse.status, retryData)) {
             activateMaintenance(getMaintenanceMessage(retryData));
+            redirectToMaintenance();
             throw new GatewayError(503, getMaintenanceMessage(retryData), retryData);
           }
         }
