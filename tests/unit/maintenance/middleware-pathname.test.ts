@@ -30,4 +30,10 @@ describe('src/middleware — x-pathname, CSP y protección de rutas (middleware 
     expect(re.test('/_next/static/x.js')).toBe(false);
     expect(re.test('/origen-icon.svg')).toBe(false);
   });
+
+  it('el matcher excluye /api/ — el proxy al gateway no necesita JWT/CSP/x-pathname', () => {
+    const re = new RegExp(`^${config.matcher[0]}$`);
+    expect(re.test('/api/v1/auth/login')).toBe(false);
+    expect(re.test('/api/upload')).toBe(false);
+  });
 });
