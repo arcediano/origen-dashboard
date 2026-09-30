@@ -7,6 +7,8 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
+import { MaintenanceScreen } from "@/components/features/maintenance/MaintenanceScreen";
+import { fetchSiteStatus } from "@/lib/maintenance-server";
 
 const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-sans", weight: ["400", "500", "600", "700", "800"] });
 const cormorant = Cormorant_Garamond({ subsets: ["latin"], variable: "--font-serif", weight: ["400", "500", "600", "700"] });
@@ -33,17 +35,24 @@ export const viewport: Viewport = {
   themeColor: "#215943",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Modo mantenimiento (fail-open: si /site-status falla, la app funciona normal)
+  const siteStatus = await fetchSiteStatus();
+
   return (
     <html lang="es">
       <body className={`${plusJakartaSans.variable} ${cormorant.variable} font-sans`}>
-        <Providers>
-          {children}
-        </Providers>
+        {siteStatus?.maintenanceMode ? (
+          <MaintenanceScreen message={siteStatus.maintenanceMessage} />
+        ) : (
+          <Providers>
+            {children}
+          </Providers>
+        )}
       </body>
     </html>
   );

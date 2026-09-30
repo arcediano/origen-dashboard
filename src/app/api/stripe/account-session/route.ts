@@ -18,6 +18,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createConnectAccount, createAccountSession } from '@/lib/stripe/server';
+import { maintenanceProxyResponse } from '@/lib/maintenance-server';
 
 const GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
 
@@ -121,6 +122,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (!onboardingRes.ok) {
+      const maintenance = await maintenanceProxyResponse(onboardingRes);
+      if (maintenance) return maintenance;
       return NextResponse.json(
         { success: false, error: 'No se pudo validar la cuenta del usuario' },
         { status: onboardingRes.status === 401 ? 401 : 502 },

@@ -26,6 +26,14 @@
  * ```
  */
 
+import {
+  activateMaintenance,
+  detectMaintenanceResponse,
+  getMaintenanceMessage,
+  getMaintenanceState,
+  isMaintenanceResponse,
+} from '@/lib/maintenance';
+
 // Browser: usa siempre el origen actual del navegador para que dominios custom
 // como producers.origen.delivery sigan haciendo peticiones same-origin y
 // aprovechen el rewrite /api/v1/* de Next.js sin CORS.
@@ -77,6 +85,7 @@ async function tryRefreshToken(): Promise<boolean> {
         window.location.origin + "/api/v1/auth/refresh",
         { method: "POST", credentials: "include" },
       );
+      if (!res.ok) await detectMaintenanceResponse(res);
       return res.ok;
     } catch {
       return false;
@@ -213,6 +222,13 @@ async function request<T>(
   }
 
   if (!response.ok) {
+    // Modo mantenimiento: NUNCA es una sesión caducada → pantalla de mantenimiento,
+    // sin refresco de token, sin dispatchSessionExpired y sin reintentos.
+    if (isMaintenanceResponse(response.status, data)) {
+      if (typeof window !== 'undefined') activateMaintenance(getMaintenanceMessage(data));
+      throw new GatewayError(503, getMaintenanceMessage(data), data);
+    }
+
     const raw = (data as { message?: string | string[] })?.message;
     const message = Array.isArray(raw)
       ? raw.join(', ')
@@ -239,8 +255,13 @@ async function request<T>(
           if (retryResponse.ok) {
             return retryData as T;
           }
+          if (isMaintenanceResponse(retryResponse.status, retryData)) {
+            activateMaintenance(getMaintenanceMessage(retryData));
+            throw new GatewayError(503, getMaintenanceMessage(retryData), retryData);
+          }
         }
-        dispatchSessionExpired();
+        // Si el refresh (o el reintento) chocó con el mantenimiento, no es sesión caducada
+        if (!getMaintenanceState().active) dispatchSessionExpired();
       }
     }
 
