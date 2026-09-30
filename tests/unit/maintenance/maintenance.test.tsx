@@ -7,6 +7,7 @@ import {
   getMaintenanceState,
   isMaintenanceResponse,
   parseSiteStatus,
+  redirectToMaintenance,
   resetMaintenanceState,
 } from '@/lib/maintenance';
 import { fetchSiteStatus, maintenanceProxyResponse } from '@/lib/maintenance-server';
@@ -18,7 +19,17 @@ const maintenanceBody = { success: false, code: 'MAINTENANCE', message: 'Volvemo
 const json = (body: unknown, status: number) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
-beforeEach(() => resetMaintenanceState());
+let replaceSpy: ReturnType<typeof vi.fn>;
+beforeEach(() => {
+  resetMaintenanceState();
+  window.sessionStorage.clear();
+  replaceSpy = vi.fn();
+  vi.spyOn(window, 'location', 'get').mockReturnValue({
+    ...window.location,
+    pathname: '/dashboard',
+    replace: replaceSpy,
+  } as unknown as Location);
+});
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
@@ -32,9 +43,10 @@ describe('detección de 503 MAINTENANCE', () => {
     expect(isMaintenanceResponse(500, maintenanceBody)).toBe(false);
   });
 
-  it('detectMaintenanceResponse activa el estado sin consumir el cuerpo', async () => {
+  it('detectMaintenanceResponse activa el estado, navega a /mantenimiento y no consume el cuerpo', async () => {
     const res = json(maintenanceBody, 503);
     expect(await detectMaintenanceResponse(res)).toBe(true);
+    expect(replaceSpy).toHaveBeenCalledWith('/mantenimiento');
     expect(getMaintenanceState()).toEqual({ active: true, message: 'Volvemos a las 18:00' });
     expect(await res.json()).toEqual(maintenanceBody);
   });
@@ -45,7 +57,7 @@ describe('detección de 503 MAINTENANCE', () => {
     expect(getMaintenanceState().active).toBe(false);
   });
 
-  it('gatewayClient: 503 MAINTENANCE activa la pantalla, no refresca token ni cierra sesión', async () => {
+  it('gatewayClient: 503 MAINTENANCE navega a /mantenimiento, no refresca token ni cierra sesión', async () => {
     const fetchMock = vi.fn().mockResolvedValue(json(maintenanceBody, 503));
     vi.stubGlobal('fetch', fetchMock);
     const expired = vi.fn();
@@ -57,6 +69,8 @@ describe('detección de 503 MAINTENANCE', () => {
     expect(err).toBeInstanceOf(GatewayError);
     expect((err as GatewayError).status).toBe(503);
     expect(getMaintenanceState().active).toBe(true);
+    expect(replaceSpy).toHaveBeenCalledTimes(1);
+    expect(replaceSpy).toHaveBeenCalledWith('/mantenimiento');
     expect(fetchMock).toHaveBeenCalledTimes(1); // sin reintentos
     expect(expired).not.toHaveBeenCalled();
   });
@@ -74,6 +88,7 @@ describe('detección de 503 MAINTENANCE', () => {
     window.removeEventListener('session:expired', expired);
 
     expect(getMaintenanceState().active).toBe(true);
+    expect(replaceSpy).toHaveBeenCalledWith('/mantenimiento');
     expect(expired).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
@@ -93,6 +108,29 @@ describe('detección de 503 MAINTENANCE', () => {
 
     expect(expired).toHaveBeenCalledTimes(1);
     expect(getMaintenanceState().active).toBe(false);
+    expect(replaceSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('redirectToMaintenance (anti-bucle)', () => {
+  it('navega con replace a /mantenimiento', () => {
+    redirectToMaintenance();
+    expect(replaceSpy).toHaveBeenCalledWith('/mantenimiento');
+  });
+
+  it('no navega si ya está en /mantenimiento', () => {
+    vi.spyOn(window, 'location', 'get').mockReturnValue({
+      pathname: '/mantenimiento',
+      replace: replaceSpy,
+    } as unknown as Location);
+    redirectToMaintenance();
+    expect(replaceSpy).not.toHaveBeenCalled();
+  });
+
+  it('no repite la navegación en menos de 5 s (evita bucle con el servidor)', () => {
+    redirectToMaintenance();
+    redirectToMaintenance();
+    expect(replaceSpy).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -153,21 +191,18 @@ describe('renderizado condicional', () => {
     expect(screen.getByRole('status')).toHaveTextContent(DEFAULT_MAINTENANCE_MESSAGE);
   });
 
-  it('MaintenanceGate renderiza la app y, tras un 503 MAINTENANCE, solo la pantalla', () => {
+  it('MaintenanceGate renderiza siempre la app (ya no pinta la pantalla en sitio)', () => {
     render(
       <MaintenanceGate>
         <div>app normal</div>
       </MaintenanceGate>,
     );
-    expect(screen.getByText('app normal')).toBeInTheDocument();
-    expect(screen.queryByRole('main')).toBeNull();
-
     act(() => activateMaintenance('En mantenimiento'));
-    expect(screen.queryByText('app normal')).toBeNull();
-    expect(screen.getByRole('status')).toHaveTextContent('En mantenimiento');
+    expect(screen.getByText('app normal')).toBeInTheDocument();
+    expect(screen.queryByRole('status')).toBeNull();
   });
 
-  it('MaintenanceGate: window.fetch global detecta el 503 (uploads y fetch crudos)', async () => {
+  it('MaintenanceGate: window.fetch global detecta el 503 y navega (uploads y fetch crudos)', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(json(maintenanceBody, 503)));
     render(
       <MaintenanceGate>
@@ -177,6 +212,8 @@ describe('renderizado condicional', () => {
     await act(async () => {
       await window.fetch('/api/upload');
     });
-    expect(screen.getByRole('status')).toHaveTextContent('Volvemos a las 18:00');
+    expect(replaceSpy).toHaveBeenCalledWith('/mantenimiento');
+    expect(getMaintenanceState().message).toBe('Volvemos a las 18:00');
+    expect(screen.getByText('app normal')).toBeInTheDocument();
   });
 });

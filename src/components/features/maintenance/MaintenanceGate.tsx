@@ -1,34 +1,21 @@
 /**
  * MaintenanceGate — red de seguridad en cliente
  *
- * Si cualquier petición del cliente recibe el 503 MAINTENANCE del gateway
- * (login y refresh incluidos), sustituye la app por la pantalla de mantenimiento
- * sin cerrar la sesión ni redirigir. Sin polling ni reintentos: el botón
- * "Reintentar" recarga la página, y el layout vuelve a consultar /site-status.
+ * Instala el guard global de window.fetch: si cualquier petición del cliente
+ * (login y refresh incluidos, subidas, fetch crudos) recibe el 503 MAINTENANCE
+ * del gateway, navega a /mantenimiento sin cerrar la sesión ni refrescar token.
+ * Sin polling ni reintentos.
  */
 
 'use client';
 
-import { useEffect, useSyncExternalStore, type ReactNode } from 'react';
-import {
-  getMaintenanceState,
-  getServerMaintenanceState,
-  installMaintenanceFetchGuard,
-  subscribeMaintenance,
-} from '@/lib/maintenance';
-import { MaintenanceScreen } from './MaintenanceScreen';
+import { useEffect, type ReactNode } from 'react';
+import { installMaintenanceFetchGuard } from '@/lib/maintenance';
 
 export function MaintenanceGate({ children }: { children: ReactNode }) {
-  const { active, message } = useSyncExternalStore(
-    subscribeMaintenance,
-    getMaintenanceState,
-    getServerMaintenanceState,
-  );
-
   useEffect(() => {
     installMaintenanceFetchGuard();
   }, []);
 
-  if (active) return <MaintenanceScreen message={message} />;
   return <>{children}</>;
 }

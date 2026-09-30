@@ -3,6 +3,7 @@
  * (layout raíz y rutas API internas de Next).
  */
 
+import { cache } from 'react';
 import { NextResponse } from 'next/server';
 import {
   getMaintenanceMessage,
@@ -25,8 +26,10 @@ function gatewayUrl(): string {
  * Consulta GET /api/v1/site-status sin caché.
  * FAIL-OPEN: ante cualquier fallo (red, timeout, 4xx/5xx, cuerpo inesperado)
  * devuelve null y la app funciona con normalidad.
+ * Memoizada por petición (cache de React): layout raíz y /mantenimiento comparten
+ * una única llamada.
  */
-export async function fetchSiteStatus(): Promise<SiteStatus | null> {
+export const fetchSiteStatus = cache(async function fetchSiteStatus(): Promise<SiteStatus | null> {
   try {
     const res = await fetch(`${gatewayUrl()}/api/v1/site-status`, {
       cache: 'no-store',
@@ -38,7 +41,7 @@ export async function fetchSiteStatus(): Promise<SiteStatus | null> {
   } catch {
     return null;
   }
-}
+});
 
 /**
  * Si la respuesta del gateway es el 503 MAINTENANCE, devuelve la NextResponse
