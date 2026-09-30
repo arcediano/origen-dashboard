@@ -1,147 +1,67 @@
 // 📁 /src/app/onboarding/page.tsx
 /**
- * @page Onboarding Premium - VERSIÓN DEFINITIVA
- * @version 14.0.0 - CORREGIDO: Tipos específicos por paso
+ * @page Onboarding de productores (ADR-020, 5 pasos)
+ *
+ * 1 Ubicación e identidad legal · 2 Perfil visual · 3 Envíos ·
+ * 4 Documentación y certificaciones · 5 Pagos.
+ *
+ * - `?step=N` abre el wizard en ese paso (los emails de recordatorio lo usan).
+ * - Cada paso se guarda al continuar y se rehidrata entero desde
+ *   `GET onboarding/data`, así que recargar no pierde nada.
+ * - Al terminar se muestra una pantalla con lo que falta para publicar.
  */
 
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { Alert, Button, ConfirmDialog } from '@arcediano/ux-library';
 import { useAuth } from '@/contexts/AuthContext';
-
-import { Alert, Button } from '@arcediano/ux-library';
-import { MobileStepperBar } from '@/components/features/onboarding/components/MobileStepperBar';
-import { MobileNavBar } from '@/components/features/onboarding/components/MobileNavBar';
-import { StepValidationPanel } from '@/components/features/onboarding/components/StepValidationPanel';
-import { uploadFile } from '@/lib/api/media';
 import { GatewayError } from '@/lib/api/client';
-import { validateSpanishTaxId } from '@/lib/utils/tax-id';
 import {
-  saveStep1,
-  saveStep2,
-  saveStep3,
-  saveStep4,
-  saveStep5,
-  saveStep6,
-  saveStepProducts,
   completeOnboarding as apiCompleteOnboarding,
+  getMyReadiness,
+  getShippingCoverage,
   loadOnboardingData,
+  type ProducerReadinessReport,
 } from '@/lib/api/onboarding';
-
-// Importar tipos específicos de cada paso
-import { EnhancedStep1Location, type EnhancedLocationData } from '@/components/features/onboarding/components/steps/step-location';
-import { EnhancedStep2Story, type EnhancedStoryData, type Certification } from '@/components/features/onboarding/components/steps/step-story';
-import { EnhancedStep3Visual, type EnhancedVisualData } from '@/components/features/onboarding/components/steps/step-visual';
-import { EnhancedStep4Capacity, type EnhancedCapacityData } from '@/components/features/onboarding/components/steps/step-capacity';
-import { EnhancedStep5Documents, type EnhancedStep5DocumentsData } from '@/components/features/onboarding/components/steps/step-documents';
-import { EnhancedStep6Stripe, type EnhancedStep6StripeData } from '@/components/features/onboarding/components/steps/step-stripe';
-import { EnhancedStepProducts, type EnhancedProductsData, getProductErrors } from '@/components/features/onboarding/components/steps/step-products';
-
+import { hydrateOnboardingForm } from '@/lib/onboarding/hydrate';
+import { saveOnboardingStep } from '@/lib/onboarding/save-step';
 import {
-  MapPin,
-  BookOpen,
-  Camera,
-  Package,
-  FileText,
-  CreditCard,
-  ShoppingBasket,
-  ChevronLeft,
-  ChevronRight,
-  ArrowRight,
-  CheckCircle,
-  Clock,
-  Sparkles,
-  Shield,
-  Leaf,
-} from 'lucide-react';
+  ONBOARDING_STEPS,
+  ONBOARDING_TOTAL_STEPS,
+  getMaxReachableIndex,
+  normalizeCompletedSteps,
+  parseStepParam,
+  resolveInitialStepIndex,
+} from '@/lib/onboarding/steps';
+import { INITIAL_FORM_DATA, type OnboardingFormData, type ShippingCoverage } from '@/lib/onboarding/types';
+import { issuesToFieldErrors, validateStep } from '@/lib/onboarding/validation';
+import { WizardProgress } from '@/components/shared/wizard-progress';
+import { MobileNavBar } from '@/components/features/onboarding/components/MobileNavBar';
+import { OnboardingDone } from '@/components/features/onboarding/components/OnboardingDone';
+import { StepValidationPanel } from '@/components/features/onboarding/components/StepValidationPanel';
+import { EnhancedStep1Location } from '@/components/features/onboarding/components/steps/step-location';
+import { EnhancedStep2Visual } from '@/components/features/onboarding/components/steps/step-visual';
+import { EnhancedStep3Shipping } from '@/components/features/onboarding/components/steps/step-shipping';
+import { EnhancedStep4Documents } from '@/components/features/onboarding/components/steps/step-documents';
+import { EnhancedStep5Payments } from '@/components/features/onboarding/components/steps/step-stripe';
+import { Camera, Clock, CreditCard, FileText, MapPin, Truck } from 'lucide-react';
 
 // ============================================================================
-// CONFIGURACIÓN DE PASOS
+// CONFIGURACIÓN
 // ============================================================================
 
-const STEPS = [
-  {
-    id: 1,
-    title: 'Ubicación',
-    icon: MapPin,
-    color: 'text-hoja-tinta',
-    bgColor: 'bg-origen-pradera/10',
-    time: '2 min',
-    description: 'Dirección, provincia y categorías',
-    longDescription: 'Cuéntanos dónde está ubicado tu negocio y qué productos vendes.'
-  },
-  {
-    id: 2,
-    title: 'Historia',
-    icon: BookOpen,
-    color: 'text-origen-hoja',
-    bgColor: 'bg-origen-hoja/10',
-    time: '3 min',
-    description: 'Nombre, descripción y valores',
-    longDescription: 'Comparte la historia detrás de tus productos y los valores de tu marca.'
-  },
-  {
-    id: 3,
-    title: 'Productos',
-    icon: ShoppingBasket,
-    color: 'text-origen-hoja',
-    bgColor: 'bg-origen-hoja/10',
-    time: '3 min',
-    description: 'Catálogo inicial y alérgenos',
-    longDescription: 'Define hasta 5 productos con nombre, precio y alérgenos obligatorios por ley.'
-  },
-  {
-    id: 4,
-    title: 'Perfil visual',
-    icon: Camera,
-    color: 'text-origen-pino',
-    bgColor: 'bg-origen-pino/10',
-    time: '2 min',
-    description: 'Logo, banner y fotos',
-    longDescription: 'Configura la imagen de tu perfil y muestra tus productos.'
-  },
-  {
-    id: 5,
-    title: 'Capacidad',
-    icon: Package,
-    color: 'text-origen-bosque',
-    bgColor: 'bg-origen-bosque/10',
-    time: '2 min',
-    description: 'Producción y envíos',
-    longDescription: 'Define tu capacidad de producción y las opciones de envío.'
-  },
-  {
-    id: 6,
-    title: 'Documentación',
-    icon: FileText,
-    color: 'text-origen-oscuro',
-    bgColor: 'bg-origen-oscuro/10',
-    time: '3 min',
-    description: 'Verificación de identidad',
-    longDescription: 'Verifica tu identidad como productor y sube tus certificaciones.'
-  },
-  {
-    id: 7,
-    title: 'Pagos',
-    icon: CreditCard,
-    color: 'text-hoja-tinta',
-    bgColor: 'bg-origen-pradera/10',
-    time: '2 min',
-    description: 'Conectar Stripe',
-    longDescription: 'Configura Stripe para recibir pagos de forma segura.'
-  }
-];
+const STEP_ICONS = [MapPin, Camera, Truck, FileText, CreditCard];
 
-// ============================================================================
-// HELPER: MENSAJES DE ERROR PARA EL USUARIO
-// ============================================================================
+const WIZARD_STEPS = ONBOARDING_STEPS.map((step, i) => {
+  const Icon = STEP_ICONS[i];
+  return { id: String(step.id), label: step.label, icon: <Icon className="h-4 w-4" /> };
+});
 
 function getUserFriendlyError(error: unknown, fallback = 'Error inesperado. Inténtalo de nuevo.'): string {
-  // Sin conexión / timeout
   if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('network'))) {
     return 'No se pudo conectar al servidor. Comprueba tu conexión a internet e inténtalo de nuevo.';
   }
@@ -166,25 +86,11 @@ function getUserFriendlyError(error: unknown, fallback = 'Error inesperado. Int�
         return error.message || fallback;
     }
   }
-  if (error instanceof Error) {
-    return error.message || fallback;
-  }
+  if (error instanceof Error) return error.message || fallback;
   return fallback;
 }
 
-// ============================================================================
-// TIPOS ESPECÍFICOS PARA CADA PASO
-// ============================================================================
-
-interface OnboardingFormData {
-  step1: EnhancedLocationData;
-  step2: EnhancedStoryData;
-  step_products: EnhancedProductsData;
-  step3: EnhancedVisualData;
-  step4: EnhancedCapacityData;
-  step5: EnhancedStep5DocumentsData;
-  step6: EnhancedStep6StripeData;
-}
+const COVERAGE_STEP_INDEX = 2;
 
 // ============================================================================
 // COMPONENTE PRINCIPAL
@@ -198,768 +104,308 @@ export default function OnboardingPage() {
     const message = encodeURIComponent('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
     router.replace(`/auth/login?reason=expired&message=${message}`);
   }, [router]);
+
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  // UX-3: counter para disparar auto-expansión del primer producto incompleto en step 2
-  const [focusProductsCounter, setFocusProductsCounter] = useState(0);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [formData, setFormData] = useState<OnboardingFormData>(INITIAL_FORM_DATA);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [backendCurrentStep, setBackendCurrentStep] = useState<number | null>(null);
+  /** Pasos en los que el productor ya intentó continuar (a partir de ahí se muestran los errores). */
+  const [attempted, setAttempted] = useState<Record<number, boolean>>({});
+  const [exitDialogOpen, setExitDialogOpen] = useState(false);
+  const [done, setDone] = useState(false);
+  const [readiness, setReadiness] = useState<ProducerReadinessReport | null | undefined>(undefined);
 
-  // Estado con tipos específicos por paso
-  const [formData, setFormData] = useState<OnboardingFormData>({
-    step1: {
-      street: '',
-      streetNumber: '',
-      streetComplement: '',
-      city: '',
-      province: '',
-      postalCode: '',
-      categories: [],
-      locationImages: [],
-      foundedYear: undefined,
-      teamSize: undefined,
-      taxId: '',
-      entityType: undefined,
-      legalRepresentativeName: '',
-      businessPhone: '',
-      billingAddressSameAsProduction: true,
-      billingAddress: undefined,
-    },
-    step2: {
-      businessName: '',
-      tagline: '',
-      description: '',
-      values: [],
-      photos: [],
-      website: '',
-      instagramHandle: '',
-      productionPhilosophy: '',
-      certifications: []
-    },
-    step_products: {
-      products: [],
-    },
-    step3: {
-      logo: null,
-      banner: null,
-      introVideo: ''
-    },
-    step4: {
-      isInOriginRoute: false,
-      deliveryChoice: undefined,
-      deliveryOptions: [],
-      includedZones: [],
-      excludedZones: [],
-      minOrderAmount: 0,
-      sustainablePackaging: false,
-      packagingDescription: ''
-    },
-    step5: {
-      cif: undefined,
-      seguroRC: undefined,
-      manipuladorAlimentos: undefined,
-      certifications: [],
-      verificationStatus: 'pending'
-    },
-    step6: {
-      stripeConnected: false,
-      acceptTerms: false
-    }
-  });
+  // Cobertura de Origen (paso 3)
+  const [coverage, setCoverage] = useState<ShippingCoverage | null>(null);
+  const [coverageLoading, setCoverageLoading] = useState(false);
+  const [coverageError, setCoverageError] = useState(false);
 
-  /**
-   * Construye la URL pública de una clave S3 usando NEXT_PUBLIC_CDN_BASE_URL.
-   * Fallback para when the backend no devuelve URLs precalculadas todavía.
-   */
-  const buildCdnUrl = (key: string): string => {
-    const base = (process.env.NEXT_PUBLIC_CDN_BASE_URL ?? '').replace(/\/$/, '');
-    return base ? `${base}/${key}` : key;
-  };
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
-  /**
-   * Resuelve la lista de imágenes con { key, url } desde la respuesta del backend.
-   * Estrategia de tres niveles (más reciente → más robusto):
-   *   1. d.visual.teamPhotoUrls  — nuevo formato inline (backend ≥ commit 2549558)
-   *   2. d.visualUrls.teamPhotos — campo separado (backend ≥ commit 2549558 variante)
-   *   3. d.visual.teamPhotoDocIds — claves raw + CDN env var (cualquier versión del backend)
-   */
-  const resolveImageList = (
-    inline: any[] | undefined | null,
-    separate: any[] | undefined | null,
-    rawKeys: string[] | undefined | null,
-  ): Array<{ key: string; url: string }> => {
-    if (Array.isArray(inline) && inline.length > 0) return inline;
-    if (Array.isArray(separate) && separate.length > 0) return separate;
-    if (Array.isArray(rawKeys) && rawKeys.length > 0) {
-      return rawKeys.map((k) => ({ key: k, url: buildCdnUrl(k) }));
-    }
-    return [];
-  };
+  // ── Navegación y URL ──────────────────────────────────────────────────────
 
-  /**
-   * Refresco acotado al estado de Stripe del paso 6.
-   *
-   * Deliberadamente NO reutiliza el cargador completo del efecto de montaje:
-   * ese restaura `currentStep` desde el servidor y apaga `isLoading`, así que
-   * usarlo como refresco en segundo plano movería al productor de paso
-   * mientras rellena el formulario. Además reescribe `formData` entero, lo
-   * que pisaría ediciones sin guardar de otros pasos.
-   *
-   * Sólo toca `stripeConnected`/`stripeAccountId`, que son datos que manda el
-   * servidor (el webhook de Stripe es su única fuente de verdad). `acceptTerms`
-   * se deja intacto a propósito: es una casilla que gestiona el usuario en
-   * local y no debe revertirse por un refresco.
-   */
-  const refreshStripeState = useCallback(async () => {
-    try {
-      const res: any = await loadOnboardingData();
-      const payment = res?.data?.payment;
-      if (!payment) return;
-
-      setFormData((prev) => ({
-        ...prev,
-        step6: {
-          ...prev.step6,
-          stripeConnected: payment.stripeConnected ?? prev.step6.stripeConnected,
-          stripeAccountId: payment.stripeAccountId ?? prev.step6.stripeAccountId,
-        },
-      }));
-    } catch {
-      // Silencio deliberado: es un refresco en segundo plano. Un fallo de red
-      // puntual no debe interrumpir al productor con un error; el siguiente
-      // tick del polling reintenta.
-    }
+  const syncUrl = useCallback((index: number) => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    url.searchParams.set('step', String(index + 1));
+    window.history.replaceState(window.history.state, '', url.toString());
   }, []);
 
+  const goToStep = useCallback(
+    (index: number, dir?: number) => {
+      const bounded = Math.max(0, Math.min(index, ONBOARDING_TOTAL_STEPS - 1));
+      setDirection(dir ?? (bounded >= currentStep ? 1 : -1));
+      setCurrentStep(bounded);
+      setSaveError(null);
+      syncUrl(bounded);
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [currentStep, syncUrl],
+  );
+
+  // ── Carga inicial (rehidratación completa) ────────────────────────────────
+
   useEffect(() => {
+    const urlStep = typeof window !== 'undefined'
+      ? parseStepParam(new URLSearchParams(window.location.search).get('step'))
+      : null;
+
     loadOnboardingData()
-      .then((res: any) => {
+      .then((res) => {
         const d = res?.data;
-        if (!d) return;
-        setFormData(prev => ({
-          ...prev,
-          step1: {
-            ...prev.step1,
-            // Identidad legal (Sprint 2)
-            entityType: d.fiscal?.entityType ?? prev.step1.entityType,
-            legalRepresentativeName: d.fiscal?.legalRepresentativeName ?? prev.step1.legalRepresentativeName,
-            businessPhone: d.fiscal?.businessPhone ?? prev.step1.businessPhone,
-            taxId: d.fiscal?.taxId ?? prev.step1.taxId,
-            // Dirección de producción
-            street: d.location?.street ?? d.location?.address ?? prev.step1.street,
-            streetNumber: d.location?.streetNumber ?? prev.step1.streetNumber,
-            streetComplement: d.location?.streetComplement ?? prev.step1.streetComplement,
-            city: d.location?.city ?? prev.step1.city,
-            province: d.location?.province ?? d.fiscal?.legalProvince ?? prev.step1.province,
-            postalCode: d.location?.postalCode ?? prev.step1.postalCode,
-            foundedYear: d.location?.foundedYear ?? prev.step1.foundedYear,
-            teamSize: d.location?.teamSize ?? prev.step1.teamSize,
-            categories: d.fiscal?.categories?.length ? d.fiscal.categories : prev.step1.categories,
-            // Dirección de facturación (Sprint 2)
-            billingAddressSameAsProduction: d.fiscal?.billingAddress == null,
-            billingAddress: d.fiscal?.billingAddress ?? prev.step1.billingAddress,
-            // Fotos de ubicación guardadas previamente (3-level fallback)
-            locationImages: (() => {
-              const imgs = resolveImageList(
-                d.visual?.locationImageUrls,
-                d.visualUrls?.locationImages,
-                d.visual?.locationImageDocIds,
-              );
-              return imgs.length > 0
-                ? imgs.map((img) => ({
-                    id: img.key,
-                    key: img.key,
-                    name: img.key.split('/').pop() || 'location-image',
-                    size: 0,
-                    type: 'image/jpeg',
-                    url: img.url,
-                    preview: img.url,
-                  }))
-                : prev.step1.locationImages;
-            })(),
-          },
-          step2: {
-            ...prev.step2,
-            businessName: d.story?.businessName ?? d.fiscal?.businessName ?? prev.step2.businessName,
-            tagline: d.story?.tagline ?? prev.step2.tagline,
-            description: d.story?.description ?? d.fiscal?.whyOrigin ?? prev.step2.description,
-            productionPhilosophy: d.story?.productionPhilosophy ?? prev.step2.productionPhilosophy,
-            values: d.story?.values?.length ? d.story.values : prev.step2.values,
-            website: d.story?.website ?? prev.step2.website,
-            instagramHandle: d.story?.instagramHandle ?? prev.step2.instagramHandle,
-            // Fotos de equipo guardadas previamente (3-level fallback)
-            photos: (() => {
-              const imgs = resolveImageList(
-                d.visual?.teamPhotoUrls,
-                d.visualUrls?.teamPhotos,
-                d.visual?.teamPhotoDocIds,
-              );
-              return imgs.length > 0
-                ? imgs.map((img) => ({
-                    id: img.key,
-                    key: img.key,
-                    name: img.key.split('/').pop() || 'team-photo',
-                    size: 0,
-                    type: 'image/jpeg',
-                    url: img.url,
-                    preview: img.url,
-                  }))
-                : prev.step2.photos;
-            })(),
-            // Certificaciones declaradas previamente
-            certifications: Array.isArray(d.certifications) && d.certifications.length > 0
-              ? d.certifications.map((c: any) => ({
-                  id: c.certificationId,
-                  name: c.name,
-                  issuingBody: c.issuingBody,
-                  verified: c.status === 'VERIFIED',
-                }))
-              : prev.step2.certifications,
-          },
-          step3: {
-            ...prev.step3,
-            introVideo: d.story?.introVideoUrl ?? prev.step3.introVideo,
-            // Logo y banner guardados previamente (3-level fallback)
-            logo: (() => {
-              const logoUrl = d.visual?.logoUrl ?? d.visualUrls?.logoUrl
-                ?? (d.visual?.logoDocId ? buildCdnUrl(d.visual.logoDocId) : null);
-              const logoKey = d.visual?.logoDocId ?? d.visualUrls?.logoKey ?? null;
-              return logoUrl && logoKey
-                ? { id: logoKey, key: logoKey, name: 'logo', size: 0, type: 'image/jpeg', url: logoUrl, preview: logoUrl }
-                : prev.step3.logo;
-            })(),
-            banner: (() => {
-              const bannerUrl = d.visual?.bannerUrl ?? d.visualUrls?.bannerUrl
-                ?? (d.visual?.bannerDocId ? buildCdnUrl(d.visual.bannerDocId) : null);
-              const bannerKey = d.visual?.bannerDocId ?? d.visualUrls?.bannerKey ?? null;
-              return bannerUrl && bannerKey
-                ? { id: bannerKey, key: bannerKey, name: 'banner', size: 0, type: 'image/jpeg', url: bannerUrl, preview: bannerUrl }
-                : prev.step3.banner;
-            })(),
-          },
-          step4: d.logistics ? {
-            ...prev.step4,
-            isInOriginRoute: d.logistics.isInOriginRoute,
-            deliveryChoice: d.logistics.deliveryChoice ?? prev.step4.deliveryChoice,
-            minOrderAmount: Number.isFinite(Number(d.logistics.minOrderAmount))
-              ? Number(d.logistics.minOrderAmount)
-              : prev.step4.minOrderAmount,
-            sustainablePackaging: d.logistics.sustainablePackaging,
-            packagingDescription: d.logistics.packagingDescription ?? '',
-            deliveryOptions: (Array.isArray(d.logistics.deliveryOptions) ? d.logistics.deliveryOptions : []).map((o: any) => ({
-              id: o.id, name: o.name, description: o.description ?? '',
-              price: Number(o.price), estimatedDaysValue: o.estimatedDaysValue, estimatedDaysUnit: o.estimatedDaysUnit ?? 'DAYS',
-              icon: Package,
-            })),
-            includedZones: (Array.isArray(d.logistics.shippingZones) ? d.logistics.shippingZones : []).filter((z: any) => !z.isExcluded)
-              .map((z: any) => ({ id: z.id, type: z.type.toLowerCase(), value: z.value, label: z.label })),
-            excludedZones: (Array.isArray(d.logistics.shippingZones) ? d.logistics.shippingZones : []).filter((z: any) => z.isExcluded)
-              .map((z: any) => ({ id: z.id, type: z.type.toLowerCase(), value: z.value, label: z.label })),
-          } : prev.step4,
-          step_products: Array.isArray(d.products) && d.products.length ? {
-            products: d.products.map((p: any) => ({
-              id: p.id,
-              name: p.name ?? '',
-              description: p.description ?? '',
-              categoryId: p.categoryId ?? '',
-              referencePrice: p.referencePrice != null ? Number(p.referencePrice) : undefined,
-              unit: p.unit ?? 'kg',
-              allergens: p.allergens ?? [],
-              mayContain: p.mayContain ?? [],
-              noAllergens: p.noAllergens ?? false,
-              availabilityType: p.availabilityType ?? 'year_round',
-              activeMonths: p.activeMonths ?? [],
-              leadTimeDays: p.leadTimeDays ?? undefined,
-              photo: p.imageUrl && p.imageKey
-                ? {
-                    id: p.imageKey,
-                    key: p.imageKey,
-                    name: p.imageKey.split('/').pop() || 'product-image',
-                    size: 0,
-                    type: 'image/jpeg',
-                    url: p.imageUrl,
-                    preview: p.imageUrl,
-                  }
-                : undefined,
-            })),
-          } : prev.step_products,
-          step6: d.payment ? {
-            stripeConnected: d.payment.stripeConnected,
-            // Necesario para que el polling del paso 6 sepa que hay una cuenta
-            // que vigilar tras recargar la página: sin esto, un productor que
-            // vuelve al wizard con la cuenta aún en verificación no vería
-            // actualizarse el estado.
-            stripeAccountId: d.payment.stripeAccountId ?? undefined,
-            acceptTerms: !!d.payment.acceptedTermsAt,
-          } : prev.step6,
-        }));
-        if (d.onboarding?.currentStep) {
-          // El backend numera los pasos 1-6 (sin paso de Productos).
-          // El frontend tiene 7 pasos (0-6) con "Productos" en el índice 2,
-          // entre "Historia" (índice 1, backend paso 2) y "Perfil visual" (índice 3, backend paso 3).
-          // Mapeo correcto:
-          //   backendStep 1 → frontend 0 (Ubicación)
-          //   backendStep 2 → frontend 1 (Historia)
-          //   backendStep 3 + sin productos → frontend 2 (Productos)
-          //   backendStep 3 + con productos → frontend 3 (Perfil visual)
-          //   backendStep 4 → frontend 4 (Capacidad)
-          //   backendStep 5 → frontend 5 (Documentación)
-          //   backendStep 6 → frontend 6 (Pagos)
-          const hasProducts = Array.isArray(d.products) && d.products.length > 0;
-          let savedStep: number;
-          if (d.onboarding.currentStep >= 4) {
-            savedStep = d.onboarding.currentStep; // pasos 4,5,6 coinciden con índices frontend 4,5,6
-          } else if (d.onboarding.currentStep === 3) {
-            savedStep = hasProducts ? 3 : 2; // con productos → Visual; sin → Productos
-          } else {
-            savedStep = d.onboarding.currentStep - 1; // 1→0, 2→1
-          }
-          setCurrentStep(Math.max(0, Math.min(savedStep, STEPS.length - 1)));
+        const completed = normalizeCompletedSteps(d?.onboarding?.completedSteps);
+        if (d) {
+          setFormData((prev) => hydrateOnboardingForm(d, prev));
+          setCompletedSteps(completed);
+          setBackendCurrentStep(d.onboarding?.currentStep ?? null);
         }
+        const index = resolveInitialStepIndex({
+          urlStep,
+          currentStep: d?.onboarding?.currentStep,
+          completedSteps: completed,
+        });
+        setCurrentStep(index);
+        syncUrl(index);
       })
       .catch((error: unknown) => {
         if (error instanceof GatewayError && error.status === 401) {
           redirectToLoginOnExpiredSession();
           return;
         }
-        /* primer acceso — sin datos guardados */
+        // Primer acceso — sin datos guardados: se empieza por el paso indicado o el 1.
+        if (urlStep) setCurrentStep(0);
       })
       .finally(() => setIsLoading(false));
-  }, [redirectToLoginOnExpiredSession]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [redirectToLoginOnExpiredSession, syncUrl]);
 
-  const totalSteps = STEPS.length;
-  const progress = ((currentStep + 1) / totalSteps) * 100;
+  // ── Cobertura de Origen: se consulta cada vez que se entra en el paso 3 ──
 
-  const stepValidationMessages = useMemo<string[]>(() => {
-    const messages: string[] = [];
-
-    switch (currentStep) {
-      case 0: {
-        const { step1 } = formData;
-        const billingRequired = !step1.billingAddressSameAsProduction;
-        const billingOk = !billingRequired ||
-          (!!step1.billingAddress?.street.trim() &&
-           !!step1.billingAddress?.streetNumber.trim() &&
-           !!step1.billingAddress?.city.trim() &&
-           /^\d{5}$/.test(step1.billingAddress?.postalCode ?? ''));
-        const phoneOk = !!step1.businessPhone && /^[6789]\d{8}$/.test(step1.businessPhone);
-
-        if (!step1.entityType) messages.push('Selecciona el tipo de entidad.');
-        if (!validateSpanishTaxId(step1.taxId ?? '').valid) messages.push('Introduce un CIF/NIF válido.');
-        if (!phoneOk) messages.push('Introduce un teléfono válido (9 dígitos, empieza por 6, 7, 8 o 9).');
-        if (!step1.street.trim()) messages.push('Completa la calle de producción.');
-        if (!step1.streetNumber.trim()) messages.push('Completa el número de la dirección de producción.');
-        if (!step1.city.trim()) messages.push('Completa la ciudad de producción.');
-        if (!step1.province) messages.push('Selecciona la provincia de producción.');
-        if (!/^\d{5}$/.test(step1.postalCode)) messages.push('El código postal de producción debe tener 5 dígitos.');
-        if (step1.categories.length < 1) messages.push('Selecciona al menos una categoría de productos.');
-        if (!billingOk) messages.push('Completa la dirección de facturación o marca que es igual a la de producción.');
-        break;
+  const loadCoverage = useCallback(async () => {
+    setCoverage(null);
+    setCoverageLoading(true);
+    setCoverageError(false);
+    try {
+      setCoverage(await getShippingCoverage());
+    } catch (error) {
+      if (error instanceof GatewayError && error.status === 401) {
+        redirectToLoginOnExpiredSession();
+        return;
       }
-      case 1: {
-        if (!formData.step2.businessName.trim()) messages.push('Escribe el nombre del negocio.');
-        if (formData.step2.description.trim().length < 50) messages.push('Amplía la historia del negocio (mínimo 50 caracteres).');
-        if (formData.step2.values.length < 1) messages.push('Selecciona al menos un valor que represente tu marca.');
-        break;
-      }
-      case 2: {
-        const products = formData.step_products.products;
-        // Los productos son opcionales — el usuario puede añadirlos más tarde
-        // desde su panel de catálogo. Solo validamos los que ya tiene rellenados.
-        products.forEach((product, index) => {
-          const errors = getProductErrors(product);
-          if (errors.length > 0) {
-            const productLabel =
-              product.name.trim().length >= 3
-                ? `"${product.name.trim()}"`
-                : `Producto ${index + 1}`;
-            messages.push(`${productLabel}: falta ${errors.join(', ')}.`);
-          }
-        });
-        break;
-      }
-      case 3: {
-        if (formData.step3.logo === null) messages.push('Sube el logo del negocio para continuar.');
-        break;
-      }
-      case 4: {
-        if (!formData.step4.deliveryChoice) {
-          messages.push('Elige cómo vas a gestionar el envío: delegar en Origen o gestionarlo por tu cuenta.');
-        }
-        if (formData.step4.deliveryChoice !== 'delegated' && formData.step4.deliveryOptions.length < 1) {
-          messages.push('Añade al menos un método de envío.');
-        }
-        const incompleteDeliveryOption = formData.step4.deliveryOptions.some(
-          (opt) => !opt.name.trim() || !opt.description.trim() || opt.estimatedDaysValue === null || opt.price <= 0,
-        );
-        if (incompleteDeliveryOption) {
-          messages.push('Completa nombre, descripción, precio y tiempo estimado de todos tus métodos de envío.');
-        }
-        if (formData.step4.includedZones.length < 1) messages.push('Añade al menos una zona de entrega incluida.');
-        if (!formData.step4.minOrderAmount || formData.step4.minOrderAmount <= 0) messages.push('El pedido mínimo debe ser mayor que 0 €.');
-        break;
-      }
-      case 5: {
-        if (!formData.step5.cif) messages.push('Sube el documento CIF/NIF.');
-        if (!formData.step5.seguroRC) messages.push('Sube el documento de seguro RC.');
-        if (!formData.step5.manipuladorAlimentos) messages.push('Sube el documento de manipulador de alimentos.');
-        break;
-      }
-      case 6: {
-        if (!formData.step6.acceptTerms) {
-          messages.push('Debes aceptar los términos para finalizar el onboarding. Stripe sigue siendo opcional en este paso.');
-        }
-        break;
-      }
-      default:
-        break;
+      setCoverageError(true);
+    } finally {
+      setCoverageLoading(false);
     }
+  }, [redirectToLoginOnExpiredSession]);
 
-    return messages;
-  }, [currentStep, formData]);
+  useEffect(() => {
+    if (!isLoading && !done && currentStep === COVERAGE_STEP_INDEX) void loadCoverage();
+  }, [currentStep, isLoading, done, loadCoverage]);
 
-  const isStepValid = stepValidationMessages.length === 0;
+  // Aviso "Paso guardado": desaparece solo
+  useEffect(() => {
+    if (!notice) return undefined;
+    const t = setTimeout(() => setNotice(null), 4000);
+    return () => clearTimeout(t);
+  }, [notice]);
 
-  const focusFirstIncompleteField = useCallback(() => {
-    if (typeof window === 'undefined') return;
+  // El foco pasa al título al cambiar de paso (lectores de pantalla y teclado)
+  useEffect(() => {
+    if (!isLoading && !done) titleRef.current?.focus({ preventScroll: true });
+  }, [currentStep, isLoading, done]);
 
-    // UX-3: en el paso de productos, delegar al componente vía counter
-    if (currentStep === 2) {
-      setFocusProductsCounter((c) => c + 1);
-      return;
+  /**
+   * Refresco acotado al estado de Stripe del paso 5. No reutiliza el cargador
+   * completo: ese restaura el paso y reescribe todo el formulario, pisando
+   * ediciones sin guardar. Solo toca `stripeConnected`/`stripeAccountId` (datos
+   * que manda el servidor; el webhook de Stripe es su única fuente de verdad);
+   * `acceptTerms` es una casilla local que no debe revertirse.
+   */
+  const refreshStripeState = useCallback(async () => {
+    try {
+      const res = await loadOnboardingData();
+      const payment = res?.data?.payment;
+      if (!payment) return;
+      setFormData((prev) => ({
+        ...prev,
+        step5: {
+          ...prev.step5,
+          stripeConnected: payment.stripeConnected ?? prev.step5.stripeConnected,
+          stripeAccountId: payment.stripeAccountId ?? prev.step5.stripeAccountId,
+        },
+      }));
+    } catch {
+      // Refresco en segundo plano: un fallo puntual no debe interrumpir al productor.
     }
+  }, []);
 
-    const formRoot = document.querySelector('[data-onboarding-step-content]');
-    if (!formRoot) return;
+  // ── Validación del paso actual ────────────────────────────────────────────
 
-    const candidates = Array.from(
-      formRoot.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLButtonElement>(
-        'input, textarea, select, button[role="combobox"]',
-      ),
-    );
+  const issues = useMemo(() => validateStep(currentStep, formData, { coverage }), [currentStep, formData, coverage]);
+  const isStepValid = issues.length === 0;
+  const showErrors = Boolean(attempted[currentStep]);
+  const fieldErrors = useMemo(() => (showErrors ? issuesToFieldErrors(issues) : {}), [showErrors, issues]);
 
-    const firstInvalid = candidates.find((el) => {
-      if (el.hasAttribute('disabled')) return false;
-      if (el.getAttribute('aria-invalid') === 'true') return true;
+  const focusField = useCallback((fieldId?: string) => {
+    if (typeof document === 'undefined') return;
+    const root = document.querySelector('[data-onboarding-step-content]');
+    const target =
+      (fieldId ? document.getElementById(fieldId) : null) ??
+      root?.querySelector<HTMLElement>('[aria-invalid="true"], input:not([readonly]), textarea, button[role="combobox"]') ??
+      null;
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.focus({ preventScroll: true });
+  }, []);
 
-      const isRequired = el.hasAttribute('required');
-      if (!isRequired) return false;
+  // ── Guardado ──────────────────────────────────────────────────────────────
 
-      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) {
-        return !String(el.value ?? '').trim();
+  const persistStep = useCallback(
+    async (stepIndex: number) => {
+      const patch = await saveOnboardingStep(stepIndex, formData);
+      setFormData((prev) => ({ ...prev, ...patch }));
+      setCompletedSteps((prev) => normalizeCompletedSteps([...prev, stepIndex + 1]));
+      setBackendCurrentStep((prev) => Math.min(ONBOARDING_TOTAL_STEPS, Math.max(prev ?? 1, stepIndex + 2)));
+    },
+    [formData],
+  );
+
+  const handleError = useCallback(
+    (error: unknown, fallback: string) => {
+      console.error('[Onboarding]', error);
+      if (error instanceof GatewayError && error.status === 401) {
+        redirectToLoginOnExpiredSession();
+        return;
       }
-
-      return false;
-    });
-
-    if (firstInvalid) {
-      firstInvalid.focus();
-      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
-
-    const firstFocusable = formRoot.querySelector<HTMLElement>('input, textarea, select, button[role="combobox"]');
-    if (firstFocusable) {
-      firstFocusable.focus();
-      firstFocusable.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [currentStep]);
-
-  // ========================================================================
-  // GUARDAR PASO ACTUAL EN EL BACKEND
-  // ========================================================================
-
-  const saveCurrentStep = useCallback(async (step: number) => {
-    switch (step) {
-      case 0: {
-        let locationImageKeys: string[] = [];
-        try {
-          // Claves de imágenes ya subidas previamente (hidratadas desde servidor)
-          const existingKeys = formData.step1.locationImages
-            .filter((f) => !f.file && f.key)
-            .map((f) => f.key!);
-          const newKeys = await Promise.all(
-            formData.step1.locationImages.filter((f) => f.file).map((f) => uploadFile(f.file!, 'visual/location').then((r) => r.key)),
-          );
-          locationImageKeys = [...existingKeys, ...newKeys];
-        } catch (uploadErr) {
-          throw new Error(`No se pudieron subir las fotos del local: ${getUserFriendlyError(uploadErr)}`);
-        }
-        await saveStep1(formData.step1, locationImageKeys);
-        break;
-      }
-      case 1: {
-        // Combinar claves existentes con nuevas subidas
-        const existingTeamKeys = formData.step2.photos
-          .filter((f) => !f.file && f.key)
-          .map((f) => f.key!);
-        const newTeamKeys = await Promise.all(
-          formData.step2.photos.filter((f) => f.file).map((f) => uploadFile(f.file!, 'visual/team').then((r) => r.key)),
-        );
-        const teamPhotoKeys = [...existingTeamKeys, ...newTeamKeys];
-        await saveStep2(formData.step2, teamPhotoKeys);
-        break;
-      }
-      case 2: {
-        // Subir nuevas imágenes (las que tienen File adjunto)
-        const newImageKeys = await Promise.all(
-          formData.step_products.products
-            .filter((p) => p.photo?.file)
-            .map(async (p) => ({
-              productId: p.id,
-              imageKey: (await uploadFile(p.photo!.file!, `products/${p.id}/images`, {
-                entityType: 'products',
-                entityId: p.id,
-              })).key,
-            })),
-        );
-        // Preservar claves S3 de imágenes ya subidas (hidratadas del servidor)
-        const existingImageKeys = formData.step_products.products
-          .filter((p) => !p.photo?.file && p.photo?.key)
-          .map((p) => ({ productId: p.id, imageKey: p.photo!.key! }));
-        await saveStepProducts(formData.step_products.products, [...newImageKeys, ...existingImageKeys]);
-        break;
-      }
-      case 3: {
-        // Usar clave existente si no se sube una nueva imagen
-        const logoKey = formData.step3.logo?.file
-          ? (await uploadFile(formData.step3.logo.file, 'visual/logo')).key
-          : formData.step3.logo?.key;
-        const bannerKey = formData.step3.banner?.file
-          ? (await uploadFile(formData.step3.banner.file, 'visual/banner')).key
-          : formData.step3.banner?.key;
-        await saveStep3({ logoKey, bannerKey, introVideoUrl: formData.step3.introVideo });
-        break;
-      }
-      case 4: {
-        await saveStep4(formData.step4);
-        break;
-      }
-      case 5: {
-        const cifKey = formData.step5.cif?.file
-          ? (await uploadFile(formData.step5.cif.file, 'documents/cif')).key
-          : undefined;
-        const seguroRcKey = formData.step5.seguroRC?.file
-          ? (await uploadFile(formData.step5.seguroRC.file, 'documents/seguro-rc')).key
-          : undefined;
-        const manipuladorAlimentosKey = formData.step5.manipuladorAlimentos?.file
-          ? (await uploadFile(formData.step5.manipuladorAlimentos.file, 'documents/manipulador-alimentos')).key
-          : undefined;
-        const certificationDocumentKeys = await Promise.all(
-          formData.step5.certifications
-            .filter((c) => (c as any).file)
-            .map(async (c) => ({
-              certificationId: c.certificationId,
-              documentKey: (await uploadFile((c as any).file, `documents/certifications/${c.certificationId}`, {
-                entityType: 'certifications',
-                entityId: c.certificationId,
-              })).key,
-            })),
-        );
-        await saveStep5(formData.step5, { cifKey, seguroRcKey, manipuladorAlimentosKey, certificationDocumentKeys });
-        break;
-      }
-      case 6: {
-        await saveStep6(formData.step6);
-        break;
-      }
-    }
-  }, [formData]);
-
-  // ========================================================================
-  // MANEJADORES DE NAVEGACIÓN
-  // ========================================================================
+      setSaveError(getUserFriendlyError(error, fallback));
+    },
+    [redirectToLoginOnExpiredSession],
+  );
 
   const handleNext = async () => {
-    if (currentStep >= totalSteps - 1) return;
+    if (currentStep >= ONBOARDING_TOTAL_STEPS - 1) return;
     if (!isStepValid) {
-      // El botón ya no está nativamente disabled (no daba feedback al tocarlo
-      // en móvil, donde vive en una barra fija separada del contenido) --
-      // en vez de bloquear el tap, guiamos al usuario al primer campo que falta.
-      focusFirstIncompleteField();
+      // El botón no está deshabilitado (en móvil, en una barra fija, no daría feedback):
+      // se muestran los errores junto a cada campo y se lleva al primero pendiente.
+      setAttempted((prev) => ({ ...prev, [currentStep]: true }));
+      focusField(issues[0]?.fieldId);
       return;
     }
     setIsSubmitting(true);
     setSaveError(null);
     try {
-      await saveCurrentStep(currentStep);
-      setDirection(1);
-      setCurrentStep(currentStep + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error: unknown) {
-      console.error('[Onboarding] handleNext error:', error);
-      if (error instanceof GatewayError && error.status === 401) {
-        redirectToLoginOnExpiredSession();
-        return;
-      }
-      setSaveError(getUserFriendlyError(error, 'Error al guardar. Inténtalo de nuevo.'));
+      await persistStep(currentStep);
+      setNotice(`Paso ${currentStep + 1} guardado`);
+      goToStep(currentStep + 1, 1);
+    } catch (error) {
+      handleError(error, 'Error al guardar. Inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      setDirection(-1);
-      setCurrentStep(currentStep - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    if (currentStep > 0) goToStep(currentStep - 1, -1);
   };
 
-  const handleStepClick = (index: number) => {
-    if (index <= currentStep) {
-      setDirection(index > currentStep ? 1 : -1);
-      setCurrentStep(index);
-    }
+  const maxReachable = getMaxReachableIndex(completedSteps, backendCurrentStep);
+
+  const handleStepClick = (id: string) => {
+    const index = Number(id) - 1;
+    if (index === currentStep || index > maxReachable) return;
+    goToStep(index);
   };
 
   const handleComplete = async () => {
     if (!isStepValid) {
-      focusFirstIncompleteField();
+      setAttempted((prev) => ({ ...prev, [currentStep]: true }));
+      focusField(issues[0]?.fieldId);
       return;
     }
     setIsSubmitting(true);
     setSaveError(null);
     try {
-      await saveCurrentStep(currentStep);
+      await persistStep(currentStep);
       await apiCompleteOnboarding();
-      if (user) {
-        setUser({ ...user, onboardingCompleted: true });
-      }
-      router.push('/dashboard');
-    } catch (error: unknown) {
-      console.error('[Onboarding] handleComplete error:', error);
-      if (error instanceof GatewayError && error.status === 401) {
-        redirectToLoginOnExpiredSession();
-        return;
-      }
-      setSaveError(getUserFriendlyError(error, 'Error al completar el onboarding. Inténtalo de nuevo.'));
+      if (user) setUser({ ...user, onboardingCompleted: true });
+      setDone(true);
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
+      getMyReadiness().then(setReadiness).catch(() => setReadiness(null));
+    } catch (error) {
+      handleError(error, 'Error al completar el onboarding. Inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleSkipOnboarding = async () => {
+  /** "Guardar y continuar más tarde": guarda el paso si está completo; si no, pide confirmación. */
+  const handleSaveAndExit = async () => {
+    if (!isStepValid) {
+      setExitDialogOpen(true);
+      return;
+    }
     setIsSubmitting(true);
     setSaveError(null);
     try {
-      await saveCurrentStep(currentStep);
+      await persistStep(currentStep);
       router.push('/dashboard');
-    } catch (error: unknown) {
-      console.error('[Onboarding] handleSkipOnboarding error:', error);
-      if (error instanceof GatewayError && error.status === 401) {
-        redirectToLoginOnExpiredSession();
-        return;
-      }
-      setSaveError(getUserFriendlyError(error, 'Error al guardar. Inténtalo de nuevo.'));
+    } catch (error) {
+      handleError(error, 'Error al guardar. Inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // ========================================================================
-  // MANEJADORES DE CAMBIO POR PASO (TIPADOS)
-  // ========================================================================
-  
-  const handleStep1Change = (data: EnhancedLocationData) => {
-    setFormData(prev => ({ ...prev, step1: data }));
-  };
+  // ── Cambios por paso ──────────────────────────────────────────────────────
 
-  const handleStep2Change = (data: EnhancedStoryData) => {
-    setFormData(prev => ({ ...prev, step2: data }));
-  };
+  const setStep = <K extends 'step1' | 'step2' | 'step3' | 'step4' | 'step5'>(key: K) =>
+    (data: OnboardingFormData[K]) => setFormData((prev) => ({ ...prev, [key]: data }));
 
-  const handleStepProductsChange = (data: EnhancedProductsData) => {
-    setFormData(prev => ({ ...prev, step_products: data }));
-  };
-
-  const handleStep3Change = (data: EnhancedVisualData) => {
-    setFormData(prev => ({ ...prev, step3: data }));
-  };
-
-  const handleStep4Change = (data: EnhancedCapacityData) => {
-    setFormData(prev => ({ ...prev, step4: data }));
-  };
-
-  const handleStep5Change = (data: EnhancedStep5DocumentsData) => {
-    setFormData(prev => ({ ...prev, step5: data }));
-  };
-
-  const handleStep6Change = (data: EnhancedStep6StripeData) => {
-    setFormData(prev => ({ ...prev, step6: data }));
-  };
-
-  // ========================================================================
-  // RENDER DEL PASO ACTUAL
-  // ========================================================================
-  
   const renderStep = () => {
     switch (currentStep) {
       case 0:
         return (
           <EnhancedStep1Location
             data={formData.step1}
-            onChange={handleStep1Change}
+            onChange={setStep('step1')}
+            businessName={formData.meta.businessName}
+            errors={fieldErrors}
           />
         );
       case 1:
-        return (
-          <EnhancedStep2Story
-            data={formData.step2}
-            onChange={handleStep2Change}
-          />
-        );
+        return <EnhancedStep2Visual data={formData.step2} onChange={setStep('step2')} errors={fieldErrors} />;
       case 2:
         return (
-          <EnhancedStepProducts
-            data={formData.step_products}
-            onChange={handleStepProductsChange}
-            autoExpandFirstIncomplete={focusProductsCounter}
+          <EnhancedStep3Shipping
+            data={formData.step3}
+            onChange={setStep('step3')}
+            coverage={coverage}
+            coverageLoading={coverageLoading}
+            coverageError={coverageError}
+            onRetryCoverage={loadCoverage}
+            onGoToStep={(id) => goToStep(id - 1, -1)}
+            homeProvince={formData.step1.province}
+            errors={fieldErrors}
           />
         );
       case 3:
-        return (
-          <EnhancedStep3Visual
-            data={formData.step3}
-            onChange={handleStep3Change}
-          />
-        );
+        return <EnhancedStep4Documents data={formData.step4} onChange={setStep('step4')} errors={fieldErrors} />;
       case 4:
         return (
-          <EnhancedStep4Capacity
-            data={formData.step4}
-            onChange={handleStep4Change}
-            producerLocation={{
-              province: formData.step1.province,
-              city: formData.step1.city,
-              postalCode: formData.step1.postalCode,
-            }}
-          />
-        );
-      case 5:
-        return (
-          <EnhancedStep5Documents
+          <EnhancedStep5Payments
             data={formData.step5}
-            onChange={handleStep5Change}
-            selectedCertifications={formData.step2.certifications?.map(c => ({
-              id: c.id,
-              name: c.name,
-              issuingBody: c.issuingBody
-            })) || []}
-          />
-        );
-      case 6:
-        return (
-          <EnhancedStep6Stripe
-            data={formData.step6}
-            onChange={handleStep6Change}
+            onChange={setStep('step5')}
             userEmail={user?.email}
             firstName={user?.firstName}
             lastName={user?.lastName}
-            businessName={formData.step2.businessName}
-            website={formData.step2.website}
+            businessName={formData.meta.businessName}
+            website={formData.meta.website}
             onRequestRefresh={refreshStripeState}
+            errors={fieldErrors}
           />
         );
       default:
@@ -969,358 +415,170 @@ export default function OnboardingPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-origen-pradera border-t-transparent rounded-full animate-spin" />
+      <div className="flex min-h-screen items-center justify-center" role="status" aria-label="Cargando tu configuración">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-origen-pradera border-t-transparent" />
+      </div>
+    );
+  }
+
+  const isLastStep = currentStep === ONBOARDING_TOTAL_STEPS - 1;
+  const step = ONBOARDING_STEPS[currentStep];
+  const completedMap = Object.fromEntries(completedSteps.map((id) => [String(id), true]));
+  const progress = (completedSteps.length / ONBOARDING_TOTAL_STEPS) * 100;
+
+  // ── Pantalla final ────────────────────────────────────────────────────────
+
+  if (done) {
+    return (
+      <div className="min-h-screen bg-origen-crema">
+        <header className="w-full border-b border-border-subtle bg-surface-alt/80">
+          <div className="mx-auto flex max-w-3xl items-center px-4 py-3 sm:px-6">
+            <Link href="/" className="flex items-center" aria-label="Origen">
+              <img src="/origen-icon.svg" alt="" width={36} height={36} className="h-9 w-9" />
+            </Link>
+          </div>
+        </header>
+        <main className="px-4 py-6 pb-10 sm:px-6 lg:py-10">
+          <OnboardingDone readiness={readiness} businessName={formData.meta.businessName} />
+        </main>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-origen-crema">
-      
-      {/* ====================================================================
-          HEADER - Ultra minimal
-      ==================================================================== */}
-      <header className="sticky top-0 z-50 w-full bg-surface-alt/80 backdrop-blur-sm border-b border-border-subtle">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center">
-              <img src="/origen-icon.svg" alt="" width={36} height={36} className="h-9 w-9" />
-            </Link>
-            
-            {/* Solo desktop: en mobile, MobileStepperBar ya muestra "Paso X de Y"
-                justo debajo — duplicarlo aquí repite la misma cifra dos veces
-                seguidas en el mismo scroll (R10) sin aportar información nueva. */}
-            <div className="hidden lg:flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">
-                {currentStep + 1}/{totalSteps}
-              </span>
-              <div className="w-20 h-1.5 bg-surface rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-origen-pradera rounded-full transition-all duration-500"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-          </div>
+      <header className="w-full border-b border-border-subtle bg-surface-alt/80">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 sm:px-6">
+          <Link href="/" className="flex items-center" aria-label="Origen">
+            <img src="/origen-icon.svg" alt="" width={36} height={36} className="h-9 w-9" />
+          </Link>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleSaveAndExit}
+            disabled={isSubmitting}
+            className="min-h-11 w-auto text-xs text-text-subtle sm:text-sm"
+          >
+            Guardar y continuar más tarde
+          </Button>
         </div>
       </header>
 
-      {/* Stepper horizontal - solo mobile */}
-      <MobileStepperBar steps={STEPS} currentStep={currentStep} onStepClick={handleStepClick} />
+      {/* Espacio bajo el ActionBar fijo de móvil: 1 fila (botón principal) en el paso 1 y 2 filas
+          (principal + "Anterior") en el resto. Clases literales completas para el JIT de Tailwind. */}
+      <main
+        className={`mx-auto max-w-3xl px-4 sm:px-6 lg:pb-10 ${
+          currentStep === 0
+            ? 'pb-[calc(96px+env(safe-area-inset-bottom,0px))]'
+            : 'pb-[calc(148px+env(safe-area-inset-bottom,0px))]'
+        }`}
+      >
+        <WizardProgress
+          steps={WIZARD_STEPS}
+          currentId={String(step.id)}
+          completed={completedMap}
+          onStepChange={handleStepClick}
+          maxReachableIndex={maxReachable}
+          progress={progress}
+          idPrefix="onboarding"
+          stickyClassName="top-0"
+          stickyOffsetPx={0}
+        />
 
-      {/* ====================================================================
-          MAIN - Layout: Timeline vertical (4) + Formulario (8)
-      ==================================================================== */}
-      {/* Padding inferior en mobile calculado sobre la altura REAL renderizada de
-          MobileNavBar (ActionBar de origen-UXLibrary), no sobre NAV_HEIGHT_MOBILE_DASHBOARD:
-          esta ruta no tiene BottomTabBar global (fuera de dashboard/layout.tsx), solo su
-          propio ActionBar fijo. pt-3(12)+botón primario h-12(48)+pb-3(12) = 72px con una
-          sola fila (paso 0, sin "Anterior"/"Más tarde"); +gap(8)+botón secundario h-11(44)
-          = 124px con fila secundaria (pasos 1-6). +16px de aire para no pegar el contenido
-          al botón. Nota: appShellPaddingClass()/NAV_HEIGHT_MOBILE_DASHBOARD interpolados en
-          un className vía plantilla NO generan CSS (Tailwind JIT no puede detectar el valor
-          en build-time) — usar siempre clases literales completas, como aquí. */}
-      <main className={`max-w-7xl mx-auto px-4 sm:px-6 py-4 lg:py-8 ${currentStep === 0 ? 'pb-[calc(88px+env(safe-area-inset-bottom,0px))]' : 'pb-[calc(140px+env(safe-area-inset-bottom,0px))]'} lg:pb-8`}>
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
+        <div className="mb-5 mt-1">
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">
+            Paso {step.id} de {ONBOARDING_TOTAL_STEPS}
+            <span aria-hidden="true">·</span>
+            <Clock className="h-3 w-3" aria-hidden="true" />
+            {step.time}
+          </p>
+          <h1 ref={titleRef} tabIndex={-1} className="mt-1 text-h2 font-bold text-origen-bosque focus:outline-hidden">
+            {step.title}
+          </h1>
+          <p className="mt-1 text-sm text-text-subtle sm:text-base">{step.purpose}</p>
+        </div>
 
-          {/* ====================================================================
-              COLUMNA IZQUIERDA - Timeline vertical (4/12) — solo desktop
-          ==================================================================== */}
-          <div className="hidden lg:block lg:w-4/12">
-            <div className="sticky top-24 space-y-6">
-              
-              {/* Título de la sección */}
-              <div className="flex items-center gap-2 pb-2 border-b border-border">
-                <Sparkles className="w-4 h-4 text-hoja-tinta" />
-                <h2 className="text-xs font-bold text-origen-bosque uppercase tracking-wider">
-                  Configura tu tienda
-                </h2>
-              </div>
-              
-              {/* Timeline vertical */}
-              <div className="relative">
-                {STEPS.map((step, index) => {
-                  const isActive = index === currentStep;
-                  const isCompleted = index < currentStep;
-                  const isPending = index > currentStep;
-                  const Icon = step.icon;
-                  
-                  return (
-                    <div key={step.id} className="relative flex gap-4 pb-8 last:pb-0">
-                      
-                      {/* Línea conectora vertical */}
-                      {index < totalSteps - 1 && (
-                        <div 
-                          className={cn(
-                            "absolute left-5 top-10 w-0.5 h-[calc(100%-1.5rem)]",
-                            index < currentStep 
-                              ? "bg-linear-to-b from-origen-pradera to-origen-pradera/40" 
-                              : "bg-border"
-                          )}
-                        />
-                      )}
-                      
-                      {/* Indicador del paso */}
-                      <div className="relative z-10 shrink-0">
-                        <div className={cn(
-                          "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                          isCompleted && "bg-origen-bosque text-white shadow-sm",
-                          isActive && "bg-surface-alt border-2 shadow-sm",
-                          isActive && `border-${step.color.replace('text-', '')}`,
-                          isPending && "bg-surface border border-border text-text-subtle",
-                          !isActive && !isCompleted && !isPending && "bg-surface-alt border-2 border-border text-muted-foreground"
-                        )}>
-                          {isCompleted ? (
-                            <CheckCircle className="w-5 h-5" />
-                          ) : (
-                            <Icon className={cn("w-5 h-5", isActive && step.color)} />
-                          )}
-                        </div>
-                        
-                        {/* Badge de tiempo */}
-                        <span className={cn(
-                          "absolute -bottom-2 -right-2 text-[10px] font-medium px-1.5 py-0.5 rounded-full shadow-sm",
-                          isCompleted 
-                            ? "bg-origen-pastel text-origen-bosque border border-origen-pradera/30" 
-                            : "bg-surface-alt text-muted-foreground border border-border"
-                        )}>
-                          {step.time}
-                        </span>
-                      </div>
-                      
-                      {/* Contenido del paso */}
-                      <div 
-                        onClick={() => handleStepClick(index)}
-                        className={cn(
-                          "flex-1 pt-1 transition-all",
-                          isPending && "opacity-50 cursor-not-allowed",
-                          !isPending && "cursor-pointer"
-                        )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <h3 className={cn(
-                            "text-sm font-semibold",
-                            isActive && "text-origen-bosque",
-                            isCompleted && "text-origen-oscuro",
-                            isPending && "text-muted-foreground"
-                          )}>
-                            {step.title}
-                          </h3>
-                          
-                          {/* Indicador de estado */}
-                          {isActive && (
-                            <span className="text-[10px] font-medium text-hoja-tinta flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-origen-pradera animate-pulse" />
-                              En progreso
-                            </span>
-                          )}
-                          {isCompleted && (
-                            <span className="text-[10px] font-medium text-hoja-tinta flex items-center gap-1">
-                              <CheckCircle className="w-3 h-3" />
-                              Listo
-                            </span>
-                          )}
-                        </div>
-                        
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-                          {step.description}
-                        </p>
-                        
-                        {/* Descripción larga - solo paso activo */}
-                        {isActive && (
-                          <p className="text-xs text-muted-foreground mt-2 italic">
-                            {step.longDescription}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {/* Tiempo total estimado */}
-              <div className="mt-4 bg-surface-alt/50 rounded-xl border border-border-subtle p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-origen-pradera/5 flex items-center justify-center">
-                    <Clock className="w-4 h-4 text-hoja-tinta" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Tiempo total</p>
-                    <p className="text-sm font-semibold text-origen-bosque">~14 minutos</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {notice && (
+          <Alert variant="success" dismissible onDismiss={() => setNotice(null)} className="mb-4" role="status">
+            {notice}
+          </Alert>
+        )}
+
+        {showErrors && issues.length > 0 && (
+          <div className="mb-4">
+            <StepValidationPanel issues={issues} onFocusField={focusField} stepKey={currentStep} />
           </div>
-          
-          {/* ====================================================================
-              COLUMNA DERECHA - Formulario (8/12)
-          ==================================================================== */}
-          <div className="w-full lg:w-8/12">
-            
-            {/* Título del paso actual */}
-            <div className="mb-6 pb-4 border-b border-border-subtle">
-              <div className="flex items-center gap-2 mb-1">
-                <div className={cn(
-                  "w-6 h-6 rounded-md flex items-center justify-center",
-                  STEPS[currentStep].bgColor
-                )}>
-                  {(() => {
-                    const Icon = STEPS[currentStep].icon;
-                    return <Icon className={cn("w-3.5 h-3.5", STEPS[currentStep].color)} />;
-                  })()}
-                </div>
-                <span className="text-xs font-medium text-muted-foreground">
-                  Paso {currentStep + 1} de {totalSteps}
-                </span>
-              </div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-origen-bosque">
-                {STEPS[currentStep].title}
-              </h1>
+        )}
 
-              {!isStepValid && stepValidationMessages.length > 0 && (
-                <StepValidationPanel
-                  messages={stepValidationMessages}
-                  onFocusFirstIncompleteField={focusFirstIncompleteField}
-                  currentStep={currentStep}
-                />
-              )}
-            </div>
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentStep}
+            data-onboarding-step-content
+            custom={direction}
+            initial={{ opacity: 0, x: direction > 0 ? 20 : -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: direction > 0 ? -20 : 20 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+          >
+            {renderStep()}
+          </motion.div>
+        </AnimatePresence>
 
-            {/* Contenido del paso - ANIMADO */}
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={currentStep}
-                data-onboarding-step-content
-                custom={direction}
-                initial={{ opacity: 0, x: direction > 0 ? 20 : -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: direction > 0 ? -20 : 20 }}
-                transition={{ duration: 0.25, ease: 'easeInOut' }}
-              >
-                {renderStep()}
-              </motion.div>
-            </AnimatePresence>
+        {isLastStep && formData.step5.acceptTerms && !formData.step5.stripeConnected && (
+          <Alert variant="warning" className="mt-4">
+            Puedes finalizar sin Stripe ahora, pero no podrás publicar productos hasta conectarlo desde tu panel.
+          </Alert>
+        )}
 
-            {currentStep === 6 && formData.step6.acceptTerms && !formData.step6.stripeConnected && (
-              <Alert variant="warning" className="mt-4">
-                Puedes finalizar el onboarding sin Stripe ahora, pero no podrás publicar productos hasta conectarlo desde tu dashboard.
-              </Alert>
+        {saveError && (
+          <Alert variant="error" dismissible onDismiss={() => setSaveError(null)} className="mt-6">
+            {saveError}
+          </Alert>
+        )}
+
+        {/* Navegación — solo escritorio (en móvil, MobileNavBar) */}
+        <div className="mt-8 hidden items-center justify-between border-t border-border pt-6 lg:flex">
+          <div>
+            {currentStep > 0 && (
+              <Button variant="secondary" onClick={handleBack} disabled={isSubmitting}>
+                Anterior
+              </Button>
             )}
-
-            {/* ====================================================================
-                ERROR DE GUARDADO
-            ==================================================================== */}
-            {saveError && (
-              <Alert
-                variant="error"
-                dismissible
-                onDismiss={() => setSaveError(null)}
-                className="mt-6"
-              >
-                {saveError}
-              </Alert>
-            )}
-
-            {/* ====================================================================
-                NAVEGACIÓN - Botones (solo desktop — mobile usa MobileNavBar)
-            ==================================================================== */}
-            <div className="hidden lg:flex items-center justify-between mt-10 pt-6 border-t border-border">
-              
-              {/* Trust badges */}
-              <div className="flex items-center gap-3 text-xs text-text-subtle">
-                <div className="flex items-center gap-1">
-                  <Shield className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">SSL</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Leaf className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Km 0</span>
-                </div>
-              </div>
-
-              {/* Botones */}
-              <div className="flex items-center gap-3">
-                {currentStep > 0 && (
-                  <Button
-                    variant="secondary"
-                    onClick={handleBack}
-                    disabled={isSubmitting}
-                    className="h-10 px-4"
-                  >
-                    Anterior
-                  </Button>
-                )}
-
-                {currentStep >= 1 && currentStep < totalSteps - 1 && (
-                  <Button
-                    variant="ghost"
-                    onClick={handleSkipOnboarding}
-                    disabled={isSubmitting}
-                    className="h-10 px-4 text-muted-foreground text-xs"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-3 h-3 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin mr-2" />
-                        Guardando...
-                      </>
-                    ) : (
-                      'Guardar y salir'
-                    )}
-                  </Button>
-                )}
-
-                {currentStep < totalSteps - 1 ? (
-                  <Button
-                    onClick={handleNext}
-                    disabled={isSubmitting}
-                    aria-disabled={!isStepValid}
-                    aria-describedby={!isStepValid ? 'onboarding-step-validation' : undefined}
-                    className={cn(!isStepValid && 'opacity-60')}
-                    size="sm"
-                  >
-                    Continuar
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleComplete}
-                    disabled={isSubmitting}
-                    aria-disabled={!isStepValid}
-                    aria-describedby={!isStepValid ? 'onboarding-step-validation' : undefined}
-                    className={cn(!isStepValid && 'opacity-60')}
-                    size="sm"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                        Completando...
-                      </>
-                    ) : (
-                      <>
-                        Finalizar
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
-            </div>
           </div>
+          <Button
+            onClick={isLastStep ? handleComplete : handleNext}
+            disabled={isSubmitting}
+            loading={isSubmitting}
+            loadingText={isLastStep ? 'Finalizando...' : 'Guardando...'}
+            aria-disabled={!isStepValid}
+            aria-describedby={!isStepValid && showErrors ? 'onboarding-step-validation' : undefined}
+            className={!isStepValid && !isSubmitting ? 'opacity-60' : undefined}
+          >
+            {isLastStep ? 'Finalizar' : 'Guardar y continuar'}
+          </Button>
         </div>
       </main>
 
-      {/* Barra de navegación fija — solo mobile */}
       <MobileNavBar
         currentStep={currentStep}
-        totalSteps={totalSteps}
         onBack={handleBack}
-        onNext={currentStep < totalSteps - 1 ? handleNext : handleComplete}
-        onSkip={handleSkipOnboarding}
+        onNext={isLastStep ? handleComplete : handleNext}
         canContinue={isStepValid}
         isSubmitting={isSubmitting}
-        isLastStep={currentStep === totalSteps - 1}
+        isLastStep={isLastStep}
+      />
+
+      <ConfirmDialog
+        open={exitDialogOpen}
+        onOpenChange={setExitDialogOpen}
+        title="Este paso está incompleto"
+        description="Si sales ahora, no se guardará lo que has cambiado en este paso. Conservas todo lo guardado en los pasos anteriores y puedes retomarlo cuando quieras."
+        confirmLabel="Salir sin guardar"
+        cancelLabel="Seguir aquí"
+        confirmVariant="primary"
+        onConfirm={() => router.push('/dashboard')}
       />
     </div>
   );
 }
-

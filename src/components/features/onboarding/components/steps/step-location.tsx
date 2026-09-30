@@ -1,808 +1,417 @@
-// 📁 /src/components/onboarding/steps/EnhancedStep1Location.tsx
 /**
- * @file EnhancedStep1Location.tsx
- * @description Paso 1: Ubicación + Confianza inicial
- * @version 8.0.0 - CORREGIDO: Imports de select, tipos locales
+ * @file step-location.tsx
+ * @description Paso 1 del onboarding: ubicación e identidad legal.
+ * Pide lo que necesitamos para verificar la cuenta, facturar y, con el código
+ * postal de producción, decidir en el paso 3 si Origen puede recoger los pedidos.
  */
 
 'use client';
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { Alert, CheckboxWithLabel, Input, InputAffixField } from '@arcediano/ux-library';
+import { FileUpload } from '@/components/shared';
+import { CategoryCard } from '@/components/shared';
 import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
-
-import { Input, InputAffixField, CheckboxWithLabel } from '@arcediano/ux-library';
-import { FileUpload, type UploadedFile, CategoryCard } from '@/components/shared';
 import { validateSpanishTaxId, type TaxIdType } from '@/lib/utils/tax-id';
-
-import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { PRODUCER_CATEGORIES } from '@/constants/categories';
 import { getProvinciaFromCP } from '@/constants/cp-provincias';
+import { ENTITY_TYPE_LABELS, type EntityType, type LocationData } from '@/lib/onboarding/types';
+import { cn } from '@/lib/utils';
+import { Building2, Camera, ChevronDown, FileText, Home, Info, Store } from 'lucide-react';
+import { FieldError, OptionalBadge, SelectField } from '../FormBits';
+import { StepSection } from '../StepSection';
 
-import {
-  Camera,
-  CheckCircle2,
-  AlertCircle,
-  Leaf,
-  Home,
-  Store,
-  Info,
-  ChevronDown,
-  FileText,
-  Building2,
-} from 'lucide-react';
-
-// ============================================================================
-// SELECT PERSONALIZADO - Sin dependencias de ui/select
-// ============================================================================
-
-interface SelectProps {
-  value: string;
-  onValueChange: (value: string) => void;
-  placeholder: string;
-  className?: string;
-  searchable?: boolean;
-  disabled?: boolean;
-  children: React.ReactNode;
-}
-
-const Select: React.FC<SelectProps> = ({
-  value,
-  onValueChange,
-  placeholder,
-  className,
-  searchable = false,
-  disabled = false,
-  children
-}) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [selectedLabel, setSelectedLabel] = React.useState('');
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const selectRef = React.useRef<HTMLDivElement>(null);
-  const searchRef = React.useRef<HTMLInputElement>(null);
-
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setSearchQuery('');
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  React.useEffect(() => {
-    if (isOpen && searchable && searchRef.current) {
-      setTimeout(() => searchRef.current?.focus(), 50);
-    }
-    if (!isOpen) setSearchQuery('');
-  }, [isOpen, searchable]);
-
-  // Buscar la label del valor seleccionado
-  React.useEffect(() => {
-    if (value) {
-      const option = React.Children.toArray(children).find(
-        (child: any) => child.props?.value === value
-      );
-      if (option && React.isValidElement<{ children?: React.ReactNode }>(option)) {
-        setSelectedLabel(option.props.children as string);
-      }
-    } else {
-      setSelectedLabel('');
-    }
-  }, [value, children]);
-
-  const filteredChildren = searchable && searchQuery
-    ? React.Children.toArray(children).filter((child: any) => {
-        const label = typeof child.props?.children === 'string' ? child.props.children : '';
-        return label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          .includes(searchQuery.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
-      })
-    : React.Children.toArray(children);
-
-  return (
-    <div ref={selectRef} className="relative">
-      <button
-        type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        disabled={disabled}
-        className={cn(
-          "flex w-full items-center justify-between rounded-xl border bg-surface-alt px-4 py-3 text-left transition-all",
-          "border-border hover:border-origen-pradera focus:border-origen-pradera focus:outline-none focus:ring-2 focus:ring-origen-pradera/20",
-          disabled && "cursor-not-allowed opacity-50 bg-surface hover:border-border",
-          className
-        )}
-      >
-        <span className={cn(
-          "text-base",
-          value ? "text-origen-oscuro" : "text-text-subtle"
-        )}>
-          {selectedLabel || placeholder}
-        </span>
-        <ChevronDown className={cn(
-          "h-5 w-5 text-muted-foreground transition-transform",
-          isOpen && "rotate-180"
-        )} />
-      </button>
-
-      {isOpen && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border border-border bg-surface-alt shadow-lg animate-in fade-in-0 zoom-in-95">
-          {searchable && (
-            <div className="p-2 border-b border-border-subtle">
-              <input
-                ref={searchRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar provincia..."
-                className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:border-origen-pradera"
-              />
-            </div>
-          )}
-          <div className="max-h-56 overflow-auto p-1">
-            {filteredChildren.length === 0 && (
-              <p className="px-3 py-2.5 text-sm text-text-subtle text-center">Sin resultados</p>
-            )}
-            {filteredChildren.map((child) => {
-              if (React.isValidElement(child)) {
-                return React.cloneElement(child as React.ReactElement<any>, {
-                  onSelect: (v: string) => {
-                    onValueChange(v);
-                    setIsOpen(false);
-                  },
-                  isSelected: (child as React.ReactElement<any>).props.value === value
-                });
-              }
-              return child;
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-interface SelectItemProps {
-  value: string;
-  children: React.ReactNode;
-  onSelect?: (value: string) => void;
-  isSelected?: boolean;
-}
-
-const SelectItem: React.FC<SelectItemProps> = ({
-  value,
-  children,
-  onSelect,
-  isSelected
-}) => {
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect?.(value)}
-      className={cn(
-        "relative flex w-full cursor-pointer select-none items-center rounded-lg px-3 py-2.5 text-sm outline-none transition-colors",
-        "hover:bg-origen-crema hover:text-origen-bosque",
-        "focus:bg-origen-crema focus:text-origen-bosque",
-        isSelected && "bg-origen-pradera/10 font-medium text-origen-bosque"
-      )}
-    >
-      <span className="flex-1 text-left">{children}</span>
-      {isSelected && (
-        <CheckCircle2 className="h-4 w-4 text-hoja-tinta" />
-      )}
-    </button>
-  );
-};
-
-// ============================================================================
-// TIPOS
-// ============================================================================
-
-export interface AddressFields {
-  street: string;
-  streetNumber: string;
-  streetComplement?: string;
-  city: string;
-  province: string;
-  postalCode: string;
-}
-
-export type EntityType =
-  | 'autonomo'
-  | 'sl'
-  | 'sa'
-  | 'cooperativa'
-  | 'comunidad_bienes'
-  | 'asociacion'
-  | 'otro';
-
-export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
-  autonomo: 'Autónomo / Empresario individual',
-  sl: 'Sociedad Limitada (SL)',
-  sa: 'Sociedad Anónima (SA)',
-  cooperativa: 'Cooperativa',
-  comunidad_bienes: 'Comunidad de Bienes',
-  asociacion: 'Asociación / Fundación',
-  otro: 'Otra forma jurídica',
-};
-
-export interface EnhancedLocationData {
-  // Identidad legal
-  entityType?: EntityType;
-  legalRepresentativeName?: string;
-  businessPhone?: string;
-
-  // Dirección de producción (punto de recogida de pedidos)
-  street: string;
-  streetNumber: string;
-  streetComplement?: string;
-  city: string;
-  province: string;
-  postalCode: string;
-
-  // Dirección de facturación
-  billingAddress?: AddressFields;
-  billingAddressSameAsProduction: boolean;
-
-  categories: string[];
-  locationImages: UploadedFile[];
-
-  // Confianza inicial
-  foundedYear?: number;
-  teamSize?: '1-2' | '3-5' | '6-10' | '11+';
-  taxId?: string;
-}
+export type { LocationData as EnhancedLocationData, EntityType };
 
 export interface EnhancedStep1LocationProps {
-  data: EnhancedLocationData;
-  onChange: (data: EnhancedLocationData) => void;
+  data: LocationData;
+  onChange: (data: LocationData) => void;
+  /** Nombre del negocio (viene del registro; solo lectura). */
+  businessName?: string;
+  /** Errores de validación por `id` de campo (se muestran tras intentar continuar). */
+  errors?: Record<string, string>;
 }
 
-// CategoryCard importado de @/components/shared — componente canónico
+const ENTITY_OPTIONS = (Object.entries(ENTITY_TYPE_LABELS) as [EntityType, string][]).map(([value, label]) => ({
+  value,
+  label,
+}));
 
-// ============================================================================
-// COMPONENTE PRINCIPAL
-// ============================================================================
+const capitalizeWords = (str: string) =>
+  str.trim().toLowerCase().replace(/(?:^|\s)\S/g, (c) => c.toUpperCase());
 
-export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationProps) {
-  const billingAddressSameAsProduction = data.billingAddressSameAsProduction ?? true;
-  
-  // ========================================================================
-  // VALIDACIÓN
-  // ========================================================================
-  
-  const hasBasicInfo = Boolean(
-    data.street?.trim() &&
-    data.streetNumber?.trim() &&
-    data.city?.trim() &&
-    data.province &&
-    data.postalCode?.trim()
-  );
+export function EnhancedStep1Location({ data, onChange, businessName, errors = {} }: EnhancedStep1LocationProps) {
+  const billingSame = data.billingAddressSameAsProduction ?? true;
+  const [photosExpanded, setPhotosExpanded] = React.useState((data.locationImages?.length ?? 0) > 0);
+  const [phoneTouched, setPhoneTouched] = React.useState(false);
+  const [taxIdTouched, setTaxIdTouched] = React.useState(false);
+
+  const update = (patch: Partial<LocationData>) => onChange({ ...data, billingAddressSameAsProduction: billingSame, ...patch });
+  const updateBilling = (patch: Partial<NonNullable<LocationData['billingAddress']>>) =>
+    update({
+      billingAddress: {
+        street: '', streetNumber: '', city: '', province: '', postalCode: '',
+        ...data.billingAddress,
+        ...patch,
+      },
+    });
 
   const cpError = React.useMemo(() => {
     const cp = data.postalCode || '';
-    if (cp.length < 5 || !data.province) return undefined;
+    if (cp.length < 5) return undefined;
     const expected = getProvinciaFromCP(cp);
-    if (expected === null) return undefined;
-    // Both values are now the capitalized PROVINCIAS_ESPANA name — direct comparison
-    if (expected === data.province) return undefined;
-    return `Este código postal corresponde a ${expected}, no a ${data.province}.`;
-  }, [data.postalCode, data.province]);
-
-  const hasCategories = data.categories?.length > 0;
-  const hasYear = Boolean(data.foundedYear && data.foundedYear >= 1900 && data.foundedYear <= new Date().getFullYear());
-  const hasTeamSize = Boolean(data.teamSize);
-
-  // Validación teléfono — solo tras perder el foco
-  const [photosExpanded, setPhotosExpanded] = React.useState(false);
-
-  const [phoneTouched, setPhoneTouched] = React.useState(false);
-  const phoneError = React.useMemo(() => {
-    if (!data.businessPhone?.trim()) return undefined; // no mostrar hasta que se toque
-    if (!/^[6789]\d{8}$/.test(data.businessPhone.trim())) {
-      return 'Introduce un teléfono español válido (9 dígitos, comenzando por 6, 7, 8 o 9)';
-    }
+    if (expected === null) return 'No reconocemos este código postal.';
     return undefined;
-  }, [data.businessPhone]);
+  }, [data.postalCode]);
 
-  // Validación NIF/CIF/NIE — solo tras perder el foco
-  const [taxIdTouched, setTaxIdTouched] = React.useState(false);
+  const phoneError =
+    data.businessPhone && !/^[6789]\d{8}$/.test(data.businessPhone)
+      ? 'Introduce un teléfono español válido (9 dígitos, empieza por 6, 7, 8 o 9).'
+      : undefined;
+
   const taxIdValidation = React.useMemo(
-    () => (data.taxId ? validateSpanishTaxId(data.taxId) : { valid: false }),
+    () => (data.taxId ? validateSpanishTaxId(data.taxId) : { valid: false as const }),
     [data.taxId],
   );
-  const taxIdError = taxIdTouched && !taxIdValidation.valid ? taxIdValidation.error : undefined;
+  const taxIdLocalError = taxIdTouched && data.taxId && !taxIdValidation.valid
+    ? ('error' in taxIdValidation && taxIdValidation.error) || 'Introduce un NIF, NIE o CIF válido.'
+    : undefined;
   const taxIdBadge: Record<TaxIdType, string> = { NIF: 'NIF', NIE: 'NIE', CIF: 'CIF' };
-
-  const totalSteps = 4;
-  const completedSteps = [hasBasicInfo, hasCategories, hasYear, hasTeamSize].filter(Boolean).length;
-  const progress = (completedSteps / totalSteps) * 100;
-
-  // ========================================================================
-  // MANEJADORES
-  // ========================================================================
-  
-  const handleInputChange = (field: keyof EnhancedLocationData, value: any) => {
-    onChange({ ...data, billingAddressSameAsProduction, [field]: value });
-  };
-
-  const capitalizeWords = (str: string) =>
-    str.trim().toLowerCase().replace(/(?:^|\s)\S/g, (c) => c.toUpperCase());
 
   const handlePostalCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 5);
-    if (value.length === 5) {
-      const expected = getProvinciaFromCP(value);
-      if (expected !== null) {
-        onChange({ ...data, postalCode: value, province: expected });
-        return;
-      }
-    }
-    handleInputChange('postalCode', value);
-  };
-
-  const handleCityBlur = () => {
-    if (data.city) handleInputChange('city', capitalizeWords(data.city));
-  };
-
-  const handleStreetBlur = () => {
-    if (data.street) handleInputChange('street', capitalizeWords(data.street));
+    const expected = value.length === 5 ? getProvinciaFromCP(value) : null;
+    update({ postalCode: value, ...(expected !== null ? { province: expected } : value.length < 5 ? { province: '' } : {}) });
   };
 
   const handleCategorySelect = (categoryId: string) => {
-    const isSelected = data.categories?.includes(categoryId);
-    const newCategories = isSelected
-      ? data.categories.filter(id => id !== categoryId)
-      : [...(data.categories || []), categoryId];
-    handleInputChange('categories', newCategories);
+    const isSelected = data.categories.includes(categoryId);
+    update({
+      categories: isSelected ? data.categories.filter((id) => id !== categoryId) : [...data.categories, categoryId],
+    });
   };
 
-  // ========================================================================
-  // RENDER
-  // ========================================================================
-  
+  const nameTooShort = (businessName ?? '').trim().length < 3;
+
   return (
     <div className="space-y-4">
-      
-      {/* ====================================================================
-          PROGRESS BAR
-      ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-3 md:p-4 shadow-sm hover:shadow-md transition-all">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-origen-pradera animate-pulse" />
-            <span className="text-sm font-medium text-hoja-tinta">Información del negocio</span>
-          </div>
-          <span className="text-sm font-semibold text-hoja-tinta">{completedSteps}/{totalSteps}</span>
-        </div>
-        <div className="h-2.5 bg-origen-crema rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-origen-pradera rounded-full transition-all duration-700"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-          <Info className="w-3.5 h-3.5 text-hoja-tinta" />
-          Completa tu ubicación y cuéntanos tu trayectoria
-        </p>
-      </div>
-
-      {/* ====================================================================
-          CARD 0: IDENTIDAD LEGAL
-      ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
-            <Building2 className="w-5 h-5 text-hoja-tinta" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-origen-bosque">Identidad legal</h2>
-            <p className="text-xs text-muted-foreground">Necesario para la verificación de tu cuenta y la emisión de facturas</p>
-          </div>
-        </div>
-
+      {/* ── Identidad legal ─────────────────────────────────────────────── */}
+      <StepSection
+        icon={<Building2 className="h-5 w-5" />}
+        title="Identidad legal"
+        description="Necesario para verificar tu cuenta y emitir facturas."
+      >
         <div className="space-y-4">
-
-          {/* Tipo de entidad — selector compacto para reducir scroll en mobile */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-              Forma jurídica <span className="text-feedback-danger">*</span>
-            </label>
-            <Select
-              value={data.entityType || ''}
-              onValueChange={(value) => handleInputChange('entityType', value as EntityType)}
-              placeholder="Selecciona forma jurídica"
-            >
-              {(Object.entries(ENTITY_TYPE_LABELS) as [EntityType, string][]).map(([key, label]) => (
-                <SelectItem key={key} value={key}>
-                  {label}
-                </SelectItem>
-              ))}
-            </Select>
-            <p className="text-xs text-muted-foreground">Puedes cambiarlo más adelante desde tu perfil fiscal.</p>
-          </div>
-
-          {/* Nombre del representante legal — solo si no es autónomo */}
-          <div
-            className={cn(
-              'overflow-hidden transition-all duration-300',
-              data.entityType && data.entityType !== 'autonomo' ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0',
-            )}
-          >
-            <div className="pt-1">
-              <Input
-                label="Nombre del representante legal (opcional)"
-                value={data.legalRepresentativeName || ''}
-                onChange={(e) => handleInputChange('legalRepresentativeName', e.target.value)}
-                placeholder="Nombre y apellidos del representante"
-                inputSize="md"
-                helperText="Persona física con poderes de representación de la entidad. Puedes añadirlo más adelante desde tu perfil."
-              />
+          {nameTooShort ? (
+            <Alert variant="warning">
+              Falta el nombre de tu negocio (mínimo 3 caracteres). Podrás completarlo en{' '}
+              <Link href="/dashboard/profile/business" className="font-medium underline underline-offset-2">
+                Perfil comercial
+              </Link>
+              ; es obligatorio para publicar.
+            </Alert>
+          ) : (
+            <div className="rounded-xl border border-border-subtle bg-origen-crema/30 px-3 py-2.5">
+              <p className="text-xs text-text-subtle">Nombre de tu negocio</p>
+              <p className="text-sm font-semibold text-origen-bosque" data-testid="onb-business-name">{businessName}</p>
+              <p className="mt-0.5 text-xs text-text-subtle">Viene de tu registro. Puedes cambiarlo en Perfil comercial.</p>
             </div>
-          </div>
+          )}
 
-          {/* NIF/CIF + Teléfono en 2 columnas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <SelectField
+            id="onb-entity-type"
+            label="Forma jurídica"
+            required
+            value={data.entityType ?? ''}
+            onValueChange={(v) => update({ entityType: v as EntityType })}
+            options={ENTITY_OPTIONS}
+            placeholder="Selecciona tu forma jurídica"
+            error={errors['onb-entity-type']}
+          />
+
+          {data.entityType && data.entityType !== 'autonomo' && (
+            <Input
+              id="onb-legal-rep"
+              label="Representante legal"
+              value={data.legalRepresentativeName || ''}
+              onChange={(e) => update({ legalRepresentativeName: e.target.value })}
+              placeholder="Nombre y apellidos"
+              helperText="Opcional. Persona con poderes de representación de la entidad."
+            />
+          )}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              {taxIdValidation.valid && taxIdValidation.type && (
-                <div className="flex justify-end mb-1">
-                  <span className="text-xs font-semibold text-feedback-success-text bg-feedback-success-subtle px-2 py-0.5 rounded-full">
-                    {taxIdBadge[taxIdValidation.type]} ✓
-                  </span>
-                </div>
-              )}
               <Input
+                id="onb-tax-id"
                 label="NIF / CIF / NIE"
                 required
                 value={data.taxId || ''}
-                onChange={(e) => handleInputChange('taxId', e.target.value.toUpperCase().replace(/[\s\-]/g, ''))}
+                onChange={(e) => update({ taxId: e.target.value.toUpperCase().replace(/[\s-]/g, '') })}
                 onBlur={() => setTaxIdTouched(true)}
                 placeholder="12345678A"
-                inputSize="md"
                 className="font-mono uppercase"
                 maxLength={9}
-                error={taxIdError}
-                helperText={!taxIdError ? 'NIF, NIE o CIF' : undefined}
+                error={taxIdLocalError ?? errors['onb-tax-id']}
+                helperText={
+                  taxIdValidation.valid && 'type' in taxIdValidation && taxIdValidation.type
+                    ? `${taxIdBadge[taxIdValidation.type]} válido`
+                    : 'NIF, NIE o CIF'
+                }
               />
             </div>
-            <div>
-              <InputAffixField
-                label="Teléfono del negocio"
-                required
-                value={data.businessPhone || ''}
-                onChange={(e) => {
-                  const digits = e.target.value.replace(/\D/g, '').slice(0, 9);
-                  handleInputChange('businessPhone', digits);
-                }}
-                onBlur={() => setPhoneTouched(true)}
-                placeholder="600 000 000"
-                inputMode="tel"
-                inputSize="md"
-                affixLeft="+34"
-                error={phoneTouched ? phoneError : undefined}
-                helperText={!phoneTouched || !phoneError ? 'No público' : undefined}
-              />
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* ====================================================================
-          CARD 1: UBICACIÓN + AÑO FUNDACIÓN + EQUIPO
-      ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
-            <Home className="w-5 h-5 text-hoja-tinta" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-origen-bosque">Dirección de producción</h2>
-            <p className="text-xs text-muted-foreground">Aquí se recogerán tus pedidos.</p>
-          </div>
-        </div>
-
-        {/* Helper contextual */}
-        <div className="flex items-start gap-2 p-2.5 bg-origen-crema/40 rounded-lg border border-origen-pradera/20 mb-4">
-          <Info className="w-4 h-4 text-hoja-tinta shrink-0 mt-0.5" />
-          <p className="text-xs text-muted-foreground">
-            Esta información nos ayuda a conectarte con compradores de tu zona y a verificar tu identidad como productor.
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          {/* Nombre de la vía */}
-          <Input
-            label="Nombre de la vía"
-            required
-            value={data.street || ''}
-            onChange={(e) => handleInputChange('street', e.target.value)}
-            onBlur={handleStreetBlur}
-            placeholder="Calle Mayor, Av. de la Constitución"
-            inputSize="md"
-          />
-
-          {/* Número + Piso/Puerta */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <Input
-              label="Número"
+            <InputAffixField
+              id="onb-phone"
+              label="Teléfono del negocio"
               required
-              value={data.streetNumber || ''}
-              onChange={(e) => handleInputChange('streetNumber', e.target.value)}
-              inputSize="md"
-              className="font-mono"
+              value={data.businessPhone || ''}
+              onChange={(e) => update({ businessPhone: e.target.value.replace(/\D/g, '').slice(0, 9) })}
+              onBlur={() => setPhoneTouched(true)}
+              placeholder="600 000 000"
+              inputMode="tel"
+              affixLeft="+34"
+              error={(phoneTouched ? phoneError : undefined) ?? errors['onb-phone']}
+              helperText="Solo lo usa Origen, no es público."
             />
-            <div className="sm:col-span-2">
-              <Input
-                label="Piso / Puerta"
-                value={data.streetComplement || ''}
-                onChange={(e) => handleInputChange('streetComplement', e.target.value)}
-                placeholder="3º A, Bajo"
-                inputSize="md"
-              />
-            </div>
+          </div>
+        </div>
+      </StepSection>
+
+      {/* ── Dirección de producción ─────────────────────────────────────── */}
+      <StepSection
+        icon={<Home className="h-5 w-5" />}
+        title="Dirección de producción"
+        description="Desde aquí se recogen tus pedidos."
+      >
+        <div className="space-y-4">
+          <div className="flex items-start gap-2 rounded-lg border border-origen-pradera/20 bg-origen-crema/40 p-2.5">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-hoja-tinta" aria-hidden="true" />
+            <p className="text-xs text-text-subtle">
+              Con tu código postal comprobaremos en el paso de envíos si Origen puede recoger tus pedidos o si los gestionas tú.
+            </p>
           </div>
 
-          {/* CP + Provincia + Ciudad/Municipio */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Input
-              label="Código Postal"
+              id="onb-postal-code"
+              label="Código postal"
               required
               value={data.postalCode || ''}
               onChange={handlePostalCodeChange}
+              inputMode="numeric"
+              autoComplete="postal-code"
               maxLength={5}
-              inputSize="md"
               className="font-mono"
-              error={cpError}
+              error={cpError ?? errors['onb-postal-code']}
             />
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-origen-bosque">
-                Provincia <span className="text-feedback-danger">*</span>
-              </label>
-              <Select
-                value={data.province || ''}
-                onValueChange={(value) => handleInputChange('province', value)}
-                placeholder="Autodetectada"
-                disabled
-              >
-                {PROVINCIAS_ESPANA.map((province) => (
-                  <SelectItem key={province} value={province}>
-                    {province}
-                  </SelectItem>
-                ))}
-              </Select>
-            </div>
             <Input
-              label="Ciudad / Municipio"
+              id="onb-province"
+              label="Provincia"
+              value={data.province || ''}
+              readOnly
+              tabIndex={-1}
+              placeholder="Se rellena con el código postal"
+              className="bg-surface text-text-subtle"
+            />
+            <Input
+              id="onb-city"
+              label="Ciudad / municipio"
               required
               value={data.city || ''}
-              onChange={(e) => handleInputChange('city', e.target.value)}
-              onBlur={handleCityBlur}
-              inputSize="md"
+              onChange={(e) => update({ city: e.target.value })}
+              onBlur={() => data.city && update({ city: capitalizeWords(data.city) })}
+              autoComplete="address-level2"
+              error={errors['onb-city']}
             />
           </div>
 
-          {/* Año de fundación */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-border-subtle">
-            <div>
-              <Input
-                label="Año de fundación"
-                type="number"
-                value={data.foundedYear || ''}
-                onChange={(e) => handleInputChange('foundedYear', parseInt(e.target.value) || undefined)}
-                min={1900}
-                max={new Date().getFullYear()}
-                inputSize="md"
-              />
-              {data.foundedYear && (
-                <p className="text-xs text-hoja-tinta mt-1">
-                  {new Date().getFullYear() - data.foundedYear} años de experiencia
-                </p>
-              )}
-            </div>
-
-            {/* Tamaño del equipo */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-origen-bosque flex items-center gap-2">
-                Tamaño del equipo
-                <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
-              </label>
-              <Select
-                value={data.teamSize || ''}
-                onValueChange={(value) => handleInputChange('teamSize', value as any)}
-                placeholder="Selecciona tamaño"
-              >
-                <SelectItem value="1-2">Emprendedor individual (1-2 personas)</SelectItem>
-                <SelectItem value="3-5">Pequeño equipo (3-5 personas)</SelectItem>
-                <SelectItem value="6-10">Equipo mediano (6-10 personas)</SelectItem>
-                <SelectItem value="11+">Gran equipo (más de 11 personas)</SelectItem>
-              </Select>
-              <p className="text-xs text-muted-foreground">Humaniza tu negocio</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ====================================================================
-          CARD 1b: DIRECCIÓN DE FACTURACIÓN
-      ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-bosque/10 to-origen-hoja/10 flex items-center justify-center shrink-0">
-            <FileText className="w-5 h-5 text-hoja-tinta" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-origen-bosque">Dirección de facturación</h2>
-            <p className="text-xs text-muted-foreground">Datos fiscales para emitir facturas</p>
-          </div>
-        </div>
-
-        {/* Checkbox "igual a la de producción" */}
-        <div className="p-2.5 bg-origen-crema/30 rounded-xl border border-border-subtle hover:bg-origen-crema/50 transition-colors mb-4">
-          <CheckboxWithLabel
-            id="billing-address-same-as-production"
-            label="La dirección de facturación es la misma que la de producción"
-            checked={billingAddressSameAsProduction}
-            onCheckedChange={(same) => {
-              const isSame = same === true;
-              onChange({
-                ...data,
-                billingAddressSameAsProduction: isSame,
-                billingAddress: isSame ? undefined : data.billingAddress,
-              });
-            }}
-            variant="seed"
+          <Input
+            id="onb-street"
+            label="Nombre de la vía"
+            required
+            value={data.street || ''}
+            onChange={(e) => update({ street: e.target.value })}
+            onBlur={() => data.street && update({ street: capitalizeWords(data.street) })}
+            placeholder="Calle Mayor, Av. de la Constitución"
+            autoComplete="address-line1"
+            error={errors['onb-street']}
           />
-        </div>
 
-        {/* Campos de facturación — solo si son distintas */}
-        {!billingAddressSameAsProduction && (
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Input
-              label="Nombre de la vía"
+              id="onb-street-number"
+              label="Número"
               required
-              value={data.billingAddress?.street || ''}
-              onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, street: e.target.value })}
-              placeholder="Calle Mayor"
-              inputSize="md"
+              value={data.streetNumber || ''}
+              onChange={(e) => update({ streetNumber: e.target.value })}
+              className="font-mono"
+              error={errors['onb-street-number']}
             />
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="sm:col-span-2">
               <Input
-                label="Número"
-                required
-                value={data.billingAddress?.streetNumber || ''}
-                onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, streetNumber: e.target.value })}
-                inputSize="md"
-                className="font-mono"
+                id="onb-street-complement"
+                label="Piso / puerta"
+                value={data.streetComplement || ''}
+                onChange={(e) => update({ streetComplement: e.target.value })}
+                placeholder="3º A, Bajo"
+                helperText="Opcional."
               />
-              <div className="sm:col-span-2">
+            </div>
+          </div>
+        </div>
+      </StepSection>
+
+      {/* ── Dirección de facturación ────────────────────────────────────── */}
+      <StepSection
+        icon={<FileText className="h-5 w-5" />}
+        title="Dirección de facturación"
+        description="Aparece en tus facturas."
+      >
+        <div className="space-y-4">
+          <div className="rounded-xl border border-border-subtle bg-origen-crema/30 p-3">
+            <CheckboxWithLabel
+              id="onb-billing-same"
+              label="Es la misma que la dirección de producción"
+              checked={billingSame}
+              onCheckedChange={(same) => {
+                const isSame = same === true;
+                onChange({ ...data, billingAddressSameAsProduction: isSame, billingAddress: isSame ? undefined : data.billingAddress });
+              }}
+              variant="seed"
+            />
+          </div>
+
+          {!billingSame && (
+            <div className="space-y-3">
+              <Input
+                id="onb-billing-street"
+                label="Nombre de la vía"
+                required
+                value={data.billingAddress?.street || ''}
+                onChange={(e) => updateBilling({ street: e.target.value })}
+                placeholder="Calle Mayor"
+                error={errors['onb-billing-street']}
+              />
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <Input
-                  label="Piso / Puerta"
-                  value={data.billingAddress?.streetComplement || ''}
-                  onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, streetComplement: e.target.value })}
-                  placeholder="3º A"
-                  inputSize="md"
+                  id="onb-billing-street-number"
+                  label="Número"
+                  required
+                  value={data.billingAddress?.streetNumber || ''}
+                  onChange={(e) => updateBilling({ streetNumber: e.target.value })}
+                  className="font-mono"
+                  error={errors['onb-billing-street-number']}
+                />
+                <div className="sm:col-span-2">
+                  <Input
+                    id="onb-billing-complement"
+                    label="Piso / puerta"
+                    value={data.billingAddress?.streetComplement || ''}
+                    onChange={(e) => updateBilling({ streetComplement: e.target.value })}
+                    placeholder="3º A"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <Input
+                  id="onb-billing-postal-code"
+                  label="Código postal"
+                  required
+                  value={data.billingAddress?.postalCode || ''}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+                    const province = value.length === 5 ? getProvinciaFromCP(value) ?? data.billingAddress?.province ?? '' : data.billingAddress?.province ?? '';
+                    updateBilling({ postalCode: value, province });
+                  }}
+                  inputMode="numeric"
+                  maxLength={5}
+                  className="font-mono"
+                  error={errors['onb-billing-postal-code']}
+                />
+                <Input
+                  id="onb-billing-province"
+                  label="Provincia"
+                  value={data.billingAddress?.province || ''}
+                  readOnly
+                  tabIndex={-1}
+                  placeholder="Se rellena con el código postal"
+                  className="bg-surface text-text-subtle"
+                />
+                <Input
+                  id="onb-billing-city"
+                  label="Ciudad"
+                  required
+                  value={data.billingAddress?.city || ''}
+                  onChange={(e) => updateBilling({ city: e.target.value })}
+                  error={errors['onb-billing-city']}
                 />
               </div>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Input
-                label="Código Postal"
-                required
-                value={data.billingAddress?.postalCode || ''}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '').slice(0, 5);
-                  const province = value.length === 5 ? (getProvinciaFromCP(value) ?? data.billingAddress?.province ?? '') : (data.billingAddress?.province ?? '');
-                  handleInputChange('billingAddress', { ...data.billingAddress, postalCode: value, province });
-                }}
-                maxLength={5}
-                inputSize="md"
-                className="font-mono"
-              />
-              <Input
-                label="Provincia"
-                required
-                value={data.billingAddress?.province || ''}
-                disabled
-                placeholder="Autodetectada"
-                inputSize="md"
-                className="bg-surface text-muted-foreground"
-              />
-              <Input
-                label="Ciudad"
-                required
-                value={data.billingAddress?.city || ''}
-                onChange={(e) => handleInputChange('billingAddress', { ...data.billingAddress, city: e.target.value })}
-                inputSize="md"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ====================================================================
-          CARD 2: CATEGORÍAS
-      ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border p-4 md:p-5 shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all">
-        
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
-            <Store className="w-5 h-5 text-hoja-tinta" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-origen-bosque">¿Qué productos vendes?</h2>
-            <p className="text-xs text-muted-foreground">Selecciona tu categoría principal</p>
-          </div>
+          )}
         </div>
+      </StepSection>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
+      {/* ── Categorías ──────────────────────────────────────────────────── */}
+      <StepSection
+        icon={<Store className="h-5 w-5" />}
+        title="¿Qué productos vendes?"
+        description="Elige una o varias categorías para que los clientes te encuentren."
+        id="onb-categories"
+      >
+        <div
+          role="group"
+          aria-label="Categorías de productos"
+          className="grid grid-cols-2 gap-2.5 lg:grid-cols-3"
+        >
           {PRODUCER_CATEGORIES.map((category) => (
             <CategoryCard
               key={category.id}
               category={category}
-              isSelected={data.categories?.includes(category.id) || false}
+              isSelected={data.categories.includes(category.id)}
               onSelect={handleCategorySelect}
             />
           ))}
         </div>
+        <FieldError>{errors['onb-categories']}</FieldError>
+      </StepSection>
 
-        {!hasCategories && (
-          <div className="mt-6 p-4 bg-feedback-danger-subtle/50 rounded-xl border border-feedback-danger/30 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-feedback-danger shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-feedback-danger-text">
-                Selecciona al menos una categoría
-              </p>
-              <p className="text-xs text-feedback-danger-text/80 mt-1">
-                Necesitamos saber qué productos vendes para personalizar tu experiencia.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ====================================================================
-          CARD 3: FOTOS DEL ENTORNO (OPCIONAL — colapsable)
-      ==================================================================== */}
-      <div className="bg-surface-alt rounded-2xl border border-border shadow-sm hover:shadow-md hover:border-origen-pradera/30 transition-all overflow-hidden">
+      {/* ── Fotos del entorno (opcional) ────────────────────────────────── */}
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface-alt shadow-xs">
         <button
           type="button"
-          onClick={() => setPhotosExpanded(e => !e)}
-          className="w-full flex items-center justify-between p-4 md:p-5 text-left"
+          onClick={() => setPhotosExpanded((e) => !e)}
+          aria-expanded={photosExpanded}
+          aria-controls="onb-location-photos"
+          className="flex min-h-11 w-full items-center justify-between gap-3 p-4 text-left sm:p-5"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 flex items-center justify-center shrink-0">
-              <Camera className="w-5 h-5 text-hoja-tinta" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-origen-bosque">
-                Fotos del entorno
-                <span className="ml-2 text-xs font-normal text-muted-foreground">(opcional)</span>
-              </h2>
-              <p className="text-xs text-muted-foreground">Muestra tu huerta, taller o establecimiento</p>
-            </div>
-          </div>
-          <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", photosExpanded && "rotate-180")} />
+          <span className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-origen-pradera/20 to-origen-hoja/20 text-hoja-tinta">
+              <Camera className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <span>
+              <span className="flex flex-wrap items-center gap-2">
+                <span className="text-lg font-semibold leading-tight text-origen-bosque">Fotos del entorno</span>
+                <OptionalBadge />
+              </span>
+              <span className="block text-xs text-text-subtle sm:text-sm">Tu huerta, taller o establecimiento.</span>
+            </span>
+          </span>
+          <ChevronDown className={cn('h-4 w-4 shrink-0 text-text-subtle transition-transform', photosExpanded && 'rotate-180')} />
         </button>
         {photosExpanded && (
-          <div className="px-4 pb-4 md:px-5 md:pb-5 border-t border-border-subtle">
-            <div className="pt-4">
-              <FileUpload
-                value={data.locationImages || []}
-                onChange={(files) => handleInputChange('locationImages', files)}
-                helperText="Arrastra imágenes o haz clic para subir"
-                accept="image/*"
-                multiple={true}
-                maxSize={5}
-                qualityRequirement={IMAGE_QUALITY_PRESETS.profileGallery}
-                dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.profileGallery)}
-              />
-            </div>
+          <div id="onb-location-photos" className="border-t border-border-subtle p-4 sm:p-5">
+            <FileUpload
+              value={data.locationImages || []}
+              onChange={(files) => update({ locationImages: files })}
+              helperText="Arrastra imágenes o toca para subir"
+              accept="image/*"
+              multiple
+              maxFiles={10}
+              maxSize={5}
+              qualityRequirement={IMAGE_QUALITY_PRESETS.profileGallery}
+              dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.profileGallery)}
+            />
           </div>
         )}
       </div>
@@ -813,4 +422,3 @@ export function EnhancedStep1Location({ data, onChange }: EnhancedStep1LocationP
 EnhancedStep1Location.displayName = 'EnhancedStep1Location';
 
 export default EnhancedStep1Location;
-
