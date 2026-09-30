@@ -19,6 +19,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { checkAccountStatus } from '@/lib/stripe/server';
+import { maintenanceProxyResponse } from '@/lib/maintenance-server';
 
 const GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
 
@@ -64,6 +65,8 @@ export async function GET(request: NextRequest) {
   });
 
   if (!onboardingRes.ok) {
+    const maintenance = await maintenanceProxyResponse(onboardingRes);
+    if (maintenance) return maintenance;
     return NextResponse.json(
       { success: false, error: 'No se pudo validar la cuenta Stripe del usuario' },
       { status: 502 },

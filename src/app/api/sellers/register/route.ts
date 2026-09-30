@@ -11,6 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { initialRegistrationSchema } from '@/lib/validations/seller';
+import { maintenanceProxyResponse } from '@/lib/maintenance-server';
 
 const GATEWAY_URL =
   process.env.API_GATEWAY_URL ??
@@ -47,6 +48,9 @@ export async function POST(request: NextRequest) {
         acceptsPrivacy:     validatedData.acceptsPrivacy,
       }),
     });
+
+    const maintenance = await maintenanceProxyResponse(response);
+    if (maintenance) return maintenance;
 
     const data = await response.json();
 
