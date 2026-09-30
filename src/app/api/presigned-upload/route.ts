@@ -18,13 +18,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const GATEWAY_URL =
-  process.env.API_GATEWAY_URL ??
-  process.env.NEXT_PUBLIC_API_GATEWAY_URL ??
-  'http://localhost:3000';
+const GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
 
-if (!process.env.API_GATEWAY_URL && !process.env.NEXT_PUBLIC_API_GATEWAY_URL) {
-  console.error('[presigned-upload] ⚠️  Ninguna variable API_GATEWAY_URL configurada — usando localhost:3000');
+if (!process.env.NEXT_PUBLIC_API_GATEWAY_URL) {
+  console.error('[presigned-upload] ⚠️  NEXT_PUBLIC_API_GATEWAY_URL no configurada — usando localhost:3000');
 }
 
 export async function GET(req: NextRequest) {

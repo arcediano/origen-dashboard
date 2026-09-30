@@ -15,11 +15,7 @@ import {
 const SITE_STATUS_TIMEOUT_MS = 3000;
 
 function gatewayUrl(): string {
-  return (
-    process.env.API_GATEWAY_URL ??
-    process.env.NEXT_PUBLIC_API_GATEWAY_URL ??
-    'http://localhost:3000'
-  );
+  return process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
 }
 
 /**
