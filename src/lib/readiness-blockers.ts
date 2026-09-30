@@ -24,12 +24,10 @@ const PRODUCER_STATUS_LABEL: Record<string, string> = {
 
 const BLOCKER_TEXT_MAP: Record<string, string> = {
   MISSING_TAX_ID: 'CIF/NIF requerido',
-  MISSING_BUSINESS_NAME: 'Nombre fiscal del negocio requerido',
+  MISSING_BUSINESS_NAME: 'Falta el nombre del negocio (mínimo 3 caracteres): complétalo en Perfil comercial',
   MISSING_ENTITY_TYPE: 'Tipo de entidad requerido',
   MISSING_CATEGORIES: 'Selecciona al menos una categoría de productos',
   MISSING_LOCATION: 'Completa ciudad, provincia y código postal',
-  MISSING_BRAND_NAME: 'El nombre comercial debe tener al menos 3 caracteres',
-  MISSING_DESCRIPTION: 'La descripción debe tener al menos 50 caracteres',
   MISSING_LOGO: 'Sube el logo de tu negocio',
   MISSING_DELIVERY_OPTION: 'Añade al menos un método de envío activo',
   STRIPE_NOT_CONNECTED: 'Conecta tu cuenta de pagos (Stripe)',

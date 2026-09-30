@@ -254,12 +254,12 @@ export default function CertificationsPage() {
         status: c.status as DocStatus,
         certificationId: c.certificationId,
         name: c.name,
-        issuingBody: c.issuingBody,
-        documentRef: c.documentKey ?? c.documentDocId ?? null,
+        issuingBody: c.issuingBody ?? '',
+        documentRef: c.documentKey ?? null,
         documentUrl: c.documentUrl ?? null,
         verifiedAt: c.verifiedAt ?? null,
         expiresAt: c.expiresAt ?? null,
-        pendingDocumentRef: c.pendingDocumentKey ?? c.pendingDocumentDocId ?? null, // ADR-009
+        pendingDocumentRef: c.pendingDocumentKey ?? null, // ADR-009
         pendingExpiresAt: c.pendingExpiresAt ?? null,
       }));
 
@@ -281,12 +281,12 @@ export default function CertificationsPage() {
       for (const d of res.data.documents ?? []) {
         const existing = docMap.get(d.type as DocType);
         if (existing) {
-          existing.documentRef = d.documentKey ?? d.docServiceId ?? null;
+          existing.documentRef = d.documentKey ?? null;
           existing.documentUrl = d.documentUrl ?? null;
           existing.status = d.status as DocStatus;
           existing.verifiedAt = d.verifiedAt ?? null;
           existing.expiresAt = d.expiresAt ?? null;
-          existing.pendingDocumentRef = d.pendingDocumentKey ?? d.pendingDocServiceId ?? null; // ADR-009
+          existing.pendingDocumentRef = d.pendingDocumentKey ?? null; // ADR-009
           existing.pendingExpiresAt = d.pendingExpiresAt ?? null;
         }
       }
