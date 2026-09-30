@@ -225,11 +225,11 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Matcher ampliado para cubrir todas las rutas de páginas HTML (App Router),
-  // excluyendo assets estáticos, imágenes optimizadas y archivos internos de Next.js.
-  // Patrón recomendado por Next.js para middleware que debe ejecutarse en todas las
-  // páginas pero no en recursos estáticos.
+  // Solo páginas HTML (App Router): sin /api/ (proxy same-origin al gateway vía
+  // next.config.js rewrites — no necesita JWT/CSP/x-pathname, y su invocación
+  // añadía trabajo de Edge Middleware en cada llamada, incluida /api/v1/auth/login),
+  // sin assets estáticos, imágenes optimizadas ni archivos internos de Next.js.
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
+    '/((?!api/|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
   ],
 };
