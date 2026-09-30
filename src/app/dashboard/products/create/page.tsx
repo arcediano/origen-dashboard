@@ -20,7 +20,7 @@ import { AiProductIntake, type IntakeResult } from '@/app/dashboard/products/com
 import { AiProductReview } from '@/app/dashboard/products/components/ai-onboarding/AiProductReview';
 import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductFormSidebar';
 
-import { useProductForm } from '@/hooks/useProductForm';
+import { useProductForm, discardLocalProductDraft } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
 import { useHideBottomTabBar } from '@/hooks/useHideBottomTabBar';
 import { FORM_STEPS, defaultNutritionalInfo, type FormStepId, type ProductImage } from '@/types/product';
@@ -109,10 +109,11 @@ export default function CreateProductPage() {
   // disponible y no hay ya un borrador a medias; si no, el wizard de siempre.
   useEffect(() => {
     if (mode !== 'loading' || !quota) return;
-    const hasDraft = !!formData.name || formData.gallery.length > 0;
     const aiAvailable = quota.enabled && (quota.used < quota.total || aiAssistUsedUnsaved);
-    setMode(!hasDraft && aiAvailable ? 'ai-intake' : 'wizard');
-  }, [mode, quota, formData.name, formData.gallery.length, aiAssistUsedUnsaved]);
+    // El asistente va siempre primero; un borrador local a medias se ofrece
+    // continuar o descartar dentro de esa pantalla (no se salta el asistente).
+    setMode(aiAvailable ? 'ai-intake' : 'wizard');
+  }, [mode, quota, aiAssistUsedUnsaved]);
 
   const handleAiDraft = useCallback(
     async ({ response, productPhoto }: IntakeResult) => {
@@ -257,6 +258,18 @@ export default function CreateProductPage() {
             quota={quota && quota.enabled ? { used: quota.used, total: quota.total } : null}
             onDraft={handleAiDraft}
             onManual={() => setMode('wizard')}
+            pendingDraft={
+              formData.name || formData.gallery.length > 0
+                ? {
+                    name: formData.name,
+                    onResume: () => setMode('wizard'),
+                    onDiscard: () => {
+                      discardLocalProductDraft();
+                      window.location.reload();
+                    },
+                  }
+                : undefined
+            }
           />
         )}
 

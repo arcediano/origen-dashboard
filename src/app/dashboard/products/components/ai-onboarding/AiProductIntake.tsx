@@ -66,6 +66,8 @@ interface AiProductIntakeProps {
   onDraft: (result: IntakeResult) => void;
   /** El productor prefiere rellenar el formulario a mano. */
   onManual: () => void;
+  /** Borrador local a medias: se ofrece continuarlo o descartarlo sin saltarse el asistente. */
+  pendingDraft?: { name: string; onResume: () => void; onDiscard: () => void };
 }
 
 function useObjectUrl(file: File | null): string | null {
@@ -93,7 +95,7 @@ function LabelThumb({ file, onRemove, disabled }: { file: File; onRemove: () => 
   );
 }
 
-export function AiProductIntake({ assistKey, quota, onDraft, onManual }: AiProductIntakeProps) {
+export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDraft }: AiProductIntakeProps) {
   const [photo, setPhoto] = useState<File | null>(null);
   const [labels, setLabels] = useState<File[]>([]);
   const [text, setText] = useState('');
@@ -206,6 +208,26 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual }: AiProdu
       transition={{ duration: 0.35 }}
       className="mx-auto max-w-2xl space-y-6"
     >
+      {pendingDraft && (
+        <Alert>
+          <AlertTitle>Tienes un borrador sin terminar</AlertTitle>
+          <AlertDescription>
+            <p className="mb-3">
+              {pendingDraft.name ? `«${pendingDraft.name}»` : 'Un producto a medias'}: puedes continuarlo o
+              descartarlo para empezar de nuevo con el asistente.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button type="button" variant="outline" size="sm" onClick={pendingDraft.onResume}>
+                Continuar borrador
+              </Button>
+              <Button type="button" variant="ghost" size="sm" onClick={pendingDraft.onDiscard}>
+                Descartar y empezar de nuevo
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="text-center space-y-3">
         <Badge variant="leaf" size="sm" className="inline-flex items-center gap-1">
           <Sparkles className="w-3 h-3" aria-hidden="true" />
