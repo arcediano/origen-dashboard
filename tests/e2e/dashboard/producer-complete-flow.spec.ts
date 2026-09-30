@@ -11,7 +11,10 @@
  * ┌──────────────────────────────────────────────────────────────┐
  * │ FASE 1 · Registro de múltiples productores vía formulario UI │
  * │ FASE 2 · Login de cada productor registrado                  │
- * │ FASE 3 · Onboarding Paso 1 (Ubicación + Identidad)           │
+ * │ FASES 3-9 · DESACTIVADAS: modelaban el onboarding antiguo de 7 │
+ * │ pasos (Historia/Productos/Capacidad). Pendiente reescribirlas   │
+ * │ para los 5 pasos de ADR-020 (ver registro-login-onboarding).    │
+ * │ FASE 3 · (antiguo) Onboarding Paso 1 (Ubicación + Identidad) │
  * │ FASE 4 · Onboarding Paso 2 (Historia + Valores)              │
  * │ FASE 5 · Onboarding Paso 3 (Productos)                       │
  * └──────────────────────────────────────────────────────────────┘
@@ -1136,7 +1139,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
   // FASE 3: Onboarding Paso 1 — Ubicación e identidad fiscal
   // ───────────────────────────────────────────────────────────────────────────
 
-  test.describe('Fase 3 · Onboarding Paso 1 (Ubicación)', () => {
+  test.describe.skip('Fase 3 · Onboarding Paso 1 (Ubicación)', () => {
     test.setTimeout(90_000);
     for (let i = 0; i < PROFILES.length; i++) {
       const profile = PROFILES[i];
@@ -1183,7 +1186,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
   // FASE 4: Onboarding Paso 2 — Historia y valores
   // ───────────────────────────────────────────────────────────────────────────
 
-  test.describe('Fase 4 · Onboarding Paso 2 (Historia)', () => {
+  test.describe.skip('Fase 4 · Onboarding Paso 2 (Historia)', () => {
     test.setTimeout(120_000);
     for (let i = 0; i < PROFILES.length; i++) {
       const profile = PROFILES[i];
@@ -1229,7 +1232,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
   // FASE 5: Onboarding Paso 3 — Productos
   // ───────────────────────────────────────────────────────────────────────────
 
-  test.describe('Fase 5 · Onboarding Paso 3 (Productos)', () => {
+  test.describe.skip('Fase 5 · Onboarding Paso 3 (Productos)', () => {
     test.setTimeout(120_000);
     for (let i = 0; i < PROFILES.length; i++) {
       const profile = PROFILES[i];
@@ -1276,7 +1279,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
   // FASE 6: Onboarding Paso 4 — Perfil visual
   // ───────────────────────────────────────────────────────────────────────────
 
-  test.describe('Fase 6 · Onboarding Paso 4 (Perfil visual)', () => {
+  test.describe.skip('Fase 6 · Onboarding Paso 4 (Perfil visual)', () => {
     test.setTimeout(90_000);
 
     for (let i = 0; i < PROFILES.length; i++) {
@@ -1320,7 +1323,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
   // FASE 7: Onboarding Paso 5 — Capacidad
   // ───────────────────────────────────────────────────────────────────────────
 
-  test.describe('Fase 7 · Onboarding Paso 5 (Capacidad)', () => {
+  test.describe.skip('Fase 7 · Onboarding Paso 5 (Capacidad)', () => {
     test.setTimeout(90_000);
 
     for (let i = 0; i < PROFILES.length; i++) {
@@ -1365,7 +1368,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
   // FASE 8: Onboarding Paso 6 — Documentación
   // ───────────────────────────────────────────────────────────────────────────
 
-  test.describe('Fase 8 · Onboarding Paso 6 (Documentación)', () => {
+  test.describe.skip('Fase 8 · Onboarding Paso 6 (Documentación)', () => {
     test.setTimeout(90_000);
 
     for (let i = 0; i < PROFILES.length; i++) {
@@ -1411,7 +1414,7 @@ test.describe.serial('Flujo encadenado — Registro → Login → Onboarding', (
   // FASE 9: Onboarding Paso 7 — Pagos y Finalización
   // ───────────────────────────────────────────────────────────────────────────
 
-  test.describe('Fase 9 · Onboarding Paso 7 (Pagos)', () => {
+  test.describe.skip('Fase 9 · Onboarding Paso 7 (Pagos)', () => {
     test.setTimeout(90_000);
 
     for (let i = 0; i < PROFILES.length; i++) {

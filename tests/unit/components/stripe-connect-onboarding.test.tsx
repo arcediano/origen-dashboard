@@ -16,11 +16,11 @@ vi.mock('@/lib/stripe/connect-appearance', () => ({
 }));
 
 vi.mock('@/lib/api/onboarding', () => ({
-  saveStep6: vi.fn(),
+  saveStep5: vi.fn(),
 }));
 
 import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-connect-onboarding';
-import { saveStep6 } from '@/lib/api/onboarding';
+import { saveStep5 } from '@/lib/api/onboarding';
 
 describe('StripeConnectOnboarding', () => {
   const defaultProps = {
@@ -39,7 +39,7 @@ describe('StripeConnectOnboarding', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     global.fetch = vi.fn();
-    vi.mocked(saveStep6).mockResolvedValue({ success: true } as any);
+    vi.mocked(saveStep5).mockResolvedValue({ success: true } as any);
   });
 
   it('renderiza el componente embebido', () => {
@@ -93,11 +93,11 @@ describe('StripeConnectOnboarding', () => {
     exitButton.click();
 
     await waitFor(() => {
-      expect(saveStep6).toHaveBeenCalled();
+      expect(saveStep5).toHaveBeenCalled();
     });
 
     // Verificación CRÍTICA: el payload NO debe incluir stripeConnected
-    const payload = vi.mocked(saveStep6).mock.calls[0][0];
+    const payload = vi.mocked(saveStep5).mock.calls[0][0];
     expect(payload).not.toHaveProperty('stripeConnected');
 
     // Pero SÍ debe incluir otros campos
@@ -105,7 +105,7 @@ describe('StripeConnectOnboarding', () => {
     expect(payload).toHaveProperty('acceptTerms', true);
   });
 
-  it('onExit llama a onVerified después de guardar step6', async () => {
+  it('onExit llama a onVerified después de guardar el paso 5', async () => {
     global.fetch = vi.fn()
       .mockResolvedValueOnce({
         ok: true,
@@ -143,11 +143,11 @@ describe('StripeConnectOnboarding', () => {
       expect(onVerified).toHaveBeenCalled();
     });
 
-    // Verificar que saveStep6 se llamó ANTES que onVerified
-    const saveStep6Calls = vi.mocked(saveStep6).mock.invocationCallOrder;
+    // Verificar que saveStep5 se llamó ANTES que onVerified
+    const saveStep5Calls = vi.mocked(saveStep5).mock.invocationCallOrder;
     const onVerifiedCalls = onVerified.mock.invocationCallOrder;
 
-    expect(saveStep6Calls[0]).toBeLessThan(onVerifiedCalls[0]);
+    expect(saveStep5Calls[0]).toBeLessThan(onVerifiedCalls[0]);
   });
 
   it('maneja error en onExit sin fallar', async () => {
@@ -172,7 +172,7 @@ describe('StripeConnectOnboarding', () => {
     expect(onVerified).toHaveBeenCalled();
   });
 
-  it('no guarda step6 si detailsSubmitted=false', async () => {
+  it('no guarda el paso 5 si detailsSubmitted=false', async () => {
     global.fetch = vi.fn()
       .mockResolvedValueOnce({
         ok: true,
@@ -210,7 +210,7 @@ describe('StripeConnectOnboarding', () => {
       expect(onVerified).toHaveBeenCalled();
     });
 
-    // saveStep6 NO debe ser llamado si detallesSubmitted es false
-    expect(saveStep6).not.toHaveBeenCalled();
+    // saveStep5 NO debe ser llamado si detallesSubmitted es false
+    expect(saveStep5).not.toHaveBeenCalled();
   });
 });

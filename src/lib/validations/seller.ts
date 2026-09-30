@@ -40,45 +40,4 @@ export const initialRegistrationSchema = z.object({
   path: ['confirmPassword'],
 });
 
-/** Paso 1: Ubicación y región turística */
-export const onboardingStep1Schema = z.object({
-  street: z.string().min(3, 'Introduce tu calle'),
-  number: z.string().min(1, 'Introduce el número'),
-  postalCode: z.string().regex(/^\d{5}$/, 'Código postal inválido'),
-  city: z.string().min(2, 'Introduce tu ciudad'),
-  province: z.string().min(2, 'Selecciona tu provincia'),
-  autonomousCommunity: z.string().min(2, 'Selecciona tu comunidad autónoma'),
-  touristicRegionId: z.string().optional(),
-  touristicRegionName: z.string().optional(),
-});
-
-/** Paso 2: Historia y valores */
-export const onboardingStep2Schema = z.object({
-  businessStory: z.string().min(200, 'Cuéntanos más sobre tu historia (mínimo 200 caracteres)').max(1000),
-  philosophy: z.string().min(100, 'Describe tu filosofía (mínimo 100 caracteres)').max(500),
-  sustainabilityPractices: z.array(z.string()).min(1, 'Selecciona al menos una práctica'),
-  hasOrganicCertification: z.boolean(),
-  hasDopIgpCertification: z.boolean(),
-  certificationDetails: z.string().optional(),
-});
-
-/** Paso 3: Perfil visual */
-export const onboardingStep3Schema = z.object({
-  bannerFile: z.any().optional(),
-  logoFile: z.any().optional(),
-  galleryFiles: z.array(z.any()).optional(),
-});
-
-/** Paso 4: Capacidad y entregas */
-export const onboardingStep4Schema = z.object({
-  monthlyCapacity: z.number().min(1, 'Introduce tu capacidad mensual'),
-  capacityUnit: z.enum(['kg', 'litros', 'unidades']),
-  deliveryRadius: z.number().min(1, 'Introduce tu radio de entrega').max(200),
-  availableDeliveryDays: z.array(z.string()).min(1, 'Selecciona al menos un día'),
-  workingHours: z.string().optional(),
-});
-
 export type InitialRegistrationFormData = z.infer<typeof initialRegistrationSchema>;
-export type OnboardingStep1FormData = z.infer<typeof onboardingStep1Schema>;
-export type OnboardingStep2FormData = z.infer<typeof onboardingStep2Schema>;
-export type OnboardingStep4FormData = z.infer<typeof onboardingStep4Schema>;
