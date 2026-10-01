@@ -46,10 +46,10 @@ export function HeroSection() {
 
   const stats = [
     {
-      value: '15%',
+      value: '12%',
       label: 'Comisión',
       icon: TrendingUp,
-      sublabel: 'Solo al vender',
+      sublabel: '+ 0,25€ · solo al vender',
       gradient: 'hoja' as const
     },
     {
@@ -319,7 +319,7 @@ export function HeroSection() {
                       <div className="text-center md:text-left">
                         <p className="text-xs text-origen-hoja mb-1">Comisión por venta</p>
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl md:text-3xl font-bold text-origen-bosque">15%</span>
+                          <span className="text-2xl md:text-3xl font-bold text-origen-bosque">12% + 0,25€</span>
                           <span className="text-sm text-muted-foreground">por venta</span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">Solo cuando vendes</p>

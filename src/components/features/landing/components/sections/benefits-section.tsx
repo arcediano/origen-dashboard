@@ -112,12 +112,12 @@ export function BenefitsSection() {
         {/* Móvil: stats compactas */}
         <div className="md:hidden mt-6 grid grid-cols-3 gap-2 text-center">
           {[
-            { value: '15%', label: 'Comisión' },
+            { value: '12% + 0,25€', label: 'Comisión' },
             { value: '0€', label: 'Cuota fija' },
             { value: '24h', label: 'Soporte' },
           ].map(({ value, label }) => (
             <div key={label} className="bg-origen-crema/60 rounded-xl p-3">
-              <div className="text-xl font-bold text-origen-hoja">{value}</div>
+              <div className="text-base font-bold text-origen-hoja">{value}</div>
               <div className="text-xs text-origen-bosque font-medium mt-0.5">{label}</div>
             </div>
           ))}
@@ -129,12 +129,12 @@ export function BenefitsSection() {
             <div className="bg-surface-alt rounded-3xl p-10 border border-origen-hoja/30 shadow-origen">
               <div className="grid grid-cols-3 gap-8 text-center">
                 {[
-                  { value: '15%', title: 'Comisión única', sub: 'Solo pagas cuando vendes' },
+                  { value: '12% + 0,25€', title: 'Comisión única', sub: 'Solo pagas cuando vendes' },
                   { value: '0€', title: 'Sin costes fijos', sub: 'No hay cuotas mensuales' },
                   { value: '24h', title: 'Soporte prioritario', sub: 'Respuesta en menos de 24h' },
                 ].map(({ value, title, sub }) => (
                   <div key={value}>
-                    <div className="text-4xl font-bold text-origen-hoja mb-3">{value}</div>
+                    <div className="text-3xl lg:text-4xl font-bold text-origen-hoja mb-3">{value}</div>
                     <h4 className="font-bold text-origen-bosque text-base mb-2">{title}</h4>
                     <p className="text-muted-foreground text-sm">{sub}</p>
                   </div>
