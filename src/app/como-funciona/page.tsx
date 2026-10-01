@@ -213,8 +213,8 @@ export default function HowItWorksPage() {
           {/* CTA final */}
           <div className="mt-12 md:mt-20 text-center">
             <div className="bg-surface-alt rounded-3xl p-8 md:p-12 border border-origen-hoja/30 shadow-origen max-w-2xl mx-auto">
-              <div className="flex items-center justify-center gap-2 mb-3">
-                {['15% comisión', '0€ alta', '24h soporte'].map((item) => (
+              <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
+                {['12% + 0,25€ comisión', '0€ alta', '24h soporte'].map((item) => (
                   <div key={item} className="inline-flex items-center gap-1.5 bg-origen-crema/60 rounded-full px-3 py-1 border border-origen-hoja/20">
                     <CheckCircle className="w-3.5 h-3.5 text-origen-hoja" />
                     <span className="text-xs font-medium text-origen-bosque">{item}</span>
