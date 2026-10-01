@@ -48,7 +48,8 @@ import { EnhancedStep2Visual } from '@/components/features/onboarding/components
 import { EnhancedStep3Shipping } from '@/components/features/onboarding/components/steps/step-shipping';
 import { EnhancedStep4Documents } from '@/components/features/onboarding/components/steps/step-documents';
 import { EnhancedStep5Payments } from '@/components/features/onboarding/components/steps/step-stripe';
-import { Camera, Clock, CreditCard, FileText, MapPin, Truck } from 'lucide-react';
+import { Camera, CheckCircle, Clock, CreditCard, FileText, MapPin, Sparkles, Truck } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // ============================================================================
 // CONFIGURACIÓN
@@ -60,6 +61,9 @@ const WIZARD_STEPS = ONBOARDING_STEPS.map((step, i) => {
   const Icon = STEP_ICONS[i];
   return { id: String(step.id), label: step.label, icon: <Icon className="h-4 w-4" /> };
 });
+
+/** Suma los minutos de `ONBOARDING_STEPS` (p. ej. "3 min" → 3) para el total estimado. */
+const TOTAL_MINUTES = ONBOARDING_STEPS.reduce((sum, s) => sum + (parseInt(s.time, 10) || 0), 0);
 
 function getUserFriendlyError(error: unknown, fallback = 'Error inesperado. Inténtalo de nuevo.'): string {
   if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('network'))) {
@@ -468,95 +472,214 @@ export default function OnboardingPage() {
       {/* Espacio bajo el ActionBar fijo de móvil: 1 fila (botón principal) en el paso 1 y 2 filas
           (principal + "Anterior") en el resto. Clases literales completas para el JIT de Tailwind. */}
       <main
-        className={`mx-auto max-w-3xl px-4 sm:px-6 lg:pb-10 ${
+        className={`mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:py-8 lg:pb-10 ${
           currentStep === 0
             ? 'pb-[calc(96px+env(safe-area-inset-bottom,0px))]'
             : 'pb-[calc(148px+env(safe-area-inset-bottom,0px))]'
         }`}
       >
-        <WizardProgress
-          steps={WIZARD_STEPS}
-          currentId={String(step.id)}
-          completed={completedMap}
-          onStepChange={handleStepClick}
-          maxReachableIndex={maxReachable}
-          progress={progress}
-          idPrefix="onboarding"
-          stickyClassName="top-0"
-          stickyOffsetPx={0}
-        />
+        <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
+          {/* ================================================================
+              COLUMNA IZQUIERDA — timeline vertical, solo escritorio
+          ================================================================ */}
+          <div className="hidden lg:block lg:w-4/12">
+            <div className="sticky top-24 space-y-6">
+              <div className="flex items-center gap-2 border-b border-border pb-2">
+                <Sparkles className="h-4 w-4 text-hoja-tinta" aria-hidden="true" />
+                <h2 className="text-xs font-bold uppercase tracking-wider text-origen-bosque">
+                  Configura tu tienda
+                </h2>
+              </div>
 
-        <div className="mb-5 mt-1">
-          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">
-            Paso {step.id} de {ONBOARDING_TOTAL_STEPS}
-            <span aria-hidden="true">·</span>
-            <Clock className="h-3 w-3" aria-hidden="true" />
-            {step.time}
-          </p>
-          <h1 ref={titleRef} tabIndex={-1} className="mt-1 text-h2 font-bold text-origen-bosque focus:outline-hidden">
-            {step.title}
-          </h1>
-          <p className="mt-1 text-sm text-text-subtle sm:text-base">{step.purpose}</p>
-        </div>
+              <div className="relative">
+                {ONBOARDING_STEPS.map((s, index) => {
+                  const Icon = STEP_ICONS[index];
+                  const isActive = index === currentStep;
+                  const isCompleted = completedSteps.includes(s.id);
+                  const isClickable = index <= maxReachable;
 
-        {notice && (
-          <Alert variant="success" dismissible onDismiss={() => setNotice(null)} className="mb-4" role="status">
-            {notice}
-          </Alert>
-        )}
+                  return (
+                    <div key={s.id} className="relative flex gap-4 pb-8 last:pb-0">
+                      {index < ONBOARDING_STEPS.length - 1 && (
+                        <div
+                          className={cn(
+                            'absolute left-5 top-10 h-[calc(100%-1.5rem)] w-0.5',
+                            isCompleted
+                              ? 'bg-linear-to-b from-origen-pradera to-origen-pradera/40'
+                              : 'bg-border',
+                          )}
+                        />
+                      )}
 
-        {showErrors && issues.length > 0 && (
-          <div className="mb-4">
-            <StepValidationPanel issues={issues} onFocusField={focusField} stepKey={currentStep} />
+                      <div className="relative z-10 shrink-0">
+                        <div
+                          className={cn(
+                            'flex h-10 w-10 items-center justify-center rounded-full transition-all',
+                            isCompleted && 'bg-origen-bosque text-white shadow-sm',
+                            isActive && 'border-2 border-origen-pradera bg-surface-alt shadow-sm',
+                            !isActive && !isCompleted && 'border border-border bg-surface-alt text-muted-foreground',
+                          )}
+                        >
+                          {isCompleted ? (
+                            <CheckCircle className="h-5 w-5" />
+                          ) : (
+                            <Icon className={cn('h-5 w-5', isActive && 'text-origen-pradera')} />
+                          )}
+                        </div>
+                        <span
+                          className={cn(
+                            'absolute -bottom-2 -right-2 rounded-full px-1.5 py-0.5 text-[10px] font-medium shadow-sm',
+                            isCompleted
+                              ? 'border border-origen-pradera/30 bg-origen-pastel text-origen-bosque'
+                              : 'border border-border bg-surface-alt text-muted-foreground',
+                          )}
+                        >
+                          {s.time}
+                        </span>
+                      </div>
+
+                      <div
+                        onClick={() => isClickable && handleStepClick(String(s.id))}
+                        className={cn(
+                          'flex-1 pt-1 transition-all',
+                          isClickable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h3
+                            className={cn(
+                              'text-sm font-semibold',
+                              isActive && 'text-origen-bosque',
+                              isCompleted && !isActive && 'text-origen-oscuro',
+                              !isActive && !isCompleted && 'text-muted-foreground',
+                            )}
+                          >
+                            {s.title}
+                          </h3>
+                          {isActive && (
+                            <span className="flex shrink-0 items-center gap-1 text-[10px] font-medium text-hoja-tinta">
+                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-origen-pradera" />
+                              En progreso
+                            </span>
+                          )}
+                          {isCompleted && !isActive && (
+                            <span className="flex shrink-0 items-center gap-1 text-[10px] font-medium text-hoja-tinta">
+                              <CheckCircle className="h-3 w-3" />
+                              Listo
+                            </span>
+                          )}
+                        </div>
+                        {isActive && <p className="mt-2 text-xs italic text-muted-foreground">{s.purpose}</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 rounded-xl border border-border-subtle bg-surface-alt/50 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-origen-pradera/5">
+                    <Clock className="h-4 w-4 text-hoja-tinta" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Tiempo total</p>
+                    <p className="text-sm font-semibold text-origen-bosque">~{TOTAL_MINUTES} minutos</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
 
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.div
-            key={currentStep}
-            data-onboarding-step-content
-            custom={direction}
-            initial={{ opacity: 0, x: direction > 0 ? 20 : -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: direction > 0 ? -20 : 20 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-          >
-            {renderStep()}
-          </motion.div>
-        </AnimatePresence>
+          {/* ================================================================
+              COLUMNA DERECHA — formulario
+          ================================================================ */}
+          <div className="w-full lg:w-8/12">
+            <WizardProgress
+              steps={WIZARD_STEPS}
+              currentId={String(step.id)}
+              completed={completedMap}
+              onStepChange={handleStepClick}
+              maxReachableIndex={maxReachable}
+              progress={progress}
+              idPrefix="onboarding"
+              stickyClassName="top-0"
+              stickyOffsetPx={0}
+              className="lg:hidden"
+            />
 
-        {isLastStep && formData.step5.acceptTerms && !formData.step5.stripeConnected && (
-          <Alert variant="warning" className="mt-4">
-            Puedes finalizar sin Stripe ahora, pero no podrás publicar productos hasta conectarlo desde tu panel.
-          </Alert>
-        )}
+            <div className="mb-5 mt-1 lg:mt-0">
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">
+                Paso {step.id} de {ONBOARDING_TOTAL_STEPS}
+                <span aria-hidden="true">·</span>
+                <Clock className="h-3 w-3" aria-hidden="true" />
+                {step.time}
+              </p>
+              <h1 ref={titleRef} tabIndex={-1} className="mt-1 text-h2 font-bold text-origen-bosque focus:outline-hidden">
+                {step.title}
+              </h1>
+              <p className="mt-1 text-sm text-text-subtle sm:text-base">{step.purpose}</p>
+            </div>
 
-        {saveError && (
-          <Alert variant="error" dismissible onDismiss={() => setSaveError(null)} className="mt-6">
-            {saveError}
-          </Alert>
-        )}
-
-        {/* Navegación — solo escritorio (en móvil, MobileNavBar) */}
-        <div className="mt-8 hidden items-center justify-between border-t border-border pt-6 lg:flex">
-          <div>
-            {currentStep > 0 && (
-              <Button variant="secondary" onClick={handleBack} disabled={isSubmitting}>
-                Anterior
-              </Button>
+            {notice && (
+              <Alert variant="success" dismissible onDismiss={() => setNotice(null)} className="mb-4" role="status">
+                {notice}
+              </Alert>
             )}
+
+            {showErrors && issues.length > 0 && (
+              <div className="mb-4">
+                <StepValidationPanel issues={issues} onFocusField={focusField} stepKey={currentStep} />
+              </div>
+            )}
+
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={currentStep}
+                data-onboarding-step-content
+                custom={direction}
+                initial={{ opacity: 0, x: direction > 0 ? 20 : -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: direction > 0 ? -20 : 20 }}
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+              >
+                {renderStep()}
+              </motion.div>
+            </AnimatePresence>
+
+            {isLastStep && formData.step5.acceptTerms && !formData.step5.stripeConnected && (
+              <Alert variant="warning" className="mt-4">
+                Puedes finalizar sin Stripe ahora, pero no podrás publicar productos hasta conectarlo desde tu panel.
+              </Alert>
+            )}
+
+            {saveError && (
+              <Alert variant="error" dismissible onDismiss={() => setSaveError(null)} className="mt-6">
+                {saveError}
+              </Alert>
+            )}
+
+            {/* Navegación — solo escritorio (en móvil, MobileNavBar) */}
+            <div className="mt-8 hidden items-center justify-between border-t border-border pt-6 lg:flex">
+              <div>
+                {currentStep > 0 && (
+                  <Button variant="secondary" onClick={handleBack} disabled={isSubmitting}>
+                    Anterior
+                  </Button>
+                )}
+              </div>
+              <Button
+                onClick={isLastStep ? handleComplete : handleNext}
+                disabled={isSubmitting}
+                loading={isSubmitting}
+                loadingText={isLastStep ? 'Finalizando...' : 'Guardando...'}
+                aria-disabled={!isStepValid}
+                aria-describedby={!isStepValid && showErrors ? 'onboarding-step-validation' : undefined}
+                className={!isStepValid && !isSubmitting ? 'opacity-60' : undefined}
+              >
+                {isLastStep ? 'Finalizar' : 'Guardar y continuar'}
+              </Button>
+            </div>
           </div>
-          <Button
-            onClick={isLastStep ? handleComplete : handleNext}
-            disabled={isSubmitting}
-            loading={isSubmitting}
-            loadingText={isLastStep ? 'Finalizando...' : 'Guardando...'}
-            aria-disabled={!isStepValid}
-            aria-describedby={!isStepValid && showErrors ? 'onboarding-step-validation' : undefined}
-            className={!isStepValid && !isSubmitting ? 'opacity-60' : undefined}
-          >
-            {isLastStep ? 'Finalizar' : 'Guardar y continuar'}
-          </Button>
         </div>
       </main>
 
