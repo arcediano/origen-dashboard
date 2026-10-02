@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, X } from 'lucide-react';
+import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, Sparkles, X } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
@@ -215,16 +215,16 @@ export default function CreateProductPage() {
       <div className="hidden lg:block fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       <PageHeader
-        title="Crear producto"
+        title={mode === 'ai-intake' ? 'Crea tu producto en un minuto' : 'Crear producto'}
         description={
           mode === 'ai-intake'
-            ? 'Con ayuda del asistente de IA'
+            ? 'Sube una foto y cuéntanos qué es. Preparamos la ficha completa; tú solo la revisas y decides.'
             : mode === 'ai-review'
               ? 'Revisa la ficha y publícala'
               : 'Completa los pasos para publicar tu producto'
         }
-        badgeIcon={Package}
-        badgeText="Nuevo producto"
+        badgeIcon={mode === 'ai-intake' ? Sparkles : Package}
+        badgeText={mode === 'ai-intake' ? 'Asistente de IA' : 'Nuevo producto'}
         tooltip="Creación de producto"
         tooltipDetailed="Completa todos los pasos para publicar tu producto en el catálogo"
         showBackButton
