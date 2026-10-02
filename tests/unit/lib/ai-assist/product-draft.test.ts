@@ -44,6 +44,7 @@ const response = (over: Partial<ProductDraftResponse['proposal']> = {}, rest: Pa
   unreadableFields: [],
   producerMustComplete: ['Precio', 'Stock'],
   notes: null,
+  followUpQuestions: [],
   quota: { used: 1, total: 5 },
   ...rest,
 });

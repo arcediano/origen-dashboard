@@ -9,6 +9,25 @@
 import type { NutritionalInfo } from '@/types/product';
 import { proposalToPatches, unreadableFieldNames, type LabelProposal } from './label-proposal';
 
+/**
+ * Campos sobre los que el asistente puede proponer una pregunta de
+ * seguimiento (ver `product-draft.schema.ts` en el backend — misma lista
+ * cerrada). Nunca ingredientes/alérgenos/nutrición.
+ */
+export type FollowUpField =
+  | 'productionInfo.origin'
+  | 'productionInfo.productionMethod'
+  | 'nutritionalInfo.isGlutenFree'
+  | 'nutritionalInfo.isVegan'
+  | 'nutritionalInfo.isVegetarian';
+
+export interface FollowUpQuestion {
+  field: FollowUpField;
+  question: string;
+  type: 'text' | 'single_choice';
+  options: string[] | null;
+}
+
 /** Forma de la respuesta de `POST /ai-assist/product-draft`. */
 export interface ProductDraftResponse {
   proposal: {
@@ -29,6 +48,8 @@ export interface ProductDraftResponse {
   /** Lo que la IA nunca propone y el productor debe completar. */
   producerMustComplete: string[];
   notes: string | null;
+  /** Preguntas dinámicas para completar lo que la IA no pudo determinar. */
+  followUpQuestions: FollowUpQuestion[];
   quota: { used: number; total: number };
 }
 

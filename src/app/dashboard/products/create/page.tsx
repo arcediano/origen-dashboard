@@ -38,8 +38,16 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { getAiAssistQuota } from '@/lib/api/ai-assist';
 import { fetchCategoriesTree } from '@/lib/api/categories';
-import { draftToPatches, type ProductDraftResponse } from '@/lib/ai-assist/product-draft';
+import { draftToPatches, type FollowUpField, type ProductDraftResponse } from '@/lib/ai-assist/product-draft';
 import type { AiAssistQuota } from '@/lib/ai-assist/label-proposal';
+import { AiFollowUpQuestions } from '@/app/dashboard/products/components/ai-onboarding/AiFollowUpQuestions';
+
+/** Las 3 marcas dietéticas de followUpQuestions responden "Sí"/"No": se guardan como boolean. */
+const BOOLEAN_FOLLOW_UP_FIELDS = new Set<FollowUpField>([
+  'nutritionalInfo.isGlutenFree',
+  'nutritionalInfo.isVegan',
+  'nutritionalInfo.isVegetarian',
+]);
 
 // ─── Animaciones ──────────────────────────────────────────────────────────────
 
@@ -93,6 +101,9 @@ export default function CreateProductPage() {
   const [mode, setMode] = useState<CreateMode>('loading');
   const [quota, setQuota] = useState<AiAssistQuota | null>(null);
   const [draft, setDraft] = useState<ProductDraftResponse | null>(null);
+  // Entre el borrador de la IA y la revisión final: si quedan campos que no
+  // pudo determinar, se preguntan aquí para que la revisión llegue completa.
+  const [pendingFollowUps, setPendingFollowUps] = useState<ProductDraftResponse['followUpQuestions']>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -143,10 +154,30 @@ export default function CreateProductPage() {
       markAiAssistUsed();
       setQuota((q) => (q ? { ...q, used: response.quota.used, total: response.quota.total } : q));
       setDraft(response);
+      // Si a la IA le quedó algo pendiente de esos campos, se pregunta antes
+      // de pasar a revisión — así la pantalla de revisión llega ya completa.
+      if (response.followUpQuestions.length > 0) {
+        setPendingFollowUps(response.followUpQuestions);
+      } else {
+        setMode('ai-review');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+    [handleInputChange, handleNestedChange, handleImagesChange, markAiAssistUsed],
+  );
+
+  const handleFollowUpComplete = useCallback(
+    (answers: Partial<Record<FollowUpField, string>>) => {
+      for (const [field, value] of Object.entries(answers) as [FollowUpField, string][]) {
+        const [section, key] = field.split('.') as ['nutritionalInfo' | 'productionInfo', string];
+        const finalValue = BOOLEAN_FOLLOW_UP_FIELDS.has(field) ? value === 'Sí' : value;
+        handleNestedChange(section, key, finalValue);
+      }
+      setPendingFollowUps([]);
       setMode('ai-review');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    [handleInputChange, handleNestedChange, handleImagesChange, markAiAssistUsed],
+    [handleNestedChange],
   );
 
   useEffect(() => {
@@ -424,6 +455,12 @@ export default function CreateProductPage() {
         ]}
       />
       )}
+
+      <AiFollowUpQuestions
+        open={pendingFollowUps.length > 0}
+        questions={pendingFollowUps}
+        onComplete={handleFollowUpComplete}
+      />
 
       <CreateProductCancelDialog
         open={showCancelDialog}
