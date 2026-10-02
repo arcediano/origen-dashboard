@@ -45,6 +45,9 @@ const response = (over: Partial<ProductDraftResponse['proposal']> = {}, rest: Pa
   producerMustComplete: ['Precio', 'Stock'],
   notes: null,
   followUpQuestions: [],
+  nutritionSource: null,
+  allergenSource: null,
+  externalSourceNote: null,
   quota: { used: 1, total: 5 },
   ...rest,
 });
@@ -138,5 +141,31 @@ describe('summarizeDraft', () => {
     );
     expect(partial.filled).toEqual(expect.arrayContaining(['Ingredientes', 'Alérgenos', 'Información nutricional']));
     expect(partial.toReview.join(' ')).toContain('sodio');
+  });
+
+  it('avisa cuando ingredientes/alérgenos vienen de un código de barras', () => {
+    const s = summarizeDraft(
+      response(
+        {},
+        {
+          allergenSource: 'barcode',
+          nutritionSource: 'barcode',
+          externalSourceNote: 'Open Food Facts: Queso X (código de barras 8412345678901)',
+        },
+      ),
+    );
+    expect(s.toReview.join(' ')).toContain('Open Food Facts');
+    expect(s.toReview.join(' ')).toContain('código de barras');
+  });
+
+  it('avisa de que la nutrición es una estimación, no un dato exacto', () => {
+    const s = summarizeDraft(
+      response(
+        {},
+        { nutritionSource: 'estimated', externalSourceNote: 'BEDCA: queso curado de oveja' },
+      ),
+    );
+    expect(s.toReview.join(' ')).toMatch(/ESTIMADA/);
+    expect(s.toReview.join(' ')).toContain('BEDCA');
   });
 });

@@ -8,7 +8,7 @@ describe('AiProductIntake — borrador local a medias', () => {
   it('sin borrador no muestra el aviso', () => {
     render(<AiProductIntake {...base} />);
     expect(screen.queryByText('Tienes un borrador sin terminar')).toBeNull();
-    expect(screen.getByText('Crea tu producto en un minuto')).toBeTruthy();
+    expect(screen.getByText('1 · Foto del producto')).toBeTruthy();
   });
 
   it('con borrador muestra el asistente Y ofrece continuar o descartar', () => {
@@ -20,7 +20,6 @@ describe('AiProductIntake — borrador local a medias', () => {
         pendingDraft={{ name: 'Queso Manchego', onResume, onDiscard }}
       />,
     );
-    expect(screen.getByText('Crea tu producto en un minuto')).toBeTruthy();
     expect(screen.getByText('Tienes un borrador sin terminar')).toBeTruthy();
     expect(screen.getByText(/«Queso Manchego»/)).toBeTruthy();
 

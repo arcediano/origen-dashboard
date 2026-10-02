@@ -50,6 +50,16 @@ export interface ProductDraftResponse {
   notes: string | null;
   /** Preguntas dinámicas para completar lo que la IA no pudo determinar. */
   followUpQuestions: FollowUpQuestion[];
+  /**
+   * De dónde vienen ingredientes/alérgenos/nutrición cuando no son de la
+   * etiqueta leída por IA: código de barras real (Open Food Facts) o
+   * estimación por búsqueda web (solo nutrición, nunca ingredientes/alérgenos).
+   * `null` si no aplica ninguna (viene de la etiqueta o no hay datos).
+   */
+  nutritionSource: 'barcode' | 'estimated' | null;
+  allergenSource: 'barcode' | null;
+  /** Nota de la fuente externa, para mostrarla al productor. */
+  externalSourceNote: string | null;
   quota: { used: number; total: number };
 }
 
@@ -126,6 +136,20 @@ export function summarizeDraft(response: ProductDraftResponse): {
   const unreadable = unreadableFieldNames(response.unreadableFields);
   if (response.labelLegible === true && unreadable.length > 0) {
     toReview.push(`No se pudo leer: ${unreadable.join(', ')}`);
+  }
+  if (response.allergenSource === 'barcode') {
+    toReview.push(
+      `Ingredientes y alérgenos de Open Food Facts por el código de barras: confirma que coinciden con tu producto${response.externalSourceNote ? ` (${response.externalSourceNote})` : ''}.`,
+    );
+  }
+  if (response.nutritionSource === 'estimated') {
+    toReview.push(
+      `Información nutricional ESTIMADA (no es de tu producto exacto)${response.externalSourceNote ? `: ${response.externalSourceNote}` : ''}. Corrígela si tienes el dato real.`,
+    );
+  } else if (response.nutritionSource === 'barcode' && response.allergenSource !== 'barcode') {
+    toReview.push(
+      `Información nutricional de Open Food Facts por el código de barras: confirma que coincide con tu producto${response.externalSourceNote ? ` (${response.externalSourceNote})` : ''}.`,
+    );
   }
 
   return { filled, toReview, toComplete: response.producerMustComplete };

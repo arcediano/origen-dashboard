@@ -159,7 +159,8 @@ export function AiProductReview({
   const hasProduction =
     !!draft.proposal.productionInfo.origin || !!draft.proposal.productionInfo.productionMethod;
   const hasNutrition =
-    draft.labelLegible === true || draft.proposal.nutritionalInfo.isGlutenFree === true ||
+    draft.labelLegible === true || draft.nutritionSource !== null || draft.allergenSource !== null ||
+    draft.proposal.nutritionalInfo.isGlutenFree === true ||
     draft.proposal.nutritionalInfo.isVegan === true || draft.proposal.nutritionalInfo.isVegetarian === true;
 
   const missing = useMemo(() => {
