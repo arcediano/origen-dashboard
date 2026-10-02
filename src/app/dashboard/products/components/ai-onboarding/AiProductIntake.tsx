@@ -11,7 +11,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, ImagePlus, Loader2, ScanLine, Sparkles, X } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle, Badge, Button, Card, Textarea } from '@arcediano/ux-library';
+import { Alert, AlertDescription, AlertTitle, Button, Card, Textarea } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import { resizeLabelImage } from '@/lib/ai-assist/resize-label-image';
 import { AiAssistError, draftProduct } from '@/lib/api/ai-assist';
@@ -227,17 +227,6 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
           </AlertDescription>
         </Alert>
       )}
-
-      <div className="text-center space-y-3">
-        <Badge variant="leaf" size="sm" className="inline-flex items-center gap-1">
-          <Sparkles className="w-3 h-3" aria-hidden="true" />
-          Asistente de IA
-        </Badge>
-        <h2 className="text-2xl sm:text-3xl font-semibold text-origen-bosque">Crea tu producto en un minuto</h2>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Sube una foto y cuéntanos qué es. Preparamos la ficha completa; tú solo la revisas y decides.
-        </p>
-      </div>
 
       <Card variant="elevated" className="p-4 sm:p-6 space-y-7">
         {/* 1. Foto */}
