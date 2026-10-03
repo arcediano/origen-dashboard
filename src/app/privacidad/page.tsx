@@ -6,9 +6,11 @@
 
 import { Shield } from 'lucide-react';
 import { LegalPage, type LegalSection } from '@/components/features/legal/LegalPage';
-import { COMPANY_INFO_REVALIDATE, companyContact, companyIdentityItems, fetchCompanyInfo, type CompanyInfo } from '@/lib/company-info';
+import { companyContact, companyIdentityItems, fetchCompanyInfo, type CompanyInfo } from '@/lib/company-info';
 
-export const revalidate = COMPANY_INFO_REVALIDATE;
+// Debe ser un literal (Next no admite constantes importadas en la config de segmento).
+// Mantener igual que COMPANY_INFO_REVALIDATE en @/lib/company-info.
+export const revalidate = 300;
 
 export const metadata = {
   title: 'Política de privacidad · Origen',
