@@ -118,13 +118,17 @@ export function LegalPage({ icon, title, updated, intro, sections, related }: Le
                 )}
                 {section.contact && (
                   <div className="mt-3 space-y-1 text-sm">
-                    <p className="text-foreground">
-                      <span className="font-medium text-origen-bosque">Email: </span>
-                      <a href={`mailto:${section.contact.email}`} className="text-hoja-tinta hover:underline transition-colors underline">{section.contact.email}</a>
-                    </p>
-                    <p className="text-foreground">
-                      <span className="font-medium text-origen-bosque">Dirección: </span>{section.contact.address}
-                    </p>
+                    {section.contact.email && (
+                      <p className="text-foreground">
+                        <span className="font-medium text-origen-bosque">Email: </span>
+                        <a href={`mailto:${section.contact.email}`} className="text-hoja-tinta hover:underline transition-colors underline">{section.contact.email}</a>
+                      </p>
+                    )}
+                    {section.contact.address && (
+                      <p className="text-foreground">
+                        <span className="font-medium text-origen-bosque">Dirección: </span>{section.contact.address}
+                      </p>
+                    )}
                   </div>
                 )}
               </section>

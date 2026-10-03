@@ -6,20 +6,29 @@
 
 import { Shield } from 'lucide-react';
 import { LegalPage, type LegalSection } from '@/components/features/legal/LegalPage';
+import { COMPANY_INFO_REVALIDATE, companyContact, companyIdentityItems, fetchCompanyInfo, type CompanyInfo } from '@/lib/company-info';
+
+export const revalidate = COMPANY_INFO_REVALIDATE;
 
 export const metadata = {
   title: 'Política de privacidad · Origen',
   description: 'Cómo trata Origen Marketplace los datos personales de los productores.',
 };
 
-const CONTACT = { email: 'privacidad@origen.com', address: 'Calle Ejemplo 123, 28001 Madrid, España' };
-
-const sections: LegalSection[] = [
+function buildSections(company: CompanyInfo | null): LegalSection[] {
+  const name = company?.businessName ?? 'Origen Marketplace';
+  const contactEmail = company?.email;
+  return [
   {
     title: 'Responsable del tratamiento',
     paragraphs: [
-      'El responsable del tratamiento de tus datos es ORIGEN MARKETPLACE S.L. (en adelante, «Origen»), cuyos datos de identificación figuran en el Aviso Legal. Puedes contactar con nosotros para cualquier cuestión de privacidad en privacidad@origen.com.',
+      `El responsable del tratamiento de tus datos es ${name} (en adelante, «Origen»). ${
+        contactEmail
+          ? `Puedes contactar con nosotros para cualquier cuestión de privacidad en ${contactEmail}.`
+          : 'Puedes contactar con nosotros para cualquier cuestión de privacidad desde la página de contacto.'
+      }`,
     ],
+    items: companyIdentityItems(company),
   },
   {
     title: 'Datos que tratamos',
@@ -78,7 +87,11 @@ const sections: LegalSection[] = [
   },
   {
     title: 'Tus derechos',
-    paragraphs: ['Conforme al RGPD y a la LOPDGDD, puedes ejercer en cualquier momento los siguientes derechos escribiendo a privacidad@origen.com:'],
+    paragraphs: [
+      `Conforme al RGPD y a la LOPDGDD, puedes ejercer en cualquier momento los siguientes derechos ${
+        contactEmail ? `escribiendo a ${contactEmail}` : 'desde la página de contacto'
+      }:`,
+    ],
     items: [
       'Acceso a tus datos personales.',
       'Rectificación de datos inexactos o incompletos.',
@@ -99,18 +112,20 @@ const sections: LegalSection[] = [
   {
     title: 'Contacto',
     paragraphs: ['Si tienes preguntas sobre esta política o quieres ejercer tus derechos:'],
-    contact: CONTACT,
+    contact: companyContact(company),
   },
-];
+  ];
+}
 
-export default function PrivacyPolicyPage() {
+export default async function PrivacyPolicyPage() {
+  const company = await fetchCompanyInfo();
   return (
     <LegalPage
       icon={<Shield />}
       title="Política de privacidad"
       updated="octubre 2026"
       intro="Esta política describe cómo recopilamos, usamos y protegemos tu información personal cuando te registras y vendes en Origen Marketplace, conforme al RGPD y a la LOPDGDD."
-      sections={sections}
+      sections={buildSections(company)}
       related={[
         { href: '/terminos', label: 'Términos y condiciones' },
         { href: '/cookies', label: 'Política de cookies' },
