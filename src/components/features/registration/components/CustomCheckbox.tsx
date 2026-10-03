@@ -3,7 +3,7 @@
 // ============================================================================
 // Custom checkbox component with label, description, and error state
 
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 import { Check, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 export interface CustomCheckboxProps {
   id?: string;
   label: string;
-  description?: string;
+  description?: ReactNode;
   checked: boolean;
   onChange: (checked: boolean) => void;
   required?: boolean;

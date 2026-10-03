@@ -185,8 +185,12 @@ export function EnhancedStep5Payments({
                 Términos de Stripe
               </a>{' '}
               y la{' '}
-              <a href="#" onClick={(e) => e.preventDefault()} className="text-hoja-tinta underline underline-offset-2">
+              <a href="/privacidad" target="_blank" rel="noopener noreferrer" className="text-hoja-tinta underline underline-offset-2">
                 Política de privacidad de Origen
+              </a>
+              , así como los{' '}
+              <a href="/terminos" target="_blank" rel="noopener noreferrer" className="text-hoja-tinta underline underline-offset-2">
+                Términos y condiciones de Origen
               </a>
               .
             </p>
