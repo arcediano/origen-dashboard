@@ -4,11 +4,10 @@
  * navegación), para que el visitante no salga de la página.
  */
 
-import { Clock, Heart, Mail, Phone, Shield } from 'lucide-react';
+import { Clock, Heart, Phone, Shield } from 'lucide-react';
 
 const CONTACT_INFO = [
-  { icon: Mail, label: 'Email', value: 'info@origen.es' },
-  { icon: Phone, label: 'Teléfono', value: '+34 900 123 456' },
+  { icon: Phone, label: 'Teléfono', value: '658 603 506' },
   { icon: Clock, label: 'Horario', value: 'L-V, 9:00 - 18:00' },
 ];
 
