@@ -576,7 +576,15 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               <div className="space-y-3 md:space-y-4">
                 <CustomCheckbox
                   label="Acepto los términos y condiciones"
-                  description="He leído y acepto las condiciones de uso de la plataforma Origen"
+                  description={
+                    <>
+                      He leído y acepto las{' '}
+                      <a href="/terminos" className="font-semibold text-hoja-tinta underline underline-offset-2" target="_blank" rel="noopener noreferrer">
+                        condiciones de uso de la plataforma Origen
+                      </a>{' '}
+                      (se abre en una pestaña nueva)
+                    </>
+                  }
                   checked={formValues.acceptsTerms}
                   onChange={(checked) => setValue('acceptsTerms', checked, { shouldValidate: true })}
                   error={shouldShowFieldError('acceptsTerms') ? errors.acceptsTerms?.message : undefined}
@@ -584,7 +592,15 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 />
                 <CustomCheckbox
                   label="Acepto la política de privacidad"
-                  description="Autorizo el tratamiento de mis datos personales según el RGPD"
+                  description={
+                    <>
+                      Autorizo el tratamiento de mis datos personales según la{' '}
+                      <a href="/privacidad" className="font-semibold text-hoja-tinta underline underline-offset-2" target="_blank" rel="noopener noreferrer">
+                        política de privacidad
+                      </a>{' '}
+                      y el RGPD
+                    </>
+                  }
                   checked={formValues.acceptsPrivacy}
                   onChange={(checked) => setValue('acceptsPrivacy', checked, { shouldValidate: true })}
                   error={shouldShowFieldError('acceptsPrivacy') ? errors.acceptsPrivacy?.message : undefined}
