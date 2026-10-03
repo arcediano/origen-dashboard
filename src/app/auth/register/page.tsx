@@ -14,7 +14,6 @@ import { HeroSection } from '@/components/features/landing/components/sections/h
 import { BenefitsSection } from '@/components/features/landing/components/sections/benefits-section';
 import { ProcessSection } from '@/components/features/landing/components/sections/process-section';
 import { TestimonialsSection } from '@/components/features/landing/components/sections/testimonials-section';
-import { FinalCTASection } from '@/components/features/landing/components/sections/final-cta-section';
 import { Shield } from 'lucide-react';
 
 export default function RegisterPage() {
@@ -56,10 +55,7 @@ export default function RegisterPage() {
         </div>
       </section>
 
-      {/* CTA final */}
-      <FinalCTASection />
-
-      {/* Pie de la landing (sin enlaces legales: es solo captación) */}
+      {/* Pie de la landing (sin enlaces: es solo captación, no se sale de la página) */}
       <RegisterFooter />
     </div>
   );

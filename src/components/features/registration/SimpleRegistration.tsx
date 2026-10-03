@@ -297,32 +297,11 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                       : 'No se pudo procesar tu solicitud'}
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {errorMessage === 'duplicate_email' ? (
-                      <>
-                        Ya existe una solicitud pendiente de revisión con este email.
-                        Si tienes alguna duda, contacta con nosotros desde la{' '}
-                        <a href="/contacto" className="font-semibold text-hoja-tinta hover:underline">
-                          sección de contacto
-                        </a>.
-                      </>
-                    ) : (
-                      <>
-                        Ha ocurrido un error al enviar tu solicitud. Por favor, ponte en contacto
-                        con nuestro equipo de soporte desde la{' '}
-                        <a href="/contacto" className="font-semibold text-hoja-tinta hover:underline">
-                          sección de contacto
-                        </a>
-                        {' '}de nuestra página web.
-                      </>
-                    )}
+                    {errorMessage === 'duplicate_email'
+                      ? 'Ya existe una solicitud pendiente de revisión con este email. Nuestro equipo la está revisando.'
+                      : 'Ha ocurrido un error al enviar tu solicitud. Por favor, inténtalo de nuevo en unos minutos.'}
                   </p>
                 </div>
-                <a
-                  href="/contacto"
-                  className="inline-flex w-full items-center justify-center py-2.5 rounded-xl border border-origen-hoja/30 bg-origen-hoja/10 text-sm font-semibold text-hoja-tinta hover:bg-origen-hoja/20 hover:border-origen-hoja/50 active:scale-[.98] transition-all"
-                >
-                  Contactar soporte
-                </a>
                 <button
                   onClick={() => setSubmitStatus('idle')}
                   className="w-full py-2.5 rounded-xl border border-border text-sm font-semibold text-muted-foreground hover:text-origen-bosque hover:border-red-200 hover:bg-red-50/30 active:scale-[.98] transition-all"
