@@ -6,6 +6,22 @@
 import { z } from 'zod';
 
 /** Validación del formulario de registro inicial */
+/** Añade `https://` si falta; devuelve `undefined` si el campo está vacío. */
+export function normalizeWebsite(value: string | undefined): string | undefined {
+  const v = (value ?? '').trim();
+  if (!v) return undefined;
+  return /^https?:\/\//i.test(v) ? v : `https://${v}`;
+}
+
+function isValidWebsite(value: string): boolean {
+  try {
+    const url = new URL(normalizeWebsite(value) ?? '');
+    return /^https?:$/.test(url.protocol) && url.hostname.includes('.');
+  } catch {
+    return false;
+  }
+}
+
 export const initialRegistrationSchema = z.object({
   contactName: z.string().min(2, 'Mínimo 2 caracteres').max(50),
   contactSurname: z.string().min(2, 'Mínimo 2 caracteres').max(100),
@@ -29,6 +45,16 @@ export const initialRegistrationSchema = z.object({
   whyOrigin: z.string()
     .min(50, 'Cuéntanos un poco más (mínimo 50 caracteres)')
     .max(300, 'Máximo 300 caracteres'),
+  // Presencia online (opcional): ayuda a valorar la candidatura.
+  website: z
+    .string()
+    .trim()
+    .max(300, 'Máximo 300 caracteres')
+    .refine((v) => v === '' || isValidWebsite(v), 'Introduce una web válida (ej. www.minegocio.es)')
+    .optional(),
+  instagram: z.string().trim().max(200, 'Máximo 200 caracteres').optional(),
+  facebook: z.string().trim().max(200, 'Máximo 200 caracteres').optional(),
+  tiktok: z.string().trim().max(200, 'Máximo 200 caracteres').optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Las contraseñas no coinciden',
   path: ['confirmPassword'],

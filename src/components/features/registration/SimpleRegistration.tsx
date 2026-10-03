@@ -22,6 +22,7 @@ import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { getProvinciaFromCP } from '@/constants/cp-provincias';
 import {
   initialRegistrationSchema,
+  normalizeWebsite,
   type InitialRegistrationFormData
 } from '@/lib/validations/seller';
 import { registerProducer } from '@/lib/api/auth';
@@ -103,6 +104,10 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
       province: '',
       producerCategory: undefined,
       whyOrigin: '',
+      website: '',
+      instagram: '',
+      facebook: '',
+      tiktok: '',
     }
   });
 
@@ -188,6 +193,10 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
           municipio: data.municipio,
           postalCode: data.postalCode,
           whyOrigin: data.whyOrigin,
+          website: normalizeWebsite(data.website),
+          instagram: data.instagram?.trim() || undefined,
+          facebook: data.facebook?.trim() || undefined,
+          tiktok: data.tiktok?.trim() || undefined,
         });
 
         setTrackingCode(result.data.trackingCode ?? '');
@@ -538,6 +547,42 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     <span className="font-medium">¡Gracias por contarnos tu historia!</span>
                   </div>
                 )}
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <Input
+                    label="Página web del negocio"
+                    inputSize="lg"
+                    placeholder="www.minegocio.es"
+                    helperText="Opcional, pero nos ayuda a conocer tu negocio"
+                    autoComplete="url"
+                    error={shouldShowFieldError('website') ? errors.website?.message : undefined}
+                    {...register('website')}
+                  />
+                  <Input
+                    label="Instagram"
+                    inputSize="lg"
+                    placeholder="@minegocio"
+                    helperText="Opcional"
+                    error={shouldShowFieldError('instagram') ? errors.instagram?.message : undefined}
+                    {...register('instagram')}
+                  />
+                  <Input
+                    label="Facebook"
+                    inputSize="lg"
+                    placeholder="facebook.com/minegocio"
+                    helperText="Opcional"
+                    error={shouldShowFieldError('facebook') ? errors.facebook?.message : undefined}
+                    {...register('facebook')}
+                  />
+                  <Input
+                    label="TikTok"
+                    inputSize="lg"
+                    placeholder="@minegocio"
+                    helperText="Opcional"
+                    error={shouldShowFieldError('tiktok') ? errors.tiktok?.message : undefined}
+                    {...register('tiktok')}
+                  />
+                </div>
               </div>
             </FormSection>
 
