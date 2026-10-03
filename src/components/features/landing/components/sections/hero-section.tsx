@@ -17,6 +17,7 @@ import { Button, StatHighlightCard } from '@arcediano/ux-library';
 import { ArrowRight, Sparkles, TrendingUp, Clock, ShieldCheck, Globe, Leaf, CheckCircle, User, MapPin, Package, Store } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { COMMISSION_LABEL } from '@/components/features/landing/commission';
 
 export function HeroSection() {
   const [isMobile, setIsMobile] = useState(false);
@@ -49,7 +50,7 @@ export function HeroSection() {
       value: '12%',
       label: 'Comisión',
       icon: TrendingUp,
-      sublabel: '+ 0,25€ · solo al vender',
+      sublabel: '+\u00A00,25€ · solo al vender',
       gradient: 'hoja' as const
     },
     {
@@ -318,9 +319,9 @@ export function HeroSection() {
                     <div className="flex flex-col md:flex-row items-center justify-between gap-3">
                       <div className="text-center md:text-left">
                         <p className="text-xs text-origen-hoja mb-1">Comisión por venta</p>
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl md:text-3xl font-bold text-origen-bosque">12% + 0,25€</span>
-                          <span className="text-sm text-muted-foreground">por venta</span>
+                        <div className="flex flex-wrap items-baseline justify-center gap-x-1.5 md:justify-start">
+                          <span className="whitespace-nowrap text-2xl md:text-3xl font-bold text-origen-bosque">{COMMISSION_LABEL}</span>
+                          <span className="whitespace-nowrap text-sm text-muted-foreground">por venta</span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">Solo cuando vendes</p>
                       </div>

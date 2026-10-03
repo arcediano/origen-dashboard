@@ -29,12 +29,6 @@ export const initialRegistrationSchema = z.object({
   whyOrigin: z.string()
     .min(50, 'Cuéntanos un poco más (mínimo 50 caracteres)')
     .max(300, 'Máximo 300 caracteres'),
-  acceptsTerms: z.boolean().refine((val) => val === true, {
-    message: 'Debes aceptar los términos y condiciones',
-  }),
-  acceptsPrivacy: z.boolean().refine((val) => val === true, {
-    message: 'Debes aceptar la política de privacidad',
-  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Las contraseñas no coinciden',
   path: ['confirmPassword'],

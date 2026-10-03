@@ -41,8 +41,6 @@ export async function POST(request: NextRequest) {
         municipio:          validatedData.municipio,
         postalCode:         validatedData.postalCode,
         whyOrigin:          validatedData.whyOrigin,
-        acceptsTerms:       validatedData.acceptsTerms,
-        acceptsPrivacy:     validatedData.acceptsPrivacy,
       }),
     });
 
