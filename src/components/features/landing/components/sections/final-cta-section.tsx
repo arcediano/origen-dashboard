@@ -110,7 +110,7 @@ export function FinalCTASection() {
             <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 text-text-subtle text-xs">
               <div className="flex items-center gap-1.5">
                 <Shield className="w-3 h-3 text-origen-hoja" />
-                <span>Datos protegidos LOPD/RGPD</span>
+                <span>Sin cuotas ni permanencia</span>
               </div>
               <span className="hidden md:block w-px h-3 bg-border" />
               <div className="flex items-center gap-1.5">

@@ -45,7 +45,6 @@ import {
 
 // Components
 import { SuccessModal } from './components/SuccessModal';
-import { CustomCheckbox } from './components/CustomCheckbox';
 import { BusinessTypeSelector } from './components/BusinessTypeSelector';
 import { CategoryCard } from './components/CategoryCard';
 import { FormSection } from './components/FormSection';
@@ -104,8 +103,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
       province: '',
       producerCategory: undefined,
       whyOrigin: '',
-      acceptsTerms: false,
-      acceptsPrivacy: false,
     }
   });
 
@@ -191,8 +188,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
           municipio: data.municipio,
           postalCode: data.postalCode,
           whyOrigin: data.whyOrigin,
-          acceptsTerms: true,
-          acceptsPrivacy: true,
         });
 
         setTrackingCode(result.data.trackingCode ?? '');
@@ -348,7 +343,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
             <FormSection
               title="Información de contacto"
               description="¿Cómo podemos llamarte?"
-              badge="Paso 1 de 5"
+              badge="Paso 1 de 4"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Input
@@ -419,7 +414,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
             <FormSection
               title="Tu negocio"
               description="Cuéntanos sobre tu proyecto"
-              badge="Paso 2 de 5"
+              badge="Paso 2 de 4"
             >
               <Input
                 label="Nombre del negocio"
@@ -518,7 +513,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
             <FormSection
               title="¿Qué vendes?"
               description="Selecciona tu categoría principal"
-              badge="Paso 3 de 5"
+              badge="Paso 3 de 4"
             >
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {PRODUCER_CATEGORIES.map((category) => (
@@ -544,7 +539,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
             <FormSection
               title="Tu candidatura"
               description="Esta información es clave para valorar si encajas en la comunidad Origen"
-              badge="Paso 4 de 5"
+              badge="Paso 4 de 4"
             >
               <div className="space-y-3">
                 <Textarea
@@ -564,48 +559,6 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     <span className="font-medium">¡Gracias por contarnos tu historia!</span>
                   </div>
                 )}
-              </div>
-            </FormSection>
-
-            {/* SECCIÓN 5: Legal */}
-            <FormSection
-              title="Confirmación legal"
-              description="Último paso para unirte a la comunidad"
-              badge="Paso 5 de 5"
-            >
-              <div className="space-y-3 md:space-y-4">
-                <CustomCheckbox
-                  label="Acepto los términos y condiciones"
-                  description={
-                    <>
-                      He leído y acepto las{' '}
-                      <a href="/terminos" className="font-semibold text-hoja-tinta underline underline-offset-2" target="_blank" rel="noopener noreferrer">
-                        condiciones de uso de la plataforma Origen
-                      </a>{' '}
-                      (se abre en una pestaña nueva)
-                    </>
-                  }
-                  checked={formValues.acceptsTerms}
-                  onChange={(checked) => setValue('acceptsTerms', checked, { shouldValidate: true })}
-                  error={shouldShowFieldError('acceptsTerms') ? errors.acceptsTerms?.message : undefined}
-                  required
-                />
-                <CustomCheckbox
-                  label="Acepto la política de privacidad"
-                  description={
-                    <>
-                      Autorizo el tratamiento de mis datos personales según la{' '}
-                      <a href="/privacidad" className="font-semibold text-hoja-tinta underline underline-offset-2" target="_blank" rel="noopener noreferrer">
-                        política de privacidad
-                      </a>{' '}
-                      y el RGPD
-                    </>
-                  }
-                  checked={formValues.acceptsPrivacy}
-                  onChange={(checked) => setValue('acceptsPrivacy', checked, { shouldValidate: true })}
-                  error={shouldShowFieldError('acceptsPrivacy') ? errors.acceptsPrivacy?.message : undefined}
-                  required
-                />
               </div>
             </FormSection>
 

@@ -3,6 +3,7 @@
 
 import { Users, Shield, Truck, Target, Package, Award, CheckCircle } from 'lucide-react';
 import { MobileScrollSlider } from '@arcediano/ux-library';
+import { COMMISSION_LABEL } from '@/components/features/landing/commission';
 
 export function BenefitsSection() {
   const benefits = [
@@ -15,7 +16,7 @@ export function BenefitsSection() {
     {
       icon: Shield,
       title: 'Protección total',
-      description: 'Pagos seguros con Stripe y políticas claras que te respaldan.',
+      description: 'Pagos seguros con Stripe y un equipo que te respalda.',
       features: ['Pagos seguros', 'Protección contra fraude', 'Seguro de envío'],
     },
     {
@@ -110,14 +111,14 @@ export function BenefitsSection() {
         </div>
 
         {/* Móvil: stats compactas */}
-        <div className="md:hidden mt-6 grid grid-cols-3 gap-2 text-center">
+        <div className="md:hidden mt-6 grid grid-cols-2 gap-2 text-center">
           {[
-            { value: '12% + 0,25€', label: 'Comisión' },
-            { value: '0€', label: 'Cuota fija' },
-            { value: '24h', label: 'Soporte' },
-          ].map(({ value, label }) => (
-            <div key={label} className="bg-origen-crema/60 rounded-xl p-3">
-              <div className="text-base font-bold text-origen-hoja">{value}</div>
+            { value: COMMISSION_LABEL, label: 'Comisión por venta', wide: true },
+            { value: '0€', label: 'Cuota fija', wide: false },
+            { value: '24h', label: 'Soporte', wide: false },
+          ].map(({ value, label, wide }) => (
+            <div key={label} className={`bg-origen-crema/60 rounded-xl p-3${wide ? ' col-span-2' : ''}`}>
+              <div className="whitespace-nowrap text-lg font-bold text-origen-hoja">{value}</div>
               <div className="text-xs text-origen-bosque font-medium mt-0.5">{label}</div>
             </div>
           ))}
@@ -129,12 +130,12 @@ export function BenefitsSection() {
             <div className="bg-surface-alt rounded-3xl p-10 border border-origen-hoja/30 shadow-origen">
               <div className="grid grid-cols-3 gap-8 text-center">
                 {[
-                  { value: '12% + 0,25€', title: 'Comisión única', sub: 'Solo pagas cuando vendes' },
+                  { value: COMMISSION_LABEL, title: 'Comisión única', sub: 'Solo pagas cuando vendes' },
                   { value: '0€', title: 'Sin costes fijos', sub: 'No hay cuotas mensuales' },
                   { value: '24h', title: 'Soporte prioritario', sub: 'Respuesta en menos de 24h' },
                 ].map(({ value, title, sub }) => (
                   <div key={value}>
-                    <div className="text-3xl lg:text-4xl font-bold text-origen-hoja mb-3">{value}</div>
+                    <div className="whitespace-nowrap text-2xl lg:text-3xl xl:text-4xl font-bold text-origen-hoja mb-3">{value}</div>
                     <h4 className="font-bold text-origen-bosque text-base mb-2">{title}</h4>
                     <p className="text-muted-foreground text-sm">{sub}</p>
                   </div>

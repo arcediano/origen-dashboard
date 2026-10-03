@@ -92,8 +92,6 @@ export async function registerProducer(params: {
   municipio: string;
   postalCode: string;
   whyOrigin: string;
-  acceptsTerms: true;
-  acceptsPrivacy: true;
 }): Promise<RegisterResponse> {
   return gatewayClient.post<RegisterResponse>('/auth/register', params);
 }
