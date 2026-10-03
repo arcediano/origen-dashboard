@@ -1,16 +1,10 @@
 /**
  * Pie de página de la landing de captación (/auth/register). Es solo una
- * landing para atraer productores: sin enlaces ni menciones legales.
+ * landing para atraer productores: SIN ningún enlace (ni legal ni de
+ * navegación), para que el visitante no salga de la página.
  */
 
-import Link from 'next/link';
-import { ChevronRight, Clock, Heart, Mail, Phone, Shield, Store } from 'lucide-react';
-
-const NAV_LINKS = [
-  { href: '/como-funciona', label: 'Cómo funciona' },
-  { href: '/contacto', label: 'Soporte especializado' },
-  { href: '/casos-exito', label: 'Casos de éxito' },
-];
+import { Clock, Heart, Mail, Phone, Shield } from 'lucide-react';
 
 const CONTACT_INFO = [
   { icon: Mail, label: 'Email', value: 'info@origen.es' },
@@ -24,8 +18,8 @@ export function RegisterFooter() {
   return (
     <footer className="bg-origen-bosque mt-8 md:mt-16 lg:mt-20">
       <div className="container mx-auto px-4 md:px-6 pt-10 pb-6 md:pt-14 md:pb-8">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-12 lg:gap-12">
-          <div className="space-y-4 lg:col-span-5">
+        <div className="grid gap-8 md:grid-cols-2 lg:gap-12">
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
               <img src="/origen-icon.svg" alt="" width={40} height={40} className="h-10 w-10" />
               <div>
@@ -39,33 +33,7 @@ export function RegisterFooter() {
             </p>
           </div>
 
-          <nav aria-label="Enlaces" className="lg:col-span-3">
-            <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-white">Para productores</h3>
-            <ul className="space-y-1">
-              {NAV_LINKS.map(({ href, label }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className="group inline-flex min-h-11 items-center gap-1 text-sm text-white/70 transition-colors hover:text-white"
-                  >
-                    <ChevronRight className="h-3 w-3 text-origen-pradera/70" />
-                    {label}
-                  </Link>
-                </li>
-              ))}
-              <li className="pt-1">
-                <Link
-                  href="/auth/login"
-                  className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-origen-pradera transition-colors hover:text-white"
-                >
-                  <Store className="h-3.5 w-3.5" />
-                  Acceso productores
-                </Link>
-              </li>
-            </ul>
-          </nav>
-
-          <div className="lg:col-span-4">
+          <div>
             <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-white">Contacto</h3>
             <div className="space-y-3 rounded-xl border border-white/10 bg-surface-alt/10 p-5">
               {CONTACT_INFO.map(({ icon: Icon, label, value }) => (
