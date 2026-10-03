@@ -6,19 +6,17 @@
 import { AuthFooter } from '@arcediano/ux-library';
 import Link from 'next/link';
 import { Store, ArrowRight, FileText, CheckCircle, ArrowLeft, Info } from 'lucide-react';
+import { COMPANY_INFO_REVALIDATE, companyContact, companyIdentityItems, fetchCompanyInfo, type CompanyInfo } from '@/lib/company-info';
 
-const sections = [
+export const revalidate = COMPANY_INFO_REVALIDATE;
+
+function buildSections(company: CompanyInfo | null) {
+  return [
   {
     number: '1',
     title: 'Identificación del titular',
     content: 'En cumplimiento de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio Electrónico:',
-    items: [
-      'Denominación social: ORIGEN MARKETPLACE S.L.',
-      'CIF: B12345678',
-      'Registro Mercantil de Madrid, Tomo 12345, Folio 123, Hoja M-123456',
-      'Domicilio: Calle Ejemplo 123, 28001 Madrid, España',
-      'Email: legal@origen.com',
-    ],
+    items: companyIdentityItems(company),
   },
   {
     number: '2',
@@ -64,11 +62,14 @@ const sections = [
     number: '7',
     title: 'Contacto legal',
     content: 'Para cualquier consulta sobre este Aviso Legal:',
-    contact: { email: 'legal@origen.com', address: 'Calle Ejemplo 123, 28001 Madrid, España' },
+    contact: companyContact(company),
   },
-];
+  ];
+}
 
-export default function LegalNoticePage() {
+export default async function LegalNoticePage() {
+  const company = await fetchCompanyInfo();
+  const sections = buildSections(company);
   return (
     <div className="min-h-screen bg-origen-crema/30">
 
@@ -149,13 +150,26 @@ export default function LegalNoticePage() {
                 )}
                 {section.contact && (
                   <div className="mt-3 space-y-1 text-sm">
-                    <p className="text-foreground">
-                      <span className="font-medium text-origen-bosque">Email: </span>
-                      <a href={`mailto:${section.contact.email}`} className="text-hoja-tinta hover:underline transition-colors underline">{section.contact.email}</a>
-                    </p>
-                    <p className="text-foreground">
-                      <span className="font-medium text-origen-bosque">Dirección: </span>{section.contact.address}
-                    </p>
+                    {section.contact.email && (
+
+                      <p className="text-foreground">
+
+                        <span className="font-medium text-origen-bosque">Email: </span>
+
+                        <a href={`mailto:${section.contact.email}`} className="text-hoja-tinta hover:underline transition-colors underline">{section.contact.email}</a>
+
+                      </p>
+
+                    )}
+                    {section.contact.address && (
+
+                      <p className="text-foreground">
+
+                        <span className="font-medium text-origen-bosque">Dirección: </span>{section.contact.address}
+
+                      </p>
+
+                    )}
                   </div>
                 )}
               </div>

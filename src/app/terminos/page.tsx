@@ -6,19 +6,22 @@
 
 import { FileText } from 'lucide-react';
 import { LegalPage, type LegalSection } from '@/components/features/legal/LegalPage';
+import { COMPANY_INFO_REVALIDATE, companyContact, fetchCompanyInfo, type CompanyInfo } from '@/lib/company-info';
+
+export const revalidate = COMPANY_INFO_REVALIDATE;
 
 export const metadata = {
   title: 'Términos y condiciones · Origen',
   description: 'Condiciones de uso de Origen Marketplace para productores.',
 };
 
-const CONTACT = { email: 'legal@origen.com', address: 'Calle Ejemplo 123, 28001 Madrid, España' };
-
-const sections: LegalSection[] = [
+function buildSections(company: CompanyInfo | null): LegalSection[] {
+  const name = company?.businessName ?? 'Origen Marketplace';
+  return [
   {
     title: 'Objeto y partes',
     paragraphs: [
-      'Estos Términos y Condiciones regulan el acceso y uso de Origen Marketplace por parte de los productores que se registran para vender sus productos a través de la plataforma, titularidad de ORIGEN MARKETPLACE S.L. (en adelante, «Origen»). Los datos de identificación de Origen figuran en el Aviso Legal.',
+      `Estos Términos y Condiciones regulan el acceso y uso de Origen Marketplace por parte de los productores que se registran para vender sus productos a través de la plataforma, titularidad de ${name} (en adelante, «Origen»). Los datos de identificación de Origen figuran en el Aviso Legal.`,
       'Origen actúa como intermediario tecnológico: pone en contacto a productores con compradores y facilita las herramientas de publicación, pedido, cobro y gestión. La compraventa de cada producto se celebra entre el productor, como vendedor, y el comprador.',
     ],
   },
@@ -124,19 +127,25 @@ const sections: LegalSection[] = [
   },
   {
     title: 'Contacto',
-    paragraphs: ['Para cualquier consulta sobre estas condiciones puedes escribirnos a:'],
-    contact: CONTACT,
+    paragraphs: [
+      company?.email
+        ? 'Para cualquier consulta sobre estas condiciones puedes escribirnos a:'
+        : 'Para cualquier consulta sobre estas condiciones puedes escribirnos desde la página de contacto.',
+    ],
+    contact: companyContact(company),
   },
-];
+  ];
+}
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const company = await fetchCompanyInfo();
   return (
     <LegalPage
       icon={<FileText />}
       title="Términos y condiciones"
       updated="octubre 2026"
       intro="Estas condiciones regulan tu uso de Origen Marketplace como productor. Léelas con atención: al completar tu registro confirmas que las has leído y las aceptas."
-      sections={sections}
+      sections={buildSections(company)}
       related={[
         { href: '/privacidad', label: 'Política de privacidad' },
         { href: '/cookies', label: 'Política de cookies' },
