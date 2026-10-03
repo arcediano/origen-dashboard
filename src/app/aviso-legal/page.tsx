@@ -6,9 +6,11 @@
 import { AuthFooter } from '@arcediano/ux-library';
 import Link from 'next/link';
 import { Store, ArrowRight, FileText, CheckCircle, ArrowLeft, Info } from 'lucide-react';
-import { COMPANY_INFO_REVALIDATE, companyContact, companyIdentityItems, fetchCompanyInfo, type CompanyInfo } from '@/lib/company-info';
+import { companyContact, companyIdentityItems, fetchCompanyInfo, type CompanyInfo } from '@/lib/company-info';
 
-export const revalidate = COMPANY_INFO_REVALIDATE;
+// Debe ser un literal (Next no admite constantes importadas en la config de segmento).
+// Mantener igual que COMPANY_INFO_REVALIDATE en @/lib/company-info.
+export const revalidate = 300;
 
 function buildSections(company: CompanyInfo | null) {
   return [
