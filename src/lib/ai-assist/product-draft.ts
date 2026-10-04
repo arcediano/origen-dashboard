@@ -163,3 +163,26 @@ export function summarizeDraft(response: ProductDraftResponse): {
 
   return { filled, toReview, toComplete: response.producerMustComplete };
 }
+
+/** Etiquetas legibles de `FollowUpField`, para construir las notas que se le pasan a la IA al reescribir la descripción. */
+export const FOLLOW_UP_FIELD_LABELS: Record<FollowUpField, string> = {
+  'productionInfo.origin': 'Origen',
+  'productionInfo.productionMethod': 'Método de producción',
+  'nutritionalInfo.isGlutenFree': '¿Sin gluten?',
+  'nutritionalInfo.isVegan': '¿Vegano?',
+  'nutritionalInfo.isVegetarian': '¿Vegetariano?',
+};
+
+/**
+ * Notas para `POST /ai-assist/text-improvement` tras responder las preguntas
+ * de seguimiento: así la IA incorpora las respuestas en una descripción
+ * coherente, en vez de quedar solo en campos estructurados sueltos. `null`
+ * si no se respondió nada (no hay nada que reescribir).
+ */
+export function buildFollowUpNotes(answers: Partial<Record<FollowUpField, string>>): string | null {
+  const lines = (Object.entries(answers) as [FollowUpField, string][])
+    .filter(([, value]) => value.trim().length > 0)
+    .map(([field, value]) => `${FOLLOW_UP_FIELD_LABELS[field]}: ${value}`);
+  if (lines.length === 0) return null;
+  return `Datos que el productor acaba de confirmar — incorpóralos de forma natural en la descripción:\n${lines.join('\n')}`;
+}
