@@ -116,6 +116,13 @@ export default function CreateProductPage() {
     };
   }, []);
 
+  // Tras comprar créditos: el cupo total ya incluye los nuevos créditos.
+  const handleCreditsPurchased = useCallback(() => {
+    getAiAssistQuota()
+      .then(setQuota)
+      .catch(() => {});
+  }, []);
+
   // Con el cupo cargado se decide el modo inicial: asistente de IA si está
   // disponible y no hay ya un borrador a medias; si no, el wizard de siempre.
   useEffect(() => {
@@ -314,6 +321,7 @@ export default function CreateProductPage() {
             quota={quota && quota.enabled ? { used: quota.used, total: quota.total } : null}
             onDraft={handleAiDraft}
             onManual={() => setMode('wizard')}
+            onCreditsPurchased={handleCreditsPurchased}
             pendingDraft={
               formData.name || formData.gallery.length > 0
                 ? {
