@@ -36,9 +36,9 @@ import {
   Button,
 } from '@arcediano/ux-library';
 import { useCallback, useEffect, useState } from 'react';
-import { getAiAssistQuota } from '@/lib/api/ai-assist';
+import { getAiAssistQuota, improveText } from '@/lib/api/ai-assist';
 import { fetchCategoriesTree } from '@/lib/api/categories';
-import { draftToPatches, type FollowUpField, type ProductDraftResponse } from '@/lib/ai-assist/product-draft';
+import { buildFollowUpNotes, draftToPatches, type FollowUpField, type ProductDraftResponse } from '@/lib/ai-assist/product-draft';
 import type { AiAssistQuota } from '@/lib/ai-assist/label-proposal';
 import { AiFollowUpQuestions } from '@/app/dashboard/products/components/ai-onboarding/AiFollowUpQuestions';
 
@@ -167,17 +167,38 @@ export default function CreateProductPage() {
   );
 
   const handleFollowUpComplete = useCallback(
-    (answers: Partial<Record<FollowUpField, string>>) => {
+    async (answers: Partial<Record<FollowUpField, string>>) => {
       for (const [field, value] of Object.entries(answers) as [FollowUpField, string][]) {
         const [section, key] = field.split('.') as ['nutritionalInfo' | 'productionInfo', string];
         const finalValue = BOOLEAN_FOLLOW_UP_FIELDS.has(field) ? value === 'Sí' : value;
         handleNestedChange(section, key, finalValue);
       }
       setPendingFollowUps([]);
+
+      // Si se respondió algo, se reescribe la descripción para que quede un texto
+      // coherente con esos datos en vez de dejarlos sueltos solo en campos
+      // estructurados — mismo asistente ya usado en "Redactar con IA", mismo
+      // assistKey (ya consumió su cupo con el borrador inicial, esto no cuenta más).
+      const notes = buildFollowUpNotes(answers);
+      if (notes && aiAssistKey) {
+        setMode('loading');
+        try {
+          const result = await improveText(aiAssistKey, {
+            name: formData.name,
+            fullDescription: formData.fullDescription,
+            notes,
+          });
+          handleInputChange('fullDescription', result.proposal.fullDescription);
+        } catch {
+          // Best-effort: si falla, se sigue con los campos estructurados ya
+          // rellenados y la descripción tal cual la dejó el borrador inicial.
+        }
+      }
+
       setMode('ai-review');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    [handleNestedChange],
+    [handleNestedChange, handleInputChange, formData.name, formData.fullDescription, aiAssistKey],
   );
 
   useEffect(() => {
