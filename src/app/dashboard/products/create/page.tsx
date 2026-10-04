@@ -123,15 +123,16 @@ export default function CreateProductPage() {
       .catch(() => {});
   }, []);
 
-  // Con el cupo cargado se decide el modo inicial: asistente de IA si está
-  // disponible y no hay ya un borrador a medias; si no, el wizard de siempre.
+  // Con el cupo cargado se decide el modo inicial: si el asistente está
+  // activo, siempre entra primero por ahí — aunque el cupo gratis esté
+  // agotado, la propia pantalla del asistente es quien debe avisar de eso y
+  // ofrecer comprar créditos (si se salta aquí a mano, esa pantalla nunca
+  // llega a verse). Un borrador local a medias se ofrece continuar o
+  // descartar dentro de esa misma pantalla, no se salta el asistente.
   useEffect(() => {
     if (mode !== 'loading' || !quota) return;
-    const aiAvailable = quota.enabled && (quota.used < quota.total || aiAssistUsedUnsaved);
-    // El asistente va siempre primero; un borrador local a medias se ofrece
-    // continuar o descartar dentro de esa pantalla (no se salta el asistente).
-    setMode(aiAvailable ? 'ai-intake' : 'wizard');
-  }, [mode, quota, aiAssistUsedUnsaved]);
+    setMode(quota.enabled ? 'ai-intake' : 'wizard');
+  }, [mode, quota]);
 
   const handleAiDraft = useCallback(
     async ({ response, productPhoto }: IntakeResult) => {
