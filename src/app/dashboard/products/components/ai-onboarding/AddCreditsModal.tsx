@@ -6,7 +6,8 @@
  * "Añadir créditos" de referencia — tarjetas de cantidad con descuento,
  * resumen del pedido y botón de pago. 1 crédito = 1,80 €; 15% de descuento
  * desde 3 créditos, 30% desde 5 (el backend es la autoridad de precio; aquí
- * solo se muestran los importes que él calcula).
+ * solo se muestran los importes que él calcula). Cantidades fijas (1/3/5):
+ * sin cantidad libre (petición del humano, 2026-10-04).
  */
 
 'use client';
@@ -31,7 +32,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Input,
 } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import {
@@ -53,24 +53,29 @@ function getStripe() {
   return stripePromise;
 }
 
-const MIN_CUSTOM_CREDITS = 2;
-const MAX_CREDITS = 50;
 /** Cuántas veces se consulta el estado tras confirmar el pago, antes de darlo por "en proceso". */
 const STATUS_POLL_ATTEMPTS = 6;
 const STATUS_POLL_DELAY_MS = 1500;
 
-export interface AddCreditsModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  /** Tras acreditar los créditos (webhook confirmado): refresca el cupo del productor. */
-  onCreditsPurchased: () => void;
-}
+/**
+ * `DialogContent` (ver `@arcediano/ux-library`) no recorta su propio
+ * contenido en escritorio (`overflow` sin fijar) ni limita su alto —
+ * `DialogHeader` queda con esquinas rectas por encima del `rounded-2xl` del
+ * panel, y un contenido alto (el Payment Element de Stripe con sus campos)
+ * puede no caber en pantalla sin forma de hacer scroll. Se corrige aquí,
+ * igual que ya hace la propia librería en su variante móvil (panel con
+ * `overflow-hidden` + `flex flex-col`, y un único hijo intermedio con
+ * `overflow-y-auto` entre cabecera y pie, ambos fijos): cabecera y pie
+ * quedan fijos, solo el contenido intermedio hace scroll.
+ */
+const DIALOG_CONTENT_CLASSNAME = 'flex max-h-[85dvh] flex-col overflow-hidden sm:max-w-xl';
+const SCROLL_AREA_CLASSNAME = 'min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 py-5';
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Tarjeta de cantidad preconfigurada (1 / 3 / 5 créditos), con el precio ya calculado por el backend. */
+/** Tarjeta de cantidad (1 / 3 / 5 créditos), con el precio ya calculado por el backend. */
 function PresetCard({
   quote,
   selected,
@@ -85,7 +90,7 @@ function PresetCard({
       type="button"
       onClick={onSelect}
       className={cn(
-        'relative flex flex-col items-center gap-1 rounded-xl border-2 px-3 py-4 text-center transition-colors sm:flex-1',
+        'relative flex flex-col items-center gap-1 rounded-xl border-2 px-3 py-4 text-center transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera',
         selected
           ? 'border-origen-bosque bg-origen-pradera/5'
@@ -177,13 +182,15 @@ function PaymentStep({
   };
 
   return (
-    <div className="space-y-4">
-      <PaymentElement />
-      {error && (
-        <Alert variant="error">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+    <>
+      <div className={SCROLL_AREA_CLASSNAME}>
+        <PaymentElement />
+        {error && (
+          <Alert variant="error">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+      </div>
       <DialogFooter className="justify-between sm:justify-between">
         <Button type="button" variant="ghost" size="sm" onClick={onBack} disabled={isPaying}>
           Atrás
@@ -200,16 +207,21 @@ function PaymentStep({
           Pagar {formatEurCents(checkout.totalCents)}
         </Button>
       </DialogFooter>
-    </div>
+    </>
   );
+}
+
+export interface AddCreditsModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Tras acreditar los créditos (webhook confirmado): refresca el cupo del productor. */
+  onCreditsPurchased: () => void;
 }
 
 export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddCreditsModalProps) {
   const [pricing, setPricing] = useState<AiCreditsPricingInfo | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedCredits, setSelectedCredits] = useState<number | null>(null);
-  const [customCredits, setCustomCredits] = useState('');
-  const [isCustom, setIsCustom] = useState(false);
   const [isStartingCheckout, setIsStartingCheckout] = useState(false);
   const [checkout, setCheckout] = useState<AiCreditsCheckoutResult | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
@@ -221,8 +233,6 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
     setPricing(null);
     setLoadError(null);
     setSelectedCredits(null);
-    setCustomCredits('');
-    setIsCustom(false);
     setCheckout(null);
     setCheckoutError(null);
     setSucceeded(false);
@@ -231,21 +241,12 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
       .catch(() => setLoadError('No se han podido cargar los precios. Inténtalo de nuevo.'));
   }, [open]);
 
-  const customValue = Number(customCredits);
-  const customValid =
-    customCredits.trim().length > 0 &&
-    Number.isInteger(customValue) &&
-    customValue >= MIN_CUSTOM_CREDITS &&
-    customValue <= MAX_CREDITS;
-
-  const creditsToBuy = isCustom ? (customValid ? customValue : null) : selectedCredits;
-
   const handleStartCheckout = async () => {
-    if (!creditsToBuy || isStartingCheckout) return;
+    if (!selectedCredits || isStartingCheckout) return;
     setIsStartingCheckout(true);
     setCheckoutError(null);
     try {
-      const result = await checkoutAiCredits(creditsToBuy);
+      const result = await checkoutAiCredits(selectedCredits);
       setCheckout(result);
     } catch (err) {
       setCheckoutError(
@@ -268,7 +269,7 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className={DIALOG_CONTENT_CLASSNAME}>
         <DialogHeader>
           <div className="flex items-center gap-2">
             <Coins className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />
@@ -281,90 +282,49 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5 px-6 py-5">
-          {succeeded ? (
-            <div className="flex flex-col items-center gap-3 py-4 text-center">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-origen-pradera/10 text-origen-bosque">
-                <Sparkles className="h-6 w-6" aria-hidden="true" />
-              </span>
-              <p className="text-sm text-origen-oscuro">
-                Ya puedes seguir creando productos con el asistente de IA.
-              </p>
-              <Button type="button" variant="primary" size="sm" onClick={() => onOpenChange(false)}>
-                Seguir creando
-              </Button>
-            </div>
-          ) : loadError ? (
+        {succeeded ? (
+          <div className={cn(SCROLL_AREA_CLASSNAME, 'flex flex-col items-center py-4 text-center')}>
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-origen-pradera/10 text-origen-bosque">
+              <Sparkles className="h-6 w-6" aria-hidden="true" />
+            </span>
+            <p className="text-sm text-origen-oscuro">
+              Ya puedes seguir creando productos con el asistente de IA.
+            </p>
+            <Button type="button" variant="primary" size="sm" onClick={() => onOpenChange(false)}>
+              Seguir creando
+            </Button>
+          </div>
+        ) : loadError ? (
+          <div className={SCROLL_AREA_CLASSNAME}>
             <Alert variant="error">
               <AlertDescription>{loadError}</AlertDescription>
             </Alert>
-          ) : !pricing ? (
-            <div className="flex items-center justify-center py-10">
-              <Loader2 className="h-6 w-6 animate-spin text-origen-bosque" aria-hidden="true" />
-            </div>
-          ) : checkout ? (
-            <Elements stripe={getStripe()} options={stripeOptions}>
-              <PaymentStep
-                checkout={checkout}
-                onSucceeded={handleSucceeded}
-                onBack={() => setCheckout(null)}
-              />
-            </Elements>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 gap-2 sm:flex">
+          </div>
+        ) : !pricing ? (
+          <div className={cn(SCROLL_AREA_CLASSNAME, 'flex items-center justify-center py-10')}>
+            <Loader2 className="h-6 w-6 animate-spin text-origen-bosque" aria-hidden="true" />
+          </div>
+        ) : checkout ? (
+          <Elements stripe={getStripe()} options={stripeOptions}>
+            <PaymentStep
+              checkout={checkout}
+              onSucceeded={handleSucceeded}
+              onBack={() => setCheckout(null)}
+            />
+          </Elements>
+        ) : (
+          <>
+            <div className={SCROLL_AREA_CLASSNAME}>
+              <div className="grid grid-cols-3 gap-2">
                 {pricing.presets.map((quote) => (
                   <PresetCard
                     key={quote.credits}
                     quote={quote}
-                    selected={!isCustom && selectedCredits === quote.credits}
-                    onSelect={() => {
-                      setIsCustom(false);
-                      setSelectedCredits(quote.credits);
-                    }}
+                    selected={selectedCredits === quote.credits}
+                    onSelect={() => setSelectedCredits(quote.credits)}
                   />
                 ))}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsCustom(true);
-                    setSelectedCredits(null);
-                  }}
-                  className={cn(
-                    'relative flex flex-col items-center justify-center gap-1 rounded-xl border-2 px-3 py-4 text-center transition-colors sm:flex-1',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera',
-                    isCustom
-                      ? 'border-origen-bosque bg-origen-pradera/5'
-                      : 'border-border-subtle bg-surface-alt hover:border-origen-pradera/60',
-                  )}
-                >
-                  {isCustom && (
-                    <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-origen-bosque text-white">
-                      <Check className="h-3 w-3" aria-hidden="true" />
-                    </span>
-                  )}
-                  <span className="text-sm font-semibold text-origen-bosque">Otros</span>
-                  <span className="text-xs text-text-subtle">Elige la cantidad</span>
-                </button>
               </div>
-
-              {isCustom && (
-                <Input
-                  type="number"
-                  inputMode="numeric"
-                  min={MIN_CUSTOM_CREDITS}
-                  max={MAX_CREDITS}
-                  value={customCredits}
-                  onChange={(e) => setCustomCredits(e.target.value)}
-                  placeholder={`Entre ${MIN_CUSTOM_CREDITS} y ${MAX_CREDITS} créditos`}
-                  error={
-                    customCredits.trim().length > 0 && !customValid
-                      ? `Indica un número entero entre ${MIN_CUSTOM_CREDITS} y ${MAX_CREDITS}.`
-                      : undefined
-                  }
-                  helperText="A partir de 3 créditos tienes descuento, y desde 5, el máximo."
-                />
-              )}
 
               {pricing.purchasedCredits > 0 && (
                 <p className="text-xs text-text-subtle">
@@ -378,23 +338,23 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
                   <AlertDescription>{checkoutError}</AlertDescription>
                 </Alert>
               )}
+            </div>
 
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="sm"
-                  fullWidth
-                  disabled={!creditsToBuy}
-                  loading={isStartingCheckout}
-                  onClick={() => void handleStartCheckout()}
-                >
-                  Continuar al pago
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                fullWidth
+                disabled={!selectedCredits}
+                loading={isStartingCheckout}
+                onClick={() => void handleStartCheckout()}
+              >
+                Continuar al pago
+              </Button>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

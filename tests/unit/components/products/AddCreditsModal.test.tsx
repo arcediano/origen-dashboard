@@ -61,21 +61,16 @@ describe('AddCreditsModal', () => {
     expect(await screen.findByText(/Ya tienes 2 créditos comprados disponibles/)).toBeTruthy();
   });
 
-  it('"Otros": valida el rango antes de permitir continuar', async () => {
+  it('solo ofrece las 3 cantidades fijas (sin opción de cantidad libre)', async () => {
     const user = userEvent.setup();
     render(<AddCreditsModal open onOpenChange={vi.fn()} onCreditsPurchased={vi.fn()} />);
     await screen.findByText('1 crédito');
 
-    await user.click(screen.getByText('Otros'));
-    const input = screen.getByPlaceholderText(/Entre 2 y 50 créditos/);
+    expect(screen.queryByText('Otros')).toBeNull();
     const continueButton = screen.getByRole('button', { name: 'Continuar al pago' });
     expect(continueButton).toBeDisabled();
 
-    await user.type(input, '1');
-    expect(continueButton).toBeDisabled(); // 1 crédito no es "Otros" (ya tiene su propia tarjeta)
-
-    await user.clear(input);
-    await user.type(input, '7');
+    await user.click(screen.getByText('5 créditos'));
     expect(continueButton).not.toBeDisabled();
   });
 
