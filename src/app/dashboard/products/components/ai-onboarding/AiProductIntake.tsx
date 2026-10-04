@@ -10,7 +10,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Barcode, Camera, ImagePlus, Loader2, ScanLine, Sparkles, X } from 'lucide-react';
+import { Barcode, Camera, Coins, ImagePlus, Loader2, ScanLine, Sparkles, X } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle, Button, Card, Input, Textarea } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import { resizeLabelImage } from '@/lib/ai-assist/resize-label-image';
@@ -21,6 +21,7 @@ import {
   buildImageResolutionError,
   getImageDimensions,
 } from '@/lib/validations/image-quality';
+import { AddCreditsModal } from './AddCreditsModal';
 
 const MAX_LABEL_PHOTOS = 2;
 const MIN_TEXT = 10;
@@ -69,6 +70,8 @@ interface AiProductIntakeProps {
   onManual: () => void;
   /** Borrador local a medias: se ofrece continuarlo o descartarlo sin saltarse el asistente. */
   pendingDraft?: { name: string; onResume: () => void; onDiscard: () => void };
+  /** Tras comprar créditos (webhook ya confirmado): refresca el cupo mostrado. */
+  onCreditsPurchased?: () => void;
 }
 
 function useObjectUrl(file: File | null): string | null {
@@ -96,13 +99,22 @@ function LabelThumb({ file, onRemove, disabled }: { file: File; onRemove: () => 
   );
 }
 
-export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDraft }: AiProductIntakeProps) {
+export function AiProductIntake({
+  assistKey,
+  quota,
+  onDraft,
+  onManual,
+  pendingDraft,
+  onCreditsPurchased,
+}: AiProductIntakeProps) {
   const [photo, setPhoto] = useState<File | null>(null);
   const [labels, setLabels] = useState<File[]>([]);
   const [text, setText] = useState('');
   const [barcode, setBarcode] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [quotaExceeded, setQuotaExceeded] = useState(false);
+  const [showAddCredits, setShowAddCredits] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [messageIndex, setMessageIndex] = useState(0);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -165,6 +177,7 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
     if (!canSubmit || !photo || !assistKey) return;
     setIsGenerating(true);
     setError(null);
+    setQuotaExceeded(false);
     try {
       const [productImage, ...labelImages] = await Promise.all(
         [photo, ...labels].map(resizeLabelImage),
@@ -179,6 +192,7 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
       onDraft({ response, productPhoto: photo });
     } catch (err) {
       setError(friendlyError(err));
+      setQuotaExceeded(err instanceof AiAssistError && err.code === 'AI_PRODUCER_QUOTA_EXCEEDED');
       setIsGenerating(false);
     }
   };
@@ -370,9 +384,33 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
         {error && (
           <Alert variant="error">
             <AlertTitle>No hemos podido preparar la ficha</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>
+              <p>{error}</p>
+              {quotaExceeded && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="mt-3 w-auto"
+                  leftIcon={<Coins className="h-4 w-4" aria-hidden="true" />}
+                  onClick={() => setShowAddCredits(true)}
+                >
+                  Comprar créditos
+                </Button>
+              )}
+            </AlertDescription>
           </Alert>
         )}
+
+        <AddCreditsModal
+          open={showAddCredits}
+          onOpenChange={setShowAddCredits}
+          onCreditsPurchased={() => {
+            setError(null);
+            setQuotaExceeded(false);
+            onCreditsPurchased?.();
+          }}
+        />
 
         <div className="space-y-3">
           <Button
