@@ -259,7 +259,7 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
                 size="sm"
                 onClick={() => photoInputRef.current?.click()}
                 leftIcon={<Camera className="w-4 h-4" aria-hidden="true" />}
-                className="absolute bottom-3 right-3 sm:w-auto"
+                className="absolute bottom-3 right-3 w-auto"
               >
                 Cambiar foto
               </Button>
