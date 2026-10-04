@@ -368,7 +368,13 @@ export function EnhancedStep3Shipping({
               Aún no has añadido ningún método de envío.
             </p>
           )}
-          <Button type="button" variant="secondary" onClick={addOption} className="mt-3 w-full justify-center sm:w-auto">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={addOption}
+            disabled={editingOption !== null}
+            className="mt-3 w-full justify-center sm:w-auto"
+          >
             <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" /> Añadir método de envío
           </Button>
           <div className="mt-2"><FieldError>{errors['onb-delivery-options']}</FieldError></div>
