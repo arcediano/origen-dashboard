@@ -1,71 +1,63 @@
 'use client';
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
 import { Alert } from '@arcediano/ux-library';
+import { cn } from '@/lib/utils';
+import type { StepIssue } from '@/lib/onboarding/validation';
 
 interface StepValidationPanelProps {
-  messages: string[];
-  onFocusFirstIncompleteField: () => void;
-  currentStep?: number;
+  issues: StepIssue[];
+  /** Lleva el foco al control indicado (o al primero pendiente si no se indica). */
+  onFocusField: (fieldId?: string) => void;
+  /** Reinicia el estado plegado al cambiar de paso. */
+  stepKey?: number;
 }
 
-export function StepValidationPanel({
-  messages,
-  onFocusFirstIncompleteField,
-  currentStep,
-}: StepValidationPanelProps) {
+/**
+ * Resumen de pendientes del paso: cada elemento es un botón que lleva al campo
+ * concreto. En escritorio abierto por defecto; en móvil, plegado con el recuento.
+ */
+export function StepValidationPanel({ issues, onFocusField, stepKey }: StepValidationPanelProps) {
   const [isExpanded, setIsExpanded] = React.useState(false);
 
   React.useEffect(() => {
-    // En desktop abierta por defecto; en mobile abrimos por defecto el paso Capacidad (step 4)
-    if (typeof window !== 'undefined') {
-      if (window.innerWidth >= 1024) {
-        setIsExpanded(true);
-      } else {
-        setIsExpanded(currentStep === 4);
-      }
-    }
-  }, [currentStep]);
+    if (typeof window !== 'undefined') setIsExpanded(window.innerWidth >= 1024);
+  }, [stepKey]);
 
-  if (messages.length === 0) {
-    return null;
-  }
+  if (issues.length === 0) return null;
 
   return (
-    <Alert id="onboarding-step-validation" variant="warning" className="mt-4 items-start">
+    <Alert id="onboarding-step-validation" variant="warning" className="items-start">
       <div className="min-w-0 flex-1">
         <button
           type="button"
           onClick={() => setIsExpanded((v) => !v)}
-          className="flex w-full items-center justify-between gap-3 text-left"
+          aria-expanded={isExpanded}
+          className="flex min-h-11 w-full items-center justify-between gap-3 text-left"
         >
           <span className="text-sm font-semibold">
-            Tienes {messages.length} pendiente{messages.length > 1 ? 's' : ''} para continuar
+            {issues.length === 1 ? 'Te falta 1 cosa para continuar' : `Te faltan ${issues.length} cosas para continuar`}
           </span>
-          <ChevronDown
-            className={cn('h-4 w-4 shrink-0 transition-transform', isExpanded && 'rotate-180')}
-          />
+          <ChevronDown className={cn('h-4 w-4 shrink-0 transition-transform', isExpanded && 'rotate-180')} aria-hidden="true" />
         </button>
 
-        <div className={cn('overflow-hidden transition-all', isExpanded ? 'mt-2 max-h-72' : 'max-h-0')}>
-          <ul className="space-y-1 text-xs">
-            {messages.map((message) => (
-              <li key={message} className="flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-current/70" />
-                <span>{message}</span>
+        {isExpanded && (
+          <ul className="mt-1 space-y-0.5 text-sm">
+            {issues.map((issue) => (
+              <li key={`${issue.fieldId ?? ''}-${issue.message}`}>
+                <button
+                  type="button"
+                  onClick={() => onFocusField(issue.fieldId)}
+                  className="flex min-h-9 w-full items-start gap-2 py-1 text-left hover:underline"
+                >
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-70" aria-hidden="true" />
+                  <span>{issue.message}</span>
+                </button>
               </li>
             ))}
           </ul>
-          <button
-            type="button"
-            onClick={onFocusFirstIncompleteField}
-            className="mt-2 text-xs font-medium underline underline-offset-2 hover:opacity-80"
-          >
-            Ir al primer campo pendiente
-          </button>
-        </div>
+        )}
       </div>
     </Alert>
   );

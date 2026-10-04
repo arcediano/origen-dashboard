@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, X } from 'lucide-react';
+import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, Sparkles, X } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
@@ -20,7 +20,7 @@ import { AiProductIntake, type IntakeResult } from '@/app/dashboard/products/com
 import { AiProductReview } from '@/app/dashboard/products/components/ai-onboarding/AiProductReview';
 import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductFormSidebar';
 
-import { useProductForm } from '@/hooks/useProductForm';
+import { useProductForm, discardLocalProductDraft } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
 import { useHideBottomTabBar } from '@/hooks/useHideBottomTabBar';
 import { FORM_STEPS, defaultNutritionalInfo, type FormStepId, type ProductImage } from '@/types/product';
@@ -38,8 +38,16 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { getAiAssistQuota } from '@/lib/api/ai-assist';
 import { fetchCategoriesTree } from '@/lib/api/categories';
-import { draftToPatches, type ProductDraftResponse } from '@/lib/ai-assist/product-draft';
+import { draftToPatches, type FollowUpField, type ProductDraftResponse } from '@/lib/ai-assist/product-draft';
 import type { AiAssistQuota } from '@/lib/ai-assist/label-proposal';
+import { AiFollowUpQuestions } from '@/app/dashboard/products/components/ai-onboarding/AiFollowUpQuestions';
+
+/** Las 3 marcas dietéticas de followUpQuestions responden "Sí"/"No": se guardan como boolean. */
+const BOOLEAN_FOLLOW_UP_FIELDS = new Set<FollowUpField>([
+  'nutritionalInfo.isGlutenFree',
+  'nutritionalInfo.isVegan',
+  'nutritionalInfo.isVegetarian',
+]);
 
 // ─── Animaciones ──────────────────────────────────────────────────────────────
 
@@ -93,6 +101,9 @@ export default function CreateProductPage() {
   const [mode, setMode] = useState<CreateMode>('loading');
   const [quota, setQuota] = useState<AiAssistQuota | null>(null);
   const [draft, setDraft] = useState<ProductDraftResponse | null>(null);
+  // Entre el borrador de la IA y la revisión final: si quedan campos que no
+  // pudo determinar, se preguntan aquí para que la revisión llegue completa.
+  const [pendingFollowUps, setPendingFollowUps] = useState<ProductDraftResponse['followUpQuestions']>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,10 +120,11 @@ export default function CreateProductPage() {
   // disponible y no hay ya un borrador a medias; si no, el wizard de siempre.
   useEffect(() => {
     if (mode !== 'loading' || !quota) return;
-    const hasDraft = !!formData.name || formData.gallery.length > 0;
     const aiAvailable = quota.enabled && (quota.used < quota.total || aiAssistUsedUnsaved);
-    setMode(!hasDraft && aiAvailable ? 'ai-intake' : 'wizard');
-  }, [mode, quota, formData.name, formData.gallery.length, aiAssistUsedUnsaved]);
+    // El asistente va siempre primero; un borrador local a medias se ofrece
+    // continuar o descartar dentro de esa pantalla (no se salta el asistente).
+    setMode(aiAvailable ? 'ai-intake' : 'wizard');
+  }, [mode, quota, aiAssistUsedUnsaved]);
 
   const handleAiDraft = useCallback(
     async ({ response, productPhoto }: IntakeResult) => {
@@ -142,10 +154,30 @@ export default function CreateProductPage() {
       markAiAssistUsed();
       setQuota((q) => (q ? { ...q, used: response.quota.used, total: response.quota.total } : q));
       setDraft(response);
+      // Si a la IA le quedó algo pendiente de esos campos, se pregunta antes
+      // de pasar a revisión — así la pantalla de revisión llega ya completa.
+      if (response.followUpQuestions.length > 0) {
+        setPendingFollowUps(response.followUpQuestions);
+      } else {
+        setMode('ai-review');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+    [handleInputChange, handleNestedChange, handleImagesChange, markAiAssistUsed],
+  );
+
+  const handleFollowUpComplete = useCallback(
+    (answers: Partial<Record<FollowUpField, string>>) => {
+      for (const [field, value] of Object.entries(answers) as [FollowUpField, string][]) {
+        const [section, key] = field.split('.') as ['nutritionalInfo' | 'productionInfo', string];
+        const finalValue = BOOLEAN_FOLLOW_UP_FIELDS.has(field) ? value === 'Sí' : value;
+        handleNestedChange(section, key, finalValue);
+      }
+      setPendingFollowUps([]);
       setMode('ai-review');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    [handleInputChange, handleNestedChange, handleImagesChange, markAiAssistUsed],
+    [handleNestedChange],
   );
 
   useEffect(() => {
@@ -214,16 +246,16 @@ export default function CreateProductPage() {
       <div className="hidden lg:block fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       <PageHeader
-        title="Crear producto"
+        title={mode === 'ai-intake' ? 'Crea tu producto en un minuto' : 'Crear producto'}
         description={
           mode === 'ai-intake'
-            ? 'Con ayuda del asistente de IA'
+            ? 'Sube una foto y cuéntanos qué es. Preparamos la ficha completa; tú solo la revisas y decides.'
             : mode === 'ai-review'
               ? 'Revisa la ficha y publícala'
               : 'Completa los pasos para publicar tu producto'
         }
-        badgeIcon={Package}
-        badgeText="Nuevo producto"
+        badgeIcon={mode === 'ai-intake' ? Sparkles : Package}
+        badgeText={mode === 'ai-intake' ? 'Asistente de IA' : 'Nuevo producto'}
         tooltip="Creación de producto"
         tooltipDetailed="Completa todos los pasos para publicar tu producto en el catálogo"
         showBackButton
@@ -257,6 +289,18 @@ export default function CreateProductPage() {
             quota={quota && quota.enabled ? { used: quota.used, total: quota.total } : null}
             onDraft={handleAiDraft}
             onManual={() => setMode('wizard')}
+            pendingDraft={
+              formData.name || formData.gallery.length > 0
+                ? {
+                    name: formData.name,
+                    onResume: () => setMode('wizard'),
+                    onDiscard: () => {
+                      discardLocalProductDraft();
+                      window.location.reload();
+                    },
+                  }
+                : undefined
+            }
           />
         )}
 
@@ -411,6 +455,12 @@ export default function CreateProductPage() {
         ]}
       />
       )}
+
+      <AiFollowUpQuestions
+        open={pendingFollowUps.length > 0}
+        questions={pendingFollowUps}
+        onComplete={handleFollowUpComplete}
+      />
 
       <CreateProductCancelDialog
         open={showCancelDialog}

@@ -10,8 +10,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Camera, ImagePlus, Loader2, ScanLine, Sparkles, X } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle, Badge, Button, Card, Textarea } from '@arcediano/ux-library';
+import { Barcode, Camera, ImagePlus, Loader2, ScanLine, Sparkles, X } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle, Button, Card, Input, Textarea } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import { resizeLabelImage } from '@/lib/ai-assist/resize-label-image';
 import { AiAssistError, draftProduct } from '@/lib/api/ai-assist';
@@ -26,6 +26,7 @@ const MAX_LABEL_PHOTOS = 2;
 const MIN_TEXT = 10;
 const MAX_TEXT = 2000;
 const MAX_FILE_MB = 10;
+const BARCODE_RE = /^\d{8}$|^\d{12,14}$/;
 
 const PROGRESS_MESSAGES = [
   'Mirando tu foto…',
@@ -66,6 +67,8 @@ interface AiProductIntakeProps {
   onDraft: (result: IntakeResult) => void;
   /** El productor prefiere rellenar el formulario a mano. */
   onManual: () => void;
+  /** Borrador local a medias: se ofrece continuarlo o descartarlo sin saltarse el asistente. */
+  pendingDraft?: { name: string; onResume: () => void; onDiscard: () => void };
 }
 
 function useObjectUrl(file: File | null): string | null {
@@ -93,10 +96,11 @@ function LabelThumb({ file, onRemove, disabled }: { file: File; onRemove: () => 
   );
 }
 
-export function AiProductIntake({ assistKey, quota, onDraft, onManual }: AiProductIntakeProps) {
+export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDraft }: AiProductIntakeProps) {
   const [photo, setPhoto] = useState<File | null>(null);
   const [labels, setLabels] = useState<File[]>([]);
   const [text, setText] = useState('');
+  const [barcode, setBarcode] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -116,7 +120,10 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual }: AiProdu
   }, [isGenerating]);
 
   const trimmedLength = text.trim().length;
-  const canSubmit = !!photo && trimmedLength >= MIN_TEXT && !!assistKey && !isGenerating;
+  const trimmedBarcode = barcode.trim();
+  const barcodeInvalid = trimmedBarcode.length > 0 && !BARCODE_RE.test(trimmedBarcode);
+  const canSubmit =
+    !!photo && trimmedLength >= MIN_TEXT && !!assistKey && !isGenerating && !barcodeInvalid;
 
   const handlePhoto = async (list: FileList | null) => {
     const file = list?.[0];
@@ -166,6 +173,8 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual }: AiProdu
         text: text.trim(),
         productImage,
         ...(labelImages.length > 0 && { labelImages }),
+        // El backend solo lo usa si no hay fotos de etiqueta.
+        ...(labelImages.length === 0 && trimmedBarcode && { barcode: trimmedBarcode }),
       });
       onDraft({ response, productPhoto: photo });
     } catch (err) {
@@ -206,16 +215,25 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual }: AiProdu
       transition={{ duration: 0.35 }}
       className="mx-auto max-w-2xl space-y-6"
     >
-      <div className="text-center space-y-3">
-        <Badge variant="leaf" size="sm" className="inline-flex items-center gap-1">
-          <Sparkles className="w-3 h-3" aria-hidden="true" />
-          Asistente de IA
-        </Badge>
-        <h2 className="text-2xl sm:text-3xl font-semibold text-origen-bosque">Crea tu producto en un minuto</h2>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Sube una foto y cuéntanos qué es. Preparamos la ficha completa; tú solo la revisas y decides.
-        </p>
-      </div>
+      {pendingDraft && (
+        <Alert>
+          <AlertTitle>Tienes un borrador sin terminar</AlertTitle>
+          <AlertDescription>
+            <p className="mb-3">
+              {pendingDraft.name ? `«${pendingDraft.name}»` : 'Un producto a medias'}: puedes continuarlo o
+              descartarlo para empezar de nuevo con el asistente.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button type="button" variant="outline" size="sm" onClick={pendingDraft.onResume}>
+                Continuar borrador
+              </Button>
+              <Button type="button" variant="ghost" size="sm" onClick={pendingDraft.onDiscard}>
+                Descartar y empezar de nuevo
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card variant="elevated" className="p-4 sm:p-6 space-y-7">
         {/* 1. Foto */}
@@ -327,6 +345,27 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual }: AiProdu
             )}
           </div>
         </section>
+
+        {/* 4. Código de barras — solo si no hay foto de etiqueta */}
+        {labels.length === 0 && (
+          <section aria-labelledby="intake-barcode">
+            <h3 id="intake-barcode" className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground mb-1">
+              4 · Código de barras <span className="normal-case tracking-normal font-normal">(opcional)</span>
+            </h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Si tu producto tiene un código de barras real (EAN), lo buscamos en Open Food Facts para proponerte ingredientes y nutrición ya reales — tú los confirmas igual.
+            </p>
+            <Input
+              value={barcode}
+              onChange={(e) => setBarcode(e.target.value.replace(/[^\d]/g, ''))}
+              inputMode="numeric"
+              placeholder="Ej.: 8412345678901"
+              leftIcon={<Barcode className="w-4 h-4" aria-hidden="true" />}
+              error={barcodeInvalid ? 'El código debe tener 8, o entre 12 y 14 dígitos.' : undefined}
+              maxLength={14}
+            />
+          </section>
+        )}
 
         {error && (
           <Alert variant="error">

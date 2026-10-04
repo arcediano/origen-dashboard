@@ -22,6 +22,7 @@ import { PROVINCIAS_ESPANA } from '@/constants/provinces';
 import { getProvinciaFromCP } from '@/constants/cp-provincias';
 import {
   initialRegistrationSchema,
+  normalizeWebsite,
   type InitialRegistrationFormData
 } from '@/lib/validations/seller';
 import { registerProducer } from '@/lib/api/auth';
@@ -45,7 +46,6 @@ import {
 
 // Components
 import { SuccessModal } from './components/SuccessModal';
-import { CustomCheckbox } from './components/CustomCheckbox';
 import { BusinessTypeSelector } from './components/BusinessTypeSelector';
 import { CategoryCard } from './components/CategoryCard';
 import { FormSection } from './components/FormSection';
@@ -104,8 +104,10 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
       province: '',
       producerCategory: undefined,
       whyOrigin: '',
-      acceptsTerms: false,
-      acceptsPrivacy: false,
+      website: '',
+      instagram: '',
+      facebook: '',
+      tiktok: '',
     }
   });
 
@@ -191,8 +193,10 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
           municipio: data.municipio,
           postalCode: data.postalCode,
           whyOrigin: data.whyOrigin,
-          acceptsTerms: true,
-          acceptsPrivacy: true,
+          website: normalizeWebsite(data.website),
+          instagram: data.instagram?.trim() || undefined,
+          facebook: data.facebook?.trim() || undefined,
+          tiktok: data.tiktok?.trim() || undefined,
         });
 
         setTrackingCode(result.data.trackingCode ?? '');
@@ -302,32 +306,11 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                       : 'No se pudo procesar tu solicitud'}
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {errorMessage === 'duplicate_email' ? (
-                      <>
-                        Ya existe una solicitud pendiente de revisión con este email.
-                        Si tienes alguna duda, contacta con nosotros desde la{' '}
-                        <a href="/contacto" className="font-semibold text-hoja-tinta hover:underline">
-                          sección de contacto
-                        </a>.
-                      </>
-                    ) : (
-                      <>
-                        Ha ocurrido un error al enviar tu solicitud. Por favor, ponte en contacto
-                        con nuestro equipo de soporte desde la{' '}
-                        <a href="/contacto" className="font-semibold text-hoja-tinta hover:underline">
-                          sección de contacto
-                        </a>
-                        {' '}de nuestra página web.
-                      </>
-                    )}
+                    {errorMessage === 'duplicate_email'
+                      ? 'Ya existe una solicitud pendiente de revisión con este email. Nuestro equipo la está revisando.'
+                      : 'Ha ocurrido un error al enviar tu solicitud. Por favor, inténtalo de nuevo en unos minutos.'}
                   </p>
                 </div>
-                <a
-                  href="/contacto"
-                  className="inline-flex w-full items-center justify-center py-2.5 rounded-xl border border-origen-hoja/30 bg-origen-hoja/10 text-sm font-semibold text-hoja-tinta hover:bg-origen-hoja/20 hover:border-origen-hoja/50 active:scale-[.98] transition-all"
-                >
-                  Contactar soporte
-                </a>
                 <button
                   onClick={() => setSubmitStatus('idle')}
                   className="w-full py-2.5 rounded-xl border border-border text-sm font-semibold text-muted-foreground hover:text-origen-bosque hover:border-red-200 hover:bg-red-50/30 active:scale-[.98] transition-all"
@@ -348,7 +331,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
             <FormSection
               title="Información de contacto"
               description="¿Cómo podemos llamarte?"
-              badge="Paso 1 de 5"
+              badge="Paso 1 de 4"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Input
@@ -419,7 +402,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
             <FormSection
               title="Tu negocio"
               description="Cuéntanos sobre tu proyecto"
-              badge="Paso 2 de 5"
+              badge="Paso 2 de 4"
             >
               <Input
                 label="Nombre del negocio"
@@ -518,7 +501,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
             <FormSection
               title="¿Qué vendes?"
               description="Selecciona tu categoría principal"
-              badge="Paso 3 de 5"
+              badge="Paso 3 de 4"
             >
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {PRODUCER_CATEGORIES.map((category) => (
@@ -544,7 +527,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
             <FormSection
               title="Tu candidatura"
               description="Esta información es clave para valorar si encajas en la comunidad Origen"
-              badge="Paso 4 de 5"
+              badge="Paso 4 de 4"
             >
               <div className="space-y-3">
                 <Textarea
@@ -564,32 +547,42 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                     <span className="font-medium">¡Gracias por contarnos tu historia!</span>
                   </div>
                 )}
-              </div>
-            </FormSection>
 
-            {/* SECCIÓN 5: Legal */}
-            <FormSection
-              title="Confirmación legal"
-              description="Último paso para unirte a la comunidad"
-              badge="Paso 5 de 5"
-            >
-              <div className="space-y-3 md:space-y-4">
-                <CustomCheckbox
-                  label="Acepto los términos y condiciones"
-                  description="He leído y acepto las condiciones de uso de la plataforma Origen"
-                  checked={formValues.acceptsTerms}
-                  onChange={(checked) => setValue('acceptsTerms', checked, { shouldValidate: true })}
-                  error={shouldShowFieldError('acceptsTerms') ? errors.acceptsTerms?.message : undefined}
-                  required
-                />
-                <CustomCheckbox
-                  label="Acepto la política de privacidad"
-                  description="Autorizo el tratamiento de mis datos personales según el RGPD"
-                  checked={formValues.acceptsPrivacy}
-                  onChange={(checked) => setValue('acceptsPrivacy', checked, { shouldValidate: true })}
-                  error={shouldShowFieldError('acceptsPrivacy') ? errors.acceptsPrivacy?.message : undefined}
-                  required
-                />
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <Input
+                    label="Página web del negocio"
+                    inputSize="lg"
+                    placeholder="www.minegocio.es"
+                    helperText="Opcional, pero nos ayuda a conocer tu negocio"
+                    autoComplete="url"
+                    error={shouldShowFieldError('website') ? errors.website?.message : undefined}
+                    {...register('website')}
+                  />
+                  <Input
+                    label="Instagram"
+                    inputSize="lg"
+                    placeholder="@minegocio"
+                    helperText="Opcional"
+                    error={shouldShowFieldError('instagram') ? errors.instagram?.message : undefined}
+                    {...register('instagram')}
+                  />
+                  <Input
+                    label="Facebook"
+                    inputSize="lg"
+                    placeholder="facebook.com/minegocio"
+                    helperText="Opcional"
+                    error={shouldShowFieldError('facebook') ? errors.facebook?.message : undefined}
+                    {...register('facebook')}
+                  />
+                  <Input
+                    label="TikTok"
+                    inputSize="lg"
+                    placeholder="@minegocio"
+                    helperText="Opcional"
+                    error={shouldShowFieldError('tiktok') ? errors.tiktok?.message : undefined}
+                    {...register('tiktok')}
+                  />
+                </div>
               </div>
             </FormSection>
 

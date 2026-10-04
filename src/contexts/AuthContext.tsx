@@ -11,6 +11,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { useRouter } from 'next/navigation';
 import type { AuthUser } from '@/lib/api/auth';
 import { getCurrentUser, logoutUser, setActiveRole } from '@/lib/api/auth';
+import { getMaintenanceState } from '@/lib/maintenance';
 import { useInactivityTimeout } from '@/hooks/useInactivityTimeout';
 import { useSessionVisibilityGuard } from '@/hooks/useSessionVisibilityGuard';
 
@@ -104,6 +105,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return;
         }
 
+        // Modo mantenimiento: ya se navega a /mantenimiento (gatewayClient) — sin reintentos
+        if (getMaintenanceState().active) {
+          setUser(null);
+          setIsLoading(false);
+          setHasTriedLoad(true);
+          return;
+        }
+
         // Para otros errores (503, red): reintentar con delay
         if (attempt < MAX_RETRIES - 1) {
           if (process.env.NODE_ENV !== 'production') {
@@ -163,8 +172,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           console.warn(`[AuthContext] Intento ${i + 1}/${maxRetries} fallido:`, err);
         }
 
-        // Último intento fallido
-        if (i === maxRetries - 1) {
+        // Último intento fallido (o modo mantenimiento activo: no reintentar)
+        if (i === maxRetries - 1 || getMaintenanceState().active) {
           const errorMessage = err instanceof Error ? err.message : 'Error al cargar datos del usuario';
           setError(errorMessage);
           setUser(null);
@@ -231,18 +240,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // ── Cargar usuario al montar (solo una vez) ─────────────────────────────────
   useEffect(() => {
-    let mounted = true;
-
     if (!hasTriedLoad && !user) {
-      const load = async () => {
-        await refreshUser();
-      };
-      load();
+      void refreshUser();
     }
-
-    return () => {
-      mounted = false;
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

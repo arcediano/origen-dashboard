@@ -22,12 +22,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-// API_GATEWAY_URL (server-only) tiene prioridad; si no está, cae a NEXT_PUBLIC_.
-// Esto permite configurar la URL del gateway en Vercel como variable privada.
-const GATEWAY_URL =
-  process.env.API_GATEWAY_URL ??
-  process.env.NEXT_PUBLIC_API_GATEWAY_URL ??
-  'http://localhost:3000';
+const GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3000';
 
 // Aumentar duración máxima para uploads de imágenes grandes en Vercel Pro
 export const maxDuration = 30;

@@ -92,8 +92,10 @@ export async function registerProducer(params: {
   municipio: string;
   postalCode: string;
   whyOrigin: string;
-  acceptsTerms: true;
-  acceptsPrivacy: true;
+  website?: string;
+  instagram?: string;
+  facebook?: string;
+  tiktok?: string;
 }): Promise<RegisterResponse> {
   return gatewayClient.post<RegisterResponse>('/auth/register', params);
 }

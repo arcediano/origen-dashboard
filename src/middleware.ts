@@ -26,6 +26,11 @@
  *   Token expirado o inválido → redirect a /auth/login (fail-secure).
  *   NO se intenta renovar el token automáticamente.
  *
+ * MANTENIMIENTO: además expone la ruta actual al layout raíz (header `x-pathname`)
+ * para que la redirección del modo mantenimiento no entre en bucle en
+ * `/mantenimiento`. Este es el ÚNICO middleware del repo: con carpeta `src/`,
+ * Next.js solo carga `src/middleware.ts` (el antiguo de la raíz nunca se ejecutaba).
+ *
  * @module middleware
  */
 
@@ -55,14 +60,29 @@ const AUTH_PREFIXES      = ['/auth/login', '/auth/register'];
  * detectados automáticamente por Next.js App Router e inyectados con el
  * nonce, sin que sea necesario tocar el código de la app.
  */
+
+/** Origen del CDN público de imágenes (S3/CloudFront), para permitirlo en `img-src`. */
+function cdnOrigin(): string {
+  try {
+    return process.env.NEXT_PUBLIC_CDN_BASE_URL
+      ? new URL(process.env.NEXT_PUBLIC_CDN_BASE_URL).origin
+      : '';
+  } catch {
+    return '';
+  }
+}
+
 function buildCspHeader(nonce: string): string {
+  // `next dev` necesita eval() para el refresco en caliente; en producción no.
+  const devEval = process.env.NODE_ENV === 'production' ? '' : " 'unsafe-eval'";
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://js.stripe.com https://connect-js.stripe.com`,
+    `script-src 'self' 'nonce-${nonce}'${devEval} https://js.stripe.com https://connect-js.stripe.com`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "frame-src https://connect-js.stripe.com https://js.stripe.com https://hooks.stripe.com",
-    "img-src 'self' data: https://storage.googleapis.com https://res.cloudinary.com https://*.cloudfront.net https://*.amazonaws.com https://images.unsplash.com https://*.stripe.com",
+    // blob: = vistas previas de imágenes recién elegidas (subida de producto, selector de foco)
+    `img-src 'self' data: blob: ${cdnOrigin()} https://storage.googleapis.com https://res.cloudinary.com https://*.cloudfront.net https://*.amazonaws.com https://images.unsplash.com https://*.stripe.com`,
     "connect-src 'self' https://api.stripe.com https://connect-js.stripe.com",
   ].join('; ');
 }
@@ -136,6 +156,8 @@ export async function middleware(request: NextRequest) {
   // Preparar headers para propagar el nonce hacia Next.js App Router
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('Content-Security-Policy', cspHeader);
+  // Ruta actual para el layout raíz (redirección de mantenimiento sin bucles)
+  requestHeaders.set('x-pathname', pathname);
   // ───────────────────────────────────────────────────────────────────────────────
 
   const accessTokenCookie = request.cookies.get('accessToken');
@@ -203,11 +225,11 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Matcher ampliado para cubrir todas las rutas de páginas HTML (App Router),
-  // excluyendo assets estáticos, imágenes optimizadas y archivos internos de Next.js.
-  // Patrón recomendado por Next.js para middleware que debe ejecutarse en todas las
-  // páginas pero no en recursos estáticos.
+  // Solo páginas HTML (App Router): sin /api/ (proxy same-origin al gateway vía
+  // next.config.js rewrites — no necesita JWT/CSP/x-pathname, y su invocación
+  // añadía trabajo de Edge Middleware en cada llamada, incluida /api/v1/auth/login),
+  // sin assets estáticos, imágenes optimizadas ni archivos internos de Next.js.
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
+    '/((?!api/|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
   ],
 };

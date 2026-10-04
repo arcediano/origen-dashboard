@@ -9,6 +9,25 @@
 import type { NutritionalInfo } from '@/types/product';
 import { proposalToPatches, unreadableFieldNames, type LabelProposal } from './label-proposal';
 
+/**
+ * Campos sobre los que el asistente puede proponer una pregunta de
+ * seguimiento (ver `product-draft.schema.ts` en el backend — misma lista
+ * cerrada). Nunca ingredientes/alérgenos/nutrición.
+ */
+export type FollowUpField =
+  | 'productionInfo.origin'
+  | 'productionInfo.productionMethod'
+  | 'nutritionalInfo.isGlutenFree'
+  | 'nutritionalInfo.isVegan'
+  | 'nutritionalInfo.isVegetarian';
+
+export interface FollowUpQuestion {
+  field: FollowUpField;
+  question: string;
+  type: 'text' | 'single_choice';
+  options: string[] | null;
+}
+
 /** Forma de la respuesta de `POST /ai-assist/product-draft`. */
 export interface ProductDraftResponse {
   proposal: {
@@ -29,6 +48,21 @@ export interface ProductDraftResponse {
   /** Lo que la IA nunca propone y el productor debe completar. */
   producerMustComplete: string[];
   notes: string | null;
+  /** Preguntas dinámicas para completar lo que la IA no pudo determinar. */
+  followUpQuestions: FollowUpQuestion[];
+  /**
+   * De dónde vienen ingredientes/alérgenos/nutrición cuando no son de la
+   * etiqueta leída por IA: código de barras real (Open Food Facts), búsqueda
+   * web del producto exacto (`web`, incluye ingredientes/alérgenos) o
+   * estimación de un producto/tipo parecido (`estimated`, solo nutrición).
+   * `null` si no aplica ninguna (viene de la etiqueta o no hay datos).
+   */
+  nutritionSource: 'barcode' | 'estimated' | 'web' | null;
+  allergenSource: 'barcode' | 'web' | null;
+  /** Nota de la fuente externa, para mostrarla al productor. */
+  externalSourceNote: string | null;
+  /** Páginas consultadas por la búsqueda web (puede faltar en respuestas antiguas). */
+  externalSourceUrls?: string[];
   quota: { used: number; total: number };
 }
 
@@ -105,6 +139,26 @@ export function summarizeDraft(response: ProductDraftResponse): {
   const unreadable = unreadableFieldNames(response.unreadableFields);
   if (response.labelLegible === true && unreadable.length > 0) {
     toReview.push(`No se pudo leer: ${unreadable.join(', ')}`);
+  }
+  if (response.allergenSource === 'barcode') {
+    toReview.push(
+      `Ingredientes y alérgenos de Open Food Facts por el código de barras: confirma que coinciden con tu producto${response.externalSourceNote ? ` (${response.externalSourceNote})` : ''}.`,
+    );
+  }
+  if (response.allergenSource === 'web' || response.nutritionSource === 'web') {
+    const urls = response.externalSourceUrls?.length ? ` Fuentes: ${response.externalSourceUrls.join(', ')}` : '';
+    toReview.push(
+      `Información encontrada en internet para tu producto${response.externalSourceNote ? ` (${response.externalSourceNote})` : ''}.${urls} Revisa ingredientes, alérgenos y valores nutricionales y confirma que coinciden con tu producto antes de guardar.`,
+    );
+  }
+  if (response.nutritionSource === 'estimated') {
+    toReview.push(
+      `Información nutricional ESTIMADA (no es de tu producto exacto)${response.externalSourceNote ? `: ${response.externalSourceNote}` : ''}. Corrígela si tienes el dato real.`,
+    );
+  } else if (response.nutritionSource === 'barcode' && response.allergenSource !== 'barcode') {
+    toReview.push(
+      `Información nutricional de Open Food Facts por el código de barras: confirma que coincide con tu producto${response.externalSourceNote ? ` (${response.externalSourceNote})` : ''}.`,
+    );
   }
 
   return { filled, toReview, toComplete: response.producerMustComplete };

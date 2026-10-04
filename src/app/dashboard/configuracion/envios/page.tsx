@@ -1,14 +1,13 @@
 /**
  * @page Logística y Envíos
- * @version 2.0.0 — sustituye el mock estático por datos reales de
- * GET /producers/onboarding/data y guarda con POST /producers/onboarding/step/4
- * (saveStep4), reutilizado del wizard de onboarding.
+ * @version 3.0.0 — datos reales de GET /producers/onboarding/data; guarda con
+ * POST /producers/onboarding/step/3 (saveStep3, ADR-020) y decide si se puede
+ * delegar en Origen con GET /producers/onboarding/shipping-coverage.
  */
 
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import {
   Alert,
   AlertDescription,
@@ -16,9 +15,7 @@ import {
   Button,
   Card,
   CardContent,
-  CardHeader,
   CardIconHeader,
-  CardTitle,
   Input,
   InputAffixField,
   Label,
@@ -29,22 +26,17 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-  Switch,
   ToggleGroup,
   ToggleGroupItem,
   appShellPaddingClass,
   NAV_HEIGHT_MOBILE_DASHBOARD,
-  type BadgeVariant,
 } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { PROVINCIAS_ESPANA } from '@/constants/provinces';
-import { loadOnboardingData, saveStep4, respondPickupAssignmentChoice } from '@/lib/api/onboarding';
+import { getShippingCoverage, loadOnboardingData, saveStep3, respondPickupAssignmentChoice } from '@/lib/api/onboarding';
 import { formatEstimatedDelivery, DELIVERY_TIME_UNIT_OPTIONS, type DeliveryTimeUnit } from '@/lib/format-estimated-delivery';
-import type {
-  DeliveryOption as OnboardingDeliveryOption,
-  ShippingZone as OnboardingShippingZone,
-  EnhancedCapacityData,
-} from '@/components/features/onboarding/components/steps/step-capacity';
+import { pickDeliveryIcon } from '@/components/features/onboarding/components/steps/step-shipping';
+import type { ShippingCoverage, ShippingZone as OnboardingShippingZone } from '@/lib/onboarding/types';
 import {
   AlertCircle,
   Check,
@@ -54,23 +46,18 @@ import {
   Info,
   Leaf,
   Loader2,
-  Lock,
   MapPin,
-  Package,
   Pencil,
   Plus,
   Recycle,
   Route,
   Save,
-  Store,
   Truck,
   X,
-  Zap,
 } from 'lucide-react';
 
 // ─── Tipos locales ──────────────────────────────────────────────────────────
 
-type LogisticsLevel = 'centralized' | 'transport' | 'own';
 type ZoneType = 'PROVINCE' | 'POSTAL' | 'CUSTOM';
 
 interface DeliveryOptionRow {
@@ -91,42 +78,6 @@ interface ShippingZoneRow {
   isExcluded: boolean;
 }
 
-// ─── Copy de los 3 modos de cobertura Origen (Etapa 3 del plan de diseño) ──
-// Reutiliza literal el copy ya validado en step-capacity.tsx, no se redacta de nuevo.
-
-const LEVEL_CONFIG: Record<
-  LogisticsLevel,
-  { label: string; badgeVariant: BadgeVariant; icon: typeof Route; description: string }
-> = {
-  centralized: {
-    label: 'Logística centralizada · Nivel 1',
-    badgeVariant: 'success',
-    icon: Route,
-    description:
-      'Origen recoge los pedidos en tu dirección de producción y gestiona la entrega al comprador. No necesitas configurar transportistas.',
-  },
-  transport: {
-    label: 'Transporte concertado · Nivel 2',
-    badgeVariant: 'info',
-    icon: Truck,
-    description:
-      'Tu zona no tiene logística centralizada, pero puedes usar nuestro transportista concertado. Tú preparas el pedido, nosotros lo enviamos.',
-  },
-  own: {
-    label: 'Gestión propia · Nivel 3',
-    badgeVariant: 'neutral',
-    icon: Package,
-    description:
-      'Tu zona no tiene cobertura de logística o transporte de Origen. Configura tus propias opciones de envío a continuación.',
-  },
-};
-
-function pickDeliveryIcon(option: { price: number; estimatedDaysValue: number | null; estimatedDaysUnit: DeliveryTimeUnit }) {
-  if (option.price === 0) return Store;
-  if (option.estimatedDaysUnit === 'HOURS' || (option.estimatedDaysUnit === 'DAYS' && (option.estimatedDaysValue ?? 0) <= 1)) return Zap;
-  return Truck;
-}
-
 let localIdCounter = 0;
 function nextLocalId(prefix: string): string {
   localIdCounter += 1;
@@ -141,16 +92,15 @@ export default function EnviosPage() {
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
 
   // Cobertura Origen — solo lectura, calculada por el backend
-  const [isInOriginRoute, setIsInOriginRoute] = useState(false);
-  const [logisticsLevel, setLogisticsLevel] = useState<LogisticsLevel>('own');
   const [profilePubliclyReady, setProfilePubliclyReady] = useState(false);
 
   // Elección EXPLÍCITA de logística (delegar en Origen / gestión propia) —
   // decisión del humano 2026-09-02: es el campo que de verdad determina
   // shippingMode, obligatorio desde el paso 4 del onboarding en adelante.
   const [deliveryChoice, setDeliveryChoice] = useState<'delegated' | 'own' | null>(null);
-  const [pickupRouteAvailable, setPickupRouteAvailable] = useState(false);
-  const [pickupRouteName, setPickupRouteName] = useState<string | null>(null);
+  const [coverage, setCoverage] = useState<ShippingCoverage | null>(null);
+  const pickupRouteAvailable = Boolean(coverage?.canDelegate);
+  const pickupRouteName = coverage?.pickupRoute?.name ?? null;
 
   // Pickup assignment — elección de ruta de recogida (si aplica)
   const [pickupAssignment, setPickupAssignment] = useState<{ id: string; state: 'ACTIVE' | 'PENDING_CHOICE'; routeName: string | null; warehouseName: string | null } | null>(null);
@@ -158,7 +108,6 @@ export default function EnviosPage() {
   const [pickupChoiceError, setPickupChoiceError] = useState<string | null>(null);
 
   // Configuración editable del productor
-  const [useCentralizedTransport, setUseCentralizedTransport] = useState(true);
   const [minOrderAmount, setMinOrderAmount] = useState<number>(0);
   const [sustainablePackaging, setSustainablePackaging] = useState(false);
   const [packagingDescription, setPackagingDescription] = useState('');
@@ -179,11 +128,8 @@ export default function EnviosPage() {
       const logistics = response?.data?.logistics ?? null;
 
       setProfilePubliclyReady(Boolean(response?.data?.profilePubliclyReady));
-      setIsInOriginRoute(Boolean(logistics?.isInOriginRoute));
-      setLogisticsLevel((logistics?.logisticsLevel as LogisticsLevel) ?? 'own');
       setPickupAssignment(response?.data?.pickupAssignment ?? null);
       setDeliveryChoice(logistics?.deliveryChoice ?? null);
-      setUseCentralizedTransport(logistics?.useCentralizedTransport ?? true);
       setMinOrderAmount(Number(logistics?.minOrderAmount ?? 0));
       setSustainablePackaging(Boolean(logistics?.sustainablePackaging));
       setPackagingDescription(logistics?.packagingDescription ?? '');
@@ -207,18 +153,11 @@ export default function EnviosPage() {
         })),
       );
 
-      const postalCode = response?.data?.location?.postalCode;
-      if (postalCode && /^\d{5}$/.test(postalCode)) {
-        try {
-          const zoneCheckRes = await fetch(`/api/v1/producers/logistics/zone-check?postalCode=${postalCode}`, { credentials: 'include' });
-          if (zoneCheckRes.ok) {
-            const zoneCheck: { data?: { pickupRouteAvailable: boolean; pickupRouteName: string | null } } = await zoneCheckRes.json();
-            setPickupRouteAvailable(Boolean(zoneCheck.data?.pickupRouteAvailable));
-            setPickupRouteName(zoneCheck.data?.pickupRouteName ?? null);
-          }
-        } catch {
-          // sin cambios si falla — la opción "delegar" simplemente no se ofrece
-        }
+      try {
+        setCoverage(await getShippingCoverage());
+      } catch {
+        // sin cambios si falla — la opción "delegar" simplemente no se ofrece
+        setCoverage(null);
       }
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : 'No se pudo cargar tu configuración de logística.');
@@ -316,17 +255,6 @@ export default function EnviosPage() {
     setSaveError(null);
     setSaveSuccess(null);
 
-    const toOnboardingDeliveryOption = (opt: DeliveryOptionRow): OnboardingDeliveryOption => ({
-      id: opt.id,
-      name: opt.name,
-      description: opt.description,
-      price: opt.price,
-      // isDeliveryOptionIncomplete ya garantizó que no es null antes de llegar aquí.
-      estimatedDaysValue: opt.estimatedDaysValue ?? 0,
-      estimatedDaysUnit: opt.estimatedDaysUnit,
-      icon: pickDeliveryIcon(opt),
-    });
-
     const toOnboardingZone = (zone: ShippingZoneRow): OnboardingShippingZone => ({
       id: zone.id,
       type: zone.type.toLowerCase() as 'province' | 'postal' | 'custom',
@@ -334,21 +262,19 @@ export default function EnviosPage() {
       label: zone.label,
     });
 
-    const payload: EnhancedCapacityData = {
-      isInOriginRoute,
-      logisticsLevel,
-      useCentralizedTransport: logisticsLevel === 'transport' ? useCentralizedTransport : undefined,
+    const payload = {
       deliveryChoice,
-      deliveryOptions: deliveryOptions.map(toOnboardingDeliveryOption),
-      includedZones: shippingZones.filter((z) => !z.isExcluded).map(toOnboardingZone),
-      excludedZones: shippingZones.filter((z) => z.isExcluded).map(toOnboardingZone),
       minOrderAmount,
       sustainablePackaging,
-      packagingDescription: sustainablePackaging ? packagingDescription : undefined,
+      packagingDescription: sustainablePackaging ? packagingDescription : '',
+      // isDeliveryOptionIncomplete ya garantizó que ninguna opción está incompleta antes de llegar aquí.
+      deliveryOptions: deliveryOptions.map((opt) => ({ ...opt })),
+      includedZones: shippingZones.filter((z) => !z.isExcluded).map(toOnboardingZone),
+      excludedZones: shippingZones.filter((z) => z.isExcluded).map(toOnboardingZone),
     };
 
     try {
-      await saveStep4(payload);
+      await saveStep3(payload);
       setSaveSuccess('Configuración de logística guardada correctamente.');
       setEditingOptionId(null);
     } catch (error) {
@@ -384,9 +310,6 @@ export default function EnviosPage() {
   if (loadError) {
     return <PageError message={loadError} onRetry={loadData} />;
   }
-
-  const level = LEVEL_CONFIG[logisticsLevel];
-  const LevelIcon = level.icon;
 
   return (
     <div className="w-full">
@@ -444,40 +367,9 @@ export default function EnviosPage() {
         )}
 
         {/* ══════════════════════════════════════════════════════════════════
-            COBERTURA ORIGEN — solo lectura, calculada por el backend por CP
-        ══════════════════════════════════════════════════════════════════ */}
-        <Card variant="default" padding="md" className="border-dashed border-border-strong bg-surface">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-alt border border-border-subtle shrink-0">
-              <Lock className="h-4 w-4 text-text-subtle" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-base font-semibold text-origen-bosque">Cobertura Origen</h2>
-                <Badge variant={level.badgeVariant} size="sm" icon={<LevelIcon className="w-3 h-3" />}>
-                  {level.label}
-                </Badge>
-              </div>
-              <p className="mt-1.5 text-sm text-muted-foreground">{level.description}</p>
-              <p className="mt-3 text-xs text-text-subtle flex items-start gap-1.5">
-                <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-hoja-tinta" />
-                <span>
-                  Este valor se calcula automáticamente a partir de tu código postal de producción. Si necesitas
-                  revisarlo,{' '}
-                  <Link href="/dashboard/profile/business" className="text-hoja-tinta underline underline-offset-2 hover:text-origen-bosque">
-                    actualiza tu dirección en Mi negocio
-                  </Link>
-                  .
-                </span>
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        {/* ══════════════════════════════════════════════════════════════════
             ELECCIÓN EXPLÍCITA DE LOGÍSTICA — decisión del humano 2026-09-02:
             unifica lo que antes eran dos sistemas separados (PickupRoute vs
-            isInOriginRoute/CoveragePolicy). Se omite mientras haya una
+            PickupRoute vs cobertura por política, esta última ya retirada). Se omite mientras haya una
             asignación de ruta PENDING_CHOICE (tarjeta de abajo), que cubre
             la misma elección en ese caso puntual.
         ══════════════════════════════════════════════════════════════════ */}
@@ -598,39 +490,6 @@ export default function EnviosPage() {
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* ══════════════════════════════════════════════════════════════════
-            TRANSPORTE CENTRALIZADO — solo si logisticsLevel === 'transport'
-        ══════════════════════════════════════════════════════════════════ */}
-        {logisticsLevel === 'transport' && (
-          <Card variant="section" padding="md">
-            <CardIconHeader
-              icon={<Truck className="h-5 w-5" />}
-              title="Transporte centralizado de Origen"
-              description="Elige si quieres que gestionemos el transporte por ti"
-            />
-            <CardContent>
-              <button
-                type="button"
-                onClick={() => setUseCentralizedTransport(!useCentralizedTransport)}
-                className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-border-subtle hover:border-origen-pradera/50 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera/45"
-              >
-                <div className="text-left">
-                  <p className="text-sm font-medium text-origen-bosque">Usar el transportista concertado de Origen</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Tú preparas el pedido, nosotros lo enviamos. Si lo desactivas, gestionarás tu propio envío con los
-                    métodos que configures abajo.
-                  </p>
-                </div>
-                <Switch
-                  checked={useCentralizedTransport}
-                  onCheckedChange={setUseCentralizedTransport}
-                  className="shrink-0 ml-4"
-                />
-              </button>
             </CardContent>
           </Card>
         )}

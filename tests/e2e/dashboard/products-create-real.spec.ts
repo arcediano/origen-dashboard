@@ -136,7 +136,7 @@ async function fillNutritionalStep(page: Page): Promise<void> {
 async function fillProductionStep(page: Page): Promise<void> {
   await ensureStep(page, /Producci[oó]n/i);
   await page.getByRole('button', { name: /Historia/i }).click();
-  await page.getByLabel(/Historia del productor/i).fill('Historia e2e');
+  await page.getByLabel(/Proceso artesanal/i).fill('Proceso e2e');
   await page.getByRole('button', { name: /Origen/i }).click();
   await page.getByLabel(/Pa[ií]s de origen/i).fill('Espana');
   await clickNext(page);

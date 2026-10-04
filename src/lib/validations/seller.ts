@@ -6,6 +6,22 @@
 import { z } from 'zod';
 
 /** Validación del formulario de registro inicial */
+/** Añade `https://` si falta; devuelve `undefined` si el campo está vacío. */
+export function normalizeWebsite(value: string | undefined): string | undefined {
+  const v = (value ?? '').trim();
+  if (!v) return undefined;
+  return /^https?:\/\//i.test(v) ? v : `https://${v}`;
+}
+
+function isValidWebsite(value: string): boolean {
+  try {
+    const url = new URL(normalizeWebsite(value) ?? '');
+    return /^https?:$/.test(url.protocol) && url.hostname.includes('.');
+  } catch {
+    return false;
+  }
+}
+
 export const initialRegistrationSchema = z.object({
   contactName: z.string().min(2, 'Mínimo 2 caracteres').max(50),
   contactSurname: z.string().min(2, 'Mínimo 2 caracteres').max(100),
@@ -29,56 +45,19 @@ export const initialRegistrationSchema = z.object({
   whyOrigin: z.string()
     .min(50, 'Cuéntanos un poco más (mínimo 50 caracteres)')
     .max(300, 'Máximo 300 caracteres'),
-  acceptsTerms: z.boolean().refine((val) => val === true, {
-    message: 'Debes aceptar los términos y condiciones',
-  }),
-  acceptsPrivacy: z.boolean().refine((val) => val === true, {
-    message: 'Debes aceptar la política de privacidad',
-  }),
+  // Presencia online (opcional): ayuda a valorar la candidatura.
+  website: z
+    .string()
+    .trim()
+    .max(300, 'Máximo 300 caracteres')
+    .refine((v) => v === '' || isValidWebsite(v), 'Introduce una web válida (ej. www.minegocio.es)')
+    .optional(),
+  instagram: z.string().trim().max(200, 'Máximo 200 caracteres').optional(),
+  facebook: z.string().trim().max(200, 'Máximo 200 caracteres').optional(),
+  tiktok: z.string().trim().max(200, 'Máximo 200 caracteres').optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Las contraseñas no coinciden',
   path: ['confirmPassword'],
 });
 
-/** Paso 1: Ubicación y región turística */
-export const onboardingStep1Schema = z.object({
-  street: z.string().min(3, 'Introduce tu calle'),
-  number: z.string().min(1, 'Introduce el número'),
-  postalCode: z.string().regex(/^\d{5}$/, 'Código postal inválido'),
-  city: z.string().min(2, 'Introduce tu ciudad'),
-  province: z.string().min(2, 'Selecciona tu provincia'),
-  autonomousCommunity: z.string().min(2, 'Selecciona tu comunidad autónoma'),
-  touristicRegionId: z.string().optional(),
-  touristicRegionName: z.string().optional(),
-});
-
-/** Paso 2: Historia y valores */
-export const onboardingStep2Schema = z.object({
-  businessStory: z.string().min(200, 'Cuéntanos más sobre tu historia (mínimo 200 caracteres)').max(1000),
-  philosophy: z.string().min(100, 'Describe tu filosofía (mínimo 100 caracteres)').max(500),
-  sustainabilityPractices: z.array(z.string()).min(1, 'Selecciona al menos una práctica'),
-  hasOrganicCertification: z.boolean(),
-  hasDopIgpCertification: z.boolean(),
-  certificationDetails: z.string().optional(),
-});
-
-/** Paso 3: Perfil visual */
-export const onboardingStep3Schema = z.object({
-  bannerFile: z.any().optional(),
-  logoFile: z.any().optional(),
-  galleryFiles: z.array(z.any()).optional(),
-});
-
-/** Paso 4: Capacidad y entregas */
-export const onboardingStep4Schema = z.object({
-  monthlyCapacity: z.number().min(1, 'Introduce tu capacidad mensual'),
-  capacityUnit: z.enum(['kg', 'litros', 'unidades']),
-  deliveryRadius: z.number().min(1, 'Introduce tu radio de entrega').max(200),
-  availableDeliveryDays: z.array(z.string()).min(1, 'Selecciona al menos un día'),
-  workingHours: z.string().optional(),
-});
-
 export type InitialRegistrationFormData = z.infer<typeof initialRegistrationSchema>;
-export type OnboardingStep1FormData = z.infer<typeof onboardingStep1Schema>;
-export type OnboardingStep2FormData = z.infer<typeof onboardingStep2Schema>;
-export type OnboardingStep4FormData = z.infer<typeof onboardingStep4Schema>;

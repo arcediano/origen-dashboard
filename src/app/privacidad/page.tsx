@@ -1,173 +1,138 @@
 /**
  * Política de Privacidad - Origen Marketplace
- * @version 2.0.0 - Rediseño con Manual de Marca v3.0 "Bosque Profundo"
+ * Se enlaza desde el paso 5 del registro (/auth/register), el paso final del
+ * onboarding y el pie de página.
  */
 
-import { AuthFooter } from '@arcediano/ux-library';
-import Link from 'next/link';
-import { Store, ArrowRight, Shield, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Shield } from 'lucide-react';
+import { LegalPage, type LegalSection } from '@/components/features/legal/LegalPage';
+import { companyContact, companyIdentityItems, fetchCompanyInfo, type CompanyInfo } from '@/lib/company-info';
 
-const sections = [
+// Debe ser un literal (Next no admite constantes importadas en la config de segmento).
+// Mantener igual que COMPANY_INFO_REVALIDATE en @/lib/company-info.
+export const revalidate = 300;
+
+export const metadata = {
+  title: 'Política de privacidad · Origen',
+  description: 'Cómo trata Origen Marketplace los datos personales de los productores.',
+};
+
+function buildSections(company: CompanyInfo | null): LegalSection[] {
+  const name = company?.businessName ?? 'Origen Marketplace';
+  const contactEmail = company?.email;
+  return [
   {
-    number: '1',
-    title: 'Información que recopilamos',
-    content: 'Recopilamos información personal que nos proporcionas directamente, como:',
+    title: 'Responsable del tratamiento',
+    paragraphs: [
+      `El responsable del tratamiento de tus datos es ${name} (en adelante, «Origen»). ${
+        contactEmail
+          ? `Puedes contactar con nosotros para cualquier cuestión de privacidad en ${contactEmail}.`
+          : 'Puedes contactar con nosotros para cualquier cuestión de privacidad desde la página de contacto.'
+      }`,
+    ],
+    items: companyIdentityItems(company),
+  },
+  {
+    title: 'Datos que tratamos',
     items: [
-      'Información de contacto (nombre, correo electrónico, teléfono)',
-      'Información de cuenta (usuario, contraseña cifrada)',
-      'Información de perfil de productor (negocio, categorías, descripción)',
-      'Información de transacciones y pedidos',
+      'Datos de contacto y de cuenta: nombre, correo electrónico, teléfono y credenciales (la contraseña se almacena cifrada).',
+      'Datos del negocio y del alta de productor: denominación, categorías, descripción de tu proyecto, ubicación y zonas de reparto, datos fiscales y de facturación, y la documentación y certificaciones que aportes para verificar tu actividad.',
+      'Datos de cobro: la verificación de identidad y los datos bancarios necesarios para recibir pagos los recoge y trata directamente Stripe; Origen recibe únicamente el estado de la verificación y la información necesaria para las liquidaciones.',
+      'Contenido que publicas: fichas de producto, fotografías, vídeos y textos.',
+      'Datos de pedidos y comunicaciones: pedidos, liquidaciones, facturas, incidencias, reembolsos y mensajes con Origen. Para gestionar un pedido accedes a los datos del comprador estrictamente necesarios.',
+      'Datos técnicos: dirección IP, tipo de dispositivo y navegador, registros de acceso y de actividad en la cuenta, con fines de seguridad. Para las cookies, consulta la Política de cookies.',
     ],
   },
   {
-    number: '2',
-    title: 'Cómo usamos tu información',
-    content: 'Utilizamos tu información exclusivamente para:',
+    title: 'Para qué usamos tus datos y con qué base jurídica',
     items: [
-      'Proporcionar y mejorar nuestros servicios',
-      'Procesar transacciones y gestionar pedidos',
-      'Comunicarnos contigo sobre tu cuenta o consultas',
-      'Enviarte información comercial si has dado tu consentimiento',
-      'Mejorar la experiencia de todos los usuarios de la plataforma',
+      'Gestionar tu registro, alta y cuenta de productor, y prestarte el servicio (publicación, pedidos, cobros y liquidaciones, atención al cliente). Base: ejecución del contrato.',
+      'Cumplir obligaciones legales: facturación, contabilidad, fiscalidad, prevención del fraude y atención a requerimientos de las autoridades. Base: obligación legal.',
+      'Garantizar la seguridad de la plataforma, detectar usos fraudulentos o abusivos, moderar contenidos y mejorar el servicio. Base: interés legítimo de Origen.',
+      'Enviarte comunicaciones comerciales o novedades sobre Origen. Base: tu consentimiento, que puedes retirar en cualquier momento. Las comunicaciones del servicio (avisos de pedidos, cambios de condiciones, seguridad) no son comerciales.',
     ],
   },
   {
-    number: '3',
-    title: 'Protección de tu información',
-    content:
-      'Implementamos medidas de seguridad técnicas y organizativas para proteger tu información personal contra accesos no autorizados, alteraciones, divulgación o destrucción. Todos los datos en tránsito se cifran mediante TLS y los datos en reposo están protegidos con cifrado AES-256.',
+    title: 'Asistente de inteligencia artificial',
+    paragraphs: [
+      'Si usas el asistente de creación de productos, enviamos al proveedor de IA (Anthropic) las fotografías y textos que subas en esa pantalla, y puede realizarse una búsqueda en internet con el nombre del producto identificado para completar su ficha. Se usa solo para generar una propuesta que tú revisas y confirmas; no se toman decisiones automatizadas con efectos jurídicos sobre ti.',
+      'Evita incluir en esas fotos y textos datos personales que no sean necesarios para describir el producto.',
+    ],
   },
   {
-    number: '4',
+    title: 'Destinatarios y encargados del tratamiento',
+    paragraphs: ['No vendemos tus datos. Los comunicamos o ponemos a disposición de terceros solo cuando es necesario:'],
+    items: [
+      'Stripe, para la verificación de identidad, los cobros y las liquidaciones.',
+      'Proveedores tecnológicos que actúan como encargados del tratamiento bajo contrato: alojamiento y base de datos (Render, Vercel), almacenamiento de archivos (Amazon Web Services), envío de correo electrónico (Brevo) y el proveedor de IA mencionado.',
+      'Transportistas y operadores logísticos, cuando delegas el envío en Origen, y los compradores, que reciben los datos de la tienda necesarios para su pedido y su factura.',
+      'Administraciones públicas, jueces y tribunales, cuando exista obligación legal.',
+    ],
+  },
+  {
+    title: 'Transferencias internacionales',
+    paragraphs: [
+      'Algunos de estos proveedores pueden tratar datos fuera del Espacio Económico Europeo. En ese caso nos aseguramos de que existan garantías adecuadas, como decisiones de adecuación de la Comisión Europea o cláusulas contractuales tipo.',
+    ],
+  },
+  {
+    title: 'Cuánto tiempo conservamos tus datos',
+    paragraphs: [
+      'Conservamos los datos mientras tu cuenta esté activa. Tras la baja, los mantenemos bloqueados durante los plazos en que puedan derivarse responsabilidades, y la documentación contable y fiscal (facturas, liquidaciones) durante los plazos que exige la normativa mercantil y tributaria. Transcurridos esos plazos, se suprimen o anonimizan.',
+    ],
+  },
+  {
+    title: 'Seguridad',
+    paragraphs: [
+      'Aplicamos medidas técnicas y organizativas para proteger tus datos frente a accesos no autorizados, pérdida, alteración o divulgación, entre ellas cifrado de las comunicaciones, almacenamiento seguro de contraseñas, control de accesos por roles y registro de actividad.',
+    ],
+  },
+  {
     title: 'Tus derechos',
-    content: 'De acuerdo con el RGPD y la LOPDGDD, tienes derecho a:',
+    paragraphs: [
+      `Conforme al RGPD y a la LOPDGDD, puedes ejercer en cualquier momento los siguientes derechos ${
+        contactEmail ? `escribiendo a ${contactEmail}` : 'desde la página de contacto'
+      }:`,
+    ],
     items: [
-      'Acceder a tu información personal en cualquier momento',
-      'Solicitar la corrección de información incorrecta o incompleta',
-      'Solicitar la eliminación de tus datos ("derecho al olvido")',
-      'Retirar tu consentimiento en cualquier momento sin efecto retroactivo',
-      'Presentar una reclamación ante la Agencia Española de Protección de Datos',
+      'Acceso a tus datos personales.',
+      'Rectificación de datos inexactos o incompletos.',
+      'Supresión («derecho al olvido»), cuando proceda.',
+      'Oposición y limitación del tratamiento.',
+      'Portabilidad de los datos que nos has facilitado.',
+      'Retirada del consentimiento, sin efecto retroactivo.',
+    ],
+    footnote:
+      'Si consideras que no hemos tratado tus datos correctamente, puedes presentar una reclamación ante la Agencia Española de Protección de Datos (www.aepd.es).',
+  },
+  {
+    title: 'Cambios en esta política',
+    paragraphs: [
+      'Podemos actualizar esta política. Te avisaremos de los cambios significativos mediante un aviso en la plataforma o por correo electrónico con al menos 30 días de antelación.',
     ],
   },
   {
-    number: '5',
-    title: 'Conservación de datos',
-    content:
-      'Conservamos tus datos personales durante el tiempo necesario para cumplir con los fines descritos en esta política, salvo que la ley exija o permita un período de conservación más largo. Los datos de cuenta activa se conservan mientras mantengas tu cuenta. Los datos de transacciones se conservan durante 7 años por obligaciones fiscales.',
-  },
-  {
-    number: '6',
-    title: 'Cambios a esta política',
-    content:
-      'Nos reservamos el derecho de actualizar esta Política de Privacidad. Te notificaremos cualquier cambio significativo mediante un aviso en la plataforma o por correo electrónico con al menos 30 días de antelación.',
-  },
-  {
-    number: '7',
     title: 'Contacto',
-    content: 'Si tienes preguntas sobre esta Política de Privacidad o deseas ejercer tus derechos:',
-    contact: { email: 'privacidad@origen.com', address: 'Calle Ejemplo 123, 28001 Madrid, España' },
+    paragraphs: ['Si tienes preguntas sobre esta política o quieres ejercer tus derechos:'],
+    contact: companyContact(company),
   },
-];
+  ];
+}
 
-export default function PrivacyPolicyPage() {
+export default async function PrivacyPolicyPage() {
+  const company = await fetchCompanyInfo();
   return (
-    <div className="min-h-screen bg-origen-crema/30">
-
-      {/* HEADER */}
-      <header className="sticky top-0 z-40 w-full bg-surface-alt/95 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 md:gap-3 group focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2 rounded-lg p-1">
-              <img
-                src="/origen-icon.svg"
-                alt=""
-                width={44}
-                height={44}
-                className="w-10 h-10 md:w-11 md:h-11 group-hover:scale-105 transition-transform"
-              />
-              <div className="flex flex-col">
-                <span className="text-lg md:text-xl font-semibold text-origen-bosque leading-tight">Origen.</span>
-                <span className="text-[10px] md:text-xs text-hoja-tinta -mt-1">Productores locales</span>
-              </div>
-            </Link>
-            <Link href="/auth/register" className="inline-flex items-center gap-1.5 md:gap-2 text-sm font-medium text-origen-bosque border-2 border-origen-pradera/30 hover:border-origen-pradera bg-surface-alt hover:bg-origen-crema px-4 py-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-origen-pradera focus:ring-offset-2">
-              <Store className="w-4 h-4 text-hoja-tinta" />
-              <span className="hidden sm:inline">Nuevo productor</span>
-              <span className="sm:hidden">Registro</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* MAIN */}
-      <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 lg:py-16">
-        <div className="max-w-3xl mx-auto">
-
-          {/* Volver */}
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-hoja-tinta hover:underline transition-colors mb-6">
-            <ArrowLeft className="w-4 h-4" />
-            Volver al inicio
-          </Link>
-
-          {/* Cabecera */}
-          <div className="mb-8 md:mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-origen-bosque to-origen-pino flex items-center justify-center shadow-md">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-origen-bosque">Política de Privacidad</h1>
-                <p className="text-sm text-muted-foreground mt-0.5">Última actualización: enero 2026</p>
-              </div>
-            </div>
-            <p className="text-muted-foreground leading-relaxed">
-              Esta Política de Privacidad describe cómo recopilamos, usamos y protegemos tu información personal cuando utilizas Origen Marketplace. Nos comprometemos a tratar tus datos con total transparencia y conforme al RGPD.
-            </p>
-          </div>
-
-          {/* Secciones */}
-          <div className="space-y-6">
-            {sections.map(section => (
-              <div key={section.number} className="bg-surface-alt rounded-2xl border border-border p-6 md:p-8 shadow-sm">
-                <h2 className="text-base md:text-lg font-bold text-origen-bosque mb-3 pb-2 border-b border-border-subtle flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-origen-pradera/10 text-hoja-tinta text-xs font-bold flex items-center justify-center shrink-0">
-                    {section.number}
-                  </span>
-                  {section.title}
-                </h2>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-3">{section.content}</p>
-                {section.items && (
-                  <ul className="space-y-2">
-                    {section.items.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <div className="w-4 h-4 rounded-full bg-origen-hoja/10 flex items-center justify-center shrink-0 mt-0.5">
-                          <CheckCircle className="w-2.5 h-2.5 text-origen-hoja" />
-                        </div>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {section.contact && (
-                  <div className="mt-3 space-y-1 text-sm">
-                    <p className="text-foreground">
-                      <span className="font-medium text-origen-bosque">Email: </span>
-                      <a href={`mailto:${section.contact.email}`} className="text-hoja-tinta hover:underline transition-colors underline">{section.contact.email}</a>
-                    </p>
-                    <p className="text-foreground">
-                      <span className="font-medium text-origen-bosque">Dirección: </span>{section.contact.address}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </main>
-
-      <AuthFooter variant="info" linkComponent={Link} />
-    </div>
+    <LegalPage
+      icon={<Shield />}
+      title="Política de privacidad"
+      updated="octubre 2026"
+      intro="Esta política describe cómo recopilamos, usamos y protegemos tu información personal cuando te registras y vendes en Origen Marketplace, conforme al RGPD y a la LOPDGDD."
+      sections={buildSections(company)}
+      related={[
+        { href: '/terminos', label: 'Términos y condiciones' },
+        { href: '/cookies', label: 'Política de cookies' },
+        { href: '/aviso-legal', label: 'Aviso legal' },
+      ]}
+    />
   );
 }

@@ -11,11 +11,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { initialRegistrationSchema } from '@/lib/validations/seller';
+import { maintenanceProxyResponse } from '@/lib/maintenance-server';
 
-const GATEWAY_URL =
-  process.env.API_GATEWAY_URL ??
-  process.env.NEXT_PUBLIC_API_GATEWAY_URL ??
-  'http://localhost:3001';
+const GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? 'http://localhost:3001';
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,10 +41,11 @@ export async function POST(request: NextRequest) {
         municipio:          validatedData.municipio,
         postalCode:         validatedData.postalCode,
         whyOrigin:          validatedData.whyOrigin,
-        acceptsTerms:       validatedData.acceptsTerms,
-        acceptsPrivacy:     validatedData.acceptsPrivacy,
       }),
     });
+
+    const maintenance = await maintenanceProxyResponse(response);
+    if (maintenance) return maintenance;
 
     const data = await response.json();
 

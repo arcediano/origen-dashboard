@@ -100,6 +100,8 @@ export interface ProductDraftInput {
   text: string;
   productImage: LabelImagePayload;
   labelImages?: LabelImagePayload[];
+  /** EAN/UPC real del envase (opcional, solo se usa si no hay fotos de etiqueta). */
+  barcode?: string;
 }
 
 /** Onboarding: foto + texto (+ etiquetas) → borrador completo. Imputa 1 unidad de cupo. */

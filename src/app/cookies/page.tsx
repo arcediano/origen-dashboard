@@ -6,6 +6,11 @@
 import { AuthFooter } from '@arcediano/ux-library';
 import Link from 'next/link';
 import { Store, ArrowRight, Cookie, CheckCircle, ArrowLeft, Info } from 'lucide-react';
+import { companyContact, fetchCompanyInfo, type CompanyInfo } from '@/lib/company-info';
+
+// Debe ser un literal (Next no admite constantes importadas en la config de segmento).
+// Mantener igual que COMPANY_INFO_REVALIDATE en @/lib/company-info.
+export const revalidate = 300;
 
 const cookieTypes = [
   {
@@ -43,7 +48,8 @@ const cookieTypes = [
   },
 ];
 
-const sections = [
+function buildSections(company: CompanyInfo | null) {
+  return [
   {
     number: '1',
     title: '¿Qué son las cookies?',
@@ -69,11 +75,14 @@ const sections = [
     number: '5',
     title: 'Contacto',
     content: 'Para cualquier pregunta sobre nuestra Política de Cookies:',
-    contact: { email: 'privacidad@origen.com', address: 'Calle Ejemplo 123, 28001 Madrid, España' },
+    contact: companyContact(company),
   },
-];
+  ];
+}
 
-export default function CookiePolicyPage() {
+export default async function CookiePolicyPage() {
+  const company = await fetchCompanyInfo();
+  const sections = buildSections(company);
   return (
     <div className="min-h-screen bg-origen-crema/30">
 
@@ -191,13 +200,26 @@ export default function CookiePolicyPage() {
               )}
               {section.contact && (
                 <div className="mt-3 space-y-1 text-sm">
-                  <p className="text-foreground">
-                    <span className="font-medium text-origen-bosque">Email: </span>
-                    <a href={`mailto:${section.contact.email}`} className="text-hoja-tinta hover:underline transition-colors underline">{section.contact.email}</a>
-                  </p>
-                  <p className="text-foreground">
-                    <span className="font-medium text-origen-bosque">Dirección: </span>{section.contact.address}
-                  </p>
+                  {section.contact.email && (
+
+                    <p className="text-foreground">
+
+                      <span className="font-medium text-origen-bosque">Email: </span>
+
+                      <a href={`mailto:${section.contact.email}`} className="text-hoja-tinta hover:underline transition-colors underline">{section.contact.email}</a>
+
+                    </p>
+
+                  )}
+                  {section.contact.address && (
+
+                    <p className="text-foreground">
+
+                      <span className="font-medium text-origen-bosque">Dirección: </span>{section.contact.address}
+
+                    </p>
+
+                  )}
                 </div>
               )}
             </div>

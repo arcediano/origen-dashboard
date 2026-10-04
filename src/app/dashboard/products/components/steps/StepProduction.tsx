@@ -315,15 +315,6 @@ export function StepProduction({
           {/* TAB HISTORIA */}
           <TabsContent value="story" className="space-y-6">
               <RichTextEditor
-                label="Historia del productor"
-                tooltip="Las historias auténticas conectan con los clientes."
-                value={productionInfo.story}
-                onChange={(html) => handleChange('story', html)}
-                placeholder="Tradición familiar, métodos artesanales, pasión por la calidad..."
-                minHeight="120px"
-              />
-
-              <RichTextEditor
                 label="Proceso artesanal"
                 tooltip="Describe las técnicas tradicionales, detalles del proceso, tiempos de maduracion."
                 value={productionInfo.artisanProcess}
