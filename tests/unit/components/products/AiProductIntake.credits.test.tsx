@@ -36,7 +36,7 @@ vi.mock('@stripe/react-stripe-js', () => ({
 import { AiAssistError } from '@/lib/api/ai-assist';
 import { AiProductIntake } from '@/app/dashboard/products/components/ai-onboarding/AiProductIntake';
 
-const base = { assistKey: 'clave-12345', quota: { used: 3, total: 3 }, onDraft: vi.fn(), onManual: vi.fn() };
+const base = { assistKey: 'clave-12345', onDraft: vi.fn(), onManual: vi.fn() };
 
 async function fillAndSubmit(user: ReturnType<typeof userEvent.setup>) {
   const file = new File(['x'], 'producto.jpg', { type: 'image/jpeg' });
@@ -53,12 +53,30 @@ describe('AiProductIntake — cupo agotado y compra de créditos', () => {
     pricingMock.mockResolvedValue({ purchasedCredits: 0, presets: [] });
   });
 
-  it('al agotar el cupo muestra el botón "Comprar créditos" y abre el modal', async () => {
+  it('con cupo agotado (de antemano, sin intentar generar) muestra el aviso y deshabilita "Crear con IA"', async () => {
+    const user = userEvent.setup();
+    render(<AiProductIntake {...base} quota={{ used: 3, total: 3 }} />);
+
+    expect(await screen.findByText('Sin créditos para el asistente de IA')).toBeTruthy();
+    const createButton = screen.getByRole('button', { name: 'Crear con IA' });
+    expect(createButton).toBeDisabled();
+    expect(draftMock).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Comprar créditos' }));
+    await waitFor(() => expect(pricingMock).toHaveBeenCalled());
+  });
+
+  it('con cupo disponible no muestra el aviso y "Crear con IA" queda habilitado al rellenar', async () => {
+    render(<AiProductIntake {...base} quota={{ used: 1, total: 3 }} />);
+    expect(screen.queryByText('Sin créditos para el asistente de IA')).toBeNull();
+  });
+
+  it('si el backend rechaza por cupo pese a que el cupo mostrado aún tenía margen, muestra el aviso reactivo', async () => {
     draftMock.mockRejectedValue(
       new AiAssistError('cupo agotado', 'AI_PRODUCER_QUOTA_EXCEEDED', 403),
     );
     const user = userEvent.setup();
-    render(<AiProductIntake {...base} />);
+    render(<AiProductIntake {...base} quota={{ used: 1, total: 3 }} />);
 
     await fillAndSubmit(user);
 
@@ -72,7 +90,7 @@ describe('AiProductIntake — cupo agotado y compra de créditos', () => {
   it('un error distinto (p. ej. tope mensual) no muestra el botón de comprar créditos', async () => {
     draftMock.mockRejectedValue(new AiAssistError('tope mensual', 'AI_MONTHLY_CAP_REACHED', 503));
     const user = userEvent.setup();
-    render(<AiProductIntake {...base} />);
+    render(<AiProductIntake {...base} quota={{ used: 1, total: 3 }} />);
 
     await fillAndSubmit(user);
 

@@ -37,12 +37,16 @@ const PROGRESS_MESSAGES = [
   'Ordenando ingredientes e información nutricional…',
 ];
 
+/** Mismo mensaje tanto si lo detecta el cupo ya cargado (antes de generar) como si lo rechaza el backend al intentarlo. */
+const QUOTA_EXCEEDED_MESSAGE =
+  'Has alcanzado el máximo de productos con asistente de IA. Compra más créditos para seguir usándolo, o rellena este producto a mano.';
+
 /** Mensajes claros por código de error del backend; el resto usa el mensaje ya en español. */
 function friendlyError(error: unknown): string {
   if (error instanceof AiAssistError) {
     switch (error.code) {
       case 'AI_PRODUCER_QUOTA_EXCEEDED':
-        return 'Has alcanzado el máximo de productos con asistente. Puedes crear este producto rellenándolo a mano.';
+        return QUOTA_EXCEEDED_MESSAGE;
       case 'AI_MONTHLY_CAP_REACHED':
       case 'AI_DISABLED':
       case 'AI_NOT_CONFIGURED':
@@ -134,8 +138,17 @@ export function AiProductIntake({
   const trimmedLength = text.trim().length;
   const trimmedBarcode = barcode.trim();
   const barcodeInvalid = trimmedBarcode.length > 0 && !BARCODE_RE.test(trimmedBarcode);
+  // Se sabe de antemano por el cupo ya cargado, sin esperar a que el backend
+  // rechace el intento — así el aviso (y el acceso a comprar créditos) sale
+  // nada más abrirse el asistente, no solo tras un primer intento fallido.
+  const quotaExhausted = !!quota && quota.used >= quota.total;
   const canSubmit =
-    !!photo && trimmedLength >= MIN_TEXT && !!assistKey && !isGenerating && !barcodeInvalid;
+    !!photo &&
+    trimmedLength >= MIN_TEXT &&
+    !!assistKey &&
+    !isGenerating &&
+    !barcodeInvalid &&
+    !quotaExhausted;
 
   const handlePhoto = async (list: FileList | null) => {
     const file = list?.[0];
@@ -381,6 +394,25 @@ export function AiProductIntake({
           </section>
         )}
 
+        {!error && quotaExhausted && (
+          <Alert variant="error">
+            <AlertTitle>Sin créditos para el asistente de IA</AlertTitle>
+            <AlertDescription>
+              <p>{QUOTA_EXCEEDED_MESSAGE}</p>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="mt-3 w-auto"
+                leftIcon={<Coins className="h-4 w-4" aria-hidden="true" />}
+                onClick={() => setShowAddCredits(true)}
+              >
+                Comprar créditos
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {error && (
           <Alert variant="error">
             <AlertTitle>No hemos podido preparar la ficha</AlertTitle>
@@ -424,7 +456,7 @@ export function AiProductIntake({
           >
             Crear con IA
           </Button>
-          {quota && (
+          {quota && !quotaExhausted && (
             <p className="text-center text-xs text-text-subtle">
               Cuenta como 1 de tus {quota.total} productos con asistente (has usado {quota.used}). Puedes repetir en este mismo producto sin gastar más.
             </p>
