@@ -59,6 +59,9 @@ interface LegalDocItem {
   description: string;
   documentRef: string | null;
   documentUrl: string | null;
+  /** Reverso — solo lo rellena el CIF. */
+  documentRefBack?: string | null;
+  documentUrlBack?: string | null;
   status: DocStatus | null;
   verifiedAt: string | null;
   expiresAt: string | null;
@@ -156,6 +159,8 @@ export default function CertificationsPage() {
   // Fechas de caducidad para nuevos uploads
   const [expiresAtInputs, setExpiresAtInputs] = useState<Partial<Record<DocType, string>>>({});
   const [expiresAtCertInputs, setExpiresAtCertInputs] = useState<Record<string, string>>({});
+  // CIF/NIF: las dos caras se eligen antes de guardar (una sola revisión para ambas)
+  const [cifSides, setCifSides] = useState<{ front?: UploadedFile; back?: UploadedFile }>({});
 
   // Confirmación de reemplazo de documento verificado
   const [confirmReplace, setConfirmReplace] = useState<{
@@ -283,6 +288,8 @@ export default function CertificationsPage() {
         if (existing) {
           existing.documentRef = d.documentKey ?? null;
           existing.documentUrl = d.documentUrl ?? null;
+          existing.documentRefBack = d.documentKeyBack ?? null;
+          existing.documentUrlBack = d.documentUrlBack ?? null;
           existing.status = d.status as DocStatus;
           existing.verifiedAt = d.verifiedAt ?? null;
           existing.expiresAt = d.expiresAt ?? null;
@@ -408,6 +415,42 @@ export default function CertificationsPage() {
         delete next[type];
         return next;
       });
+      await fetchData();
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Error al guardar el documento.');
+    } finally {
+      setSavingFor(null);
+    }
+  };
+
+  // ── Guardar CIF/NIF (anverso + reverso + caducidad en una sola petición) ─────
+  const handleCifSave = async () => {
+    const front = (cifSides.front as unknown as { file?: File } | undefined)?.file;
+    const back = (cifSides.back as unknown as { file?: File } | undefined)?.file;
+    if (!front || !back) {
+      setSaveError('Sube las dos caras del CIF/NIF (anverso y reverso) para guardarlo.');
+      return;
+    }
+    if (!expiresAtInputs.CIF) {
+      setSaveError('Debes indicar la fecha de caducidad del documento antes de guardarlo.');
+      return;
+    }
+
+    setSavingFor('CIF');
+    setSaveError(null);
+    try {
+      const [frontUpload, backUpload] = await Promise.all([
+        uploadFile(front, DOC_META.CIF.category),
+        uploadFile(back, DOC_META.CIF.category),
+      ]);
+      await updateProducerDocument('CIF', frontUpload.key, expiresAtInputs.CIF, backUpload.key);
+      setExpiresAtInputs((prev) => {
+        const next = { ...prev };
+        delete next.CIF;
+        return next;
+      });
+      setCifSides({});
+      setUploadingFor(null);
       await fetchData();
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Error al guardar el documento.');
@@ -691,8 +734,20 @@ export default function CertificationsPage() {
                                 leftIcon={<Eye className="w-4 h-4" />}
                                 onClick={() => handleOpenDocument(doc.documentRef, doc.documentUrl, false)}
                               >
-                                Ver
+                                {doc.type === 'CIF' ? 'Ver anverso' : 'Ver'}
                               </Button>
+                              {doc.type === 'CIF' && hasDocumentReference(doc.documentRefBack ?? null, doc.documentUrlBack ?? null) && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  aria-label={`Ver reverso del documento ${doc.label}`}
+                                  disabled={openingDoc === doc.documentRefBack}
+                                  leftIcon={<Eye className="w-4 h-4" />}
+                                  onClick={() => handleOpenDocument(doc.documentRefBack ?? null, doc.documentUrlBack ?? null, false)}
+                                >
+                                  Ver reverso
+                                </Button>
+                              )}
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -722,6 +777,47 @@ export default function CertificationsPage() {
                                   <Spinner size="sm" variant="primary" />
                                   <span className="text-xs text-muted-foreground">Subiendo documento…</span>
                                 </div>
+                              ) : doc.type === 'CIF' ? (
+                                <>
+                                  <p className="text-xs text-muted-foreground">
+                                    El CIF/NIF necesita las dos caras. Sube anverso y reverso y pulsa «Guardar».
+                                  </p>
+                                  {([
+                                    ['Anverso', 'front'],
+                                    ['Reverso', 'back'],
+                                  ] as const).map(([label, side]) => (
+                                    <div key={side} className="space-y-1.5">
+                                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+                                      <FileUpload
+                                        value={cifSides[side] ? [cifSides[side] as UploadedFile] : []}
+                                        onChange={(files) => setCifSides((prev) => ({ ...prev, [side]: files[0] }))}
+                                        helperText="PDF, JPG o PNG · Máx 5MB"
+                                        accept=".pdf,.jpg,.jpeg,.png"
+                                        multiple={false}
+                                        maxSize={5}
+                                      />
+                                    </div>
+                                  ))}
+                                  <div className="flex flex-wrap items-center justify-end gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setCifSides({});
+                                        setUploadingFor(null);
+                                      }}
+                                    >
+                                      Cancelar
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      disabled={!cifSides.front || !cifSides.back || !expiresAtInputs.CIF}
+                                      onClick={() => void handleCifSave()}
+                                    >
+                                      Guardar CIF/NIF
+                                    </Button>
+                                  </div>
+                                </>
                               ) : (
                                 <>
                                   <FileUpload
