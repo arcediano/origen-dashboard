@@ -37,9 +37,15 @@ function validateDocumentSlot(
   idBase: string,
   today: string,
   out: StepIssue[],
+  /** El CIF/NIF exige también el reverso. */
+  requireBack = false,
 ) {
   if (!slot.file) {
     out.push({ message: `Sube el documento: ${label}.`, fieldId: idBase });
+    return;
+  }
+  if (requireBack && !slot.fileBack) {
+    out.push({ message: `Sube también el reverso: ${label}.`, fieldId: `${idBase}-back` });
     return;
   }
   if (slot.status === 'VERIFIED') return; // verificado: no se toca
@@ -111,7 +117,7 @@ export function validateStep(stepIndex: number, form: OnboardingFormData, ctx: V
     }
     case 3: {
       const d = form.step4;
-      validateDocumentSlot(d.cif, 'CIF / NIF', 'onb-doc-cif', today, issues);
+      validateDocumentSlot(d.cif, 'CIF / NIF', 'onb-doc-cif', today, issues, true);
       validateDocumentSlot(d.seguroRc, 'seguro de responsabilidad civil', 'onb-doc-seguroRc', today, issues);
       validateDocumentSlot(d.manipulador, 'manipulador de alimentos', 'onb-doc-manipulador', today, issues);
       for (const cert of d.certifications) {

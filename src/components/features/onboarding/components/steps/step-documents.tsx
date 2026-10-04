@@ -54,7 +54,7 @@ const CERT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
 };
 
 const LEGAL_DOCS: Array<{ key: LegalDocumentKey; title: string; description: string }> = [
-  { key: 'cif', title: 'CIF / NIF', description: 'El documento que identifica fiscalmente a tu negocio.' },
+  { key: 'cif', title: 'CIF / NIF', description: 'El documento que identifica fiscalmente a tu negocio. Sube el anverso y el reverso.' },
   { key: 'seguroRc', title: 'Seguro de responsabilidad civil', description: 'Cobertura mínima de 150.000 €. Es obligatorio para vender en Origen.' },
   { key: 'manipulador', title: 'Manipulador de alimentos', description: 'Necesario para cualquier productor de alimentos.' },
 ];
@@ -135,7 +135,9 @@ function DocumentField({ idBase, title, description, slot, onChange, errors, req
                 helperText={
                   verified
                     ? 'Documento verificado: para cambiar la caducidad, quítalo y sube el renovado.'
-                    : 'Te avisaremos antes de que caduque.'
+                    : slot.expiresAt
+                      ? 'Te avisaremos antes de que caduque.'
+                      : 'Obligatoria: sin esta fecha no podrás pulsar "Guardar y continuar".'
                 }
               />
             </div>
@@ -149,6 +151,115 @@ function DocumentField({ idBase, title, description, slot, onChange, errors, req
             multiple={false}
             maxSize={5}
           />
+        )}
+        <FieldError>{errors[idBase]}</FieldError>
+      </div>
+    </div>
+  );
+}
+
+interface CifDocumentFieldProps {
+  idBase: string;
+  title: string;
+  description?: string;
+  slot: DocumentSlot;
+  onChange: (slot: DocumentSlot) => void;
+  errors: Record<string, string>;
+}
+
+/**
+ * El CIF/NIF es el único documento legal que exige dos fotos (anverso y
+ * reverso) además de la caducidad. Las dos caras comparten una sola revisión:
+ * cambiar cualquiera de las dos vuelve a poner el documento en revisión.
+ */
+function CifDocumentField({ idBase, title, description, slot, onChange, errors }: CifDocumentFieldProps) {
+  const today = todayISO();
+  const verified = slot.status === 'VERIFIED';
+  const badge = slot.status ? STATUS_BADGE[slot.status] : undefined;
+  const dateError = errors[`${idBase}-expires`];
+  const backError = errors[`${idBase}-back`];
+
+  const handleUploadSide = (side: 'file' | 'fileBack') => (files: UploadedFile[]) => {
+    if (files.length === 0) return;
+    // Cualquier cara nueva se revisa de nuevo: se descarta el estado/fecha del anterior.
+    onChange({ ...slot, [side]: { ...files[0], status: 'pending' }, expiresAt: undefined, originalExpiresAt: null, status: undefined });
+  };
+
+  const renderSide = (label: string, file: UploadedFile | undefined, side: 'file' | 'fileBack') => (
+    <div className="space-y-2">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      {file ? (
+        <FileRow
+          name={file.name}
+          meta={[kb(file.size), verified ? 'Verificado por Origen' : 'Pendiente de verificación'].filter(Boolean).join(' · ')}
+          removeLabel={`Quitar el documento ${title} (${label.toLowerCase()})`}
+          onRemove={() => onChange({})}
+        />
+      ) : (
+        <FileUpload
+          value={[]}
+          onChange={handleUploadSide(side)}
+          helperText="PDF, JPG o PNG · máx. 5 MB"
+          accept=".pdf,.jpg,.jpeg,.png"
+          multiple={false}
+          maxSize={5}
+        />
+      )}
+    </div>
+  );
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-sm font-semibold text-origen-bosque sm:text-base">{title}</h3>
+          {!slot.file && <Badge variant="danger" size="xs">Obligatorio</Badge>}
+          {slot.file && badge && <Badge variant={badge.variant} size="xs">{badge.label}</Badge>}
+        </div>
+        {description && <p className="mt-0.5 text-xs text-text-subtle sm:text-sm">{description}</p>}
+      </div>
+
+      {slot.status === 'REJECTED' && !slot.file && (
+        <Alert variant="error">
+          Este documento fue rechazado{slot.rejectedReason ? `: ${slot.rejectedReason}` : ''}. Sube uno nuevo.
+        </Alert>
+      )}
+      {slot.status === 'EXPIRED' && !slot.file && (
+        <Alert variant="warning">Este documento ha caducado. Sube la versión renovada.</Alert>
+      )}
+
+      <div id={idBase} tabIndex={-1} className="space-y-4 focus:outline-hidden">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {renderSide('Anverso', slot.file, 'file')}
+          {renderSide('Reverso', slot.fileBack, 'fileBack')}
+        </div>
+        {slot.file && !slot.fileBack && (
+          <p className="text-xs text-feedback-danger">
+            Falta el reverso: sube también la otra cara del documento para continuar.
+          </p>
+        )}
+        <FieldError>{backError}</FieldError>
+
+        {slot.file && (
+          <div className="max-w-xs">
+            <DateInput
+              id={`${idBase}-expires`}
+              label="Fecha de caducidad"
+              required
+              min={today}
+              value={slot.expiresAt ?? ''}
+              disabled={verified}
+              onChange={(e) => onChange({ ...slot, expiresAt: e.target.value || undefined })}
+              error={dateError}
+              helperText={
+                verified
+                  ? 'Documento verificado: para cambiar la caducidad, quítalo y sube el renovado.'
+                  : slot.expiresAt
+                    ? 'Te avisaremos antes de que caduque.'
+                    : 'Obligatoria: sin esta fecha no podrás pulsar "Guardar y continuar".'
+              }
+            />
+          </div>
         )}
         <FieldError>{errors[idBase]}</FieldError>
       </div>
@@ -198,19 +309,32 @@ export function EnhancedStep4Documents({ data, onChange, errors = {} }: Enhanced
         description="Necesarios para verificar tu negocio. Cada uno con su fecha de caducidad."
       >
         <div className="divide-y divide-border-subtle">
-          {LEGAL_DOCS.map((doc) => (
-            <div key={doc.key} className="py-4 first:pt-0 last:pb-0">
-              <DocumentField
-                idBase={`onb-doc-${doc.key}`}
-                title={doc.title}
-                description={doc.description}
-                slot={data[doc.key]}
-                onChange={(slot) => setLegal(doc.key, slot)}
-                errors={errors}
-                required
-              />
-            </div>
-          ))}
+          {LEGAL_DOCS.map((doc) =>
+            doc.key === 'cif' ? (
+              <div key={doc.key} className="py-4 first:pt-0 last:pb-0">
+                <CifDocumentField
+                  idBase={`onb-doc-${doc.key}`}
+                  title={doc.title}
+                  description={doc.description}
+                  slot={data[doc.key]}
+                  onChange={(slot) => setLegal(doc.key, slot)}
+                  errors={errors}
+                />
+              </div>
+            ) : (
+              <div key={doc.key} className="py-4 first:pt-0 last:pb-0">
+                <DocumentField
+                  idBase={`onb-doc-${doc.key}`}
+                  title={doc.title}
+                  description={doc.description}
+                  slot={data[doc.key]}
+                  onChange={(slot) => setLegal(doc.key, slot)}
+                  errors={errors}
+                  required
+                />
+              </div>
+            ),
+          )}
         </div>
       </StepSection>
 

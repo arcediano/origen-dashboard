@@ -126,6 +126,8 @@ export type DocumentStatus = 'PENDING' | 'VERIFIED' | 'REJECTED' | 'EXPIRED';
 export interface DocumentSlot {
   /** Archivo nuevo (con `file`) o ya subido/hidratado (con `key`). */
   file?: UploadedFile;
+  /** Reverso del documento. Solo lo usa el CIF/NIF (anverso en `file`, reverso aquí). */
+  fileBack?: UploadedFile;
   /** Caducidad en formato `YYYY-MM-DD` (lo que edita el `DateInput`). */
   expiresAt?: string;
   /** Caducidad ISO tal como la devolvió el servidor (para reenviarla intacta si no cambia). */

@@ -69,4 +69,38 @@ describe('EnhancedStep4Documents', () => {
     render(<Harness errors={{ 'onb-doc-cif': 'Sube el documento: CIF / NIF.' }} />);
     expect(screen.getByText('Sube el documento: CIF / NIF.')).toBeInTheDocument();
   });
+
+  it('CIF: con solo el anverso subido, avisa de que falta el reverso y no muestra aún la caducidad', () => {
+    render(<Harness initial={{ cif: { file: file('cif-anverso.pdf') } }} />);
+    expect(screen.getByText('cif-anverso.pdf')).toBeInTheDocument();
+    expect(screen.getByText(/falta el reverso/i)).toBeInTheDocument();
+    // La caducidad sí se muestra ya con solo el anverso (para no bloquear su edición).
+    expect(screen.getAllByLabelText(/fecha de caducidad/i)).toHaveLength(1);
+  });
+
+  it('CIF: con anverso y reverso subidos, ya no avisa de que falta nada', () => {
+    render(
+      <Harness
+        initial={{ cif: { file: file('cif-anverso.pdf'), fileBack: file('cif-reverso.pdf') } }}
+      />,
+    );
+    expect(screen.getByText('cif-anverso.pdf')).toBeInTheDocument();
+    expect(screen.getByText('cif-reverso.pdf')).toBeInTheDocument();
+    expect(screen.queryByText(/falta el reverso/i)).not.toBeInTheDocument();
+  });
+
+  it('CIF: el aviso de caducidad obligatoria explica por qué bloquea "Guardar y continuar"', () => {
+    render(<Harness initial={{ cif: { file: file('cif-anverso.pdf'), fileBack: file('cif-reverso.pdf') } }} />);
+    expect(screen.getByText(/sin esta fecha no podrás pulsar/i)).toBeInTheDocument();
+  });
+
+  it('pinta el error de reverso faltante (fieldId con sufijo -back)', () => {
+    render(
+      <Harness
+        initial={{ cif: { file: file('cif-anverso.pdf') } }}
+        errors={{ 'onb-doc-cif-back': 'Sube también el reverso: CIF / NIF.' }}
+      />,
+    );
+    expect(screen.getByText('Sube también el reverso: CIF / NIF.')).toBeInTheDocument();
+  });
 });

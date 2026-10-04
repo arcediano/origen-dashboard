@@ -53,13 +53,17 @@ function docType(key: string): string {
 function slotFromApi(doc: {
   status: ApiDocumentStatus;
   documentKey?: string | null;
+  documentKeyBack?: string | null;
   expiresAt?: string | null;
   rejectedReason?: string | null;
   pendingDocumentKey?: string | null;
+  pendingDocumentKeyBack?: string | null;
   pendingExpiresAt?: string | null;
 } | undefined): DocumentSlot {
   if (!doc) return {};
   const key = doc.pendingDocumentKey ?? doc.documentKey ?? null;
+  // Reverso (solo CIF): sigue la misma sustitución pendiente (ADR-009) que el anverso.
+  const keyBack = doc.pendingDocumentKey ? doc.pendingDocumentKeyBack ?? doc.documentKeyBack : doc.documentKeyBack;
   const expires = doc.pendingDocumentKey ? doc.pendingExpiresAt ?? doc.expiresAt : doc.expiresAt;
   const status: DocumentStatus = doc.pendingDocumentKey ? 'PENDING' : doc.status;
   const reusable = Boolean(key) && (status === 'PENDING' || status === 'VERIFIED');
@@ -68,6 +72,9 @@ function slotFromApi(doc: {
     rejectedReason: doc.rejectedReason ?? null,
     file: reusable && key
       ? { ...fileFromKey(key, null, 'documento', docType(key)), status: status.toLowerCase() }
+      : undefined,
+    fileBack: reusable && keyBack
+      ? { ...fileFromKey(keyBack, null, 'documento', docType(keyBack)), status: status.toLowerCase() }
       : undefined,
     expiresAt: reusable && expires ? expires.slice(0, 10) : undefined,
     originalExpiresAt: reusable ? expires ?? null : null,
