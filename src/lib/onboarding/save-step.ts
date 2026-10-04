@@ -78,8 +78,9 @@ export async function saveOnboardingStep(stepIndex: number, form: OnboardingForm
 
     case 3: {
       const d = form.step4;
-      const [cifKey, seguroRcKey, manipuladorAlimentosKey] = await Promise.all([
+      const [cifKey, cifBackKey, seguroRcKey, manipuladorAlimentosKey] = await Promise.all([
         ensureKey(d.cif.file, 'documents/cif'),
+        ensureKey(d.cif.fileBack, 'documents/cif'),
         ensureKey(d.seguroRc.file, 'documents/seguro-rc'),
         ensureKey(d.manipulador.file, 'documents/manipulador-alimentos'),
       ]);
@@ -93,6 +94,7 @@ export async function saveOnboardingStep(stepIndex: number, form: OnboardingForm
       );
       const keys: Step4Keys = {
         cifKey,
+        cifBackKey,
         seguroRcKey,
         manipuladorAlimentosKey,
         certifications: d.certifications.map((c, i) => ({
@@ -109,7 +111,7 @@ export async function saveOnboardingStep(stepIndex: number, form: OnboardingForm
       });
       return {
         step4: {
-          cif: settle(d.cif, cifKey),
+          cif: { ...settle(d.cif, cifKey), fileBack: d.cif.fileBack ? withKey(d.cif.fileBack, cifBackKey) : undefined },
           seguroRc: settle(d.seguroRc, seguroRcKey),
           manipulador: settle(d.manipulador, manipuladorAlimentosKey),
           certifications: d.certifications.map((c, i): CertificationSlot => ({ ...settle(c, certKeys[i]), certificationId: c.certificationId })),

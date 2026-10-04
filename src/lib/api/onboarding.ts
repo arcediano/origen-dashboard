@@ -126,10 +126,14 @@ export interface OnboardingData {
     status: ApiDocumentStatus;
     documentKey?: string | null;
     documentUrl?: string | null;
+    /** Reverso — solo el CIF lo rellena; el resto de tipos van siempre `null`. */
+    documentKeyBack?: string | null;
+    documentUrlBack?: string | null;
     verifiedAt?: string | null;
     expiresAt?: string | null;
     rejectedReason?: string | null;
     pendingDocumentKey?: string | null; // ADR-009
+    pendingDocumentKeyBack?: string | null; // ADR-009
     pendingExpiresAt?: string | null; // ADR-009
   }> | null;
   logistics?: {
@@ -295,6 +299,8 @@ export async function getShippingCoverage(): Promise<ShippingCoverage> {
 
 export interface Step4Keys {
   cifKey?: string;
+  /** Reverso del CIF/NIF. Obligatorio en el servidor en cuanto se envía `cifKey`. */
+  cifBackKey?: string;
   seguroRcKey?: string;
   manipuladorAlimentosKey?: string;
   /** Lista completa de certificaciones declaradas (reemplaza la del servidor). */
@@ -313,6 +319,7 @@ export function resolveExpiresAt(slot: Pick<DocumentSlot, 'expiresAt' | 'origina
 export function buildStep4Body(data: DocumentsData, keys: Step4Keys) {
   return {
     cifKey: keys.cifKey,
+    cifBackKey: keys.cifBackKey,
     cifExpiresAt: resolveExpiresAt(data.cif),
     seguroRcKey: keys.seguroRcKey,
     seguroRcExpiresAt: resolveExpiresAt(data.seguroRc),
@@ -370,9 +377,12 @@ export async function updateProducerDocument(
   type: 'CIF' | 'SEGURO_RC' | 'MANIPULADOR_ALIMENTOS',
   documentKey: string,
   expiresAt?: string,
+  /** Reverso del documento. Solo aplica a CIF (anverso + reverso). */
+  documentBackKey?: string,
 ): Promise<{ success: boolean }> {
   return gatewayClient.patch(`/producers/me/documents/${type}`, {
     documentKey,
+    documentBackKey,
     expiresAt: expiresAt ?? null,
   });
 }

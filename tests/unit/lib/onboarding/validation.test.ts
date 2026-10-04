@@ -67,13 +67,18 @@ describe('paso 4 (documentación)', () => {
     expect(ids(3, form())).toEqual(['onb-doc-cif', 'onb-doc-seguroRc', 'onb-doc-manipulador']);
   });
   it('la caducidad es obligatoria y futura; un verificado no la exige', () => {
-    const base = { ...INITIAL_FORM_DATA.step4, cif: { file, expiresAt: '2030-01-01' }, seguroRc: { file }, manipulador: { file, expiresAt: '2026-01-01' } };
+    const base = { ...INITIAL_FORM_DATA.step4, cif: { file, fileBack: file, expiresAt: '2030-01-01' }, seguroRc: { file }, manipulador: { file, expiresAt: '2026-01-01' } };
     expect(ids(3, form({ step4: base }))).toEqual(['onb-doc-seguroRc-expires', 'onb-doc-manipulador-expires']);
     const verified = { ...base, seguroRc: { file, status: 'VERIFIED' as const }, manipulador: { file, expiresAt: '2031-01-01' } };
     expect(ids(3, form({ step4: verified }))).toEqual([]);
   });
+  it('el CIF con solo el anverso pide el reverso (sin llegar a pedir la caducidad)', () => {
+    const base = { ...INITIAL_FORM_DATA.step4, cif: { file, expiresAt: '2030-01-01' }, seguroRc: { file, expiresAt: '2030-01-01' }, manipulador: { file, expiresAt: '2030-01-01' } };
+    expect(ids(3, form({ step4: base }))).toEqual(['onb-doc-cif-back']);
+    expect(ids(3, form({ step4: { ...base, cif: { ...base.cif, fileBack: file } } }))).toEqual([]);
+  });
   it('una certificación con documento necesita caducidad; sin documento no pide nada', () => {
-    const docs = { cif: { file, expiresAt: '2030-01-01' }, seguroRc: { file, expiresAt: '2030-01-01' }, manipulador: { file, expiresAt: '2030-01-01' } };
+    const docs = { cif: { file, fileBack: file, expiresAt: '2030-01-01' }, seguroRc: { file, expiresAt: '2030-01-01' }, manipulador: { file, expiresAt: '2030-01-01' } };
     expect(ids(3, form({ step4: { ...docs, certifications: [{ certificationId: 'ecologico' }] } }))).toEqual([]);
     expect(ids(3, form({ step4: { ...docs, certifications: [{ certificationId: 'ecologico', file }] } }))).toEqual(['onb-cert-ecologico-expires']);
   });
