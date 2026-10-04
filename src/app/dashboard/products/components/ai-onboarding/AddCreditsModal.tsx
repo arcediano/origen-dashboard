@@ -85,7 +85,7 @@ function PresetCard({
       type="button"
       onClick={onSelect}
       className={cn(
-        'relative flex flex-1 flex-col items-center gap-1 rounded-xl border-2 px-3 py-4 text-center transition-colors',
+        'relative flex flex-col items-center gap-1 rounded-xl border-2 px-3 py-4 text-center transition-colors sm:flex-1',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera',
         selected
           ? 'border-origen-bosque bg-origen-pradera/5'
@@ -312,7 +312,7 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
             </Elements>
           ) : (
             <>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex">
                 {pricing.presets.map((quote) => (
                   <PresetCard
                     key={quote.credits}
@@ -331,7 +331,7 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
                     setSelectedCredits(null);
                   }}
                   className={cn(
-                    'relative flex flex-1 flex-col items-center justify-center gap-1 rounded-xl border-2 px-3 py-4 text-center transition-colors',
+                    'relative flex flex-col items-center justify-center gap-1 rounded-xl border-2 px-3 py-4 text-center transition-colors sm:flex-1',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera',
                     isCustom
                       ? 'border-origen-bosque bg-origen-pradera/5'
