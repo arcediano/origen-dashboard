@@ -249,15 +249,19 @@ export default function CreateProductPage() {
         title={mode === 'ai-intake' ? 'Crea tu producto en un minuto' : 'Crear producto'}
         description={
           mode === 'ai-intake'
-            ? 'Sube una foto y cuéntanos qué es. Preparamos la ficha completa; tú solo la revisas y decides.'
+            ? 'Sube una foto y cuéntanos qué es con tus palabras (origen, elaboración, formato…). Preparamos la ficha completa combinando ambas cosas; tú solo la revisas y decides.'
             : mode === 'ai-review'
               ? 'Revisa la ficha y publícala'
               : 'Completa los pasos para publicar tu producto'
         }
         badgeIcon={mode === 'ai-intake' ? Sparkles : Package}
         badgeText={mode === 'ai-intake' ? 'Asistente de IA' : 'Nuevo producto'}
-        tooltip="Creación de producto"
-        tooltipDetailed="Completa todos los pasos para publicar tu producto en el catálogo"
+        tooltip={mode === 'ai-intake' ? 'Asistente de IA' : 'Creación de producto'}
+        tooltipDetailed={
+          mode === 'ai-intake'
+            ? 'La foto le dice a la IA qué aspecto tiene tu producto, pero no puede contarle su origen, cómo lo elaboras o el formato — eso solo lo sabes tú. Escribe unas líneas con esos detalles: cuanta más información le des, mejor saldrá la ficha. Después la revisas tú antes de publicar.'
+            : 'Completa todos los pasos para publicar tu producto en el catálogo'
+        }
         showBackButton
         onBack={() => setShowCancelDialog(true)}
         actions={
