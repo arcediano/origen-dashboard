@@ -37,6 +37,8 @@ import { getShippingCoverage, loadOnboardingData, saveStep3, respondPickupAssign
 import { formatEstimatedDelivery, DELIVERY_TIME_UNIT_OPTIONS, type DeliveryTimeUnit } from '@/lib/format-estimated-delivery';
 import { pickDeliveryIcon } from '@/components/features/onboarding/components/steps/step-shipping';
 import type { ShippingCoverage, ShippingZone as OnboardingShippingZone } from '@/lib/onboarding/types';
+import { NO_FREE_SHIPPING, freeShippingFromApi, validateFreeShipping, type FreeShippingConfig } from '@/lib/onboarding/free-shipping';
+import { FreeShippingField } from '@/components/features/onboarding/components/FreeShippingField';
 import {
   AlertCircle,
   Check,
@@ -109,6 +111,7 @@ export default function EnviosPage() {
 
   // Configuración editable del productor
   const [minOrderAmount, setMinOrderAmount] = useState<number>(0);
+  const [freeShipping, setFreeShipping] = useState<FreeShippingConfig>(NO_FREE_SHIPPING);
   const [sustainablePackaging, setSustainablePackaging] = useState(false);
   const [packagingDescription, setPackagingDescription] = useState('');
   const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOptionRow[]>([]);
@@ -131,6 +134,7 @@ export default function EnviosPage() {
       setPickupAssignment(response?.data?.pickupAssignment ?? null);
       setDeliveryChoice(logistics?.deliveryChoice ?? null);
       setMinOrderAmount(Number(logistics?.minOrderAmount ?? 0));
+      setFreeShipping(freeShippingFromApi(logistics?.freeShippingFrom));
       setSustainablePackaging(Boolean(logistics?.sustainablePackaging));
       setPackagingDescription(logistics?.packagingDescription ?? '');
       setDeliveryOptions(
@@ -250,6 +254,11 @@ export default function EnviosPage() {
       setSaveError('El pedido mínimo no puede ser negativo.');
       return;
     }
+    const freeShippingError = deliveryChoice === 'own' ? validateFreeShipping(freeShipping) : undefined;
+    if (freeShippingError) {
+      setSaveError(freeShippingError);
+      return;
+    }
 
     setIsSaving(true);
     setSaveError(null);
@@ -265,6 +274,7 @@ export default function EnviosPage() {
     const payload = {
       deliveryChoice,
       minOrderAmount,
+      freeShipping,
       sustainablePackaging,
       packagingDescription: sustainablePackaging ? packagingDescription : '',
       // isDeliveryOptionIncomplete ya garantizó que ninguna opción está incompleta antes de llegar aquí.
@@ -517,6 +527,16 @@ export default function EnviosPage() {
             <p className="text-xs text-muted-foreground mt-3">Sin mínimo por defecto. Si lo fijas, recomendamos 20-30 € para venta al público general</p>
           </CardContent>
         </Card>
+
+        {/* ENVÍO GRATUITO — solo logística gestionada por el productor */}
+        {deliveryChoice === 'own' && (
+          <Card variant="section" padding="md">
+            <CardIconHeader icon={<Truck className="h-5 w-5" />} title="Envío gratuito" description="Opcional: gratis a partir de un importe, o siempre" />
+            <CardContent>
+              <FreeShippingField value={freeShipping} onChange={setFreeShipping} />
+            </CardContent>
+          </Card>
+        )}
 
         {/* ══════════════════════════════════════════════════════════════════
             MÉTODOS DE ENVÍO — lista editable

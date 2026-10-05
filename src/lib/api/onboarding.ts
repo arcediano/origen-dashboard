@@ -9,6 +9,7 @@
 
 import { gatewayClient } from './client';
 import { isDeliveryOptionComplete } from '@/lib/onboarding/shipping';
+import { freeShippingToApi } from '@/lib/onboarding/free-shipping';
 import type {
   DeliveryChoice,
   DeliveryTimeUnit,
@@ -141,6 +142,8 @@ export interface OnboardingData {
     /** Elección explícita del productor (delegar en Origen / gestión propia). */
     deliveryChoice?: DeliveryChoice | null;
     minOrderAmount?: number;
+    /** Envío gratuito (null = sin envío gratuito, 0 = siempre, > 0 = desde ese importe). */
+    freeShippingFrom?: number | string | null;
     sustainablePackaging?: boolean;
     packagingDescription?: string | null;
     deliveryOptions?: Array<{
@@ -259,6 +262,8 @@ export function buildStep3Body(data: ShippingData & { deliveryChoice: DeliveryCh
   return {
     deliveryChoice: data.deliveryChoice,
     minOrderAmount: data.minOrderAmount,
+    // Solo aplica con envío propio; delegando en Origen se limpia.
+    freeShippingFrom: data.deliveryChoice === 'own' ? freeShippingToApi(data.freeShipping) : null,
     sustainablePackaging: data.sustainablePackaging,
     packagingDescription: data.sustainablePackaging ? data.packagingDescription.trim() || undefined : undefined,
     deliveryOptions: data.deliveryOptions.filter(isDeliveryOptionComplete).map((opt) => ({

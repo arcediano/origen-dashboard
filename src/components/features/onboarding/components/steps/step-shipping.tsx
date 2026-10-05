@@ -59,6 +59,7 @@ import {
 import { FieldError, OptionalBadge } from '../FormBits';
 import { StepSection } from '../StepSection';
 import { ZoneEditor } from '../ZoneEditor';
+import { FreeShippingField } from '../FreeShippingField';
 
 export type { ShippingData as EnhancedShippingData };
 
@@ -422,6 +423,22 @@ export function EnhancedStep3Shipping({
           />
         </div>
       </StepSection>
+
+      {/* ── Envío gratuito (solo envío gestionado por el productor) ─────── */}
+      {data.deliveryChoice === 'own' && (
+        <StepSection
+          icon={<Truck className="h-5 w-5" />}
+          title="Envío gratuito"
+          description="Decide si tus clientes pagan el envío o es gratuito a partir de un importe."
+          badge={<OptionalBadge />}
+        >
+          <FreeShippingField
+            value={data.freeShipping}
+            onChange={(freeShipping) => update({ freeShipping })}
+            error={errors['onb-free-shipping-amount']}
+          />
+        </StepSection>
+      )}
 
       {/* ── Packaging sostenible ────────────────────────────────────────── */}
       <StepSection

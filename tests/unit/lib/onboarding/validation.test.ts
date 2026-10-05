@@ -56,6 +56,14 @@ describe('paso 3 (envíos)', () => {
     expect(ids(2, form({ step3: { ...step3, deliveryChoice: 'own', deliveryOptions: [opt] } }))).toEqual([]);
     expect(ids(2, form({ step3: { ...step3, deliveryChoice: 'own', deliveryOptions: [{ ...opt, price: 0 }] } }))).toEqual(['onb-delivery-options']);
   });
+  it('envío gratuito: con gestión propia, "desde un importe" exige importe > 0; delegando no se valida', () => {
+    const opt = { id: 'a', name: 'E', description: 'd', price: 5, estimatedDaysValue: 2, estimatedDaysUnit: 'DAYS' as const };
+    const own = { ...step3, deliveryChoice: 'own' as const, deliveryOptions: [opt] };
+    expect(ids(2, form({ step3: { ...own, freeShipping: { mode: 'from', amount: 0 } } }))).toEqual(['onb-free-shipping-amount']);
+    expect(ids(2, form({ step3: { ...own, freeShipping: { mode: 'from', amount: 30 } } }))).toEqual([]);
+    expect(ids(2, form({ step3: { ...own, freeShipping: { mode: 'always', amount: 0 } } }))).toEqual([]);
+    expect(ids(2, form({ step3: { ...step3, deliveryChoice: 'delegated', freeShipping: { mode: 'from', amount: 0 } } }))).toEqual([]);
+  });
   it('las zonas son obligatorias; el pedido mínimo es opcional (0 = sin mínimo) pero no negativo', () => {
     expect(ids(2, form({ step3: { ...INITIAL_FORM_DATA.step3, deliveryChoice: 'delegated' } }))).toEqual(['onb-zone-value']);
     expect(ids(2, form({ step3: { ...INITIAL_FORM_DATA.step3, deliveryChoice: 'delegated', minOrderAmount: -5 } }))).toEqual(['onb-zone-value', 'onb-min-order']);
