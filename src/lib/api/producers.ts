@@ -55,6 +55,13 @@ export interface ProducerProfileVisual {
 }
 
 export interface ProducerProfileData {
+  /** Presencia online indicada en la solicitud de alta (solo lectura). */
+  registration?: {
+    website?: string | null;
+    instagram?: string | null;
+    facebook?: string | null;
+    tiktok?: string | null;
+  } | null;
   fiscal: {
     businessName?: string;
     legalName?: string;
@@ -63,7 +70,6 @@ export interface ProducerProfileData {
     categories?: string[];
     entityType?: string;
     legalRepresentativeName?: string;
-    whyOrigin?: string | null;
     billingAddress?: {
       street?: string;
       streetNumber?: string;
@@ -88,6 +94,7 @@ export interface ProducerProfileData {
     tagline?: string | null;
     description?: string | null;
     productionPhilosophy?: string | null;
+    animalWelfare?: string | null;
     values?: string[];
     website?: string | null;
     introVideoUrl?: string | null;
@@ -132,7 +139,7 @@ export interface UpdateProducerProfilePayload {
   };
   tagline?: string;
   description?: string;
-  whyOrigin?: string;
+  animalWelfare?: string;
   productionPhilosophy?: string;
   values?: string[];
   website?: string;

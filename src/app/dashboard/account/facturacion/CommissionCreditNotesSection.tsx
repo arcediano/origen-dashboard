@@ -40,7 +40,7 @@ function handleDownload(id: string) {
 
 function CreditNoteCard({ note }: { note: CommissionCreditNoteItem }) {
   return (
-    <div className="rounded-xl sm:rounded-2xl border border-border shadow-origen px-4 py-4 flex items-center gap-3.5">
+    <div className="rounded-xl sm:rounded-2xl border border-border bg-surface-alt shadow-origen px-4 py-4 flex items-center gap-3.5">
       <div className="w-11 h-11 rounded-2xl bg-origen-pastel flex items-center justify-center shrink-0 shadow-subtle">
         <FileMinus className="w-5 h-5 text-origen-pino" />
       </div>

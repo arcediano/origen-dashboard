@@ -19,6 +19,7 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { CommissionInvoicesTable } from '../../facturas/components/CommissionInvoicesTable';
 import { CommissionInvoiceCard, CommissionInvoiceCardSkeleton } from '../../facturas/components/CommissionInvoiceCard';
 import { CommissionCreditNotesSection } from './CommissionCreditNotesSection';
+import { AiCreditPurchasesSection } from './AiCreditPurchasesSection';
 import { fetchSellerCommissionInvoices, type CommissionInvoiceItem } from '@/lib/api/orders';
 
 export default function FacturacionPage() {
@@ -132,6 +133,7 @@ export default function FacturacionPage() {
         )}
 
         {!isLoading && !error && <CommissionCreditNotesSection />}
+        {!isLoading && !error && <AiCreditPurchasesSection />}
       </div>
     </div>
   );

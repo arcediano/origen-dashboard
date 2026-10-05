@@ -37,6 +37,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { z } from 'zod';
 import type { PriceTier, FlashDeal, FlashDealFormValue } from '@/types/product';
+import { NetContentField } from './NetContentField';
 import { createFlashDeal, updateFlashDeal, cancelFlashDeal } from '@/lib/api/products';
 
 interface StepPricingProps {
@@ -499,6 +500,15 @@ export function StepPricing({
               placeholder="Ej: 29,90"
             />
           </div>
+        </div>
+
+        {/* Contenido que se vende: a qué cantidad corresponde el precio */}
+        <div className="mb-8">
+          <NetContentField
+            netContent={formData.netContent}
+            netContentUnit={formData.netContentUnit}
+            onChange={(field, value) => onInputChange(field, value)}
+          />
         </div>
 
         {/* Descuento calculado vs precio tachado */}

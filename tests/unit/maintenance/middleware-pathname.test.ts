@@ -17,6 +17,21 @@ describe('src/middleware — x-pathname, CSP y protección de rutas (middleware 
     expect(res.headers.get('x-middleware-request-content-security-policy')).toBe(csp);
   });
 
+  it('connect-src incluye los dominios de telemetría de Stripe.js (sin ellos, el Payment Element se queda cargando para siempre)', async () => {
+    const res = await middleware(new NextRequest('http://localhost/mantenimiento'));
+    const csp = res.headers.get('Content-Security-Policy') ?? '';
+    const connectSrc = csp.split(';').find((d) => d.trim().startsWith('connect-src')) ?? '';
+    for (const domain of [
+      'https://api.stripe.com',
+      'https://js.stripe.com',
+      'https://m.stripe.com',
+      'https://m.stripe.network',
+      'https://r.stripe.com',
+    ]) {
+      expect(connectSrc).toContain(domain);
+    }
+  });
+
   it('una ruta protegida sin cookie redirige a /auth/login', async () => {
     const res = await middleware(new NextRequest('http://localhost/dashboard/orders'));
     expect(res.status).toBe(307);

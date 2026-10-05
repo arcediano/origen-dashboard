@@ -83,7 +83,15 @@ function buildCspHeader(nonce: string): string {
     "frame-src https://connect-js.stripe.com https://js.stripe.com https://hooks.stripe.com",
     // blob: = vistas previas de imágenes recién elegidas (subida de producto, selector de foco)
     `img-src 'self' data: blob: ${cdnOrigin()} https://storage.googleapis.com https://res.cloudinary.com https://*.cloudfront.net https://*.amazonaws.com https://images.unsplash.com https://*.stripe.com`,
-    "connect-src 'self' https://api.stripe.com https://connect-js.stripe.com",
+    // api.stripe.com/connect-js.stripe.com ya cubrían Connect (onboarding de
+    // pagos del productor, @stripe/connect-js). m.stripe.com/m.stripe.network/
+    // r.stripe.com son los dominios de telemetría de fraude (Radar) que el
+    // propio Stripe.js v3 exige en connect-src (https://docs.stripe.com/security/guide#content-security-policy)
+    // — sin ellos, el Payment Element (@stripe/stripe-js, compra de créditos
+    // de IA) se queda mostrando los esqueletos de carga para siempre: las
+    // llamadas de telemetría bloqueadas por CSP impiden que termine de
+    // inicializarse. No se veía antes porque Connect nunca lo necesitó.
+    "connect-src 'self' https://api.stripe.com https://connect-js.stripe.com https://js.stripe.com https://m.stripe.com https://m.stripe.network https://r.stripe.com",
   ].join('; ');
 }
 

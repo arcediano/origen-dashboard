@@ -51,7 +51,7 @@ export function CommissionInvoiceCard({ invoice, onDownload }: CommissionInvoice
   return (
     <div
       className={cn(
-        'relative rounded-xl sm:rounded-2xl border border-border shadow-origen',
+        'relative rounded-xl sm:rounded-2xl border border-border bg-surface-alt shadow-origen',
         'px-4 py-4 flex items-center gap-3.5',
       )}
     >

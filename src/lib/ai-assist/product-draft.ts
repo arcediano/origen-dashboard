@@ -6,7 +6,7 @@
  * cambios sobre el formulario de producto; lo que la IA no rellenó no se toca.
  */
 
-import type { NutritionalInfo } from '@/types/product';
+import type { DynamicAttribute, NetContentUnit, NutritionalInfo } from '@/types/product';
 import { proposalToPatches, unreadableFieldNames, type LabelProposal } from './label-proposal';
 
 /**
@@ -19,7 +19,11 @@ export type FollowUpField =
   | 'productionInfo.productionMethod'
   | 'nutritionalInfo.isGlutenFree'
   | 'nutritionalInfo.isVegan'
-  | 'nutritionalInfo.isVegetarian';
+  | 'nutritionalInfo.isVegetarian'
+  // Preguntas de elaboración (texto libre) para redactar "Historia y producción":
+  | 'productionInfo.artisanProcess'
+  | 'productionInfo.maturationTime'
+  | 'productionInfo.story';
 
 export interface FollowUpQuestion {
   field: FollowUpField;
@@ -36,11 +40,24 @@ export interface ProductDraftResponse {
     categoryId: string;
     subcategoryId: string | null;
     nutritionalInfo: LabelProposal & {
+      /** Conservación leída de la etiqueta o dicha por el productor. */
+      storageInstructions?: string | null;
       isGlutenFree: boolean | null;
       isVegan: boolean | null;
       isVegetarian: boolean | null;
     };
-    productionInfo: { origin: string | null; productionMethod: string | null };
+    productionInfo: {
+      origin: string | null;
+      productionMethod: string | null;
+      /** YYYY-MM-DD, solo si se leyó en las fotos o lo dijo el productor. */
+      harvestDate?: string | null;
+      productionDate?: string | null;
+      expiryDate?: string | null;
+    };
+    /** Contenido neto de una unidad de venta (a qué cantidad corresponde el precio). */
+    netContent?: { value: number; unit: NetContentUnit } | null;
+    /** Atributos destacados según el tipo de producto (tipo de leche, curación…). */
+    attributes?: Array<{ name: string; value: string }>;
   };
   /** `null` si no se enviaron fotos de etiqueta. */
   labelLegible: boolean | null;
@@ -111,6 +128,37 @@ export function draftToPatches(
   }
 
   const { origin, productionMethod } = proposal.productionInfo;
+  for (const key of ['harvestDate', 'productionDate', 'expiryDate'] as const) {
+    const iso = proposal.productionInfo[key];
+    const date = iso ? new Date(iso) : null;
+    if (date && !Number.isNaN(date.getTime())) {
+      patches.push({ kind: 'nested', section: 'productionInfo', field: key, value: date });
+    }
+  }
+  if (proposal.nutritionalInfo.storageInstructions) {
+    patches.push({
+      kind: 'nested',
+      section: 'nutritionalInfo',
+      field: 'storageInstructions',
+      value: proposal.nutritionalInfo.storageInstructions,
+    });
+  }
+  if (proposal.netContent) {
+    field('netContent', proposal.netContent.value);
+    field('netContentUnit', proposal.netContent.unit);
+  }
+  if (proposal.attributes?.length) {
+    field(
+      'attributes',
+      proposal.attributes.map((a, i): DynamicAttribute => ({
+        id: `ai-attr-${i}-${Date.now()}`,
+        name: a.name,
+        type: 'text',
+        value: a.value,
+        visible: true,
+      })),
+    );
+  }
   if (origin) patches.push({ kind: 'nested', section: 'productionInfo', field: 'origin', value: origin });
   if (productionMethod) {
     patches.push({ kind: 'nested', section: 'productionInfo', field: 'productionMethod', value: productionMethod });
@@ -132,6 +180,12 @@ export function summarizeDraft(response: ProductDraftResponse): {
   if (proposal.nutritionalInfo.calories !== null) filled.push('Información nutricional');
   if (proposal.productionInfo.origin) filled.push('Origen');
   if (proposal.productionInfo.productionMethod) filled.push('Elaboración');
+  if (proposal.netContent) filled.push('Formato de venta');
+  if (proposal.productionInfo.expiryDate || proposal.productionInfo.harvestDate || proposal.productionInfo.productionDate) {
+    filled.push('Fechas');
+  }
+  if (proposal.nutritionalInfo.storageInstructions) filled.push('Conservación');
+  if (proposal.attributes?.length) filled.push('Atributos');
 
   const toReview: string[] = [];
   if (response.labelLegible === true) toReview.push('Alérgenos y valores nutricionales leídos de la etiqueta');
@@ -162,4 +216,30 @@ export function summarizeDraft(response: ProductDraftResponse): {
   }
 
   return { filled, toReview, toComplete: response.producerMustComplete };
+}
+
+/** Etiquetas legibles de `FollowUpField`, para construir las notas que se le pasan a la IA al reescribir la descripción. */
+export const FOLLOW_UP_FIELD_LABELS: Record<FollowUpField, string> = {
+  'productionInfo.origin': 'Origen',
+  'productionInfo.productionMethod': 'Método de producción',
+  'nutritionalInfo.isGlutenFree': '¿Sin gluten?',
+  'nutritionalInfo.isVegan': '¿Vegano?',
+  'nutritionalInfo.isVegetarian': '¿Vegetariano?',
+  'productionInfo.artisanProcess': 'Técnicas de elaboración',
+  'productionInfo.maturationTime': 'Tiempo de maduración',
+  'productionInfo.story': 'Historia del producto',
+};
+
+/**
+ * Notas para `POST /ai-assist/text-improvement` tras responder las preguntas
+ * de seguimiento: así la IA incorpora las respuestas en una descripción
+ * coherente, en vez de quedar solo en campos estructurados sueltos. `null`
+ * si no se respondió nada (no hay nada que reescribir).
+ */
+export function buildFollowUpNotes(answers: Partial<Record<FollowUpField, string>>): string | null {
+  const lines = (Object.entries(answers) as [FollowUpField, string][])
+    .filter(([, value]) => value.trim().length > 0)
+    .map(([field, value]) => `${FOLLOW_UP_FIELD_LABELS[field]}: ${value}`);
+  if (lines.length === 0) return null;
+  return `Datos que el productor acaba de confirmar — incorpóralos de forma natural en la descripción:\n${lines.join('\n')}`;
 }

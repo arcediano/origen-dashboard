@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  buildFollowUpNotes,
   draftToPatches,
   summarizeDraft,
   type DraftCategory,
@@ -167,5 +168,29 @@ describe('summarizeDraft', () => {
     );
     expect(s.toReview.join(' ')).toMatch(/ESTIMADA/);
     expect(s.toReview.join(' ')).toContain('BEDCA');
+  });
+});
+
+describe('buildFollowUpNotes', () => {
+  it('null si no se respondió nada', () => {
+    expect(buildFollowUpNotes({})).toBeNull();
+  });
+
+  it('construye una línea legible por cada respuesta, con su etiqueta', () => {
+    const notes = buildFollowUpNotes({
+      'productionInfo.origin': 'Soria',
+      'nutritionalInfo.isVegan': 'Sí',
+    });
+    expect(notes).toContain('Origen: Soria');
+    expect(notes).toContain('¿Vegano?: Sí');
+  });
+
+  it('ignora respuestas vacías (saltadas)', () => {
+    const notes = buildFollowUpNotes({
+      'productionInfo.origin': 'Soria',
+      'productionInfo.productionMethod': '',
+    });
+    expect(notes).toContain('Origen: Soria');
+    expect(notes).not.toContain('Método de producción');
   });
 });

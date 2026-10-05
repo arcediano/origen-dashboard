@@ -10,7 +10,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Barcode, Camera, ImagePlus, Loader2, ScanLine, Sparkles, X } from 'lucide-react';
+import { Barcode, Camera, Coins, ImagePlus, Loader2, ScanLine, Sparkles, X } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle, Button, Card, Input, Textarea } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import { resizeLabelImage } from '@/lib/ai-assist/resize-label-image';
@@ -21,6 +21,8 @@ import {
   buildImageResolutionError,
   getImageDimensions,
 } from '@/lib/validations/image-quality';
+import { AddCreditsModal } from './AddCreditsModal';
+import { AiCreditsPanel } from './AiCreditsPanel';
 
 const MAX_LABEL_PHOTOS = 2;
 const MIN_TEXT = 10;
@@ -36,12 +38,16 @@ const PROGRESS_MESSAGES = [
   'Ordenando ingredientes e información nutricional…',
 ];
 
+/** Mismo mensaje tanto si lo detecta el cupo ya cargado (antes de generar) como si lo rechaza el backend al intentarlo. */
+const QUOTA_EXCEEDED_MESSAGE =
+  'Has alcanzado el máximo de productos con asistente de IA. Compra más créditos para seguir usándolo, o rellena este producto a mano.';
+
 /** Mensajes claros por código de error del backend; el resto usa el mensaje ya en español. */
 function friendlyError(error: unknown): string {
   if (error instanceof AiAssistError) {
     switch (error.code) {
       case 'AI_PRODUCER_QUOTA_EXCEEDED':
-        return 'Has alcanzado el máximo de productos con asistente. Puedes crear este producto rellenándolo a mano.';
+        return QUOTA_EXCEEDED_MESSAGE;
       case 'AI_MONTHLY_CAP_REACHED':
       case 'AI_DISABLED':
       case 'AI_NOT_CONFIGURED':
@@ -62,13 +68,15 @@ export interface IntakeResult {
 interface AiProductIntakeProps {
   /** Clave de imputación del cupo (borrador en el navegador). */
   assistKey: string | null;
-  quota: { used: number; total: number } | null;
+  quota: { used: number; total: number; free?: number; purchased?: number } | null;
   /** Al recibir el borrador de la IA. */
   onDraft: (result: IntakeResult) => void;
   /** El productor prefiere rellenar el formulario a mano. */
   onManual: () => void;
   /** Borrador local a medias: se ofrece continuarlo o descartarlo sin saltarse el asistente. */
   pendingDraft?: { name: string; onResume: () => void; onDiscard: () => void };
+  /** Tras comprar créditos (webhook ya confirmado): refresca el cupo mostrado. */
+  onCreditsPurchased?: () => void;
 }
 
 function useObjectUrl(file: File | null): string | null {
@@ -96,13 +104,22 @@ function LabelThumb({ file, onRemove, disabled }: { file: File; onRemove: () => 
   );
 }
 
-export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDraft }: AiProductIntakeProps) {
+export function AiProductIntake({
+  assistKey,
+  quota,
+  onDraft,
+  onManual,
+  pendingDraft,
+  onCreditsPurchased,
+}: AiProductIntakeProps) {
   const [photo, setPhoto] = useState<File | null>(null);
   const [labels, setLabels] = useState<File[]>([]);
   const [text, setText] = useState('');
   const [barcode, setBarcode] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [quotaExceeded, setQuotaExceeded] = useState(false);
+  const [showAddCredits, setShowAddCredits] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [messageIndex, setMessageIndex] = useState(0);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -122,8 +139,17 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
   const trimmedLength = text.trim().length;
   const trimmedBarcode = barcode.trim();
   const barcodeInvalid = trimmedBarcode.length > 0 && !BARCODE_RE.test(trimmedBarcode);
+  // Se sabe de antemano por el cupo ya cargado, sin esperar a que el backend
+  // rechace el intento — así el aviso (y el acceso a comprar créditos) sale
+  // nada más abrirse el asistente, no solo tras un primer intento fallido.
+  const quotaExhausted = !!quota && quota.used >= quota.total;
   const canSubmit =
-    !!photo && trimmedLength >= MIN_TEXT && !!assistKey && !isGenerating && !barcodeInvalid;
+    !!photo &&
+    trimmedLength >= MIN_TEXT &&
+    !!assistKey &&
+    !isGenerating &&
+    !barcodeInvalid &&
+    !quotaExhausted;
 
   const handlePhoto = async (list: FileList | null) => {
     const file = list?.[0];
@@ -165,6 +191,7 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
     if (!canSubmit || !photo || !assistKey) return;
     setIsGenerating(true);
     setError(null);
+    setQuotaExceeded(false);
     try {
       const [productImage, ...labelImages] = await Promise.all(
         [photo, ...labels].map(resizeLabelImage),
@@ -179,6 +206,7 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
       onDraft({ response, productPhoto: photo });
     } catch (err) {
       setError(friendlyError(err));
+      setQuotaExceeded(err instanceof AiAssistError && err.code === 'AI_PRODUCER_QUOTA_EXCEEDED');
       setIsGenerating(false);
     }
   };
@@ -235,6 +263,14 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
         </Alert>
       )}
 
+      {quota && (
+        <AiCreditsPanel
+          quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
+          onRecharge={() => setShowAddCredits(true)}
+          onManual={quotaExhausted || quotaExceeded ? onManual : undefined}
+        />
+      )}
+
       <Card variant="elevated" className="p-4 sm:p-6 space-y-7">
         {/* 1. Foto */}
         <section aria-labelledby="intake-photo">
@@ -259,7 +295,7 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
                 size="sm"
                 onClick={() => photoInputRef.current?.click()}
                 leftIcon={<Camera className="w-4 h-4" aria-hidden="true" />}
-                className="absolute bottom-3 right-3 sm:w-auto"
+                className="absolute bottom-3 right-3 w-auto"
               >
                 Cambiar foto
               </Button>
@@ -313,7 +349,7 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
             3 · Etiqueta <span className="normal-case tracking-normal font-normal">(opcional)</span>
           </h3>
           <p className="text-sm text-muted-foreground mb-3">
-            ¿Tienes la etiqueta? Sube fotos de los ingredientes y la información nutricional y las leemos por ti.
+            ¿Tienes la etiqueta? Sube fotos de los ingredientes y la información nutricional y las leemos por ti; si hay fecha de caducidad, de producción o conservación, las rellenamos también. Puedes saltarte las fotos: creamos la ficha con lo que tengas.
           </p>
           <input
             ref={labelInputRef}
@@ -368,11 +404,23 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
         )}
 
         {error && (
-          <Alert variant="error">
-            <AlertTitle>No hemos podido preparar la ficha</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+          <Alert variant={quotaExceeded ? 'warning' : 'error'}>
+            <AlertTitle>{quotaExceeded ? 'Sin créditos del asistente' : 'No hemos podido preparar la ficha'}</AlertTitle>
+            <AlertDescription>
+              <p>{error}</p>
+            </AlertDescription>
           </Alert>
         )}
+
+        <AddCreditsModal
+          open={showAddCredits}
+          onOpenChange={setShowAddCredits}
+          onCreditsPurchased={() => {
+            setError(null);
+            setQuotaExceeded(false);
+            onCreditsPurchased?.();
+          }}
+        />
 
         <div className="space-y-3">
           <Button
@@ -386,11 +434,6 @@ export function AiProductIntake({ assistKey, quota, onDraft, onManual, pendingDr
           >
             Crear con IA
           </Button>
-          {quota && (
-            <p className="text-center text-xs text-text-subtle">
-              Cuenta como 1 de tus {quota.total} productos con asistente (has usado {quota.used}). Puedes repetir en este mismo producto sin gastar más.
-            </p>
-          )}
           <div className="text-center">
             <Button type="button" variant="ghost" size="sm" onClick={onManual}>
               Prefiero rellenarlo yo

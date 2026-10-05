@@ -11,6 +11,8 @@ import type { DeliveryTimeUnit } from '@/lib/format-estimated-delivery';
 
 // ─── Paso 1 — Ubicación e identidad legal ────────────────────────────────────
 
+import { NO_FREE_SHIPPING, type FreeShippingConfig } from './free-shipping';
+
 export type EntityType =
   | 'autonomo'
   | 'sl'
@@ -98,6 +100,8 @@ export interface ShippingData {
   /** Elección explícita y obligatoria (delegar en Origen / gestión propia). */
   deliveryChoice?: DeliveryChoice;
   minOrderAmount: number;
+  /** Envío gratuito (solo con `deliveryChoice === 'own'`). */
+  freeShipping: FreeShippingConfig;
   sustainablePackaging: boolean;
   packagingDescription: string;
   /** Solo se piden con `deliveryChoice === 'own'`; con `delegated` se conservan las ya guardadas. */
@@ -156,6 +160,8 @@ export interface StripeData {
   /** Solo lo escribe el webhook de Stripe: nunca se envía al backend. */
   stripeConnected: boolean;
   stripeAccountId?: string;
+  /** Stripe pide más información o ha restringido la cuenta (dato del servidor, solo lectura). */
+  stripeNeedsAttention?: boolean;
   acceptTerms: boolean;
 }
 
@@ -192,6 +198,7 @@ export const INITIAL_FORM_DATA: OnboardingFormData = {
   step3: {
     deliveryChoice: undefined,
     minOrderAmount: 0,
+    freeShipping: NO_FREE_SHIPPING,
     sustainablePackaging: false,
     packagingDescription: '',
     deliveryOptions: [],

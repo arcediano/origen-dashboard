@@ -13,6 +13,11 @@ import type {
 import type { TextDraft, TextImprovementResponse } from '@/lib/ai-assist/text-proposal';
 import type { ProductDraftResponse } from '@/lib/ai-assist/product-draft';
 import type { LabelImagePayload } from '@/lib/ai-assist/resize-label-image';
+import type {
+  AiCreditPurchaseStatusResult,
+  AiCreditsCheckoutResult,
+  AiCreditsPricingInfo,
+} from '@/lib/ai-assist/ai-credits';
 
 /** Lectura con visión: hasta ~90 s en el gateway. */
 const LABEL_READING_TIMEOUT_MS = 90_000;
@@ -115,6 +120,57 @@ export async function draftProduct(
       { assistKey, ...input },
       { timeoutMs: PRODUCT_DRAFT_TIMEOUT_MS },
     );
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+/** Precios de los paquetes de créditos y cuántos tiene ya comprados el productor. */
+export async function getAiCreditsPricing(): Promise<AiCreditsPricingInfo> {
+  try {
+    return await gatewayClient.get<AiCreditsPricingInfo>('/ai-assist/credits');
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+/** Crea el PaymentIntent de la compra; el frontend confirma el pago con Stripe.js (`clientSecret`). */
+export async function checkoutAiCredits(credits: number): Promise<AiCreditsCheckoutResult> {
+  try {
+    return await gatewayClient.post<AiCreditsCheckoutResult>('/ai-assist/credits/checkout', {
+      credits,
+    });
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+/** Para comprobar si el webhook ya confirmó la compra tras `stripe.confirmPayment`. */
+export async function getAiCreditPurchaseStatus(
+  purchaseId: string,
+): Promise<AiCreditPurchaseStatusResult> {
+  try {
+    return await gatewayClient.get<AiCreditPurchaseStatusResult>(
+      `/ai-assist/credits/purchases/${purchaseId}`,
+    );
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+/** Una compra confirmada de créditos del asistente de IA (sección Facturación). */
+export interface AiCreditPurchaseItem {
+  id: string;
+  credits: number;
+  amountCents: number;
+  currency: string;
+  createdAt: string;
+}
+
+/** Historial de compras de créditos confirmadas del productor, más recientes primero. */
+export async function listAiCreditPurchases(): Promise<AiCreditPurchaseItem[]> {
+  try {
+    return await gatewayClient.get<AiCreditPurchaseItem[]>('/ai-assist/credits/purchases');
   } catch (error) {
     throw toAiAssistError(error);
   }

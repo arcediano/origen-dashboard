@@ -20,6 +20,7 @@ import {
 } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import { StepBasic } from '../steps/StepBasic';
+import { NetContentField } from '../steps/NetContentField';
 import { StepImages } from '../steps/StepImages';
 import { StepNutritional } from '../steps/StepNutritional';
 import { StepProduction } from '../steps/StepProduction';
@@ -182,6 +183,15 @@ export function AiProductReview({
       transition={{ duration: 0.35 }}
       className={cn('mx-auto max-w-3xl space-y-6', appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64), 'lg:pb-0')}
     >
+      {/* Estado real del producto: aún no existe en el catálogo ni como borrador guardado */}
+      <Alert variant="info" data-testid="unsaved-product-notice">
+        <AlertTitle>Este producto todavía no está guardado</AlertTitle>
+        <AlertDescription>
+          Es el producto que estás creando ahora, no un borrador. Pulsa «Guardar» para conservarlo. Si sales sin guardar se descarta,
+          y los créditos del asistente que ya has gastado no se recuperan.
+        </AlertDescription>
+      </Alert>
+
       {/* Resumen de lo que ha hecho el asistente */}
       <Card variant="elevated" className="p-4 sm:p-6 space-y-4">
         <div className="flex items-start gap-3">
@@ -275,6 +285,13 @@ export function AiProductReview({
             onChange={(e) => onInputChange('stock', Math.max(0, parseInt(e.target.value, 10) || 0))}
             min={0}
             inputSize="lg"
+          />
+        </div>
+        <div className="mt-6">
+          <NetContentField
+            netContent={formData.netContent}
+            netContentUnit={formData.netContentUnit}
+            onChange={(field, value) => onInputChange(field, value)}
           />
         </div>
         <p className="mt-4 text-xs text-text-subtle">

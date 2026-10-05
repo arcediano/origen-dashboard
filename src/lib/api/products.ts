@@ -268,6 +268,8 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
     trackInventory:    formData.trackInventory,
     allowBackorders:   formData.allowBackorders,
 
+    netContent:     formData.netContent,
+    netContentUnit: formData.netContentUnit,
     weight:     formData.weight,
     weightUnit: formData.weightUnit,
     dimensions: formData.dimensions,
@@ -345,7 +347,6 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
           producerName: formData.productionInfo.producerName,
           productionMethod: formData.productionInfo.productionMethod,
           sustainabilityInfo: formData.productionInfo.sustainabilityInfo,
-          animalWelfare: formData.productionInfo.animalWelfare,
           artisanProcess: formData.productionInfo.artisanProcess,
           practices: formData.productionInfo.practices,
           harvestDate: formData.productionInfo.harvestDate?.toISOString(),
@@ -380,7 +381,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
     'name', 'fullDescription', 'categoryId', 'subcategoryId',
     'basePrice', 'comparePrice', 'sku', 'barcode', 'stock',
     'lowStockThreshold', 'trackInventory', 'allowBackorders',
-    'weight', 'weightUnit', 'dimensions', 'shippingClass',
+    'netContent', 'netContentUnit', 'weight', 'weightUnit', 'dimensions', 'shippingClass',
   ];
 
   for (const key of scalar) {
@@ -469,7 +470,6 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
           producerName: product.productionInfo.producerName,
           productionMethod: product.productionInfo.productionMethod,
           sustainabilityInfo: product.productionInfo.sustainabilityInfo,
-          animalWelfare: product.productionInfo.animalWelfare,
           artisanProcess: product.productionInfo.artisanProcess,
           practices: product.productionInfo.practices,
           harvestDate: product.productionInfo.harvestDate?.toISOString(),
@@ -804,6 +804,8 @@ export async function duplicateProduct(id: string): Promise<ApiResponse<Product>
       lowStockThreshold: original.lowStockThreshold,
       trackInventory:    original.trackInventory,
       allowBackorders:   original.allowBackorders,
+      netContent:        original.netContent,
+      netContentUnit:    original.netContentUnit,
       weight:            original.weight,
       weightUnit:        original.weightUnit,
       dimensions:        original.dimensions,

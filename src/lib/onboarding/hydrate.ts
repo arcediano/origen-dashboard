@@ -7,6 +7,7 @@
 
 import type { UploadedFile } from '@/components/shared/upload/file-upload';
 import type { ApiDocumentStatus, OnboardingData } from '@/lib/api/onboarding';
+import { freeShippingFromApi } from './free-shipping';
 import type {
   CertificationSlot,
   DeliveryOption,
@@ -163,6 +164,7 @@ export function hydrateOnboardingForm(d: OnboardingData, prev: OnboardingFormDat
           minOrderAmount: Number.isFinite(Number(logistics.minOrderAmount))
             ? Number(logistics.minOrderAmount)
             : prev.step3.minOrderAmount,
+          freeShipping: freeShippingFromApi(logistics.freeShippingFrom),
           sustainablePackaging: Boolean(logistics.sustainablePackaging),
           packagingDescription: logistics.packagingDescription ?? '',
           deliveryOptions: options,
@@ -181,6 +183,7 @@ export function hydrateOnboardingForm(d: OnboardingData, prev: OnboardingFormDat
           stripeConnected: Boolean(d.payment.stripeConnected),
           // Necesario para que el polling del paso 5 sepa que hay una cuenta que vigilar tras recargar.
           stripeAccountId: d.payment.stripeAccountId ?? undefined,
+          stripeNeedsAttention: Boolean(d.payment.stripeNeedsAttention),
           acceptTerms: !!d.payment.acceptedTermsAt,
         }
       : prev.step5,

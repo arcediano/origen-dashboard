@@ -59,6 +59,7 @@ import {
 import { FieldError, OptionalBadge } from '../FormBits';
 import { StepSection } from '../StepSection';
 import { ZoneEditor } from '../ZoneEditor';
+import { FreeShippingField } from '../FreeShippingField';
 
 export type { ShippingData as EnhancedShippingData };
 
@@ -128,8 +129,7 @@ export function EnhancedStep3Shipping({
     if (editingOption === id) setEditingOption(null);
   };
 
-  const minOrderError =
-    data.minOrderAmount !== 0 && data.minOrderAmount <= 0 ? 'El pedido mínimo debe ser mayor que 0 €.' : undefined;
+  const minOrderError = data.minOrderAmount < 0 ? 'El pedido mínimo no puede ser negativo.' : undefined;
 
   const choose = (c: DeliveryChoice) => update({ deliveryChoice: c });
 
@@ -404,7 +404,8 @@ export function EnhancedStep3Shipping({
       <StepSection
         icon={<Euro className="h-5 w-5" />}
         title="Pedido mínimo"
-        description="Importe mínimo que debe alcanzar un pedido. Recomendado: 20–30 €."
+        description="Importe mínimo que debe alcanzar un pedido. Déjalo vacío si no quieres exigir mínimo."
+        badge={<OptionalBadge />}
       >
         <div className="max-w-xs">
           <InputAffixField
@@ -414,14 +415,30 @@ export function EnhancedStep3Shipping({
             inputMode="decimal"
             value={data.minOrderAmount || ''}
             onChange={(e) => update({ minOrderAmount: parseFloat(e.target.value) || 0 })}
-            min={1}
+            min={0}
             step={5}
             affixLeft="€"
-            placeholder="25"
+            placeholder="Sin mínimo"
             error={minOrderError ?? errors['onb-min-order']}
           />
         </div>
       </StepSection>
+
+      {/* ── Envío gratuito (solo envío gestionado por el productor) ─────── */}
+      {data.deliveryChoice === 'own' && (
+        <StepSection
+          icon={<Truck className="h-5 w-5" />}
+          title="Envío gratuito"
+          description="Decide si tus clientes pagan el envío o es gratuito a partir de un importe."
+          badge={<OptionalBadge />}
+        >
+          <FreeShippingField
+            value={data.freeShipping}
+            onChange={(freeShipping) => update({ freeShipping })}
+            error={errors['onb-free-shipping-amount']}
+          />
+        </StepSection>
+      )}
 
       {/* ── Packaging sostenible ────────────────────────────────────────── */}
       <StepSection

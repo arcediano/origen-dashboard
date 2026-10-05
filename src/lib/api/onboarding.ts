@@ -9,6 +9,7 @@
 
 import { gatewayClient } from './client';
 import { isDeliveryOptionComplete } from '@/lib/onboarding/shipping';
+import { freeShippingToApi } from '@/lib/onboarding/free-shipping';
 import type {
   DeliveryChoice,
   DeliveryTimeUnit,
@@ -46,7 +47,6 @@ export interface OnboardingData {
     entityType?: string;
     legalRepresentativeName?: string;
     legalProvince?: string;
-    whyOrigin?: string | null;
     billingAddress?: {
       street?: string;
       streetNumber?: string;
@@ -71,10 +71,18 @@ export interface OnboardingData {
     tagline?: string | null;
     description?: string | null;
     productionPhilosophy?: string | null;
+    animalWelfare?: string | null;
     values?: string[];
     website?: string | null;
     introVideoUrl?: string | null;
     instagramHandle?: string | null;
+  } | null;
+  /** Presencia online indicada en la solicitud de alta (solo lectura). */
+  registration?: {
+    website?: string | null;
+    instagram?: string | null;
+    facebook?: string | null;
+    tiktok?: string | null;
   } | null;
   visual?: {
     logoUrl?: string | null;
@@ -98,6 +106,7 @@ export interface OnboardingData {
   payment?: {
     stripeConnected?: boolean;
     stripeAccountId?: string | null;
+    stripeNeedsAttention?: boolean;
     acceptedTermsAt?: string | null;
     /** Modelo A - Intermediario (Sección 3): true si hay un reembolso cuyo
      *  Transfer ya cobrado no se pudo revertir por saldo insuficiente. */
@@ -140,6 +149,8 @@ export interface OnboardingData {
     /** Elección explícita del productor (delegar en Origen / gestión propia). */
     deliveryChoice?: DeliveryChoice | null;
     minOrderAmount?: number;
+    /** Envío gratuito (null = sin envío gratuito, 0 = siempre, > 0 = desde ese importe). */
+    freeShippingFrom?: number | string | null;
     sustainablePackaging?: boolean;
     packagingDescription?: string | null;
     deliveryOptions?: Array<{
@@ -258,6 +269,8 @@ export function buildStep3Body(data: ShippingData & { deliveryChoice: DeliveryCh
   return {
     deliveryChoice: data.deliveryChoice,
     minOrderAmount: data.minOrderAmount,
+    // Solo aplica con envío propio; delegando en Origen se limpia.
+    freeShippingFrom: data.deliveryChoice === 'own' ? freeShippingToApi(data.freeShipping) : null,
     sustainablePackaging: data.sustainablePackaging,
     packagingDescription: data.sustainablePackaging ? data.packagingDescription.trim() || undefined : undefined,
     deliveryOptions: data.deliveryOptions.filter(isDeliveryOptionComplete).map((opt) => ({

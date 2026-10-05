@@ -36,9 +36,9 @@ import {
   Button,
 } from '@arcediano/ux-library';
 import { useCallback, useEffect, useState } from 'react';
-import { getAiAssistQuota } from '@/lib/api/ai-assist';
+import { getAiAssistQuota, improveText } from '@/lib/api/ai-assist';
 import { fetchCategoriesTree } from '@/lib/api/categories';
-import { draftToPatches, type FollowUpField, type ProductDraftResponse } from '@/lib/ai-assist/product-draft';
+import { buildFollowUpNotes, draftToPatches, type FollowUpField, type ProductDraftResponse } from '@/lib/ai-assist/product-draft';
 import type { AiAssistQuota } from '@/lib/ai-assist/label-proposal';
 import { AiFollowUpQuestions } from '@/app/dashboard/products/components/ai-onboarding/AiFollowUpQuestions';
 
@@ -116,15 +116,23 @@ export default function CreateProductPage() {
     };
   }, []);
 
-  // Con el cupo cargado se decide el modo inicial: asistente de IA si está
-  // disponible y no hay ya un borrador a medias; si no, el wizard de siempre.
+  // Tras comprar créditos: el cupo total ya incluye los nuevos créditos.
+  const handleCreditsPurchased = useCallback(() => {
+    getAiAssistQuota()
+      .then(setQuota)
+      .catch(() => {});
+  }, []);
+
+  // Con el cupo cargado se decide el modo inicial: si el asistente está
+  // activo, siempre entra primero por ahí — aunque el cupo gratis esté
+  // agotado, la propia pantalla del asistente es quien debe avisar de eso y
+  // ofrecer comprar créditos (si se salta aquí a mano, esa pantalla nunca
+  // llega a verse). Un borrador local a medias se ofrece continuar o
+  // descartar dentro de esa misma pantalla, no se salta el asistente.
   useEffect(() => {
     if (mode !== 'loading' || !quota) return;
-    const aiAvailable = quota.enabled && (quota.used < quota.total || aiAssistUsedUnsaved);
-    // El asistente va siempre primero; un borrador local a medias se ofrece
-    // continuar o descartar dentro de esa pantalla (no se salta el asistente).
-    setMode(aiAvailable ? 'ai-intake' : 'wizard');
-  }, [mode, quota, aiAssistUsedUnsaved]);
+    setMode(quota.enabled ? 'ai-intake' : 'wizard');
+  }, [mode, quota]);
 
   const handleAiDraft = useCallback(
     async ({ response, productPhoto }: IntakeResult) => {
@@ -156,10 +164,13 @@ export default function CreateProductPage() {
       setDraft(response);
       // Si a la IA le quedó algo pendiente de esos campos, se pregunta antes
       // de pasar a revisión — así la pantalla de revisión llega ya completa.
+      // Se pasa ya a la pantalla de revisión (el producto en creación); las preguntas
+      // salen encima. Si se quedara en el intake, el formulario ya relleno se leería
+      // como un "borrador sin terminar" cuando es el producto que se está creando.
+      setMode('ai-review');
       if (response.followUpQuestions.length > 0) {
         setPendingFollowUps(response.followUpQuestions);
       } else {
-        setMode('ai-review');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     },
@@ -167,17 +178,45 @@ export default function CreateProductPage() {
   );
 
   const handleFollowUpComplete = useCallback(
-    (answers: Partial<Record<FollowUpField, string>>) => {
+    async (answers: Partial<Record<FollowUpField, string>>) => {
       for (const [field, value] of Object.entries(answers) as [FollowUpField, string][]) {
+        // La maduración no tiene campo propio: va dentro del proceso de elaboración (más abajo).
+        if (field === 'productionInfo.maturationTime') continue;
         const [section, key] = field.split('.') as ['nutritionalInfo' | 'productionInfo', string];
         const finalValue = BOOLEAN_FOLLOW_UP_FIELDS.has(field) ? value === 'Sí' : value;
         handleNestedChange(section, key, finalValue);
       }
+      const maturation = answers['productionInfo.maturationTime']?.trim();
+      if (maturation) {
+        const process = (answers['productionInfo.artisanProcess'] ?? formData.productionInfo.artisanProcess ?? '').trim();
+        handleNestedChange('productionInfo', 'artisanProcess', `${process}<p>Tiempo de maduración: ${maturation.replace(/</g, '&lt;')}</p>`);
+      }
       setPendingFollowUps([]);
+
+      // Si se respondió algo, se reescribe la descripción para que quede un texto
+      // coherente con esos datos en vez de dejarlos sueltos solo en campos
+      // estructurados — mismo asistente ya usado en "Redactar con IA", mismo
+      // assistKey (ya consumió su cupo con el borrador inicial, esto no cuenta más).
+      const notes = buildFollowUpNotes(answers);
+      if (notes && aiAssistKey) {
+        setMode('loading');
+        try {
+          const result = await improveText(aiAssistKey, {
+            name: formData.name,
+            fullDescription: formData.fullDescription,
+            notes,
+          });
+          handleInputChange('fullDescription', result.proposal.fullDescription);
+        } catch {
+          // Best-effort: si falla, se sigue con los campos estructurados ya
+          // rellenados y la descripción tal cual la dejó el borrador inicial.
+        }
+      }
+
       setMode('ai-review');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    [handleNestedChange],
+    [handleNestedChange, handleInputChange, formData.name, formData.fullDescription, formData.productionInfo.artisanProcess, aiAssistKey],
   );
 
   useEffect(() => {
@@ -249,15 +288,19 @@ export default function CreateProductPage() {
         title={mode === 'ai-intake' ? 'Crea tu producto en un minuto' : 'Crear producto'}
         description={
           mode === 'ai-intake'
-            ? 'Sube una foto y cuéntanos qué es. Preparamos la ficha completa; tú solo la revisas y decides.'
+            ? 'Sube una foto y cuéntanos qué es con tus palabras (origen, elaboración, formato…). Preparamos la ficha completa combinando ambas cosas; tú solo la revisas y decides.'
             : mode === 'ai-review'
               ? 'Revisa la ficha y publícala'
               : 'Completa los pasos para publicar tu producto'
         }
         badgeIcon={mode === 'ai-intake' ? Sparkles : Package}
         badgeText={mode === 'ai-intake' ? 'Asistente de IA' : 'Nuevo producto'}
-        tooltip="Creación de producto"
-        tooltipDetailed="Completa todos los pasos para publicar tu producto en el catálogo"
+        tooltip={mode === 'ai-intake' ? 'Asistente de IA' : 'Creación de producto'}
+        tooltipDetailed={
+          mode === 'ai-intake'
+            ? 'La foto le dice a la IA qué aspecto tiene tu producto, pero no puede contarle su origen, cómo lo elaboras o el formato — eso solo lo sabes tú. Escribe unas líneas con esos detalles: cuanta más información le des, mejor saldrá la ficha. Después la revisas tú antes de publicar.'
+            : 'Completa todos los pasos para publicar tu producto en el catálogo'
+        }
         showBackButton
         onBack={() => setShowCancelDialog(true)}
         actions={
@@ -286,9 +329,10 @@ export default function CreateProductPage() {
         {mode === 'ai-intake' && (
           <AiProductIntake
             assistKey={aiAssistKey}
-            quota={quota && quota.enabled ? { used: quota.used, total: quota.total } : null}
+            quota={quota && quota.enabled ? { used: quota.used, total: quota.total, free: quota.free, purchased: quota.purchased } : null}
             onDraft={handleAiDraft}
             onManual={() => setMode('wizard')}
+            onCreditsPurchased={handleCreditsPurchased}
             pendingDraft={
               formData.name || formData.gallery.length > 0
                 ? {

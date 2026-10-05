@@ -71,7 +71,7 @@ describe('hydrateOnboardingForm', () => {
   });
 
   it('paso 5: Stripe y términos', () => {
-    expect(f.step5).toEqual({ stripeConnected: true, stripeAccountId: 'acct_1', acceptTerms: true });
+    expect(f.step5).toEqual({ stripeConnected: true, stripeAccountId: 'acct_1', stripeNeedsAttention: false, acceptTerms: true });
   });
 
   it('conserva lo escrito si el servidor no devuelve el bloque', () => {

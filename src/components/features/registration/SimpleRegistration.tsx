@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo, type JSX } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -57,6 +57,13 @@ import { useAutosave } from './hooks/useAutosave';
 // ============================================================================
 // TIPOS
 // ============================================================================
+
+// Orden visual del formulario, para localizar el primer campo con error
+const FIELD_ORDER: (keyof InitialRegistrationFormData)[] = [
+  'contactName', 'contactSurname', 'email', 'phone', 'password', 'confirmPassword',
+  'businessName', 'businessType', 'street', 'streetNumber', 'postalCode', 'province', 'municipio',
+  'producerCategory', 'whyOrigin', 'website', 'instagram', 'facebook', 'tiktok',
+];
 
 type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -216,6 +223,22 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
     }, 0);
   }, [onSuccess, clearDraft]);
 
+  // Al pulsar "Enviar solicitud" con campos obligatorios sin rellenar, react-hook-form marca
+  // isSubmitted (los errores pasan a verse en rojo) y aquí se lleva al usuario al primero.
+  const onInvalid = useCallback((formErrors: FieldErrors<InitialRegistrationFormData>) => {
+    const firstField = FIELD_ORDER.find((name) => formErrors[name]);
+    if (!firstField) return;
+    const target =
+      firstField === 'producerCategory'
+        ? document.getElementById('registration-category')
+        : document.querySelector<HTMLElement>(`[name="${firstField}"]`);
+    if (!target) return;
+    const block = target.closest<HTMLElement>('div') ?? target;
+    block.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+    if (target instanceof HTMLInputElement && target.type !== 'hidden') target.focus({ preventScroll: true });
+    else if (target instanceof HTMLTextAreaElement) target.focus({ preventScroll: true });
+  }, []);
+
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
@@ -325,7 +348,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
 
       <div className={cn('w-full', className)}>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
+        <form noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-3 md:space-y-4">
 
             {/* SECCIÓN 1: Contacto */}
             <FormSection
@@ -503,7 +526,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
               description="Selecciona tu categoría principal"
               badge="Paso 3 de 4"
             >
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              <div id="registration-category" className="grid grid-cols-2 lg:grid-cols-3 gap-4 scroll-mt-24">
                 {PRODUCER_CATEGORIES.map((category) => (
                   <CategoryCard
                     key={category.id}
@@ -593,22 +616,19 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
                 size="lg"
                 variant="primary"
                 fullWidth
-                disabled={!isFormValid}
-                className="md:w-auto md:min-w-[280px] disabled:text-white/90"
+                className="md:w-auto md:min-w-[280px]"
               >
-                {isFormValid ? (
-                  <motion.span
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center justify-center gap-2 md:gap-3"
-                  >
-                    Enviar solicitud
-                    <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
-                  </motion.span>
-                ) : (
-                  <span>Completar registro</span>
-                )}
+                <span className="flex items-center justify-center gap-2 md:gap-3">
+                  Enviar solicitud
+                  <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                </span>
               </Button>
+              {isSubmitted && !isFormValid && (
+                <p role="alert" className="mt-3 flex items-center gap-2 text-sm text-feedback-danger">
+                  <AlertCircle className="w-4 h-4" />
+                  Revisa los campos marcados en rojo para poder enviar tu solicitud.
+                </p>
+              )}
 
               <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mt-4 md:mt-6">
                 <div className="flex items-center gap-1.5">

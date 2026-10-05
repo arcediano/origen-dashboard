@@ -1,5 +1,6 @@
 /**
- * Catálogo de certificaciones que el productor puede declarar en el paso 4.
+ * Catálogo de certificaciones del NEGOCIO que el productor puede declarar en el paso 4.
+ * Las propias de un producto (sin gluten, vegano…) se declaran al crear el producto.
  * Los ids deben coincidir con el catálogo del backend
  * (`producers/constants/certification-catalog.ts`, ADR-020 §5): el backend
  * deriva `name`/`issuingBody` de ahí, por eso ya no se piden en el formulario.
@@ -19,8 +20,6 @@ export const CERTIFICATION_CATALOG: CertificationCatalogEntry[] = [
   { id: 'produccion_integrada', name: 'Producción integrada', description: 'Sistema sostenible de producción' },
   { id: 'bienestar_animal', name: 'Bienestar animal', description: 'Certificación de bienestar animal' },
   { id: 'agricultura_regenerativa', name: 'Agricultura regenerativa', description: 'Prácticas que regeneran el suelo' },
-  { id: 'sin_gluten', name: 'Sin gluten', description: 'Producto apto para celíacos' },
-  { id: 'vegano', name: 'Vegano', description: 'Producto apto para veganos' },
 ];
 
 export const CERTIFICATION_IDS = CERTIFICATION_CATALOG.map((c) => c.id);

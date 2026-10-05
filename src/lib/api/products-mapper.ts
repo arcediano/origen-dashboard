@@ -25,6 +25,7 @@ import {
   type Dimensions,
   type Certification,
   type DynamicAttribute,
+  type NetContentUnit,
   type NutritionalInfo,
   type PriceTier,
   type ProductionInfo,
@@ -118,7 +119,6 @@ export interface ApiProductionInfo {
   producerName?: string;
   productionMethod: string;
   sustainabilityInfo?: string;
-  animalWelfare?: string;
   artisanProcess?: string;
   practices: string[];
   harvestDate?: string;
@@ -176,6 +176,8 @@ export interface ApiProduct {
   mainImage?: ApiProductImage;
   gallery: ApiProductImage[];
   // Dimensiones
+  netContent?: number;
+  netContentUnit?: string;
   weight?: number;
   weightUnit?: string;
   dimensions?: { length?: number; width?: number; height?: number; unit?: string };
@@ -372,7 +374,6 @@ function mapProductionInfo(info?: ApiProductionInfo): ProductionInfo | undefined
     producerName: info.producerName,
     productionMethod: info.productionMethod,
     sustainabilityInfo: info.sustainabilityInfo ?? '',
-    animalWelfare: info.animalWelfare ?? '',
     artisanProcess: info.artisanProcess ?? '',
     practices: info.practices ?? [],
     harvestDate: info.harvestDate ? new Date(info.harvestDate) : undefined,
@@ -442,6 +443,8 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     trackInventory:   api.trackInventory,
     allowBackorders:  api.allowBackorders,
 
+    netContent:     api.netContent,
+    netContentUnit: api.netContentUnit as NetContentUnit | undefined,
     weight:        api.weight,
     weightUnit:    api.weightUnit as 'kg' | 'g' | undefined,
     dimensions:    api.dimensions as Dimensions | undefined,

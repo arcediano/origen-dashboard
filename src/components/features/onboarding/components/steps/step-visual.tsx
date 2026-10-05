@@ -74,7 +74,7 @@ export function EnhancedStep2Visual({ data, onChange, errors = {} }: EnhancedSte
       <StepSection
         icon={<Camera className="h-5 w-5" />}
         title="Imagen de cabecera"
-        description="Una foto amplia y nítida para la parte superior de tu tienda."
+        description="Una foto panorámica (horizontal) y nítida para la parte superior de tu tienda. No sirve una imagen cuadrada."
         badge={<OptionalBadge />}
       >
         {data.banner ? (
@@ -108,16 +108,16 @@ export function EnhancedStep2Visual({ data, onChange, errors = {} }: EnhancedSte
       <StepSection
         icon={<Users className="h-5 w-5" />}
         title="Fotos del equipo"
-        description="Enseña a las personas detrás de tus productos. Generan confianza."
+        description="Hasta 3 fotos de las personas detrás de tus productos. Aparecen en tu perfil público y generan confianza."
         badge={<OptionalBadge />}
       >
         <FileUpload
           value={data.teamPhotos}
           onChange={(files) => update({ teamPhotos: files })}
-          helperText="Arrastra imágenes o toca para subir (hasta 10)"
+          helperText="Arrastra imágenes o toca para subir (hasta 3)"
           accept="image/jpeg,image/png,image/webp"
           multiple
-          maxFiles={10}
+          maxFiles={3}
           maxSize={5}
           qualityRequirement={IMAGE_QUALITY_PRESETS.profileGallery}
           dimensionsHint={getImageQualityHint(IMAGE_QUALITY_PRESETS.profileGallery)}
