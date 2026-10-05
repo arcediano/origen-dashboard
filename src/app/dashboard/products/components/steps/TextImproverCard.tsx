@@ -101,7 +101,7 @@ export function TextImproverCard({
           <p className="text-xs text-muted-foreground mt-2">
             {unlimited
               ? 'Al editar un producto que ya tienes guardado no hay límite de uso del asistente.'
-              : `Has usado el asistente en ${quota.used} de ${quota.total} productos. Cada producto nuevo en el que lo uses cuenta como uno; puedes repetir en el mismo producto sin gastar más.`}
+              : `1 crédito = 1 producto. Puedes repetir en el mismo producto sin gastar más.`}
           </p>
         </div>
       </div>
