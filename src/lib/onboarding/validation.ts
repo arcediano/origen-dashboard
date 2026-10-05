@@ -7,6 +7,7 @@
 import { validateSpanishTaxId } from '@/lib/utils/tax-id';
 import { isDeliveryOptionComplete } from './shipping';
 import { isValidVideoUrl } from './video';
+import { validateFreeShipping } from './free-shipping';
 import type {
   DocumentSlot,
   OnboardingFormData,
@@ -113,6 +114,10 @@ export function validateStep(stepIndex: number, form: OnboardingFormData, ctx: V
       if (s.includedZones.length < 1) issues.push({ message: 'Añade al menos una zona de entrega.', fieldId: 'onb-zone-value' });
       // El pedido mínimo es opcional: 0 (o vacío) = sin pedido mínimo.
       if (s.minOrderAmount < 0) issues.push({ message: 'El pedido mínimo no puede ser negativo.', fieldId: 'onb-min-order' });
+      if (s.deliveryChoice === 'own') {
+        const freeShippingError = validateFreeShipping(s.freeShipping);
+        if (freeShippingError) issues.push({ message: freeShippingError, fieldId: 'onb-free-shipping-amount' });
+      }
       if (s.sustainablePackaging && !s.packagingDescription.trim()) issues.push({ message: 'Describe tu packaging sostenible.', fieldId: 'onb-packaging-description' });
       break;
     }
