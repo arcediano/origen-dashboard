@@ -156,6 +156,8 @@ export interface StripeData {
   /** Solo lo escribe el webhook de Stripe: nunca se envía al backend. */
   stripeConnected: boolean;
   stripeAccountId?: string;
+  /** Stripe pide más información o ha restringido la cuenta (dato del servidor, solo lectura). */
+  stripeNeedsAttention?: boolean;
   acceptTerms: boolean;
 }
 
