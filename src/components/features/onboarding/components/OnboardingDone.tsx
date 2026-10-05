@@ -5,22 +5,26 @@ import Link from 'next/link';
 import { Alert, Button, Card, CardIconHeader } from '@arcediano/ux-library';
 import { buildPublishChecklist, isPendingReview } from '@/lib/onboarding/publish-checklist';
 import type { ProducerReadinessReport } from '@/lib/api/onboarding';
-import { ArrowRight, BookOpen, CheckCircle2, Clock, PackagePlus, PartyPopper, Rocket } from 'lucide-react';
+import { ArrowRight, BookOpen, CheckCircle2, PackagePlus, PartyPopper, Rocket } from 'lucide-react';
 
 interface OnboardingDoneProps {
   /** `undefined` = cargando; `null` = no disponible. */
   readiness: ProducerReadinessReport | null | undefined;
   businessName?: string;
+  /** El productor ya conectó Stripe en el paso 5: no se le vuelve a pedir aunque readiness vaya con retraso. */
+  stripeConnected?: boolean;
 }
 
 /**
  * Pantalla final: qué falta para publicar la tienda (con enlace directo a cada
  * cosa) y accesos a los siguientes pasos útiles.
  */
-export function OnboardingDone({ readiness, businessName }: OnboardingDoneProps) {
+export function OnboardingDone({ readiness, businessName, stripeConnected }: OnboardingDoneProps) {
   const loading = readiness === undefined;
   const blockers = readiness?.blockers ?? [];
-  const checklist = buildPublishChecklist(blockers);
+  const checklist = buildPublishChecklist(blockers).filter(
+    (item) => !(stripeConnected && item.code === 'STRIPE_NOT_CONNECTED'),
+  );
   const pendingReview = isPendingReview(blockers);
   const allDone = readiness != null && checklist.length === 0;
 
@@ -74,10 +78,7 @@ export function OnboardingDone({ readiness, businessName }: OnboardingDoneProps)
         )}
         {pendingReview && (
           <Alert variant="info" className="mt-3">
-            <span className="flex items-start gap-2">
-              <Clock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <span>Nuestro equipo está revisando tu documentación (24-48 h laborables). Te avisaremos cuando esté verificada.</span>
-            </span>
+            Nuestro equipo está revisando tu documentación (24-48 h laborables). Te avisaremos cuando esté verificada.
           </Alert>
         )}
       </Card>
@@ -88,13 +89,13 @@ export function OnboardingDone({ readiness, businessName }: OnboardingDoneProps)
           <Button asChild variant="primary" className="w-full">
             <Link href="/dashboard/products/create">
               <PackagePlus className="mr-2 h-4 w-4" aria-hidden="true" />
-              Crear tu primer producto con el asistente
+              Crear mi primer producto
             </Link>
           </Button>
           <Button asChild variant="outline" className="w-full">
             <Link href="/dashboard/profile/business#historia">
               <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" />
-              Completar perfil comercial (historia, opcional)
+              Completar mi perfil
             </Link>
           </Button>
         </div>
