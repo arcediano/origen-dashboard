@@ -50,7 +50,7 @@ export function CreateProductCancelDialog({
       description="Los datos no guardados se perderán."
       body={
         aiAssistUsed
-          ? 'Si cancelas ahora, perderás todos los cambios que no hayas guardado. Además, ya has usado el asistente de IA en este producto: si no lo guardas, perderás una de tus plazas de productos con IA sin conservar el producto. ¿Estás seguro de que quieres salir?'
+          ? 'Si cancelas ahora, el producto no se guarda como borrador: se descarta. Ya has usado un crédito del asistente de IA en este producto y no se recupera. ¿Estás seguro de que quieres salir?'
           : 'Si cancelas ahora, perderás todos los cambios que no hayas guardado. ¿Estás seguro de que quieres salir?'
       }
       confirmVariant="danger"

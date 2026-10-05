@@ -268,6 +268,8 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
     trackInventory:    formData.trackInventory,
     allowBackorders:   formData.allowBackorders,
 
+    netContent:     formData.netContent,
+    netContentUnit: formData.netContentUnit,
     weight:     formData.weight,
     weightUnit: formData.weightUnit,
     dimensions: formData.dimensions,
@@ -379,7 +381,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
     'name', 'fullDescription', 'categoryId', 'subcategoryId',
     'basePrice', 'comparePrice', 'sku', 'barcode', 'stock',
     'lowStockThreshold', 'trackInventory', 'allowBackorders',
-    'weight', 'weightUnit', 'dimensions', 'shippingClass',
+    'netContent', 'netContentUnit', 'weight', 'weightUnit', 'dimensions', 'shippingClass',
   ];
 
   for (const key of scalar) {
@@ -802,6 +804,8 @@ export async function duplicateProduct(id: string): Promise<ApiResponse<Product>
       lowStockThreshold: original.lowStockThreshold,
       trackInventory:    original.trackInventory,
       allowBackorders:   original.allowBackorders,
+      netContent:        original.netContent,
+      netContentUnit:    original.netContentUnit,
       weight:            original.weight,
       weightUnit:        original.weightUnit,
       dimensions:        original.dimensions,

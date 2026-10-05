@@ -57,18 +57,27 @@ describe('AiProductIntake — cupo agotado y compra de créditos', () => {
     const user = userEvent.setup();
     render(<AiProductIntake {...base} quota={{ used: 3, total: 3 }} />);
 
-    expect(await screen.findByText('Sin créditos para el asistente de IA')).toBeTruthy();
+    expect(await screen.findByText('No te quedan créditos del asistente')).toBeTruthy();
     const createButton = screen.getByRole('button', { name: 'Crear con IA' });
     expect(createButton).toBeDisabled();
     expect(draftMock).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole('button', { name: 'Comprar créditos' }));
+    await user.click(screen.getByRole('button', { name: 'Recargar créditos' }));
     await waitFor(() => expect(pricingMock).toHaveBeenCalled());
   });
 
   it('con cupo disponible no muestra el aviso y "Crear con IA" queda habilitado al rellenar', async () => {
     render(<AiProductIntake {...base} quota={{ used: 1, total: 3 }} />);
-    expect(screen.queryByText('Sin créditos para el asistente de IA')).toBeNull();
+    expect(screen.queryByText('No te quedan créditos del asistente')).toBeNull();
+  });
+
+  it('muestra arriba cuántos créditos quedan, gratis y comprados, y que cada producto gasta 1', () => {
+    render(<AiProductIntake {...base} quota={{ used: 2, total: 5, free: 3, purchased: 2 }} />);
+    expect(screen.getByTestId('ai-credits-remaining').textContent).toBe('3');
+    const panel = screen.getByTestId('ai-credits-panel');
+    expect(panel.textContent).toMatch(/3 gratis \+ 2 comprados · 2 usados/);
+    expect(panel.textContent).toMatch(/gasta 1 crédito/);
+    expect(panel.getAttribute('data-state')).toBe('available');
   });
 
   it('si el backend rechaza por cupo pese a que el cupo mostrado aún tenía margen, muestra el aviso reactivo', async () => {
@@ -81,13 +90,13 @@ describe('AiProductIntake — cupo agotado y compra de créditos', () => {
     await fillAndSubmit(user);
 
     await waitFor(() => expect(draftMock).toHaveBeenCalled());
-    const buyButton = await screen.findByRole('button', { name: 'Comprar créditos' });
+    const buyButton = await screen.findByRole('button', { name: 'Recargar créditos' });
 
     await user.click(buyButton);
     await waitFor(() => expect(pricingMock).toHaveBeenCalled());
   });
 
-  it('un error distinto (p. ej. tope mensual) no muestra el botón de comprar créditos', async () => {
+  it('un error distinto (p. ej. tope mensual) no marca los créditos como agotados', async () => {
     draftMock.mockRejectedValue(new AiAssistError('tope mensual', 'AI_MONTHLY_CAP_REACHED', 503));
     const user = userEvent.setup();
     render(<AiProductIntake {...base} quota={{ used: 1, total: 3 }} />);
@@ -96,6 +105,6 @@ describe('AiProductIntake — cupo agotado y compra de créditos', () => {
 
     await waitFor(() => expect(draftMock).toHaveBeenCalled());
     await screen.findByText(/no está disponible ahora mismo/);
-    expect(screen.queryByRole('button', { name: 'Comprar créditos' })).toBeNull();
+    expect(screen.getByTestId('ai-credits-panel').getAttribute('data-state')).toBe('available');
   });
 });

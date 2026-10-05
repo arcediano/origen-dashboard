@@ -37,6 +37,10 @@ export interface AiAssistQuota {
   enabled: boolean;
   used: number;
   total: number;
+  /** Productos con asistente incluidos gratis. */
+  free?: number;
+  /** Créditos comprados por el productor. */
+  purchased?: number;
 }
 
 /** Etiquetas en español de los campos, para el resumen "no se han podido leer…". */

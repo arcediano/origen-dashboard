@@ -137,6 +137,16 @@ export interface ProductCertification extends Certification {
 // TIPOS DE ATRIBUTOS DINÁMICOS
 // ============================================================================
 
+export type NetContentUnit = 'g' | 'kg' | 'ml' | 'l' | 'ud';
+
+export const NET_CONTENT_UNIT_LABELS: Record<NetContentUnit, string> = {
+  g: 'g',
+  kg: 'kg',
+  ml: 'ml',
+  l: 'l',
+  ud: 'unidades',
+};
+
 export type AttributeType = 'text' | 'number' | 'boolean' | 'date';
 
 export interface DynamicAttribute {
@@ -208,6 +218,9 @@ export interface InventoryData {
   lowStockThreshold: number;
   trackInventory: boolean;
   allowBackorders: boolean;
+  /** Contenido neto que se vende (cantidad a la que corresponde el precio). */
+  netContent?: number;
+  netContentUnit?: NetContentUnit;
   weight?: number;
   weightUnit?: 'kg' | 'g';
   dimensions?: Dimensions;
@@ -280,6 +293,9 @@ export interface Product {
   lowStockThreshold: number;
   trackInventory: boolean;
   allowBackorders?: boolean;
+  /** Contenido neto que se vende (cantidad a la que corresponde el precio). */
+  netContent?: number;
+  netContentUnit?: NetContentUnit;
   weight?: number;
   weightUnit?: 'kg' | 'g';
   dimensions?: Dimensions;
@@ -332,6 +348,9 @@ export interface ProductFormData {
   lowStockThreshold: number;
   trackInventory: boolean;
   allowBackorders?: boolean;
+  /** Contenido neto que se vende (cantidad a la que corresponde el precio). */
+  netContent?: number;
+  netContentUnit?: NetContentUnit;
   weight?: number;
   weightUnit?: 'kg' | 'g';
   dimensions?: Dimensions;
@@ -421,6 +440,8 @@ export const defaultFormData: ProductFormData = {
   lowStockThreshold: 5,
   trackInventory: true,
   allowBackorders: false,
+  netContent: undefined,
+  netContentUnit: 'g',
   weight: undefined,
   weightUnit: 'kg',
   dimensions: undefined,

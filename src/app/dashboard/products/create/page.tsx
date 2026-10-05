@@ -164,10 +164,13 @@ export default function CreateProductPage() {
       setDraft(response);
       // Si a la IA le quedó algo pendiente de esos campos, se pregunta antes
       // de pasar a revisión — así la pantalla de revisión llega ya completa.
+      // Se pasa ya a la pantalla de revisión (el producto en creación); las preguntas
+      // salen encima. Si se quedara en el intake, el formulario ya relleno se leería
+      // como un "borrador sin terminar" cuando es el producto que se está creando.
+      setMode('ai-review');
       if (response.followUpQuestions.length > 0) {
         setPendingFollowUps(response.followUpQuestions);
       } else {
-        setMode('ai-review');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     },
@@ -326,7 +329,7 @@ export default function CreateProductPage() {
         {mode === 'ai-intake' && (
           <AiProductIntake
             assistKey={aiAssistKey}
-            quota={quota && quota.enabled ? { used: quota.used, total: quota.total } : null}
+            quota={quota && quota.enabled ? { used: quota.used, total: quota.total, free: quota.free, purchased: quota.purchased } : null}
             onDraft={handleAiDraft}
             onManual={() => setMode('wizard')}
             onCreditsPurchased={handleCreditsPurchased}

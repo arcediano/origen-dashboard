@@ -6,7 +6,7 @@
  * cambios sobre el formulario de producto; lo que la IA no rellenó no se toca.
  */
 
-import type { NutritionalInfo } from '@/types/product';
+import type { DynamicAttribute, NetContentUnit, NutritionalInfo } from '@/types/product';
 import { proposalToPatches, unreadableFieldNames, type LabelProposal } from './label-proposal';
 
 /**
@@ -40,11 +40,24 @@ export interface ProductDraftResponse {
     categoryId: string;
     subcategoryId: string | null;
     nutritionalInfo: LabelProposal & {
+      /** Conservación leída de la etiqueta o dicha por el productor. */
+      storageInstructions?: string | null;
       isGlutenFree: boolean | null;
       isVegan: boolean | null;
       isVegetarian: boolean | null;
     };
-    productionInfo: { origin: string | null; productionMethod: string | null };
+    productionInfo: {
+      origin: string | null;
+      productionMethod: string | null;
+      /** YYYY-MM-DD, solo si se leyó en las fotos o lo dijo el productor. */
+      harvestDate?: string | null;
+      productionDate?: string | null;
+      expiryDate?: string | null;
+    };
+    /** Contenido neto de una unidad de venta (a qué cantidad corresponde el precio). */
+    netContent?: { value: number; unit: NetContentUnit } | null;
+    /** Atributos destacados según el tipo de producto (tipo de leche, curación…). */
+    attributes?: Array<{ name: string; value: string }>;
   };
   /** `null` si no se enviaron fotos de etiqueta. */
   labelLegible: boolean | null;
@@ -115,6 +128,37 @@ export function draftToPatches(
   }
 
   const { origin, productionMethod } = proposal.productionInfo;
+  for (const key of ['harvestDate', 'productionDate', 'expiryDate'] as const) {
+    const iso = proposal.productionInfo[key];
+    const date = iso ? new Date(iso) : null;
+    if (date && !Number.isNaN(date.getTime())) {
+      patches.push({ kind: 'nested', section: 'productionInfo', field: key, value: date });
+    }
+  }
+  if (proposal.nutritionalInfo.storageInstructions) {
+    patches.push({
+      kind: 'nested',
+      section: 'nutritionalInfo',
+      field: 'storageInstructions',
+      value: proposal.nutritionalInfo.storageInstructions,
+    });
+  }
+  if (proposal.netContent) {
+    field('netContent', proposal.netContent.value);
+    field('netContentUnit', proposal.netContent.unit);
+  }
+  if (proposal.attributes?.length) {
+    field(
+      'attributes',
+      proposal.attributes.map((a, i): DynamicAttribute => ({
+        id: `ai-attr-${i}-${Date.now()}`,
+        name: a.name,
+        type: 'text',
+        value: a.value,
+        visible: true,
+      })),
+    );
+  }
   if (origin) patches.push({ kind: 'nested', section: 'productionInfo', field: 'origin', value: origin });
   if (productionMethod) {
     patches.push({ kind: 'nested', section: 'productionInfo', field: 'productionMethod', value: productionMethod });
@@ -136,6 +180,12 @@ export function summarizeDraft(response: ProductDraftResponse): {
   if (proposal.nutritionalInfo.calories !== null) filled.push('Información nutricional');
   if (proposal.productionInfo.origin) filled.push('Origen');
   if (proposal.productionInfo.productionMethod) filled.push('Elaboración');
+  if (proposal.netContent) filled.push('Contenido que vendes');
+  if (proposal.productionInfo.expiryDate || proposal.productionInfo.harvestDate || proposal.productionInfo.productionDate) {
+    filled.push('Fechas');
+  }
+  if (proposal.nutritionalInfo.storageInstructions) filled.push('Conservación');
+  if (proposal.attributes?.length) filled.push('Atributos');
 
   const toReview: string[] = [];
   if (response.labelLegible === true) toReview.push('Alérgenos y valores nutricionales leídos de la etiqueta');
