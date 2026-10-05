@@ -157,3 +157,21 @@ export async function getAiCreditPurchaseStatus(
     throw toAiAssistError(error);
   }
 }
+
+/** Una compra confirmada de créditos del asistente de IA (sección Facturación). */
+export interface AiCreditPurchaseItem {
+  id: string;
+  credits: number;
+  amountCents: number;
+  currency: string;
+  createdAt: string;
+}
+
+/** Historial de compras de créditos confirmadas del productor, más recientes primero. */
+export async function listAiCreditPurchases(): Promise<AiCreditPurchaseItem[]> {
+  try {
+    return await gatewayClient.get<AiCreditPurchaseItem[]>('/ai-assist/credits/purchases');
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}

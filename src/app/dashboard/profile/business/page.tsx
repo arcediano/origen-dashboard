@@ -74,7 +74,7 @@ type BusinessFormState = {
   teamSize: string;
   description: string;
   tagline: string;
-  whyOrigin: string;
+  animalWelfare: string;
   productionPhilosophy: string;
   values: string[];
   categories: string[];
@@ -111,7 +111,7 @@ const EMPTY_FORM: BusinessFormState = {
   teamSize: '',
   description: '',
   tagline: '',
-  whyOrigin: '',
+  animalWelfare: '',
   productionPhilosophy: '',
   values: [],
   categories: [],
@@ -203,14 +203,15 @@ function mapProfileToForm(data: ProducerProfileData): BusinessFormState {
     teamSize: mapTeamSizeFromApi(data.location?.teamSize),
     description: data.story?.description ?? '',
     tagline: data.story?.tagline ?? '',
-    whyOrigin: data.fiscal?.whyOrigin ?? '',
+    animalWelfare: data.story?.animalWelfare ?? '',
     productionPhilosophy: data.story?.productionPhilosophy ?? '',
     values: data.story?.values ?? [],
     categories: data.fiscal?.categories ?? [],
     phone: data.fiscal?.businessPhone ?? '',
-    website: data.story?.website ?? '',
+    // Si aún no tiene web/Instagram propios, se parte de lo indicado en la solicitud de alta.
+    website: data.story?.website ?? data.registration?.website ?? '',
     introVideoUrl: data.story?.introVideoUrl ?? '',
-    instagram: data.story?.instagramHandle ?? '',
+    instagram: data.story?.instagramHandle ?? data.registration?.instagram?.replace(/^@/, '') ?? '',
     street: data.location?.street ?? '',
     streetNumber: data.location?.streetNumber ?? '',
     streetComplement: data.location?.streetComplement ?? '',
@@ -357,8 +358,26 @@ export default function BusinessInfoPage() {
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [readinessReport, setReadinessReport] = useState<ProducerReadinessReport | null>(null);
+  const [registration, setRegistration] = useState<ProducerProfileData['registration']>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  // Redes y web que el productor indicó en la solicitud de alta (solo lectura).
+  const registeredSocials = useMemo(() => {
+    const clean = (v?: string | null) => v?.trim() ?? '';
+    const asUrl = (v: string) => (/^https?:\/\//i.test(v) ? v : `https://${v}`);
+    const handle = (v: string) => v.replace(/^@/, '');
+    const out: Array<{ label: string; value: string; href: string | null }> = [];
+    const website = clean(registration?.website);
+    const instagram = clean(registration?.instagram);
+    const facebook = clean(registration?.facebook);
+    const tiktok = clean(registration?.tiktok);
+    if (website) out.push({ label: 'Web', value: website, href: asUrl(website) });
+    if (instagram) out.push({ label: 'Instagram', value: `@${handle(instagram)}`, href: `https://instagram.com/${handle(instagram)}` });
+    if (facebook) out.push({ label: 'Facebook', value: facebook, href: /facebook\.com|fb\.com/i.test(facebook) ? asUrl(facebook) : null });
+    if (tiktok) out.push({ label: 'TikTok', value: `@${handle(tiktok)}`, href: `https://tiktok.com/@${handle(tiktok)}` });
+    return out;
+  }, [registration]);
 
   const producerInitial = useMemo(() => {
     if (!form.businessName) return 'P';
@@ -420,6 +439,7 @@ export default function BusinessInfoPage() {
         const mapped = mapProfileToForm(response.data);
 
         if (!mounted) return;
+        setRegistration(response.data.registration ?? null);
         setForm(mapped);
         setInitialForm(mapped);
         setReadinessReport(readiness);
@@ -547,7 +567,7 @@ export default function BusinessInfoPage() {
       ),
       tagline: form.tagline.trim() || undefined,
       description: form.description.trim() || undefined,
-      whyOrigin: form.whyOrigin.trim() || undefined,
+      animalWelfare: form.animalWelfare.trim() || undefined,
       productionPhilosophy: form.productionPhilosophy.trim() || undefined,
       values: form.values.length > 0 ? form.values : undefined,
       website: form.website.trim() || undefined,
@@ -566,6 +586,7 @@ export default function BusinessInfoPage() {
       const response = await updateProducerProfile(payload);
       const updated = response?.data ? mapProfileToForm(response.data) : form;
 
+      if (response?.data) setRegistration(response.data.registration ?? null);
       setForm(updated);
       setInitialForm(updated);
       setIsEditing(false);
@@ -920,6 +941,23 @@ export default function BusinessInfoPage() {
                       <Input id="instagram" maxLength={100} value={form.instagram} onChange={(e) => setForm({ ...form, instagram: e.target.value.replace(/^@/, '') })} disabled={!isEditing} placeholder="@usuario" />
                     </div>
                   </div>
+                  {registeredSocials.length > 0 && (
+                    <div className="mt-4 rounded-xl border border-border-subtle bg-origen-pastel/20 p-3" data-testid="registered-socials">
+                      <p className="text-xs font-semibold text-origen-bosque">Redes que indicaste en tu solicitud de alta</p>
+                      <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                        {registeredSocials.map((social) => (
+                          <li key={social.label}>
+                            <span className="text-text-subtle">{social.label}: </span>
+                            {social.href ? (
+                              <a href={social.href} target="_blank" rel="noopener noreferrer" className="font-medium text-hoja-tinta underline-offset-2 hover:underline">{social.value}</a>
+                            ) : (
+                              <span className="font-medium text-origen-bosque">{social.value}</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -1088,16 +1126,20 @@ export default function BusinessInfoPage() {
                     {errors.description && <p className="text-xs text-feedback-danger">{errors.description}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="whyOrigin">Por que Origen?</Label>
-                    <Textarea id="whyOrigin" value={form.whyOrigin} onChange={(e) => setForm({ ...form, whyOrigin: e.target.value })} disabled={!isEditing} rows={3} placeholder="Cuéntanos tu motivación para unirte a Origen" />
-                  </div>
-                  <div className="space-y-2">
                     <Label htmlFor="introVideoUrl">Video de presentacion</Label>
                     <Input id="introVideoUrl" maxLength={500} value={form.introVideoUrl} onChange={(e) => setForm({ ...form, introVideoUrl: e.target.value })} disabled={!isEditing} placeholder="https://youtube.com/watch?v=..." />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="productionPhilosophy">Filosofia de produccion</Label>
                     <Textarea id="productionPhilosophy" maxLength={1000} value={form.productionPhilosophy} onChange={(e) => setForm({ ...form, productionPhilosophy: e.target.value })} disabled={!isEditing} rows={4} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="animalWelfare" className="flex items-center gap-2">
+                      Bienestar animal
+                      <Badge variant="neutral" size="xs">Si aplica</Badge>
+                    </Label>
+                    <Textarea id="animalWelfare" maxLength={1000} value={form.animalWelfare} onChange={(e) => setForm({ ...form, animalWelfare: e.target.value })} disabled={!isEditing} rows={3} placeholder="Cría en libertad, alimentación natural, sin antibióticos…" />
+                    <p className="text-xs text-muted-foreground">Solo si tu negocio trabaja con animales: condiciones de cría y cuidados.</p>
                   </div>
                   <div className="space-y-2">
                     <Label>Valores</Label>

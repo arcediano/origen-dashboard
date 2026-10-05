@@ -184,7 +184,6 @@ export interface ProductionInfo {
   expiryDate?: Date;
   batchNumber: string;
   sustainabilityInfo: string;
-  animalWelfare: string;
   artisanProcess: string;
   practices: string[];
   media: ProductionMedia[];
@@ -400,7 +399,6 @@ export const defaultProductionInfo: ProductionInfo = {
   expiryDate: undefined,
   batchNumber: '',
   sustainabilityInfo: '',
-  animalWelfare: '',
   artisanProcess: '',
   practices: [],
   media: [],

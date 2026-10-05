@@ -118,7 +118,6 @@ export interface ApiProductionInfo {
   producerName?: string;
   productionMethod: string;
   sustainabilityInfo?: string;
-  animalWelfare?: string;
   artisanProcess?: string;
   practices: string[];
   harvestDate?: string;
@@ -372,7 +371,6 @@ function mapProductionInfo(info?: ApiProductionInfo): ProductionInfo | undefined
     producerName: info.producerName,
     productionMethod: info.productionMethod,
     sustainabilityInfo: info.sustainabilityInfo ?? '',
-    animalWelfare: info.animalWelfare ?? '',
     artisanProcess: info.artisanProcess ?? '',
     practices: info.practices ?? [],
     harvestDate: info.harvestDate ? new Date(info.harvestDate) : undefined,

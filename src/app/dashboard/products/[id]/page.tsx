@@ -243,17 +243,6 @@ function ProduccionSection({ info, formatDate }: {
         </div>
       )}
 
-      {/* Bienestar animal */}
-      {info.animalWelfare && (
-        <div className="border-l-2 border-origen-pradera/30 pl-4">
-          <h4 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-2">Bienestar animal</h4>
-          <div
-            className="text-sm text-text-default leading-relaxed prose prose-sm max-w-none [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:ml-4 [&_blockquote]:italic [&_blockquote]:text-text-subtle"
-            dangerouslySetInnerHTML={{ __html: sanitizeHtml(info.animalWelfare) }}
-          />
-        </div>
-      )}
-
       {/* Información general */}
       <div>
         <InfoRow label="Productor" value={info.farmName} />
