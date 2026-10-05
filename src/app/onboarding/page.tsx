@@ -443,7 +443,11 @@ export default function OnboardingPage() {
           </div>
         </header>
         <main className="px-4 py-6 pb-10 sm:px-6 lg:py-10">
-          <OnboardingDone readiness={readiness} businessName={formData.meta.businessName} />
+          <OnboardingDone
+            readiness={readiness}
+            businessName={formData.meta.businessName}
+            stripeConnected={formData.step5.stripeConnected}
+          />
         </main>
       </div>
     );
