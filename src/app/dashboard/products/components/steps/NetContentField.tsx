@@ -2,7 +2,7 @@
 
 /**
  * @component NetContentField
- * @description Contenido neto que se vende (a qué cantidad corresponde el precio):
+ * @description Formato de venta (contenido neto: a qué cantidad corresponde el precio):
  * cantidad + unidad (g, kg, ml, l, unidades). Compartido por el paso de precios y la
  * pantalla de revisión del alta con IA.
  */
@@ -22,18 +22,18 @@ export function NetContentField({ netContent, netContentUnit, onChange }: NetCon
     <div className="space-y-2" data-testid="net-content">
       <div className="flex items-center gap-2">
         <Package className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />
-        <span className="text-sm font-medium text-foreground">Contenido que vendes</span>
+        <span className="text-sm font-medium text-foreground">Formato de venta</span>
         <Tooltip
-          content="Cantidad a la que corresponde el precio"
-          detailed="Indica cuánto producto recibe el cliente por el precio de venta: 500 g, 1 kg, 750 ml, 1 l o un número de unidades. Así el cliente sabe a qué cantidad corresponde lo que paga."
+          content="Lo que recibe el cliente por este precio"
+          detailed="Indica la cantidad de producto que incluye una unidad a la venta: un tarro de 500 g, una pieza de 1 kg, una botella de 750 ml o un pack de 6 unidades. Así el cliente sabe a qué cantidad corresponde lo que paga."
           size="sm"
         />
       </div>
-      <div className="flex max-w-md gap-2">
+      <div className="flex max-w-xs gap-2">
         <Input
           type="number"
           inputMode="decimal"
-          aria-label="Cantidad del contenido que vendes"
+          aria-label="Cantidad del formato de venta"
           value={netContent ?? ''}
           onChange={(e) => onChange('netContent', e.target.value ? parseFloat(e.target.value) : undefined)}
           min={0}
@@ -42,8 +42,12 @@ export function NetContentField({ netContent, netContentUnit, onChange }: NetCon
           placeholder="Ej: 500"
           containerClassName="min-w-0 flex-1"
         />
-        <Select value={netContentUnit ?? 'g'} onValueChange={(v) => onChange('netContentUnit', v as NetContentUnit)}>
-          <SelectTrigger className="h-12 w-32 shrink-0 rounded-xl" aria-label="Unidad del contenido">
+        <Select
+          className="w-28 shrink-0"
+          value={netContentUnit ?? 'g'}
+          onValueChange={(v) => onChange('netContentUnit', v as NetContentUnit)}
+        >
+          <SelectTrigger className="h-12 rounded-xl" aria-label="Unidad del formato">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -56,7 +60,7 @@ export function NetContentField({ netContent, netContentUnit, onChange }: NetCon
         </Select>
       </div>
       <p className="text-xs text-muted-foreground">
-        Recomendable: es lo que el cliente ve junto al precio (p. ej. «12,50 € · 500 g»).
+        Cantidad que lleva cada unidad (p. ej. 500 g, 1 kg, 750 ml, 6 unidades). Se muestra junto al precio: «12,50 € · 500 g».
       </p>
     </div>
   );
