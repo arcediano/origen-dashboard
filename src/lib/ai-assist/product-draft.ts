@@ -180,7 +180,7 @@ export function summarizeDraft(response: ProductDraftResponse): {
   if (proposal.nutritionalInfo.calories !== null) filled.push('Información nutricional');
   if (proposal.productionInfo.origin) filled.push('Origen');
   if (proposal.productionInfo.productionMethod) filled.push('Elaboración');
-  if (proposal.netContent) filled.push('Contenido que vendes');
+  if (proposal.netContent) filled.push('Formato de venta');
   if (proposal.productionInfo.expiryDate || proposal.productionInfo.harvestDate || proposal.productionInfo.productionDate) {
     filled.push('Fechas');
   }
