@@ -49,8 +49,6 @@ const CERT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
   produccion_integrada: Sprout,
   bienestar_animal: Shield,
   agricultura_regenerativa: Recycle,
-  sin_gluten: Leaf,
-  vegano: Leaf,
 };
 
 const LEGAL_DOCS: Array<{ key: LegalDocumentKey; title: string; description: string }> = [

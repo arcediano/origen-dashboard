@@ -56,8 +56,9 @@ describe('paso 3 (envíos)', () => {
     expect(ids(2, form({ step3: { ...step3, deliveryChoice: 'own', deliveryOptions: [opt] } }))).toEqual([]);
     expect(ids(2, form({ step3: { ...step3, deliveryChoice: 'own', deliveryOptions: [{ ...opt, price: 0 }] } }))).toEqual(['onb-delivery-options']);
   });
-  it('zonas y pedido mínimo siempre obligatorios', () => {
-    expect(ids(2, form({ step3: { ...INITIAL_FORM_DATA.step3, deliveryChoice: 'delegated' } }))).toEqual(['onb-zone-value', 'onb-min-order']);
+  it('las zonas son obligatorias; el pedido mínimo es opcional (0 = sin mínimo) pero no negativo', () => {
+    expect(ids(2, form({ step3: { ...INITIAL_FORM_DATA.step3, deliveryChoice: 'delegated' } }))).toEqual(['onb-zone-value']);
+    expect(ids(2, form({ step3: { ...INITIAL_FORM_DATA.step3, deliveryChoice: 'delegated', minOrderAmount: -5 } }))).toEqual(['onb-zone-value', 'onb-min-order']);
   });
 });
 

@@ -16,8 +16,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Alert, Button, ConfirmDialog } from '@arcediano/ux-library';
+import { Alert, Button } from '@arcediano/ux-library';
 import { useAuth } from '@/contexts/AuthContext';
 import { GatewayError } from '@/lib/api/client';
 import {
@@ -100,6 +99,23 @@ const COVERAGE_STEP_INDEX = 2;
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
+/**
+ * Cabecera del onboarding: logo (sin enlace: no se puede salir hasta completarlo)
+ * alineado a la izquierda junto al texto que identifica la página actual.
+ */
+function OnboardingHeader({ title }: { title: string }) {
+  return (
+    <header className="w-full border-b border-border-subtle bg-surface-alt/80">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/origen-icon.svg" alt="Origen" width={36} height={36} className="h-9 w-9 shrink-0" />
+        <span aria-hidden="true" className="h-6 w-px shrink-0 bg-border" />
+        <p className="min-w-0 truncate text-sm font-semibold text-origen-bosque sm:text-base">{title}</p>
+      </div>
+    </header>
+  );
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
   const { user, setUser } = useAuth();
@@ -120,8 +136,9 @@ export default function OnboardingPage() {
   const [backendCurrentStep, setBackendCurrentStep] = useState<number | null>(null);
   /** Pasos en los que el productor ya intentó continuar (a partir de ahí se muestran los errores). */
   const [attempted, setAttempted] = useState<Record<number, boolean>>({});
-  const [exitDialogOpen, setExitDialogOpen] = useState(false);
   const [done, setDone] = useState(false);
+  /** Evita que la guarda de "ya completado" interrumpa la pantalla final recién alcanzada. */
+  const justCompletedRef = useRef(false);
   const [readiness, setReadiness] = useState<ProducerReadinessReport | null | undefined>(undefined);
 
   // Cobertura de Origen (paso 3)
@@ -151,6 +168,11 @@ export default function OnboardingPage() {
     },
     [currentStep, syncUrl],
   );
+
+  // Con el onboarding ya completado no se puede volver a entrar por URL: los cambios se hacen desde el panel.
+  useEffect(() => {
+    if (user?.onboardingCompleted && !justCompletedRef.current) router.replace('/dashboard');
+  }, [user?.onboardingCompleted, router]);
 
   // ── Carga inicial (rehidratación completa) ────────────────────────────────
 
@@ -336,30 +358,13 @@ export default function OnboardingPage() {
     try {
       await persistStep(currentStep);
       await apiCompleteOnboarding();
+      justCompletedRef.current = true;
       if (user) setUser({ ...user, onboardingCompleted: true });
       setDone(true);
       if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
       getMyReadiness().then(setReadiness).catch(() => setReadiness(null));
     } catch (error) {
       handleError(error, 'Error al completar el onboarding. Inténtalo de nuevo.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  /** "Guardar y continuar más tarde": guarda el paso si está completo; si no, pide confirmación. */
-  const handleSaveAndExit = async () => {
-    if (!isStepValid) {
-      setExitDialogOpen(true);
-      return;
-    }
-    setIsSubmitting(true);
-    setSaveError(null);
-    try {
-      await persistStep(currentStep);
-      router.push('/dashboard');
-    } catch (error) {
-      handleError(error, 'Error al guardar. Inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
@@ -436,13 +441,7 @@ export default function OnboardingPage() {
   if (done) {
     return (
       <div className="min-h-screen bg-origen-crema">
-        <header className="w-full border-b border-border-subtle bg-surface-alt/80">
-          <div className="mx-auto flex max-w-3xl items-center px-4 py-3 sm:px-6">
-            <Link href="/" className="flex items-center" aria-label="Origen">
-              <img src="/origen-icon.svg" alt="" width={36} height={36} className="h-9 w-9" />
-            </Link>
-          </div>
-        </header>
+        <OnboardingHeader title="Configuración inicial completada" />
         <main className="px-4 py-6 pb-10 sm:px-6 lg:py-10">
           <OnboardingDone
             readiness={readiness}
@@ -456,23 +455,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-origen-crema">
-      <header className="w-full border-b border-border-subtle bg-surface-alt/80">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 sm:px-6">
-          <Link href="/" className="flex items-center" aria-label="Origen">
-            <img src="/origen-icon.svg" alt="" width={36} height={36} className="h-9 w-9" />
-          </Link>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleSaveAndExit}
-            disabled={isSubmitting}
-            className="min-h-11 w-auto text-xs text-text-subtle sm:text-sm"
-          >
-            Guardar y continuar más tarde
-          </Button>
-        </div>
-      </header>
+      <OnboardingHeader title={`Configura tu tienda · ${step.title}`} />
 
       {/* Espacio bajo el ActionBar fijo de móvil: 1 fila (botón principal) en el paso 1 y 2 filas
           (principal + "Anterior") en el resto. Clases literales completas para el JIT de Tailwind. */}
@@ -695,17 +678,6 @@ export default function OnboardingPage() {
         canContinue={isStepValid}
         isSubmitting={isSubmitting}
         isLastStep={isLastStep}
-      />
-
-      <ConfirmDialog
-        open={exitDialogOpen}
-        onOpenChange={setExitDialogOpen}
-        title="Este paso está incompleto"
-        description="Si sales ahora, no se guardará lo que has cambiado en este paso. Conservas todo lo guardado en los pasos anteriores y puedes retomarlo cuando quieras."
-        confirmLabel="Salir sin guardar"
-        cancelLabel="Seguir aquí"
-        confirmVariant="primary"
-        onConfirm={() => router.push('/dashboard')}
       />
     </div>
   );

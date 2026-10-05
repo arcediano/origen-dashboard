@@ -15,6 +15,7 @@ import * as React from 'react';
 import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import {
+  buildImageAspectRatioError,
   buildImageResolutionError,
   getImageDimensions,
   getImageQualityHint,
@@ -192,6 +193,11 @@ export function FileUpload({
         if (resolvedMinDimensions && isImageFile(file.type)) {
           try {
             const { width, height } = await getImageDimensions(file);
+            const ratioError = qualityRequirement ? buildImageAspectRatioError(file.name, { width, height }, qualityRequirement) : null;
+            if (ratioError) {
+              errors.push(ratioError);
+              continue;
+            }
             if (width < resolvedMinDimensions.width || height < resolvedMinDimensions.height) {
               if (qualityRequirement) {
                 errors.push(buildImageResolutionError(file.name, { width, height }, qualityRequirement));

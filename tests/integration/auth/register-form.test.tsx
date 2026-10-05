@@ -69,29 +69,13 @@ describe('SimpleRegistration — Formulario de registro', () => {
     expect(getInputByName('phone')).toBeInTheDocument();
   });
 
-  it('el botón muestra "Completar registro" cuando el formulario no es válido', () => {
-    render(<SimpleRegistration />);
-    // Cuando el formulario está vacío/inválido, el botón muestra "Completar registro"
-    expect(screen.getByRole('button', { name: /completar registro/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /completar registro/i })).toBeDisabled();
-  });
-
-  it('tiene los checkboxes de términos y privacidad desmarcados por defecto', () => {
-    render(<SimpleRegistration />);
-    expect(screen.getByLabelText(/acepto los términos/i)).not.toBeChecked();
-    expect(screen.getByLabelText(/acepto la política/i)).not.toBeChecked();
-  });
-
-  it('los checkboxes de términos y privacidad son interactuables', async () => {
+  it('el botón "Enviar solicitud" siempre está activo y, con campos vacíos, avisa de que hay campos en rojo', async () => {
     const user = userEvent.setup();
     render(<SimpleRegistration />);
-
-    const termsCheckbox = screen.getByLabelText(/acepto los términos/i);
-    await user.click(termsCheckbox);
-    expect(termsCheckbox).toBeChecked();
-
-    await user.click(termsCheckbox);
-    expect(termsCheckbox).not.toBeChecked();
+    const button = screen.getByRole('button', { name: /enviar solicitud/i });
+    expect(button).toBeEnabled();
+    await user.click(button);
+    expect(await screen.findByText(/campos marcados en rojo/i)).toBeInTheDocument();
   });
 
   it('la textarea de historia acepta y muestra texto escrito', async () => {
