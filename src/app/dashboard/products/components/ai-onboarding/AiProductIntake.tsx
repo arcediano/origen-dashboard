@@ -22,6 +22,7 @@ import {
   getImageDimensions,
 } from '@/lib/validations/image-quality';
 import { AddCreditsModal } from './AddCreditsModal';
+import { AiCreditsPanel } from './AiCreditsPanel';
 
 const MAX_LABEL_PHOTOS = 2;
 const MIN_TEXT = 10;
@@ -67,7 +68,7 @@ export interface IntakeResult {
 interface AiProductIntakeProps {
   /** Clave de imputación del cupo (borrador en el navegador). */
   assistKey: string | null;
-  quota: { used: number; total: number } | null;
+  quota: { used: number; total: number; free?: number; purchased?: number } | null;
   /** Al recibir el borrador de la IA. */
   onDraft: (result: IntakeResult) => void;
   /** El productor prefiere rellenar el formulario a mano. */
@@ -262,6 +263,14 @@ export function AiProductIntake({
         </Alert>
       )}
 
+      {quota && (
+        <AiCreditsPanel
+          quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
+          onRecharge={() => setShowAddCredits(true)}
+          onManual={quotaExhausted || quotaExceeded ? onManual : undefined}
+        />
+      )}
+
       <Card variant="elevated" className="p-4 sm:p-6 space-y-7">
         {/* 1. Foto */}
         <section aria-labelledby="intake-photo">
@@ -340,7 +349,7 @@ export function AiProductIntake({
             3 · Etiqueta <span className="normal-case tracking-normal font-normal">(opcional)</span>
           </h3>
           <p className="text-sm text-muted-foreground mb-3">
-            ¿Tienes la etiqueta? Sube fotos de los ingredientes y la información nutricional y las leemos por ti.
+            ¿Tienes la etiqueta? Sube fotos de los ingredientes y la información nutricional y las leemos por ti; si hay fecha de caducidad, de producción o conservación, las rellenamos también. Puedes saltarte las fotos: creamos la ficha con lo que tengas.
           </p>
           <input
             ref={labelInputRef}
@@ -394,42 +403,11 @@ export function AiProductIntake({
           </section>
         )}
 
-        {!error && quotaExhausted && (
-          <Alert variant="error">
-            <AlertTitle>Sin créditos para el asistente de IA</AlertTitle>
-            <AlertDescription>
-              <p>{QUOTA_EXCEEDED_MESSAGE}</p>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="mt-3 w-auto"
-                leftIcon={<Coins className="h-4 w-4" aria-hidden="true" />}
-                onClick={() => setShowAddCredits(true)}
-              >
-                Comprar créditos
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
         {error && (
-          <Alert variant="error">
-            <AlertTitle>No hemos podido preparar la ficha</AlertTitle>
+          <Alert variant={quotaExceeded ? 'warning' : 'error'}>
+            <AlertTitle>{quotaExceeded ? 'Sin créditos del asistente' : 'No hemos podido preparar la ficha'}</AlertTitle>
             <AlertDescription>
               <p>{error}</p>
-              {quotaExceeded && (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  className="mt-3 w-auto"
-                  leftIcon={<Coins className="h-4 w-4" aria-hidden="true" />}
-                  onClick={() => setShowAddCredits(true)}
-                >
-                  Comprar créditos
-                </Button>
-              )}
             </AlertDescription>
           </Alert>
         )}
@@ -456,11 +434,6 @@ export function AiProductIntake({
           >
             Crear con IA
           </Button>
-          {quota && !quotaExhausted && (
-            <p className="text-center text-xs text-text-subtle">
-              Cuenta como 1 de tus {quota.total} productos con asistente (has usado {quota.used}). Puedes repetir en este mismo producto sin gastar más.
-            </p>
-          )}
           <div className="text-center">
             <Button type="button" variant="ghost" size="sm" onClick={onManual}>
               Prefiero rellenarlo yo

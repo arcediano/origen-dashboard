@@ -184,7 +184,8 @@ function PaymentStep({
   return (
     <>
       <div className={SCROLL_AREA_CLASSNAME}>
-        <PaymentElement />
+        {/* Solo tarjeta: el PaymentIntent del backend admite únicamente `card`. */}
+        <PaymentElement options={{ wallets: { applePay: 'never', googlePay: 'never' } }} />
         {error && (
           <Alert variant="error">
             <AlertDescription>{error}</AlertDescription>

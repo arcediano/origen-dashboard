@@ -25,6 +25,7 @@ import {
   type Dimensions,
   type Certification,
   type DynamicAttribute,
+  type NetContentUnit,
   type NutritionalInfo,
   type PriceTier,
   type ProductionInfo,
@@ -175,6 +176,8 @@ export interface ApiProduct {
   mainImage?: ApiProductImage;
   gallery: ApiProductImage[];
   // Dimensiones
+  netContent?: number;
+  netContentUnit?: string;
   weight?: number;
   weightUnit?: string;
   dimensions?: { length?: number; width?: number; height?: number; unit?: string };
@@ -440,6 +443,8 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     trackInventory:   api.trackInventory,
     allowBackorders:  api.allowBackorders,
 
+    netContent:     api.netContent,
+    netContentUnit: api.netContentUnit as NetContentUnit | undefined,
     weight:        api.weight,
     weightUnit:    api.weightUnit as 'kg' | 'g' | undefined,
     dimensions:    api.dimensions as Dimensions | undefined,
