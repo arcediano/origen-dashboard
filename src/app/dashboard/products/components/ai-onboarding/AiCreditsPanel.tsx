@@ -1,14 +1,15 @@
 /**
  * @component AiCreditsPanel
  * @description Estado de los créditos del asistente de IA, siempre visible arriba del
- * alta con IA (sin hacer scroll): cuántos créditos gratis y comprados tiene, cuántos le
- * quedan y que cada producto creado gasta 1. Sin créditos, cambia a un aviso neutro
- * (no de error) con la acción de recargar.
+ * alta con IA (sin hacer scroll). Es visual, no textual: una ficha por cada crédito que
+ * le queda (sin desglose gratis/comprados ni créditos gastados) y la equivalencia
+ * "1 crédito = 1 producto". Sin créditos, cambia a un aviso neutro (no de error) con la
+ * acción de recargar.
  */
 
 'use client';
 
-import { Coins, Sparkles } from 'lucide-react';
+import { Coins, Package, Sparkles } from 'lucide-react';
 import { Button } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 
@@ -22,10 +23,30 @@ export interface AiCreditsPanelProps {
 
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 
+/** Fichas de crédito que se dibujan como máximo; el resto se resume en "+N". */
+const MAX_VISIBLE_TOKENS = 8;
+
+function CreditTokens({ remaining }: { remaining: number }) {
+  const visible = Math.min(remaining, MAX_VISIBLE_TOKENS);
+  const extra = remaining - visible;
+  return (
+    <div className="flex flex-wrap items-center gap-1.5" aria-hidden="true" data-testid="ai-credits-tokens">
+      {Array.from({ length: visible }, (_, i) => (
+        <span
+          key={i}
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-origen-pradera text-white shadow-subtle"
+        >
+          <Coins className="h-4 w-4" />
+        </span>
+      ))}
+      {extra > 0 && <span className="text-sm font-semibold text-origen-bosque">+{extra}</span>}
+    </div>
+  );
+}
+
 export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCreditsPanelProps) {
   const remaining = Math.max(0, quota.total - quota.used);
   const exhausted = remaining === 0;
-  const hasBreakdown = quota.free !== undefined && quota.purchased !== undefined;
 
   if (exhausted) {
     return (
@@ -47,8 +68,7 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
               No te quedan créditos del asistente
             </h2>
             <p className="text-sm text-text-subtle">
-              Has usado tus {quota.total} {plural(quota.total, 'crédito', 'créditos')}. Cada producto creado con IA gasta 1.
-              Puedes recargar con tarjeta{onManual ? ' o crear este producto a mano' : ''}.
+              Recarga con tarjeta{onManual ? ' o crea este producto a mano' : ''}. 1 crédito = 1 producto.
             </p>
             <div className="flex flex-col gap-2 pt-2 sm:flex-row">
               <Button type="button" variant="primary" size="sm" className="w-auto" onClick={onRecharge} leftIcon={<Coins className="h-4 w-4" aria-hidden="true" />}>
@@ -77,17 +97,22 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-origen-bosque shadow-subtle">
           <Sparkles className="h-5 w-5" aria-hidden="true" />
         </span>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 space-y-2">
           <h2 id="ai-credits-title" className="text-base font-semibold text-origen-bosque sm:text-lg">
             Te {plural(remaining, 'queda', 'quedan')}{' '}
             <span className="tabular-nums" data-testid="ai-credits-remaining">{remaining}</span>{' '}
-            {plural(remaining, 'crédito', 'créditos')} del asistente
+            {plural(remaining, 'crédito', 'créditos')}
           </h2>
-          <p className="text-sm text-text-subtle">
-            {hasBreakdown
-              ? `${quota.free} ${plural(quota.free ?? 0, 'gratis', 'gratis')} + ${quota.purchased} ${plural(quota.purchased ?? 0, 'comprado', 'comprados')} · ${quota.used} ${plural(quota.used, 'usado', 'usados')}. `
-              : `${quota.used} de ${quota.total} usados. `}
-            Cada producto creado con IA gasta 1 crédito; repetir en el mismo producto no gasta más.
+          <CreditTokens remaining={remaining} />
+          <p
+            className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-medium text-origen-bosque shadow-subtle"
+            data-testid="ai-credits-equivalence"
+          >
+            <Coins className="h-3.5 w-3.5" aria-hidden="true" />
+            1 crédito
+            <span aria-hidden="true">=</span>
+            <Package className="h-3.5 w-3.5" aria-hidden="true" />
+            1 producto
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" className="hidden w-auto shrink-0 sm:inline-flex" onClick={onRecharge}>
