@@ -111,7 +111,8 @@ export function validateStep(stepIndex: number, form: OnboardingFormData, ctx: V
         }
       }
       if (s.includedZones.length < 1) issues.push({ message: 'Añade al menos una zona de entrega.', fieldId: 'onb-zone-value' });
-      if (!s.minOrderAmount || s.minOrderAmount <= 0) issues.push({ message: 'El pedido mínimo debe ser mayor que 0 €.', fieldId: 'onb-min-order' });
+      // El pedido mínimo es opcional: 0 (o vacío) = sin pedido mínimo.
+      if (s.minOrderAmount < 0) issues.push({ message: 'El pedido mínimo no puede ser negativo.', fieldId: 'onb-min-order' });
       if (s.sustainablePackaging && !s.packagingDescription.trim()) issues.push({ message: 'Describe tu packaging sostenible.', fieldId: 'onb-packaging-description' });
       break;
     }

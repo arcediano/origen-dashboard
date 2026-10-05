@@ -234,7 +234,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
         : document.querySelector<HTMLElement>(`[name="${firstField}"]`);
     if (!target) return;
     const block = target.closest<HTMLElement>('div') ?? target;
-    block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    block.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
     if (target instanceof HTMLInputElement && target.type !== 'hidden') target.focus({ preventScroll: true });
     else if (target instanceof HTMLTextAreaElement) target.focus({ preventScroll: true });
   }, []);
@@ -348,7 +348,7 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
 
       <div className={cn('w-full', className)}>
 
-        <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-3 md:space-y-4">
+        <form noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-3 md:space-y-4">
 
             {/* SECCIÓN 1: Contacto */}
             <FormSection

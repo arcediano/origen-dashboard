@@ -97,6 +97,12 @@ function DashboardContentWrapper({
     }
   }, [authLoading, isAuthenticated, isProducer, router]);
 
+  // Sin completar el onboarding no se accede al panel: se devuelve al productor al onboarding.
+  const mustFinishOnboarding = isAuthenticated && isProducer && user?.onboardingCompleted === false;
+  useEffect(() => {
+    if (!authLoading && mustFinishOnboarding) router.replace('/onboarding');
+  }, [authLoading, mustFinishOnboarding, router]);
+
   // Inicializar responsive y montar componente
   useEffect(() => {
     const checkMobile = () => {
@@ -120,7 +126,7 @@ function DashboardContentWrapper({
     );
   }
 
-  if (!isAuthenticated || !isProducer) return null;
+  if (!isAuthenticated || !isProducer || mustFinishOnboarding) return null;
 
     return (
       <ReadinessProvider>

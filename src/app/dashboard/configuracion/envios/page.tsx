@@ -246,8 +246,8 @@ export default function EnviosPage() {
       setEditingOptionId(incompleteOption.id);
       return;
     }
-    if (!minOrderAmount || minOrderAmount <= 0) {
-      setSaveError('El pedido mínimo debe ser mayor que 0 €.');
+    if (minOrderAmount < 0) {
+      setSaveError('El pedido mínimo no puede ser negativo.');
       return;
     }
 
@@ -498,7 +498,7 @@ export default function EnviosPage() {
             PEDIDO MÍNIMO
         ══════════════════════════════════════════════════════════════════ */}
         <Card variant="section" padding="md">
-          <CardIconHeader icon={<Euro className="h-5 w-5" />} title="Pedido mínimo" description="Importe mínimo por pedido" />
+          <CardIconHeader icon={<Euro className="h-5 w-5" />} title="Pedido mínimo" description="Opcional: déjalo en blanco si no quieres exigir un pedido mínimo" />
           <CardContent>
             <div className="flex items-center gap-4">
               <div className="flex-1 max-w-xs">
@@ -514,7 +514,7 @@ export default function EnviosPage() {
               </div>
               <span className="text-sm text-muted-foreground">euros</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-3">Recomendado: 20-30 € para venta al público general</p>
+            <p className="text-xs text-muted-foreground mt-3">Sin mínimo por defecto. Si lo fijas, recomendamos 20-30 € para venta al público general</p>
           </CardContent>
         </Card>
 
