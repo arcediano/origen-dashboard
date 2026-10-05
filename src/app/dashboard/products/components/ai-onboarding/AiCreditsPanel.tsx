@@ -114,14 +114,19 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
             <Package className="h-3.5 w-3.5" aria-hidden="true" />
             1 producto
           </p>
+          {/* En móvil el botón vive dentro de esta misma columna (alineado con el
+              título/fichas/píldora, no con el icono) y usa `outline` — igual que
+              la versión de escritorio — en vez de `ghost`: sobre el fondo
+              `bg-origen-pradera/10` del panel, `ghost` (transparente, borde muy
+              sutil) se perdía visualmente. Ancho completo por defecto del propio
+              Button (`w-full sm:w-auto`, ver guía de diseño) para que destaque
+              como una acción real, no como un enlace de texto. */}
+          <Button type="button" variant="outline" size="sm" className="sm:hidden" onClick={onRecharge}>
+            Recargar créditos
+          </Button>
         </div>
         <Button type="button" variant="outline" size="sm" className="hidden w-auto shrink-0 sm:inline-flex" onClick={onRecharge}>
           Recargar
-        </Button>
-      </div>
-      <div className="mt-2 sm:hidden">
-        <Button type="button" variant="ghost" size="sm" className="w-auto" onClick={onRecharge}>
-          Recargar créditos
         </Button>
       </div>
     </section>
