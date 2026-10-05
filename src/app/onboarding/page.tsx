@@ -240,6 +240,7 @@ export default function OnboardingPage() {
           ...prev.step5,
           stripeConnected: payment.stripeConnected ?? prev.step5.stripeConnected,
           stripeAccountId: payment.stripeAccountId ?? prev.step5.stripeAccountId,
+          stripeNeedsAttention: payment.stripeNeedsAttention ?? prev.step5.stripeNeedsAttention,
         },
       }));
     } catch {

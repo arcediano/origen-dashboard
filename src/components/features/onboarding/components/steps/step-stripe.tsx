@@ -80,6 +80,17 @@ export function EnhancedStep5Payments({
 
   return (
     <div className="space-y-4">
+      {!connected && data.stripeNeedsAttention && (
+        <Alert variant="error" className="items-start" data-testid="stripe-needs-attention">
+          <span className="block">
+            <span className="block font-semibold">Stripe necesita más información para activar tus cobros</span>
+            <span className="mt-0.5 block text-sm">
+              Completa o revisa los datos de tu cuenta en el formulario de abajo. Hasta entonces no podrás cobrar pedidos.
+            </span>
+          </span>
+        </Alert>
+      )}
+
       {!connected && (
         <Alert variant="warning" className="items-start">
           <span className="flex items-start gap-2">

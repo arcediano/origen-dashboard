@@ -181,6 +181,7 @@ export function hydrateOnboardingForm(d: OnboardingData, prev: OnboardingFormDat
           stripeConnected: Boolean(d.payment.stripeConnected),
           // Necesario para que el polling del paso 5 sepa que hay una cuenta que vigilar tras recargar.
           stripeAccountId: d.payment.stripeAccountId ?? undefined,
+          stripeNeedsAttention: Boolean(d.payment.stripeNeedsAttention),
           acceptTerms: !!d.payment.acceptedTermsAt,
         }
       : prev.step5,
