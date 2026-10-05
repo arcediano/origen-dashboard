@@ -45,7 +45,7 @@ export function InvoiceCard({ invoice, onPress, onDownload }: InvoiceCardProps) 
   return (
     <div
       className={cn(
-        'relative rounded-xl sm:rounded-2xl border border-border shadow-origen',
+        'relative rounded-xl sm:rounded-2xl border border-border bg-surface-alt shadow-origen',
         'hover:shadow-origen-lg hover:border-origen-pradera transition-all duration-300',
       )}
     >
