@@ -19,7 +19,11 @@ export type FollowUpField =
   | 'productionInfo.productionMethod'
   | 'nutritionalInfo.isGlutenFree'
   | 'nutritionalInfo.isVegan'
-  | 'nutritionalInfo.isVegetarian';
+  | 'nutritionalInfo.isVegetarian'
+  // Preguntas de elaboración (texto libre) para redactar "Historia y producción":
+  | 'productionInfo.artisanProcess'
+  | 'productionInfo.maturationTime'
+  | 'productionInfo.story';
 
 export interface FollowUpQuestion {
   field: FollowUpField;
@@ -171,6 +175,9 @@ export const FOLLOW_UP_FIELD_LABELS: Record<FollowUpField, string> = {
   'nutritionalInfo.isGlutenFree': '¿Sin gluten?',
   'nutritionalInfo.isVegan': '¿Vegano?',
   'nutritionalInfo.isVegetarian': '¿Vegetariano?',
+  'productionInfo.artisanProcess': 'Técnicas de elaboración',
+  'productionInfo.maturationTime': 'Tiempo de maduración',
+  'productionInfo.story': 'Historia del producto',
 };
 
 /**

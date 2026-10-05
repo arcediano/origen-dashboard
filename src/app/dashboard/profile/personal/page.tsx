@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, MapPin, Camera, CheckCircle, Edit } from 'lucide-react';
+import { User, Camera, CheckCircle, Edit } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
@@ -22,12 +22,6 @@ type PersonalFormState = {
   email: string;
   phone: string;
   birthDate: string;
-  address: string;
-  city: string;
-  postalCode: string;
-  province: string;
-  country: string;
-  bio: string;
   avatar: string | null;
 };
 
@@ -36,12 +30,6 @@ const EMPTY_FORM: PersonalFormState = {
   email: '',
   phone: '',
   birthDate: '',
-  address: '',
-  city: '',
-  postalCode: '',
-  province: '',
-  country: 'Espana',
-  bio: '',
   avatar: null,
 };
 
@@ -77,10 +65,6 @@ function splitName(fullName: string): { firstName: string; lastName: string } {
   const lastName = parts.join(' ');
 
   return { firstName, lastName };
-}
-
-function buildAddress(street?: string, streetNumber?: string): string {
-  return [street, streetNumber].filter(Boolean).join(' ').trim();
 }
 
 export default function PersonalInfoPage() {
@@ -173,12 +157,6 @@ export default function PersonalInfoPage() {
           email: user.email,
           phone: user.phone ?? '',
           birthDate: formattedBirthDate,
-          address: buildAddress(data?.location?.street, data?.location?.streetNumber),
-          city: data?.location?.city ?? '',
-          postalCode: data?.location?.postalCode ?? '',
-          province: data?.location?.province ?? '',
-          country: 'Espana',
-          bio: data?.story?.tagline ?? data?.story?.description ?? '',
           avatar: producerProfile?.data?.visual?.logoUrl ?? null,
         };
 
@@ -235,14 +213,6 @@ export default function PersonalInfoPage() {
         const result = await loadOnboardingData();
         if (result?.data) {
           setOnboardingData(result.data);
-          setForm((prev) => ({
-            ...prev,
-            address: buildAddress(result.data.location?.street, result.data.location?.streetNumber),
-            city: result.data.location?.city ?? '',
-            postalCode: result.data.location?.postalCode ?? '',
-            province: result.data.location?.province ?? '',
-            bio: result.data.story?.tagline ?? result.data.story?.description ?? '',
-          }));
         }
       } else if (section === 'producerProfile') {
         const result = await getProducerProfile();
@@ -290,21 +260,24 @@ export default function PersonalInfoPage() {
       return;
     }
 
-    const addressParts = form.address.trim().split(/\s+/);
-    const streetNumber = onboardingData.location?.streetNumber ?? addressParts.pop() ?? 'S/N';
-    const street = onboardingData.location?.street ?? (addressParts.join(' ') || form.address.trim());
+    // La dirección se gestiona en Mi negocio: aquí se reenvía tal cual está guardada.
+    const location = onboardingData.location;
+    if (!location?.street || !location.city || !location.postalCode || !location.province) {
+      setSaveError('Completa primero la dirección de tu negocio en Mi negocio.');
+      return;
+    }
 
     const step1Payload: LocationData = {
       entityType: onboardingData.fiscal?.entityType as EntityType | undefined,
       legalRepresentativeName: onboardingData.fiscal?.legalRepresentativeName ?? '',
       businessPhone: form.phone.replace(/\s+/g, ''),
       taxId,
-      street,
-      streetNumber,
-      streetComplement: onboardingData.location?.streetComplement ?? '',
-      city: form.city.trim(),
-      province: form.province.trim(),
-      postalCode: form.postalCode.trim(),
+      street: location.street,
+      streetNumber: location.streetNumber ?? 'S/N',
+      streetComplement: location.streetComplement ?? '',
+      city: location.city,
+      province: location.province,
+      postalCode: location.postalCode,
       billingAddressSameAsProduction: !onboardingData.fiscal?.billingAddress,
       billingAddress: onboardingData.fiscal?.billingAddress
         ? {
@@ -328,12 +301,6 @@ export default function PersonalInfoPage() {
       // Sin segundo argumento: `locationImageKeys` omitido = no tocar las fotos del local
       // (pasar `[]` las borraría todas). La historia/tagline ya no viaja por el onboarding.
       const updates: Array<Promise<unknown>> = [saveStep1(step1Payload)];
-
-      // La bio de esta pantalla es el tagline del perfil comercial (máx. 150 caracteres).
-      const bio = form.bio.trim();
-      if (bio && bio !== initialForm.bio.trim()) {
-        updates.push(updateProducerProfile({ tagline: bio.slice(0, 150) }));
-      }
 
       if (authUser) {
         const authUserPayload: Parameters<typeof updateCurrentUser>[0] = {};
@@ -382,11 +349,11 @@ export default function PersonalInfoPage() {
 
       <PageHeader
         title="Datos personales"
-        description="Actualiza tu nombre, datos de contacto, dirección y foto de perfil de tu cuenta de productor"
+        description="Actualiza tu nombre, datos de contacto y foto de perfil de tu cuenta de productor"
         badgeIcon={User}
         badgeText="Datos personales"
         tooltip="Datos personales"
-        tooltipDetailed="Actualiza tus datos de contacto, dirección y foto de perfil personal, distintos de la información comercial de tu negocio."
+        tooltipDetailed="Actualiza tus datos de contacto y foto de perfil personal, distintos de la información comercial de tu negocio."
         showBackButton={true}
         onBack={() => router.push('/dashboard/profile')}
       />
@@ -501,7 +468,7 @@ export default function PersonalInfoPage() {
               </Card>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               <motion.div variants={itemVariants}>
                 <Card className="border border-border shadow-sm h-full">
                   <CardHeader className="pb-3 border-b border-border-subtle">
@@ -570,112 +537,7 @@ export default function PersonalInfoPage() {
                   </CardContent>
                 </Card>
               </motion.div>
-
-              <motion.div variants={itemVariants}>
-                <Card className="border border-border shadow-sm h-full">
-                  <CardHeader className="pb-3 border-b border-border-subtle">
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <MapPin className="w-4 h-4 text-hoja-tinta" />
-                      Direccion
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-4 space-y-4">
-                    <div className="space-y-1">
-                      <Label htmlFor="address" className="text-sm font-medium">
-                        Direccion
-                      </Label>
-                      <Input
-                        id="address"
-                        value={form.address}
-                        onChange={(e) => setForm({ ...form, address: e.target.value })}
-                        disabled={!isEditing}
-                        className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
-                        placeholder="Calle, numero, piso..."
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label htmlFor="city" className="text-sm">Ciudad</Label>
-                        <Input
-                          id="city"
-                          value={form.city}
-                          onChange={(e) => setForm({ ...form, city: e.target.value })}
-                          disabled={!isEditing}
-                          className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="postalCode" className="text-sm">Codigo postal</Label>
-                        <Input
-                          id="postalCode"
-                          value={form.postalCode}
-                          onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
-                          disabled={!isEditing}
-                          className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label htmlFor="province" className="text-sm">Provincia</Label>
-                        <Input
-                          id="province"
-                          value={form.province}
-                          onChange={(e) => setForm({ ...form, province: e.target.value })}
-                          disabled={!isEditing}
-                          className={`h-10 ${!isEditing ? 'bg-surface' : ''}`}
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="country" className="text-sm">Pais</Label>
-                        <Input
-                          id="country"
-                          value={form.country}
-                          disabled={true}
-                          className="h-10 bg-surface"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-3 bg-origen-pastel/20 rounded-md border border-origen-pradera/10">
-                      <p className="text-xs text-text-subtle">
-                        Esta es tu dirección productiva, la misma que gestionas en Mi negocio. Cualquier cambio aquí se refleja allí y viceversa.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
             </div>
-
-            <motion.div variants={itemVariants}>
-              <Card className="border border-border shadow-sm">
-                <CardHeader className="pb-3 border-b border-border-subtle">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <User className="w-4 h-4 text-hoja-tinta" />
-                    Biografia
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="space-y-1">
-                    <textarea
-                      id="bio"
-                      value={form.bio}
-                      onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                      disabled={!isEditing}
-                      rows={4}
-                      maxLength={150}
-                      className="w-full p-3 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-hoja-tinta focus:border-hoja-tinta disabled:bg-surface"
-                      placeholder="Cuentanos algo sobre ti..."
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Esta informacion se sincroniza con el tagline comercial de tu perfil (máx. 150 caracteres).
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
 
             <motion.div variants={itemVariants}>
               <Alert variant={isLoading ? 'default' : 'success'} className="py-3">

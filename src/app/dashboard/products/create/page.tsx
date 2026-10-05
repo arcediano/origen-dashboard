@@ -177,9 +177,16 @@ export default function CreateProductPage() {
   const handleFollowUpComplete = useCallback(
     async (answers: Partial<Record<FollowUpField, string>>) => {
       for (const [field, value] of Object.entries(answers) as [FollowUpField, string][]) {
+        // La maduración no tiene campo propio: va dentro del proceso de elaboración (más abajo).
+        if (field === 'productionInfo.maturationTime') continue;
         const [section, key] = field.split('.') as ['nutritionalInfo' | 'productionInfo', string];
         const finalValue = BOOLEAN_FOLLOW_UP_FIELDS.has(field) ? value === 'Sí' : value;
         handleNestedChange(section, key, finalValue);
+      }
+      const maturation = answers['productionInfo.maturationTime']?.trim();
+      if (maturation) {
+        const process = (answers['productionInfo.artisanProcess'] ?? formData.productionInfo.artisanProcess ?? '').trim();
+        handleNestedChange('productionInfo', 'artisanProcess', `${process}<p>Tiempo de maduración: ${maturation.replace(/</g, '&lt;')}</p>`);
       }
       setPendingFollowUps([]);
 
@@ -206,7 +213,7 @@ export default function CreateProductPage() {
       setMode('ai-review');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    [handleNestedChange, handleInputChange, formData.name, formData.fullDescription, aiAssistKey],
+    [handleNestedChange, handleInputChange, formData.name, formData.fullDescription, formData.productionInfo.artisanProcess, aiAssistKey],
   );
 
   useEffect(() => {

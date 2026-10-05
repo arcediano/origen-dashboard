@@ -47,7 +47,6 @@ export interface OnboardingData {
     entityType?: string;
     legalRepresentativeName?: string;
     legalProvince?: string;
-    whyOrigin?: string | null;
     billingAddress?: {
       street?: string;
       streetNumber?: string;
@@ -72,10 +71,18 @@ export interface OnboardingData {
     tagline?: string | null;
     description?: string | null;
     productionPhilosophy?: string | null;
+    animalWelfare?: string | null;
     values?: string[];
     website?: string | null;
     introVideoUrl?: string | null;
     instagramHandle?: string | null;
+  } | null;
+  /** Presencia online indicada en la solicitud de alta (solo lectura). */
+  registration?: {
+    website?: string | null;
+    instagram?: string | null;
+    facebook?: string | null;
+    tiktok?: string | null;
   } | null;
   visual?: {
     logoUrl?: string | null;

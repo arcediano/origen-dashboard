@@ -96,7 +96,6 @@ export function StepProduction({
     expiryDate: undefined,
     batchNumber: '',
     sustainabilityInfo: '',
-    animalWelfare: '',
     artisanProcess: '',
     practices: [],
     media: [],
@@ -329,16 +328,6 @@ export function StepProduction({
                 value={productionInfo.productionMethod}
                 onChange={(html) => handleChange('productionMethod', html)}
                 placeholder="Proceso de elaboracion, tecnicas y tiempos: fermentacion, maduracion..."
-                minHeight="100px"
-              />
-
-              <RichTextEditor
-                label="Bienestar animal"
-                tooltip="Si tu producto es de origen animal, indica las condiciones de cria y cuidados."
-                helperText="Opcional - solo si aplica"
-                value={productionInfo.animalWelfare}
-                onChange={(html) => handleChange('animalWelfare', html)}
-                placeholder="Cria en libertad, alimentacion natural, sin antibioticos..."
                 minHeight="100px"
               />
           </TabsContent>
