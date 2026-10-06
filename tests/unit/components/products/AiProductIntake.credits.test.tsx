@@ -71,13 +71,14 @@ describe('AiProductIntake — cupo agotado y compra de créditos', () => {
     expect(screen.queryByText('No te quedan créditos del asistente')).toBeNull();
   });
 
-  it('muestra arriba cuántos créditos quedan, gratis y comprados, y que cada producto gasta 1', () => {
+  it('muestra de forma visual los créditos que quedan (sin gastados ni desglose) y que 1 crédito = 1 producto', () => {
     render(<AiProductIntake {...base} quota={{ used: 2, total: 5, free: 3, purchased: 2 }} />);
     expect(screen.getByTestId('ai-credits-remaining').textContent).toBe('3');
     const panel = screen.getByTestId('ai-credits-panel');
-    expect(panel.textContent).toMatch(/3 gratis \+ 2 comprados · 2 usados/);
-    expect(panel.textContent).toMatch(/gasta 1 crédito/);
     expect(panel.getAttribute('data-state')).toBe('available');
+    expect(screen.getByTestId('ai-credits-tokens').children).toHaveLength(3);
+    expect(screen.getByTestId('ai-credits-equivalence').textContent).toMatch(/1 crédito\s*=\s*1 producto/);
+    expect(panel.textContent).not.toMatch(/usado|gratis|comprado/i);
   });
 
   it('si el backend rechaza por cupo pese a que el cupo mostrado aún tenía margen, muestra el aviso reactivo', async () => {

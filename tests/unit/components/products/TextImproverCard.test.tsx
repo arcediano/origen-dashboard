@@ -62,7 +62,8 @@ describe('TextImproverCard', () => {
     expect(screen.getByText(/se sustituirá tu nombre, descripción actual/)).toBeInTheDocument();
     expect(onApply).not.toHaveBeenCalled();
     expect(onUsed).toHaveBeenCalled();
-    expect(screen.getByText(/2 de 5 productos/)).toBeInTheDocument();
+    expect(screen.getByText(/1 crédito = 1 producto/)).toBeInTheDocument();
+    expect(screen.queryByText(/de 5 productos/)).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Aplicar propuesta' }));
     expect(onApply).toHaveBeenCalledWith(proposal);
