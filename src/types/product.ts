@@ -267,6 +267,40 @@ export interface FlashDealFormValue {
 }
 
 // ============================================================================
+// TIPOS DE OFERTAS POR CANTIDAD (gestión granular — petición del humano,
+// 2026-10-08: sección "Ofertas por cantidad" independiente del alta/edición
+// de producto, espejo de Ofertas flash). `type` en MAYÚSCULAS — mismo
+// convenio que FlashDeal.discountType, distinto del `PriceTier.type` en
+// minúsculas que usa (y seguirá usando) el formulario de producto.
+// ============================================================================
+
+export interface QuantityOffer {
+  id: string;
+  minQuantity: number;
+  maxQuantity?: number | null;
+  type: 'FIXED' | 'PERCENTAGE' | 'BUNDLE';
+  value?: number | null;
+  buyQuantity?: number | null;
+  payQuantity?: number | null;
+  label?: string | null;
+  isActive: boolean;
+  offerPrice: number;
+  savings: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface QuantityOfferWithProduct extends QuantityOffer {
+  productId: string;
+  productName: string;
+  productSlug: string;
+  productMainImageUrl?: string | null;
+  productBasePrice: number;
+  productVisible?: boolean;
+  productStatus?: string;
+}
+
+// ============================================================================
 // TIPO PRODUCTO PRINCIPAL
 // ============================================================================
 
@@ -340,8 +374,6 @@ export interface ProductFormData {
   gallery: ProductImage[];
   basePrice?: number;
   comparePrice?: number;
-  priceTiers: PriceTier[];
-  flashDeal?: FlashDeal;
   sku: string;
   barcode?: string;
   stock: number;
@@ -433,7 +465,6 @@ export const defaultFormData: ProductFormData = {
   gallery: [],
   basePrice: undefined,
   comparePrice: undefined,
-  priceTiers: [],
   sku: '',
   barcode: '',
   stock: 0,

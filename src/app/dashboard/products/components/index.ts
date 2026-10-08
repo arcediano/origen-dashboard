@@ -21,5 +21,4 @@ export { AdjustStockDialog } from './ProductDialogs/AdjustStockDialog';
 export { DeleteProductDialog } from './ProductDialogs/DeleteProductDialog';
 export { SuccessPublishModal } from './ProductDialogs/SuccessPublishModal';
 export { SensitiveChangeConfirmDialog } from './ProductDialogs/SensitiveChangeConfirmDialog';
-export { OfferConflictDialog } from './ProductDialogs/OfferConflictDialog';
 export { MoveToDraftConfirmDialog } from './ProductDialogs/MoveToDraftConfirmDialog';

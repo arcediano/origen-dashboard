@@ -12,9 +12,16 @@
  */
 
 import { gatewayClient, GatewayError } from './client';
-import { type Product, type ProductFormData, type FlashDeal, type FlashDealWithProduct } from '@/types/product';
+import {
+  type Product,
+  type ProductFormData,
+  type FlashDeal,
+  type FlashDealWithProduct,
+  type QuantityOffer,
+  type QuantityOfferWithProduct,
+} from '@/types/product';
 
-export type { FlashDealWithProduct };
+export type { FlashDealWithProduct, QuantityOffer, QuantityOfferWithProduct };
 import { uploadFile } from './media';
 import {
   type ApiProduct,
@@ -110,15 +117,6 @@ function mapSortBy(sortBy?: string): string | undefined {
     'sales-desc': 'sales',
   };
   return map[sortBy] ?? 'newest';
-}
-
-function mapPriceTierType(type: string): string {
-  const map: Record<string, string> = {
-    fixed: 'FIXED',
-    percentage: 'PERCENTAGE',
-    bundle: 'BUNDLE',
-  };
-  return map[type] ?? 'FIXED';
 }
 
 function mapCertificationStatus(status: string): string {
@@ -248,16 +246,6 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
 
     basePrice:         formData.basePrice,
     comparePrice:      formData.comparePrice || undefined,
-    priceTiers:        formData.priceTiers.map((tier) => ({
-      minQuantity: tier.minQuantity,
-      maxQuantity: tier.maxQuantity,
-      type: mapPriceTierType(tier.type),
-      value: tier.value,
-      buyQuantity: tier.buyQuantity,
-      payQuantity: tier.payQuantity,
-      label: tier.label,
-      savings: Math.max(0, tier.savings ?? 0),
-    })),
 
     // El backend genera el SKU si está vacío
     sku:               formData.sku || undefined,
@@ -419,19 +407,6 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
   if (product.gallery !== undefined) {
     body.galleryImageUrls = product.gallery.map(img => img.url);
     body.galleryImageKeys = product.gallery.map(img => img.id);
-  }
-
-  if (product.priceTiers !== undefined) {
-    body.priceTiers = product.priceTiers.map((tier) => ({
-      minQuantity: tier.minQuantity,
-      maxQuantity: tier.maxQuantity,
-      type: mapPriceTierType(tier.type),
-      value: tier.value,
-      buyQuantity: tier.buyQuantity,
-      payQuantity: tier.payQuantity,
-      label: tier.label,
-      savings: Math.max(0, tier.savings ?? 0),
-    }));
   }
 
   if (product.nutritionalInfo !== undefined) {
@@ -753,15 +728,10 @@ export async function saveProductDraft(
 export async function updateProduct(
   id: string,
   productData: Partial<Product>,
-  options?: {
-    /** Confirma el reemplazo: desactiva la oferta Flash vigente/programada y activa los `priceTiers` enviados. */
-    replaceActiveFlashDeal?: boolean;
-  },
 ): Promise<ApiResponse<Product>> {
   try {
     const normalizedProductData = await normalizePartialProductBeforeSubmit({ ...productData, id });
     const body = partialProductToApiBody(normalizedProductData);
-    if (options?.replaceActiveFlashDeal) body.replaceActiveFlashDeal = true;
     const raw  = await gatewayClient.put<ApiProduct>(`/products/${id}`, body);
     return { data: mapApiProductToProduct(raw), status: 200 };
   } catch (error) {
@@ -1124,5 +1094,119 @@ export async function fetchMyFlashDeals(params?: {
     };
   } catch (error) {
     return handleError(error, 'fetchMyFlashDeals');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// OFERTAS POR CANTIDAD (QuantityOffer / PriceTier — gestión granular)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Crea un nuevo tier de precio por cantidad para un producto.
+ * Ruta backend: POST /products/:id/price-tier
+ */
+export async function createQuantityOffer(
+  productId: string,
+  data: {
+    minQuantity: number;
+    maxQuantity?: number;
+    type: 'FIXED' | 'PERCENTAGE' | 'BUNDLE';
+    value?: number;
+    buyQuantity?: number;
+    payQuantity?: number;
+    label?: string;
+    /** Confirma el reemplazo: desactiva la oferta Flash activa/programada y crea este tier. */
+    replaceActiveFlashDeal?: boolean;
+  },
+): Promise<ApiResponse<QuantityOffer>> {
+  try {
+    const raw = await gatewayClient.post<{ success: boolean; data: QuantityOffer }>(
+      `/products/${productId}/price-tier`,
+      data,
+    );
+    return { data: raw.data, status: 201 };
+  } catch (error) {
+    return handleError(error, 'createQuantityOffer');
+  }
+}
+
+/**
+ * Actualiza un tier de precio por cantidad existente de un producto.
+ * Ruta backend: PATCH /products/:id/price-tier/:tierId
+ */
+export async function updateQuantityOffer(
+  productId: string,
+  tierId: string,
+  data: {
+    minQuantity?: number;
+    maxQuantity?: number;
+    type?: 'FIXED' | 'PERCENTAGE' | 'BUNDLE';
+    value?: number;
+    buyQuantity?: number;
+    payQuantity?: number;
+    label?: string;
+  },
+): Promise<ApiResponse<QuantityOffer>> {
+  try {
+    const raw = await gatewayClient.patch<{ success: boolean; data: QuantityOffer }>(
+      `/products/${productId}/price-tier/${tierId}`,
+      data,
+    );
+    return { data: raw.data, status: 200 };
+  } catch (error) {
+    return handleError(error, 'updateQuantityOffer');
+  }
+}
+
+/**
+ * Desactiva un tier de precio por cantidad de un producto (soft delete: isActive = false).
+ * Ruta backend: DELETE /products/:id/price-tier/:tierId
+ */
+export async function deleteQuantityOffer(
+  productId: string,
+  tierId: string,
+): Promise<ApiResponse<null>> {
+  try {
+    await gatewayClient.delete(`/products/${productId}/price-tier/${tierId}`);
+    return { status: 204, data: null };
+  } catch (error) {
+    return handleError(error, 'deleteQuantityOffer');
+  }
+}
+
+/**
+ * Obtiene todos los tiers de precio por cantidad del productor autenticado.
+ * Ruta backend: GET /products/producer/price-tiers
+ */
+export async function fetchMyQuantityOffers(params?: {
+  status?: 'active' | 'inactive';
+  page?: number;
+  limit?: number;
+}): Promise<ApiResponse<{ data: QuantityOfferWithProduct[]; total: number; page: number; limit: number }>> {
+  try {
+    const query: Record<string, string | number | undefined> = {
+      page: params?.page ?? 1,
+      limit: params?.limit ?? 20,
+    };
+
+    if (params?.status) {
+      query.status = params.status;
+    }
+
+    const raw = await gatewayClient.get<{
+      data: QuantityOfferWithProduct[];
+      total: number;
+      page: number;
+      limit: number;
+    }>('/products/producer/price-tiers', {
+      params: query as Record<string, string | number | boolean | undefined | null>,
+    });
+
+    return {
+      data: raw,
+      status: 200,
+    };
+  } catch (error) {
+    return handleError(error, 'fetchMyQuantityOffers');
   }
 }

@@ -16,7 +16,7 @@ import { StepProduction } from './steps/StepProduction';
 import { StepInventory } from './steps/StepInventory';
 import { StepCertificationsAttributes } from './steps/StepCertificationsAttributes';
 
-import { defaultNutritionalInfo, defaultProductionInfo, type FormStepId, type PriceTier } from '@/types/product';
+import { defaultNutritionalInfo, defaultProductionInfo, type FormStepId } from '@/types/product';
 
 // ─── Variantes ────────────────────────────────────────────────────────────────
 
@@ -37,7 +37,6 @@ interface ProductFormStepsProps {
   completedTabs: Record<string, boolean>;
   onInputChange: (field: string, value: any) => void;
   onNestedChange: (section: string, field: string, value: any) => void;
-  onPriceTiersChange: (tiers: PriceTier[]) => void;
   onImagesChange: (images: any[]) => void;
   skuSuggestion?: string;
   /** ID del producto en modo edición — permite llamadas granulares a la API de certs. */
@@ -58,7 +57,6 @@ export function ProductFormSteps({
   completedTabs,
   onInputChange,
   onNestedChange,
-  onPriceTiersChange,
   onImagesChange,
   skuSuggestion,
   productId,
@@ -104,7 +102,6 @@ export function ProductFormSteps({
             errors={{}}
             touched={{}}
             onInputChange={onInputChange}
-            onPriceTiersChange={onPriceTiersChange}
             completed={completedTabs.pricing}
           />
         )}

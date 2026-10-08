@@ -88,7 +88,6 @@ export default function CreateProductPage() {
     currentStepErrors,
     handleInputChange,
     handleNestedChange,
-    handlePriceTiersChange,
     handleImagesChange,
     handleSave,
     handlePublish,
@@ -409,7 +408,6 @@ export default function CreateProductPage() {
                 completedTabs={completedTabs}
                 onInputChange={handleInputChange}
                 onNestedChange={handleNestedChange}
-                onPriceTiersChange={handlePriceTiersChange}
                 onImagesChange={handleImagesChange}
               />
 

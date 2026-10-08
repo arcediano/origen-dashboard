@@ -20,7 +20,6 @@ import {
   CreateProductCancelDialog,
   SuccessPublishModal,
   SensitiveChangeConfirmDialog,
-  OfferConflictDialog,
 } from '../../components';
 import { ProductFormSteps } from '../../components/ProductFormSteps';
 import { ProductFormSidebar } from '../../components/ProductFormSidebar';
@@ -69,7 +68,6 @@ export default function EditProductPage() {
     currentStepErrors,
     handleInputChange,
     handleNestedChange,
-    handlePriceTiersChange,
     handleImagesChange,
     handleSave,
     handlePublish,
@@ -79,10 +77,6 @@ export default function EditProductPage() {
     sensitiveDirtyFields,
     pendingSensitiveConfirmation,
     confirmSensitiveSave,
-    pendingOfferConflict,
-    isResolvingOfferConflict,
-    confirmOfferConflictReplace,
-    cancelOfferConflict,
   } = useProductForm(productId);
 
   const showPageLoader = useDelayedLoading(isLoading);
@@ -246,7 +240,6 @@ export default function EditProductPage() {
               completedTabs={completedTabs}
               onInputChange={handleInputChange}
               onNestedChange={handleNestedChange}
-              onPriceTiersChange={handlePriceTiersChange}
               onImagesChange={handleImagesChange}
               skuSuggestion={skuSuggestion}
               productId={productId}
@@ -402,13 +395,6 @@ export default function EditProductPage() {
           // El usuario eligió no guardar — el modal se cierra y puede seguir editando
         }}
         isSaving={isSaving}
-      />
-
-      <OfferConflictDialog
-        open={!!pendingOfferConflict}
-        onOpenChange={(open) => { if (!open) cancelOfferConflict(); }}
-        onConfirm={confirmOfferConflictReplace}
-        isLoading={isResolvingOfferConflict}
       />
     </div>
   );
