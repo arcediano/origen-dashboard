@@ -426,16 +426,18 @@ export function StepVariants({ productId, basePrice = 0, completed }: StepVarian
                         key={variant.id ?? `${comboLabel(variant)}-${index}`}
                         className="p-3 bg-surface-alt rounded-xl border border-border-subtle grid grid-cols-1 sm:grid-cols-[1.5fr_1fr_1fr_1fr_auto] gap-2 items-center"
                       >
-                        <span className="text-sm font-medium text-origen-bosque truncate" title={comboLabel(variant)}>
+                        <span className="text-sm font-medium text-origen-bosque truncate sm:self-end sm:pb-2.5" title={comboLabel(variant)}>
                           {comboLabel(variant) || '—'}
                         </span>
                         <Input
+                          label="SKU"
                           placeholder="SKU"
                           value={variant.sku}
                           onChange={(e) => handleVariantFieldChange(index, 'sku', e.target.value)}
                           className="h-10"
                         />
                         <CurrencyInput
+                          label="Precio"
                           value={variant.price}
                           onChange={(v) => handleVariantFieldChange(index, 'price', v)}
                           min={0.01}
@@ -443,7 +445,9 @@ export function StepVariants({ productId, basePrice = 0, completed }: StepVarian
                         />
                         <Input
                           type="number"
-                          placeholder="Stock"
+                          label="Stock"
+                          tooltip="Unidades disponibles de esta variante en concreto (no del producto en general)."
+                          placeholder="0"
                           value={variant.stock}
                           onChange={(e) => handleVariantFieldChange(index, 'stock', parseInt(e.target.value, 10) || 0)}
                           min={0}
