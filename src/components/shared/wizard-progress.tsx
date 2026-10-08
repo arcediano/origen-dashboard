@@ -109,7 +109,15 @@ export function WizardProgress({
   }, [condensed]);
 
   const navId = `${idPrefix}-steps-nav`;
-  const gridStyle = { gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` } as const;
+  // En `embedded` (columna lateral estrecha, p. ej. junto a "Consejos útiles")
+  // una sola fila con una columna por paso deja de caber a partir de cierto
+  // número de pasos: el icono+etiqueta de cada uno se encoge tanto que el
+  // texto se solapa en vez de truncarse. Se limita a 4 columnas como máximo
+  // ahí y el grid pasa a envolver en varias filas automáticamente (sin tocar
+  // el resto del layout); el resto de usos (a todo el ancho de página) sigue
+  // con una columna por paso, donde ya hay sitio de sobra.
+  const gridColumns = embedded ? Math.min(steps.length, 4) : steps.length;
+  const gridStyle = { gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` } as const;
 
   const stepButtons = steps.map((step, index) => {
     const isActive = step.id === currentId;
