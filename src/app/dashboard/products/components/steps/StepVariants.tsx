@@ -9,6 +9,13 @@
  * Solo disponible en edición (requiere `productId` — las opciones/variantes
  * se guardan contra el producto ya creado, mismo criterio que "Ofertas por
  * cantidad"/"Oferta flash" tras la tanda 2026-10-08).
+ *
+ * Valor de cada opción = texto libre (igual que Shopify, sin campo de unidad
+ * aparte) — si representa una cantidad (peso, volumen…), la unidad se
+ * escribe dentro del propio texto ("250g", "1kg"), avisado en la propia UI.
+ * Decisión del humano (misma fecha): de momento no hace falta un desplegable
+ * de unidad que concatene al valor -- posible mejora futura, no para esta
+ * versión (el alcance sigue siendo solo modelo + edición en dashboard).
  */
 
 'use client';
@@ -329,6 +336,12 @@ export function StepVariants({ productId, basePrice = 0, completed }: StepVarian
                 )}
               </div>
 
+              <p className="text-[10px] text-text-subtle leading-relaxed">
+                Si el valor es una cantidad (peso, volumen…), incluye la unidad en el propio texto —
+                escribe <span className="font-medium">&quot;250g&quot;</span>, <span className="font-medium">&quot;1kg&quot;</span> o{' '}
+                <span className="font-medium">&quot;750ml&quot;</span>, no solo el número.
+              </p>
+
               {optionDrafts.length === 0 ? (
                 <p className="text-xs text-text-subtle">
                   Sin opciones todavía — añade una (p. ej. &quot;Tamaño&quot;) para empezar a generar variantes.
@@ -348,7 +361,7 @@ export function StepVariants({ productId, basePrice = 0, completed }: StepVarian
                         className="h-11"
                       />
                       <Input
-                        placeholder="Valores separados por comas (ej: S, M, L)"
+                        placeholder="Valores separados por comas (ej: S, M, L o 250g, 500g, 1kg)"
                         value={option.valuesText}
                         onChange={(e) =>
                           setOptionDrafts((prev) =>
