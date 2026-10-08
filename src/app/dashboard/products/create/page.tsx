@@ -393,14 +393,22 @@ export default function CreateProductPage() {
                 640-1023px sin espacio reservado mientras la ActionBar sigue
                 fija abajo, tapando el formulario. */}
             <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-0`}>
+              {/* Sin aiAssistKey/onAiAssistUsed aquí (petición del humano,
+                  2026-10-08): en el alta manual no se muestran las ayudas
+                  puntuales del asistente de IA por campo ("Redactar con IA"
+                  en StepBasic, "Leer etiqueta con IA" en StepNutritional) —
+                  si quiere usar la IA, el asistente completo (modo
+                  "ai-intake") sigue disponible y ahora se promociona desde
+                  los propios consejos útiles del alta manual (ver
+                  useStepTips). aiAssistKey se sigue usando para el flujo
+                  de revisión tras el borrador de IA (más abajo en este
+                  fichero), solo se ha dejado de pasar a este wizard manual. */}
               <ProductFormSteps
                 activeTab={activeTab}
                 formData={formData}
                 completedTabs={completedTabs}
                 onInputChange={handleInputChange}
                 onNestedChange={handleNestedChange}
-                aiAssistKey={aiAssistKey}
-                onAiAssistUsed={markAiAssistUsed}
                 onPriceTiersChange={handlePriceTiersChange}
                 onImagesChange={handleImagesChange}
               />
