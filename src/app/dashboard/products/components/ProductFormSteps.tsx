@@ -44,10 +44,6 @@ interface ProductFormStepsProps {
   productId?: string;
   /** Indica si el producto está publicado (ACTIVE u OUT_OF_STOCK). Usado para mostrar indicadores de campos sensibles. */
   isPublishedProduct?: boolean;
-  /** Clave de cupo del asistente de IA en modo creación (en edición se usa `productId`). */
-  aiAssistKey?: string | null;
-  /** Notifica que el asistente de IA ha consumido cupo en este producto. */
-  onAiAssistUsed?: () => void;
   /** El producto ya tiene variantes guardadas — StepPricing/StepInventory dejan de mostrar sus campos redundantes (petición del humano, 2026-10-08). */
   hasVariants?: boolean;
   /** StepVariants notifica aquí tras guardar/eliminar variantes. */
@@ -66,8 +62,6 @@ export function ProductFormSteps({
   skuSuggestion,
   productId,
   isPublishedProduct,
-  aiAssistKey,
-  onAiAssistUsed,
   hasVariants,
   onVariantsChange,
 }: ProductFormStepsProps) {
@@ -88,9 +82,6 @@ export function ProductFormSteps({
             onInputChange={onInputChange}
             completed={completedTabs.basic}
             isPublishedProduct={isPublishedProduct}
-            aiAssistKey={aiAssistKey ?? productId ?? null}
-            onAiAssistUsed={onAiAssistUsed}
-            aiAssistUnlimited={!!productId}
           />
         )}
 
@@ -120,9 +111,6 @@ export function ProductFormSteps({
             onNestedChange={onNestedChange}
             completed={completedTabs.nutritional}
             isPublishedProduct={isPublishedProduct}
-            aiAssistKey={aiAssistKey ?? productId ?? null}
-            onAiAssistUsed={onAiAssistUsed}
-            aiAssistUnlimited={!!productId}
           />
         )}
 
