@@ -6,16 +6,28 @@
  *
  * Todos los breakpoints: `FilterToolbar` (búsqueda + botón "Filtros" con
  * badge contador) + botón "Ordenar" propio (su propio bottom sheet, sin
- * relación con `FilterPanel`) + `FilterPanel` — bottom sheet en móvil/tablet
- * (<lg), panel deslizante ("drawer") desde el borde derecho en escritorio
- * (≥lg). El toggle de vista grid/lista se oculta en `<lg`: en móvil/tablet
- * el listado siempre usa `ProductMobileList`, así que alternar la vista no
- * cambia nada visible ahí.
+ * relación con el panel de filtros) + panel de filtros propio — bottom sheet
+ * en móvil/tablet (<lg), panel deslizante ("drawer") desde el borde derecho
+ * en escritorio (≥lg). El toggle de vista grid/lista se oculta en `<lg`: en
+ * móvil/tablet el listado siempre usa `ProductMobileList`, así que alternar
+ * la vista no cambia nada visible ahí.
  *
- * `compact` en `FilterToolbar`: con dos botones junto a la búsqueda
- * ("Filtros" + "Ordenar"), la búsqueda no baja a su propia fila y ambos
- * botones se muestran solo con icono en `<sm` — así la barra cabe en una
- * sola línea también en el móvil más estrecho.
+ * **Panel de filtros propio, no `FilterPanel` de la librería (petición del
+ * humano, 2026-10-08)**: "Pendiente de aprobación" faltaba como estado para
+ * filtrar y, además, pidió explícitamente que categoría/estado/stock se
+ * controlen con el `Select` de `@arcediano/ux-library` en vez de los chips
+ * de `FilterPanel` — "dentro del sidebar [del panel de filtros] mostrar los
+ * select, pero no cambiar la forma de mostrar los filtros" (mismo
+ * contenedor — bottom sheet/drawer bajo el botón "Filtros" — manteniendo la
+ * unificación 2026-09-19 "Bosque Comercial v6", solo cambia el control
+ * dentro). `FilterPanel` no admite más secciones que
+ * `chips/daterange/numberrange/toggles/text` (sin hueco para contenido
+ * propio) y añadir un tipo `select` ahí es un cambio de la librería
+ * compartida que requiere publicar una versión nueva con el token del
+ * humano (fuera del alcance de esta sesión) — así que este panel se
+ * reconstruye aquí con las piezas ya publicadas de la librería
+ * (`Sheet`/`SheetContent` para el drawer de escritorio, `FilterBottomSheet`
+ * para móvil, igual que ya usa "Ordenar") en vez de `FilterPanel`.
  *
  * Los filtros activos aparecen como chips bajo la barra en todos los
  * breakpoints — el orden ya no es uno de ellos.
@@ -24,15 +36,21 @@
 'use client';
 
 import React from 'react';
-import { Grid3x3, List, ArrowUpDown, Check } from 'lucide-react';
+import { Grid3x3, List, ArrowUpDown, Check, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   FilterToolbar,
-  FilterPanel,
   FilterBottomSheet,
   ActiveFilterChips,
+  Sheet,
+  SheetContent,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  useIsMobile,
   type ActiveFilterChip,
-  type FilterSection,
 } from '@arcediano/ux-library';
 
 export interface ProductFiltersProps {
@@ -63,11 +81,14 @@ const DEFAULT_CATEGORIES = [
   { value: 'panaderia', label: 'Panadería' },
 ];
 
+// 5 estados reales del producto (ProductStatus del backend): activo,
+// borrador, pendiente de aprobación, sin stock, inactivo.
 const STATUS_OPTIONS = [
-  { value: 'active',       label: 'Activos' },
-  { value: 'draft',        label: 'Borradores' },
-  { value: 'out_of_stock', label: 'Sin stock' },
-  { value: 'inactive',     label: 'Inactivos' },
+  { value: 'active',           label: 'Activos' },
+  { value: 'draft',            label: 'Borradores' },
+  { value: 'pending_approval', label: 'Pendiente aprobación' },
+  { value: 'out_of_stock',     label: 'Sin stock' },
+  { value: 'inactive',         label: 'Inactivos' },
 ];
 
 const STOCK_OPTIONS = [
@@ -87,6 +108,176 @@ const SORT_OPTIONS = [
   { value: 'stock-desc', label: 'Stock ↓' },
   { value: 'sales-desc', label: 'Más vendidos' },
 ];
+
+// ─── Panel de filtros propio (ver nota de cabecera) ────────────────────────────
+
+interface FilterDraft {
+  category: string;
+  status: string;
+  stock: string;
+}
+
+interface ProductFiltersPanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+  categories: Array<{ value: string; label: string }>;
+  selectedCategory: string;
+  onCategoryChange: (value: string) => void;
+  selectedStatus: string;
+  onStatusChange: (value: string) => void;
+  selectedStock: string;
+  onStockChange: (value: string) => void;
+  totalProducts: number;
+  onClearAll: () => void;
+}
+
+function ProductFiltersPanel({
+  isOpen,
+  onClose,
+  categories,
+  selectedCategory,
+  onCategoryChange,
+  selectedStatus,
+  onStatusChange,
+  selectedStock,
+  onStockChange,
+  totalProducts,
+  onClearAll,
+}: ProductFiltersPanelProps) {
+  const isMobile = useIsMobile(1024);
+  const [draft, setDraft] = React.useState<FilterDraft>({
+    category: selectedCategory,
+    status: selectedStatus,
+    stock: selectedStock,
+  });
+
+  // Draft fresco cada vez que se abre, igual que el panel de filtros compartido.
+  React.useEffect(() => {
+    if (isOpen) {
+      setDraft({ category: selectedCategory, status: selectedStatus, stock: selectedStock });
+    }
+  }, [isOpen, selectedCategory, selectedStatus, selectedStock]);
+
+  const hasActive = Boolean(draft.category || draft.status || draft.stock);
+
+  const handleApply = () => {
+    onCategoryChange(draft.category);
+    onStatusChange(draft.status);
+    onStockChange(draft.stock);
+    onClose();
+  };
+
+  const handleClear = () => {
+    onClearAll();
+    onClose();
+  };
+
+  const body = (
+    <div className="flex flex-col gap-6">
+      <Select
+        label="Categoría"
+        placeholder="Todas"
+        value={draft.category}
+        onValueChange={(v) => setDraft((d) => ({ ...d, category: v }))}
+        items={categories}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Todas" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">Todas</SelectItem>
+          {categories.map((c) => (
+            <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
+        label="Estado"
+        placeholder="Todos"
+        value={draft.status}
+        onValueChange={(v) => setDraft((d) => ({ ...d, status: v }))}
+        items={STATUS_OPTIONS}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Todos" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">Todos</SelectItem>
+          {STATUS_OPTIONS.map((o) => (
+            <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
+        label="Stock"
+        placeholder="Todo"
+        value={draft.stock}
+        onValueChange={(v) => setDraft((d) => ({ ...d, stock: v }))}
+        items={STOCK_OPTIONS}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Todo" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">Todo</SelectItem>
+          {STOCK_OPTIONS.map((o) => (
+            <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
+  const footer = (
+    <div className="flex gap-3">
+      <button
+        type="button"
+        onClick={handleClear}
+        disabled={!hasActive}
+        className={cn(
+          'flex-1 h-12 rounded-2xl border-2 text-sm font-medium transition-all active:scale-95',
+          hasActive
+            ? 'border-origen-bosque/40 text-origen-bosque hover:border-origen-bosque/70'
+            : 'border-border text-text-subtle opacity-40 cursor-not-allowed',
+        )}
+      >
+        Limpiar filtros
+      </button>
+      <button
+        type="button"
+        onClick={handleApply}
+        className="flex-2 h-12 rounded-2xl bg-origen-bosque text-white text-sm font-semibold active:scale-95 transition-all hover:bg-origen-pino"
+      >
+        Ver {totalProducts} {totalProducts === 1 ? 'producto' : 'productos'}
+      </button>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <FilterBottomSheet open={isOpen} onClose={onClose} title="Filtros" footer={footer}>
+        {body}
+      </FilterBottomSheet>
+    );
+  }
+
+  return (
+    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <SheetContent side="right" className="flex w-[360px] max-w-[90vw] flex-col overflow-y-auto">
+        <div className="mb-4 flex items-center gap-2">
+          <SlidersHorizontal className="w-4 h-4 text-origen-bosque" />
+          <span className="text-sm font-semibold text-origen-bosque">Filtros</span>
+        </div>
+        <div className="flex-1">{body}</div>
+        <div className="mt-6 border-t border-border-subtle pt-4">{footer}</div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+// ─── Componente principal ───────────────────────────────────────────────────────
 
 export function ProductFilters({
   searchQuery,
@@ -137,39 +328,6 @@ export function ProductFilters({
 
   const activeCount = activeChips.length;
   const sortLabel = SORT_OPTIONS.find((o) => o.value === sortBy)?.label;
-
-  // ── Secciones del panel móvil ────────────────────────────────────────────────
-  const sections: FilterSection[] = [
-    {
-      type: 'chips', id: 'category', title: 'Categoría',
-      options: [{ label: 'Todas', value: '' }, ...categories.map((c) => ({ label: c.label, value: c.value }))],
-      value: selectedCategory,
-      onChange: onCategoryChange,
-    },
-    {
-      type: 'chips', id: 'status', title: 'Estado',
-      options: [
-        { label: 'Todos', value: '' },
-        { label: 'Activos', value: 'active' },
-        { label: 'Borradores', value: 'draft' },
-        { label: 'Sin stock', value: 'out_of_stock' },
-        { label: 'Inactivos', value: 'inactive' },
-      ],
-      value: selectedStatus,
-      onChange: onStatusChange,
-    },
-    {
-      type: 'chips', id: 'stock', title: 'Stock',
-      options: [
-        { label: 'Todo', value: '' },
-        { label: 'Con stock', value: 'disponible' },
-        { label: 'Stock bajo', value: 'bajo' },
-        { label: 'Agotados', value: 'agotado' },
-      ],
-      value: selectedStock,
-      onChange: onStockChange,
-    },
-  ];
 
   // ── Botón "Ordenar" — separado de "Filtros", su propio bottom sheet ─────────
   const sortButton = (
@@ -259,15 +417,18 @@ export function ProductFilters({
       )}
 
       {/* ── Panel de filtros: bottom sheet (<lg) / drawer deslizante (≥lg) ────── */}
-      <FilterPanel
+      <ProductFiltersPanel
         isOpen={panelOpen}
         onClose={() => setPanelOpen(false)}
-        triggerRef={filtersButtonRef}
-        sections={sections}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={onCategoryChange}
+        selectedStatus={selectedStatus}
+        onStatusChange={onStatusChange}
+        selectedStock={selectedStock}
+        onStockChange={onStockChange}
+        totalProducts={totalProducts}
         onClearAll={onClearFilters}
-        resultCount={totalProducts}
-        resultLabel={totalProducts === 1 ? 'producto' : 'productos'}
-        variant="drawer"
       />
 
       {/* ── "Ordenar" — hoja propia, independiente de "Filtros"; selección

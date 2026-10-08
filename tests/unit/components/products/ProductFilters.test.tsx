@@ -8,6 +8,9 @@
  * - "Ordenar" ya no aparece en la fila de chips "Activos:".
  * - El botón "Ordenar" abre su propia hoja con las opciones de orden y,
  *   al elegir una, llama a onSortChange con el valor correcto y se cierra.
+ * - El panel de filtros (categoría/estado/stock) usa el `Select` de la
+ *   librería y el estado incluye "Pendiente aprobación" (petición del
+ *   humano, 2026-10-08: faltaba como opción para filtrar).
  *
  * `@arcediano/ux-library` se mockea (patrón ya usado en OrganicScoreBadge.test.tsx)
  * porque el alias de vitest resuelve al paquete publicado en npm, no al
@@ -40,16 +43,17 @@ vi.mock('@arcediano/ux-library', () => ({
       {actions}
     </div>
   ),
-  FilterPanel: () => null,
   FilterBottomSheet: ({
     open,
     title,
     children,
+    footer,
   }: {
     open: boolean;
     title?: string;
     children?: React.ReactNode;
-  }) => (open ? <div role="dialog" aria-label={title}>{children}</div> : null),
+    footer?: React.ReactNode;
+  }) => (open ? <div role="dialog" aria-label={title}>{children}{footer}</div> : null),
   ActiveFilterChips: ({ chips }: { chips: Array<{ id: string; label: string }> }) => (
     <div data-testid="active-chips">
       {chips.map((c) => (
@@ -57,6 +61,21 @@ vi.mock('@arcediano/ux-library', () => ({
       ))}
     </div>
   ),
+  // Panel de filtros propio (ver cabecera de ProductFilters.tsx): escritorio
+  // siempre en estos tests (useIsMobile mockeado a false) — pasa por Sheet,
+  // no por FilterBottomSheet. Mocks mínimos, suficientes para comprobar que
+  // las opciones de cada Select (incluida "Pendiente aprobación") llegan al DOM.
+  useIsMobile: () => false,
+  Sheet: ({ open, children }: { open: boolean; children?: React.ReactNode }) =>
+    (open ? <div role="dialog" aria-label="Filtros">{children}</div> : null),
+  SheetContent: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  Select: ({ label, children }: { label?: string; children?: React.ReactNode }) => (
+    <div data-testid={`select-${label}`}>{children}</div>
+  ),
+  SelectTrigger: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  SelectValue: ({ placeholder }: { placeholder?: string }) => <span>{placeholder}</span>,
+  SelectContent: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  SelectItem: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }));
 
 const baseProps = {
@@ -134,5 +153,31 @@ describe('ProductFilters — Ordenar separado de Filtros', () => {
 
     rerender(<ProductFilters {...baseProps} sortBy="price-desc" onSortChange={vi.fn()} />);
     expect(screen.getByRole('button', { name: /Ordenar/ }).className).toContain('bg-origen-bosque');
+  });
+});
+
+describe('ProductFilters — panel de filtros con Select (petición del humano, 2026-10-08)', () => {
+  it('el Select de Estado incluye "Pendiente aprobación", antes ausente', () => {
+    render(<ProductFilters {...baseProps} sortBy="" onSortChange={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir filtros' }));
+
+    const statusSelect = screen.getByTestId('select-Estado');
+    expect(statusSelect).toHaveTextContent('Pendiente aprobación');
+    // Y los demás estados reales del producto siguen ahí.
+    expect(statusSelect).toHaveTextContent('Activos');
+    expect(statusSelect).toHaveTextContent('Borradores');
+    expect(statusSelect).toHaveTextContent('Sin stock');
+    expect(statusSelect).toHaveTextContent('Inactivos');
+  });
+
+  it('categoría/estado/stock se controlan con el Select de la librería, no con botones de chip', () => {
+    render(<ProductFilters {...baseProps} sortBy="" onSortChange={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir filtros' }));
+
+    expect(screen.getByTestId('select-Categoría')).toBeInTheDocument();
+    expect(screen.getByTestId('select-Estado')).toBeInTheDocument();
+    expect(screen.getByTestId('select-Stock')).toBeInTheDocument();
   });
 });
