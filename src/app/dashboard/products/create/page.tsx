@@ -58,7 +58,7 @@ const containerVariants: Variants = {
 
 /**
  * Cómo se crea el producto: con el asistente de IA (pantalla de entrada +
- * pantalla única de revisión, opción B) o a mano con el wizard de 7 pasos.
+ * pantalla única de revisión, opción B) o a mano con el wizard de 8 pasos.
  */
 type CreateMode = 'loading' | 'ai-intake' | 'ai-review' | 'wizard';
 

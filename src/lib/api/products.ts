@@ -19,6 +19,8 @@ import {
   type FlashDealWithProduct,
   type QuantityOffer,
   type QuantityOfferWithProduct,
+  type ProductOption,
+  type ProductVariant,
 } from '@/types/product';
 
 export type { FlashDealWithProduct, QuantityOffer, QuantityOfferWithProduct };
@@ -1208,5 +1210,60 @@ export async function fetchMyQuantityOffers(params?: {
     };
   } catch (error) {
     return handleError(error, 'fetchMyQuantityOffers');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// VARIANTES DE PRODUCTO (estilo Shopify — solo modelo + edición en dashboard
+// por ahora, sin conectar al checkout/carrito)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Reemplaza el conjunto completo de opciones de variante de un producto.
+ * Ruta backend: PUT /products/:id/options
+ */
+export async function syncProductOptions(
+  productId: string,
+  options: Array<{ name: string; values: string[] }>,
+): Promise<ApiResponse<ProductOption[]>> {
+  try {
+    const raw = await gatewayClient.put<{ success: boolean; data: ProductOption[] }>(
+      `/products/${productId}/options`,
+      { options },
+    );
+    return { data: raw.data, status: 200 };
+  } catch (error) {
+    return handleError(error, 'syncProductOptions');
+  }
+}
+
+/**
+ * Sincroniza el listado completo de variantes de un producto (upsert por id
+ * + borrado de las que ya no aparecen) en una sola llamada.
+ * Ruta backend: PUT /products/:id/variants
+ */
+export async function syncProductVariants(
+  productId: string,
+  variants: Array<{
+    id?: string;
+    option1Value?: string;
+    option2Value?: string;
+    option3Value?: string;
+    sku?: string;
+    barcode?: string;
+    price: number;
+    compareAtPrice?: number;
+    stock: number;
+    trackInventory?: boolean;
+  }>,
+): Promise<ApiResponse<ProductVariant[]>> {
+  try {
+    const raw = await gatewayClient.put<{ success: boolean; data: ProductVariant[] }>(
+      `/products/${productId}/variants`,
+      { variants },
+    );
+    return { data: raw.data, status: 200 };
+  } catch (error) {
+    return handleError(error, 'syncProductVariants');
   }
 }

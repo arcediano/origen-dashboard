@@ -507,6 +507,9 @@ export function useProductForm(productId?: string) {
       // los valores de stock — los campos tienen defaults válidos (0 / 5).
       inventory: formData.stock >= 0 && formData.lowStockThreshold >= 0,
       certifications: true,
+      // Variantes: opcional, siempre "completado" (igual que certifications) --
+      // no bloquea la publicación (ver REQUIRED_STEPS_FOR_PUBLISH).
+      variants: true,
     });
   }, [formData]);
 

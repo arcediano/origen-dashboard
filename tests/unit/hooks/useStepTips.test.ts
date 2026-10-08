@@ -9,7 +9,7 @@ import { describe, it, expect } from 'vitest';
 import { useStepTips } from '@/hooks/useStepTips';
 
 describe('useStepTips — recuerdo del asistente de IA', () => {
-  it.each([1, 2, 3, 4, 5, 6, 7])('añade el consejo del asistente de IA al final del paso %i', (step) => {
+  it.each([1, 2, 3, 4, 5, 6, 7, 8])('añade el consejo del asistente de IA al final del paso %i', (step) => {
     const tips = useStepTips(step, {});
     expect(tips.length).toBeGreaterThan(0);
     const last = tips[tips.length - 1];

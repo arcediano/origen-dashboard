@@ -11,7 +11,8 @@ export const KEY_FACTS_BY_STEP: Record<number, string> = {
   4: 'Los productos con información nutricional completa tienen un 40% más de confianza',
   5: 'Los productos con historia tienen un 50% más de reseñas positivas',
   6: 'El 15% de los pedidos cancelados son por falta de stock',
-  7: 'Los productos con certificaciones tienen un 35% más de confianza',
+  7: 'Ofrecer varios formatos o tamaños amplía tu público sin crear productos nuevos',
+  8: 'Los productos con certificaciones tienen un 35% más de confianza',
 };
 
 /**
@@ -87,6 +88,13 @@ function getStepTips(
         { description: 'Pesa tus productos para calcular envíos correctamente' },
       ];
     case 7:
+      return [
+        { description: 'Define primero las opciones (Tamaño, Formato…) y luego genera las combinaciones' },
+        { description: 'Cada variante puede tener su propio precio, stock y SKU' },
+        { description: 'Las variantes se guardan una vez creado el producto' },
+        { description: 'De momento las variantes solo se gestionan desde aquí, todavía no afectan al catálogo público' },
+      ];
+    case 8:
       return [
         { description: 'Las certificaciones ecológicas generan confianza' },
         { description: 'Añade atributos específicos de tu producto' },

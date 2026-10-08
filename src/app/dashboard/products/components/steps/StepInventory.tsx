@@ -216,7 +216,7 @@ export function StepInventory({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 6 de 7
+              Paso 6 de 8
             </Badge>
           </div>
         </div>

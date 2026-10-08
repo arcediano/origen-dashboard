@@ -8,7 +8,7 @@
 'use client';
 
 import React from 'react';
-import { Package, Camera, DollarSign, FlaskConical, Leaf, ShoppingBag, Award } from 'lucide-react';
+import { Package, Camera, DollarSign, FlaskConical, Leaf, ShoppingBag, Award, Boxes } from 'lucide-react';
 import { WizardProgress } from '@/components/shared/wizard-progress';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 
@@ -20,6 +20,7 @@ const iconMap: Record<string, React.ReactNode> = {
   Leaf: <Leaf className="w-4 h-4" />,
   ShoppingBag: <ShoppingBag className="w-4 h-4" />,
   Award: <Award className="w-4 h-4" />,
+  Boxes: <Boxes className="w-4 h-4" />,
 };
 
 const PRODUCT_STEPS = FORM_STEPS.map((s) => ({ id: s.id, label: s.label, icon: iconMap[s.icon] }));

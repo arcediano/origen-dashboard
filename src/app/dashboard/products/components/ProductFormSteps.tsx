@@ -15,6 +15,7 @@ import { StepNutritional } from './steps/StepNutritional';
 import { StepProduction } from './steps/StepProduction';
 import { StepInventory } from './steps/StepInventory';
 import { StepCertificationsAttributes } from './steps/StepCertificationsAttributes';
+import { StepVariants } from './steps/StepVariants';
 
 import { defaultNutritionalInfo, defaultProductionInfo, type FormStepId } from '@/types/product';
 
@@ -147,6 +148,14 @@ export function ProductFormSteps({
             productCategory={formData.categoryName || formData.categoryId}
             productId={productId}
             isPublishedProduct={isPublishedProduct}
+          />
+        )}
+
+        {activeTab === 'variants' && (
+          <StepVariants
+            productId={productId}
+            basePrice={formData.basePrice}
+            completed={completedTabs.variants}
           />
         )}
       </motion.div>

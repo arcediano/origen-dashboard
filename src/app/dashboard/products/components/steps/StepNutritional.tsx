@@ -235,7 +235,7 @@ export function StepNutritional({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 4 de 7
+              Paso 4 de 8
             </Badge>
           </div>
         </div>

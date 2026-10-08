@@ -29,6 +29,9 @@ import {
   type NutritionalInfo,
   type PriceTier,
   type ProductionInfo,
+  type FlashDealSummary,
+  type ProductOption,
+  type ProductVariant,
 } from '@/types/product';
 
 // ─── TIPOS DE RESPUESTA DEL BACKEND ──────────────────────────────────────────
@@ -138,6 +141,45 @@ export interface ApiProductAttribute {
   description?: string;
 }
 
+/** Resumen de la oferta flash vigente, embebido en la respuesta de producto (FlashDealSummaryDto). */
+export interface ApiFlashDealSummary {
+  id: string;
+  discountType: string;
+  discountValue: number;
+  endsAt?: string;
+  effectivePrice?: number;
+  stacksWithTiers: boolean;
+}
+
+export interface ApiProductOptionValue {
+  id: string;
+  value: string;
+  sortOrder: number;
+}
+
+export interface ApiProductOption {
+  id: string;
+  name: string;
+  sortOrder: number;
+  values: ApiProductOptionValue[];
+}
+
+export interface ApiProductVariant {
+  id: string;
+  option1Value?: string;
+  option2Value?: string;
+  option3Value?: string;
+  sku?: string;
+  barcode?: string;
+  price: number;
+  compareAtPrice?: number;
+  stock: number;
+  trackInventory: boolean;
+  imageUrl?: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
 /**
  * Respuesta paginada de products-service para el listado del productor.
  * El gateway la reenvía sin modificaciones.
@@ -198,6 +240,9 @@ export interface ApiProduct {
   views: number;
   conversion?: number;
   priceTiers: ApiPriceTier[];
+  flashDeal?: ApiFlashDealSummary;
+  options?: ApiProductOption[];
+  variants?: ApiProductVariant[];
   nutritionalInfo?: ApiNutritionalInfo;
   certifications: ApiCertification[];
   productionInfo?: ApiProductionInfo;
@@ -288,6 +333,49 @@ function mapPriceTier(tier: ApiPriceTier): PriceTier {
     payQuantity: tier.payQuantity,
     label: tier.label,
     savings: tier.savings,
+  };
+}
+
+function mapFlashDealSummary(deal?: ApiFlashDealSummary): FlashDealSummary | undefined {
+  if (!deal) return undefined;
+  return {
+    id: deal.id,
+    discountType: deal.discountType as FlashDealSummary['discountType'],
+    discountValue: deal.discountValue,
+    endsAt: deal.endsAt ? new Date(deal.endsAt) : undefined,
+    effectivePrice: deal.effectivePrice,
+    stacksWithTiers: deal.stacksWithTiers,
+  };
+}
+
+function mapProductOption(option: ApiProductOption): ProductOption {
+  return {
+    id: option.id,
+    name: option.name,
+    sortOrder: option.sortOrder,
+    values: option.values.map((value) => ({
+      id: value.id,
+      value: value.value,
+      sortOrder: value.sortOrder,
+    })),
+  };
+}
+
+function mapProductVariant(variant: ApiProductVariant): ProductVariant {
+  return {
+    id: variant.id,
+    option1Value: variant.option1Value,
+    option2Value: variant.option2Value,
+    option3Value: variant.option3Value,
+    sku: variant.sku,
+    barcode: variant.barcode,
+    price: variant.price,
+    compareAtPrice: variant.compareAtPrice,
+    stock: variant.stock,
+    trackInventory: variant.trackInventory,
+    imageUrl: variant.imageUrl,
+    sortOrder: variant.sortOrder,
+    isActive: variant.isActive,
   };
 }
 
@@ -434,6 +522,9 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     basePrice:    api.basePrice,
     comparePrice: api.comparePrice,
     priceTiers:   (api.priceTiers ?? []).map(mapPriceTier),
+    flashDeal:    mapFlashDealSummary(api.flashDeal),
+    options:      (api.options ?? []).map(mapProductOption),
+    variants:     (api.variants ?? []).map(mapProductVariant),
 
     sku:              api.sku,
     barcode:          api.barcode,

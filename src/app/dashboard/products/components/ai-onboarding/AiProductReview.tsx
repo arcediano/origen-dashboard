@@ -4,7 +4,7 @@
  * decisión del humano): la ficha que preparó el asistente, en secciones
  * editables, más lo que solo el productor puede completar (precio y stock).
  * Nada se publica sin que el productor lo revise. El alta manual sigue usando
- * el wizard de 7 pasos.
+ * el wizard de 8 pasos.
  */
 
 'use client';

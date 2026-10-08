@@ -247,6 +247,26 @@ export interface FlashDeal {
   updatedAt?: Date;
 }
 
+/**
+ * Resumen de la oferta flash vigente embebido en `Product.flashDeal` (lo que
+ * de verdad devuelve el backend ahí — `FlashDealSummaryDto`, más reducido
+ * que `FlashDeal`: sin startsAt/isActive/isCurrentlyActive). Antes de
+ * corregir este tipo, `mapApiProductToProduct` nunca llegaba a rellenar
+ * `Product.flashDeal` (no estaba ni en `ApiProduct`), así que cualquier
+ * `!!product.flashDeal` leído desde `fetchProducts`/`fetchProductById`
+ * siempre daba `false` — hallazgo corregido en el mismo ciclo que añadió el
+ * primer consumidor real de este campo (selector de producto de "Ofertas
+ * por cantidad", 2026-10-08).
+ */
+export interface FlashDealSummary {
+  id: string;
+  discountType: 'PERCENTAGE' | 'FIXED';
+  discountValue: number;
+  endsAt?: Date;
+  effectivePrice?: number;
+  stacksWithTiers: boolean;
+}
+
 export interface FlashDealWithProduct extends FlashDeal {
   productId: string;
   productName: string;
@@ -301,6 +321,46 @@ export interface QuantityOfferWithProduct extends QuantityOffer {
 }
 
 // ============================================================================
+// TIPOS DE VARIANTES DE PRODUCTO (estilo Shopify — petición del humano,
+// 2026-10-08: "además del precio, se podrá configurar las variantes que
+// puede tener ese producto... se puede replicar cómo se configura esto en
+// Shopify"). Alcance de esta primera versión: solo modelo + edición en el
+// dashboard, sin conectar todavía al checkout/carrito. Hasta 3 opciones por
+// producto (p. ej. "Tamaño"), cada variante es una combinación concreta de
+// hasta 3 valores (option1Value/option2Value/option3Value, mismo modelo
+// denormalizado que usa Shopify) con su propio precio/stock/SKU.
+// ============================================================================
+
+export interface ProductOptionValue {
+  id: string;
+  value: string;
+  sortOrder: number;
+}
+
+export interface ProductOption {
+  id: string;
+  name: string;
+  sortOrder: number;
+  values: ProductOptionValue[];
+}
+
+export interface ProductVariant {
+  id: string;
+  option1Value?: string;
+  option2Value?: string;
+  option3Value?: string;
+  sku?: string;
+  barcode?: string;
+  price: number;
+  compareAtPrice?: number;
+  stock: number;
+  trackInventory: boolean;
+  imageUrl?: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+// ============================================================================
 // TIPO PRODUCTO PRINCIPAL
 // ============================================================================
 
@@ -319,7 +379,9 @@ export interface Product {
   basePrice: number;
   comparePrice?: number;
   priceTiers: PriceTier[];
-  flashDeal?: FlashDeal;
+  flashDeal?: FlashDealSummary;
+  options: ProductOption[];
+  variants: ProductVariant[];
   sku: string;
   barcode?: string;
   stock: number;
@@ -405,6 +467,13 @@ export const FORM_STEPS = [
   { id: 'nutritional', label: 'Nutricional', icon: 'FlaskConical' },
   { id: 'production', label: 'Producción', icon: 'Leaf' },
   { id: 'inventory', label: 'Inventario', icon: 'ShoppingBag' },
+  { id: 'variants', label: 'Variantes', icon: 'Boxes' },
+  // Certificaciones se mantiene como ÚLTIMO paso a propósito: create/page.tsx,
+  // [id]/edit/page.tsx y CreateProductNavigation.tsx derivan "¿es el último
+  // paso?" de la posición en este array (FORM_STEPS.length - 1) para decidir
+  // dónde mostrar el botón "Publicar" y los avisos de certificaciones
+  // pendientes -- insertar un paso nuevo DESPUÉS de "certifications" movería
+  // esa UI al paso nuevo sin querer. "variants" va antes, no al final.
   { id: 'certifications', label: 'Certificaciones', icon: 'Award' },
 ] as const;
 

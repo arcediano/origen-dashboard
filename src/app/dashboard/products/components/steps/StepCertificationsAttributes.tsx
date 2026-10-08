@@ -637,7 +637,7 @@ export function StepCertificationsAttributes({
 
           {/* Badges — 4 en este paso (vs. 2 en el resto); igual que el resto de
               pasos, se dejan envolver en 2 filas en móvil (flex-wrap) en vez de
-              ocultarlos, para no perder "Paso 7 de 7" justo en el paso que
+              ocultarlos, para no perder "Paso 8 de 8" justo en el paso que
               bloquea publicar. */}
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             <Badge variant="leaf" size="sm" className="bg-origen-pradera/10">
@@ -656,7 +656,7 @@ export function StepCertificationsAttributes({
               </Badge>
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> Paso 7 de 7
+              <Sparkles className="w-3 h-3" /> Paso 8 de 8
             </Badge>
           </div>
         </div>
