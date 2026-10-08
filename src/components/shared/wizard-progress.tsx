@@ -63,12 +63,21 @@ export interface WizardProgressProps {
  * cabecera fija deja de ser visible y la cabecera pasa a su forma compacta. Así
  * el panel ocupa toda su altura solo arriba del todo y en cuanto se trabaja en el
  * formulario cede el espacio.
+ *
+ * `enabled=false` desactiva el condensado por completo (el panel se queda
+ * siempre en su forma completa) — usado en `embedded` (columna lateral junto
+ * a "Consejos útiles"): ahí sí hay sitio de sobra para mantenerlo igual al
+ * hacer scroll, pedido explícito del humano, 2026-10-08.
  */
-function useCondensedOnScroll(offsetPx: number) {
+function useCondensedOnScroll(offsetPx: number, enabled: boolean) {
   const sentinelRef = React.useRef<HTMLDivElement>(null);
   const [condensed, setCondensed] = React.useState(false);
 
   React.useEffect(() => {
+    if (!enabled) {
+      setCondensed(false);
+      return;
+    }
     const el = sentinelRef.current;
     if (!el || typeof IntersectionObserver === 'undefined') return;
     const observer = new IntersectionObserver(
@@ -77,7 +86,7 @@ function useCondensedOnScroll(offsetPx: number) {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [offsetPx]);
+  }, [offsetPx, enabled]);
 
   return { sentinelRef, condensed };
 }
@@ -100,7 +109,7 @@ export function WizardProgress({
   const currentStep = steps[currentIndex];
   const reachable = maxReachableIndex ?? currentIndex + 1;
   const percent = progress ?? ((currentIndex + 1) / steps.length) * 100;
-  const { sentinelRef, condensed } = useCondensedOnScroll(stickyOffsetPx);
+  const { sentinelRef, condensed } = useCondensedOnScroll(stickyOffsetPx, !embedded);
   // Móvil: resumen de una línea "Paso X de N" con toggle para ver los pasos.
   // Con scroll se pliega solo.
   const [isExpanded, setIsExpanded] = React.useState(false);

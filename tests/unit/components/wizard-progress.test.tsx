@@ -52,4 +52,12 @@ describe('WizardProgress', () => {
     const wrapper = container.querySelector('[aria-hidden="true"]')?.nextElementSibling;
     expect(wrapper?.className).toContain('sticky');
   });
+
+  it('embedded: nunca se condensa con el scroll (hay sitio de sobra en la columna lateral, petición del humano 2026-10-08)', () => {
+    render(<WizardProgress steps={steps} currentId="a" completed={{}} onStepChange={vi.fn()} embedded />);
+    // Sin embedded, este mismo evento pasaría al modo condensado (ver test de arriba) --
+    // en embedded no debe tener efecto: el icono se mantiene en su tamaño completo.
+    act(() => ioCallback?.([{ isIntersecting: false }]));
+    expect(screen.getByRole('button', { name: 'Ir al paso A' }).querySelector('div')?.className).not.toContain('h-7 w-7');
+  });
 });
