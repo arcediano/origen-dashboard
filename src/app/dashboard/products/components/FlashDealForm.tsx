@@ -4,7 +4,6 @@ import { Button, Input, Alert, SelectableCard, Label } from '@arcediano/ux-libra
 import { CurrencyInput, PercentageInput } from '@arcediano/ux-library';
 import {
   DollarSign,
-  AlertCircle,
   Percent,
   Zap,
 } from 'lucide-react';
@@ -356,7 +355,6 @@ export function FlashDealForm({
         {/* Aviso de exclusividad: un producto no puede tener Flash y Volumen activas a la vez */}
         {hasTiers && !hasConflict && (
           <Alert variant="info" className="text-xs">
-            <AlertCircle className="w-3 h-3 mr-1 shrink-0 mt-0.5" />
             <p>
               Este producto ya tiene descuentos por cantidad activos. Un producto no puede
               tener a la vez oferta flash y descuentos por cantidad — si creas esta oferta,
@@ -368,7 +366,6 @@ export function FlashDealForm({
         {/* Conflicto 409: ya hay una oferta por Volumen activa — ofrecer reemplazo en un solo paso */}
         {hasConflict && (
           <Alert variant="warning" className="text-xs">
-            <AlertCircle className="w-3 h-3 mr-1 shrink-0 mt-0.5" />
             <div className="space-y-2">
               <p>
                 Este producto ya tiene descuentos por cantidad activos y no puede tener
@@ -397,12 +394,7 @@ export function FlashDealForm({
           </Alert>
         )}
 
-        {error && (
-          <Alert variant="error" className="text-xs">
-            <AlertCircle className="w-3 h-3 mr-1 shrink-0" />
-            {error}
-          </Alert>
-        )}
+        {error && <Alert variant="error" className="text-xs">{error}</Alert>}
 
         {!hasConflict && (
           <div className="flex gap-2 pt-3 border-t border-border-subtle">

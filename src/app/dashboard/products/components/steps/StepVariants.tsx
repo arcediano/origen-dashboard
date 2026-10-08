@@ -26,7 +26,6 @@ import {
   Boxes,
   CheckCircle,
   Sparkles,
-  AlertCircle,
   Plus,
   Trash2,
   Save,
@@ -319,10 +318,7 @@ export function StepVariants({ productId, basePrice = 0, completed }: StepVarian
             ))}
           </div>
         ) : loadError ? (
-          <Alert variant="error">
-            <AlertCircle className="w-4 h-4 mr-2" />
-            {loadError}
-          </Alert>
+          <Alert variant="error">{loadError}</Alert>
         ) : (
           <div className="space-y-8">
             {/* Opciones */}
@@ -386,10 +382,7 @@ export function StepVariants({ productId, basePrice = 0, completed }: StepVarian
               )}
 
               {optionsError && (
-                <Alert variant="error" className="text-xs">
-                  <AlertCircle className="mr-1 h-3 w-3 shrink-0" />
-                  {optionsError}
-                </Alert>
+                <Alert variant="error" className="text-xs">{optionsError}</Alert>
               )}
 
               <Button
@@ -472,10 +465,7 @@ export function StepVariants({ productId, basePrice = 0, completed }: StepVarian
                 )}
 
                 {variantsError && (
-                  <Alert variant="error" className="text-xs">
-                    <AlertCircle className="mr-1 h-3 w-3 shrink-0" />
-                    {variantsError}
-                  </Alert>
+                  <Alert variant="error" className="text-xs">{variantsError}</Alert>
                 )}
 
                 {variantDrafts.length > 0 && (

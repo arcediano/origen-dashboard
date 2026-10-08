@@ -2,7 +2,7 @@
 
 import { Button, Input, Alert, SelectableCard, Label } from '@arcediano/ux-library';
 import { CurrencyInput, PercentageInput } from '@arcediano/ux-library';
-import { DollarSign, AlertCircle, Percent, Gift, Hash, Package } from 'lucide-react';
+import { DollarSign, Percent, Gift, Hash, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { z } from 'zod';
@@ -311,7 +311,6 @@ export function QuantityOfferForm({
         {/* Aviso de exclusividad: un producto no puede tener Flash y Volumen activas a la vez */}
         {hasFlashDeal && !hasConflict && (
           <Alert variant="info" className="text-xs">
-            <AlertCircle className="mr-1 mt-0.5 h-3 w-3 shrink-0" />
             <p>
               Este producto ya tiene una oferta flash activa o programada. Un producto no puede
               tener a la vez oferta flash y descuentos por cantidad — si creas este tier, la
@@ -323,7 +322,6 @@ export function QuantityOfferForm({
         {/* Conflicto 409: ya hay una Flash activa/programada — ofrecer reemplazo en un solo paso */}
         {hasConflict && (
           <Alert variant="warning" className="text-xs">
-            <AlertCircle className="mr-1 mt-0.5 h-3 w-3 shrink-0" />
             <div className="space-y-2">
               <p>
                 Este producto ya tiene una oferta flash activa o programada y no puede tener
@@ -342,12 +340,7 @@ export function QuantityOfferForm({
           </Alert>
         )}
 
-        {error && (
-          <Alert variant="error" className="text-xs">
-            <AlertCircle className="mr-1 h-3 w-3 shrink-0" />
-            {error}
-          </Alert>
-        )}
+        {error && <Alert variant="error" className="text-xs">{error}</Alert>}
 
         {!hasConflict && (
           <div className="flex gap-2 border-t border-border-subtle pt-3">
