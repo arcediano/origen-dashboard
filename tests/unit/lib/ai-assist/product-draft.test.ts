@@ -50,6 +50,7 @@ const response = (over: Partial<ProductDraftResponse['proposal']> = {}, rest: Pa
   allergenSource: null,
   externalSourceNote: null,
   quota: { used: 1, total: 5 },
+  mainImage: { key: 'products/foto.jpg', url: 'https://cdn.example.com/products/foto.jpg' },
   ...rest,
 });
 

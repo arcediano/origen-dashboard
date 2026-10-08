@@ -81,6 +81,12 @@ export interface ProductDraftResponse {
   /** Páginas consultadas por la búsqueda web (puede faltar en respuestas antiguas). */
   externalSourceUrls?: string[];
   quota: { used: number; total: number };
+  /**
+   * Foto del producto ya procesada por FLUX (fondo blanco 2000x2000,
+   * petición del humano 2026-10-08) y subida — usar directamente como
+   * imagen principal, sin volver a subirla al guardar el producto.
+   */
+  mainImage: { key: string; url: string };
 }
 
 export interface DraftCategory {

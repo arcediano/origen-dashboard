@@ -148,10 +148,13 @@ export default function CreateProductPage() {
         if (patch.kind === 'field') handleInputChange(patch.field, patch.value);
         else handleNestedChange(patch.section, patch.field, patch.value);
       }
+      // La foto principal ya viene procesada por FLUX (fondo blanco, 2000x2000
+      // — petición del humano, 2026-10-08) y subida desde el propio backend:
+      // sin `file`, para que el guardado la trate como ya subida y no vuelva
+      // a subir la foto original sin procesar (ver normalizeProductImagesForApi).
       const photo: ProductImage = {
-        id: `temp-${Date.now()}-0-${Math.random().toString(36).substring(2, 7)}`,
-        url: URL.createObjectURL(productPhoto),
-        file: productPhoto,
+        id: response.mainImage.key,
+        url: response.mainImage.url,
         isMain: true,
         sortOrder: 0,
         uploading: false,
