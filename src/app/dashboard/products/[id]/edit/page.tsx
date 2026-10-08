@@ -117,7 +117,17 @@ export default function EditProductPage() {
     if (nextStep) { handleTabChange(nextStep); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   };
 
-  if (showPageLoader) return <PageLoader message="Cargando producto..." className="animate-fade-in" />;
+  // `isLoading` (no el `showPageLoader` ya debounced) es lo que decide si se
+  // pinta el formulario — si no, durante la ventana de 200 ms en la que
+  // useDelayedLoading todavía suprime el spinner (a propósito, para cargas
+  // rápidas) se colaba el formulario completo con `defaultFormData` (nombre
+  // vacío, sin categoría...) antes de que llegase el producto real: un
+  // parpadeo real (formulario en blanco → spinner → datos reales) reportado
+  // por el humano, 2026-10-08, al pulsar "Editar" desde el listado. Con esto,
+  // esa ventana se queda en blanco (nada que mostrar todavía) en vez de
+  // mostrar datos incorrectos, y el spinner solo aparece si la carga tarda
+  // más de esos 200 ms.
+  if (isLoading) return showPageLoader ? <PageLoader message="Cargando producto..." className="animate-fade-in" /> : null;
   if (error) return <PageError title="Error al cargar" message={error} onRetry={reloadProduct} />;
 
   return (

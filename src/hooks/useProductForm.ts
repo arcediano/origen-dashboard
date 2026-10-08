@@ -254,7 +254,13 @@ export function useProductForm(productId?: string) {
   const [completedTabs, setCompletedTabs] = useState<Record<string, boolean>>({});
   
   // UI States
-  const [isLoading, setIsLoading] = useState(false);
+  // Arranca en `true` si hay productId (modo edición): sin esto, el primer
+  // render pintaba la edición completa con `defaultFormData` (nombre vacío,
+  // sin categoría...) ANTES de que el efecto de carga llegase siquiera a
+  // poner isLoading a true -- un parpadeo real (formulario en blanco →
+  // spinner → datos reales) reportado por el humano, 2026-10-08, al pulsar
+  // "Editar" desde el listado de productos.
+  const [isLoading, setIsLoading] = useState(!!productId);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
