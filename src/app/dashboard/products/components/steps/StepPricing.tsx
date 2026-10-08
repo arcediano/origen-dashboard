@@ -27,6 +27,8 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { NetContentField } from './NetContentField';
+import { Boxes } from 'lucide-react';
+import { FORM_STEPS, stepPosition } from '@/types/product';
 
 interface StepPricingProps {
   formData?: any;
@@ -34,12 +36,15 @@ interface StepPricingProps {
   touched?: Record<string, boolean>;
   onInputChange: (field: string, value: any) => void;
   completed?: boolean;
+  /** El producto ya tiene variantes guardadas (paso "Variantes") — cada una define su propio formato de venta, así que "Formato de venta" aquí deja de usarse (petición del humano, 2026-10-08). */
+  hasVariants?: boolean;
 }
 
 export function StepPricing({
   formData = { basePrice: undefined, comparePrice: undefined },
   onInputChange,
-  completed
+  completed,
+  hasVariants,
 }: StepPricingProps) {
   const [priceTouched, setPriceTouched] = useState(false);
   const basePrice = formData.basePrice || 0;
@@ -82,7 +87,7 @@ export function StepPricing({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 3 de 8
+              Paso {stepPosition('pricing')} de {FORM_STEPS.length}
             </Badge>
           </div>
         </div>
@@ -143,14 +148,27 @@ export function StepPricing({
           </div>
         </div>
 
-        {/* Contenido que se vende: a qué cantidad corresponde el precio */}
-        <div>
-          <NetContentField
-            netContent={formData.netContent}
-            netContentUnit={formData.netContentUnit}
-            onChange={(field, value) => onInputChange(field, value)}
-          />
-        </div>
+        {/* Contenido que se vende: a qué cantidad corresponde el precio —
+            solo tiene sentido sin variantes (ver prop `hasVariants`): cada
+            variante ya define su propio formato ("200gr", "500gr"...). */}
+        {hasVariants ? (
+          <div className="flex items-start gap-2 p-3 rounded-xl border border-dashed border-origen-pradera/30 bg-origen-crema/30">
+            <Boxes className="h-4 w-4 text-origen-pradera/60 shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="text-xs text-text-subtle leading-relaxed">
+              Este producto tiene variantes — cada una define su propio formato de venta
+              (p. ej. &quot;200g&quot;, &quot;500g&quot;). Este campo ya no se usa; gestiónalo en el paso{' '}
+              <span className="font-medium text-origen-bosque">Variantes</span>.
+            </p>
+          </div>
+        ) : (
+          <div>
+            <NetContentField
+              netContent={formData.netContent}
+              netContentUnit={formData.netContentUnit}
+              onChange={(field, value) => onInputChange(field, value)}
+            />
+          </div>
+        )}
 
         {/* Descuento calculado vs precio tachado */}
         {formData.comparePrice && formData.comparePrice > basePrice && (

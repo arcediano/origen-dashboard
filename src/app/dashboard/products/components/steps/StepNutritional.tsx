@@ -1,6 +1,6 @@
 /**
  * @component StepNutritional
- * @description Paso 4: Información nutricional
+ * @description Información nutricional
  */
 
 'use client';
@@ -46,7 +46,7 @@ import {
   Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ALLERGENS } from '@/types/product';
+import { ALLERGENS, FORM_STEPS, stepPosition } from '@/types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
@@ -235,7 +235,7 @@ export function StepNutritional({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 4 de 8
+              Paso {stepPosition('nutritional')} de {FORM_STEPS.length}
             </Badge>
           </div>
         </div>

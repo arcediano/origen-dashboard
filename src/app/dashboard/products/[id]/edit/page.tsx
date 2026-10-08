@@ -60,6 +60,8 @@ export default function EditProductPage() {
     showSuccessModal,
     setShowSuccessModal,
     skuSuggestion,
+    hasVariants,
+    onVariantsChange,
     allStepsCompleted,
     hasCertifications,
     certificationsApproved,
@@ -81,8 +83,7 @@ export default function EditProductPage() {
 
   const showPageLoader = useDelayedLoading(isLoading);
 
-  const stepNumber = FORM_STEPS.findIndex(s => s.id === activeTab) + 1;
-  const tips = useStepTips(stepNumber, formData);
+  const tips = useStepTips(activeTab, formData);
 
   const handleTabChange = (tab: FormStepId) => {
     setShowMobileErrors(false);
@@ -244,6 +245,8 @@ export default function EditProductPage() {
               skuSuggestion={skuSuggestion}
               productId={productId}
               isPublishedProduct={isPublishedProduct}
+              hasVariants={hasVariants}
+              onVariantsChange={onVariantsChange}
             />
 
             {/* Navegación de pasos — sólo visible en ≥ lg; hasta ahí usa ActionBar */}
@@ -284,7 +287,7 @@ export default function EditProductPage() {
               />
               <ProductFormSidebar
                 tips={tips}
-                keyFact={KEY_FACTS_BY_STEP[stepNumber]}
+                keyFact={KEY_FACTS_BY_STEP[activeTab]}
                 embedded
               />
             </div>

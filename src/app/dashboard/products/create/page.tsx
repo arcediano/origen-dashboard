@@ -95,6 +95,8 @@ export default function CreateProductPage() {
     aiAssistKey,
     aiAssistUsedUnsaved,
     markAiAssistUsed,
+    hasVariants,
+    onVariantsChange,
   } = useProductForm();
 
   const [mode, setMode] = useState<CreateMode>('loading');
@@ -237,8 +239,7 @@ export default function CreateProductPage() {
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, [aiAssistUsedUnsaved]);
 
-  const stepNumber = FORM_STEPS.findIndex(s => s.id === activeTab) + 1;
-  const tips = useStepTips(stepNumber, formData);
+  const tips = useStepTips(activeTab, formData);
 
   const [showMobileErrors, setShowMobileErrors] = useState(false);
 
@@ -409,6 +410,8 @@ export default function CreateProductPage() {
                 onInputChange={handleInputChange}
                 onNestedChange={handleNestedChange}
                 onImagesChange={handleImagesChange}
+                hasVariants={hasVariants}
+                onVariantsChange={onVariantsChange}
               />
 
               {/* Navegación de pasos — sólo visible en ≥ lg; hasta ahí usa ActionBar */}
@@ -447,7 +450,7 @@ export default function CreateProductPage() {
                 />
                 <ProductFormSidebar
                   tips={tips}
-                  keyFact={KEY_FACTS_BY_STEP[stepNumber]}
+                  keyFact={KEY_FACTS_BY_STEP[activeTab]}
                   embedded
                 />
               </div>

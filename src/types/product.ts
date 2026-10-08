@@ -464,20 +464,33 @@ export const FORM_STEPS = [
   { id: 'basic', label: 'Básico', icon: 'Package' },
   { id: 'images', label: 'Imágenes', icon: 'Camera' },
   { id: 'pricing', label: 'Precios', icon: 'DollarSign' },
+  // Variantes va justo después de Precios (petición del humano, 2026-10-08):
+  // antes iba justo antes de Certificaciones, al final del wizard -- pero eso
+  // significaba rellenar Inventario (stock) y "Formato de venta" (paso
+  // Precios) ANTES de decidir si el producto tiene variantes, y esos campos
+  // dejan de usarse en cuanto el producto tiene variantes guardadas (cada
+  // variante define su propio stock/formato — ver StepPricing/StepInventory,
+  // prop `hasVariants`). Con Variantes aquí, el productor decide pronto y
+  // Precios/Inventario ya pueden adaptar su UI en el resto del flujo.
+  { id: 'variants', label: 'Variantes', icon: 'Boxes' },
   { id: 'nutritional', label: 'Nutricional', icon: 'FlaskConical' },
   { id: 'production', label: 'Producción', icon: 'Leaf' },
   { id: 'inventory', label: 'Inventario', icon: 'ShoppingBag' },
-  { id: 'variants', label: 'Variantes', icon: 'Boxes' },
   // Certificaciones se mantiene como ÚLTIMO paso a propósito: create/page.tsx,
   // [id]/edit/page.tsx y CreateProductNavigation.tsx derivan "¿es el último
   // paso?" de la posición en este array (FORM_STEPS.length - 1) para decidir
   // dónde mostrar el botón "Publicar" y los avisos de certificaciones
   // pendientes -- insertar un paso nuevo DESPUÉS de "certifications" movería
-  // esa UI al paso nuevo sin querer. "variants" va antes, no al final.
+  // esa UI al paso nuevo sin querer.
   { id: 'certifications', label: 'Certificaciones', icon: 'Award' },
 ] as const;
 
 export type FormStepId = typeof FORM_STEPS[number]['id'];
+
+/** Posición (1-indexada) de un paso en el wizard -- para el badge "Paso X de N", calculada en vez de hardcodeada para que un reordenamiento de FORM_STEPS no la desincronice. */
+export function stepPosition(id: FormStepId): number {
+  return FORM_STEPS.findIndex((s) => s.id === id) + 1;
+}
 
 export const defaultNutritionalInfo: NutritionalInfo = {
   servingSize: '100g',

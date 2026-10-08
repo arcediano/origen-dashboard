@@ -48,6 +48,10 @@ interface ProductFormStepsProps {
   aiAssistKey?: string | null;
   /** Notifica que el asistente de IA ha consumido cupo en este producto. */
   onAiAssistUsed?: () => void;
+  /** El producto ya tiene variantes guardadas — StepPricing/StepInventory dejan de mostrar sus campos redundantes (petición del humano, 2026-10-08). */
+  hasVariants?: boolean;
+  /** StepVariants notifica aquí tras guardar/eliminar variantes. */
+  onVariantsChange?: (count: number) => void;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -64,6 +68,8 @@ export function ProductFormSteps({
   isPublishedProduct,
   aiAssistKey,
   onAiAssistUsed,
+  hasVariants,
+  onVariantsChange,
 }: ProductFormStepsProps) {
   return (
     <AnimatePresence mode="wait">
@@ -104,6 +110,7 @@ export function ProductFormSteps({
             touched={{}}
             onInputChange={onInputChange}
             completed={completedTabs.pricing}
+            hasVariants={hasVariants}
           />
         )}
 
@@ -135,6 +142,7 @@ export function ProductFormSteps({
             onNestedChange={onNestedChange}
             completed={completedTabs.inventory}
             skuSuggestion={skuSuggestion}
+            hasVariants={hasVariants}
           />
         )}
 
@@ -156,6 +164,7 @@ export function ProductFormSteps({
             productId={productId}
             basePrice={formData.basePrice}
             completed={completedTabs.variants}
+            onVariantsChange={onVariantsChange}
           />
         )}
       </motion.div>

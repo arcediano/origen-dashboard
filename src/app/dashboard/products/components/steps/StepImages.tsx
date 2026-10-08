@@ -21,6 +21,7 @@ import {
 import { cn } from '@/lib/utils';
 import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
 import type { ProductImage } from '@/types/product';
+import { FORM_STEPS, stepPosition } from '@/types/product';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
 
 interface StepImagesProps {
@@ -95,7 +96,7 @@ export function StepImages({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 2 de 8
+              Paso {stepPosition('images')} de {FORM_STEPS.length}
             </Badge>
           </div>
         </div>

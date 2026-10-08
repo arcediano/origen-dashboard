@@ -25,6 +25,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
 import { TextImproverCard } from './TextImproverCard';
+import { FORM_STEPS, stepPosition } from '@/types/product';
 
 // ============================================================================
 // TIPOS
@@ -172,7 +173,7 @@ export function StepBasic({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 1 de 8
+              Paso {stepPosition('basic')} de {FORM_STEPS.length}
             </Badge>
           </div>
         </div>

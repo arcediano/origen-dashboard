@@ -1,6 +1,6 @@
 /**
  * @component StepInventory
- * @description Paso 6: Inventario y gestión de stock - VERSIÓN ACTUALIZADA (SIN GENERAR SKU)
+ * @description Inventario y gestión de stock (SIN GENERAR SKU, lo asigna el backend)
  */
 
 'use client';
@@ -23,11 +23,13 @@ import {
   Truck,
   TrendingDown,
   TrendingUp,
+  Boxes,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
 import { z } from 'zod';
+import { FORM_STEPS, stepPosition } from '@/types/product';
 
 // ============================================================================
 // TIPOS
@@ -60,6 +62,8 @@ interface StepInventoryProps {
   onNestedChange: (section: string, field: string, value: any) => void;
   completed?: boolean;
   skuSuggestion?: string; // ← NUEVO: para mostrar sugerencia
+  /** El producto ya tiene variantes guardadas (paso "Variantes") — cada una define su propio stock, así que el stock de aquí deja de usarse (petición del humano, 2026-10-08). */
+  hasVariants?: boolean;
 }
 
 // ============================================================================
@@ -140,6 +144,7 @@ export function StepInventory({
   onNestedChange,
   completed,
   skuSuggestion = '', // ← NUEVO: valor por defecto
+  hasVariants,
 }: StepInventoryProps) {
   
   const [localTouched, setLocalTouched] = useState<Record<string, boolean>>({});
@@ -216,7 +221,7 @@ export function StepInventory({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 6 de 8
+              Paso {stepPosition('inventory')} de {FORM_STEPS.length}
             </Badge>
           </div>
         </div>
@@ -256,71 +261,85 @@ export function StepInventory({
           />
         </div>
 
-        {/* Stock */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Input
-            label="Stock actual"
-            required
-            tooltip="Número de unidades disponibles para la venta. Se actualizará automáticamente con los pedidos."
-            type="number"
-            value={formData?.stock || 0}
-            onChange={(e) => handleChange('stock', parseInt(e.target.value) || 0)}
-            min={0}
-            inputSize="lg"
-          />
-
-          <Input
-            label="Umbral de stock bajo"
-            tooltip="Recibirás una notificación cuando el stock esté por debajo de este número. Recomendado: 5-10 unidades."
-            type="number"
-            value={formData?.lowStockThreshold || 5}
-            onChange={(e) => handleChange('lowStockThreshold', parseInt(e.target.value) || 5)}
-            min={0}
-            inputSize="lg"
-          />
-        </div>
-
-        {/* Indicador de nivel de stock */}
-        <div className="mb-8 p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
-          <StockLevelIndicator 
-            current={formData?.stock || 0}
-            threshold={formData?.lowStockThreshold || 5}
-            max={formData?.maxStock}
-          />
-        </div>
-
-        {/* Opciones de inventario */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          <div className="flex items-start gap-3 p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 transition-all">
-            <Checkbox
-              id="trackInventory"
-              checked={formData?.trackInventory}
-              onCheckedChange={(checked) => handleChange('trackInventory', checked)}
-              className="mt-1"
-            />
-            <div>
-              <label htmlFor="trackInventory" className="text-sm font-medium text-origen-bosque cursor-pointer">
-                Controlar inventario automáticamente
-              </label>
-              <p className="text-xs text-muted-foreground mt-1">Descuenta stock automáticamente cuando se realizan ventas</p>
-            </div>
+        {/* Stock — solo tiene sentido sin variantes (prop `hasVariants`): cada
+            variante ya define su propio stock (paso "Variantes"). */}
+        {hasVariants ? (
+          <div className="flex items-start gap-2 p-3 mb-8 rounded-xl border border-dashed border-origen-pradera/30 bg-origen-crema/30">
+            <Boxes className="h-4 w-4 text-origen-pradera/60 shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="text-xs text-text-subtle leading-relaxed">
+              Este producto tiene variantes — cada una tiene su propio stock. Los campos de stock
+              de aquí ya no se usan; gestiónalo en el paso{' '}
+              <span className="font-medium text-origen-bosque">Variantes</span>.
+            </p>
           </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <Input
+                label="Stock actual"
+                required
+                tooltip="Número de unidades disponibles para la venta. Se actualizará automáticamente con los pedidos."
+                type="number"
+                value={formData?.stock || 0}
+                onChange={(e) => handleChange('stock', parseInt(e.target.value) || 0)}
+                min={0}
+                inputSize="lg"
+              />
 
-          <div className="flex items-start gap-3 p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 transition-all">
-            <Checkbox
-              id="allowBackorders"
-              checked={formData?.allowBackorders}
-              onCheckedChange={(checked) => handleChange('allowBackorders', checked)}
-              className="mt-1"
-            />
-            <div>
-              <label htmlFor="allowBackorders" className="text-sm font-medium text-origen-bosque cursor-pointer">
-                Permitir pedidos sin stock
-              </label>
-              <p className="text-xs text-muted-foreground mt-1">Los clientes pueden comprar aunque no haya stock disponible</p>
+              <Input
+                label="Umbral de stock bajo"
+                tooltip="Recibirás una notificación cuando el stock esté por debajo de este número. Recomendado: 5-10 unidades."
+                type="number"
+                value={formData?.lowStockThreshold || 5}
+                onChange={(e) => handleChange('lowStockThreshold', parseInt(e.target.value) || 5)}
+                min={0}
+                inputSize="lg"
+              />
             </div>
-          </div>
-        </div>
+
+            {/* Indicador de nivel de stock */}
+            <div className="mb-8 p-4 bg-origen-crema/30 rounded-xl border border-origen-pradera/20">
+              <StockLevelIndicator
+                current={formData?.stock || 0}
+                threshold={formData?.lowStockThreshold || 5}
+                max={formData?.maxStock}
+              />
+            </div>
+
+            {/* Opciones de inventario */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              <div className="flex items-start gap-3 p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 transition-all">
+                <Checkbox
+                  id="trackInventory"
+                  checked={formData?.trackInventory}
+                  onCheckedChange={(checked) => handleChange('trackInventory', checked)}
+                  className="mt-1"
+                />
+                <div>
+                  <label htmlFor="trackInventory" className="text-sm font-medium text-origen-bosque cursor-pointer">
+                    Controlar inventario automáticamente
+                  </label>
+                  <p className="text-xs text-muted-foreground mt-1">Descuenta stock automáticamente cuando se realizan ventas</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-4 bg-surface-alt rounded-xl border border-border hover:border-origen-pradera/30 transition-all">
+                <Checkbox
+                  id="allowBackorders"
+                  checked={formData?.allowBackorders}
+                  onCheckedChange={(checked) => handleChange('allowBackorders', checked)}
+                  className="mt-1"
+                />
+                <div>
+                  <label htmlFor="allowBackorders" className="text-sm font-medium text-origen-bosque cursor-pointer">
+                    Permitir pedidos sin stock
+                  </label>
+                  <p className="text-xs text-muted-foreground mt-1">Los clientes pueden comprar aunque no haya stock disponible</p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Datos de envío */}
         <div className="pt-4 border-t border-border">
@@ -426,7 +445,9 @@ export function StepInventory({
           )}
         </div>
 
-        {/* Punto de reorden y stock máximo (opcional) */}
+        {/* Punto de reorden y stock máximo (opcional) — mismo criterio que el
+            resto de campos de stock: sin sentido con variantes. */}
+        {!hasVariants && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-border">
           <div>
             <p className="text-xs font-medium text-foreground mb-1 flex items-center gap-1">
@@ -460,6 +481,7 @@ export function StepInventory({
             <p className="text-xs text-text-subtle mt-1">Límite superior de inventario</p>
           </div>
         </div>
+        )}
       </Card>
     </motion.div>
   );

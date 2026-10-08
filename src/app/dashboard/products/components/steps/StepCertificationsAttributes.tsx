@@ -1,6 +1,6 @@
 /**
  * @component StepCertificationsAttributes
- * @description Paso 7: Certificaciones y atributos
+ * @description Último paso del wizard: Certificaciones y atributos
  *
  * Mobile UX:
  * - Catálogo en bottom sheet (slide-up) en móvil, panel inline en desktop
@@ -65,6 +65,7 @@ import type {
   CertificationStatus,
   CertificationCategory
 } from '@/types/product';
+import { FORM_STEPS, stepPosition } from '@/types/product';
 import {
   getCertificationsCatalog,
   addProductCertification,
@@ -656,7 +657,7 @@ export function StepCertificationsAttributes({
               </Badge>
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> Paso 8 de 8
+              <Sparkles className="w-3 h-3" /> Paso {stepPosition('certifications')} de {FORM_STEPS.length}
             </Badge>
           </div>
         </div>

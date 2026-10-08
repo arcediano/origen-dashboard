@@ -1,6 +1,6 @@
 /**
  * @component StepProduction
- * @description Paso 5: Historia y producción - VERSIÓN CORREGIDA
+ * @description Historia y producción
  */
 
 'use client';
@@ -40,6 +40,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import type { ProductionInfo, ProductionMedia } from '@/types/product';
 import type { ProductImage } from '@/types/product';
+import { FORM_STEPS, stepPosition } from '@/types/product';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
 
 interface StepProductionProps {
@@ -283,7 +284,7 @@ export function StepProduction({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 5 de 8
+              Paso {stepPosition('production')} de {FORM_STEPS.length}
             </Badge>
           </div>
         </div>

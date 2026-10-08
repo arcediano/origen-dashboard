@@ -65,16 +65,6 @@ export function discardLocalProductDraft(): void {
   }
   clearAiAssistDraft();
 }
-const FORM_STEP_KEYS: FormStepId[] = [
-  'basic',
-  'images',
-  'pricing',
-  'nutritional',
-  'production',
-  'inventory',
-  'certifications',
-];
-
 /**
  * Lista de campos granularizados que disparan revisión automática si el producto
  * está publicado (ACTIVE/OUT_OF_STOCK) y se modifican.
@@ -162,6 +152,13 @@ export const productToFormData = (product: Product): ProductFormData => {
   gallery,
   basePrice: product.basePrice,
   comparePrice: product.comparePrice,
+  // Bug encontrado al revisar esta sección (petición del humano, 2026-10-08):
+  // netContent/netContentUnit ("Formato de venta", paso Precios) estaban
+  // declarados en ProductFormData pero nunca se cargaban aquí desde la API
+  // -- al editar un producto ya existente, el campo siempre aparecía vacío
+  // aunque se hubiera guardado al crearlo.
+  netContent: product.netContent,
+  netContentUnit: product.netContentUnit || 'g',
   sku: product.sku,
   barcode: product.barcode,
   stock: product.stock,
@@ -217,6 +214,11 @@ export const formDataToProduct = (formData: ProductFormData): Partial<Product> =
     gallery: formData.gallery,
     basePrice: formData.basePrice,
     comparePrice: formData.comparePrice,
+    // Mismo bug que en productToFormData (ver nota ahí): sin esto, el
+    // guardado ordinario de un producto existente nunca persistía cambios
+    // en "Formato de venta".
+    netContent: formData.netContent,
+    netContentUnit: formData.netContentUnit,
     sku: formData.sku,
     barcode: formData.barcode,
     stock: formData.stock,
@@ -261,6 +263,15 @@ export function useProductForm(productId?: string) {
   const [publishStatus, setPublishStatus] = useState<'idle' | 'success' | 'pending_approval' | 'error'>('idle');
   const [publishError, setPublishError] = useState<string | null>(null);
   const [skuSuggestion, setSkuSuggestion] = useState<string>('');
+
+  // ¿Tiene el producto variantes guardadas? (paso "Variantes") -- señal
+  // ligera, separada de `formData`/ProductFormData a propósito: StepVariants
+  // gestiona su propio modelo de options/variants en edición (ver ese
+  // fichero), esto es solo el booleano que StepPricing/StepInventory
+  // necesitan para dejar de mostrar sus campos redundantes (petición del
+  // humano, 2026-10-08). Nunca se envía al backend -- no forma parte de
+  // formDataToProduct.
+  const [hasVariants, setHasVariants] = useState(false);
   
   // Ref para evitar que el auto-guardado dispare en la carga inicial
   const isInitialDataLoad = useRef(true);
@@ -309,6 +320,7 @@ export function useProductForm(productId?: string) {
         // Guardar el producto original para detectar cambios sensibles
         originalProductRef.current = formData;
         originalStatusRef.current = response.data.status;
+        setHasVariants((response.data.variants?.length ?? 0) > 0);
         setLastSaved(new Date());
       }
     } catch (err) {
@@ -750,7 +762,10 @@ export function useProductForm(productId?: string) {
     showSuccessModal,
     setShowSuccessModal,
     skuSuggestion,
-    
+    hasVariants,
+    /** StepVariants llama a esto tras guardar/eliminar variantes, para que StepPricing/StepInventory reaccionen sin recargar la página. */
+    onVariantsChange: useCallback((count: number) => setHasVariants(count > 0), []),
+
     // Valores computados
     allStepsCompleted: REQUIRED_STEPS_FOR_PUBLISH.every((step) => completedTabs[step]),
     hasCertifications: formData.certifications.length > 0,

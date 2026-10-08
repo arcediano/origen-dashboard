@@ -1,6 +1,6 @@
 /**
  * @component StepVariants
- * @description Paso 8: Variantes del producto (estilo Shopify) — petición
+ * @description Variantes del producto (estilo Shopify) — petición
  * del humano, 2026-10-08: "además del precio, se podrá configurar las
  * variantes que puede tener ese producto... se puede replicar cómo se
  * configura esto en Shopify". Alcance de esta primera versión: solo modelo
@@ -16,6 +16,14 @@
  * Decisión del humano (misma fecha): de momento no hace falta un desplegable
  * de unidad que concatene al valor -- posible mejora futura, no para esta
  * versión (el alcance sigue siendo solo modelo + edición en dashboard).
+ *
+ * Va justo después de "Precios" en el wizard (`FORM_STEPS`, petición del
+ * humano, 2026-10-08) -- para que el productor decida pronto si el producto
+ * tiene variantes, antes de rellenar "Formato de venta" (paso Precios) o
+ * Inventario (stock), que dejan de usarse en cuanto hay variantes guardadas
+ * (ver prop `hasVariants` en StepPricing/StepInventory). Al guardar u
+ * eliminar variantes aquí, se notifica al padre vía `onVariantsChange` para
+ * que esos otros pasos reaccionen sin esperar a un recargo de página.
  */
 
 'use client';
@@ -35,12 +43,15 @@ import {
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import type { ProductOption, ProductVariant } from '@/types/product';
+import { FORM_STEPS, stepPosition } from '@/types/product';
 import { fetchProductById, syncProductOptions, syncProductVariants } from '@/lib/api/products';
 
 interface StepVariantsProps {
   productId?: string;
   basePrice?: number;
   completed?: boolean;
+  /** Notifica al padre (`useProductForm`) el nº de variantes guardadas tras un alta/baja — para que StepPricing/StepInventory sepan si deben dejar de mostrar sus campos redundantes (`hasVariants`), sin esperar a recargar la página. */
+  onVariantsChange?: (count: number) => void;
 }
 
 interface OptionDraft {
@@ -78,7 +89,7 @@ function comboLabel(variant: { option1Value?: string; option2Value?: string; opt
   return [variant.option1Value, variant.option2Value, variant.option3Value].filter(Boolean).join(' / ');
 }
 
-export function StepVariants({ productId, basePrice = 0, completed }: StepVariantsProps) {
+export function StepVariants({ productId, basePrice = 0, completed, onVariantsChange }: StepVariantsProps) {
   const [isLoading, setIsLoading] = useState(!!productId);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -124,8 +135,9 @@ export function StepVariants({ productId, basePrice = 0, completed }: StepVarian
           stock: variant.stock,
         })),
       );
+      onVariantsChange?.(result.data.variants?.length ?? 0);
     }
-  }, [productId]);
+  }, [productId, onVariantsChange]);
 
   useEffect(() => {
     void loadProduct();
@@ -262,6 +274,7 @@ export function StepVariants({ productId, basePrice = 0, completed }: StepVarian
           stock: variant.stock,
         })),
       );
+      onVariantsChange?.(result.data.length);
     }
   };
 
@@ -298,7 +311,7 @@ export function StepVariants({ productId, basePrice = 0, completed }: StepVarian
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 7 de 8
+              Paso {stepPosition('variants')} de {FORM_STEPS.length}
             </Badge>
           </div>
         </div>

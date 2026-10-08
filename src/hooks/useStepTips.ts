@@ -2,17 +2,26 @@
  * @hook useStepTips
  * @description Tips y datos clave por paso del formulario de producto.
  * Compartido entre create/page.tsx y [id]/edit/page.tsx.
+ *
+ * Indexados por `FormStepId` (no por posición numérica, petición del humano
+ * 2026-10-08): FORM_STEPS se reordenó para mover "Variantes" justo después
+ * de "Precios" (ver types/product.ts), y una indexación por número habría
+ * desincronizado estos tips silenciosamente con el paso que el productor
+ * tiene delante. Indexar por id hace que un futuro reordenamiento no
+ * requiera tocar este fichero.
  */
 
-export const KEY_FACTS_BY_STEP: Record<number, string> = {
-  1: 'Los productos con descripción completa tienen un 30% más de conversión',
-  2: 'Los productos con 3+ imágenes tienen un 40% más de ventas',
-  3: 'Las ofertas 3x2 aumentan el ticket medio un 25%',
-  4: 'Los productos con información nutricional completa tienen un 40% más de confianza',
-  5: 'Los productos con historia tienen un 50% más de reseñas positivas',
-  6: 'El 15% de los pedidos cancelados son por falta de stock',
-  7: 'Ofrecer varios formatos o tamaños amplía tu público sin crear productos nuevos',
-  8: 'Los productos con certificaciones tienen un 35% más de confianza',
+import type { FormStepId } from '@/types/product';
+
+export const KEY_FACTS_BY_STEP: Record<FormStepId, string> = {
+  basic: 'Los productos con descripción completa tienen un 30% más de conversión',
+  images: 'Los productos con 3+ imágenes tienen un 40% más de ventas',
+  pricing: 'Las ofertas 3x2 aumentan el ticket medio un 25%',
+  variants: 'Ofrecer varios formatos o tamaños amplía tu público sin crear productos nuevos',
+  nutritional: 'Los productos con información nutricional completa tienen un 40% más de confianza',
+  production: 'Los productos con historia tienen un 50% más de reseñas positivas',
+  inventory: 'El 15% de los pedidos cancelados son por falta de stock',
+  certifications: 'Los productos con certificaciones tienen un 35% más de confianza',
 };
 
 /**
@@ -28,7 +37,7 @@ const AI_ASSIST_TIP = {
 };
 
 export function useStepTips(
-  step: number,
+  step: FormStepId,
   formData: any,
 ): Array<{ description: string; category?: string }> {
   const tips = getStepTips(step, formData);
@@ -36,11 +45,11 @@ export function useStepTips(
 }
 
 function getStepTips(
-  step: number,
+  step: FormStepId,
   formData: any,
 ): Array<{ description: string; category?: string }> {
   switch (step) {
-    case 1:
+    case 'basic':
       return [
         { description: 'Usa palabras clave que tus clientes buscarían' },
         { description: 'Incluye variedad, tiempo de curación o características únicas' },
@@ -52,49 +61,49 @@ function getStepTips(
         },
         { description: 'Las categorías ayudan a los clientes a encontrarte' },
       ];
-    case 2:
+    case 'images':
       return [
         { description: 'Usa fondo blanco o neutro para la imagen principal' },
         { description: 'Muestra diferentes ángulos del producto' },
         { description: 'Incluye una foto del producto empaquetado' },
         { description: 'Las imágenes de alta calidad generan más confianza' },
       ];
-    case 3:
+    case 'pricing':
       return [
         { description: 'El precio base debe incluir tu margen de beneficio' },
         { description: 'Las ofertas por cantidad animan a comprar más' },
         { description: 'El precio de referencia (tachado) crea sensación de ahorro' },
         { description: 'Revisa los precios de productos similares' },
       ];
-    case 4:
-      return [
-        { description: 'Indica siempre los alérgenos principales' },
-        { description: 'Los valores por 100g/ml son el estándar' },
-        { description: 'Incluye ingredientes en orden descendente' },
-        { description: 'La información completa genera confianza' },
-      ];
-    case 5:
-      return [
-        { description: 'Comparte tu historia: conecta emocionalmente' },
-        { description: 'Las fotos del proceso generan transparencia' },
-        { description: 'Los vídeos cortos (30s) funcionan muy bien' },
-        { description: 'Destaca métodos tradicionales o certificaciones' },
-      ];
-    case 6:
-      return [
-        { description: 'Mantén el stock actualizado para evitar cancelaciones' },
-        { description: 'El SKU te ayuda a organizar tu inventario interno' },
-        { description: 'Activa el control de stock para recibir alertas' },
-        { description: 'Pesa tus productos para calcular envíos correctamente' },
-      ];
-    case 7:
+    case 'variants':
       return [
         { description: 'Define primero las opciones (Tamaño, Formato…) y luego genera las combinaciones' },
         { description: 'Cada variante puede tener su propio precio, stock y SKU' },
         { description: 'Las variantes se guardan una vez creado el producto' },
         { description: 'De momento las variantes solo se gestionan desde aquí, todavía no afectan al catálogo público' },
       ];
-    case 8:
+    case 'nutritional':
+      return [
+        { description: 'Indica siempre los alérgenos principales' },
+        { description: 'Los valores por 100g/ml son el estándar' },
+        { description: 'Incluye ingredientes en orden descendente' },
+        { description: 'La información completa genera confianza' },
+      ];
+    case 'production':
+      return [
+        { description: 'Comparte tu historia: conecta emocionalmente' },
+        { description: 'Las fotos del proceso generan transparencia' },
+        { description: 'Los vídeos cortos (30s) funcionan muy bien' },
+        { description: 'Destaca métodos tradicionales o certificaciones' },
+      ];
+    case 'inventory':
+      return [
+        { description: 'Mantén el stock actualizado para evitar cancelaciones' },
+        { description: 'El SKU te ayuda a organizar tu inventario interno' },
+        { description: 'Activa el control de stock para recibir alertas' },
+        { description: 'Pesa tus productos para calcular envíos correctamente' },
+      ];
+    case 'certifications':
       return [
         { description: 'Las certificaciones ecológicas generan confianza' },
         { description: 'Añade atributos específicos de tu producto' },
