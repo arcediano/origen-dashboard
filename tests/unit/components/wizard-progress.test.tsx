@@ -34,4 +34,22 @@ describe('WizardProgress', () => {
     act(() => ioCallback?.([{ isIntersecting: false }]));
     expect(screen.getAllByRole('progressbar')).toHaveLength(1);
   });
+
+  it('embedded: sin sticky propio ni sangrado a los bordes — el padre ya aplica su propio sticky (columna lateral junto a "Consejos útiles")', () => {
+    const { container } = render(
+      <WizardProgress steps={steps} currentId="a" completed={{}} onStepChange={vi.fn()} embedded />,
+    );
+    const wrapper = container.querySelector('[aria-hidden="true"]')?.nextElementSibling;
+    expect(wrapper?.className).not.toContain('sticky');
+    expect(wrapper?.className).not.toContain('-mx-4');
+    expect(wrapper?.className).not.toContain('-mx-6');
+  });
+
+  it('sin embedded (por defecto): mantiene su propio sticky, como hasta ahora', () => {
+    const { container } = render(
+      <WizardProgress steps={steps} currentId="a" completed={{}} onStepChange={vi.fn()} />,
+    );
+    const wrapper = container.querySelector('[aria-hidden="true"]')?.nextElementSibling;
+    expect(wrapper?.className).toContain('sticky');
+  });
 });

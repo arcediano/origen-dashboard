@@ -156,11 +156,16 @@ export default function EditProductPage() {
       />
 
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <CreateProductProgress
-          currentTab={activeTab}
-          completedTabs={completedTabs}
-          onTabChange={handleTabChange}
-        />
+        {/* Panel de pasos — en escritorio (≥lg) vive en la columna lateral,
+            encima de "Consejos útiles" (ver más abajo); aquí solo para
+            móvil/tablet, donde ya era correcto. */}
+        <div className="lg:hidden">
+          <CreateProductProgress
+            currentTab={activeTab}
+            completedTabs={completedTabs}
+            onTabChange={handleTabChange}
+          />
+        </div>
 
         {/* Aviso de autoguardado -- visible en todos los tamaños de pantalla.
             Aclara explícitamente que cada cambio se guarda solo, sin depender
@@ -271,10 +276,26 @@ export default function EditProductPage() {
             </div>
           </div>
 
-          <ProductFormSidebar
-            tips={tips}
-            keyFact={KEY_FACTS_BY_STEP[stepNumber]}
-          />
+          {/* Columna lateral de escritorio: panel de pasos + consejos
+              útiles apilados dentro de un único `sticky` (petición del
+              humano, 2026-10-08) — dos `sticky` independientes nunca
+              alinean bien sus offsets porque el panel de pasos cambia de
+              alto al condensarse con el scroll. */}
+          <div className="hidden lg:block lg:col-span-1">
+            <div className="sticky top-16 space-y-4">
+              <CreateProductProgress
+                currentTab={activeTab}
+                completedTabs={completedTabs}
+                onTabChange={handleTabChange}
+                embedded
+              />
+              <ProductFormSidebar
+                tips={tips}
+                keyFact={KEY_FACTS_BY_STEP[stepNumber]}
+                embedded
+              />
+            </div>
+          </div>
         </motion.div>
       </div>
 

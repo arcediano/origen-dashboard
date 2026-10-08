@@ -31,6 +31,8 @@ export interface CreateProductProgressProps {
   completedTabs: Record<string, boolean>;
   /** Función para cambiar de paso */
   onTabChange: (tab: FormStepId) => void;
+  /** Para usarlo dentro de la columna lateral (junto a "Consejos útiles"), con su propio `sticky` — ver `WizardProgress`. */
+  embedded?: boolean;
   /** Clase CSS adicional */
   className?: string;
 }
@@ -40,6 +42,7 @@ export function CreateProductProgress({
   currentTab,
   completedTabs,
   onTabChange,
+  embedded,
   className,
 }: CreateProductProgressProps) {
   return (
@@ -53,6 +56,7 @@ export function CreateProductProgress({
         content: 'Completa todos los pasos',
         detailed: 'Cada paso debe estar completado para poder publicar el producto',
       }}
+      embedded={embedded}
       className={className}
     />
   );

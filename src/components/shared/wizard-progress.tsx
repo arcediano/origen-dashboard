@@ -40,6 +40,21 @@ export interface WizardProgressProps {
   stickyOffsetPx?: number;
   /** Ayuda contextual (solo escritorio, cabecera completa). */
   tooltip?: { content: string; detailed?: string };
+  /**
+   * Para usarlo dentro de otro contenedor que ya aplica su propio
+   * `sticky`/`top` (p. ej. la columna lateral de creación/edición de
+   * producto, junto a "Consejos útiles" — petición del humano, 2026-10-08:
+   * el panel de pasos debe quedar encima de los consejos útiles y siempre
+   * visible al hacer scroll). Apilar dos elementos con `sticky` propio e
+   * independiente nunca alinea bien sus offsets, porque este panel cambia
+   * de alto al condensarse con el scroll; la solución correcta es un único
+   * `sticky` en el contenedor padre con ambos apilados dentro en flujo
+   * normal. En `embedded`: sin `sticky` ni `position` propios (el padre ya
+   * lo aplica) y sin el sangrado a los bordes (`-mx-4`/`-mx-6`) pensado
+   * para ocupar todo el ancho de la página — aquí vive en una columna
+   * estrecha con su propio padding.
+   */
+  embedded?: boolean;
   className?: string;
 }
 
@@ -78,6 +93,7 @@ export function WizardProgress({
   stickyClassName = 'top-16',
   stickyOffsetPx = 72,
   tooltip,
+  embedded = false,
   className,
 }: WizardProgressProps) {
   const currentIndex = Math.max(0, steps.findIndex((s) => s.id === currentId));
@@ -165,8 +181,10 @@ export function WizardProgress({
       <div ref={sentinelRef} aria-hidden="true" className="h-px" />
       <div
         className={cn(
-          'sticky z-20 -mx-4 bg-linear-to-b from-origen-crema/30 to-transparent px-4 pt-2 sm:-mx-6 sm:px-6',
-          stickyClassName,
+          embedded
+            ? 'bg-linear-to-b from-origen-crema/30 to-transparent pt-2'
+            : 'sticky z-20 -mx-4 bg-linear-to-b from-origen-crema/30 to-transparent px-4 pt-2 sm:-mx-6 sm:px-6',
+          !embedded && stickyClassName,
           condensed ? 'pb-1.5' : 'pb-4',
           className,
         )}

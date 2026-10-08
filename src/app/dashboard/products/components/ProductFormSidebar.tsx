@@ -14,14 +14,23 @@ import { Badge } from '@arcediano/ux-library';
 interface ProductFormSidebarProps {
   tips: Array<{ description: string; category?: string }>;
   keyFact?: string;
+  /**
+   * Para componerlo junto al panel de pasos dentro de un único contenedor
+   * `sticky` del propio page (petición del humano, 2026-10-08: el panel de
+   * pasos debe quedar encima de "Consejos útiles" y los dos siempre
+   * visibles al hacer scroll). Sin esto, cada uno con su propio `sticky`
+   * independiente nunca alinea bien sus offsets porque el panel de pasos
+   * cambia de alto al condensarse con el scroll. En `embedded`: sin el
+   * wrapper `hidden lg:block lg:col-span-1` + `sticky top-[260px]` propio
+   * — el padre ya aplica la columna y el `sticky`.
+   */
+  embedded?: boolean;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export function ProductFormSidebar({ tips, keyFact }: ProductFormSidebarProps) {
-  return (
-    <div className="hidden lg:block lg:col-span-1">
-      <div className="sticky top-[260px]">
+export function ProductFormSidebar({ tips, keyFact, embedded }: ProductFormSidebarProps) {
+  const card = (
         <Card
           variant="elevated"
           className="overflow-hidden border border-border shadow-sm"
@@ -70,6 +79,14 @@ export function ProductFormSidebar({ tips, keyFact }: ProductFormSidebarProps) {
             )}
           </CardContent>
         </Card>
+  );
+
+  if (embedded) return card;
+
+  return (
+    <div className="hidden lg:block lg:col-span-1">
+      <div className="sticky top-[260px]">
+        {card}
       </div>
     </div>
   );
