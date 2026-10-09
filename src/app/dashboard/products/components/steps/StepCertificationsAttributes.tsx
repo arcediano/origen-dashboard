@@ -522,9 +522,19 @@ export function StepCertificationsAttributes({
             />
           </div>
 
-          {/* Filtro de categoría — full width en móvil, auto en desktop */}
-          <Select value={catalogCategory} onValueChange={setCatalogCategory}>
-            <SelectTrigger className="h-12 sm:h-11 w-full sm:w-auto sm:min-w-[150px] rounded-xl gap-1.5">
+          {/* Filtro de categoría — full width en móvil, auto en desktop.
+              IMPORTANTE: el ancho se pasa a `Select` (su raíz real es
+              `cn("relative w-full", className)`), no a `SelectTrigger` --
+              pasarlo solo a SelectTrigger no llega a la raíz y el filtro se
+              queda forzando w-full del propio Select dentro de la fila,
+              dejando el buscador comprimido a ~80px (hallazgo real, petición
+              del humano, 2026-10-09; ver nota en guia-diseno-ux.md 8.11). */}
+          <Select
+            value={catalogCategory}
+            onValueChange={setCatalogCategory}
+            className="w-full sm:w-auto sm:min-w-[150px] sm:shrink-0"
+          >
+            <SelectTrigger className="h-12 sm:h-11 w-full rounded-xl gap-1.5">
               <Filter className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
               <SelectValue placeholder="Todas las categorías" />
             </SelectTrigger>

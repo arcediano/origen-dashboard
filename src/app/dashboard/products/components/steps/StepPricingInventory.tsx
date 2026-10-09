@@ -387,11 +387,17 @@ export function StepPricingInventory({
                 </div>
                 <div className="flex flex-col gap-1.5 shrink-0">
                   <span className="text-xs font-medium text-foreground">Unidad</span>
+                  {/* Ancho en `Select`, no en `SelectTrigger` -- su raíz real
+                      ignora el className de SelectTrigger y por defecto es
+                      w-full, forzándose a ocupar toda la fila (mismo hallazgo
+                      que el filtro de categorías del catálogo de
+                      certificaciones, 2026-10-09). */}
                   <Select
                     value={formData?.weightUnit || 'kg'}
                     onValueChange={(v) => onInputChange('weightUnit', v)}
+                    className="w-28 shrink-0"
                   >
-                    <SelectTrigger className="h-12 w-28 shrink-0 rounded-xl">
+                    <SelectTrigger className="h-12 w-full rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

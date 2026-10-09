@@ -468,11 +468,15 @@ export function VariantsEditor({ productId, basePrice = 0, onVariantsChange }: V
                         min={0}
                         className="h-10 flex-1 min-w-0"
                       />
+                      {/* Ancho en `Select`, no en `SelectTrigger` -- ver nota
+                          en StepPricingInventory.tsx (mismo hallazgo real,
+                          2026-10-09). */}
                       <Select
                         value={variant.weightUnit || 'kg'}
                         onValueChange={(v) => handleVariantFieldChange(index, 'weightUnit', v)}
+                        className="w-16 shrink-0 mt-[22px]"
                       >
-                        <SelectTrigger className="h-10 w-16 shrink-0 mt-[22px] rounded-xl">
+                        <SelectTrigger className="h-10 w-full rounded-xl">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
