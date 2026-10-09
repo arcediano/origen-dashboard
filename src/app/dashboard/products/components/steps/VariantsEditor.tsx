@@ -279,10 +279,27 @@ export function VariantsEditor({ productId, basePrice = 0, onVariantsChange }: V
   }
 
   if (isLoading) {
+    // Bordeado (no solo relleno) para que se note de verdad sobre la card
+    // blanca -- `bg-origen-crema/40` (heredado de la versión anterior de
+    // este bloque) es casi invisible sobre `bg-surface-alt`, porque
+    // `origen-crema` es el propio color de fondo de página (sección 1.1 de
+    // la guía de diseño). Con este paso ahora dentro de una pantalla que ya
+    // estaba asentada (el toggle no dispara ninguna transición de salida/
+    // entrada como el cambio de paso), ese contraste tan bajo se nota como
+    // una zona en blanco mientras carga -- hallazgo real, petición del
+    // humano, 2026-10-09. Geometría parecida a la sección real (título +
+    // fila de opción) para no colapsar tanto la altura del paso.
     return (
-      <div className="space-y-2" aria-busy="true">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-14 animate-pulse rounded-xl bg-origen-crema/40" />
+      <div className="space-y-4" aria-busy="true" aria-label="Cargando variantes">
+        <div className="h-4 w-56 animate-pulse rounded bg-origen-pastel/60" />
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_2fr_auto] gap-2">
+          <div className="h-11 animate-pulse rounded-xl border border-border-subtle bg-origen-pastel/40" />
+          <div className="h-11 animate-pulse rounded-xl border border-border-subtle bg-origen-pastel/40" />
+          <div className="h-11 w-11 animate-pulse rounded-xl border border-border-subtle bg-origen-pastel/40 hidden sm:block" />
+        </div>
+        <div className="h-9 w-40 animate-pulse rounded-xl bg-origen-pastel/60" />
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="h-20 animate-pulse rounded-xl border border-border-subtle bg-origen-pastel/40" />
         ))}
       </div>
     );
