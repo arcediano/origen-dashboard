@@ -16,11 +16,12 @@ import type { FormStepId } from '@/types/product';
 export const KEY_FACTS_BY_STEP: Record<FormStepId, string> = {
   basic: 'Los productos con descripción completa tienen un 30% más de conversión',
   images: 'Los productos con 3+ imágenes tienen un 40% más de ventas',
-  pricing: 'Las ofertas 3x2 aumentan el ticket medio un 25%',
-  variants: 'Ofrecer varios formatos o tamaños amplía tu público sin crear productos nuevos',
+  // Precios + variantes + inventario unificados en un solo paso (petición
+  // del humano, 2026-10-09) -- dato clave del propio paso, no de un
+  // sub-bloque concreto.
+  pricing: 'El 15% de los pedidos cancelados son por falta de stock',
   nutritional: 'Los productos con información nutricional completa tienen un 40% más de confianza',
   production: 'Los productos con historia tienen un 50% más de reseñas positivas',
-  inventory: 'El 15% de los pedidos cancelados son por falta de stock',
   certifications: 'Los productos con certificaciones tienen un 35% más de confianza',
 };
 
@@ -69,19 +70,19 @@ function getStepTips(
         { description: 'Las imágenes de alta calidad generan más confianza' },
       ];
     case 'pricing':
-      return [
-        { description: 'El precio base debe incluir tu margen de beneficio' },
-        { description: 'Las ofertas por cantidad animan a comprar más' },
-        { description: 'El precio de referencia (tachado) crea sensación de ahorro' },
-        { description: 'Revisa los precios de productos similares' },
-      ];
-    case 'variants':
-      return [
-        { description: 'Define primero las opciones (Tamaño, Formato…) y luego genera las combinaciones' },
-        { description: 'Cada variante puede tener su propio precio, stock y SKU' },
-        { description: 'Las variantes se guardan una vez creado el producto' },
-        { description: 'De momento las variantes solo se gestionan desde aquí, todavía no afectan al catálogo público' },
-      ];
+      return formData?.hasVariants
+        ? [
+            { description: 'Define primero las opciones (Tamaño, Formato…) y luego genera las combinaciones' },
+            { description: 'Cada variante tiene su propio precio, stock y peso de envío — el SKU se genera solo' },
+            { description: 'Las variantes se guardan una vez creado el producto' },
+            { description: 'Mantén el stock de cada variante actualizado para evitar cancelaciones' },
+          ]
+        : [
+            { description: 'El precio base debe incluir tu margen de beneficio' },
+            { description: 'El precio de referencia (tachado) crea sensación de ahorro' },
+            { description: 'Mantén el stock actualizado para evitar cancelaciones' },
+            { description: 'Pesa tu producto con embalaje para calcular bien el envío' },
+          ];
     case 'nutritional':
       return [
         { description: 'Indica siempre los alérgenos principales' },
@@ -95,13 +96,6 @@ function getStepTips(
         { description: 'Las fotos del proceso generan transparencia' },
         { description: 'Los vídeos cortos (30s) funcionan muy bien' },
         { description: 'Destaca métodos tradicionales o certificaciones' },
-      ];
-    case 'inventory':
-      return [
-        { description: 'Mantén el stock actualizado para evitar cancelaciones' },
-        { description: 'El SKU te ayuda a organizar tu inventario interno' },
-        { description: 'Activa el control de stock para recibir alertas' },
-        { description: 'Pesa tus productos para calcular envíos correctamente' },
       ];
     case 'certifications':
       return [

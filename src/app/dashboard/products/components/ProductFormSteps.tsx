@@ -10,12 +10,10 @@ import { type Variants } from 'framer-motion';
 
 import { StepBasic } from './steps/StepBasic';
 import { StepImages } from './steps/StepImages';
-import { StepPricing } from './steps/StepPricing';
+import { StepPricingInventory } from './steps/StepPricingInventory';
 import { StepNutritional } from './steps/StepNutritional';
 import { StepProduction } from './steps/StepProduction';
-import { StepInventory } from './steps/StepInventory';
 import { StepCertificationsAttributes } from './steps/StepCertificationsAttributes';
-import { StepVariants } from './steps/StepVariants';
 
 import { defaultNutritionalInfo, defaultProductionInfo, type FormStepId } from '@/types/product';
 
@@ -40,13 +38,11 @@ interface ProductFormStepsProps {
   onNestedChange: (section: string, field: string, value: any) => void;
   onImagesChange: (images: any[]) => void;
   skuSuggestion?: string;
-  /** ID del producto en modo edición — permite llamadas granulares a la API de certs. */
+  /** ID del producto en modo edición — permite llamadas granulares a la API de certs/variantes. */
   productId?: string;
   /** Indica si el producto está publicado (ACTIVE u OUT_OF_STOCK). Usado para mostrar indicadores de campos sensibles. */
   isPublishedProduct?: boolean;
-  /** El producto ya tiene variantes guardadas — StepPricing/StepInventory dejan de mostrar sus campos redundantes (petición del humano, 2026-10-08). */
-  hasVariants?: boolean;
-  /** StepVariants notifica aquí tras guardar/eliminar variantes. */
+  /** VariantsEditor notifica aquí tras guardar/eliminar variantes (dentro del paso unificado de precio/variantes/inventario). */
   onVariantsChange?: (count: number) => void;
 }
 
@@ -62,7 +58,6 @@ export function ProductFormSteps({
   skuSuggestion,
   productId,
   isPublishedProduct,
-  hasVariants,
   onVariantsChange,
 }: ProductFormStepsProps) {
   return (
@@ -95,13 +90,14 @@ export function ProductFormSteps({
         )}
 
         {activeTab === 'pricing' && (
-          <StepPricing
+          <StepPricingInventory
             formData={formData}
-            errors={{}}
-            touched={{}}
             onInputChange={onInputChange}
+            onNestedChange={onNestedChange}
             completed={completedTabs.pricing}
-            hasVariants={hasVariants}
+            skuSuggestion={skuSuggestion}
+            productId={productId}
+            onVariantsChange={onVariantsChange}
           />
         )}
 
@@ -123,17 +119,6 @@ export function ProductFormSteps({
           />
         )}
 
-        {activeTab === 'inventory' && (
-          <StepInventory
-            formData={formData}
-            onInputChange={onInputChange}
-            onNestedChange={onNestedChange}
-            completed={completedTabs.inventory}
-            skuSuggestion={skuSuggestion}
-            hasVariants={hasVariants}
-          />
-        )}
-
         {activeTab === 'certifications' && (
           <StepCertificationsAttributes
             certifications={formData.certifications}
@@ -144,15 +129,6 @@ export function ProductFormSteps({
             productCategory={formData.categoryName || formData.categoryId}
             productId={productId}
             isPublishedProduct={isPublishedProduct}
-          />
-        )}
-
-        {activeTab === 'variants' && (
-          <StepVariants
-            productId={productId}
-            basePrice={formData.basePrice}
-            completed={completedTabs.variants}
-            onVariantsChange={onVariantsChange}
           />
         )}
       </motion.div>

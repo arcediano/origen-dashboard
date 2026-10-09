@@ -60,7 +60,6 @@ export default function EditProductPage() {
     showSuccessModal,
     setShowSuccessModal,
     skuSuggestion,
-    hasVariants,
     onVariantsChange,
     allStepsCompleted,
     hasCertifications,
@@ -101,7 +100,7 @@ export default function EditProductPage() {
   // Estado para el panel de errores del ActionBar móvil
   const [showMobileErrors, setShowMobileErrors] = useState(false);
 
-  const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing', 'inventory'];
+  const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing'];
   const isMobileStepBlocked = BLOCKING_STEPS.includes(activeTab) && currentStepErrors.length > 0;
 
   const handlePrev = () => {
@@ -255,7 +254,6 @@ export default function EditProductPage() {
               skuSuggestion={skuSuggestion}
               productId={productId}
               isPublishedProduct={isPublishedProduct}
-              hasVariants={hasVariants}
               onVariantsChange={onVariantsChange}
             />
 

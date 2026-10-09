@@ -349,12 +349,16 @@ export interface ProductVariant {
   option1Value?: string;
   option2Value?: string;
   option3Value?: string;
+  /** Generado por el backend (coherente con el SKU del producto) -- nunca editable. */
   sku?: string;
   barcode?: string;
   price: number;
   compareAtPrice?: number;
   stock: number;
   trackInventory: boolean;
+  /** Peso de ESTA variante con embalaje, para envío (petición del humano, 2026-10-09). */
+  weight?: number;
+  weightUnit?: 'kg' | 'g';
   imageUrl?: string;
   sortOrder: number;
   isActive: boolean;
@@ -380,6 +384,8 @@ export interface Product {
   comparePrice?: number;
   priceTiers: PriceTier[];
   flashDeal?: FlashDealSummary;
+  /** Decisión explícita del productor: precio/stock/peso/SKU únicos (false) o por variante (true). */
+  hasVariants: boolean;
   options: ProductOption[];
   variants: ProductVariant[];
   sku: string;
@@ -436,6 +442,8 @@ export interface ProductFormData {
   gallery: ProductImage[];
   basePrice?: number;
   comparePrice?: number;
+  /** Decisión explícita del productor, elegida al principio del paso unificado de precios/variantes/inventario (petición del humano, 2026-10-09): precio/stock/peso/SKU únicos (false) o por variante (true). */
+  hasVariants: boolean;
   sku: string;
   barcode?: string;
   stock: number;
@@ -463,19 +471,18 @@ export interface ProductFormData {
 export const FORM_STEPS = [
   { id: 'basic', label: 'Básico', icon: 'Package' },
   { id: 'images', label: 'Imágenes', icon: 'Camera' },
-  { id: 'pricing', label: 'Precios', icon: 'DollarSign' },
-  // Variantes va justo después de Precios (petición del humano, 2026-10-08):
-  // antes iba justo antes de Certificaciones, al final del wizard -- pero eso
-  // significaba rellenar Inventario (stock) y "Formato de venta" (paso
-  // Precios) ANTES de decidir si el producto tiene variantes, y esos campos
-  // dejan de usarse en cuanto el producto tiene variantes guardadas (cada
-  // variante define su propio stock/formato — ver StepPricing/StepInventory,
-  // prop `hasVariants`). Con Variantes aquí, el productor decide pronto y
-  // Precios/Inventario ya pueden adaptar su UI en el resto del flujo.
-  { id: 'variants', label: 'Variantes', icon: 'Boxes' },
+  // Precios, variantes e inventario unificados en un solo paso (petición del
+  // humano, 2026-10-09: "unificar para no duplicar trabajo"). Antes eran 3
+  // pasos separados (Precios, Variantes justo después, Inventario más
+  // adelante) y el productor rellenaba precio/stock/SKU del producto único
+  // ANTES de decidir si en realidad tiene variantes -- con el toggle "¿Tiene
+  // variantes?" al principio de este paso (ver StepPricingInventory), la
+  // decisión es lo primero y el resto de la pantalla se adapta sin volver a
+  // pedir nada dos veces. Conserva el id 'pricing' (no uno nuevo) para no
+  // tener que migrar completedTabs/REQUIRED_STEPS_FOR_PUBLISH guardados.
+  { id: 'pricing', label: 'Precio e inventario', icon: 'DollarSign' },
   { id: 'nutritional', label: 'Nutricional', icon: 'FlaskConical' },
   { id: 'production', label: 'Producción', icon: 'Leaf' },
-  { id: 'inventory', label: 'Inventario', icon: 'ShoppingBag' },
   // Certificaciones se mantiene como ÚLTIMO paso a propósito: create/page.tsx,
   // [id]/edit/page.tsx y CreateProductNavigation.tsx derivan "¿es el último
   // paso?" de la posición en este array (FORM_STEPS.length - 1) para decidir
@@ -547,6 +554,7 @@ export const defaultFormData: ProductFormData = {
   gallery: [],
   basePrice: undefined,
   comparePrice: undefined,
+  hasVariants: false,
   sku: '',
   barcode: '',
   stock: 0,

@@ -115,7 +115,6 @@ const REQUIRED_STEPS_FOR_PUBLISH: FormStepId[] = [
   'basic',
   'images',
   'pricing',
-  'inventory',
 ];
 
 // ============================================================================
@@ -152,6 +151,7 @@ export const productToFormData = (product: Product): ProductFormData => {
   gallery,
   basePrice: product.basePrice,
   comparePrice: product.comparePrice,
+  hasVariants: product.hasVariants ?? false,
   // Bug encontrado al revisar esta sección (petición del humano, 2026-10-08):
   // netContent/netContentUnit ("Formato de venta", paso Precios) estaban
   // declarados en ProductFormData pero nunca se cargaban aquí desde la API
@@ -214,6 +214,7 @@ export const formDataToProduct = (formData: ProductFormData): Partial<Product> =
     gallery: formData.gallery,
     basePrice: formData.basePrice,
     comparePrice: formData.comparePrice,
+    hasVariants: formData.hasVariants,
     // Mismo bug que en productToFormData (ver nota ahí): sin esto, el
     // guardado ordinario de un producto existente nunca persistía cambios
     // en "Formato de venta".
@@ -270,14 +271,16 @@ export function useProductForm(productId?: string) {
   const [publishError, setPublishError] = useState<string | null>(null);
   const [skuSuggestion, setSkuSuggestion] = useState<string>('');
 
-  // ¿Tiene el producto variantes guardadas? (paso "Variantes") -- señal
-  // ligera, separada de `formData`/ProductFormData a propósito: StepVariants
-  // gestiona su propio modelo de options/variants en edición (ver ese
-  // fichero), esto es solo el booleano que StepPricing/StepInventory
-  // necesitan para dejar de mostrar sus campos redundantes (petición del
-  // humano, 2026-10-08). Nunca se envía al backend -- no forma parte de
-  // formDataToProduct.
-  const [hasVariants, setHasVariants] = useState(false);
+  // Nº de variantes ya guardadas en el backend (paso unificado de precios/
+  // variantes/inventario) -- señal ligera, separada de `formData` a
+  // propósito: el grid de variantes gestiona su propio modelo de
+  // options/variants con llamadas granulares a la API (ver VariantsEditor),
+  // esto solo sirve para saber si ya hay variantes de verdad al validar que
+  // el paso está completo (`getStepErrors`) cuando `formData.hasVariants` es
+  // true. La decisión de mostrar precio único vs. variantes es
+  // `formData.hasVariants` (persistido, petición del humano 2026-10-09),
+  // NUNCA este contador -- ver nota en el propio campo del tipo.
+  const [savedVariantsCount, setSavedVariantsCount] = useState(0);
   
   // Ref para evitar que el auto-guardado dispare en la carga inicial
   const isInitialDataLoad = useRef(true);
@@ -340,7 +343,7 @@ export function useProductForm(productId?: string) {
         // Guardar el producto original para detectar cambios sensibles
         originalProductRef.current = formData;
         originalStatusRef.current = response.data.status;
-        setHasVariants((response.data.variants?.length ?? 0) > 0);
+        setSavedVariantsCount(response.data.variants?.length ?? 0);
         setLastSaved(new Date());
       }
     } catch (err) {
@@ -529,21 +532,24 @@ export function useProductForm(productId?: string) {
       || production?.media?.length,
     );
 
+    // Paso unificado de precio/variantes/inventario (petición del humano,
+    // 2026-10-09): con variantes, el precio/stock del producto único ya no
+    // se piden -- se considera completo con al menos una variante guardada
+    // (mismo criterio que getStepErrors). Sin variantes, con precio > 0 (el
+    // stock siempre tiene defaults válidos, 0/5, nunca bloquea el paso).
+    const pricingComplete = formData.hasVariants
+      ? savedVariantsCount > 0
+      : !!(formData.basePrice && formData.basePrice > 0);
+
     setCompletedTabs({
       basic: !!(formData.name && formData.categoryId),
       images: !!(formData.gallery && formData.gallery.length > 0),
-      pricing: !!(formData.basePrice && formData.basePrice > 0),
+      pricing: pricingComplete,
       nutritional: hasNutritionalData,
       production: hasProductionData,
-      // Inventario: se considera completado cuando el productor ha revisado
-      // los valores de stock — los campos tienen defaults válidos (0 / 5).
-      inventory: formData.stock >= 0 && formData.lowStockThreshold >= 0,
       certifications: true,
-      // Variantes: opcional, siempre "completado" (igual que certifications) --
-      // no bloquea la publicación (ver REQUIRED_STEPS_FOR_PUBLISH).
-      variants: true,
     });
-  }, [formData]);
+  }, [formData, savedVariantsCount]);
 
   // ==========================================================================
   // SUGERENCIA DE SKU
@@ -589,18 +595,22 @@ export function useProductForm(productId?: string) {
           errors.push('Al menos una imagen del producto');
         break;
       case 'pricing':
-        if (!formData.basePrice || formData.basePrice <= 0)
+        // Con variantes, el precio/stock únicos del producto ya no se piden
+        // (cada variante define los suyos) -- en su lugar, exige al menos
+        // una variante guardada. SKU lo asigna el backend en ambos casos.
+        if (formData.hasVariants) {
+          if (savedVariantsCount === 0)
+            errors.push('Al menos una variante con precio y stock');
+        } else if (!formData.basePrice || formData.basePrice <= 0) {
           errors.push('Precio de venta (debe ser mayor que 0)');
-        break;
-      case 'inventory':
-        // SKU lo asigna el backend — no se requiere aquí.
+        }
         break;
       // nutritional, production y certifications son pasos opcionales — no bloquean
       default:
         break;
     }
     return errors;
-  }, [formData]);
+  }, [formData, savedVariantsCount]);
 
   // Errores del paso activo — para pasarlos directamente a la navegación
   const currentStepErrors = getStepErrors(activeTab);
@@ -814,9 +824,9 @@ export function useProductForm(productId?: string) {
     showSuccessModal,
     setShowSuccessModal,
     skuSuggestion,
-    hasVariants,
-    /** StepVariants llama a esto tras guardar/eliminar variantes, para que StepPricing/StepInventory reaccionen sin recargar la página. */
-    onVariantsChange: useCallback((count: number) => setHasVariants(count > 0), []),
+    savedVariantsCount,
+    /** El grid de variantes llama a esto tras guardar/eliminar variantes, para que la validación de "paso completo" reaccione sin recargar la página. */
+    onVariantsChange: useCallback((count: number) => setSavedVariantsCount(count), []),
 
     // Valores computados
     allStepsCompleted: REQUIRED_STEPS_FOR_PUBLISH.every((step) => completedTabs[step]),

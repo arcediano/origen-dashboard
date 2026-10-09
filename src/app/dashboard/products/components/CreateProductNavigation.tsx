@@ -16,7 +16,7 @@ import { FORM_STEPS, type FormStepId } from '@/types/product';
 // ============================================================================
 
 // Pasos que bloquean la navegación si están incompletos
-const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing', 'inventory'];
+const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing'];
 
 /**
  * Botonera de navegación entre pasos — solo desktop (`hidden sm:flex`).

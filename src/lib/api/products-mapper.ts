@@ -175,6 +175,8 @@ export interface ApiProductVariant {
   compareAtPrice?: number;
   stock: number;
   trackInventory: boolean;
+  weight?: number;
+  weightUnit?: string;
   imageUrl?: string;
   sortOrder: number;
   isActive: boolean;
@@ -241,6 +243,7 @@ export interface ApiProduct {
   conversion?: number;
   priceTiers: ApiPriceTier[];
   flashDeal?: ApiFlashDealSummary;
+  hasVariants?: boolean;
   options?: ApiProductOption[];
   variants?: ApiProductVariant[];
   nutritionalInfo?: ApiNutritionalInfo;
@@ -373,6 +376,8 @@ function mapProductVariant(variant: ApiProductVariant): ProductVariant {
     compareAtPrice: variant.compareAtPrice,
     stock: variant.stock,
     trackInventory: variant.trackInventory,
+    weight: variant.weight,
+    weightUnit: variant.weightUnit as 'kg' | 'g' | undefined,
     imageUrl: variant.imageUrl,
     sortOrder: variant.sortOrder,
     isActive: variant.isActive,
@@ -523,6 +528,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     comparePrice: api.comparePrice,
     priceTiers:   (api.priceTiers ?? []).map(mapPriceTier),
     flashDeal:    mapFlashDealSummary(api.flashDeal),
+    hasVariants:  api.hasVariants ?? false,
     options:      (api.options ?? []).map(mapProductOption),
     variants:     (api.variants ?? []).map(mapProductVariant),
 

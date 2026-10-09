@@ -96,7 +96,6 @@ export default function CreateProductPage() {
     aiAssistUsedUnsaved,
     markAiAssistUsed,
     setAiDraftProductId,
-    hasVariants,
     onVariantsChange,
   } = useProductForm();
 
@@ -266,7 +265,7 @@ export default function CreateProductPage() {
   const nextStep = !isLastStep ? FORM_STEPS[currentIndex + 1].id as FormStepId : null;
   const canPublish = allStepsCompleted && (!hasCertifications || certificationsApproved);
 
-  const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing', 'inventory'];
+  const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing'];
   const isMobileStepBlocked = BLOCKING_STEPS.includes(activeTab) && currentStepErrors.length > 0;
 
   const handlePrev = () => {
@@ -420,7 +419,6 @@ export default function CreateProductPage() {
                 onInputChange={handleInputChange}
                 onNestedChange={handleNestedChange}
                 onImagesChange={handleImagesChange}
-                hasVariants={hasVariants}
                 onVariantsChange={onVariantsChange}
               />
 

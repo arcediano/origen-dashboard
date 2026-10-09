@@ -26,14 +26,14 @@ describe('CreateProductProgress', () => {
   it('muestra una sola barra de progreso y el paso actual', () => {
     render(<CreateProductProgress {...props} />);
     expect(screen.getAllByRole('progressbar')).toHaveLength(1);
-    expect(screen.getByText(/Paso 1 de 8/)).toBeTruthy();
+    expect(screen.getByText(/Paso 1 de 6/)).toBeTruthy();
   });
 
   it('los 8 pasos son botones accesibles y solo se puede saltar al siguiente', () => {
     const onTabChange = vi.fn();
     render(<CreateProductProgress {...props} onTabChange={onTabChange} />);
     const steps = screen.getAllByRole('button', { name: /Ir al paso/ });
-    expect(steps).toHaveLength(8);
+    expect(steps).toHaveLength(6);
     fireEvent.click(steps[1]);
     expect(onTabChange).toHaveBeenCalledTimes(1);
     onTabChange.mockClear();

@@ -248,6 +248,7 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
 
     basePrice:         formData.basePrice,
     comparePrice:      formData.comparePrice || undefined,
+    hasVariants:       formData.hasVariants,
 
     // El backend genera el SKU si está vacío
     sku:               formData.sku || undefined,
@@ -369,7 +370,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
 
   const scalar: Array<keyof Product> = [
     'name', 'fullDescription', 'categoryId', 'subcategoryId',
-    'basePrice', 'comparePrice', 'sku', 'barcode', 'stock',
+    'basePrice', 'comparePrice', 'hasVariants', 'sku', 'barcode', 'stock',
     'lowStockThreshold', 'trackInventory', 'allowBackorders',
     'netContent', 'netContentUnit', 'weight', 'weightUnit', 'dimensions', 'shippingClass',
   ];
@@ -1249,12 +1250,14 @@ export async function syncProductVariants(
     option1Value?: string;
     option2Value?: string;
     option3Value?: string;
-    sku?: string;
     barcode?: string;
     price: number;
     compareAtPrice?: number;
     stock: number;
     trackInventory?: boolean;
+    /** Peso de ESTA variante con embalaje, para envío. */
+    weight?: number;
+    weightUnit?: 'kg' | 'g';
   }>,
 ): Promise<ApiResponse<ProductVariant[]>> {
   try {
