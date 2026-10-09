@@ -282,6 +282,20 @@ export function useProductForm(productId?: string) {
   // Ref para evitar que el auto-guardado dispare en la carga inicial
   const isInitialDataLoad = useRef(true);
 
+  // Id del producto ya persistido en el backend como borrador (status DRAFT)
+  // por el asistente de IA (petición del humano, 2026-10-09: el borrador de
+  // la IA ya no vive solo en memoria hasta que el productor pulsa Guardar/
+  // Publicar -- el backend lo guarda en cuanto lo genera, para no perder
+  // nada ni cobrar el crédito si la conexión se corta después). Deliberado
+  // que NO sea el `productId` del propio hook (ese dispara `loadProduct` vía
+  // API en el efecto de carga inicial y pisaría el `formData` ya rellenado
+  // con el borrador) -- solo decide, en creación, si Guardar/Publicar debe
+  // actualizar ese producto ya creado en vez de crear uno nuevo.
+  const aiDraftProductIdRef = useRef<string | null>(null);
+  const setAiDraftProductId = useCallback((id: string) => {
+    aiDraftProductIdRef.current = id;
+  }, []);
+
   // Ref para guardar el producto original al cargar (para detección de cambios sensibles)
   const originalProductRef = useRef<ProductFormData | null>(null);
 
@@ -637,6 +651,19 @@ export function useProductForm(productId?: string) {
         } else {
           setLastSaved(new Date());
         }
+      } else if (aiDraftProductIdRef.current) {
+        // El asistente de IA ya creó este producto como borrador en el
+        // backend (ver setAiDraftProductId): actualizarlo, nunca crear uno
+        // nuevo (duplicaría el producto).
+        const productData = formDataToProduct(formData);
+        const response = await updateProduct(aiDraftProductIdRef.current, productData);
+        if (response.error) {
+          setError(response.error);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+          clearAiAssistDraft();
+          router.push('/dashboard/products');
+        }
       } else {
         // Creación: guardar como borrador en la API (sube imágenes y crea el producto)
         const response = await saveProductDraft(formData);
@@ -682,6 +709,24 @@ export function useProductForm(productId?: string) {
           setPublishError(response.error);
         } else {
           setPublishStatus('pending_approval');
+          setShowSuccessModal(true);
+        }
+      } else if (aiDraftProductIdRef.current) {
+        // Idem handleSave: el asistente de IA ya creó este producto como
+        // borrador, actualizarlo a PENDING_APPROVAL en vez de crear uno nuevo.
+        const productData = {
+          ...formDataToProduct(formData),
+          status: 'pending_approval' as const,
+        };
+        const response = await updateProduct(aiDraftProductIdRef.current, productData);
+
+        if (response.error) {
+          setPublishStatus('error');
+          setPublishError(response.error);
+        } else {
+          setPublishStatus('pending_approval');
+          localStorage.removeItem(STORAGE_KEY);
+          clearAiAssistDraft();
           setShowSuccessModal(true);
         }
       } else {
@@ -759,6 +804,7 @@ export function useProductForm(productId?: string) {
     aiAssistKey,
     aiAssistUsedUnsaved,
     markAiAssistUsed,
+    setAiDraftProductId,
     lastSaved,
     isPublishing,
     publishStatus,

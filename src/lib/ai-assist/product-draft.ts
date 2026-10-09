@@ -87,6 +87,15 @@ export interface ProductDraftResponse {
    * imagen principal, sin volver a subirla al guardar el producto.
    */
   mainImage: { key: string; url: string };
+  /**
+   * El backend ya ha persistido este borrador como producto real (status
+   * DRAFT) — petición del humano, 2026-10-09: así, si el productor sale de
+   * la pantalla, hay un error o un timeout justo después de este punto, el
+   * borrador no se pierde (y el crédito no se cobra sin esto). Guardar/
+   * Publicar en la revisión debe actualizar ESTE producto, nunca crear uno
+   * nuevo.
+   */
+  productId: string;
 }
 
 export interface DraftCategory {

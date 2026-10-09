@@ -51,6 +51,7 @@ const response = (over: Partial<ProductDraftResponse['proposal']> = {}, rest: Pa
   externalSourceNote: null,
   quota: { used: 1, total: 5 },
   mainImage: { key: 'products/foto.jpg', url: 'https://cdn.example.com/products/foto.jpg' },
+  productId: 'product-1',
   ...rest,
 });
 

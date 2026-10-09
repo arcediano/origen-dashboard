@@ -95,6 +95,7 @@ export default function CreateProductPage() {
     aiAssistKey,
     aiAssistUsedUnsaved,
     markAiAssistUsed,
+    setAiDraftProductId,
     hasVariants,
     onVariantsChange,
   } = useProductForm();
@@ -164,6 +165,10 @@ export default function CreateProductPage() {
       };
       handleImagesChange([photo]);
       markAiAssistUsed();
+      // El backend ya ha guardado este borrador como producto real (ver
+      // ProductDraftResponse.productId): Guardar/Publicar debe actualizarlo,
+      // no crear uno nuevo (petición del humano, 2026-10-09).
+      setAiDraftProductId(response.productId);
       setQuota((q) => (q ? { ...q, used: response.quota.used, total: response.quota.total } : q));
       setDraft(response);
       // Si a la IA le quedó algo pendiente de esos campos, se pregunta antes
@@ -178,7 +183,7 @@ export default function CreateProductPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     },
-    [handleInputChange, handleNestedChange, handleImagesChange, markAiAssistUsed],
+    [handleInputChange, handleNestedChange, handleImagesChange, markAiAssistUsed, setAiDraftProductId],
   );
 
   const handleFollowUpComplete = useCallback(
