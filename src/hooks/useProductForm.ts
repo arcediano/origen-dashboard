@@ -394,6 +394,19 @@ export function useProductForm(productId?: string) {
   }, [originalStatusRef.current]);
 
   /**
+   * El producto ya se envió a revisión y está esperando aprobación del admin
+   * — mismo motivo que isPublishedProduct: formData.status colapsa
+   * PENDING_APPROVAL a 'draft', así que los callouts de "borrador" (pasos
+   * pendientes / "¡Todo completado!, publícalo ya") no deben guiarse por
+   * formData.status o mostrarán un "Publicar" que no tiene sentido sobre un
+   * producto que ya está publicado... pendiente de aprobación (hallazgo real,
+   * petición del humano, 2026-10-09).
+   */
+  const isPendingApproval = useMemo(() => {
+    return originalStatusRef.current === 'PENDING_APPROVAL';
+  }, [originalStatusRef.current]);
+
+  /**
    * Calcula el arreglo de campos sensibles que han cambiado en la sesión actual.
    * Solo se calcula para productos publicados y compara contra el original.
    */
@@ -835,6 +848,7 @@ export function useProductForm(productId?: string) {
     hasPendingManualCerts: formData.certifications.some(c => c.source === 'manual' && !c.verified),
     isEditMode: !!productId,
     isPublishedProduct,
+    isPendingApproval,
     sensitiveDirtyFields,
     pendingSensitiveConfirmation,
 

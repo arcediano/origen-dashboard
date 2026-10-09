@@ -75,6 +75,7 @@ export default function EditProductPage() {
     handleCancel,
     reloadProduct,
     isPublishedProduct,
+    isPendingApproval,
     sensitiveDirtyFields,
     pendingSensitiveConfirmation,
     confirmSensitiveSave,
@@ -191,8 +192,14 @@ export default function EditProductPage() {
           )}
         </div>
 
-        {/* Callout informativo para borradores incompletos */}
-        {formData.status === 'draft' && !allStepsCompleted && (() => {
+        {/* Callouts de "borrador" (pasos pendientes / publicar ya) -- solo
+            tienen sentido para un producto que nunca se ha enviado a
+            revisión. formData.status colapsa PENDING_APPROVAL a 'draft'
+            (ver useProductForm), así que se excluye aparte con
+            isPendingApproval -- si no, un producto ya enviado y esperando
+            aprobación del admin mostraba "¡Todo completado!, publícalo ya"
+            (hallazgo real, petición del humano, 2026-10-09). */}
+        {formData.status === 'draft' && !isPendingApproval && !allStepsCompleted && (() => {
           const pendingSteps = Object.entries(completedTabs)
             .filter(([, done]) => !done)
             .map(([id]) => FORM_STEPS.find(s => s.id === id)?.label)
@@ -207,7 +214,7 @@ export default function EditProductPage() {
             </Alert>
           );
         })()}
-        {formData.status === 'draft' && allStepsCompleted && (
+        {formData.status === 'draft' && !isPendingApproval && allStepsCompleted && (
           <Alert variant="success" className="mt-4">
             <AlertTitle>¡Todo completado!</AlertTitle>
             <AlertDescription className="space-y-3">
