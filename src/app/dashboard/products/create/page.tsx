@@ -97,11 +97,19 @@ export default function CreateProductPage() {
     markAiAssistUsed,
     setAiDraftProductId,
     onVariantsChange,
+    savedVariantsCount,
   } = useProductForm();
 
   const [mode, setMode] = useState<CreateMode>('loading');
   const [quota, setQuota] = useState<AiAssistQuota | null>(null);
   const [draft, setDraft] = useState<ProductDraftResponse | null>(null);
+  // Id real del producto ya persistido por el asistente de IA (ver
+  // `setAiDraftProductId` en useProductForm, que lo guarda en un ref
+  // deliberadamente no expuesto como valor). Se necesita como valor aquí
+  // para poder pasarlo a `ProductFormSteps`/`VariantsEditor` -- las
+  // variantes requieren que el producto ya exista, y aquí ya existe desde
+  // que la IA terminó.
+  const [aiDraftProductId, setAiDraftProductIdState] = useState<string | undefined>(undefined);
   // Entre el borrador de la IA y la revisión final: si quedan campos que no
   // pudo determinar, se preguntan aquí para que la revisión llegue completa.
   const [pendingFollowUps, setPendingFollowUps] = useState<ProductDraftResponse['followUpQuestions']>([]);
@@ -168,6 +176,7 @@ export default function CreateProductPage() {
       // ProductDraftResponse.productId): Guardar/Publicar debe actualizarlo,
       // no crear uno nuevo (petición del humano, 2026-10-09).
       setAiDraftProductId(response.productId);
+      setAiDraftProductIdState(response.productId);
       setQuota((q) => (q ? { ...q, used: response.quota.used, total: response.quota.total } : q));
       setDraft(response);
       // Si a la IA le quedó algo pendiente de esos campos, se pregunta antes
@@ -370,6 +379,11 @@ export default function CreateProductPage() {
             publishError={publishError}
             canPublish={allStepsCompleted}
             onOpenWizard={() => setMode('wizard')}
+            savedVariantsCount={savedVariantsCount}
+            onConfigureVariants={() => {
+              setActiveTab('pricing');
+              setMode('wizard');
+            }}
           />
         )}
 
@@ -420,6 +434,7 @@ export default function CreateProductPage() {
                 onNestedChange={handleNestedChange}
                 onImagesChange={handleImagesChange}
                 onVariantsChange={onVariantsChange}
+                productId={aiDraftProductId}
               />
 
               {/* Navegación de pasos — sólo visible en ≥ lg; hasta ahí usa ActionBar */}
