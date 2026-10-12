@@ -1,6 +1,5 @@
 /**
- * Comisión de Origen tal como se muestra en la landing. Espacios duros
- * (U+00A0) para que «12% + 0,25€» nunca se parta en dos líneas en móvil;
- * úsese siempre junto a `whitespace-nowrap`. Fuente única de la cifra.
+ * Comisión de Origen tal como se muestra en la landing. Fuente única de
+ * la cifra — sin la cuota fija de 0,25€ (solo el porcentaje).
  */
-export const COMMISSION_LABEL = '12% + 0,25€';
+export const COMMISSION_LABEL = '12%';

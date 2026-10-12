@@ -50,7 +50,7 @@ export function HeroSection() {
       value: '12%',
       label: 'Comisión',
       icon: TrendingUp,
-      sublabel: '+\u00A00,25€ · solo al vender',
+      sublabel: 'Solo al vender',
       gradient: 'hoja' as const
     },
     {
