@@ -36,6 +36,10 @@ const PROGRESS_MESSAGES = [
   'Redactando la descripción…',
   'Clasificando tu producto…',
   'Ordenando ingredientes e información nutricional…',
+  // Preparación de la foto principal (fondo blanco, 2000x2000 — petición del
+  // humano, 2026-10-08): corre en paralelo con el resto, así que este
+  // mensaje puede aparecer en cualquier punto, no solo al final.
+  'Preparando tu foto con fondo blanco…',
 ];
 
 /** Mismo mensaje tanto si lo detecta el cupo ya cargado (antes de generar) como si lo rechaza el backend al intentarlo. */
@@ -228,7 +232,7 @@ export function AiProductIntake({
               // eslint-disable-next-line @next/next/no-img-element
               <img src={photoUrl} alt="" aria-hidden="true" className="h-28 w-28 rounded-2xl object-cover shadow-subtle" />
             )}
-            <p className="text-xs text-text-subtle">Puede tardar hasta un minuto. No cierres esta página.</p>
+            <p className="text-xs text-text-subtle">Puede tardar hasta dos minutos. No cierres esta página.</p>
           </div>
         </Card>
       </div>

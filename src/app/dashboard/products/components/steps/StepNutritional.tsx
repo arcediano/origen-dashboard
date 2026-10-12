@@ -1,6 +1,6 @@
 /**
  * @component StepNutritional
- * @description Paso 4: Información nutricional
+ * @description Información nutricional
  */
 
 'use client';
@@ -46,15 +46,12 @@ import {
   Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ALLERGENS } from '@/types/product';
+import { ALLERGENS, FORM_STEPS, stepPosition } from '@/types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import type { NutritionalInfo } from '@/types/product';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
-import { LabelReaderCard } from './LabelReaderCard';
-import type { FieldPatch } from '@/lib/ai-assist/label-proposal';
-
 interface StepNutritionalProps {
   nutritionalInfo?: NutritionalInfo;
   onNestedChange: (section: string, field: string, value: any) => void;
@@ -62,12 +59,6 @@ interface StepNutritionalProps {
   /** Dentro de la pantalla de revisión del onboarding con IA: sin tarjeta ni cabecera propias. */
   embedded?: boolean;
   isPublishedProduct?: boolean;
-  /** Clave de cupo del asistente de IA (productId al editar, clave del borrador al crear). */
-  aiAssistKey?: string | null;
-  /** Se llama cuando el asistente de IA consume cupo en este producto. */
-  onAiAssistUsed?: () => void;
-  /** Edición de un producto existente: el asistente no tiene límite de cupo. */
-  aiAssistUnlimited?: boolean;
 }
 
 // Helper para renderizar indicador de campo sensible
@@ -145,9 +136,6 @@ export function StepNutritional({
   completed,
   embedded = false,
   isPublishedProduct = false,
-  aiAssistKey = null,
-  onAiAssistUsed,
-  aiAssistUnlimited = false,
 }: StepNutritionalProps) {
   
   const [ingredientInput, setIngredientInput] = useState('');
@@ -183,10 +171,6 @@ export function StepNutritional({
       handleChange('ingredients', newIngredients);
       setIngredientInput('');
     }
-  };
-
-  const applyLabelPatches = (patches: FieldPatch[]) => {
-    patches.forEach(({ field, value }) => handleChange(field, value));
   };
 
   const removeIngredient = (index: number) => {
@@ -235,20 +219,10 @@ export function StepNutritional({
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Paso 4 de 7
+              Paso {stepPosition('nutritional')} de {FORM_STEPS.length}
             </Badge>
           </div>
         </div>
-        )}
-
-        {aiAssistKey && (
-          <LabelReaderCard
-            assistKey={aiAssistKey}
-            nutritionalInfo={nutritionalInfo}
-            onApply={applyLabelPatches}
-            onUsed={onAiAssistUsed}
-            unlimited={aiAssistUnlimited}
-          />
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>

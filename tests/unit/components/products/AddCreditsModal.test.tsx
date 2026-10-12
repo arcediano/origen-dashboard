@@ -31,10 +31,11 @@ vi.mock('@stripe/react-stripe-js', () => ({
 
 import { AddCreditsModal } from '@/app/dashboard/products/components/ai-onboarding/AddCreditsModal';
 
+// Precios 2026-10-08: 1 crédito = 1,00 €; -15% desde 5 créditos; -30% desde 10.
 const presets = [
-  { credits: 1, unitPriceCents: 180, discountPct: 0, subtotalCents: 180, discountCents: 0, totalCents: 180, currency: 'eur' },
-  { credits: 3, unitPriceCents: 180, discountPct: 15, subtotalCents: 540, discountCents: 81, totalCents: 459, currency: 'eur' },
-  { credits: 5, unitPriceCents: 180, discountPct: 30, subtotalCents: 900, discountCents: 270, totalCents: 630, currency: 'eur' },
+  { credits: 1, unitPriceCents: 100, discountPct: 0, subtotalCents: 100, discountCents: 0, totalCents: 100, currency: 'eur' },
+  { credits: 5, unitPriceCents: 100, discountPct: 15, subtotalCents: 500, discountCents: 75, totalCents: 425, currency: 'eur' },
+  { credits: 10, unitPriceCents: 100, discountPct: 30, subtotalCents: 1000, discountCents: 300, totalCents: 700, currency: 'eur' },
 ];
 
 describe('AddCreditsModal', () => {
@@ -48,8 +49,8 @@ describe('AddCreditsModal', () => {
     await waitFor(() => expect(pricingMock).toHaveBeenCalled());
 
     expect(await screen.findByText('1 crédito')).toBeTruthy();
-    expect(screen.getByText('3 créditos')).toBeTruthy();
     expect(screen.getByText('5 créditos')).toBeTruthy();
+    expect(screen.getByText('10 créditos')).toBeTruthy();
     expect(screen.getByText('-15%')).toBeTruthy();
     expect(screen.getByText('-30%')).toBeTruthy();
     expect(screen.getByText('Sin descuento')).toBeTruthy();
@@ -79,17 +80,17 @@ describe('AddCreditsModal', () => {
     checkoutMock.mockResolvedValue({
       purchaseId: 'purchase-1',
       clientSecret: 'pi_123_secret_abc',
-      totalCents: 459,
-      credits: 3,
+      totalCents: 425,
+      credits: 5,
       currency: 'eur',
     });
     render(<AddCreditsModal open onOpenChange={vi.fn()} onCreditsPurchased={vi.fn()} />);
-    await user.click(await screen.findByText('3 créditos'));
+    await user.click(await screen.findByText('5 créditos'));
     await user.click(screen.getByRole('button', { name: 'Continuar al pago' }));
 
-    expect(checkoutMock).toHaveBeenCalledWith(3);
+    expect(checkoutMock).toHaveBeenCalledWith(5);
     expect(await screen.findByTestId('payment-element')).toBeTruthy();
-    expect(screen.getByRole('button', { name: /Pagar 4,59/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Pagar 4,25/ })).toBeTruthy();
   });
 
   it('confirma el pago, sondea el estado hasta SUCCEEDED y avisa de la compra', async () => {
@@ -98,16 +99,16 @@ describe('AddCreditsModal', () => {
     checkoutMock.mockResolvedValue({
       purchaseId: 'purchase-1',
       clientSecret: 'pi_123_secret_abc',
-      totalCents: 459,
-      credits: 3,
+      totalCents: 425,
+      credits: 5,
       currency: 'eur',
     });
     confirmPaymentMock.mockResolvedValue({ paymentIntent: { status: 'succeeded' } });
-    statusMock.mockResolvedValueOnce({ status: 'PENDING', credits: 3 });
-    statusMock.mockResolvedValueOnce({ status: 'SUCCEEDED', credits: 3 });
+    statusMock.mockResolvedValueOnce({ status: 'PENDING', credits: 5 });
+    statusMock.mockResolvedValueOnce({ status: 'SUCCEEDED', credits: 5 });
 
     render(<AddCreditsModal open onOpenChange={vi.fn()} onCreditsPurchased={onCreditsPurchased} />);
-    await user.click(await screen.findByText('3 créditos'));
+    await user.click(await screen.findByText('5 créditos'));
     await user.click(screen.getByRole('button', { name: 'Continuar al pago' }));
     await user.click(await screen.findByRole('button', { name: /Pagar/ }));
 
@@ -121,7 +122,7 @@ describe('AddCreditsModal', () => {
     checkoutMock.mockResolvedValue({
       purchaseId: 'purchase-1',
       clientSecret: 'pi_123_secret_abc',
-      totalCents: 180,
+      totalCents: 100,
       credits: 1,
       currency: 'eur',
     });

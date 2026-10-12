@@ -58,7 +58,7 @@ const containerVariants: Variants = {
 
 /**
  * Cómo se crea el producto: con el asistente de IA (pantalla de entrada +
- * pantalla única de revisión, opción B) o a mano con el wizard de 7 pasos.
+ * pantalla única de revisión, opción B) o a mano con el wizard de 8 pasos.
  */
 type CreateMode = 'loading' | 'ai-intake' | 'ai-review' | 'wizard';
 
@@ -88,7 +88,6 @@ export default function CreateProductPage() {
     currentStepErrors,
     handleInputChange,
     handleNestedChange,
-    handlePriceTiersChange,
     handleImagesChange,
     handleSave,
     handlePublish,
@@ -96,6 +95,8 @@ export default function CreateProductPage() {
     aiAssistKey,
     aiAssistUsedUnsaved,
     markAiAssistUsed,
+    setAiDraftProductId,
+    onVariantsChange,
   } = useProductForm();
 
   const [mode, setMode] = useState<CreateMode>('loading');
@@ -147,10 +148,13 @@ export default function CreateProductPage() {
         if (patch.kind === 'field') handleInputChange(patch.field, patch.value);
         else handleNestedChange(patch.section, patch.field, patch.value);
       }
+      // La foto principal ya viene procesada por FLUX (fondo blanco, 2000x2000
+      // — petición del humano, 2026-10-08) y subida desde el propio backend:
+      // sin `file`, para que el guardado la trate como ya subida y no vuelva
+      // a subir la foto original sin procesar (ver normalizeProductImagesForApi).
       const photo: ProductImage = {
-        id: `temp-${Date.now()}-0-${Math.random().toString(36).substring(2, 7)}`,
-        url: URL.createObjectURL(productPhoto),
-        file: productPhoto,
+        id: response.mainImage.key,
+        url: response.mainImage.url,
         isMain: true,
         sortOrder: 0,
         uploading: false,
@@ -160,6 +164,10 @@ export default function CreateProductPage() {
       };
       handleImagesChange([photo]);
       markAiAssistUsed();
+      // El backend ya ha guardado este borrador como producto real (ver
+      // ProductDraftResponse.productId): Guardar/Publicar debe actualizarlo,
+      // no crear uno nuevo (petición del humano, 2026-10-09).
+      setAiDraftProductId(response.productId);
       setQuota((q) => (q ? { ...q, used: response.quota.used, total: response.quota.total } : q));
       setDraft(response);
       // Si a la IA le quedó algo pendiente de esos campos, se pregunta antes
@@ -174,7 +182,7 @@ export default function CreateProductPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     },
-    [handleInputChange, handleNestedChange, handleImagesChange, markAiAssistUsed],
+    [handleInputChange, handleNestedChange, handleImagesChange, markAiAssistUsed, setAiDraftProductId],
   );
 
   const handleFollowUpComplete = useCallback(
@@ -238,8 +246,7 @@ export default function CreateProductPage() {
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, [aiAssistUsedUnsaved]);
 
-  const stepNumber = FORM_STEPS.findIndex(s => s.id === activeTab) + 1;
-  const tips = useStepTips(stepNumber, formData);
+  const tips = useStepTips(activeTab, formData);
 
   const [showMobileErrors, setShowMobileErrors] = useState(false);
 
@@ -258,7 +265,7 @@ export default function CreateProductPage() {
   const nextStep = !isLastStep ? FORM_STEPS[currentIndex + 1].id as FormStepId : null;
   const canPublish = allStepsCompleted && (!hasCertifications || certificationsApproved);
 
-  const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing', 'inventory'];
+  const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing'];
   const isMobileStepBlocked = BLOCKING_STEPS.includes(activeTab) && currentStepErrors.length > 0;
 
   const handlePrev = () => {
@@ -368,11 +375,16 @@ export default function CreateProductPage() {
 
         {mode === 'wizard' && (
           <>
-          <CreateProductProgress
-            currentTab={activeTab}
-            completedTabs={completedTabs}
-            onTabChange={handleTabChange}
-          />
+          {/* Panel de pasos — en escritorio (≥lg) vive en la columna lateral,
+              encima de "Consejos útiles" (ver más abajo); aquí solo para
+              móvil/tablet, donde ya era correcto. */}
+          <div className="lg:hidden">
+            <CreateProductProgress
+              currentTab={activeTab}
+              completedTabs={completedTabs}
+              onTabChange={handleTabChange}
+            />
+          </div>
 
           <motion.div
             variants={containerVariants}
@@ -388,16 +400,26 @@ export default function CreateProductPage() {
                 640-1023px sin espacio reservado mientras la ActionBar sigue
                 fija abajo, tapando el formulario. */}
             <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-0`}>
+              {/* Las ayudas puntuales del asistente de IA por campo
+                  ("Redactar con IA" en StepBasic, "Leer etiqueta con IA" en
+                  StepNutritional) se quitaron del todo (petición del humano,
+                  2026-10-08 para el alta manual; 2026-10-08 de nuevo para
+                  extenderlo también a la edición) — ProductFormSteps ya no
+                  acepta aiAssistKey/onAiAssistUsed ni los reenvía a esos
+                  pasos. Si quiere usar la IA, el asistente completo (modo
+                  "ai-intake") sigue disponible y se promociona desde los
+                  propios consejos útiles del alta manual (ver useStepTips).
+                  aiAssistKey (variable de este componente) se sigue usando
+                  para ese flujo completo de IA (más abajo en este fichero),
+                  independiente de esto. */}
               <ProductFormSteps
                 activeTab={activeTab}
                 formData={formData}
                 completedTabs={completedTabs}
                 onInputChange={handleInputChange}
                 onNestedChange={handleNestedChange}
-                aiAssistKey={aiAssistKey}
-                onAiAssistUsed={markAiAssistUsed}
-                onPriceTiersChange={handlePriceTiersChange}
                 onImagesChange={handleImagesChange}
+                onVariantsChange={onVariantsChange}
               />
 
               {/* Navegación de pasos — sólo visible en ≥ lg; hasta ahí usa ActionBar */}
@@ -421,10 +443,26 @@ export default function CreateProductPage() {
               </div>
             </div>
 
-            <ProductFormSidebar
-              tips={tips}
-              keyFact={KEY_FACTS_BY_STEP[stepNumber]}
-            />
+            {/* Columna lateral de escritorio: panel de pasos + consejos
+                útiles apilados dentro de un único `sticky` (petición del
+                humano, 2026-10-08) — dos `sticky` independientes nunca
+                alinean bien sus offsets porque el panel de pasos cambia de
+                alto al condensarse con el scroll. */}
+            <div className="hidden lg:block lg:col-span-1">
+              <div className="sticky top-16 space-y-4">
+                <CreateProductProgress
+                  currentTab={activeTab}
+                  completedTabs={completedTabs}
+                  onTabChange={handleTabChange}
+                  embedded
+                />
+                <ProductFormSidebar
+                  tips={tips}
+                  keyFact={KEY_FACTS_BY_STEP[activeTab]}
+                  embedded
+                />
+              </div>
+            </div>
           </motion.div>
           </>
         )}

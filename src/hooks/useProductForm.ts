@@ -34,13 +34,12 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAiAssistKey, clearAiAssistDraft } from '@/hooks/useAiAssistKey';
 import { useRouter } from 'next/navigation';
 import { toast } from '@arcediano/ux-library';
-import type { 
-  PriceTier, 
-  ProductFormData, 
-  FormStepId, 
-  ProductCertification, 
+import type {
+  ProductFormData,
+  FormStepId,
+  ProductCertification,
   ProductImage,
-  Product 
+  Product
 } from '@/types/product';
 import { defaultFormData } from '@/types/product';
 import { 
@@ -66,16 +65,6 @@ export function discardLocalProductDraft(): void {
   }
   clearAiAssistDraft();
 }
-const FORM_STEP_KEYS: FormStepId[] = [
-  'basic',
-  'images',
-  'pricing',
-  'nutritional',
-  'production',
-  'inventory',
-  'certifications',
-];
-
 /**
  * Lista de campos granularizados que disparan revisión automática si el producto
  * está publicado (ACTIVE/OUT_OF_STOCK) y se modifican.
@@ -126,7 +115,6 @@ const REQUIRED_STEPS_FOR_PUBLISH: FormStepId[] = [
   'basic',
   'images',
   'pricing',
-  'inventory',
 ];
 
 // ============================================================================
@@ -163,8 +151,14 @@ export const productToFormData = (product: Product): ProductFormData => {
   gallery,
   basePrice: product.basePrice,
   comparePrice: product.comparePrice,
-  priceTiers: product.priceTiers || [],
-  flashDeal: product.flashDeal,
+  hasVariants: product.hasVariants ?? false,
+  // Bug encontrado al revisar esta sección (petición del humano, 2026-10-08):
+  // netContent/netContentUnit ("Formato de venta", paso Precios) estaban
+  // declarados en ProductFormData pero nunca se cargaban aquí desde la API
+  // -- al editar un producto ya existente, el campo siempre aparecía vacío
+  // aunque se hubiera guardado al crearlo.
+  netContent: product.netContent,
+  netContentUnit: product.netContentUnit || 'g',
   sku: product.sku,
   barcode: product.barcode,
   stock: product.stock,
@@ -220,7 +214,12 @@ export const formDataToProduct = (formData: ProductFormData): Partial<Product> =
     gallery: formData.gallery,
     basePrice: formData.basePrice,
     comparePrice: formData.comparePrice,
-    priceTiers: formData.priceTiers,
+    hasVariants: formData.hasVariants,
+    // Mismo bug que en productToFormData (ver nota ahí): sin esto, el
+    // guardado ordinario de un producto existente nunca persistía cambios
+    // en "Formato de venta".
+    netContent: formData.netContent,
+    netContentUnit: formData.netContentUnit,
     sku: formData.sku,
     barcode: formData.barcode,
     stock: formData.stock,
@@ -256,7 +255,13 @@ export function useProductForm(productId?: string) {
   const [completedTabs, setCompletedTabs] = useState<Record<string, boolean>>({});
   
   // UI States
-  const [isLoading, setIsLoading] = useState(false);
+  // Arranca en `true` si hay productId (modo edición): sin esto, el primer
+  // render pintaba la edición completa con `defaultFormData` (nombre vacío,
+  // sin categoría...) ANTES de que el efecto de carga llegase siquiera a
+  // poner isLoading a true -- un parpadeo real (formulario en blanco →
+  // spinner → datos reales) reportado por el humano, 2026-10-08, al pulsar
+  // "Editar" desde el listado de productos.
+  const [isLoading, setIsLoading] = useState(!!productId);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -265,9 +270,34 @@ export function useProductForm(productId?: string) {
   const [publishStatus, setPublishStatus] = useState<'idle' | 'success' | 'pending_approval' | 'error'>('idle');
   const [publishError, setPublishError] = useState<string | null>(null);
   const [skuSuggestion, setSkuSuggestion] = useState<string>('');
+
+  // Nº de variantes ya guardadas en el backend (paso unificado de precios/
+  // variantes/inventario) -- señal ligera, separada de `formData` a
+  // propósito: el grid de variantes gestiona su propio modelo de
+  // options/variants con llamadas granulares a la API (ver VariantsEditor),
+  // esto solo sirve para saber si ya hay variantes de verdad al validar que
+  // el paso está completo (`getStepErrors`) cuando `formData.hasVariants` es
+  // true. La decisión de mostrar precio único vs. variantes es
+  // `formData.hasVariants` (persistido, petición del humano 2026-10-09),
+  // NUNCA este contador -- ver nota en el propio campo del tipo.
+  const [savedVariantsCount, setSavedVariantsCount] = useState(0);
   
   // Ref para evitar que el auto-guardado dispare en la carga inicial
   const isInitialDataLoad = useRef(true);
+
+  // Id del producto ya persistido en el backend como borrador (status DRAFT)
+  // por el asistente de IA (petición del humano, 2026-10-09: el borrador de
+  // la IA ya no vive solo en memoria hasta que el productor pulsa Guardar/
+  // Publicar -- el backend lo guarda en cuanto lo genera, para no perder
+  // nada ni cobrar el crédito si la conexión se corta después). Deliberado
+  // que NO sea el `productId` del propio hook (ese dispara `loadProduct` vía
+  // API en el efecto de carga inicial y pisaría el `formData` ya rellenado
+  // con el borrador) -- solo decide, en creación, si Guardar/Publicar debe
+  // actualizar ese producto ya creado en vez de crear uno nuevo.
+  const aiDraftProductIdRef = useRef<string | null>(null);
+  const setAiDraftProductId = useCallback((id: string) => {
+    aiDraftProductIdRef.current = id;
+  }, []);
 
   // Ref para guardar el producto original al cargar (para detección de cambios sensibles)
   const originalProductRef = useRef<ProductFormData | null>(null);
@@ -285,14 +315,6 @@ export function useProductForm(productId?: string) {
   // Dialog States
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-  // Conflicto 409 EXCLUSIVE_OFFER_CONFLICT al enviar priceTiers con una Flash ya activa —
-  // guarda el reintento a ejecutar (con replaceActiveFlashDeal: true) si el productor confirma.
-  const [pendingOfferConflict, setPendingOfferConflict] = useState<{
-    conflictingOfferType: 'FLASH';
-    retry: () => Promise<void>;
-  } | null>(null);
-  const [isResolvingOfferConflict, setIsResolvingOfferConflict] = useState(false);
 
   // ==========================================================================
   // CARGA INICIAL
@@ -321,6 +343,7 @@ export function useProductForm(productId?: string) {
         // Guardar el producto original para detectar cambios sensibles
         originalProductRef.current = formData;
         originalStatusRef.current = response.data.status;
+        setSavedVariantsCount(response.data.variants?.length ?? 0);
         setLastSaved(new Date());
       }
     } catch (err) {
@@ -368,6 +391,19 @@ export function useProductForm(productId?: string) {
    */
   const isPublishedProduct = useMemo(() => {
     return originalStatusRef.current === 'ACTIVE' || originalStatusRef.current === 'OUT_OF_STOCK';
+  }, [originalStatusRef.current]);
+
+  /**
+   * El producto ya se envió a revisión y está esperando aprobación del admin
+   * — mismo motivo que isPublishedProduct: formData.status colapsa
+   * PENDING_APPROVAL a 'draft', así que los callouts de "borrador" (pasos
+   * pendientes / "¡Todo completado!, publícalo ya") no deben guiarse por
+   * formData.status o mostrarán un "Publicar" que no tiene sentido sobre un
+   * producto que ya está publicado... pendiente de aprobación (hallazgo real,
+   * petición del humano, 2026-10-09).
+   */
+  const isPendingApproval = useMemo(() => {
+    return originalStatusRef.current === 'PENDING_APPROVAL';
   }, [originalStatusRef.current]);
 
   /**
@@ -461,31 +497,15 @@ export function useProductForm(productId?: string) {
         return () => {}; // Sin timer
       }
 
-      // Pausar autoguardado mientras haya un conflicto de oferta sin resolver —
-      // el usuario debe confirmar el reemplazo o quitar los tiers manualmente.
-      if (pendingOfferConflict) {
-        return () => {};
-      }
-
       const timer = setTimeout(async () => {
         setIsAutoSaving(true);
         try {
           const productData = formDataToProduct(formData);
           const response = await updateProduct(productId, productData);
-          if (response.error) {
-            if (response.errorCode === 'EXCLUSIVE_OFFER_CONFLICT' && response.conflictingOfferType === 'FLASH') {
-              setPendingOfferConflict({
-                conflictingOfferType: 'FLASH',
-                retry: async () => {
-                  const retryResponse = await updateProduct(productId, productData, { replaceActiveFlashDeal: true });
-                  if (!retryResponse.error) setLastSaved(new Date());
-                },
-              });
-            }
-            // Otros errores: silencioso — no interrumpir la UX; el usuario puede guardar manualmente
-          } else {
+          if (!response.error) {
             setLastSaved(new Date());
           }
+          // Errores: silencioso — no interrumpir la UX; el usuario puede guardar manualmente
         } catch {
           // Silencioso — no interrumpir la UX; el usuario puede guardar manualmente
         } finally {
@@ -494,7 +514,7 @@ export function useProductForm(productId?: string) {
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [formData, productId, isPublishedProduct, sensitiveDirtyFields, pendingOfferConflict]);
+  }, [formData, productId, isPublishedProduct, sensitiveDirtyFields]);
 
   // ==========================================================================
   // VALIDACIÓN DE PASOS
@@ -525,18 +545,24 @@ export function useProductForm(productId?: string) {
       || production?.media?.length,
     );
 
+    // Paso unificado de precio/variantes/inventario (petición del humano,
+    // 2026-10-09): con variantes, el precio/stock del producto único ya no
+    // se piden -- se considera completo con al menos una variante guardada
+    // (mismo criterio que getStepErrors). Sin variantes, con precio > 0 (el
+    // stock siempre tiene defaults válidos, 0/5, nunca bloquea el paso).
+    const pricingComplete = formData.hasVariants
+      ? savedVariantsCount > 0
+      : !!(formData.basePrice && formData.basePrice > 0);
+
     setCompletedTabs({
       basic: !!(formData.name && formData.categoryId),
       images: !!(formData.gallery && formData.gallery.length > 0),
-      pricing: !!(formData.basePrice && formData.basePrice > 0),
+      pricing: pricingComplete,
       nutritional: hasNutritionalData,
       production: hasProductionData,
-      // Inventario: se considera completado cuando el productor ha revisado
-      // los valores de stock — los campos tienen defaults válidos (0 / 5).
-      inventory: formData.stock >= 0 && formData.lowStockThreshold >= 0,
       certifications: true,
     });
-  }, [formData]);
+  }, [formData, savedVariantsCount]);
 
   // ==========================================================================
   // SUGERENCIA DE SKU
@@ -582,18 +608,22 @@ export function useProductForm(productId?: string) {
           errors.push('Al menos una imagen del producto');
         break;
       case 'pricing':
-        if (!formData.basePrice || formData.basePrice <= 0)
+        // Con variantes, el precio/stock únicos del producto ya no se piden
+        // (cada variante define los suyos) -- en su lugar, exige al menos
+        // una variante guardada. SKU lo asigna el backend en ambos casos.
+        if (formData.hasVariants) {
+          if (savedVariantsCount === 0)
+            errors.push('Al menos una variante con precio y stock');
+        } else if (!formData.basePrice || formData.basePrice <= 0) {
           errors.push('Precio de venta (debe ser mayor que 0)');
-        break;
-      case 'inventory':
-        // SKU lo asigna el backend — no se requiere aquí.
+        }
         break;
       // nutritional, production y certifications son pasos opcionales — no bloquean
       default:
         break;
     }
     return errors;
-  }, [formData]);
+  }, [formData, savedVariantsCount]);
 
   // Errores del paso activo — para pasarlos directamente a la navegación
   const currentStepErrors = getStepErrors(activeTab);
@@ -614,10 +644,6 @@ export function useProductForm(productId?: string) {
         [field]: value
       }
     }));
-  }, []);
-
-  const handlePriceTiersChange = useCallback((priceTiers: PriceTier[]) => {
-    setFormData(prev => ({ ...prev, priceTiers }));
   }, []);
 
   const handleImagesChange = useCallback((images: ProductImage[]) => {
@@ -644,20 +670,22 @@ export function useProductForm(productId?: string) {
         const productData = formDataToProduct(formData);
         const response = await updateProduct(productId, productData);
         if (response.error) {
-          if (response.errorCode === 'EXCLUSIVE_OFFER_CONFLICT' && response.conflictingOfferType === 'FLASH') {
-            setPendingOfferConflict({
-              conflictingOfferType: 'FLASH',
-              retry: async () => {
-                const retryResponse = await updateProduct(productId, productData, { replaceActiveFlashDeal: true });
-                if (retryResponse.error) setError(retryResponse.error);
-                else setLastSaved(new Date());
-              },
-            });
-          } else {
-            setError(response.error);
-          }
+          setError(response.error);
         } else {
           setLastSaved(new Date());
+        }
+      } else if (aiDraftProductIdRef.current) {
+        // El asistente de IA ya creó este producto como borrador en el
+        // backend (ver setAiDraftProductId): actualizarlo, nunca crear uno
+        // nuevo (duplicaría el producto).
+        const productData = formDataToProduct(formData);
+        const response = await updateProduct(aiDraftProductIdRef.current, productData);
+        if (response.error) {
+          setError(response.error);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+          clearAiAssistDraft();
+          router.push('/dashboard/products');
         }
       } else {
         // Creación: guardar como borrador en la API (sube imágenes y crea el producto)
@@ -700,27 +728,28 @@ export function useProductForm(productId?: string) {
         const response = await updateProduct(productId, productData);
 
         if (response.error) {
-          if (response.errorCode === 'EXCLUSIVE_OFFER_CONFLICT' && response.conflictingOfferType === 'FLASH') {
-            setPendingOfferConflict({
-              conflictingOfferType: 'FLASH',
-              retry: async () => {
-                const retryResponse = await updateProduct(productId, productData, { replaceActiveFlashDeal: true });
-                if (retryResponse.error) {
-                  setPublishStatus('error');
-                  setPublishError(retryResponse.error);
-                } else {
-                  setPublishStatus('pending_approval');
-                  setShowSuccessModal(true);
-                }
-              },
-            });
-            setPublishStatus('idle');
-          } else {
-            setPublishStatus('error');
-            setPublishError(response.error);
-          }
+          setPublishStatus('error');
+          setPublishError(response.error);
         } else {
           setPublishStatus('pending_approval');
+          setShowSuccessModal(true);
+        }
+      } else if (aiDraftProductIdRef.current) {
+        // Idem handleSave: el asistente de IA ya creó este producto como
+        // borrador, actualizarlo a PENDING_APPROVAL en vez de crear uno nuevo.
+        const productData = {
+          ...formDataToProduct(formData),
+          status: 'pending_approval' as const,
+        };
+        const response = await updateProduct(aiDraftProductIdRef.current, productData);
+
+        if (response.error) {
+          setPublishStatus('error');
+          setPublishError(response.error);
+        } else {
+          setPublishStatus('pending_approval');
+          localStorage.removeItem(STORAGE_KEY);
+          clearAiAssistDraft();
           setShowSuccessModal(true);
         }
       } else {
@@ -764,22 +793,7 @@ export function useProductForm(productId?: string) {
         const productData = formDataToProduct(formData);
         const response = await updateProduct(productId, productData);
         if (response.error) {
-          if (response.errorCode === 'EXCLUSIVE_OFFER_CONFLICT' && response.conflictingOfferType === 'FLASH') {
-            setPendingOfferConflict({
-              conflictingOfferType: 'FLASH',
-              retry: async () => {
-                const retryResponse = await updateProduct(productId, productData, { replaceActiveFlashDeal: true });
-                if (retryResponse.error) {
-                  setError(retryResponse.error);
-                } else {
-                  setLastSaved(new Date());
-                  originalProductRef.current = formData;
-                }
-              },
-            });
-          } else {
-            setError(response.error);
-          }
+          setError(response.error);
         } else {
           setLastSaved(new Date());
           // Resetear originalProductRef: el producto ha sido guardado con los cambios sensibles
@@ -793,27 +807,6 @@ export function useProductForm(productId?: string) {
       setIsSaving(false);
     }
   }, [formData, productId]);
-
-  /**
-   * Confirma el reemplazo tras un conflicto 409 EXCLUSIVE_OFFER_CONFLICT: ejecuta
-   * el reintento guardado (con replaceActiveFlashDeal: true) y limpia el estado.
-   */
-  const confirmOfferConflictReplace = useCallback(async () => {
-    if (!pendingOfferConflict) return;
-    const { retry } = pendingOfferConflict;
-    setIsResolvingOfferConflict(true);
-    try {
-      await retry();
-    } finally {
-      setIsResolvingOfferConflict(false);
-      setPendingOfferConflict(null);
-    }
-  }, [pendingOfferConflict]);
-
-  /** Descarta el conflicto sin reemplazar nada — los tiers quedan sin guardar. */
-  const cancelOfferConflict = useCallback(() => {
-    setPendingOfferConflict(null);
-  }, []);
 
   // ==========================================================================
   // RETURN
@@ -834,6 +827,7 @@ export function useProductForm(productId?: string) {
     aiAssistKey,
     aiAssistUsedUnsaved,
     markAiAssistUsed,
+    setAiDraftProductId,
     lastSaved,
     isPublishing,
     publishStatus,
@@ -843,7 +837,10 @@ export function useProductForm(productId?: string) {
     showSuccessModal,
     setShowSuccessModal,
     skuSuggestion,
-    
+    savedVariantsCount,
+    /** El grid de variantes llama a esto tras guardar/eliminar variantes, para que la validación de "paso completo" reaccione sin recargar la página. */
+    onVariantsChange: useCallback((count: number) => setSavedVariantsCount(count), []),
+
     // Valores computados
     allStepsCompleted: REQUIRED_STEPS_FOR_PUBLISH.every((step) => completedTabs[step]),
     hasCertifications: formData.certifications.length > 0,
@@ -851,12 +848,9 @@ export function useProductForm(productId?: string) {
     hasPendingManualCerts: formData.certifications.some(c => c.source === 'manual' && !c.verified),
     isEditMode: !!productId,
     isPublishedProduct,
+    isPendingApproval,
     sensitiveDirtyFields,
     pendingSensitiveConfirmation,
-    pendingOfferConflict,
-    isResolvingOfferConflict,
-    confirmOfferConflictReplace,
-    cancelOfferConflict,
 
     // Validación por paso
     getStepErrors,
@@ -865,7 +859,6 @@ export function useProductForm(productId?: string) {
     // Handlers
     handleInputChange,
     handleNestedChange,
-    handlePriceTiersChange,
     handleImagesChange,
     handleSave,
     handlePublish,

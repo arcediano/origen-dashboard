@@ -10,13 +10,12 @@ import { type Variants } from 'framer-motion';
 
 import { StepBasic } from './steps/StepBasic';
 import { StepImages } from './steps/StepImages';
-import { StepPricing } from './steps/StepPricing';
+import { StepPricingInventory } from './steps/StepPricingInventory';
 import { StepNutritional } from './steps/StepNutritional';
 import { StepProduction } from './steps/StepProduction';
-import { StepInventory } from './steps/StepInventory';
 import { StepCertificationsAttributes } from './steps/StepCertificationsAttributes';
 
-import { defaultNutritionalInfo, defaultProductionInfo, type FormStepId, type PriceTier } from '@/types/product';
+import { defaultNutritionalInfo, defaultProductionInfo, type FormStepId } from '@/types/product';
 
 // ─── Variantes ────────────────────────────────────────────────────────────────
 
@@ -37,17 +36,14 @@ interface ProductFormStepsProps {
   completedTabs: Record<string, boolean>;
   onInputChange: (field: string, value: any) => void;
   onNestedChange: (section: string, field: string, value: any) => void;
-  onPriceTiersChange: (tiers: PriceTier[]) => void;
   onImagesChange: (images: any[]) => void;
   skuSuggestion?: string;
-  /** ID del producto en modo edición — permite llamadas granulares a la API de certs. */
+  /** ID del producto en modo edición — permite llamadas granulares a la API de certs/variantes. */
   productId?: string;
   /** Indica si el producto está publicado (ACTIVE u OUT_OF_STOCK). Usado para mostrar indicadores de campos sensibles. */
   isPublishedProduct?: boolean;
-  /** Clave de cupo del asistente de IA en modo creación (en edición se usa `productId`). */
-  aiAssistKey?: string | null;
-  /** Notifica que el asistente de IA ha consumido cupo en este producto. */
-  onAiAssistUsed?: () => void;
+  /** VariantsEditor notifica aquí tras guardar/eliminar variantes (dentro del paso unificado de precio/variantes/inventario). */
+  onVariantsChange?: (count: number) => void;
 }
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -58,13 +54,11 @@ export function ProductFormSteps({
   completedTabs,
   onInputChange,
   onNestedChange,
-  onPriceTiersChange,
   onImagesChange,
   skuSuggestion,
   productId,
   isPublishedProduct,
-  aiAssistKey,
-  onAiAssistUsed,
+  onVariantsChange,
 }: ProductFormStepsProps) {
   return (
     <AnimatePresence mode="wait">
@@ -83,9 +77,6 @@ export function ProductFormSteps({
             onInputChange={onInputChange}
             completed={completedTabs.basic}
             isPublishedProduct={isPublishedProduct}
-            aiAssistKey={aiAssistKey ?? productId ?? null}
-            onAiAssistUsed={onAiAssistUsed}
-            aiAssistUnlimited={!!productId}
           />
         )}
 
@@ -99,13 +90,14 @@ export function ProductFormSteps({
         )}
 
         {activeTab === 'pricing' && (
-          <StepPricing
+          <StepPricingInventory
             formData={formData}
-            errors={{}}
-            touched={{}}
             onInputChange={onInputChange}
-            onPriceTiersChange={onPriceTiersChange}
+            onNestedChange={onNestedChange}
             completed={completedTabs.pricing}
+            skuSuggestion={skuSuggestion}
+            productId={productId}
+            onVariantsChange={onVariantsChange}
           />
         )}
 
@@ -115,9 +107,6 @@ export function ProductFormSteps({
             onNestedChange={onNestedChange}
             completed={completedTabs.nutritional}
             isPublishedProduct={isPublishedProduct}
-            aiAssistKey={aiAssistKey ?? productId ?? null}
-            onAiAssistUsed={onAiAssistUsed}
-            aiAssistUnlimited={!!productId}
           />
         )}
 
@@ -127,16 +116,6 @@ export function ProductFormSteps({
             onNestedChange={onNestedChange}
             completed={completedTabs.production}
             isPublishedProduct={isPublishedProduct}
-          />
-        )}
-
-        {activeTab === 'inventory' && (
-          <StepInventory
-            formData={formData}
-            onInputChange={onInputChange}
-            onNestedChange={onNestedChange}
-            completed={completedTabs.inventory}
-            skuSuggestion={skuSuggestion}
           />
         )}
 

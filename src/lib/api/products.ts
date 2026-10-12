@@ -12,9 +12,18 @@
  */
 
 import { gatewayClient, GatewayError } from './client';
-import { type Product, type ProductFormData, type FlashDeal, type FlashDealWithProduct } from '@/types/product';
+import {
+  type Product,
+  type ProductFormData,
+  type FlashDeal,
+  type FlashDealWithProduct,
+  type QuantityOffer,
+  type QuantityOfferWithProduct,
+  type ProductOption,
+  type ProductVariant,
+} from '@/types/product';
 
-export type { FlashDealWithProduct };
+export type { FlashDealWithProduct, QuantityOffer, QuantityOfferWithProduct };
 import { uploadFile } from './media';
 import {
   type ApiProduct,
@@ -110,15 +119,6 @@ function mapSortBy(sortBy?: string): string | undefined {
     'sales-desc': 'sales',
   };
   return map[sortBy] ?? 'newest';
-}
-
-function mapPriceTierType(type: string): string {
-  const map: Record<string, string> = {
-    fixed: 'FIXED',
-    percentage: 'PERCENTAGE',
-    bundle: 'BUNDLE',
-  };
-  return map[type] ?? 'FIXED';
 }
 
 function mapCertificationStatus(status: string): string {
@@ -248,16 +248,7 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
 
     basePrice:         formData.basePrice,
     comparePrice:      formData.comparePrice || undefined,
-    priceTiers:        formData.priceTiers.map((tier) => ({
-      minQuantity: tier.minQuantity,
-      maxQuantity: tier.maxQuantity,
-      type: mapPriceTierType(tier.type),
-      value: tier.value,
-      buyQuantity: tier.buyQuantity,
-      payQuantity: tier.payQuantity,
-      label: tier.label,
-      savings: Math.max(0, tier.savings ?? 0),
-    })),
+    hasVariants:       formData.hasVariants,
 
     // El backend genera el SKU si está vacío
     sku:               formData.sku || undefined,
@@ -379,7 +370,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
 
   const scalar: Array<keyof Product> = [
     'name', 'fullDescription', 'categoryId', 'subcategoryId',
-    'basePrice', 'comparePrice', 'sku', 'barcode', 'stock',
+    'basePrice', 'comparePrice', 'hasVariants', 'sku', 'barcode', 'stock',
     'lowStockThreshold', 'trackInventory', 'allowBackorders',
     'netContent', 'netContentUnit', 'weight', 'weightUnit', 'dimensions', 'shippingClass',
   ];
@@ -419,19 +410,6 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
   if (product.gallery !== undefined) {
     body.galleryImageUrls = product.gallery.map(img => img.url);
     body.galleryImageKeys = product.gallery.map(img => img.id);
-  }
-
-  if (product.priceTiers !== undefined) {
-    body.priceTiers = product.priceTiers.map((tier) => ({
-      minQuantity: tier.minQuantity,
-      maxQuantity: tier.maxQuantity,
-      type: mapPriceTierType(tier.type),
-      value: tier.value,
-      buyQuantity: tier.buyQuantity,
-      payQuantity: tier.payQuantity,
-      label: tier.label,
-      savings: Math.max(0, tier.savings ?? 0),
-    }));
   }
 
   if (product.nutritionalInfo !== undefined) {
@@ -753,15 +731,10 @@ export async function saveProductDraft(
 export async function updateProduct(
   id: string,
   productData: Partial<Product>,
-  options?: {
-    /** Confirma el reemplazo: desactiva la oferta Flash vigente/programada y activa los `priceTiers` enviados. */
-    replaceActiveFlashDeal?: boolean;
-  },
 ): Promise<ApiResponse<Product>> {
   try {
     const normalizedProductData = await normalizePartialProductBeforeSubmit({ ...productData, id });
     const body = partialProductToApiBody(normalizedProductData);
-    if (options?.replaceActiveFlashDeal) body.replaceActiveFlashDeal = true;
     const raw  = await gatewayClient.put<ApiProduct>(`/products/${id}`, body);
     return { data: mapApiProductToProduct(raw), status: 200 };
   } catch (error) {
@@ -1124,5 +1097,176 @@ export async function fetchMyFlashDeals(params?: {
     };
   } catch (error) {
     return handleError(error, 'fetchMyFlashDeals');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// OFERTAS POR CANTIDAD (QuantityOffer / PriceTier — gestión granular)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Crea un nuevo tier de precio por cantidad para un producto.
+ * Ruta backend: POST /products/:id/price-tier
+ */
+export async function createQuantityOffer(
+  productId: string,
+  data: {
+    minQuantity: number;
+    maxQuantity?: number;
+    type: 'FIXED' | 'PERCENTAGE' | 'BUNDLE';
+    value?: number;
+    buyQuantity?: number;
+    payQuantity?: number;
+    label?: string;
+    /** Confirma el reemplazo: desactiva la oferta Flash activa/programada y crea este tier. */
+    replaceActiveFlashDeal?: boolean;
+  },
+): Promise<ApiResponse<QuantityOffer>> {
+  try {
+    const raw = await gatewayClient.post<{ success: boolean; data: QuantityOffer }>(
+      `/products/${productId}/price-tier`,
+      data,
+    );
+    return { data: raw.data, status: 201 };
+  } catch (error) {
+    return handleError(error, 'createQuantityOffer');
+  }
+}
+
+/**
+ * Actualiza un tier de precio por cantidad existente de un producto.
+ * Ruta backend: PATCH /products/:id/price-tier/:tierId
+ */
+export async function updateQuantityOffer(
+  productId: string,
+  tierId: string,
+  data: {
+    minQuantity?: number;
+    maxQuantity?: number;
+    type?: 'FIXED' | 'PERCENTAGE' | 'BUNDLE';
+    value?: number;
+    buyQuantity?: number;
+    payQuantity?: number;
+    label?: string;
+  },
+): Promise<ApiResponse<QuantityOffer>> {
+  try {
+    const raw = await gatewayClient.patch<{ success: boolean; data: QuantityOffer }>(
+      `/products/${productId}/price-tier/${tierId}`,
+      data,
+    );
+    return { data: raw.data, status: 200 };
+  } catch (error) {
+    return handleError(error, 'updateQuantityOffer');
+  }
+}
+
+/**
+ * Desactiva un tier de precio por cantidad de un producto (soft delete: isActive = false).
+ * Ruta backend: DELETE /products/:id/price-tier/:tierId
+ */
+export async function deleteQuantityOffer(
+  productId: string,
+  tierId: string,
+): Promise<ApiResponse<null>> {
+  try {
+    await gatewayClient.delete(`/products/${productId}/price-tier/${tierId}`);
+    return { status: 204, data: null };
+  } catch (error) {
+    return handleError(error, 'deleteQuantityOffer');
+  }
+}
+
+/**
+ * Obtiene todos los tiers de precio por cantidad del productor autenticado.
+ * Ruta backend: GET /products/producer/price-tiers
+ */
+export async function fetchMyQuantityOffers(params?: {
+  status?: 'active' | 'inactive';
+  page?: number;
+  limit?: number;
+}): Promise<ApiResponse<{ data: QuantityOfferWithProduct[]; total: number; page: number; limit: number }>> {
+  try {
+    const query: Record<string, string | number | undefined> = {
+      page: params?.page ?? 1,
+      limit: params?.limit ?? 20,
+    };
+
+    if (params?.status) {
+      query.status = params.status;
+    }
+
+    const raw = await gatewayClient.get<{
+      data: QuantityOfferWithProduct[];
+      total: number;
+      page: number;
+      limit: number;
+    }>('/products/producer/price-tiers', {
+      params: query as Record<string, string | number | boolean | undefined | null>,
+    });
+
+    return {
+      data: raw,
+      status: 200,
+    };
+  } catch (error) {
+    return handleError(error, 'fetchMyQuantityOffers');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// VARIANTES DE PRODUCTO (estilo Shopify — solo modelo + edición en dashboard
+// por ahora, sin conectar al checkout/carrito)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Reemplaza el conjunto completo de opciones de variante de un producto.
+ * Ruta backend: PUT /products/:id/options
+ */
+export async function syncProductOptions(
+  productId: string,
+  options: Array<{ name: string; values: string[] }>,
+): Promise<ApiResponse<ProductOption[]>> {
+  try {
+    const raw = await gatewayClient.put<{ success: boolean; data: ProductOption[] }>(
+      `/products/${productId}/options`,
+      { options },
+    );
+    return { data: raw.data, status: 200 };
+  } catch (error) {
+    return handleError(error, 'syncProductOptions');
+  }
+}
+
+/**
+ * Sincroniza el listado completo de variantes de un producto (upsert por id
+ * + borrado de las que ya no aparecen) en una sola llamada.
+ * Ruta backend: PUT /products/:id/variants
+ */
+export async function syncProductVariants(
+  productId: string,
+  variants: Array<{
+    id?: string;
+    option1Value?: string;
+    option2Value?: string;
+    option3Value?: string;
+    barcode?: string;
+    price: number;
+    compareAtPrice?: number;
+    stock: number;
+    trackInventory?: boolean;
+    /** Peso de ESTA variante con embalaje, para envío. */
+    weight?: number;
+    weightUnit?: 'kg' | 'g';
+  }>,
+): Promise<ApiResponse<ProductVariant[]>> {
+  try {
+    const raw = await gatewayClient.put<{ success: boolean; data: ProductVariant[] }>(
+      `/products/${productId}/variants`,
+      { variants },
+    );
+    return { data: raw.data, status: 200 };
+  } catch (error) {
+    return handleError(error, 'syncProductVariants');
   }
 }

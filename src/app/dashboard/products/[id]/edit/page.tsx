@@ -20,7 +20,6 @@ import {
   CreateProductCancelDialog,
   SuccessPublishModal,
   SensitiveChangeConfirmDialog,
-  OfferConflictDialog,
 } from '../../components';
 import { ProductFormSteps } from '../../components/ProductFormSteps';
 import { ProductFormSidebar } from '../../components/ProductFormSidebar';
@@ -61,6 +60,7 @@ export default function EditProductPage() {
     showSuccessModal,
     setShowSuccessModal,
     skuSuggestion,
+    onVariantsChange,
     allStepsCompleted,
     hasCertifications,
     certificationsApproved,
@@ -69,26 +69,21 @@ export default function EditProductPage() {
     currentStepErrors,
     handleInputChange,
     handleNestedChange,
-    handlePriceTiersChange,
     handleImagesChange,
     handleSave,
     handlePublish,
     handleCancel,
     reloadProduct,
     isPublishedProduct,
+    isPendingApproval,
     sensitiveDirtyFields,
     pendingSensitiveConfirmation,
     confirmSensitiveSave,
-    pendingOfferConflict,
-    isResolvingOfferConflict,
-    confirmOfferConflictReplace,
-    cancelOfferConflict,
   } = useProductForm(productId);
 
   const showPageLoader = useDelayedLoading(isLoading);
 
-  const stepNumber = FORM_STEPS.findIndex(s => s.id === activeTab) + 1;
-  const tips = useStepTips(stepNumber, formData);
+  const tips = useStepTips(activeTab, formData);
 
   const handleTabChange = (tab: FormStepId) => {
     setShowMobileErrors(false);
@@ -106,7 +101,7 @@ export default function EditProductPage() {
   // Estado para el panel de errores del ActionBar móvil
   const [showMobileErrors, setShowMobileErrors] = useState(false);
 
-  const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing', 'inventory'];
+  const BLOCKING_STEPS: FormStepId[] = ['basic', 'images', 'pricing'];
   const isMobileStepBlocked = BLOCKING_STEPS.includes(activeTab) && currentStepErrors.length > 0;
 
   const handlePrev = () => {
@@ -122,7 +117,17 @@ export default function EditProductPage() {
     if (nextStep) { handleTabChange(nextStep); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   };
 
-  if (showPageLoader) return <PageLoader message="Cargando producto..." className="animate-fade-in" />;
+  // `isLoading` (no el `showPageLoader` ya debounced) es lo que decide si se
+  // pinta el formulario — si no, durante la ventana de 200 ms en la que
+  // useDelayedLoading todavía suprime el spinner (a propósito, para cargas
+  // rápidas) se colaba el formulario completo con `defaultFormData` (nombre
+  // vacío, sin categoría...) antes de que llegase el producto real: un
+  // parpadeo real (formulario en blanco → spinner → datos reales) reportado
+  // por el humano, 2026-10-08, al pulsar "Editar" desde el listado. Con esto,
+  // esa ventana se queda en blanco (nada que mostrar todavía) en vez de
+  // mostrar datos incorrectos, y el spinner solo aparece si la carga tarda
+  // más de esos 200 ms.
+  if (isLoading) return showPageLoader ? <PageLoader message="Cargando producto..." className="animate-fade-in" /> : null;
   if (error) return <PageError title="Error al cargar" message={error} onRetry={reloadProduct} />;
 
   return (
@@ -156,11 +161,16 @@ export default function EditProductPage() {
       />
 
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <CreateProductProgress
-          currentTab={activeTab}
-          completedTabs={completedTabs}
-          onTabChange={handleTabChange}
-        />
+        {/* Panel de pasos — en escritorio (≥lg) vive en la columna lateral,
+            encima de "Consejos útiles" (ver más abajo); aquí solo para
+            móvil/tablet, donde ya era correcto. */}
+        <div className="lg:hidden">
+          <CreateProductProgress
+            currentTab={activeTab}
+            completedTabs={completedTabs}
+            onTabChange={handleTabChange}
+          />
+        </div>
 
         {/* Aviso de autoguardado -- visible en todos los tamaños de pantalla.
             Aclara explícitamente que cada cambio se guarda solo, sin depender
@@ -182,8 +192,14 @@ export default function EditProductPage() {
           )}
         </div>
 
-        {/* Callout informativo para borradores incompletos */}
-        {formData.status === 'draft' && !allStepsCompleted && (() => {
+        {/* Callouts de "borrador" (pasos pendientes / publicar ya) -- solo
+            tienen sentido para un producto que nunca se ha enviado a
+            revisión. formData.status colapsa PENDING_APPROVAL a 'draft'
+            (ver useProductForm), así que se excluye aparte con
+            isPendingApproval -- si no, un producto ya enviado y esperando
+            aprobación del admin mostraba "¡Todo completado!, publícalo ya"
+            (hallazgo real, petición del humano, 2026-10-09). */}
+        {formData.status === 'draft' && !isPendingApproval && !allStepsCompleted && (() => {
           const pendingSteps = Object.entries(completedTabs)
             .filter(([, done]) => !done)
             .map(([id]) => FORM_STEPS.find(s => s.id === id)?.label)
@@ -198,7 +214,7 @@ export default function EditProductPage() {
             </Alert>
           );
         })()}
-        {formData.status === 'draft' && allStepsCompleted && (
+        {formData.status === 'draft' && !isPendingApproval && allStepsCompleted && (
           <Alert variant="success" className="mt-4">
             <AlertTitle>¡Todo completado!</AlertTitle>
             <AlertDescription className="space-y-3">
@@ -241,11 +257,11 @@ export default function EditProductPage() {
               completedTabs={completedTabs}
               onInputChange={handleInputChange}
               onNestedChange={handleNestedChange}
-              onPriceTiersChange={handlePriceTiersChange}
               onImagesChange={handleImagesChange}
               skuSuggestion={skuSuggestion}
               productId={productId}
               isPublishedProduct={isPublishedProduct}
+              onVariantsChange={onVariantsChange}
             />
 
             {/* Navegación de pasos — sólo visible en ≥ lg; hasta ahí usa ActionBar */}
@@ -271,10 +287,26 @@ export default function EditProductPage() {
             </div>
           </div>
 
-          <ProductFormSidebar
-            tips={tips}
-            keyFact={KEY_FACTS_BY_STEP[stepNumber]}
-          />
+          {/* Columna lateral de escritorio: panel de pasos + consejos
+              útiles apilados dentro de un único `sticky` (petición del
+              humano, 2026-10-08) — dos `sticky` independientes nunca
+              alinean bien sus offsets porque el panel de pasos cambia de
+              alto al condensarse con el scroll. */}
+          <div className="hidden lg:block lg:col-span-1">
+            <div className="sticky top-16 space-y-4">
+              <CreateProductProgress
+                currentTab={activeTab}
+                completedTabs={completedTabs}
+                onTabChange={handleTabChange}
+                embedded
+              />
+              <ProductFormSidebar
+                tips={tips}
+                keyFact={KEY_FACTS_BY_STEP[activeTab]}
+                embedded
+              />
+            </div>
+          </div>
         </motion.div>
       </div>
 
@@ -381,13 +413,6 @@ export default function EditProductPage() {
           // El usuario eligió no guardar — el modal se cierra y puede seguir editando
         }}
         isSaving={isSaving}
-      />
-
-      <OfferConflictDialog
-        open={!!pendingOfferConflict}
-        onOpenChange={(open) => { if (!open) cancelOfferConflict(); }}
-        onConfirm={confirmOfferConflictReplace}
-        isLoading={isResolvingOfferConflict}
       />
     </div>
   );

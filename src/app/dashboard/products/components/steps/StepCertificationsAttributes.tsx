@@ -1,6 +1,6 @@
 /**
  * @component StepCertificationsAttributes
- * @description Paso 7: Certificaciones y atributos
+ * @description Último paso del wizard: Certificaciones y atributos
  *
  * Mobile UX:
  * - Catálogo en bottom sheet (slide-up) en móvil, panel inline en desktop
@@ -65,6 +65,7 @@ import type {
   CertificationStatus,
   CertificationCategory
 } from '@/types/product';
+import { FORM_STEPS, stepPosition } from '@/types/product';
 import {
   getCertificationsCatalog,
   addProductCertification,
@@ -521,9 +522,19 @@ export function StepCertificationsAttributes({
             />
           </div>
 
-          {/* Filtro de categoría — full width en móvil, auto en desktop */}
-          <Select value={catalogCategory} onValueChange={setCatalogCategory}>
-            <SelectTrigger className="h-12 sm:h-11 w-full sm:w-auto sm:min-w-[150px] rounded-xl gap-1.5">
+          {/* Filtro de categoría — full width en móvil, auto en desktop.
+              IMPORTANTE: el ancho se pasa a `Select` (su raíz real es
+              `cn("relative w-full", className)`), no a `SelectTrigger` --
+              pasarlo solo a SelectTrigger no llega a la raíz y el filtro se
+              queda forzando w-full del propio Select dentro de la fila,
+              dejando el buscador comprimido a ~80px (hallazgo real, petición
+              del humano, 2026-10-09; ver nota en guia-diseno-ux.md 8.11). */}
+          <Select
+            value={catalogCategory}
+            onValueChange={setCatalogCategory}
+            className="w-full sm:w-auto sm:min-w-[150px] sm:shrink-0"
+          >
+            <SelectTrigger className="h-12 sm:h-11 w-full rounded-xl gap-1.5">
               <Filter className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
               <SelectValue placeholder="Todas las categorías" />
             </SelectTrigger>
@@ -637,7 +648,7 @@ export function StepCertificationsAttributes({
 
           {/* Badges — 4 en este paso (vs. 2 en el resto); igual que el resto de
               pasos, se dejan envolver en 2 filas en móvil (flex-wrap) en vez de
-              ocultarlos, para no perder "Paso 7 de 7" justo en el paso que
+              ocultarlos, para no perder "Paso 8 de 8" justo en el paso que
               bloquea publicar. */}
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             <Badge variant="leaf" size="sm" className="bg-origen-pradera/10">
@@ -656,7 +667,7 @@ export function StepCertificationsAttributes({
               </Badge>
             )}
             <Badge variant="leaf" size="sm" className="flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> Paso 7 de 7
+              <Sparkles className="w-3 h-3" /> Paso {stepPosition('certifications')} de {FORM_STEPS.length}
             </Badge>
           </div>
         </div>

@@ -8,7 +8,7 @@
 'use client';
 
 import React from 'react';
-import { Package, Camera, DollarSign, FlaskConical, Leaf, ShoppingBag, Award } from 'lucide-react';
+import { Package, Camera, DollarSign, FlaskConical, Leaf, ShoppingBag, Award, Boxes } from 'lucide-react';
 import { WizardProgress } from '@/components/shared/wizard-progress';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 
@@ -20,6 +20,7 @@ const iconMap: Record<string, React.ReactNode> = {
   Leaf: <Leaf className="w-4 h-4" />,
   ShoppingBag: <ShoppingBag className="w-4 h-4" />,
   Award: <Award className="w-4 h-4" />,
+  Boxes: <Boxes className="w-4 h-4" />,
 };
 
 const PRODUCT_STEPS = FORM_STEPS.map((s) => ({ id: s.id, label: s.label, icon: iconMap[s.icon] }));
@@ -31,6 +32,8 @@ export interface CreateProductProgressProps {
   completedTabs: Record<string, boolean>;
   /** Función para cambiar de paso */
   onTabChange: (tab: FormStepId) => void;
+  /** Para usarlo dentro de la columna lateral (junto a "Consejos útiles"), con su propio `sticky` — ver `WizardProgress`. */
+  embedded?: boolean;
   /** Clase CSS adicional */
   className?: string;
 }
@@ -40,6 +43,7 @@ export function CreateProductProgress({
   currentTab,
   completedTabs,
   onTabChange,
+  embedded,
   className,
 }: CreateProductProgressProps) {
   return (
@@ -53,6 +57,7 @@ export function CreateProductProgress({
         content: 'Completa todos los pasos',
         detailed: 'Cada paso debe estar completado para poder publicar el producto',
       }}
+      embedded={embedded}
       className={className}
     />
   );

@@ -6,10 +6,12 @@
 import {
   CreditCard,
   LayoutDashboard,
+  Layers,
   Megaphone,
   Package,
   ShoppingBag,
   Star,
+  Tag,
   Truck,
   User,
   Zap,
@@ -62,6 +64,7 @@ export interface DashboardBreadcrumbItem {
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard/campanas': 'Campañas',
   '/dashboard/ofertas-flash': 'Ofertas flash',
+  '/dashboard/ofertas-por-cantidad': 'Ofertas por cantidad',
   '/dashboard/perfil': 'Perfil',
   '/dashboard': 'Inicio',
   '/dashboard/orders': 'Pedidos',
@@ -90,6 +93,7 @@ const PAGE_TITLES: Record<string, string> = {
 const SEGMENT_LABELS: Record<string, string> = {
   campanas: 'Campañas',
   'ofertas-flash': 'Ofertas flash',
+  'ofertas-por-cantidad': 'Ofertas por cantidad',
   dashboard: 'Inicio',
   orders: 'Pedidos',
   facturas: 'Facturas de venta',
@@ -153,11 +157,25 @@ const ANALYTICS_ITEMS: MenuItem[] = [
     matchPaths: ['/dashboard/campanas*'],
   },
   {
-    id: 'ofertas-flash',
-    label: 'Ofertas flash',
-    icon: Zap,
-    href: '/dashboard/ofertas-flash',
-    matchPaths: ['/dashboard/ofertas-flash*'],
+    id: 'descuentos',
+    label: 'Descuentos',
+    icon: Tag,
+    submenu: [
+      {
+        id: 'oferta-flash',
+        label: 'Oferta flash',
+        href: '/dashboard/ofertas-flash',
+        icon: Zap,
+        matchPaths: ['/dashboard/ofertas-flash*'],
+      },
+      {
+        id: 'ofertas-cantidad',
+        label: 'Ofertas por cantidad',
+        href: '/dashboard/ofertas-por-cantidad',
+        icon: Layers,
+        matchPaths: ['/dashboard/ofertas-por-cantidad*'],
+      },
+    ],
   },
 ];
 
@@ -190,7 +208,7 @@ const ANALYTICS_ITEMS: MenuItem[] = [
 export const DASHBOARD_NAV_SECTIONS: NavigationSection[] = [
   { id: 'general', label: 'General', items: GENERAL_ITEMS },
   { id: 'operacion', label: 'Operacion', items: OPERATIONS_ITEMS },
-  { id: 'rendimiento', label: 'Rendimiento', items: ANALYTICS_ITEMS },
+  { id: 'rendimiento', label: 'Marketing', items: ANALYTICS_ITEMS },
 ];
 
 export const MENU_ITEMS: MenuItem[] = DASHBOARD_NAV_SECTIONS.flatMap((section) => section.items);
