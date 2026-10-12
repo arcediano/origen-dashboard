@@ -183,12 +183,15 @@ export function AiProductReview({
       transition={{ duration: 0.35 }}
       className={cn('mx-auto max-w-3xl space-y-6', appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64), 'lg:pb-0')}
     >
-      {/* Estado real del producto: aún no existe en el catálogo ni como borrador guardado */}
-      <Alert variant="info" data-testid="unsaved-product-notice">
-        <AlertTitle>Este producto todavía no está guardado</AlertTitle>
+      {/* Estado real del producto: ya se ha guardado como borrador real en
+          "Mis productos" en cuanto la IA terminó (petición del humano,
+          2026-10-09/2026-10-12) -- nunca se pierde, aunque el productor
+          salga de esta pantalla sin pulsar nada. */}
+      <Alert variant="info" data-testid="draft-saved-notice">
+        <AlertTitle>Borrador guardado</AlertTitle>
         <AlertDescription>
-          Es el producto que estás creando ahora, no un borrador. Pulsa «Guardar» para conservarlo. Si sales sin guardar se descarta,
-          y los créditos del asistente que ya has gastado no se recuperan.
+          Ya está guardado en «Mis productos» con lo que ha preparado la IA. Revisa, ajusta lo que quieras y completa el precio
+          cuando puedas: puedes salir y seguir más tarde sin perder nada.
         </AlertDescription>
       </Alert>
 

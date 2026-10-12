@@ -22,8 +22,10 @@ export interface CreateProductCancelDialogProps {
   /** Función para confirmar cancelación */
   onConfirm: () => void;
   /**
-   * El productor ha usado el asistente de IA en este producto sin guardarlo:
-   * salir sin guardar consume igualmente una de sus plazas de producto con IA.
+   * El productor ha usado el asistente de IA en este producto: desde la
+   * petición del humano de 2026-10-09, eso implica que el borrador ya está
+   * guardado como producto real -- salir ahora no lo descarta, solo deja sin
+   * guardar los cambios hechos en esta sesión de revisión.
    */
   aiAssistUsed?: boolean;
 }
@@ -50,11 +52,11 @@ export function CreateProductCancelDialog({
       description="Los datos no guardados se perderán."
       body={
         aiAssistUsed
-          ? 'Si cancelas ahora, el producto no se guarda como borrador: se descarta. Ya has usado un crédito del asistente de IA en este producto y no se recupera. ¿Estás seguro de que quieres salir?'
+          ? 'El borrador ya está guardado en «Mis productos» con lo que preparó la IA: no se pierde, aunque salgas ahora. Solo perderás los cambios que hayas hecho en esta revisión sin guardar. ¿Seguro que quieres salir?'
           : 'Si cancelas ahora, perderás todos los cambios que no hayas guardado. ¿Estás seguro de que quieres salir?'
       }
       confirmVariant="danger"
-      confirmLabel="Descartar"
+      confirmLabel={aiAssistUsed ? 'Salir' : 'Descartar'}
       cancelLabel="Continuar"
       onConfirm={onConfirm}
     />
