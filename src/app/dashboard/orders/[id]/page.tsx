@@ -804,6 +804,12 @@ export default function OrderDetailPage() {
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground leading-tight truncate">{item.productName}</p>
+                        {/* Variante comprada (p. ej. "500 g, Rojo") — sin esto, dos
+                            variantes del mismo producto en el pedido serían
+                            indistinguibles (mismo nombre e imagen). */}
+                        {item.variantOptionsSummary && (
+                          <p className="text-xs text-hoja-tinta font-medium mt-0.5">{item.variantOptionsSummary}</p>
+                        )}
                         <p className="text-xs text-text-subtle mt-0.5">
                           {item.quantity} × {formatCurrency(item.unitPrice)}
                           {item.discount && <span className="text-hoja-tinta ml-1.5">−{item.discount}%</span>}

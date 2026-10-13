@@ -35,6 +35,9 @@ interface BackendOrderItem {
   subtotal: number;
   commissionRate?: number | null;
   commissionAmount?: number | null;
+  variantId?: string;
+  variantSku?: string;
+  variantOptionsSummary?: string;
 }
 
 interface BackendShippingAddress {
@@ -213,6 +216,9 @@ function mapBackendOrder(o: BackendOrder): Order {
       totalPrice: item.subtotal,
       commissionRate: item.commissionRate,
       commissionAmount: item.commissionAmount,
+      variantId: item.variantId,
+      variantSku: item.variantSku,
+      variantOptionsSummary: item.variantOptionsSummary,
     })),
 
     subtotal: o.subtotal,
