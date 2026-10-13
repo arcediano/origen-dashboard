@@ -13,7 +13,7 @@
 const DOCUMENT_TYPE_LABEL: Record<string, string> = {
   CIF: 'CIF/NIF',
   SEGURO_RC: 'seguro de responsabilidad civil',
-  MANIPULADOR_ALIMENTOS: 'manipulador de alimentos',
+  MANIPULADOR_ALIMENTOS: 'formación en manipulación de alimentos',
 };
 
 const PRODUCER_STATUS_LABEL: Record<string, string> = {

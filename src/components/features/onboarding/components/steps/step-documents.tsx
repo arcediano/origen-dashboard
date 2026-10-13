@@ -2,10 +2,20 @@
  * @file step-documents.tsx
  * @description Paso 4 del onboarding: documentación legal y certificaciones.
  *
- * El productor sube los 3 documentos legales (cada uno con su caducidad,
- * obligatoria) y DECLARA sus certificaciones del catálogo (cada una puede llevar
- * documento, opcional). Todo se rehidrata desde `GET onboarding/data`: lo ya
- * subido no hay que volver a subirlo y la caducidad se puede editar sin archivo nuevo.
+ * Solo el CIF/NIF es obligatorio para dar de alta al productor (petición del
+ * humano, 2026-10-13): es el único documento legalmente imprescindible para
+ * operar. El Seguro de Responsabilidad Civil y la formación en manipulación
+ * de alimentos son recomendados, no bloqueantes -- el productor puede
+ * subirlos (con su caducidad, si lo hace) o dejarlos para más tarde desde
+ * "Mi perfil → Certificaciones". A la formación ya no se la llama "carnet de
+ * manipulador de alimentos": se aconseja completar un curso acreditado
+ * adaptado al riesgo real de la actividad del productor, no se exige subir
+ * un documento concreto.
+ *
+ * El productor DECLARA además sus certificaciones del catálogo (cada una
+ * puede llevar documento, opcional). Todo se rehidrata desde
+ * `GET onboarding/data`: lo ya subido no hay que volver a subirlo y la
+ * caducidad se puede editar sin archivo nuevo.
  */
 
 'use client';
@@ -51,10 +61,9 @@ const CERT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
   agricultura_regenerativa: Recycle,
 };
 
-const LEGAL_DOCS: Array<{ key: LegalDocumentKey; title: string; description: string }> = [
-  { key: 'cif', title: 'CIF / NIF', description: 'El documento que identifica fiscalmente a tu negocio. Sube el anverso y el reverso.' },
-  { key: 'seguroRc', title: 'Seguro de responsabilidad civil', description: 'Cobertura mínima de 150.000 €. Es obligatorio para vender en Origen.' },
-  { key: 'manipulador', title: 'Manipulador de alimentos', description: 'Necesario para cualquier productor de alimentos.' },
+const RECOMMENDED_DOCS: Array<{ key: LegalDocumentKey; title: string; description: string }> = [
+  { key: 'seguroRc', title: 'Seguro de responsabilidad civil', description: 'No es obligatorio, pero te lo recomendamos para proteger tu negocio ante posibles reclamaciones. Cobertura orientativa: 150.000 €.' },
+  { key: 'manipulador', title: 'Formación en manipulación de alimentos', description: 'No hace falta subir ningún documento: te aconsejamos completar un curso de formación acreditado, adaptado al riesgo real de tu actividad. Si ya tienes un certificado, puedes subirlo aquí.' },
 ];
 
 const STATUS_BADGE: Record<DocumentStatus, { label: string; variant: 'success' | 'warning' | 'danger' }> = {
@@ -73,13 +82,15 @@ interface DocumentFieldProps {
   slot: DocumentSlot;
   onChange: (slot: DocumentSlot) => void;
   errors: Record<string, string>;
-  /** Mostrar la insignia "Obligatorio" (documentos legales). */
+  /** Mostrar la insignia "Obligatorio" (solo el CIF la usa hoy). */
   required?: boolean;
+  /** Mostrar la insignia "Recomendado" (Seguro de RC y formación de manipulador). */
+  recommended?: boolean;
   uploadHelper?: string;
 }
 
 /** Un documento: subida (o archivo ya guardado) + caducidad. */
-function DocumentField({ idBase, title, description, slot, onChange, errors, required, uploadHelper }: DocumentFieldProps) {
+function DocumentField({ idBase, title, description, slot, onChange, errors, required, recommended, uploadHelper }: DocumentFieldProps) {
   const today = todayISO();
   const verified = slot.status === 'VERIFIED';
   const badge = slot.status ? STATUS_BADGE[slot.status] : undefined;
@@ -97,6 +108,7 @@ function DocumentField({ idBase, title, description, slot, onChange, errors, req
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="text-sm font-semibold text-origen-bosque sm:text-base">{title}</h3>
           {required && !slot.file && <Badge variant="danger" size="xs">Obligatorio</Badge>}
+          {recommended && !slot.file && <Badge variant="neutral" size="xs">Recomendado</Badge>}
           {slot.file && badge && <Badge variant={badge.variant} size="xs">{badge.label}</Badge>}
         </div>
         {description && <p className="mt-0.5 text-xs text-text-subtle sm:text-sm">{description}</p>}
@@ -300,39 +312,43 @@ export function EnhancedStep4Documents({ data, onChange, errors = {} }: Enhanced
         </span>
       </Alert>
 
-      {/* ── Documentos legales ──────────────────────────────────────────── */}
+      {/* ── Documento obligatorio (solo CIF/NIF) ────────────────────────── */}
       <StepSection
         icon={<FileText className="h-5 w-5" />}
-        title="Documentos obligatorios"
-        description="Necesarios para verificar tu negocio. Cada uno con su fecha de caducidad."
+        title="Documento obligatorio"
+        description="El único necesario para verificar tu negocio y empezar a vender."
+      >
+        <CifDocumentField
+          idBase="onb-doc-cif"
+          title="CIF / NIF"
+          description="El documento que identifica fiscalmente a tu negocio. Sube el anverso y el reverso."
+          slot={data.cif}
+          onChange={(slot) => setLegal('cif', slot)}
+          errors={errors}
+        />
+      </StepSection>
+
+      {/* ── Documentos recomendados (no bloquean el alta) ───────────────── */}
+      <StepSection
+        icon={<Shield className="h-5 w-5" />}
+        title="Documentos recomendados"
+        description="No son obligatorios para darte de alta, pero te los aconsejamos. Puedes completarlos ahora o más tarde desde Mi perfil."
+        badge={<Badge variant="neutral" size="xs">Recomendado</Badge>}
       >
         <div className="divide-y divide-border-subtle">
-          {LEGAL_DOCS.map((doc) =>
-            doc.key === 'cif' ? (
-              <div key={doc.key} className="py-4 first:pt-0 last:pb-0">
-                <CifDocumentField
-                  idBase={`onb-doc-${doc.key}`}
-                  title={doc.title}
-                  description={doc.description}
-                  slot={data[doc.key]}
-                  onChange={(slot) => setLegal(doc.key, slot)}
-                  errors={errors}
-                />
-              </div>
-            ) : (
-              <div key={doc.key} className="py-4 first:pt-0 last:pb-0">
-                <DocumentField
-                  idBase={`onb-doc-${doc.key}`}
-                  title={doc.title}
-                  description={doc.description}
-                  slot={data[doc.key]}
-                  onChange={(slot) => setLegal(doc.key, slot)}
-                  errors={errors}
-                  required
-                />
-              </div>
-            ),
-          )}
+          {RECOMMENDED_DOCS.map((doc) => (
+            <div key={doc.key} className="py-4 first:pt-0 last:pb-0">
+              <DocumentField
+                idBase={`onb-doc-${doc.key}`}
+                title={doc.title}
+                description={doc.description}
+                slot={data[doc.key]}
+                onChange={(slot) => setLegal(doc.key, slot)}
+                errors={errors}
+                recommended
+              />
+            </div>
+          ))}
         </div>
       </StepSection>
 

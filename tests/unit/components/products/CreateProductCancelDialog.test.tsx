@@ -16,11 +16,13 @@ describe('CreateProductCancelDialog', () => {
     expect(bodyOf(container)).not.toContain('plazas de productos con IA');
   });
 
-  it('con el asistente de IA usado y sin guardar avisa de que no queda borrador y el crédito no se recupera', () => {
+  it('con el asistente de IA usado, avisa de que el borrador ya está guardado y no se pierde al salir', () => {
     const { container } = render(
       <CreateProductCancelDialog open onOpenChange={vi.fn()} onConfirm={vi.fn()} aiAssistUsed />,
     );
-    expect(bodyOf(container)).toContain('no se guarda como borrador');
-    expect(bodyOf(container)).toContain('crédito del asistente de IA');
+    expect(bodyOf(container)).toContain('ya está guardado');
+    expect(bodyOf(container)).toContain('no se pierde');
+    expect(bodyOf(container)).not.toContain('no se guarda como borrador');
+    expect(bodyOf(container)).not.toContain('se descarta');
   });
 });

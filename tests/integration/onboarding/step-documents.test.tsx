@@ -23,9 +23,11 @@ function Harness({ initial, errors }: { initial?: Partial<DocumentsData>; errors
 }
 
 describe('EnhancedStep4Documents', () => {
-  it('vacío: pide subir los 3 documentos obligatorios', () => {
+  it('vacío: solo el CIF/NIF es obligatorio -- Seguro de RC y formación de manipulador se marcan como recomendados', () => {
     render(<Harness />);
-    expect(screen.getAllByText('Obligatorio')).toHaveLength(3);
+    expect(screen.getAllByText('Obligatorio')).toHaveLength(1);
+    // 1 insignia de la cabecera de sección + 1 por cada documento recomendado sin subir (2)
+    expect(screen.getAllByText('Recomendado')).toHaveLength(3);
   });
 
   it('hidratado: muestra el archivo guardado (sin zona de subida) y la caducidad editable', async () => {

@@ -72,8 +72,12 @@ describe('paso 3 (envíos)', () => {
 
 describe('paso 4 (documentación)', () => {
   const file = { id: 'k', key: 'k', name: 'd.pdf', size: 0, type: 'application/pdf' };
-  it('los 3 documentos son obligatorios', () => {
-    expect(ids(3, form())).toEqual(['onb-doc-cif', 'onb-doc-seguroRc', 'onb-doc-manipulador']);
+  it('solo el CIF/NIF es obligatorio -- Seguro de RC y formación en manipulación de alimentos son recomendados, no bloquean (petición del humano, 2026-10-13)', () => {
+    expect(ids(3, form())).toEqual(['onb-doc-cif']);
+  });
+  it('si se sube el Seguro de RC o la formación (opcionales) igualmente se les exige caducidad', () => {
+    const base = { ...INITIAL_FORM_DATA.step4, cif: { file, fileBack: file, expiresAt: '2030-01-01' }, seguroRc: { file } };
+    expect(ids(3, form({ step4: base }))).toEqual(['onb-doc-seguroRc-expires']);
   });
   it('la caducidad es obligatoria y futura; un verificado no la exige', () => {
     const base = { ...INITIAL_FORM_DATA.step4, cif: { file, fileBack: file, expiresAt: '2030-01-01' }, seguroRc: { file }, manipulador: { file, expiresAt: '2026-01-01' } };

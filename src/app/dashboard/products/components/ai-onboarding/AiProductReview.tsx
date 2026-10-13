@@ -12,7 +12,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import {
-  AlertTriangle, CheckCircle, ChevronDown, Euro, FlaskConical, Images, Leaf, Package, Save, Send, Sparkles,
+  AlertTriangle, Boxes, CheckCircle, ChevronDown, Euro, FlaskConical, Images, Leaf, Package, Save, Send, Sparkles,
 } from 'lucide-react';
 import {
   ActionBar, Alert, AlertDescription, AlertTitle, Badge, Button, Card, CurrencyInput, Input,
@@ -48,6 +48,10 @@ interface AiProductReviewProps {
   canPublish: boolean;
   /** Vuelve al formulario paso a paso conservando lo ya rellenado. */
   onOpenWizard: () => void;
+  /** Nº de variantes ya guardadas (ver useProductForm) -- para mostrar el resumen sin recargar. */
+  savedVariantsCount: number;
+  /** Abre el paso de precio/variantes del wizard directamente (mismo paso que "Ver paso a paso", pero saltando ahí). */
+  onConfigureVariants: () => void;
 }
 
 function SectionCard({
@@ -155,6 +159,8 @@ export function AiProductReview({
   publishError,
   canPublish,
   onOpenWizard,
+  savedVariantsCount,
+  onConfigureVariants,
 }: AiProductReviewProps) {
   const summary = useMemo(() => summarizeDraft(draft), [draft]);
   const hasProduction =
@@ -170,9 +176,15 @@ export function AiProductReview({
     if (!formData.fullDescription || formData.fullDescription.trim().length < 100) list.push('Descripción (mínimo 100 caracteres)');
     if (!formData.categoryId) list.push('Categoría');
     if (!formData.gallery || formData.gallery.length === 0) list.push('Al menos una foto');
-    if (!formData.basePrice || formData.basePrice <= 0) list.push('Precio de venta');
+    // Con variantes, el precio/stock únicos del producto ya no se piden -- cada
+    // variante define los suyos (mismo criterio que useProductForm.getStepErrors('pricing')).
+    if (formData.hasVariants) {
+      if (savedVariantsCount === 0) list.push('Al menos una variante con precio y stock');
+    } else if (!formData.basePrice || formData.basePrice <= 0) {
+      list.push('Precio de venta');
+    }
     return list;
-  }, [formData]);
+  }, [formData, savedVariantsCount]);
 
   const publishLabel = missing.length > 0 ? `Falta completar (${missing.length})` : 'Publicar';
 
@@ -183,12 +195,15 @@ export function AiProductReview({
       transition={{ duration: 0.35 }}
       className={cn('mx-auto max-w-3xl space-y-6', appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64), 'lg:pb-0')}
     >
-      {/* Estado real del producto: aún no existe en el catálogo ni como borrador guardado */}
-      <Alert variant="info" data-testid="unsaved-product-notice">
-        <AlertTitle>Este producto todavía no está guardado</AlertTitle>
+      {/* Estado real del producto: ya se ha guardado como borrador real en
+          "Mis productos" en cuanto la IA terminó (petición del humano,
+          2026-10-09/2026-10-12) -- nunca se pierde, aunque el productor
+          salga de esta pantalla sin pulsar nada. */}
+      <Alert variant="info" data-testid="draft-saved-notice">
+        <AlertTitle>Borrador guardado</AlertTitle>
         <AlertDescription>
-          Es el producto que estás creando ahora, no un borrador. Pulsa «Guardar» para conservarlo. Si sales sin guardar se descarta,
-          y los créditos del asistente que ya has gastado no se recuperan.
+          Ya está guardado en «Mis productos» con lo que ha preparado la IA. Revisa, ajusta lo que quieras y completa el precio
+          cuando puedas: puedes salir y seguir más tarde sin perder nada.
         </AlertDescription>
       </Alert>
 
@@ -261,42 +276,77 @@ export function AiProductReview({
         title="Precio y stock"
         description="Esto solo lo sabes tú: la IA nunca lo propone."
       >
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-foreground">
-              Precio de venta<span className="ml-1 text-feedback-danger">*</span>
-            </span>
-            <CurrencyInput
-              value={formData.basePrice ?? 0}
-              onChange={(value) => onInputChange('basePrice', value)}
-              min={0.01}
-              inputSize="lg"
-              className="h-12 w-full rounded-xl"
-              placeholder="Ej: 24,50"
-              error={!formData.basePrice || formData.basePrice <= 0 ? 'Indica el precio de venta (mayor que 0)' : undefined}
-            />
+        {formData.hasVariants ? (
+          // Con variantes, el precio/stock del producto único no aplican --
+          // cada combinación (formato, tamaño...) tiene los suyos, y solo se
+          // configuran en el wizard (VariantsEditor necesita el paso completo:
+          // combinaciones, SKU por variante, etc. -- no caben en esta pantalla
+          // resumida). Petición del humano, 2026-10-12: "no debería obligar a
+          // insertar precio sin dar la opción de crear variantes".
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface-alt p-4">
+            <div className="flex items-start gap-3 min-w-0">
+              <Boxes className="mt-0.5 h-5 w-5 shrink-0 text-hoja-tinta" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-origen-bosque">
+                  {savedVariantsCount > 0
+                    ? `${savedVariantsCount} variante${savedVariantsCount === 1 ? '' : 's'} configurada${savedVariantsCount === 1 ? '' : 's'}`
+                    : 'Variantes activadas, aún sin configurar'}
+                </p>
+                <p className="text-xs text-muted-foreground">Cada formato o tamaño tiene su propio precio, stock y peso de envío.</p>
+              </div>
+            </div>
+            <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={onConfigureVariants}>
+              {savedVariantsCount > 0 ? 'Editar variantes' : 'Configurar variantes'}
+            </Button>
           </div>
-          <Input
-            label="Stock actual"
-            tooltip="Unidades disponibles para la venta. Se actualiza solo con los pedidos."
-            type="number"
-            inputMode="numeric"
-            value={formData.stock ?? 0}
-            onChange={(e) => onInputChange('stock', Math.max(0, parseInt(e.target.value, 10) || 0))}
-            min={0}
-            inputSize="lg"
-          />
-        </div>
-        <div className="mt-6">
-          <NetContentField
-            netContent={formData.netContent}
-            netContentUnit={formData.netContentUnit}
-            onChange={(field, value) => onInputChange(field, value)}
-          />
-        </div>
-        <p className="mt-4 text-xs text-text-subtle">
-          Ofertas por cantidad, oferta flash, certificaciones y más ajustes están disponibles al editar el producto.
-        </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="space-y-2">
+                <span className="text-sm font-medium text-foreground">
+                  Precio de venta<span className="ml-1 text-feedback-danger">*</span>
+                </span>
+                <CurrencyInput
+                  value={formData.basePrice ?? 0}
+                  onChange={(value) => onInputChange('basePrice', value)}
+                  min={0.01}
+                  inputSize="lg"
+                  className="h-12 w-full rounded-xl"
+                  placeholder="Ej: 24,50"
+                  error={!formData.basePrice || formData.basePrice <= 0 ? 'Indica el precio de venta (mayor que 0)' : undefined}
+                />
+              </div>
+              <Input
+                label="Stock actual"
+                tooltip="Unidades disponibles para la venta. Se actualiza solo con los pedidos."
+                type="number"
+                inputMode="numeric"
+                value={formData.stock ?? 0}
+                onChange={(e) => onInputChange('stock', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                min={0}
+                inputSize="lg"
+              />
+            </div>
+            <div className="mt-6">
+              <NetContentField
+                netContent={formData.netContent}
+                netContentUnit={formData.netContentUnit}
+                onChange={(field, value) => onInputChange(field, value)}
+              />
+            </div>
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-border p-4">
+              <p className="text-xs text-text-subtle">
+                ¿Lo vendes en varios formatos o tamaños (p. ej. 250g/500g/1kg)? Cada uno puede tener su propio precio y stock.
+              </p>
+              <Button type="button" variant="outline" size="sm" className="shrink-0" leftIcon={<Boxes className="h-4 w-4" aria-hidden="true" />} onClick={onConfigureVariants}>
+                Configurar variantes
+              </Button>
+            </div>
+            <p className="mt-4 text-xs text-text-subtle">
+              Ofertas por cantidad, oferta flash, certificaciones y más ajustes están disponibles al editar el producto.
+            </p>
+          </>
+        )}
       </SectionCard>
 
       <CollapsibleSection
