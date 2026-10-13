@@ -39,6 +39,17 @@ export interface OrderItem {
   commissionRate?: number | null;
   commissionAmount?: number | null;
   metadata?: Record<string, any>;
+  /**
+   * Variante del producto comprada (si el producto tiene variantes).
+   * Snapshot tomado en el momento del pedido — ver `variantOptionsSummary`
+   * para el texto legible (p. ej. "500 g, Rojo"). Ausente en productos sin
+   * variantes (petición del humano, 2026-10-13).
+   */
+  variantId?: string;
+  /** SKU de la variante comprada, generado por el backend. */
+  variantSku?: string;
+  /** Resumen legible de la combinación de opciones elegida, p. ej. "500 g, Rojo". */
+  variantOptionsSummary?: string;
 }
 
 export interface OrderAddress {
