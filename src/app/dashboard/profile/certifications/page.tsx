@@ -77,12 +77,12 @@ const DOC_META: Record<DocType, { label: string; description: string; category: 
   },
   SEGURO_RC: {
     label: 'Seguro de Responsabilidad Civil',
-    description: 'Mínimo 150.000€ de cobertura',
+    description: 'Recomendado (no obligatorio) · mínimo 150.000€ de cobertura',
     category: 'documents/seguro-rc',
   },
   MANIPULADOR_ALIMENTOS: {
-    label: 'Manipulador de Alimentos',
-    description: 'Certificado de formación',
+    label: 'Formación en manipulación de alimentos',
+    description: 'Recomendado (no obligatorio) · curso de formación acreditado adaptado al riesgo de tu actividad',
     category: 'documents/manipulador-alimentos',
   },
 };
@@ -268,7 +268,7 @@ export default function CertificationsPage() {
         pendingExpiresAt: c.pendingExpiresAt ?? null,
       }));
 
-      // Documentos legales obligatorios: construct from known types + merge API data
+      // Documentos legales (solo CIF es obligatorio): construct from known types + merge API data
       const docMap = new Map<DocType, LegalDocItem>();
       for (const type of ['CIF', 'SEGURO_RC', 'MANIPULADOR_ALIMENTOS'] as DocType[]) {
         const meta = DOC_META[type];
@@ -522,7 +522,7 @@ export default function CertificationsPage() {
         badgeIcon={FileBadge}
         badgeText="Certificaciones"
         tooltip="Certificaciones"
-        tooltipDetailed="Gestiona tus certificaciones de calidad, sellos ecológicos y documentos legales obligatorios para tu tienda."
+        tooltipDetailed="Gestiona tus certificaciones de calidad, sellos ecológicos y documentos legales de tu tienda."
         showBackButton={true}
         onBack={() => router.push('/dashboard/profile')}
       />
@@ -648,10 +648,10 @@ export default function CertificationsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Shield className="w-5 h-5 text-hoja-tinta" />
-                  Documentación legal obligatoria
+                  Documentación legal
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Estos 3 documentos son necesarios para operar en la plataforma.
+                  El CIF/NIF es obligatorio para operar en la plataforma. El seguro de RC y la formación en manipulación de alimentos son recomendados.
                 </p>
               </CardHeader>
               <CardContent>

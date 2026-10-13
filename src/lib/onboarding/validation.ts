@@ -40,9 +40,16 @@ function validateDocumentSlot(
   out: StepIssue[],
   /** El CIF/NIF exige también el reverso. */
   requireBack = false,
+  /** Solo el CIF/NIF es obligatorio (petición del humano, 2026-10-13): el
+   * Seguro de RC y la formación en manipulación de alimentos son
+   * recomendados -- si el productor no sube nada, no bloquea el paso; si
+   * sube algo, se valida igual que antes (caducidad presente y futura). */
+  required = true,
 ) {
   if (!slot.file) {
-    out.push({ message: `Sube el documento: ${label}.`, fieldId: idBase });
+    if (required) {
+      out.push({ message: `Sube el documento: ${label}.`, fieldId: idBase });
+    }
     return;
   }
   if (requireBack && !slot.fileBack) {
@@ -124,8 +131,8 @@ export function validateStep(stepIndex: number, form: OnboardingFormData, ctx: V
     case 3: {
       const d = form.step4;
       validateDocumentSlot(d.cif, 'CIF / NIF', 'onb-doc-cif', today, issues, true);
-      validateDocumentSlot(d.seguroRc, 'seguro de responsabilidad civil', 'onb-doc-seguroRc', today, issues);
-      validateDocumentSlot(d.manipulador, 'manipulador de alimentos', 'onb-doc-manipulador', today, issues);
+      validateDocumentSlot(d.seguroRc, 'seguro de responsabilidad civil', 'onb-doc-seguroRc', today, issues, false, false);
+      validateDocumentSlot(d.manipulador, 'formación en manipulación de alimentos', 'onb-doc-manipulador', today, issues, false, false);
       for (const cert of d.certifications) {
         if (!cert.file || cert.status === 'VERIFIED') continue; // documento opcional por certificación
         const id = `onb-cert-${cert.certificationId}`;
