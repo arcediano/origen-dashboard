@@ -57,19 +57,10 @@ function getStripe() {
 const STATUS_POLL_ATTEMPTS = 6;
 const STATUS_POLL_DELAY_MS = 1500;
 
-/**
- * `DialogContent` (ver `@arcediano/ux-library`) no recorta su propio
- * contenido en escritorio (`overflow` sin fijar) ni limita su alto —
- * `DialogHeader` queda con esquinas rectas por encima del `rounded-2xl` del
- * panel, y un contenido alto (el Payment Element de Stripe con sus campos)
- * puede no caber en pantalla sin forma de hacer scroll. Se corrige aquí,
- * igual que ya hace la propia librería en su variante móvil (panel con
- * `overflow-hidden` + `flex flex-col`, y un único hijo intermedio con
- * `overflow-y-auto` entre cabecera y pie, ambos fijos): cabecera y pie
- * quedan fijos, solo el contenido intermedio hace scroll.
- */
-const DIALOG_CONTENT_CLASSNAME = 'flex max-h-[85dvh] flex-col overflow-hidden sm:max-w-xl';
-const SCROLL_AREA_CLASSNAME = 'min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 py-5';
+/** Ancho del panel en escritorio — el resto (recorte, alto máximo, scroll interno con cabecera/pie fijos) ya lo resuelve `DialogContent` desde `@arcediano/ux-library@0.29.1`. */
+const DIALOG_CONTENT_CLASSNAME = 'sm:max-w-xl';
+/** Espaciado/padding del contenido de cada paso — el scroll en sí (`overflow-y-auto`) ya lo aplica `DialogContent` al conjunto de sus hijos. */
+const CONTENT_AREA_CLASSNAME = 'space-y-5 px-6 py-5';
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -183,7 +174,7 @@ function PaymentStep({
 
   return (
     <>
-      <div className={SCROLL_AREA_CLASSNAME}>
+      <div className={CONTENT_AREA_CLASSNAME}>
         {/* Solo tarjeta: el PaymentIntent del backend admite únicamente `card`; sin Link ni guardar datos para pagos rápidos. */}
         <PaymentElement options={{ wallets: { applePay: 'never', googlePay: 'never', link: 'never' } }} />
         {error && (
@@ -284,7 +275,7 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
         </DialogHeader>
 
         {succeeded ? (
-          <div className={cn(SCROLL_AREA_CLASSNAME, 'flex flex-col items-center py-4 text-center')}>
+          <div className={cn(CONTENT_AREA_CLASSNAME, 'flex flex-col items-center py-4 text-center')}>
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-origen-pradera/10 text-origen-bosque">
               <Sparkles className="h-6 w-6" aria-hidden="true" />
             </span>
@@ -296,13 +287,13 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
             </Button>
           </div>
         ) : loadError ? (
-          <div className={SCROLL_AREA_CLASSNAME}>
+          <div className={CONTENT_AREA_CLASSNAME}>
             <Alert variant="error">
               <AlertDescription>{loadError}</AlertDescription>
             </Alert>
           </div>
         ) : !pricing ? (
-          <div className={cn(SCROLL_AREA_CLASSNAME, 'flex items-center justify-center py-10')}>
+          <div className={cn(CONTENT_AREA_CLASSNAME, 'flex items-center justify-center py-10')}>
             <Loader2 className="h-6 w-6 animate-spin text-origen-bosque" aria-hidden="true" />
           </div>
         ) : checkout ? (
@@ -315,7 +306,7 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
           </Elements>
         ) : (
           <>
-            <div className={SCROLL_AREA_CLASSNAME}>
+            <div className={CONTENT_AREA_CLASSNAME}>
               <div className="grid grid-cols-3 gap-2">
                 {pricing.presets.map((quote) => (
                   <PresetCard
