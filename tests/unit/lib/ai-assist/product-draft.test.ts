@@ -124,6 +124,36 @@ describe('draftToPatches', () => {
     expect(patches).toContainEqual({ kind: 'nested', section: 'productionInfo', field: 'origin', value: 'Soria' });
     expect(patches.some((p) => p.kind === 'nested' && p.field === 'productionMethod')).toBe(false);
   });
+
+  it('aplica conservación y preparación solo si vienen informadas', () => {
+    const patches = draftToPatches(
+      response({
+        nutritionalInfo: {
+          ...emptyNutrition,
+          storageInstructions: 'Conservar en frío',
+          preparationInstructions: 'Atemperar antes de servir',
+        },
+      }),
+      categories,
+      serving,
+    );
+    expect(patches).toContainEqual({
+      kind: 'nested',
+      section: 'nutritionalInfo',
+      field: 'storageInstructions',
+      value: 'Conservar en frío',
+    });
+    expect(patches).toContainEqual({
+      kind: 'nested',
+      section: 'nutritionalInfo',
+      field: 'preparationInstructions',
+      value: 'Atemperar antes de servir',
+    });
+
+    const withoutEither = draftToPatches(response(), categories, serving);
+    expect(withoutEither.some((p) => p.kind === 'nested' && p.field === 'storageInstructions')).toBe(false);
+    expect(withoutEither.some((p) => p.kind === 'nested' && p.field === 'preparationInstructions')).toBe(false);
+  });
 });
 
 describe('summarizeDraft', () => {
