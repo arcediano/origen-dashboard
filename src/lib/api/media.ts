@@ -9,6 +9,8 @@
  * y otros contextos que no son imágenes de producto.
  */
 
+import { dispatchSessionExpired, tryRefreshToken } from './client';
+
 const UPLOAD_PATH = '/api/upload';
 // Server-side route que lee la cookie HttpOnly y llama al gateway con Bearer token.
 // Evita problemas de cookie-forwarding en rewrites de Next.js y expone la sesión al cliente.
@@ -88,11 +90,28 @@ export async function uploadFile(
     return uploadFileViaProxy(file, category, options);
   }
 
+  if (presignedRes.status === 401) {
+    // El access token (15 min) puede haber caducado mientras el usuario
+    // rellenaba el formulario sin hacer ninguna otra petición autenticada
+    // (p.ej. el onboarding) — intentar renovarlo con el refresh token
+    // (30 días) antes de expulsar a login, igual que ya hace gatewayClient
+    // para el resto de peticiones (hallazgo del humano, 2026-10-15).
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      try {
+        presignedRes = await fetch(`${PRESIGNED_PATH}?${params}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+      } catch {
+        // Dejar presignedRes como estaba (401) — se gestiona más abajo.
+      }
+    }
+  }
+
   if (!presignedRes.ok) {
     if (presignedRes.status === 401) {
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('session:expired'));
-      }
+      dispatchSessionExpired();
       throw new Error('Tu sesión ha expirado.');
     }
     const data = await presignedRes.json().catch(() => ({}));
@@ -167,11 +186,24 @@ export async function uploadFileViaProxy(
     throw new Error('No se pudo conectar al servidor de archivos. Comprueba tu conexión.');
   }
 
+  if (response.status === 401) {
+    // Mismo criterio que en uploadFile(): intentar renovar el access token
+    // antes de desloguear (hallazgo del humano, 2026-10-15).
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      try {
+        response = await fetch(url, { method: 'POST', body: form });
+      } catch {
+        // Dejar response como estaba (401) — se gestiona más abajo.
+      }
+    }
+  }
+
   if (!response.ok) {
     if (response.status === 413) throw new Error('El archivo supera el tamaño máximo permitido.');
     if (response.status === 415) throw new Error('Formato de archivo no permitido.');
     if (response.status === 401) {
-      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('session:expired'));
+      dispatchSessionExpired();
       throw new Error('Tu sesión ha expirado.');
     }
     const data = await response.json().catch(() => ({}));

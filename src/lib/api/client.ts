@@ -59,11 +59,18 @@ let _refreshPromise: Promise<boolean> | null = null;
  * para evitar múltiples disparos en cascada cuando varias peticiones
  * simultáneas reciben 401.
  *
- * POLÍTICA DE SEGURIDAD: esta app de administración NO renueva tokens
- * automáticamente. Cualquier 401 cierra la sesión y obliga al usuario a
- * volver a introducir sus credenciales.
+ * Se llama solo cuando un 401 persiste TRAS intentar renovar el access
+ * token (ver `tryRefreshToken`, usado tanto aquí como en `media.ts` para
+ * las subidas de archivo) — no en cuanto llega el primer 401. El comentario
+ * anterior ("esta app NO renueva tokens automáticamente") ya no reflejaba
+ * el código: el refresco reactivo ante 401 existe desde hace tiempo en
+ * `request()` más abajo; lo que faltaba era que `media.ts` lo reutilizara
+ * en vez de desloguear directamente (hallazgo del humano, 2026-10-15: el
+ * onboarding expulsaba a login al subir una foto/documento tras varios
+ * minutos redactando, con el access token (15 min) ya caducado pero el
+ * refresh token (30 días) todavía válido).
  */
-function dispatchSessionExpired() {
+export function dispatchSessionExpired() {
   if (typeof window === 'undefined') return;
 
   if (!window.lastSessionExpiredTime) {
@@ -78,7 +85,15 @@ function dispatchSessionExpired() {
   }
 }
 
-async function tryRefreshToken(): Promise<boolean> {
+/**
+ * Intenta renovar el access token llamando a `POST /auth/refresh` (el
+ * refresh token, válido 30 días, viaja en una cookie HttpOnly separada).
+ * Exportada para que otros clientes HTTP que no pasan por `request()` más
+ * abajo — como las subidas de archivo en `media.ts` — puedan intentar
+ * renovar antes de desloguear en vez de duplicar (e inevitablemente
+ * desincronizar) su propia lógica de 401.
+ */
+export async function tryRefreshToken(): Promise<boolean> {
   if (_refreshPromise) return _refreshPromise;
   _refreshPromise = (async () => {
     try {
