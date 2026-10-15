@@ -19,7 +19,6 @@ import {
   CreateProductNavigation,
   CreateProductCancelDialog,
   SuccessPublishModal,
-  SensitiveChangeConfirmDialog,
 } from '../../components';
 import { ProductFormSteps } from '../../components/ProductFormSteps';
 import { ProductFormSidebar } from '../../components/ProductFormSidebar';
@@ -28,6 +27,7 @@ import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
+import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
 
 // ─── Animaciones ──────────────────────────────────────────────────────────────
 
@@ -237,6 +237,45 @@ export default function EditProductPage() {
           </Alert>
         )}
 
+        {/* Producto ya publicado con cambios sensibles sin enviar (petición
+            del humano, 2026-10-15): antes aparecía un modal bloqueante en
+            cuanto se tecleaba el primer carácter de un campo sensible,
+            pausando el autoguardado y obligando a confirmar/cancelar antes
+            de poder seguir editando otra cosa. Mismo patrón que el aviso de
+            "¡Todo completado!" de arriba -- un aviso que no bloquea, se
+            puede seguir editando cualquier otro paso, y se manda a revisión
+            cuando el productor quiera, sin tener que llegar al último paso.
+            Solo aparece si de verdad hay cambios (sensitiveDirtyFields). */}
+        {isPublishedProduct && pendingSensitiveConfirmation && sensitiveDirtyFields.length > 0 && (() => {
+          const fieldLabels = sensitiveDirtyFields
+            .map((field) => SENSITIVE_FIELD_LABELS[field]?.label)
+            .filter(Boolean);
+          return (
+            <Alert variant="warning" className="mt-4">
+              <AlertTitle>Tienes cambios listos para enviar a revisión</AlertTitle>
+              <AlertDescription className="space-y-3">
+                <p>
+                  Has modificado <span className="font-medium">{fieldLabels.join(', ')}</span>.
+                  Un administrador debe revisar estos cambios antes de publicarlos — mientras
+                  tanto tu producto sigue visible con sus datos actuales. Puedes mandarlos a
+                  revisión ahora mismo, no hace falta llegar al último paso.
+                </p>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  leftIcon={<Send className="w-4 h-4" />}
+                  onClick={confirmSensitiveSave}
+                  disabled={isSaving}
+                  loading={isSaving}
+                  loadingText="Enviando..."
+                >
+                  Mandar a revisión
+                </Button>
+              </AlertDescription>
+            </Alert>
+          );
+        })()}
+
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -405,15 +444,6 @@ export default function EditProductPage() {
         productName={formData.name || 'Producto'}
       />
 
-      <SensitiveChangeConfirmDialog
-        open={pendingSensitiveConfirmation}
-        sensitiveDirtyFields={sensitiveDirtyFields}
-        onConfirm={confirmSensitiveSave}
-        onCancel={() => {
-          // El usuario eligió no guardar — el modal se cierra y puede seguir editando
-        }}
-        isSaving={isSaving}
-      />
     </div>
   );
 }
