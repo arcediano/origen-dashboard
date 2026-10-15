@@ -8,7 +8,6 @@
 import { StepShell } from './StepShell';
 import { Button, Input, Badge, DateInput, Label } from '@arcediano/ux-library';
 import { Checkbox } from '@arcediano/ux-library';
-import { ImageUploader } from '../../components/ImageUploader';
 import { Tooltip } from '@arcediano/ux-library';
 import {
   Card, CardHeader, CardTitle, CardContent,
@@ -29,17 +28,12 @@ import {
   Wind,
   Package,
   MapPin,
-  Film,
-  Trash2,
   BookOpen,
-  Camera,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { IMAGE_QUALITY_PRESETS } from '@/lib/validations/image-quality';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import type { ProductionInfo, ProductionMedia } from '@/types/product';
-import type { ProductImage } from '@/types/product';
+import type { ProductionInfo } from '@/types/product';
 import { FORM_STEPS, stepPosition } from '@/types/product';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
 
@@ -108,10 +102,6 @@ export function StepProduction({
 }: StepProductionProps) {
   
   const [activeTab, setActiveTab] = useState('story');
-  const [mediaItems, setMediaItems] = useState<ProductionMedia[]>(productionInfo.media || []);
-  const [showVideoInput, setShowVideoInput] = useState(false);
-  const [videoUrl, setVideoUrl] = useState('');
-  const [videoError, setVideoError] = useState<string | null>(null);
   const [selectedPractice, setSelectedPractice] = useState<string | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -128,117 +118,6 @@ export function StepProduction({
   const handleChange = (field: string, value: any) => {
     onNestedChange('productionInfo', field, value);
     setTouched(prev => ({ ...prev, [field]: true }));
-  };
-
-  // ============================================================================
-  // GESTIÓN DE MEDIOS - CORREGIDO
-  // ============================================================================
-
-  /**
-   * Convierte ProductionMedia a ProductImage para el ImageUploader
-   */
-  const productionMediaToProductImages = (media: ProductionMedia[]): ProductImage[] => {
-    return media
-      .filter(m => m.type === 'image') // Solo imágenes, no vídeos
-      .map(m => ({
-        id: m.id,
-        url: m.url,
-        alt: m.alt,
-        caption: m.caption,
-        isMain: false, // Las imágenes de producción nunca son principales
-        sortOrder: m.sortOrder || 0,
-        file: m.file || null,
-        uploading: m.uploading,
-        progress: m.progress,
-        error: m.error,
-        width: m.width,
-        height: m.height,
-        size: m.size,
-        type: 'image/jpeg', // Aproximación, podrías mejorarlo
-      }));
-  };
-
-  /**
-   * Maneja el cambio de imágenes desde ImageUploader
-   */
-  const handleMediaChange = (files: ProductImage[]) => {
-    // Convertir ProductImage a ProductionMedia
-    const media: ProductionMedia[] = files.map(file => ({
-      id: file.id,
-      type: 'image',
-      url: file.url,
-      preview: file.url,
-      thumbnail: file.url,
-      file: file.file,
-      sortOrder: file.sortOrder,
-      caption: file.caption,
-      width: file.width,
-      height: file.height,
-      size: file.size,
-      uploading: file.uploading,
-      error: file.error,
-      alt: file.alt,
-    }));
-    
-    // Mantener los vídeos existentes
-    const existingVideos = mediaItems.filter(m => m.type === 'video');
-    const updatedMedia = [...media, ...existingVideos];
-    
-    setMediaItems(updatedMedia);
-    handleChange('media', updatedMedia);
-  };
-
-  /**
-   * Añade un vídeo desde URL
-   */
-  const handleVideoAdd = () => {
-    setVideoError(null);
-
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
-    const vimeoRegex = /^(https?:\/\/)?(www\.)?(vimeo\.com)\/.+$/;
-
-    if (!youtubeRegex.test(videoUrl) && !vimeoRegex.test(videoUrl)) {
-      setVideoError('Solo se aceptan URLs de YouTube o Vimeo');
-      return;
-    }
-
-    let thumbnail = '';
-    if (youtubeRegex.test(videoUrl)) {
-      const videoId = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1];
-      if (videoId) {
-        thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-      }
-    }
-
-    const newMedia: ProductionMedia = {
-      id: `media-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      type: 'video',
-      url: videoUrl,
-      preview: thumbnail || videoUrl,
-      thumbnail,
-      file: null,
-      sortOrder: mediaItems.length,
-    };
-
-    const updated = [...mediaItems, newMedia];
-    setMediaItems(updated);
-    handleChange('media', updated);
-    setVideoUrl('');
-    setShowVideoInput(false);
-  };
-
-  /**
-   * Elimina un medio (imagen o vídeo)
-   */
-  const handleRemoveMedia = (id: string) => {
-    const mediaToRemove = mediaItems.find(m => m.id === id);
-    if (mediaToRemove?.preview && mediaToRemove.type === 'image' && mediaToRemove.file) {
-      URL.revokeObjectURL(mediaToRemove.preview);
-    }
-    
-    const updated = mediaItems.filter(m => m.id !== id).map((m, i) => ({ ...m, sortOrder: i }));
-    setMediaItems(updated);
-    handleChange('media', updated);
   };
 
   // ============================================================================
@@ -300,7 +179,6 @@ export function StepProduction({
                   { id: 'story', label: 'Historia', icon: <BookOpen className="w-4 h-4" /> },
                   { id: 'origin', label: 'Origen', icon: <MapPin className="w-4 h-4" /> },
                   { id: 'sustainability', label: 'Sostenibilidad', icon: <TreePine className="w-4 h-4" /> },
-                  { id: 'media', label: 'Galería', icon: <Camera className="w-4 h-4" /> },
                 ].map((tab) => (
                   <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
                     {tab.icon}
@@ -514,131 +392,6 @@ export function StepProduction({
               />
           </TabsContent>
 
-          {/* TAB GALERÍA - CORREGIDO */}
-          <TabsContent value="media"
-              className="space-y-6"
-            >
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-origen-bosque">Galería del proceso</p>
-                <p className="text-xs text-text-subtle">Imágenes del proceso de elaboración, el taller o los productores en acción.</p>
-
-                <ImageUploader
-                  value={productionMediaToProductImages(mediaItems)}
-                  onChange={handleMediaChange}
-                  maxFiles={10}
-                  maxSize={10}
-                  showMainBadge={false}
-                  uploadButtonText="Arrastra o haz clic para subir imágenes del proceso"
-                  qualityRequirement={IMAGE_QUALITY_PRESETS.productionGallery}
-                />
-              </div>
-
-              {/* Sección de vídeos */}
-              <div className="mt-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Film className="h-5 w-5 text-hoja-tinta" />
-                  <h3 className="text-sm font-medium text-origen-bosque">Vídeos del proceso</h3>
-                </div>
-
-                {!showVideoInput ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full border-dashed"
-                    onClick={() => setShowVideoInput(true)}
-                    leftIcon={<Film className="w-4 h-4" aria-hidden="true" />}
-                  >
-                    Añadir vídeo (YouTube/Vimeo)
-                  </Button>
-                ) : (
-                  <div className="p-4 bg-origen-crema/30 rounded-xl border-2 border-origen-pradera/20">
-                    <Input
-                      value={videoUrl}
-                      onChange={(e) => {
-                        setVideoUrl(e.target.value);
-                        setVideoError(null);
-                      }}
-                      placeholder="https://youtube.com/watch?v=..."
-                      className={cn("h-11 text-sm mb-2 rounded-lg", videoError && "border-feedback-danger")}
-                    />
-                    {videoError && (
-                      <p className="text-xs text-feedback-danger mb-2">{videoError}</p>
-                    )}
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="flex-1"
-                        onClick={() => {
-                          setShowVideoInput(false);
-                          setVideoUrl('');
-                          setVideoError(null);
-                        }}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="flex-1"
-                        onClick={handleVideoAdd}
-                        disabled={!videoUrl}
-                      >
-                        Añadir vídeo
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Grid de vídeos existentes */}
-                {mediaItems.filter(m => m.type === 'video').length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                    <AnimatePresence>
-                      {mediaItems.filter(m => m.type === 'video').map((video) => (
-                        <motion.div
-                          key={video.id}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          className="relative aspect-video bg-linear-to-br from-origen-crema to-origen-pastel/30 rounded-lg border border-border overflow-hidden group"
-                        >
-                          {video.thumbnail ? (
-                            <img
-                              src={video.thumbnail}
-                              alt="Vídeo thumbnail"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Film className="w-8 h-8 text-text-subtle" />
-                            </div>
-                          )}
-
-                          {/* Eliminar — siempre visible en móvil (no hay :hover en touch); en escritorio solo al pasar el ratón */}
-                          <div className="absolute top-2 right-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveMedia(video.id)}
-                              className="w-9 h-9 bg-feedback-danger rounded-lg flex items-center justify-center shadow-subtle hover:bg-feedback-danger/80 transition-colors"
-                              aria-label="Eliminar vídeo"
-                              title="Eliminar"
-                            >
-                              <Trash2 className="w-4 h-4 text-white" aria-hidden="true" />
-                            </button>
-                          </div>
-
-                          <div className="absolute top-2 left-2">
-                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium bg-origen-pradera/90 text-white">
-                              <Film className="w-3 h-3" />
-                              Vídeo
-                            </span>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </div>
-                )}
-              </div>
-          </TabsContent>
         </Tabs>
     </StepShell>
   );

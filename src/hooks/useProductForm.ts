@@ -56,15 +56,6 @@ import {
 
 const STORAGE_KEY = 'origen-nuevo-producto-draft-v11';
 
-/** Descarta el borrador local del alta (formulario + clave de cupo del asistente). */
-export function discardLocalProductDraft(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* noop */
-  }
-  clearAiAssistDraft();
-}
 /**
  * Lista de campos granularizados que disparan revisión automática si el producto
  * está publicado (ACTIVE/OUT_OF_STOCK) y se modifican.
