@@ -40,8 +40,10 @@ export interface ProductDraftResponse {
     categoryId: string;
     subcategoryId: string | null;
     nutritionalInfo: LabelProposal & {
-      /** Conservación leída de la etiqueta o dicha por el productor. */
+      /** De la etiqueta/texto del productor, o razonada por tipo de producto si no constan. */
       storageInstructions?: string | null;
+      /** Igual que storageInstructions, solo si aplica a este tipo de producto. */
+      preparationInstructions?: string | null;
       isGlutenFree: boolean | null;
       isVegan: boolean | null;
       isVegetarian: boolean | null;
@@ -158,6 +160,14 @@ export function draftToPatches(
       value: proposal.nutritionalInfo.storageInstructions,
     });
   }
+  if (proposal.nutritionalInfo.preparationInstructions) {
+    patches.push({
+      kind: 'nested',
+      section: 'nutritionalInfo',
+      field: 'preparationInstructions',
+      value: proposal.nutritionalInfo.preparationInstructions,
+    });
+  }
   if (proposal.netContent) {
     field('netContent', proposal.netContent.value);
     field('netContentUnit', proposal.netContent.unit);
@@ -200,6 +210,7 @@ export function summarizeDraft(response: ProductDraftResponse): {
     filled.push('Fechas');
   }
   if (proposal.nutritionalInfo.storageInstructions) filled.push('Conservación');
+  if (proposal.nutritionalInfo.preparationInstructions) filled.push('Preparación');
   if (proposal.attributes?.length) filled.push('Atributos');
 
   const toReview: string[] = [];

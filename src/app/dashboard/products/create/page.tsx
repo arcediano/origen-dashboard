@@ -196,18 +196,29 @@ export default function CreateProductPage() {
 
   const handleFollowUpComplete = useCallback(
     async (answers: Partial<Record<FollowUpField, string>>) => {
+      // Método de producción y proceso artesanal los escribe el productor,
+      // pero no se guardan tal cual (petición del humano, 2026-10-15): se
+      // mandan al asistente para que los redacte de forma más atractiva
+      // antes de guardarlos (ver más abajo), así que aquí se saltan.
       for (const [field, value] of Object.entries(answers) as [FollowUpField, string][]) {
-        // La maduración no tiene campo propio: va dentro del proceso de elaboración (más abajo).
-        if (field === 'productionInfo.maturationTime') continue;
+        if (
+          field === 'productionInfo.maturationTime' ||
+          field === 'productionInfo.productionMethod' ||
+          field === 'productionInfo.artisanProcess'
+        ) {
+          continue;
+        }
         const [section, key] = field.split('.') as ['nutritionalInfo' | 'productionInfo', string];
         const finalValue = BOOLEAN_FOLLOW_UP_FIELDS.has(field) ? value === 'Sí' : value;
         handleNestedChange(section, key, finalValue);
       }
       const maturation = answers['productionInfo.maturationTime']?.trim();
-      if (maturation) {
-        const process = (answers['productionInfo.artisanProcess'] ?? formData.productionInfo.artisanProcess ?? '').trim();
-        handleNestedChange('productionInfo', 'artisanProcess', `${process}<p>Tiempo de maduración: ${maturation.replace(/</g, '&lt;')}</p>`);
-      }
+      const rawProductionMethod = answers['productionInfo.productionMethod']?.trim();
+      // La maduración no tiene campo propio: se suma al proceso artesanal, igual que antes.
+      const rawArtisanProcessAnswer = answers['productionInfo.artisanProcess']?.trim();
+      const rawArtisanProcess = maturation
+        ? [rawArtisanProcessAnswer, `Tiempo de maduración: ${maturation}`].filter(Boolean).join('. ')
+        : rawArtisanProcessAnswer;
       setPendingFollowUps([]);
 
       // Si se respondió algo, se reescribe la descripción para que quede un texto
@@ -215,25 +226,43 @@ export default function CreateProductPage() {
       // estructurados — mismo asistente ya usado en "Redactar con IA", mismo
       // assistKey (ya consumió su cupo con el borrador inicial, esto no cuenta más).
       const notes = buildFollowUpNotes(answers);
-      if (notes && aiAssistKey) {
+      if ((notes || rawProductionMethod || rawArtisanProcess) && aiAssistKey) {
         setMode('loading');
         try {
           const result = await improveText(aiAssistKey, {
             name: formData.name,
             fullDescription: formData.fullDescription,
-            notes,
+            ...(rawProductionMethod && { productionMethod: rawProductionMethod }),
+            ...(rawArtisanProcess && { artisanProcess: rawArtisanProcess }),
+            ...(notes && { notes }),
           });
-          handleInputChange('fullDescription', result.proposal.fullDescription);
+          if (notes) handleInputChange('fullDescription', result.proposal.fullDescription);
+          if (rawProductionMethod) {
+            handleNestedChange(
+              'productionInfo',
+              'productionMethod',
+              result.proposal.productionMethod ?? rawProductionMethod,
+            );
+          }
+          if (rawArtisanProcess) {
+            handleNestedChange(
+              'productionInfo',
+              'artisanProcess',
+              result.proposal.artisanProcess ?? rawArtisanProcess,
+            );
+          }
         } catch {
-          // Best-effort: si falla, se sigue con los campos estructurados ya
-          // rellenados y la descripción tal cual la dejó el borrador inicial.
+          // Best-effort: si falla la IA, mejor guardar lo que escribió el
+          // productor tal cual que perderlo -- la descripción se queda como estaba.
+          if (rawProductionMethod) handleNestedChange('productionInfo', 'productionMethod', rawProductionMethod);
+          if (rawArtisanProcess) handleNestedChange('productionInfo', 'artisanProcess', rawArtisanProcess);
         }
       }
 
       setMode('ai-review');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    [handleNestedChange, handleInputChange, formData.name, formData.fullDescription, formData.productionInfo.artisanProcess, aiAssistKey],
+    [handleNestedChange, handleInputChange, formData.name, formData.fullDescription, aiAssistKey],
   );
 
   useEffect(() => {

@@ -11,12 +11,18 @@ export interface TextDraft {
   categoryName?: string;
   subcategoryName?: string;
   fullDescription?: string;
+  /** Si se mandan, vuelven reescritos de forma más atractiva (nunca transcritos tal cual). */
+  productionMethod?: string;
+  artisanProcess?: string;
   notes?: string;
 }
 
 export interface TextProposal {
   name: string;
   fullDescription: string;
+  /** `null`/ausente si no se mandó ese campo a mejorar. */
+  productionMethod?: string | null;
+  artisanProcess?: string | null;
 }
 
 /** Forma de la respuesta de `POST /ai-assist/text-improvement`. */
@@ -30,6 +36,8 @@ export interface TextImprovementResponse {
 export const TEXT_FIELD_LABELS: Record<keyof TextProposal, string> = {
   name: 'Nombre',
   fullDescription: 'Descripción',
+  productionMethod: 'Método de producción',
+  artisanProcess: 'Proceso artesanal',
 };
 
 /** Quita claves vacías: el backend exige al menos nombre o notas. */
