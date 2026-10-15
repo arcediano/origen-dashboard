@@ -12,6 +12,7 @@ import { useState, type ChangeEvent } from 'react';
 import { z } from 'zod';
 import type { FlashDeal, FlashDealFormValue } from '@/types/product';
 import { createFlashDeal, updateFlashDeal } from '@/lib/api/products';
+import { MIN_PRODUCT_PRICE_EUROS } from '@/lib/constants/pricing';
 
 interface FlashDealFormProps {
   productId?: string;
@@ -99,6 +100,14 @@ export function FlashDealForm({
 
     try {
       FlashDealSchema.parse(formData);
+
+      if (
+        formData.discountType === 'FIXED' &&
+        (formData.discountValue || 0) < MIN_PRODUCT_PRICE_EUROS
+      ) {
+        setError(`El precio especial debe ser de al menos ${MIN_PRODUCT_PRICE_EUROS.toFixed(2)}€`);
+        return;
+      }
 
       if (
         formData.discountType === 'FIXED' &&
@@ -269,7 +278,7 @@ export function FlashDealForm({
             <CurrencyInput
               value={formData.discountValue || 0}
               onChange={(value) => setFormData({ ...formData, discountValue: value })}
-              min={0}
+              min={MIN_PRODUCT_PRICE_EUROS}
               className="h-10 w-full rounded-lg"
             />
           )}

@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FORM_STEPS, stepPosition } from '@/types/product';
+import { MIN_PRODUCT_PRICE_EUROS } from '@/lib/constants/pricing';
 
 interface StepPricingInventoryProps {
   formData?: any;
@@ -59,7 +60,7 @@ export function StepPricingInventory({
 
   const hasVariants = !!formData?.hasVariants;
   const basePrice = formData.basePrice || 0;
-  const hasBasePrice = basePrice > 0;
+  const hasBasePrice = basePrice >= MIN_PRODUCT_PRICE_EUROS;
   const isStepComplete = completed ?? hasBasePrice;
 
   const volume = formData?.dimensions?.length && formData?.dimensions?.width && formData?.dimensions?.height
@@ -179,14 +180,14 @@ export function StepPricingInventory({
                 value={basePrice}
                 onChange={(value) => onInputChange('basePrice', value)}
                 onBlur={() => setPriceTouched(true)}
-                min={0.01}
+                min={MIN_PRODUCT_PRICE_EUROS}
                 inputSize="lg"
                 className={cn(
                   'h-12 w-full rounded-xl',
                   priceTouched && !hasBasePrice && 'border-feedback-danger',
                 )}
                 placeholder="Ej: 24,50"
-                error={priceTouched && !hasBasePrice ? 'El precio de venta es obligatorio (debe ser mayor que 0)' : undefined}
+                error={priceTouched && !hasBasePrice ? `El precio de venta es obligatorio (mínimo ${MIN_PRODUCT_PRICE_EUROS.toFixed(2)} €)` : undefined}
               />
             </div>
 
