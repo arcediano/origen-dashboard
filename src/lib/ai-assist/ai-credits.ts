@@ -2,8 +2,8 @@
  * Tipos de la compra de créditos del asistente de IA (petición del humano,
  * 2026-10-04): cuando el productor agota el cupo gratis, puede comprar
  * créditos con cobro real de tarjeta (Stripe PaymentIntent). 1 crédito =
- * 1,80 €; 15% de descuento desde 3 créditos, 30% desde 5 — el backend es la
- * única autoridad de precio, aquí solo se tipa su respuesta.
+ * 1,20 €; 10% de descuento desde 5 créditos, 20% desde 10 — el backend es
+ * la única autoridad de precio, aquí solo se tipa su respuesta.
  */
 
 export interface AiCreditPriceQuote {

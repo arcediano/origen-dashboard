@@ -4,10 +4,11 @@
  * 2026-10-04): cuando el productor agota el cupo gratis, puede comprar más
  * con cobro REAL de tarjeta vía Stripe (Payment Element), igual que el modal
  * "Añadir créditos" de referencia — tarjetas de cantidad con descuento,
- * resumen del pedido y botón de pago. 1 crédito = 1,80 €; 15% de descuento
- * desde 3 créditos, 30% desde 5 (el backend es la autoridad de precio; aquí
- * solo se muestran los importes que él calcula). Cantidades fijas (1/3/5):
- * sin cantidad libre (petición del humano, 2026-10-04).
+ * resumen del pedido y botón de pago. 1 crédito = 1,20 €; 10% de descuento
+ * desde 5 créditos, 20% desde 10 (el backend es la autoridad de precio;
+ * aquí solo se muestran los importes que él calcula, ver
+ * ai-credits.pricing.ts). Cantidades fijas (1/5/10): sin cantidad libre
+ * (petición del humano, 2026-10-04).
  */
 
 'use client';

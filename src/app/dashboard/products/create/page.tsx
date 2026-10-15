@@ -20,7 +20,7 @@ import { AiProductIntake, type IntakeResult } from '@/app/dashboard/products/com
 import { AiProductReview } from '@/app/dashboard/products/components/ai-onboarding/AiProductReview';
 import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductFormSidebar';
 
-import { useProductForm, discardLocalProductDraft } from '@/hooks/useProductForm';
+import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
 import { useHideBottomTabBar } from '@/hooks/useHideBottomTabBar';
 import { FORM_STEPS, defaultNutritionalInfo, type FormStepId, type ProductImage } from '@/types/product';
@@ -349,18 +349,6 @@ export default function CreateProductPage() {
             onDraft={handleAiDraft}
             onManual={() => setMode('wizard')}
             onCreditsPurchased={handleCreditsPurchased}
-            pendingDraft={
-              formData.name || formData.gallery.length > 0
-                ? {
-                    name: formData.name,
-                    onResume: () => setMode('wizard'),
-                    onDiscard: () => {
-                      discardLocalProductDraft();
-                      window.location.reload();
-                    },
-                  }
-                : undefined
-            }
           />
         )}
 
