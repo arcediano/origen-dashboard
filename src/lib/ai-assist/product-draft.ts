@@ -8,6 +8,7 @@
 
 import type { DynamicAttribute, NetContentUnit, NutritionalInfo } from '@/types/product';
 import { proposalToPatches, unreadableFieldNames, type LabelProposal } from './label-proposal';
+import { ensureRichTextHtml } from '@/lib/html-sanitizer';
 
 /**
  * Campos sobre los que el asistente puede proponer una pregunta de
@@ -124,7 +125,10 @@ export function draftToPatches(
   const field = (name: string, value: unknown) => patches.push({ kind: 'field', field: name, value });
 
   field('name', proposal.name);
-  field('fullDescription', proposal.fullDescription);
+  // La IA redacta en texto plano (ver product-draft.schema.ts) -- el campo ya
+  // se edita con RichTextEditor, así que se normaliza a HTML aquí para no
+  // perder los párrafos al mostrarlo.
+  field('fullDescription', ensureRichTextHtml(proposal.fullDescription));
 
   const category = categories.find((c) => c.id === proposal.categoryId);
   if (category) {

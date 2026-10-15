@@ -41,7 +41,7 @@ import {
 
 import { type Product } from '@/types/product';
 import { fetchProductById, deleteProduct, updateProduct } from '@/lib/api/products';
-import { sanitizeHtml } from '@/lib/html-sanitizer';
+import { sanitizeHtml, ensureRichTextHtml } from '@/lib/html-sanitizer';
 import { formatFieldsInSentence } from '@/lib/constants/sensitiveFields';
 
 // ============================================================================
@@ -136,7 +136,10 @@ function DescripcionSection({ product }: { product: Product }) {
   return (
     <div className="space-y-3 pt-3">
       {product.fullDescription && (
-        <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{product.fullDescription}</p>
+        <div
+          className="text-sm text-foreground leading-relaxed prose prose-sm max-w-none [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:ml-4 [&_blockquote]:italic [&_blockquote]:text-text-subtle"
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(ensureRichTextHtml(product.fullDescription)) }}
+        />
       )}
     </div>
   );
@@ -216,7 +219,7 @@ function ProduccionSection({ info, formatDate }: {
           <h4 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-2">Historia</h4>
           <div
             className="text-sm text-text-default leading-relaxed prose prose-sm max-w-none [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:ml-4 [&_blockquote]:italic [&_blockquote]:text-text-subtle"
-            dangerouslySetInnerHTML={{ __html: sanitizeHtml(info.story) }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(ensureRichTextHtml(info.story)) }}
           />
         </div>
       )}
@@ -227,7 +230,7 @@ function ProduccionSection({ info, formatDate }: {
           <h4 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-2">Proceso artesanal</h4>
           <div
             className="text-sm text-text-default leading-relaxed prose prose-sm max-w-none [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:ml-4 [&_blockquote]:italic [&_blockquote]:text-text-subtle"
-            dangerouslySetInnerHTML={{ __html: sanitizeHtml(info.artisanProcess) }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(ensureRichTextHtml(info.artisanProcess)) }}
           />
         </div>
       )}
@@ -238,7 +241,7 @@ function ProduccionSection({ info, formatDate }: {
           <h4 className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-2">Método de producción</h4>
           <div
             className="text-sm text-text-default leading-relaxed prose prose-sm max-w-none [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:ml-4 [&_blockquote]:italic [&_blockquote]:text-text-subtle"
-            dangerouslySetInnerHTML={{ __html: sanitizeHtml(info.productionMethod) }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(ensureRichTextHtml(info.productionMethod)) }}
           />
         </div>
       )}

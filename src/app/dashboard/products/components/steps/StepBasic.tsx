@@ -7,7 +7,7 @@
 
 import { StepShell } from './StepShell';
 import { Input } from '@arcediano/ux-library';
-import { Textarea } from '@arcediano/ux-library';
+import { RichTextEditor } from '@arcediano/ux-library';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@arcediano/ux-library';
 import { Badge } from '@arcediano/ux-library';
 import { Tooltip } from '@arcediano/ux-library';
@@ -25,6 +25,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
 import { FORM_STEPS, stepPosition } from '@/types/product';
+import { ensureRichTextHtml, getVisibleTextLength } from '@/lib/html-sanitizer';
 
 // ============================================================================
 // TIPOS
@@ -51,8 +52,8 @@ const BasicProductSchema = z.object({
     .max(100, 'Máximo 100 caracteres')
     .regex(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s\-_,.]+$/, 'Caracteres no válidos'),
   fullDescription: z.string()
-    .min(100, 'Mínimo 100 caracteres')
-    .max(3000, 'Máximo 3000 caracteres'),
+    .refine((value) => getVisibleTextLength(value) >= 100, 'Mínimo 100 caracteres')
+    .refine((value) => getVisibleTextLength(value) <= 3000, 'Máximo 3000 caracteres'),
   categoryId: z.string().min(1, 'Selecciona una categoría'),
 });
 
@@ -130,7 +131,7 @@ export function StepBasic({
     setLocalTouched(prev => ({ ...prev, [field]: true }));
   };
 
-  const fullDescLength = formData?.fullDescription?.length || 0;
+  const fullDescLength = getVisibleTextLength(formData?.fullDescription);
 
   return (
     <StepShell embedded={embedded}>
@@ -309,17 +310,17 @@ export function StepBasic({
                   </div>
                 )}
               </div>
-              <Textarea
-                id="full-desc"
+              <RichTextEditor
                 tooltip="Es el texto que verán tus clientes y el que usan los buscadores. Incluye características, proceso de elaboración, historia, maridajes y usos recomendados. Mínimo 100 caracteres (recomendado 300)."
-                value={formData?.fullDescription || ''}
-                onChange={(e) => handleChange('fullDescription', e.target.value)}
-                className="min-h-[140px]"
+                value={ensureRichTextHtml(formData?.fullDescription)}
+                onChange={(html) => handleChange('fullDescription', html)}
                 placeholder="Describe tu producto: características, proceso de elaboración, maridajes, historia del productor..."
-                maxLength={3000}
-                showCharCount
-                error={allTouched?.fullDescription ? errors?.fullDescription : undefined}
+                minHeight="140px"
+                showWordCount
               />
+              {allTouched?.fullDescription && errors?.fullDescription && (
+                <p className="text-sm text-feedback-danger mt-1">{errors.fullDescription}</p>
+              )}
             </div>
             {fullDescLength < 300 && fullDescLength > 0 && (
               <Badge variant="warning" size="sm" className="flex items-center gap-1">
