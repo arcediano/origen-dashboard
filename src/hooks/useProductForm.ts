@@ -42,6 +42,7 @@ import type {
   Product
 } from '@/types/product';
 import { defaultFormData } from '@/types/product';
+import { MIN_PRODUCT_PRICE_EUROS } from '@/lib/constants/pricing';
 import { 
   createProduct, 
   saveProductDraft, 
@@ -543,7 +544,7 @@ export function useProductForm(productId?: string) {
     // stock siempre tiene defaults válidos, 0/5, nunca bloquea el paso).
     const pricingComplete = formData.hasVariants
       ? savedVariantsCount > 0
-      : !!(formData.basePrice && formData.basePrice > 0);
+      : !!(formData.basePrice && formData.basePrice >= MIN_PRODUCT_PRICE_EUROS);
 
     setCompletedTabs({
       basic: !!(formData.name && formData.categoryId),
@@ -605,8 +606,8 @@ export function useProductForm(productId?: string) {
         if (formData.hasVariants) {
           if (savedVariantsCount === 0)
             errors.push('Al menos una variante con precio y stock');
-        } else if (!formData.basePrice || formData.basePrice <= 0) {
-          errors.push('Precio de venta (debe ser mayor que 0)');
+        } else if (!formData.basePrice || formData.basePrice < MIN_PRODUCT_PRICE_EUROS) {
+          errors.push(`Precio de venta (mínimo ${MIN_PRODUCT_PRICE_EUROS.toFixed(2)} €)`);
         }
         break;
       // nutritional, production y certifications son pasos opcionales — no bloquean

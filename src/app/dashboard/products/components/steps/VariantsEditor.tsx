@@ -28,6 +28,7 @@ import {
 import { Boxes, Plus, Trash2, Save, RefreshCw, Package } from 'lucide-react';
 import type { ProductOption } from '@/types/product';
 import { fetchProductById, syncProductOptions, syncProductVariants } from '@/lib/api/products';
+import { MIN_PRODUCT_PRICE_EUROS } from '@/lib/constants/pricing';
 
 interface VariantsEditorProps {
   productId?: string;
@@ -222,9 +223,9 @@ export function VariantsEditor({ productId, basePrice = 0, onVariantsChange }: V
     if (!productId) return;
     setVariantsError(null);
 
-    const invalid = variantDrafts.some((v) => !v.price || v.price <= 0);
+    const invalid = variantDrafts.some((v) => !v.price || v.price < MIN_PRODUCT_PRICE_EUROS);
     if (invalid) {
-      setVariantsError('Todas las variantes necesitan un precio mayor que 0');
+      setVariantsError(`Todas las variantes necesitan un precio de al menos ${MIN_PRODUCT_PRICE_EUROS.toFixed(2)} €`);
       return;
     }
 
@@ -443,7 +444,7 @@ export function VariantsEditor({ productId, basePrice = 0, onVariantsChange }: V
                       label="Precio"
                       value={variant.price}
                       onChange={(v) => handleVariantFieldChange(index, 'price', v)}
-                      min={0.01}
+                      min={MIN_PRODUCT_PRICE_EUROS}
                       className="h-10"
                     />
                     <Input
