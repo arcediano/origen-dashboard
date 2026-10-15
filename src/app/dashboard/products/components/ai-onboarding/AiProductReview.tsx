@@ -19,6 +19,7 @@ import {
   NAV_HEIGHT_MOBILE_DASHBOARD, appShellPaddingClass,
 } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
+import { getVisibleTextLength } from '@/lib/html-sanitizer';
 import { StepBasic } from '../steps/StepBasic';
 import { NetContentField } from '../steps/NetContentField';
 import { StepImages } from '../steps/StepImages';
@@ -173,7 +174,7 @@ export function AiProductReview({
   const missing = useMemo(() => {
     const list: string[] = [];
     if (!formData.name || formData.name.trim().length < 5) list.push('Nombre (mínimo 5 caracteres)');
-    if (!formData.fullDescription || formData.fullDescription.trim().length < 100) list.push('Descripción (mínimo 100 caracteres)');
+    if (getVisibleTextLength(formData.fullDescription) < 100) list.push('Descripción (mínimo 100 caracteres)');
     if (!formData.categoryId) list.push('Categoría');
     if (!formData.gallery || formData.gallery.length === 0) list.push('Al menos una foto');
     // Con variantes, el precio/stock únicos del producto ya no se piden -- cada

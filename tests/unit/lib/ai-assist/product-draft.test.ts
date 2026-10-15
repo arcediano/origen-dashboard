@@ -63,13 +63,26 @@ describe('draftToPatches', () => {
     expect(patches).toEqual(
       expect.arrayContaining([
         { kind: 'field', field: 'name', value: 'Queso curado' },
-        { kind: 'field', field: 'fullDescription', value: 'Queso artesano.' },
+        { kind: 'field', field: 'fullDescription', value: '<p>Queso artesano.</p>' },
         { kind: 'field', field: 'categoryId', value: 'c1' },
         { kind: 'field', field: 'categoryName', value: 'Quesos' },
         { kind: 'field', field: 'subcategoryId', value: 's1' },
         { kind: 'field', field: 'subcategoryName', value: 'Curados' },
       ]),
     );
+  });
+
+  it('convierte la descripción en texto plano de la IA a párrafos HTML (se edita con RichTextEditor)', () => {
+    const patches = draftToPatches(
+      response({ fullDescription: 'Primer párrafo.\n\nSegundo párrafo.' }),
+      categories,
+      serving,
+    );
+    expect(patches).toContainEqual({
+      kind: 'field',
+      field: 'fullDescription',
+      value: '<p>Primer párrafo.</p><p>Segundo párrafo.</p>',
+    });
   });
 
   it('nunca propone precio ni stock', () => {

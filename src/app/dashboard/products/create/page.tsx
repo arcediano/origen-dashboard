@@ -41,6 +41,7 @@ import { fetchCategoriesTree } from '@/lib/api/categories';
 import { buildFollowUpNotes, draftToPatches, type FollowUpField, type ProductDraftResponse } from '@/lib/ai-assist/product-draft';
 import type { AiAssistQuota } from '@/lib/ai-assist/label-proposal';
 import { AiFollowUpQuestions } from '@/app/dashboard/products/components/ai-onboarding/AiFollowUpQuestions';
+import { ensureRichTextHtml } from '@/lib/html-sanitizer';
 
 /** Las 3 marcas dietéticas de followUpQuestions responden "Sí"/"No": se guardan como boolean. */
 const BOOLEAN_FOLLOW_UP_FIELDS = new Set<FollowUpField>([
@@ -236,26 +237,29 @@ export default function CreateProductPage() {
             ...(rawArtisanProcess && { artisanProcess: rawArtisanProcess }),
             ...(notes && { notes }),
           });
-          if (notes) handleInputChange('fullDescription', result.proposal.fullDescription);
+          // Estos campos se editan con RichTextEditor (ver StepBasic/StepProduction);
+          // la IA y el productor escriben texto plano, así que se normaliza a HTML
+          // para no perder los párrafos al mostrarlos.
+          if (notes) handleInputChange('fullDescription', ensureRichTextHtml(result.proposal.fullDescription));
           if (rawProductionMethod) {
             handleNestedChange(
               'productionInfo',
               'productionMethod',
-              result.proposal.productionMethod ?? rawProductionMethod,
+              ensureRichTextHtml(result.proposal.productionMethod ?? rawProductionMethod),
             );
           }
           if (rawArtisanProcess) {
             handleNestedChange(
               'productionInfo',
               'artisanProcess',
-              result.proposal.artisanProcess ?? rawArtisanProcess,
+              ensureRichTextHtml(result.proposal.artisanProcess ?? rawArtisanProcess),
             );
           }
         } catch {
           // Best-effort: si falla la IA, mejor guardar lo que escribió el
           // productor tal cual que perderlo -- la descripción se queda como estaba.
-          if (rawProductionMethod) handleNestedChange('productionInfo', 'productionMethod', rawProductionMethod);
-          if (rawArtisanProcess) handleNestedChange('productionInfo', 'artisanProcess', rawArtisanProcess);
+          if (rawProductionMethod) handleNestedChange('productionInfo', 'productionMethod', ensureRichTextHtml(rawProductionMethod));
+          if (rawArtisanProcess) handleNestedChange('productionInfo', 'artisanProcess', ensureRichTextHtml(rawArtisanProcess));
         }
       }
 

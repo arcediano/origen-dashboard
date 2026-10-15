@@ -45,3 +45,44 @@ export function createSafeHtml(html: string): { __html: string } {
     __html: sanitizeHtml(html),
   };
 }
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Convierte texto plano legado (guardado antes de que el campo usara RichTextEditor) en HTML de párrafos/<br>, preservando los saltos de línea que el usuario ya había escrito. */
+function legacyPlainTextToHtml(text: string): string {
+  return text
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br>')}</p>`)
+    .join('');
+}
+
+/**
+ * Normaliza un campo de texto enriquecido a HTML, aceptando tanto el HTML que
+ * ya escribe RichTextEditor como texto plano legado guardado antes de que
+ * existiera. Úsalo tanto para alimentar el editor (`value`) como para
+ * renderizar el campo, para no perder párrafos/saltos de línea antiguos.
+ */
+export function ensureRichTextHtml(value?: string | null): string {
+  if (!value) return '';
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  return trimmed.startsWith('<') ? value : legacyPlainTextToHtml(trimmed);
+}
+
+/** Longitud del texto visible de un campo que puede venir en HTML o en texto plano legado; las etiquetas no cuentan para los límites de caracteres. */
+export function getVisibleTextLength(value?: string | null): number {
+  if (!value) return 0;
+  return value
+    .replace(/<(p|div|br|li)[^>]*>/gi, ' ')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/\s+/g, ' ')
+    .trim().length;
+}
