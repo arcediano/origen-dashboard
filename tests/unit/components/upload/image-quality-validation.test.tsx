@@ -16,6 +16,10 @@ vi.mock('@/lib/validations/image-quality', async () => {
         return { width: 600, height: 600 };
       }
 
+      if (file.name.includes('rectangular')) {
+        return { width: 2400, height: 1200 };
+      }
+
       return { width: 2200, height: 2200 };
     }),
   };
@@ -75,6 +79,33 @@ describe('image quality validation', () => {
     });
 
     expect(screen.getByText(/ficha publica del producto y los listados/i)).toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  // Regresión (2026-10-17, guía de imágenes A.1): hasta ahora ImageUploader
+  // no comprobaba la proporción en absoluto -- una foto de producto
+  // claramente rectangular (2:1) pasaba sin aviso si cumplía la resolución
+  // mínima, a diferencia de FileUpload (que sí valida aspectRatio).
+  it('rejects a clearly non-square product image even when resolution is high enough', async () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <ImageUploader
+        value={[]}
+        onChange={onChange}
+        qualityRequirement={IMAGE_QUALITY_PRESETS.productImage}
+      />
+    );
+
+    const input = getHiddenFileInput(container);
+    const file = new File(['content'], 'rectangular-product.jpg', { type: 'image/jpeg' });
+
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(screen.getByText(/imagen rechazada/i)).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/horizontal \(apaisada\)/i)).toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
   });
 });
