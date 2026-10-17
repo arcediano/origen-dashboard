@@ -33,6 +33,7 @@ import {
   type ProductOption,
   type ProductVariant,
 } from '@/types/product';
+import type { AutonomousCommunityCode } from '@/lib/constants/autonomous-community';
 
 // ─── TIPOS DE RESPUESTA DEL BACKEND ──────────────────────────────────────────
 
@@ -117,7 +118,8 @@ export interface ApiProductionMedia {
 
 export interface ApiProductionInfo {
   story: string;
-  farmName: string;
+  /** @deprecated El formulario ya no lo pide (petición del humano, 2026-10-17) -- se conserva solo para no perder el dato de productos antiguos que ya lo tenían. */
+  farmName?: string;
   origin: string;
   producerName?: string;
   productionMethod: string;
@@ -200,6 +202,8 @@ export interface ApiProduct {
   name: string;
   slug: string;
   fullDescription: string;
+  /** Comunidad autónoma de origen (petición del humano, 2026-10-17); null si el producto no la tiene informada todavía. */
+  originRegion?: AutonomousCommunityCode | null;
   categoryId: string;
   categoryName?: string;
   subcategoryId?: string;
@@ -462,7 +466,7 @@ function mapProductionInfo(info?: ApiProductionInfo): ProductionInfo | undefined
   if (!info) return undefined;
   return {
     story: info.story,
-    farmName: info.farmName,
+    farmName: info.farmName ?? '',
     origin: info.origin,
     producerName: info.producerName,
     productionMethod: info.productionMethod,
@@ -516,6 +520,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     name:             api.name,
     slug:             api.slug,
     fullDescription:  api.fullDescription,
+    originRegion:     api.originRegion ?? undefined,
     categoryId:       api.categoryId,
     categoryName:     api.categoryName ?? '',
     subcategoryId:    api.subcategoryId,
