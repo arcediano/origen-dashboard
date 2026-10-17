@@ -21,9 +21,15 @@ import {
   DialogHeader,
   DialogTitle,
   Textarea,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import type { FollowUpField, FollowUpQuestion } from '@/lib/ai-assist/product-draft';
+import {
+  AUTONOMOUS_COMMUNITY_CODES,
+  AUTONOMOUS_COMMUNITY_NAMES,
+  autonomousCommunityFlagSrc,
+} from '@/lib/constants/autonomous-community';
 
 export interface AiFollowUpQuestionsProps {
   open: boolean;
@@ -78,7 +84,31 @@ export function AiFollowUpQuestions({ open, questions, onComplete }: AiFollowUpQ
         <div className="space-y-4 px-6 py-5">
           <p className="text-base font-medium text-origen-bosque">{question.question}</p>
 
-          {question.type === 'single_choice' ? (
+          {question.field === 'originRegion' ? (
+            // El backend siempre manda este campo como type "text" (19 opciones
+            // no caben en el límite de 2-4 de single_choice), pero la respuesta
+            // debe ser uno de los 19 códigos válidos -- se muestra el mismo
+            // selector con bandera que el formulario manual, nunca texto libre.
+            <Select onValueChange={(value) => advance(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar comunidad autónoma" />
+              </SelectTrigger>
+              <SelectContent>
+                {AUTONOMOUS_COMMUNITY_CODES.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    <span className="flex items-center gap-2">
+                      <img
+                        src={autonomousCommunityFlagSrc(code)}
+                        alt=""
+                        className="h-4 w-6 rounded-sm object-cover shrink-0"
+                      />
+                      {AUTONOMOUS_COMMUNITY_NAMES[code]}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : question.type === 'single_choice' ? (
             <div className="flex gap-2">
               {(question.options ?? []).map((opt) => (
                 <button
@@ -117,7 +147,7 @@ export function AiFollowUpQuestions({ open, questions, onComplete }: AiFollowUpQ
           >
             Saltar
           </Button>
-          {question.type === 'text' && (
+          {question.type === 'text' && question.field !== 'originRegion' && (
             <Button
               type="button"
               variant="primary"

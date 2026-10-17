@@ -209,6 +209,13 @@ export default function CreateProductPage() {
         ) {
           continue;
         }
+        // Campo de nivel superior (no de una sección anidada) -- se responde
+        // con el selector de CCAA, siempre un código válido (ver
+        // AiFollowUpQuestions), así que se aplica tal cual.
+        if (field === 'originRegion') {
+          handleInputChange('originRegion', value);
+          continue;
+        }
         const [section, key] = field.split('.') as ['nutritionalInfo' | 'productionInfo', string];
         const finalValue = BOOLEAN_FOLLOW_UP_FIELDS.has(field) ? value === 'Sí' : value;
         handleNestedChange(section, key, finalValue);

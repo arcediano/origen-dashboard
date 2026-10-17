@@ -135,6 +135,7 @@ export const productToFormData = (product: Product): ProductFormData => {
   return ({
   name: product.name,
   fullDescription: product.fullDescription,
+  originRegion: product.originRegion,
   categoryId: product.categoryId,
   categoryName: product.categoryName,
   subcategoryId: product.subcategoryId,
@@ -199,6 +200,7 @@ export const formDataToProduct = (formData: ProductFormData): Partial<Product> =
   return {
     name: formData.name,
     fullDescription: formData.fullDescription,
+    originRegion: formData.originRegion,
     categoryId: formData.categoryId,
     categoryName: formData.categoryName,
     subcategoryId: formData.subcategoryId,

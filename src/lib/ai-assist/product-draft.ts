@@ -6,6 +6,7 @@
  * cambios sobre el formulario de producto; lo que la IA no rellenó no se toca.
  */
 
+import type { AutonomousCommunityCode } from '@/lib/constants/autonomous-community';
 import type { DynamicAttribute, NetContentUnit, NutritionalInfo } from '@/types/product';
 import { proposalToPatches, unreadableFieldNames, type LabelProposal } from './label-proposal';
 import { ensureRichTextHtml } from '@/lib/html-sanitizer';
@@ -21,6 +22,11 @@ export type FollowUpField =
   | 'nutritionalInfo.isGlutenFree'
   | 'nutritionalInfo.isVegan'
   | 'nutritionalInfo.isVegetarian'
+  // Campo de nivel superior (no de productionInfo): comunidad autónoma de
+  // origen (petición del humano, 2026-10-17). La respuesta, a diferencia del
+  // resto, se responde con el selector de CCAA (AiFollowUpQuestions), nunca
+  // texto libre -- debe ser uno de los códigos cerrados.
+  | 'originRegion'
   // Preguntas de elaboración (texto libre) para redactar "Historia y producción":
   | 'productionInfo.artisanProcess'
   | 'productionInfo.maturationTime'
@@ -61,6 +67,8 @@ export interface ProductDraftResponse {
     netContent?: { value: number; unit: NetContentUnit } | null;
     /** Atributos destacados según el tipo de producto (tipo de leche, curación…). */
     attributes?: Array<{ name: string; value: string }>;
+    /** Comunidad autónoma de origen (campo de Product, no de productionInfo); null si no se pudo determinar. */
+    originRegion?: AutonomousCommunityCode | null;
   };
   /** `null` si no se enviaron fotos de etiqueta. */
   labelLegible: boolean | null;
@@ -192,6 +200,7 @@ export function draftToPatches(
   if (productionMethod) {
     patches.push({ kind: 'nested', section: 'productionInfo', field: 'productionMethod', value: productionMethod });
   }
+  if (proposal.originRegion) field('originRegion', proposal.originRegion);
 
   return patches;
 }
@@ -208,6 +217,7 @@ export function summarizeDraft(response: ProductDraftResponse): {
   if (proposal.nutritionalInfo.allergens !== null) filled.push('Alérgenos');
   if (proposal.nutritionalInfo.calories !== null) filled.push('Información nutricional');
   if (proposal.productionInfo.origin) filled.push('Origen');
+  if (proposal.originRegion) filled.push('Comunidad autónoma');
   if (proposal.productionInfo.productionMethod) filled.push('Elaboración');
   if (proposal.netContent) filled.push('Formato de venta');
   if (proposal.productionInfo.expiryDate || proposal.productionInfo.harvestDate || proposal.productionInfo.productionDate) {
@@ -255,6 +265,7 @@ export const FOLLOW_UP_FIELD_LABELS: Record<FollowUpField, string> = {
   'nutritionalInfo.isGlutenFree': '¿Sin gluten?',
   'nutritionalInfo.isVegan': '¿Vegano?',
   'nutritionalInfo.isVegetarian': '¿Vegetariano?',
+  originRegion: 'Comunidad autónoma',
   'productionInfo.artisanProcess': 'Técnicas de elaboración',
   'productionInfo.maturationTime': 'Tiempo de maduración',
   'productionInfo.story': 'Historia del producto',
@@ -268,7 +279,11 @@ export const FOLLOW_UP_FIELD_LABELS: Record<FollowUpField, string> = {
  */
 export function buildFollowUpNotes(answers: Partial<Record<FollowUpField, string>>): string | null {
   const lines = (Object.entries(answers) as [FollowUpField, string][])
-    .filter(([, value]) => value.trim().length > 0)
+    // originRegion se responde con un código cerrado (p. ej. "CANTABRIA"), no
+    // texto natural -- no tiene sentido pasárselo a la IA para que lo
+    // incorpore en la descripción (saldría el código tal cual, no un lugar
+    // legible). Se aplica directo al campo estructurado, nunca a las notas.
+    .filter(([field, value]) => field !== 'originRegion' && value.trim().length > 0)
     .map(([field, value]) => `${FOLLOW_UP_FIELD_LABELS[field]}: ${value}`);
   if (lines.length === 0) return null;
   return `Datos que el productor acaba de confirmar — incorpóralos de forma natural en la descripción:\n${lines.join('\n')}`;

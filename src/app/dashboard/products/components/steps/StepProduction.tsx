@@ -13,6 +13,7 @@ import {
   Card, CardHeader, CardTitle, CardContent,
   Textarea,
   Tabs, TabsList, TabsTrigger, TabsContent,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@arcediano/ux-library';
 import { RichTextEditor } from '@arcediano/ux-library';
 import {
@@ -36,10 +37,19 @@ import { useState } from 'react';
 import type { ProductionInfo } from '@/types/product';
 import { FORM_STEPS, stepPosition } from '@/types/product';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
+import {
+  AUTONOMOUS_COMMUNITY_CODES,
+  AUTONOMOUS_COMMUNITY_NAMES,
+  autonomousCommunityFlagSrc,
+  type AutonomousCommunityCode,
+} from '@/lib/constants/autonomous-community';
 
 interface StepProductionProps {
   productionInfo?: ProductionInfo;
   onNestedChange: (section: string, field: string, value: any) => void;
+  /** Comunidad autónoma de origen (petición del humano, 2026-10-17) -- campo de Product, no de productionInfo, por eso va aparte en vez de por onNestedChange. */
+  originRegion?: AutonomousCommunityCode;
+  onOriginRegionChange?: (value: AutonomousCommunityCode | undefined) => void;
   completed?: boolean;
   /** Dentro de la pantalla de revisión del onboarding con IA: sin tarjeta ni cabecera propias. */
   embedded?: boolean;
@@ -96,6 +106,8 @@ export function StepProduction({
     media: [],
   },
   onNestedChange,
+  originRegion,
+  onOriginRegionChange,
   completed,
   embedded = false,
   isPublishedProduct = false,
@@ -236,20 +248,44 @@ export function StepProduction({
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <Label className="text-sm font-medium">
-                      Finca / Taller
+                      Comunidad autónoma
                     </Label>
-                    {isPublishedProduct && (
-                      <div className="p-2 -m-2">
-                        <SensitiveFieldIndicator fieldName="farmName" />
-                      </div>
-                    )}
                   </div>
-                  <Input
-                    value={productionInfo.farmName}
-                    onChange={(e) => handleChange('farmName', e.target.value)}
-                    inputSize="lg"
-                    placeholder="Finca El Valle"
-                  />
+                  <Select
+                    value={originRegion ?? ''}
+                    onValueChange={(value) =>
+                      onOriginRegionChange?.(value ? (value as AutonomousCommunityCode) : undefined)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar comunidad autónoma">
+                        {originRegion && (
+                          <span className="flex items-center gap-2">
+                            <img
+                              src={autonomousCommunityFlagSrc(originRegion)}
+                              alt=""
+                              className="h-4 w-6 rounded-sm object-cover shrink-0"
+                            />
+                            {AUTONOMOUS_COMMUNITY_NAMES[originRegion]}
+                          </span>
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {AUTONOMOUS_COMMUNITY_CODES.map((code) => (
+                        <SelectItem key={code} value={code}>
+                          <span className="flex items-center gap-2">
+                            <img
+                              src={autonomousCommunityFlagSrc(code)}
+                              alt=""
+                              className="h-4 w-6 rounded-sm object-cover shrink-0"
+                            />
+                            {AUTONOMOUS_COMMUNITY_NAMES[code]}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

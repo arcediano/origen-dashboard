@@ -114,6 +114,8 @@ export function ProductFormSteps({
           <StepProduction
             productionInfo={formData.productionInfo || defaultProductionInfo}
             onNestedChange={onNestedChange}
+            originRegion={formData.originRegion}
+            onOriginRegionChange={(value) => onInputChange('originRegion', value)}
             completed={completedTabs.production}
             isPublishedProduct={isPublishedProduct}
           />

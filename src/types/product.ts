@@ -3,6 +3,8 @@
  * @description Tipos completos para la gestión de productos (UNIFICADO)
  */
 
+import type { AutonomousCommunityCode } from '@/lib/constants/autonomous-community';
+
 // ============================================================================
 // TIPO PARA DOCUMENTOS - DEFINICIÓN ÚNICA
 // ============================================================================
@@ -374,6 +376,8 @@ export interface Product {
   name: string;
   slug: string;
   fullDescription: string;
+  /** Comunidad autónoma de origen (petición del humano, 2026-10-17); undefined si el producto no la tiene informada todavía -- la card del catálogo oculta esa fila hasta que se edite. */
+  originRegion?: AutonomousCommunityCode;
   categoryId: string;
   categoryName: string;
   subcategoryId?: string;
@@ -434,6 +438,8 @@ export interface Product {
 export interface ProductFormData {
   name: string;
   fullDescription: string;
+  /** Comunidad autónoma de origen (petición del humano, 2026-10-17); se pide en el paso "Historia y producción". */
+  originRegion?: AutonomousCommunityCode;
   categoryId: string;
   categoryName: string;
   subcategoryId?: string;
@@ -547,6 +553,7 @@ export const defaultProductionInfo: ProductionInfo = {
 export const defaultFormData: ProductFormData = {
   name: '',
   fullDescription: '',
+  originRegion: undefined,
   categoryId: '',
   categoryName: '',
   subcategoryId: '',

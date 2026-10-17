@@ -235,6 +235,7 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
   return {
     name:              formData.name,
     fullDescription:   formData.fullDescription || undefined,
+    originRegion:      formData.originRegion || undefined,
     categoryId:        formData.categoryId,
     subcategoryId:     formData.subcategoryId || undefined,
 
@@ -369,7 +370,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
   const body: Record<string, unknown> = {};
 
   const scalar: Array<keyof Product> = [
-    'name', 'fullDescription', 'categoryId', 'subcategoryId',
+    'name', 'fullDescription', 'originRegion', 'categoryId', 'subcategoryId',
     'basePrice', 'comparePrice', 'hasVariants', 'sku', 'barcode', 'stock',
     'lowStockThreshold', 'trackInventory', 'allowBackorders',
     'netContent', 'netContentUnit', 'weight', 'weightUnit', 'dimensions', 'shippingClass',
@@ -769,6 +770,7 @@ export async function duplicateProduct(id: string): Promise<ApiResponse<Product>
     const duplicateBody = {
       name:              `${original.name} (copia)`,
       fullDescription:   original.fullDescription,
+      originRegion:      original.originRegion ?? undefined,
       categoryId:        original.categoryId,
       subcategoryId:     original.subcategoryId,
       basePrice:         original.basePrice,

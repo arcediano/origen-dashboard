@@ -376,6 +376,8 @@ export function AiProductReview({
           embedded
           productionInfo={formData.productionInfo || defaultProductionInfo}
           onNestedChange={onNestedChange as (section: string, field: string, value: unknown) => void}
+          originRegion={formData.originRegion}
+          onOriginRegionChange={(value) => onInputChange('originRegion', value)}
           completed={completedTabs.production}
         />
       </CollapsibleSection>
