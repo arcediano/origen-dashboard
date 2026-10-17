@@ -202,8 +202,10 @@ export interface ApiProduct {
   name: string;
   slug: string;
   fullDescription: string;
-  /** Comunidad autónoma de origen (petición del humano, 2026-10-17); null si el producto no la tiene informada todavía. */
+  /** Comunidad autónoma de origen (petición del humano, 2026-10-17); la API ya aplica aquí el valor por defecto de la comunidad del productor cuando el producto no tiene la suya propia. */
   originRegion?: AutonomousCommunityCode | null;
+  /** Municipio o enclave de origen, texto libre (petición del humano, 2026-10-17); null si no está informado (sin valor por defecto). */
+  originLocality?: string | null;
   categoryId: string;
   categoryName?: string;
   subcategoryId?: string;
@@ -521,6 +523,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     slug:             api.slug,
     fullDescription:  api.fullDescription,
     originRegion:     api.originRegion ?? undefined,
+    originLocality:   api.originLocality ?? undefined,
     categoryId:       api.categoryId,
     categoryName:     api.categoryName ?? '',
     subcategoryId:    api.subcategoryId,

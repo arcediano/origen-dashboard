@@ -376,8 +376,15 @@ export interface Product {
   name: string;
   slug: string;
   fullDescription: string;
-  /** Comunidad autónoma de origen (petición del humano, 2026-10-17); undefined si el producto no la tiene informada todavía -- la card del catálogo oculta esa fila hasta que se edite. */
+  /**
+   * Comunidad autónoma de origen (petición del humano, 2026-10-17). La API
+   * ya devuelve aquí, como valor por defecto, la comunidad autónoma del
+   * PRODUCTOR cuando el producto no tiene la suya propia -- undefined solo
+   * si tampoco se puede determinar la del productor.
+   */
   originRegion?: AutonomousCommunityCode;
+  /** Municipio o enclave de origen, texto libre (ej. "Sierra del Rincón") -- petición del humano, 2026-10-17. Complementa a originRegion; sin valor por defecto. */
+  originLocality?: string;
   categoryId: string;
   categoryName: string;
   subcategoryId?: string;
@@ -440,6 +447,8 @@ export interface ProductFormData {
   fullDescription: string;
   /** Comunidad autónoma de origen (petición del humano, 2026-10-17); se pide en el paso "Historia y producción". */
   originRegion?: AutonomousCommunityCode;
+  /** Municipio o enclave de origen, texto libre (ej. "Sierra del Rincón") -- petición del humano, 2026-10-17. */
+  originLocality?: string;
   categoryId: string;
   categoryName: string;
   subcategoryId?: string;
@@ -554,6 +563,7 @@ export const defaultFormData: ProductFormData = {
   name: '',
   fullDescription: '',
   originRegion: undefined,
+  originLocality: undefined,
   categoryId: '',
   categoryName: '',
   subcategoryId: '',
