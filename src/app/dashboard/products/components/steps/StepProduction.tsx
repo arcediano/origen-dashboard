@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ProductionInfo } from '@/types/product';
 import { FORM_STEPS, stepPosition } from '@/types/product';
 import { SENSITIVE_FIELD_LABELS } from '@/lib/constants/sensitiveFields';
@@ -50,6 +50,9 @@ interface StepProductionProps {
   /** Comunidad autónoma de origen (petición del humano, 2026-10-17) -- campo de Product, no de productionInfo, por eso va aparte en vez de por onNestedChange. */
   originRegion?: AutonomousCommunityCode;
   onOriginRegionChange?: (value: AutonomousCommunityCode | undefined) => void;
+  /** Municipio o enclave de origen, texto libre (petición del humano, 2026-10-17) -- también campo de Product, mismo motivo que originRegion. */
+  originLocality?: string;
+  onOriginLocalityChange?: (value: string | undefined) => void;
   completed?: boolean;
   /** Dentro de la pantalla de revisión del onboarding con IA: sin tarjeta ni cabecera propias. */
   embedded?: boolean;
@@ -74,6 +77,9 @@ function SensitiveFieldIndicator({ fieldName }: { fieldName: string }) {
 // ============================================================================
 // COMPONENTES AUXILIARES
 // ============================================================================
+
+/** Único país de origen soportado por ahora (petición del humano, 2026-10-17) -- el campo se deshabilita y se fija a este valor. */
+const FIXED_COUNTRY = 'España';
 
 const SUSTAINABLE_PRACTICES = [
   { id: 'renewable_energy', label: 'Energía renovable', icon: <Sun className="w-4 h-4" />, description: 'Uso de energía solar, eólica o hidráulica' },
@@ -108,6 +114,8 @@ export function StepProduction({
   onNestedChange,
   originRegion,
   onOriginRegionChange,
+  originLocality,
+  onOriginLocalityChange,
   completed,
   embedded = false,
   isPublishedProduct = false,
@@ -131,6 +139,19 @@ export function StepProduction({
     onNestedChange('productionInfo', field, value);
     setTouched(prev => ({ ...prev, [field]: true }));
   };
+
+  // El país de origen se deshabilita y se fija a España -- petición del
+  // humano, 2026-10-17: por ahora no hay otra opción, así que no tiene
+  // sentido pedírselo al productor. Normaliza en segundo plano el valor
+  // guardado (no es un cambio del productor, por eso va directo a
+  // onNestedChange y no por handleChange/setTouched) para que productos
+  // históricos con otro valor también queden en España al siguiente guardado.
+  useEffect(() => {
+    if (productionInfo.origin !== FIXED_COUNTRY) {
+      onNestedChange('productionInfo', 'origin', FIXED_COUNTRY);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ============================================================================
   // GESTIÓN DE PRÁCTICAS SOSTENIBLES
@@ -226,23 +247,17 @@ export function StepProduction({
           {/* TAB ORIGEN */}
           <TabsContent value="origin" className="space-y-6"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <Label className="text-sm font-medium">
                       País de origen
                     </Label>
-                    {isPublishedProduct && (
-                      <div className="p-2 -m-2">
-                        <SensitiveFieldIndicator fieldName="origin" />
-                      </div>
-                    )}
                   </div>
                   <Input
-                    value={productionInfo.origin}
-                    onChange={(e) => handleChange('origin', e.target.value)}
+                    value={FIXED_COUNTRY}
+                    disabled
                     inputSize="lg"
-                    placeholder="España"
                   />
                 </div>
                 <div>
@@ -286,6 +301,24 @@ export function StepProduction({
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Label className="text-sm font-medium">
+                      Municipio o enclave
+                    </Label>
+                    <Tooltip
+                      content="Opcional"
+                      detailed="Más preciso que la comunidad autónoma (ej. 'Sierra del Rincón'). Se muestra junto a ella en la tarjeta del catálogo."
+                      size="sm"
+                    />
+                  </div>
+                  <Input
+                    value={originLocality ?? ''}
+                    onChange={(e) => onOriginLocalityChange?.(e.target.value || undefined)}
+                    inputSize="lg"
+                    placeholder="Ej. Sierra del Rincón"
+                  />
                 </div>
               </div>
 
