@@ -10,6 +10,7 @@ import { type FileRejection, useDropzone } from 'react-dropzone';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@arcediano/ux-library';
 import {
+  buildImageAspectRatioError,
   buildImageResolutionError,
   getImageDimensions,
   getImageQualityHint,
@@ -74,6 +75,18 @@ export function ImageUploader({
       if (qualityRequirement) {
         try {
           dimensions = await getImageDimensions(file);
+
+          // Orden igual que en el uploader compartido (file-upload.tsx):
+          // proporción antes que resolución (petición del humano,
+          // 2026-10-17, guía de imágenes A.1 — hasta ahora `ImageUploader`
+          // no comprobaba `aspectRatio` en absoluto, a diferencia de
+          // `FileUpload`; una foto de producto claramente rectangular
+          // pasaba sin aviso si cumplía la resolución mínima).
+          const ratioError = buildImageAspectRatioError(file.name, dimensions, qualityRequirement);
+          if (ratioError) {
+            errors.push(ratioError);
+            continue;
+          }
 
           if (
             dimensions.width < qualityRequirement.minDimensions.width ||

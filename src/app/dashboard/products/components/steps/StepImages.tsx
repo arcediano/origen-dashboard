@@ -16,7 +16,11 @@ import {
   CheckCircle,
   Sparkles,
   AlertCircle,
-  Layers
+  Layers,
+  Square,
+  Palette,
+  Sun,
+  Ban,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { IMAGE_QUALITY_PRESETS, getImageQualityHint } from '@/lib/validations/image-quality';
@@ -31,6 +35,38 @@ interface StepImagesProps {
   /** Dentro de la pantalla de revisión del onboarding con IA: sin tarjeta ni cabecera propias. */
   embedded?: boolean;
   isPublishedProduct?: boolean;
+}
+
+// Checklist de estilo para fotos subidas a mano (petición del humano,
+// 2026-10-17 — guía de imágenes A.1): hasta ahora la única guía visible
+// era el texto de `getImageQualityHint` (resolución + proporción). Cosas
+// como fondo, luz o marcas de agua no se pueden validar por código, así
+// que viven aquí como checklist — el objetivo es que la foto manual se
+// acerque al resultado ya estándar de las imágenes generadas por IA
+// (FLUX, fondo blanco, 2000x2000, ver IMAGE_QUALITY_PRESETS.productImage).
+const IMAGE_STYLE_CHECKLIST = [
+  { icon: Square, label: 'Formato cuadrado (1:1), producto centrado' },
+  { icon: Palette, label: 'Fondo liso y neutro — blanco o superficie lisa' },
+  { icon: Sun, label: 'Luz natural o difusa, sin sombras duras' },
+  { icon: Ban, label: 'Sin marcas de agua, texto ni marcos superpuestos' },
+] as const;
+
+function ImageStyleGuideline() {
+  return (
+    <div className="rounded-xl border border-border-subtle bg-surface-alt/50 p-3">
+      <p className="text-xs font-semibold text-text-subtle uppercase tracking-wide mb-2">
+        Antes de subir tu foto
+      </p>
+      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+        {IMAGE_STYLE_CHECKLIST.map(({ icon: Icon, label }) => (
+          <li key={label} className="flex items-center gap-1.5 text-xs text-text-subtle">
+            <Icon className="h-3.5 w-3.5 shrink-0 text-hoja-tinta" aria-hidden="true" />
+            {label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 // Helper para renderizar indicador de campo sensible
@@ -123,6 +159,7 @@ export function StepImages({
               size="sm"
             />
           </div>
+          <ImageStyleGuideline />
           <ImageUploader
             value={gallery}
             onChange={onImagesChange}
