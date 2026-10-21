@@ -16,9 +16,11 @@ import {
   Image as ImageIcon,
   Building2,
   Tags,
+  Images,
 } from 'lucide-react';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
+import { ProfileImageManager } from '@/app/dashboard/profile/components/ProfileImageManager';
 import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 import {
   Alert,
@@ -58,6 +60,18 @@ import {
   type UpdateProducerProfilePayload,
 } from '@/lib/api/producers';
 import { uploadFile } from '@/lib/api/media';
+import { isValidVideoUrl } from '@/lib/onboarding/video';
+import { IMAGE_QUALITY_PRESETS } from '@/lib/validations/image-quality';
+import {
+  PROFILE_IMAGE_COLLECTIONS,
+  hasImageChanges,
+  itemsFromApi,
+  releasePendingUrls,
+  toKeys,
+  uploadPendingItems,
+  type ProfileImageCollection,
+  type ProfileImageItem,
+} from '@/lib/profile/image-list';
 import {
   getMyReadiness,
   type ProducerReadinessReport,
@@ -99,6 +113,10 @@ type BusinessFormState = {
   banner: string | null;
   logoKey: string | null;
   bannerKey: string | null;
+  /** Galerías de imágenes (equipo, entorno/obrador, elaboración), en el orden que ve el visitante. */
+  teamPhotos: ProfileImageItem[];
+  locationImages: ProfileImageItem[];
+  galleryImages: ProfileImageItem[];
 };
 
 const EMPTY_FORM: BusinessFormState = {
@@ -136,7 +154,34 @@ const EMPTY_FORM: BusinessFormState = {
   banner: null,
   logoKey: null,
   bannerKey: null,
+  teamPhotos: [],
+  locationImages: [],
+  galleryImages: [],
 };
+
+const IMAGE_COLLECTIONS = Object.keys(PROFILE_IMAGE_COLLECTIONS) as ProfileImageCollection[];
+
+/** ¿Hay cambios sin guardar? Compara los campos y las galerías (que llevan ficheros, no serializables). */
+function isFormDirty(form: BusinessFormState, initial: BusinessFormState): boolean {
+  const scalars = (state: BusinessFormState) => {
+    const copy: Record<string, unknown> = { ...state };
+    IMAGE_COLLECTIONS.forEach((field) => delete copy[field]);
+    return JSON.stringify(copy);
+  };
+  return (
+    scalars(form) !== scalars(initial) ||
+    IMAGE_COLLECTIONS.some((field) => hasImageChanges(form[field], initial[field]))
+  );
+}
+
+/**
+ * Valor a enviar de un campo opcional: el texto si lo hay; si el productor lo ha vaciado
+ * y antes tenía contenido, `''` (el backend lo borra); si nunca tuvo nada, `undefined`.
+ * Sin esto un campo vaciado "volvía" tras guardar porque omitirlo significa "no tocar".
+ */
+function clearableText(value: string, initial: string): string | undefined {
+  return value.trim() || (initial.trim() ? '' : undefined);
+}
 
 const TEAM_SIZE_OPTIONS = [
   { value: 'ONE_TWO', label: '1-2 personas' },
@@ -229,6 +274,9 @@ function mapProfileToForm(data: ProducerProfileData): BusinessFormState {
     banner: bannerUrl,
     logoKey: data.visual?.logoKey ?? null,
     bannerKey: data.visual?.bannerKey ?? null,
+    teamPhotos: itemsFromApi(data.visual?.teamPhotos, (image) => resolveVisualUrl(image.url, image.key)),
+    locationImages: itemsFromApi(data.visual?.locationImages, (image) => resolveVisualUrl(image.url, image.key)),
+    galleryImages: itemsFromApi(data.visual?.galleryImages, (image) => resolveVisualUrl(image.url, image.key)),
   };
 }
 
@@ -357,6 +405,8 @@ export default function BusinessInfoPage() {
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [uploadingImageIds, setUploadingImageIds] = useState<ReadonlySet<string>>(new Set());
+  const [imageErrors, setImageErrors] = useState<Record<string, string>>({});
   const [readinessReport, setReadinessReport] = useState<ProducerReadinessReport | null>(null);
   const [registration, setRegistration] = useState<ProducerProfileData['registration']>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -383,6 +433,19 @@ export default function BusinessInfoPage() {
     if (!form.businessName) return 'P';
     return form.businessName.charAt(0).toUpperCase();
   }, [form.businessName]);
+
+  const isDirty = useMemo(() => isFormDirty(form, initialForm), [form, initialForm]);
+  const isUploadingImages = uploadingImageIds.size > 0;
+
+  // Avisa antes de abandonar la página con cambios sin guardar.
+  useEffect(() => {
+    if (!isEditing || !isDirty) return undefined;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [isEditing, isDirty]);
 
   // ──────────────────────────────────────────────────────────────────────────
   // Cálculos de completitud por sección (se memorizan para evitar recálculos)
@@ -478,6 +541,11 @@ export default function BusinessInfoPage() {
     if (form.tagline.trim() && form.tagline.trim().length < 3) {
       nextErrors.tagline = 'El tagline debe tener al menos 3 caracteres';
     }
+    // Solo se valida si el productor lo ha cambiado: un valor antiguo no debe bloquear otros cambios.
+    const video = form.introVideoUrl.trim();
+    if (video && video !== initialForm.introVideoUrl.trim() && !isValidVideoUrl(video)) {
+      nextErrors.introVideoUrl = 'Introduce un enlace válido de YouTube o Vimeo.';
+    }
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -524,6 +592,10 @@ export default function BusinessInfoPage() {
   };
 
   const handleCancel = () => {
+    // Las fotos nuevas aún no existen en el servidor: se liberan sus previsualizaciones.
+    IMAGE_COLLECTIONS.forEach((field) => releasePendingUrls(form[field]));
+    setImageErrors({});
+    setUploadingImageIds(new Set());
     setForm(initialForm);
     setErrors({});
     setSaveError(null);
@@ -565,14 +637,14 @@ export default function BusinessInfoPage() {
           },
         }
       ),
-      tagline: form.tagline.trim() || undefined,
-      description: form.description.trim() || undefined,
-      animalWelfare: form.animalWelfare.trim() || undefined,
-      productionPhilosophy: form.productionPhilosophy.trim() || undefined,
-      values: form.values.length > 0 ? form.values : undefined,
-      website: form.website.trim() || undefined,
-      introVideoUrl: form.introVideoUrl.trim() || undefined,
-      instagramHandle: form.instagram.trim() || undefined,
+      tagline: clearableText(form.tagline, initialForm.tagline),
+      description: clearableText(form.description, initialForm.description),
+      animalWelfare: clearableText(form.animalWelfare, initialForm.animalWelfare),
+      productionPhilosophy: clearableText(form.productionPhilosophy, initialForm.productionPhilosophy),
+      values: form.values.length > 0 ? form.values : initialForm.values.length > 0 ? [] : undefined,
+      website: clearableText(form.website, initialForm.website),
+      introVideoUrl: clearableText(form.introVideoUrl, initialForm.introVideoUrl),
+      instagramHandle: clearableText(form.instagram, initialForm.instagram),
       categories: form.categories.length > 0 ? form.categories : undefined,
       ...(form.logoKey && { logoKey: form.logoKey }),
       ...(form.bannerKey && { bannerKey: form.bannerKey }),
@@ -581,16 +653,63 @@ export default function BusinessInfoPage() {
     setIsSaving(true);
     setSaveError(null);
     setSaveSuccess(null);
+    setImageErrors({});
 
     try {
-      const response = await updateProducerProfile(payload);
+      // 1) Subir las fotos nuevas de las galerías que han cambiado. Solo se envían las listas
+      //    modificadas (las demás no se tocan) y siempre completas y en el orden elegido.
+      const imagePayload: Partial<UpdateProducerProfilePayload> = {};
+      const uploadedLists: Partial<Record<ProfileImageCollection, ProfileImageItem[]>> = {};
+      let uploadFailed = false;
+
+      for (const field of IMAGE_COLLECTIONS) {
+        if (!hasImageChanges(form[field], initialForm[field])) continue;
+        const config = PROFILE_IMAGE_COLLECTIONS[field];
+        const outcome = await uploadPendingItems(
+          form[field],
+          (file) => uploadFile(file, config.uploadCategory),
+          {
+            onStart: (id) => setUploadingImageIds((prev) => new Set(prev).add(id)),
+            onDone: (id) =>
+              setUploadingImageIds((prev) => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+              }),
+            onError: (id, message) => {
+              setUploadingImageIds((prev) => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+              });
+              setImageErrors((prev) => ({ ...prev, [id]: message }));
+            },
+          },
+        );
+        uploadedLists[field] = outcome.items;
+        if (outcome.failed.length > 0) uploadFailed = true;
+        else imagePayload[config.payloadKey] = toKeys(outcome.items);
+      }
+
+      // Se conservan las claves ya subidas: si algo falla, el reintento no las vuelve a subir.
+      if (Object.keys(uploadedLists).length > 0) setForm((prev) => ({ ...prev, ...uploadedLists }));
+      if (uploadFailed) {
+        setSaveError('No se pudieron subir algunas fotos. Revisa los avisos junto a cada foto e inténtalo de nuevo; no se ha guardado nada.');
+        return;
+      }
+
+      // 2) Guardar el perfil (campos + listas de imágenes cambiadas).
+      const response = await updateProducerProfile({ ...payload, ...imagePayload });
+      IMAGE_COLLECTIONS.forEach((field) => {
+        if (response?.data) releasePendingUrls(form[field]);
+      });
       const updated = response?.data ? mapProfileToForm(response.data) : form;
 
       if (response?.data) setRegistration(response.data.registration ?? null);
       setForm(updated);
       setInitialForm(updated);
       setIsEditing(false);
-      setSaveSuccess('Perfil comercial sincronizado con API real.');
+      setSaveSuccess('Cambios guardados correctamente.');
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : 'No se pudo guardar el perfil comercial.');
     } finally {
@@ -1128,6 +1247,7 @@ export default function BusinessInfoPage() {
                   <div className="space-y-2">
                     <Label htmlFor="introVideoUrl">Video de presentacion</Label>
                     <Input id="introVideoUrl" maxLength={500} value={form.introVideoUrl} onChange={(e) => setForm({ ...form, introVideoUrl: e.target.value })} disabled={!isEditing} placeholder="https://youtube.com/watch?v=..." />
+                    {errors.introVideoUrl && <p className="text-xs text-feedback-danger">{errors.introVideoUrl}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="productionPhilosophy">Filosofia de produccion</Label>
@@ -1158,6 +1278,79 @@ export default function BusinessInfoPage() {
                       ))}
                     </ToggleGroup>
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card id="galeria" className="scroll-mt-24">
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Images className="w-5 h-5 text-hoja-tinta" />
+                      Fotos de tu proyecto
+                      <Badge variant="neutral" size="xs">Opcional</Badge>
+                    </CardTitle>
+                  </div>
+                  <CardDescription size="sm">
+                    Se muestran en tu página pública. La primera foto de cada bloque es la destacada: ordénalas como quieras que las vea el cliente. Los cambios se publican al guardar.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8">
+                  <section aria-labelledby="galeria-proceso-titulo" className="space-y-3">
+                    <div>
+                      <h3 id="galeria-proceso-titulo" className="text-sm font-semibold text-origen-bosque">Proceso de elaboración</h3>
+                      <p className="text-xs text-text-subtle">Imágenes de cómo trabajas: el obrador, las técnicas, los productos en marcha. Que sean tuyas y reales.</p>
+                    </div>
+                    <ProfileImageManager
+                      id="galleryImages"
+                      items={form.galleryImages}
+                      onChange={(items) => setForm((prev) => ({ ...prev, galleryImages: items }))}
+                      max={PROFILE_IMAGE_COLLECTIONS.galleryImages.max}
+                      editable={isEditing}
+                      altPrefix={`Proceso de elaboración de ${form.businessName || 'tu negocio'}, foto`}
+                      emptyLabel="Aún no has añadido fotos del proceso."
+                      qualityRequirement={IMAGE_QUALITY_PRESETS.productionGallery}
+                      uploadingIds={uploadingImageIds}
+                      errors={imageErrors}
+                    />
+                  </section>
+
+                  <section aria-labelledby="galeria-entorno-titulo" className="space-y-3">
+                    <div>
+                      <h3 id="galeria-entorno-titulo" className="text-sm font-semibold text-origen-bosque">Entorno y obrador</h3>
+                      <p className="text-xs text-text-subtle">El lugar donde produces: campo, granja, taller o tienda.</p>
+                    </div>
+                    <ProfileImageManager
+                      id="locationImages"
+                      items={form.locationImages}
+                      onChange={(items) => setForm((prev) => ({ ...prev, locationImages: items }))}
+                      max={PROFILE_IMAGE_COLLECTIONS.locationImages.max}
+                      editable={isEditing}
+                      altPrefix={`Entorno de ${form.businessName || 'tu negocio'}, foto`}
+                      emptyLabel="Aún no has añadido fotos del entorno."
+                      qualityRequirement={IMAGE_QUALITY_PRESETS.profileGallery}
+                      uploadingIds={uploadingImageIds}
+                      errors={imageErrors}
+                    />
+                  </section>
+
+                  <section aria-labelledby="galeria-equipo-titulo" className="space-y-3">
+                    <div>
+                      <h3 id="galeria-equipo-titulo" className="text-sm font-semibold text-origen-bosque">Equipo</h3>
+                      <p className="text-xs text-text-subtle">Las personas detrás de tus productos. Generan confianza.</p>
+                    </div>
+                    <ProfileImageManager
+                      id="teamPhotos"
+                      items={form.teamPhotos}
+                      onChange={(items) => setForm((prev) => ({ ...prev, teamPhotos: items }))}
+                      max={PROFILE_IMAGE_COLLECTIONS.teamPhotos.max}
+                      editable={isEditing}
+                      altPrefix={`Equipo de ${form.businessName || 'tu negocio'}, foto`}
+                      emptyLabel="Aún no has añadido fotos del equipo."
+                      qualityRequirement={IMAGE_QUALITY_PRESETS.profileGallery}
+                      uploadingIds={uploadingImageIds}
+                      errors={imageErrors}
+                    />
+                  </section>
                 </CardContent>
               </Card>
 
@@ -1234,6 +1427,11 @@ export default function BusinessInfoPage() {
           <HideBottomTabBar />
           <div className={`fixed left-0 right-0 ${appShellBottomOffsetClass(NAV_HEIGHT_MOBILE_DASHBOARD, 0)} lg:bottom-6 z-30 px-4 sm:px-6`}>
           <div className="mx-auto max-w-[680px] rounded-2xl border border-border-subtle bg-surface-alt/95 backdrop-blur-md p-3 shadow-lg">
+            {(isDirty || isUploadingImages) && (
+              <p role="status" className="px-1 pb-2 text-xs font-medium text-origen-bosque">
+                {isUploadingImages ? 'Subiendo fotos… no cierres la página.' : 'Tienes cambios sin guardar.'}
+              </p>
+            )}
             <div className="flex gap-2">
               <Button variant="ghost" size="md" className="flex-1" onClick={handleCancel}>
                 <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
@@ -1244,7 +1442,7 @@ export default function BusinessInfoPage() {
               <Button size="md" className="flex-1" onClick={handleSave} disabled={isSaving || isUploadingBanner || isUploadingLogo}>
                 <span className="flex items-center gap-2 whitespace-nowrap flex-nowrap">
                   {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  Guardar cambios
+                  {isUploadingImages ? 'Subiendo fotos…' : 'Guardar cambios'}
                 </span>
               </Button>
             </div>

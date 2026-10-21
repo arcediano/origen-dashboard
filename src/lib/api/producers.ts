@@ -47,11 +47,20 @@ export interface ProfileViewChartPoint {
   previousPeriod: number;
 }
 
+export interface ProducerProfileImage {
+  key: string;
+  url: string | null;
+}
+
 export interface ProducerProfileVisual {
   logoUrl: string | null;
   bannerUrl: string | null;
   logoKey: string | null;
   bannerKey: string | null;
+  /** Listas en el orden guardado (el que ve el visitante). Ausentes en backends anteriores. */
+  teamPhotos?: ProducerProfileImage[];
+  locationImages?: ProducerProfileImage[];
+  galleryImages?: ProducerProfileImage[];
 }
 
 export interface ProducerProfileData {
@@ -148,6 +157,13 @@ export interface UpdateProducerProfilePayload {
   categories?: string[];
   logoKey?: string;
   bannerKey?: string;
+  /**
+   * Listas de claves S3. Si se envían (incluso `[]`) REEMPLAZAN la lista guardada y
+   * fijan su orden; si se omiten, no se tocan. Envíalas solo si han cambiado.
+   */
+  teamPhotoKeys?: string[];
+  locationImageKeys?: string[];
+  galleryImageKeys?: string[];
 }
 
 /**
