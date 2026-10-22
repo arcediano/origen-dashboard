@@ -823,6 +823,13 @@ export default function OrderDetailPage() {
                           <p className="text-xs text-text-subtle mt-1">
                             Comisión de Origen: {item.commissionRate}%
                             {item.commissionAmount != null && ` (${formatCurrency(item.commissionAmount)})`}
+                            {/* IVA de la comisión mostrado como línea separada, no
+                                sumado en una única cifra -- petición del humano
+                                (2026-10-22, caso ORG-2026-00071): debe figurar
+                                claramente que lo retenido es "comisión + IVA". */}
+                            {item.commissionVatAmount != null && (
+                              <> + IVA ({formatCurrency(item.commissionVatAmount)})</>
+                            )}
                           </p>
                         )}
                       </div>
@@ -891,7 +898,7 @@ export default function OrderDetailPage() {
                     {order.total > order.sellerNetAmount && (
                       <p className="mt-1 text-right text-[11px] text-text-subtle">
                         de un total de {formatCurrency(order.total)}, se ha descontado{' '}
-                        {formatCurrency(order.total - order.sellerNetAmount)} de comisión
+                        {formatCurrency(order.total - order.sellerNetAmount)} de comisión + IVA
                       </p>
                     )}
                   </div>

@@ -66,6 +66,7 @@ export function makeBackendOrder(overrides: {
         subtotal: 45.00,
         commissionRate: 15,
         commissionAmount: 6.75,
+        commissionVatAmount: 1.42,
       },
     ],
     // timeline real (order_status_history), ordenado createdAt desc — igual

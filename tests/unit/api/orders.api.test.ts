@@ -224,6 +224,16 @@ describe('fetchSellerOrderById', () => {
     expect(item.commissionAmount).toBe(6.75);
   });
 
+  // commissionVatAmount (petición del humano, 2026-10-22, caso ORG-2026-00071):
+  // el IVA de la comisión se mapea aparte de commissionAmount, con las mismas
+  // reglas null/undefined/0, para que el detalle de pedido del productor pueda
+  // mostrar "comisión + IVA" como líneas distintas.
+  it('mapea commissionVatAmount del item tal cual', async () => {
+    const result = await fetchSellerOrderById('ord-sel-001');
+    const item = result.data!.items[0];
+    expect(item.commissionVatAmount).toBe(1.42);
+  });
+
   it('no confunde comisión 0% real (snapshot capturado) con ausencia de snapshot (null)', async () => {
     server.use(
       http.get(`${BASE}/orders/seller/:id`, () =>
