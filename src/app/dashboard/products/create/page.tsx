@@ -14,16 +14,16 @@ import {
   CreateProductNavigation,
   CreateProductCancelDialog,
   SuccessPublishModal,
+  PublicationRequirementsChecklist,
 } from '@/app/dashboard/products/components';
 import { ProductFormSteps } from '@/app/dashboard/products/components/ProductFormSteps';
-import { AiProductIntake, type IntakeResult } from '@/app/dashboard/products/components/ai-onboarding/AiProductIntake';
-import { AiProductReview } from '@/app/dashboard/products/components/ai-onboarding/AiProductReview';
+import { AiAssistChat } from '@/app/dashboard/products/components/ai-onboarding/AiAssistChat';
 import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductFormSidebar';
 
 import { useProductForm } from '@/hooks/useProductForm';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
 import { useHideBottomTabBar } from '@/hooks/useHideBottomTabBar';
-import { FORM_STEPS, defaultNutritionalInfo, type FormStepId, type ProductImage } from '@/types/product';
+import { FORM_STEPS, type FormStepId } from '@/types/product';
 import {
   toast,
   appShellPaddingClass,
@@ -36,19 +36,8 @@ import {
   Button,
 } from '@arcediano/ux-library';
 import { useCallback, useEffect, useState } from 'react';
-import { getAiAssistQuota, improveText } from '@/lib/api/ai-assist';
-import { fetchCategoriesTree } from '@/lib/api/categories';
-import { buildFollowUpNotes, draftToPatches, type FollowUpField, type ProductDraftResponse } from '@/lib/ai-assist/product-draft';
+import { getAiAssistQuota } from '@/lib/api/ai-assist';
 import type { AiAssistQuota } from '@/lib/ai-assist/label-proposal';
-import { AiFollowUpQuestions } from '@/app/dashboard/products/components/ai-onboarding/AiFollowUpQuestions';
-import { ensureRichTextHtml } from '@/lib/html-sanitizer';
-
-/** Las 3 marcas dietéticas de followUpQuestions responden "Sí"/"No": se guardan como boolean. */
-const BOOLEAN_FOLLOW_UP_FIELDS = new Set<FollowUpField>([
-  'nutritionalInfo.isGlutenFree',
-  'nutritionalInfo.isVegan',
-  'nutritionalInfo.isVegetarian',
-]);
 
 // ─── Animaciones ──────────────────────────────────────────────────────────────
 
@@ -58,10 +47,11 @@ const containerVariants: Variants = {
 };
 
 /**
- * Cómo se crea el producto: con el asistente de IA (pantalla de entrada +
- * pantalla única de revisión, opción B) o a mano con el wizard de 8 pasos.
+ * Cómo se crea el producto: con el asistente de IA (máquina de pasos fija
+ * "Origen Assist" -- rediseño v2, 2026-10-26 -- que redirige a la ficha real
+ * al terminar) o a mano con el wizard de 8 pasos.
  */
-type CreateMode = 'loading' | 'ai-intake' | 'ai-review' | 'wizard';
+type CreateMode = 'loading' | 'ai-chat' | 'wizard';
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
@@ -83,6 +73,8 @@ export default function CreateProductPage() {
     showSuccessModal,
     setShowSuccessModal,
     allStepsCompleted,
+    publicationStatus,
+    requiredStepErrors,
     hasCertifications,
     certificationsApproved,
     hasPendingManualCerts,
@@ -93,27 +85,12 @@ export default function CreateProductPage() {
     handleSave,
     handlePublish,
     handleCancel,
-    aiAssistKey,
-    aiAssistUsedUnsaved,
-    markAiAssistUsed,
-    setAiDraftProductId,
     onVariantsChange,
     savedVariantsCount,
   } = useProductForm();
 
   const [mode, setMode] = useState<CreateMode>('loading');
   const [quota, setQuota] = useState<AiAssistQuota | null>(null);
-  const [draft, setDraft] = useState<ProductDraftResponse | null>(null);
-  // Id real del producto ya persistido por el asistente de IA (ver
-  // `setAiDraftProductId` en useProductForm, que lo guarda en un ref
-  // deliberadamente no expuesto como valor). Se necesita como valor aquí
-  // para poder pasarlo a `ProductFormSteps`/`VariantsEditor` -- las
-  // variantes requieren que el producto ya exista, y aquí ya existe desde
-  // que la IA terminó.
-  const [aiDraftProductId, setAiDraftProductIdState] = useState<string | undefined>(undefined);
-  // Entre el borrador de la IA y la revisión final: si quedan campos que no
-  // pudo determinar, se preguntan aquí para que la revisión llegue completa.
-  const [pendingFollowUps, setPendingFollowUps] = useState<ProductDraftResponse['followUpQuestions']>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -141,159 +118,14 @@ export default function CreateProductPage() {
   // descartar dentro de esa misma pantalla, no se salta el asistente.
   useEffect(() => {
     if (mode !== 'loading' || !quota) return;
-    setMode(quota.enabled ? 'ai-intake' : 'wizard');
+    setMode(quota.enabled ? 'ai-chat' : 'wizard');
   }, [mode, quota]);
-
-  const handleAiDraft = useCallback(
-    async ({ response, productPhoto }: IntakeResult) => {
-      let categories: Awaited<ReturnType<typeof fetchCategoriesTree>> = [];
-      try {
-        categories = await fetchCategoriesTree();
-      } catch {
-        /* sin nombres de categoría: se aplica el id y el productor puede reelegir */
-      }
-      const patches = draftToPatches(response, categories, defaultNutritionalInfo);
-      for (const patch of patches) {
-        if (patch.kind === 'field') handleInputChange(patch.field, patch.value);
-        else handleNestedChange(patch.section, patch.field, patch.value);
-      }
-      // La foto principal ya viene procesada por FLUX (fondo blanco, 2000x2000
-      // — petición del humano, 2026-10-08) y subida desde el propio backend:
-      // sin `file`, para que el guardado la trate como ya subida y no vuelva
-      // a subir la foto original sin procesar (ver normalizeProductImagesForApi).
-      const photo: ProductImage = {
-        id: response.mainImage.key,
-        url: response.mainImage.url,
-        isMain: true,
-        sortOrder: 0,
-        uploading: false,
-        progress: 0,
-        size: productPhoto.size,
-        type: productPhoto.type,
-      };
-      handleImagesChange([photo]);
-      markAiAssistUsed();
-      // El backend ya ha guardado este borrador como producto real (ver
-      // ProductDraftResponse.productId): Guardar/Publicar debe actualizarlo,
-      // no crear uno nuevo (petición del humano, 2026-10-09).
-      setAiDraftProductId(response.productId);
-      setAiDraftProductIdState(response.productId);
-      setQuota((q) => (q ? { ...q, used: response.quota.used, total: response.quota.total } : q));
-      setDraft(response);
-      // Si a la IA le quedó algo pendiente de esos campos, se pregunta antes
-      // de pasar a revisión — así la pantalla de revisión llega ya completa.
-      // Se pasa ya a la pantalla de revisión (el producto en creación); las preguntas
-      // salen encima. Si se quedara en el intake, el formulario ya relleno se leería
-      // como un "borrador sin terminar" cuando es el producto que se está creando.
-      setMode('ai-review');
-      if (response.followUpQuestions.length > 0) {
-        setPendingFollowUps(response.followUpQuestions);
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    },
-    [handleInputChange, handleNestedChange, handleImagesChange, markAiAssistUsed, setAiDraftProductId],
-  );
-
-  const handleFollowUpComplete = useCallback(
-    async (answers: Partial<Record<FollowUpField, string>>) => {
-      // Método de producción y proceso artesanal los escribe el productor,
-      // pero no se guardan tal cual (petición del humano, 2026-10-15): se
-      // mandan al asistente para que los redacte de forma más atractiva
-      // antes de guardarlos (ver más abajo), así que aquí se saltan.
-      for (const [field, value] of Object.entries(answers) as [FollowUpField, string][]) {
-        if (
-          field === 'productionInfo.maturationTime' ||
-          field === 'productionInfo.productionMethod' ||
-          field === 'productionInfo.artisanProcess'
-        ) {
-          continue;
-        }
-        // Campo de nivel superior (no de una sección anidada) -- se responde
-        // con el selector de CCAA, siempre un código válido (ver
-        // AiFollowUpQuestions), así que se aplica tal cual.
-        if (field === 'originRegion') {
-          handleInputChange('originRegion', value);
-          continue;
-        }
-        const [section, key] = field.split('.') as ['nutritionalInfo' | 'productionInfo', string];
-        const finalValue = BOOLEAN_FOLLOW_UP_FIELDS.has(field) ? value === 'Sí' : value;
-        handleNestedChange(section, key, finalValue);
-      }
-      const maturation = answers['productionInfo.maturationTime']?.trim();
-      const rawProductionMethod = answers['productionInfo.productionMethod']?.trim();
-      // La maduración no tiene campo propio: se suma al proceso artesanal, igual que antes.
-      const rawArtisanProcessAnswer = answers['productionInfo.artisanProcess']?.trim();
-      const rawArtisanProcess = maturation
-        ? [rawArtisanProcessAnswer, `Tiempo de maduración: ${maturation}`].filter(Boolean).join('. ')
-        : rawArtisanProcessAnswer;
-      setPendingFollowUps([]);
-
-      // Si se respondió algo, se reescribe la descripción para que quede un texto
-      // coherente con esos datos en vez de dejarlos sueltos solo en campos
-      // estructurados — mismo asistente ya usado en "Redactar con IA", mismo
-      // assistKey (ya consumió su cupo con el borrador inicial, esto no cuenta más).
-      const notes = buildFollowUpNotes(answers);
-      if ((notes || rawProductionMethod || rawArtisanProcess) && aiAssistKey) {
-        setMode('loading');
-        try {
-          const result = await improveText(aiAssistKey, {
-            name: formData.name,
-            fullDescription: formData.fullDescription,
-            ...(rawProductionMethod && { productionMethod: rawProductionMethod }),
-            ...(rawArtisanProcess && { artisanProcess: rawArtisanProcess }),
-            ...(notes && { notes }),
-          });
-          // Estos campos se editan con RichTextEditor (ver StepBasic/StepProduction);
-          // la IA y el productor escriben texto plano, así que se normaliza a HTML
-          // para no perder los párrafos al mostrarlos.
-          if (notes) handleInputChange('fullDescription', ensureRichTextHtml(result.proposal.fullDescription));
-          if (rawProductionMethod) {
-            handleNestedChange(
-              'productionInfo',
-              'productionMethod',
-              ensureRichTextHtml(result.proposal.productionMethod ?? rawProductionMethod),
-            );
-          }
-          if (rawArtisanProcess) {
-            handleNestedChange(
-              'productionInfo',
-              'artisanProcess',
-              ensureRichTextHtml(result.proposal.artisanProcess ?? rawArtisanProcess),
-            );
-          }
-        } catch {
-          // Best-effort: si falla la IA, mejor guardar lo que escribió el
-          // productor tal cual que perderlo -- la descripción se queda como estaba.
-          if (rawProductionMethod) handleNestedChange('productionInfo', 'productionMethod', ensureRichTextHtml(rawProductionMethod));
-          if (rawArtisanProcess) handleNestedChange('productionInfo', 'artisanProcess', ensureRichTextHtml(rawArtisanProcess));
-        }
-      }
-
-      setMode('ai-review');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    },
-    [handleNestedChange, handleInputChange, formData.name, formData.fullDescription, aiAssistKey],
-  );
 
   useEffect(() => {
     if (error) {
       toast({ title: 'Error al guardar', description: error, variant: 'error' });
     }
   }, [error]);
-
-  // Si el productor ha usado el asistente de IA en un producto que aún no ha
-  // guardado y cierra/recarga la pestaña, el navegador pide confirmación (el
-  // texto lo pone el navegador; el aviso detallado va en el diálogo de cancelar).
-  useEffect(() => {
-    if (!aiAssistUsedUnsaved) return;
-    const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = '';
-    };
-    window.addEventListener('beforeunload', onBeforeUnload);
-    return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, [aiAssistUsedUnsaved]);
 
   const tips = useStepTips(activeTab, formData);
 
@@ -341,6 +173,7 @@ export default function CreateProductPage() {
       <div className="hidden lg:block fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       <PageHeader
+<<<<<<< HEAD
         title={mode === 'ai-intake' ? 'Crear un nuevo producto con IA' : 'Crear producto'}
         description={
           mode === 'ai-intake'
@@ -348,13 +181,25 @@ export default function CreateProductPage() {
             : mode === 'ai-review'
               ? 'Revisa la ficha y publícala'
               : 'Completa los pasos para publicar tu producto'
+=======
+        title={mode === 'ai-chat' ? 'Crea tu producto charlando' : 'Crear producto'}
+        description={
+          mode === 'ai-chat'
+            ? 'Sube una foto y cuéntale a Origen Assist qué es tu producto (origen, elaboración, formato…). Te irá preguntando lo que falte; tú solo revisas y decides al final.'
+            : 'Completa los pasos para publicar tu producto'
+>>>>>>> e83b66aec1a59664c41db7b8d3ee6ec4a4cbc94c
         }
-        badgeIcon={mode === 'ai-intake' ? Sparkles : Package}
-        badgeText={mode === 'ai-intake' ? 'Asistente de IA' : 'Nuevo producto'}
-        tooltip={mode === 'ai-intake' ? 'Asistente de IA' : 'Creación de producto'}
+        badgeIcon={mode === 'ai-chat' ? Sparkles : Package}
+        badgeText={mode === 'ai-chat' ? 'Asistente de IA' : 'Nuevo producto'}
+        tooltip={mode === 'ai-chat' ? 'Asistente de IA' : 'Creación de producto'}
         tooltipDetailed={
+<<<<<<< HEAD
           mode === 'ai-intake'
             ? 'La IA analiza la foto, detecta marca, formato, categoría y genera una ficha lista para revisar y publicar. Puedes completar detalles clave en el chat o dejar que la IA lo haga por ti.'
+=======
+          mode === 'ai-chat'
+            ? 'La foto le dice a Origen Assist qué aspecto tiene tu producto, pero no puede contarle su origen, cómo lo elaboras o el formato — eso solo lo sabes tú. Cuéntaselo en el chat: cuanta más información le des, mejor saldrá la ficha. Después la revisas tú antes de publicar.'
+>>>>>>> e83b66aec1a59664c41db7b8d3ee6ec4a4cbc94c
             : 'Completa todos los pasos para publicar tu producto en el catálogo'
         }
         showBackButton
@@ -382,36 +227,11 @@ export default function CreateProductPage() {
           </div>
         )}
 
-        {mode === 'ai-intake' && (
-          <AiProductIntake
-            assistKey={aiAssistKey}
+        {mode === 'ai-chat' && (
+          <AiAssistChat
             quota={quota && quota.enabled ? { used: quota.used, total: quota.total, free: quota.free, purchased: quota.purchased } : null}
-            onDraft={handleAiDraft}
             onManual={() => setMode('wizard')}
             onCreditsPurchased={handleCreditsPurchased}
-          />
-        )}
-
-        {mode === 'ai-review' && draft && (
-          <AiProductReview
-            formData={formData}
-            draft={draft}
-            completedTabs={completedTabs}
-            onInputChange={handleInputChange}
-            onNestedChange={handleNestedChange}
-            onImagesChange={handleImagesChange}
-            onSave={handleSave}
-            isSaving={isSaving}
-            onPublish={handlePublish}
-            isPublishing={isPublishing}
-            publishError={publishError}
-            canPublish={allStepsCompleted}
-            onOpenWizard={() => setMode('wizard')}
-            savedVariantsCount={savedVariantsCount}
-            onConfigureVariants={() => {
-              setActiveTab('pricing');
-              setMode('wizard');
-            }}
           />
         )}
 
@@ -449,11 +269,9 @@ export default function CreateProductPage() {
                   extenderlo también a la edición) — ProductFormSteps ya no
                   acepta aiAssistKey/onAiAssistUsed ni los reenvía a esos
                   pasos. Si quiere usar la IA, el asistente completo (modo
-                  "ai-intake") sigue disponible y se promociona desde los
-                  propios consejos útiles del alta manual (ver useStepTips).
-                  aiAssistKey (variable de este componente) se sigue usando
-                  para ese flujo completo de IA (más abajo en este fichero),
-                  independiente de esto. */}
+                  "ai-chat", máquina de pasos "Origen Assist") sigue
+                  disponible y se promociona desde los propios consejos
+                  útiles del alta manual (ver useStepTips). */}
               <ProductFormSteps
                 activeTab={activeTab}
                 formData={formData}
@@ -462,7 +280,6 @@ export default function CreateProductPage() {
                 onNestedChange={handleNestedChange}
                 onImagesChange={handleImagesChange}
                 onVariantsChange={onVariantsChange}
-                productId={aiDraftProductId}
               />
 
               {/* Navegación de pasos — sólo visible en ≥ lg; hasta ahí usa ActionBar */}
@@ -499,6 +316,11 @@ export default function CreateProductPage() {
                   onTabChange={handleTabChange}
                   embedded
                 />
+                <PublicationRequirementsChecklist
+                  publicationStatus={publicationStatus}
+                  clientMissing={requiredStepErrors}
+                  onJumpToStep={handleTabChange}
+                />
                 <ProductFormSidebar
                   tips={tips}
                   keyFact={KEY_FACTS_BY_STEP[activeTab]}
@@ -510,6 +332,18 @@ export default function CreateProductPage() {
           </>
         )}
       </div>
+
+      {/* Checklist de requisitos de publicación — móvil, siempre visible
+          mientras falte algo (petición del humano, 2026-10-26). */}
+      {mode === 'wizard' && !canPublish && (
+        <div className={`sm:hidden px-4 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 8)}`}>
+          <PublicationRequirementsChecklist
+            publicationStatus={publicationStatus}
+            clientMissing={requiredStepErrors}
+            onJumpToStep={handleTabChange}
+          />
+        </div>
+      )}
 
       {/* Panel de errores móvil — aparece sobre el ActionBar */}
       {mode === 'wizard' && showMobileErrors && currentStepErrors.length > 0 && (
@@ -547,16 +381,28 @@ export default function CreateProductPage() {
       {/* ActionBar móvil — navegación entre pasos con pulgar */}
       {mode === 'wizard' && (
       <ActionBar
-        primaryAction={{
-          id: 'primary',
-          label: isLastStep ? (!canPublish ? 'Completa todos los pasos' : 'Publicar') : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
-          onClick: isLastStep ? handlePublish : handleNext,
-          disabled: isLastStep ? (isPublishing || !canPublish) : false,
-          loading: isLastStep ? isPublishing : false,
-          loadingText: 'Publicando...',
-          rightIcon: !isLastStep ? <ChevronRight className="w-4 h-4" aria-hidden="true" /> : undefined,
-          leftIcon: isLastStep ? <Send className="w-4 h-4" aria-hidden="true" /> : undefined,
-        }}
+        primaryAction={
+          // "Publicar" visible desde cualquier paso en cuanto se cumplen los
+          // requisitos (petición del humano, 2026-10-26), no solo al llegar
+          // al último paso del wizard.
+          canPublish
+            ? {
+                id: 'primary',
+                label: 'Publicar',
+                onClick: handlePublish,
+                disabled: isPublishing,
+                loading: isPublishing,
+                loadingText: 'Publicando...',
+                leftIcon: <Send className="w-4 h-4" aria-hidden="true" />,
+              }
+            : {
+                id: 'primary',
+                label: isLastStep ? 'Completa todos los requisitos' : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
+                onClick: isLastStep ? handleSave : handleNext,
+                disabled: isLastStep,
+                rightIcon: !isLastStep ? <ChevronRight className="w-4 h-4" aria-hidden="true" /> : undefined,
+              }
+        }
         secondaryActions={[
           {
             id: 'prev',
@@ -581,17 +427,10 @@ export default function CreateProductPage() {
       />
       )}
 
-      <AiFollowUpQuestions
-        open={pendingFollowUps.length > 0}
-        questions={pendingFollowUps}
-        onComplete={handleFollowUpComplete}
-      />
-
       <CreateProductCancelDialog
         open={showCancelDialog}
         onOpenChange={setShowCancelDialog}
         onConfirm={handleCancel}
-        aiAssistUsed={aiAssistUsedUnsaved}
       />
 
       <SuccessPublishModal

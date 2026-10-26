@@ -38,6 +38,8 @@ export interface OrderItem {
   /** Comisión de Origen sobre esta venta. `null`/`undefined` = sin snapshot capturado (pedido legado o productor sin Stripe Connect); `0` es un valor real (productor con Connect activo pero sin tarifa configurada aún). No conflacionar ambos casos en la UI. */
   commissionRate?: number | null;
   commissionAmount?: number | null;
+  /** IVA (21%) sobre commissionAmount, retenido junto a la comisión en el Transfer al productor (petición del humano, 2026-10-22, caso ORG-2026-00071). Mismas reglas null/0 que commissionAmount. */
+  commissionVatAmount?: number | null;
   metadata?: Record<string, any>;
   /**
    * Variante del producto comprada (si el producto tiene variantes).

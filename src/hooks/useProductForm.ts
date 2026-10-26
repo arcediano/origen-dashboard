@@ -19,7 +19,7 @@
  * 
  * 4. ACCIONES
  *    - handleSave: Guarda (localStorage o API)
- *    - handlePublish: Publica (createProduct o updateProduct)
+ *    - handlePublish: Publica (saveProductDraft/updateProduct + submitProductForReview)
  *    - handleCancel: Vuelve al listado
  * 
  * 5. UTILIDADES
@@ -43,12 +43,14 @@ import type {
 } from '@/types/product';
 import { defaultFormData } from '@/types/product';
 import { MIN_PRODUCT_PRICE_EUROS } from '@/lib/constants/pricing';
-import { 
-  createProduct, 
-  saveProductDraft, 
+import {
+  saveProductDraft,
   suggestSku,
   updateProduct,
-  fetchProductById 
+  fetchProductById,
+  submitProductForReview,
+  getPublicationStatus,
+  type PublicationStatus,
 } from '@/lib/api/products';
 
 // ============================================================================
@@ -102,11 +104,15 @@ const omitImageFocus = (key: string, value: unknown) =>
   key === 'focusX' || key === 'focusY' ? undefined : value;
 
 // Pasos que el productor DEBE completar para poder publicar.
-// Los pasos opcionales (nutritional, production, certifications) no bloquean la publicación.
+// `nutritional` pasó a obligatorio junto con stock>0 (petición del humano,
+// 2026-10-26: ver claude-agile/proyectos/diseno-requisitos-publicacion-producto-2026-10-26.md
+// -- el backend es la fuente única de verdad, ver MODERATION_CRITERIA).
+// Los pasos opcionales (production, certifications) no bloquean la publicación.
 const REQUIRED_STEPS_FOR_PUBLISH: FormStepId[] = [
   'basic',
   'images',
   'pricing',
+  'nutritional',
 ];
 
 // ============================================================================
@@ -291,8 +297,14 @@ export function useProductForm(productId?: string) {
   // con el borrador) -- solo decide, en creación, si Guardar/Publicar debe
   // actualizar ese producto ya creado en vez de crear uno nuevo.
   const aiDraftProductIdRef = useRef<string | null>(null);
+  // Espejo en estado del ref anterior (petición del humano, 2026-10-26): el
+  // ref por sí solo no puede disparar un efecto cuando el id llega -- se
+  // necesita para poder consultar `getPublicationStatus` en cuanto el borrador
+  // de la IA se persiste, sin esperar a que el usuario toque el formulario.
+  const [aiDraftProductId, setAiDraftProductIdState] = useState<string | null>(null);
   const setAiDraftProductId = useCallback((id: string) => {
     aiDraftProductIdRef.current = id;
+    setAiDraftProductIdState(id);
   }, []);
 
   // Ref para guardar el producto original al cargar (para detección de cambios sensibles)
@@ -456,6 +468,50 @@ export function useProductForm(productId?: string) {
   }, [computedSensitiveDirtyFields]);
 
   // ==========================================================================
+  // ESTADO DE PUBLICACIÓN (fuente única de verdad en backend)
+  // ==========================================================================
+  // Petición del humano, 2026-10-26: los requisitos mínimos de publicación
+  // (incluyendo stock>0 e información nutricional, ahora bloqueantes) se
+  // consultan en el backend (GET :id/publication-status) en vez de
+  // reimplementarse aquí -- esto solo alimenta el checklist/estado visual del
+  // botón "Publicar"; `requiredStepErrors` (más abajo) sigue siendo el
+  // chequeo real que bloquea el envío, ya que el id persistido no siempre
+  // existe todavía (creación sin guardar aún).
+  const [publicationStatus, setPublicationStatus] = useState<PublicationStatus | null>(null);
+  const [isLoadingPublicationStatus, setIsLoadingPublicationStatus] = useState(false);
+
+  const persistedProductId = productId || aiDraftProductId;
+
+  const refreshPublicationStatus = useCallback(async () => {
+    if (!persistedProductId) {
+      setPublicationStatus(null);
+      return;
+    }
+    setIsLoadingPublicationStatus(true);
+    try {
+      const response = await getPublicationStatus(persistedProductId);
+      if (response.data) {
+        setPublicationStatus(response.data);
+      }
+    } finally {
+      setIsLoadingPublicationStatus(false);
+    }
+  }, [persistedProductId]);
+
+  useEffect(() => {
+    refreshPublicationStatus();
+  }, [refreshPublicationStatus]);
+
+  // Re-consultar tras cada guardado exitoso (autoguardado y manual) para que
+  // el checklist refleje los campos recién persistidos, no solo los del
+  // último fetch inicial.
+  useEffect(() => {
+    if (!persistedProductId || isInitialDataLoad.current) return;
+    const timer = setTimeout(refreshPublicationStatus, 2500);
+    return () => clearTimeout(timer);
+  }, [formData, persistedProductId, refreshPublicationStatus]);
+
+  // ==========================================================================
   // AUTO-GUARDADO
   // ==========================================================================
 
@@ -610,11 +666,28 @@ export function useProductForm(productId?: string) {
         if (formData.hasVariants) {
           if (savedVariantsCount === 0)
             errors.push('Al menos una variante con precio y stock');
-        } else if (!formData.basePrice || formData.basePrice < MIN_PRODUCT_PRICE_EUROS) {
-          errors.push(`Precio de venta (mínimo ${MIN_PRODUCT_PRICE_EUROS.toFixed(2)} €)`);
+        } else {
+          if (!formData.basePrice || formData.basePrice < MIN_PRODUCT_PRICE_EUROS) {
+            errors.push(`Precio de venta (mínimo ${MIN_PRODUCT_PRICE_EUROS.toFixed(2)} €)`);
+          }
+          // Stock > 0 pasó a obligatorio para publicar (petición del humano,
+          // 2026-10-26) -- mismo criterio que el backend (MODERATION_CRITERIA,
+          // getEffectiveStockForModeration). Con variantes, el stock lo valida
+          // el backend sobre el stock efectivo de las variantes.
+          if (!formData.stock || formData.stock <= 0) {
+            errors.push('Stock disponible (mayor que 0)');
+          }
         }
         break;
-      // nutritional, production y certifications son pasos opcionales — no bloquean
+      case 'nutritional':
+        // Información nutricional pasó a obligatoria para publicar (petición
+        // del humano, 2026-10-26) -- el backend exige solo que exista el
+        // objeto (getModerationCriteriaErrors: !!p.nutritionalInfo).
+        if (!formData.nutritionalInfo) {
+          errors.push('Información nutricional');
+        }
+        break;
+      // production y certifications son pasos opcionales — no bloquean
       default:
         break;
     }
@@ -702,65 +775,73 @@ export function useProductForm(productId?: string) {
     }
   }, [formData, productId, router, pendingSensitiveConfirmation]);
 
+  /**
+   * Petición del humano, 2026-10-26: el backend es la fuente única de verdad
+   * de los requisitos de publicación (MODERATION_CRITERIA /
+   * getUnsatisfiedPublicationRequirements) -- aquí solo se usa `getStepErrors`
+   * (que ya refleja esos mismos criterios, incluyendo stock>0 e información
+   * nutricional) en vez de `completedTabs`, que tiene un criterio más laxo
+   * para el indicador de progreso del wizard (p.ej. nutricional se marca
+   * "completo" con cualquier dato relevante, no solo con que exista el
+   * objeto). El guardado real sigue validándose también en servidor
+   * (`submitProductForReview` → PATCH :id/submit), este chequeo es solo para
+   * no intentar publicar y evitar un roundtrip inútil.
+   */
+  const requiredStepErrors = useMemo(
+    () => REQUIRED_STEPS_FOR_PUBLISH.flatMap((step) => getStepErrors(step)),
+    [getStepErrors],
+  );
+
   const handlePublish = useCallback(async () => {
-    // Solo verificar pasos obligatorios; nutricional, producción y certificaciones son opcionales.
-    const requiredCompleted = REQUIRED_STEPS_FOR_PUBLISH.every((step) => completedTabs[step]);
-    if (!requiredCompleted) {
-      setError('Completa los pasos obligatorios antes de publicar: Información básica, Imágenes, Precio e Inventario.');
+    if (requiredStepErrors.length > 0) {
+      setError(`Completa los pasos obligatorios antes de publicar: ${requiredStepErrors.join(', ')}.`);
       return;
     }
-    
+
     setIsPublishing(true);
     setPublishStatus('idle');
     setPublishError(null);
 
     try {
-      if (productId) {
-        // Edición: enviar a revisión (PENDING_APPROVAL) para aprobación del admin
-        const productData = {
-          ...formDataToProduct(formData),
-          status: 'pending_approval' as const,
-        };
-        const response = await updateProduct(productId, productData);
+      // Persistir primero el contenido actual del formulario (el endpoint de
+      // envío a revisión, PATCH :id/submit, no acepta payload -- solo valida
+      // y transiciona el status del producto ya guardado).
+      const existingId = productId || aiDraftProductIdRef.current;
+      let targetId = existingId;
 
-        if (response.error) {
+      if (existingId) {
+        const productData = formDataToProduct(formData);
+        const saveResponse = await updateProduct(existingId, productData);
+        if (saveResponse.error) {
           setPublishStatus('error');
-          setPublishError(response.error);
-        } else {
-          setPublishStatus('pending_approval');
-          setShowSuccessModal(true);
-        }
-      } else if (aiDraftProductIdRef.current) {
-        // Idem handleSave: el asistente de IA ya creó este producto como
-        // borrador, actualizarlo a PENDING_APPROVAL en vez de crear uno nuevo.
-        const productData = {
-          ...formDataToProduct(formData),
-          status: 'pending_approval' as const,
-        };
-        const response = await updateProduct(aiDraftProductIdRef.current, productData);
-
-        if (response.error) {
-          setPublishStatus('error');
-          setPublishError(response.error);
-        } else {
-          setPublishStatus('pending_approval');
-          localStorage.removeItem(STORAGE_KEY);
-          clearAiAssistDraft();
-          setShowSuccessModal(true);
+          setPublishError(saveResponse.error);
+          return;
         }
       } else {
-        // Creación: enviar a revisión (PENDING_APPROVAL)
-        const response = await createProduct({ ...formData, status: 'pending_approval' as const });
-
-        if (response.error) {
+        const draftResponse = await saveProductDraft(formData);
+        if (draftResponse.error || !draftResponse.data) {
           setPublishStatus('error');
-          setPublishError(response.error);
-        } else {
-          setPublishStatus('pending_approval');
-          localStorage.removeItem(STORAGE_KEY);
-          clearAiAssistDraft();
-          setShowSuccessModal(true);
+          setPublishError(draftResponse.error || 'Error al guardar el producto');
+          return;
         }
+        targetId = draftResponse.data.draftId;
+      }
+
+      const submitResponse = await submitProductForReview(targetId!);
+      // Refrescar el checklist en cualquier caso: si el servidor rechazó el
+      // envío por no cumplir requisitos (p.ej. una condición de carrera con
+      // otro guardado), el checklist debe reflejar el estado real, no el
+      // optimista de `requiredStepErrors`.
+      refreshPublicationStatus();
+
+      if (submitResponse.error) {
+        setPublishStatus('error');
+        setPublishError(submitResponse.error);
+      } else {
+        setPublishStatus('pending_approval');
+        localStorage.removeItem(STORAGE_KEY);
+        clearAiAssistDraft();
+        setShowSuccessModal(true);
       }
     } catch (error) {
       setPublishStatus('error');
@@ -768,7 +849,7 @@ export function useProductForm(productId?: string) {
     } finally {
       setIsPublishing(false);
     }
-  }, [formData, completedTabs, productId]);
+  }, [formData, requiredStepErrors, productId, refreshPublicationStatus]);
 
   const handleCancel = useCallback(() => {
     router.push('/dashboard/products');
@@ -838,7 +919,11 @@ export function useProductForm(productId?: string) {
     onVariantsChange: useCallback((count: number) => setSavedVariantsCount(count), []),
 
     // Valores computados
-    allStepsCompleted: REQUIRED_STEPS_FOR_PUBLISH.every((step) => completedTabs[step]),
+    allStepsCompleted: requiredStepErrors.length === 0,
+    requiredStepErrors,
+    publicationStatus,
+    isLoadingPublicationStatus,
+    refreshPublicationStatus,
     hasCertifications: formData.certifications.length > 0,
     certificationsApproved: formData.certifications.every(c => c.verified) || false,
     hasPendingManualCerts: formData.certifications.some(c => c.source === 'manual' && !c.verified),

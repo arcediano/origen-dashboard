@@ -13,6 +13,7 @@ export { ProductCard } from './ProductCard';
 export { ProductMobileList } from './ProductMobileList';
 export { CreateProductProgress } from './CreateProductProgress';
 export { CreateProductNavigation } from './CreateProductNavigation';
+export { PublicationRequirementsChecklist } from './PublicationRequirementsChecklist';
 export { CreateProductCancelDialog } from './ProductDialogs/CreateProductCancelDialog';
 
 
