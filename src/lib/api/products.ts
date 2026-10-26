@@ -1065,6 +1065,62 @@ export async function updateProductStatus(
   }
 }
 
+/**
+ * Envía un producto borrador a revisión (DRAFT → PENDING_APPROVAL).
+ * A diferencia de `updateProductStatus`, este endpoint dedicado valida los
+ * requisitos mínimos de publicación en el servidor (fuente única de verdad,
+ * petición del humano, 2026-10-26) y el gate de perfil del productor
+ * (ADR-007) -- es la acción real que debe disparar el botón "Publicar" del
+ * wizard, nunca `status` embebido en un guardado ordinario (`updateProduct`).
+ * Ruta backend: PATCH /products/:id/submit
+ */
+export async function submitProductForReview(
+  productId: string,
+): Promise<ApiResponse<{ id: string; status: string }>> {
+  try {
+    const raw = await gatewayClient.patch<{ id: string; status: string }>(
+      `/products/${productId}/submit`,
+      {},
+    );
+    return { data: raw, status: 200 };
+  } catch (error) {
+    return handleError(error, 'submitProductForReview');
+  }
+}
+
+export type PublicationRequirementStepId = 'basic' | 'images' | 'pricing' | 'nutritional';
+
+export interface PublicationRequirement {
+  id: string;
+  stepId: PublicationRequirementStepId;
+  message: string;
+}
+
+export interface PublicationStatus {
+  canPublish: boolean;
+  missing: PublicationRequirement[];
+}
+
+/**
+ * Requisitos mínimos de publicación pendientes para el producto, con el
+ * paso del wizard que corrige cada uno -- fuente única de verdad consultada
+ * para pintar el checklist "Requisitos para publicar" y habilitar/
+ * deshabilitar el botón "Publicar" desde cualquier paso (petición del
+ * humano, 2026-10-26). Ruta backend: GET /products/:id/publication-status
+ */
+export async function getPublicationStatus(
+  productId: string,
+): Promise<ApiResponse<PublicationStatus>> {
+  try {
+    const raw = await gatewayClient.get<PublicationStatus>(
+      `/products/${productId}/publication-status`,
+    );
+    return { data: raw, status: 200 };
+  } catch (error) {
+    return handleError(error, 'getPublicationStatus');
+  }
+}
+
 // ─── OFERTAS FLASH AGREGADAS ──────────────────────────────────────────────────
 
 /**
