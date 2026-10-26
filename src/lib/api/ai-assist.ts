@@ -11,7 +11,6 @@ import type {
   LabelReadingResponse,
 } from '@/lib/ai-assist/label-proposal';
 import type { TextDraft, TextImprovementResponse } from '@/lib/ai-assist/text-proposal';
-import type { ProductDraftResponse } from '@/lib/ai-assist/product-draft';
 import type { LabelImagePayload } from '@/lib/ai-assist/resize-label-image';
 import type {
   AiCreditPurchaseStatusResult,
@@ -27,8 +26,6 @@ import type {
 const LABEL_READING_TIMEOUT_MS = 90_000;
 /** Redacción de textos: hasta ~60 s en el gateway. */
 const TEXT_IMPROVEMENT_TIMEOUT_MS = 60_000;
-/** Onboarding completo (foto + etiquetas con Opus): hasta ~120 s en el gateway. */
-const PRODUCT_DRAFT_TIMEOUT_MS = 125_000;
 /** Chat conversacional "Origen Assist": cada turno puede hacer varias llamadas a Opus en el bucle del backend. */
 const CONVERSATION_TIMEOUT_MS = 125_000;
 
@@ -107,30 +104,6 @@ export async function improveText(
   }
 }
 
-export interface ProductDraftInput {
-  text: string;
-  productImage: LabelImagePayload;
-  labelImages?: LabelImagePayload[];
-  /** EAN/UPC real del envase (opcional, solo se usa si no hay fotos de etiqueta). */
-  barcode?: string;
-}
-
-/** Onboarding: foto + texto (+ etiquetas) → borrador completo. Imputa 1 unidad de cupo. */
-export async function draftProduct(
-  assistKey: string,
-  input: ProductDraftInput,
-): Promise<ProductDraftResponse> {
-  try {
-    return await gatewayClient.post<ProductDraftResponse>(
-      '/ai-assist/product-draft',
-      { assistKey, ...input },
-      { timeoutMs: PRODUCT_DRAFT_TIMEOUT_MS },
-    );
-  } catch (error) {
-    throw toAiAssistError(error);
-  }
-}
-
 /**
  * Chat conversacional "Origen Assist" (rediseño 2026-10-26): sustituye al
  * wizard de `draftProduct()` en el flujo del dashboard, turno a turno.
@@ -168,6 +141,8 @@ export interface ConversationRecord {
   id: string;
   status: 'ACTIVE' | 'COMPLETED' | 'ABANDONED';
   productId: string | null;
+  /** Paso actual de la máquina de pasos fija (ver `lib/ai-assist/conversation.ts`), para reanudar tras recargar. */
+  currentStep: string;
 }
 
 export async function getConversation(conversationId: string): Promise<ConversationRecord> {
