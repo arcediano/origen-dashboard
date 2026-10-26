@@ -370,25 +370,35 @@ export default function CreateProductPage() {
       {mode === 'wizard' && (
       <ActionBar
         primaryAction={
-          // "Publicar" visible desde cualquier paso en cuanto se cumplen los
-          // requisitos (petición del humano, 2026-10-26), no solo al llegar
-          // al último paso del wizard.
-          canPublish
-            ? {
-                id: 'primary',
-                label: 'Publicar',
-                onClick: handlePublish,
-                disabled: isPublishing,
-                loading: isPublishing,
-                loadingText: 'Publicando...',
-                leftIcon: <Send className="w-4 h-4" aria-hidden="true" />,
-              }
+          // "Siguiente" sigue siendo la acción primaria para avanzar de paso
+          // en paso -- "Publicar" solo sustituye al primario en el ÚLTIMO
+          // paso; en el resto convive como botón secundario (petición del
+          // humano, 2026-10-26: sin esto, en cuanto se cumplían los
+          // requisitos el botón "Siguiente" desaparecía del todo y la única
+          // forma de avanzar era tocando el stepper de arriba -- hallazgo
+          // real, captura de pantalla en edición de producto).
+          isLastStep
+            ? (canPublish
+                ? {
+                    id: 'primary',
+                    label: 'Publicar',
+                    onClick: handlePublish,
+                    disabled: isPublishing,
+                    loading: isPublishing,
+                    loadingText: 'Publicando...',
+                    leftIcon: <Send className="w-4 h-4" aria-hidden="true" />,
+                  }
+                : {
+                    id: 'primary',
+                    label: 'Completa todos los requisitos',
+                    onClick: handleSave,
+                    disabled: true,
+                  })
             : {
                 id: 'primary',
-                label: isLastStep ? 'Completa todos los requisitos' : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
-                onClick: isLastStep ? handleSave : handleNext,
-                disabled: isLastStep,
-                rightIcon: !isLastStep ? <ChevronRight className="w-4 h-4" aria-hidden="true" /> : undefined,
+                label: isMobileStepBlocked ? 'Completa este paso' : 'Siguiente',
+                onClick: handleNext,
+                rightIcon: <ChevronRight className="w-4 h-4" aria-hidden="true" />,
               }
         }
         secondaryActions={[
@@ -400,6 +410,17 @@ export default function CreateProductPage() {
             variant: 'secondary',
             leftIcon: <ChevronLeft className="w-4 h-4" aria-hidden="true" />,
           },
+          ...(canPublish && !isLastStep
+            ? [{
+                id: 'publish',
+                label: isPublishing ? 'Publicando...' : 'Publicar',
+                onClick: handlePublish,
+                disabled: isPublishing,
+                loading: isPublishing,
+                variant: 'primary' as const,
+                leftIcon: <Send className="w-4 h-4" aria-hidden="true" />,
+              }]
+            : []),
           {
             id: 'save',
             label: isSaving ? 'Guardando...' : 'Guardar',

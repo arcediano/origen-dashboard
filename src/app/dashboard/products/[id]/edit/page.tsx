@@ -410,37 +410,49 @@ export default function EditProductPage() {
       {/* ── ActionBar móvil — navegación entre pasos con pulgar ── */}      {/* Oculta el BottomTabBar global mientras el ActionBar está activo */}
       <HideBottomTabBar />      <ActionBar
         primaryAction={
-          // Producto ya ACTIVE/OUT_OF_STOCK: no hay nada que "publicar" --
-          // solo guardar cambios (igual que en cualquier otro paso).
-          // "Publicar" aquí llevaría el producto a PENDING_APPROVAL y lo
-          // sacaría del catálogo público sin que el productor lo pidiera.
-          isPublishedProduct
-            ? {
-                id: 'primary',
-                label: isSaving ? 'Guardando...' : 'Guardar cambios',
-                onClick: handleSave,
-                disabled: isSaving,
-                loading: isSaving,
-                leftIcon: <Save className="w-4 h-4" />,
-              }
-            // "Publicar" visible desde cualquier paso en cuanto se cumplen
-            // los requisitos (petición del humano, 2026-10-26).
-            : canPublish
-            ? {
-                id: 'primary',
-                label: 'Publicar',
-                onClick: handlePublish,
-                disabled: isPublishing,
-                loading: isPublishing,
-                loadingText: 'Publicando...',
-                leftIcon: <Send className="w-4 h-4" />,
-              }
+          // "Siguiente" sigue siendo la acción primaria para avanzar de paso
+          // en paso en cualquier producto, publicado o no -- "Publicar"/
+          // "Guardar cambios" solo sustituyen al primario en el ÚLTIMO paso;
+          // en el resto, "Publicar" convive como botón secundario (petición
+          // del humano, 2026-10-26: sin esto, en cuanto se cumplían los
+          // requisitos "Siguiente" desaparecía del todo y la única forma de
+          // avanzar de paso era tocando el stepper de arriba -- hallazgo
+          // real, captura de pantalla en edición de producto).
+          isLastStep
+            ? (isPublishedProduct
+                // Producto ya ACTIVE/OUT_OF_STOCK: no hay nada que
+                // "publicar" -- solo guardar cambios. "Publicar" aquí
+                // llevaría el producto a PENDING_APPROVAL y lo sacaría del
+                // catálogo público sin que el productor lo pidiera.
+                ? {
+                    id: 'primary',
+                    label: isSaving ? 'Guardando...' : 'Guardar cambios',
+                    onClick: handleSave,
+                    disabled: isSaving,
+                    loading: isSaving,
+                    leftIcon: <Save className="w-4 h-4" />,
+                  }
+                : canPublish
+                  ? {
+                      id: 'primary',
+                      label: 'Publicar',
+                      onClick: handlePublish,
+                      disabled: isPublishing,
+                      loading: isPublishing,
+                      loadingText: 'Publicando...',
+                      leftIcon: <Send className="w-4 h-4" />,
+                    }
+                  : {
+                      id: 'primary',
+                      label: 'Completa todos los requisitos',
+                      onClick: handleSave,
+                      disabled: true,
+                    })
             : {
                 id: 'primary',
-                label: isLastStep ? 'Completa todos los requisitos' : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
-                onClick: isLastStep ? handleSave : handleNext,
-                disabled: isLastStep,
-                rightIcon: !isLastStep ? <ChevronRight className="w-4 h-4" /> : undefined,
+                label: isMobileStepBlocked ? 'Completa este paso' : 'Siguiente',
+                onClick: handleNext,
+                rightIcon: <ChevronRight className="w-4 h-4" />,
               }
         }
         secondaryActions={[
@@ -452,6 +464,17 @@ export default function EditProductPage() {
             variant: 'secondary' as const,
             leftIcon: <ChevronLeft className="w-4 h-4" />,
           },
+          ...(!isPublishedProduct && canPublish && !isLastStep
+            ? [{
+                id: 'publish',
+                label: isPublishing ? 'Publicando...' : 'Publicar',
+                onClick: handlePublish,
+                disabled: isPublishing,
+                loading: isPublishing,
+                variant: 'primary' as const,
+                leftIcon: <Send className="w-4 h-4" />,
+              }]
+            : []),
           {
             id: 'save',
             label: isSaving ? 'Guardando...' : 'Guardar',
