@@ -5,13 +5,17 @@
  * `origen-master-microservices`. Se usa solo para reconstruir la pantalla al
  * reanudar una conversación tras recargar (ver `AiAssistChat.tsx`); el texto
  * real de cada turno siempre lo manda el backend.
+ *
+ * Ajuste (petición del humano, 2026-10-26, mismo día): la foto de "marca"
+ * (antes LABEL_PHOTO) se fusiona con la foto de producto -- una sola foto
+ * sirve para ambas cosas. El paso ORIGIN se retira: el origen real
+ * (comunidad autónoma + municipio) se rellena solo con los datos del
+ * perfil del productor, nunca se pregunta.
  */
 export const STEP_ORDER = [
   'PRODUCT_PHOTO',
-  'LABEL_PHOTO',
   'NUTRITION_PHOTO',
   'INGREDIENTS_PHOTO',
-  'ORIGIN',
   'CERTIFICATIONS',
   'FORMAT',
 ] as const;
@@ -28,13 +32,8 @@ export const STEP_PROMPTS: Record<
   { text: string; imageDropzoneLabel?: string; chips?: string[] }
 > = {
   PRODUCT_PHOTO: {
-    text: '📸 Sube una foto del producto. ¿La tienes?',
+    text: '📸 Sube una foto del producto donde se vea bien la marca y el nombre. ¿La tienes?',
     imageDropzoneLabel: 'Arrastra la foto del producto aquí',
-  },
-  LABEL_PHOTO: {
-    text: '📸 Ahora la etiqueta frontal (marca y nombre). ¿La subes?',
-    imageDropzoneLabel: 'Arrastra la foto de la etiqueta frontal aquí',
-    chips: ['No tengo foto'],
   },
   NUTRITION_PHOTO: {
     text: '📸 ¿Tienes la tabla nutricional? Súbela.',
@@ -45,10 +44,6 @@ export const STEP_PROMPTS: Record<
     text: '📸 ¿Y los ingredientes y alérgenos? Súbelos.',
     imageDropzoneLabel: 'Arrastra la foto de ingredientes/sellos aquí',
     chips: ['No tengo foto'],
-  },
-  ORIGIN: {
-    text: '¿Este producto es local o importado?',
-    chips: ['Local', 'Importado', 'No sé'],
   },
   CERTIFICATIONS: {
     text: '¿Tiene algún certificado?',
