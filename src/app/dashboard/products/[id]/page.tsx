@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useHideBottomTabBar } from '@/hooks/useHideBottomTabBar';
@@ -572,6 +572,7 @@ function StatusCard({
 export default function ProductoDetallePage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const productId = params.id as string;
 
   // Oculta el BottomTabBar global — esta página siempre tiene ActionBar móvil
@@ -585,6 +586,22 @@ export default function ProductoDetallePage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showStatusSheet, setShowStatusSheet]   = useState(false);
   const [confirmDraftOpen, setConfirmDraftOpen] = useState(false);
+  /**
+   * El asistente "Origen Assist" (máquina de pasos, 2026-10-26) redirige aquí
+   * con `?fromAssistant=1` al terminar. Se guarda en estado (no se lee
+   * `searchParams` directamente en el JSX) para poder quitar el query param
+   * al pulsar "Revisar más tarde" sin perder el resto de la página.
+   */
+  const [fromAssistant, setFromAssistant] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('fromAssistant') === '1') setFromAssistant(true);
+  }, [searchParams]);
+
+  const dismissAssistantBanner = useCallback(() => {
+    setFromAssistant(false);
+    router.replace(`/dashboard/products/${productId}`);
+  }, [router, productId]);
 
   const isFirstLoad = useRef(true);
 
@@ -752,8 +769,37 @@ export default function ProductoDetallePage() {
         <div className={`container mx-auto px-4 sm:px-6 lg:px-8 pt-4 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-10`}>
           <div>
 
-            {/* ── Banner borrador — visible hasta que el producto esté activo ── */}
-            {product.status === 'draft' && (
+            {/* ── Banner borrador — visible hasta que el producto esté activo ──
+                Cuando viene de "Origen Assist" (?fromAssistant=1) se muestra
+                el texto y los 2 botones del spec en vez del mensaje genérico
+                de edición manual. */}
+            {product.status === 'draft' && fromAssistant && (
+              <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 mb-4">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-amber-800">
+                    ✅ Producto creado en borrador. Este es el resultado de tu asistente.
+                  </p>
+                  <p className="text-xs text-amber-700 mt-0.5">
+                    Revisa la ficha y añade el precio cuando quieras publicarlo.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                  <Link href={`/dashboard/products/${product.id}/edit`}>
+                    <Button variant="primary" size="sm" leftIcon={<Edit className="w-3.5 h-3.5" />}
+                      className="text-xs whitespace-nowrap">
+                      Añadir precio ahora
+                    </Button>
+                  </Link>
+                  <Button variant="outline" size="sm" onClick={dismissAssistantBanner}
+                    className="border-amber-300 text-amber-800 hover:bg-amber-100 text-xs whitespace-nowrap">
+                    Revisar más tarde
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {product.status === 'draft' && !fromAssistant && (
               <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 mb-4">
                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">

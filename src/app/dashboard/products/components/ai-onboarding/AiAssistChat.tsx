@@ -1,44 +1,45 @@
 /**
  * @component AiAssistChat
- * @description Chat conversacional "Origen Assist" (rediseño 2026-10-26):
- * sustituye al formulario de una sola pantalla (`AiProductIntake`) por una
- * conversación turno a turno. Cada turno es un POST a
- * `/ai-assist/conversation` (inicio) o `/ai-assist/conversation/:id/message`
- * (siguientes), sin streaming ni WebSockets -- cada respuesta del asistente
- * llega completa. Cuando el asistente llama a `finalizar_borrador`, la
- * respuesta tiene la misma forma que `ProductDraftResponse` (ver
- * `lib/ai-assist/conversation.ts`), así que `onDraftReady` se integra con el
- * resto del flujo (`draftToPatches`, `AiProductReview`) sin cambios.
+ * @description Chat guiado "Origen Assist" (rediseño v2, 2026-10-26, spec
+ * detallado del humano): máquina de pasos FIJA de 7 pasos (no un chat libre
+ * donde el modelo decide qué preguntar), una pregunta concreta por turno con
+ * su propia zona de foto y/o chips de respuesta rápida. Al terminar, el
+ * backend ya ha creado el `Product` real (DRAFT): este componente redirige a
+ * su ficha de detalle con un spinner breve.
+ *
+ * Resiliencia de sesión (acotada a este flujo, sin tocar `AuthContext`): el
+ * `conversationId` se persiste en `sessionStorage` en cada turno -- si el
+ * usuario recarga o vuelve tras un redirect a `/login` por expiración, se
+ * recupera con `GET /ai-assist/conversation/:id` y se ofrece continuar
+ * donde lo dejó, en vez de perder el progreso (mismo patrón que
+ * `CheckoutShell.tsx` de origen-web).
  */
 
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Camera, ChevronRight, Loader2, Send, Sparkles, SkipForward, X } from 'lucide-react';
+import { Camera, Loader2, Send, Sparkles } from 'lucide-react';
 import {
   Alert,
   AlertDescription,
   AlertTitle,
   Button,
   Card,
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  Progress,
   Textarea,
 } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import { resizeLabelImage } from '@/lib/ai-assist/resize-label-image';
-import { AiAssistError, postConversationMessage, startConversation } from '@/lib/api/ai-assist';
-import type { ConversationQuestion, ConversationTurnResponse } from '@/lib/ai-assist/conversation';
-import type { ProductDraftResponse } from '@/lib/ai-assist/product-draft';
-import {
-  AUTONOMOUS_COMMUNITY_CODES,
-  AUTONOMOUS_COMMUNITY_NAMES,
-  autonomousCommunityFlagSrc,
-} from '@/lib/constants/autonomous-community';
+import { AiAssistError, getConversation, postConversationMessage, startConversation } from '@/lib/api/ai-assist';
+import type { ConversationTurnResponse } from '@/lib/ai-assist/conversation';
+import { STEP_PROMPTS, TOTAL_STEPS, stepIndexOf, type AiAssistUserStep } from '@/lib/ai-assist/step-prompts';
 import { AddCreditsModal } from './AddCreditsModal';
 import { AiCreditsPanel } from './AiCreditsPanel';
 
 const MAX_FILE_MB = 10;
+const STORAGE_KEY = 'origen-ai-assist-conversation-id';
 
 interface ChatTurn {
   role: 'user' | 'assistant';
@@ -46,15 +47,8 @@ interface ChatTurn {
   imageUrl?: string;
 }
 
-export interface AiAssistChatDraftReady {
-  response: ProductDraftResponse;
-  /** La última foto de producto subida en el chat (para size/type al guardar). */
-  productPhoto: File | null;
-}
-
 interface AiAssistChatProps {
   quota: { used: number; total: number; free?: number; purchased?: number } | null;
-  onDraftReady: (result: AiAssistChatDraftReady) => void;
   onManual: () => void;
   onCreditsPurchased?: () => void;
 }
@@ -72,120 +66,61 @@ function friendlyError(error: unknown): string {
         return error.message;
     }
   }
-  return error instanceof Error ? error.message : 'El asistente no ha podido responder.';
+  return error instanceof Error ? error.message : 'Algo ha ido mal.';
 }
 
-/** Respuesta inline a una pregunta de cierre pendiente -- mismos controles por tipo que `AiFollowUpQuestions`, sin modal. */
-function PendingQuestionAnswer({
-  question,
+/** Chips de respuesta rápida + (para "origin") el selector de CCAA no aplica aquí -- es texto libre genérico. */
+function QuickReplyChips({
+  chips,
   disabled,
-  onAnswer,
-  onSkip,
+  onPick,
 }: {
-  question: ConversationQuestion;
+  chips: string[];
   disabled: boolean;
-  onAnswer: (value: string) => void;
-  onSkip: () => void;
+  onPick: (value: string) => void;
 }) {
-  const [textValue, setTextValue] = useState('');
-
-  if (question.field === 'originRegion') {
-    return (
-      <div className="space-y-2">
-        <Select onValueChange={onAnswer} disabled={disabled}>
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar comunidad autónoma" />
-          </SelectTrigger>
-          <SelectContent>
-            {AUTONOMOUS_COMMUNITY_CODES.map((code) => (
-              <SelectItem key={code} value={code}>
-                <span className="flex items-center gap-2">
-                  <img
-                    src={autonomousCommunityFlagSrc(code)}
-                    alt=""
-                    className="h-4 w-6 rounded-sm object-cover shrink-0"
-                  />
-                  {AUTONOMOUS_COMMUNITY_NAMES[code]}
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button type="button" variant="ghost" size="sm" disabled={disabled} onClick={onSkip} leftIcon={<SkipForward className="h-4 w-4" aria-hidden="true" />}>
-          Saltar
-        </Button>
-      </div>
-    );
-  }
-
-  if (question.type === 'single_choice') {
-    return (
-      <div className="flex flex-wrap gap-2">
-        {(question.options ?? []).map((opt) => (
+  return (
+    <div className="flex flex-wrap gap-2">
+      {chips.map((chip) => {
+        // Chips de candidatos USDA llevan "usda:<i>:<descripción>" -- se muestra solo la descripción.
+        const label = chip.startsWith('usda:') ? chip.split(':').slice(2).join(':') : chip;
+        return (
           <button
-            key={opt}
+            key={chip}
             type="button"
             disabled={disabled}
-            onClick={() => onAnswer(opt)}
+            onClick={() => onPick(chip)}
             className={cn(
               'rounded-xl border-2 border-border-subtle bg-surface-alt px-4 py-2',
               'text-sm font-semibold text-origen-bosque transition-colors',
               'hover:border-origen-pradera hover:bg-origen-pradera/5',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera',
+              'disabled:opacity-50',
             )}
           >
-            {opt}
+            {label}
           </button>
-        ))}
-        <Button type="button" variant="ghost" size="sm" disabled={disabled} onClick={onSkip} leftIcon={<SkipForward className="h-4 w-4" aria-hidden="true" />}>
-          Saltar
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-2">
-      <Textarea
-        value={textValue}
-        onChange={(e) => setTextValue(e.target.value)}
-        placeholder="Escribe tu respuesta..."
-        className="min-h-[70px]"
-        disabled={disabled}
-        autoFocus
-      />
-      <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          disabled={disabled || !textValue.trim()}
-          onClick={() => onAnswer(textValue.trim())}
-          rightIcon={<ChevronRight className="h-4 w-4" aria-hidden="true" />}
-        >
-          Responder
-        </Button>
-        <Button type="button" variant="ghost" size="sm" disabled={disabled} onClick={onSkip} leftIcon={<SkipForward className="h-4 w-4" aria-hidden="true" />}>
-          Saltar
-        </Button>
-      </div>
+        );
+      })}
     </div>
   );
 }
 
-export function AiAssistChat({ quota, onDraftReady, onManual, onCreditsPurchased }: AiAssistChatProps) {
+export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistChatProps) {
+  const router = useRouter();
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [turns, setTurns] = useState<ChatTurn[]>([
-    {
-      role: 'assistant',
-      text: 'Hola, soy Origen Assist. Sube una foto de tu producto y cuéntame qué es -- con eso preparo la ficha completa para que la revises.',
-    },
-  ]);
-  const [pendingQuestion, setPendingQuestion] = useState<ConversationQuestion | null>(null);
+  const [turns, setTurns] = useState<ChatTurn[]>([]);
+  const [stepData, setStepData] = useState<{
+    stepIndex: number;
+    totalSteps: number;
+    imageDropzoneLabel?: string;
+    chips?: string[];
+  } | null>(null);
+  const [resumeOffer, setResumeOffer] = useState<{ conversationId: string; step: string } | null>(null);
   const [text, setText] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
-  const [lastProductPhoto, setLastProductPhoto] = useState<File | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quotaExceeded, setQuotaExceeded] = useState(false);
   const [showAddCredits, setShowAddCredits] = useState(false);
@@ -194,9 +129,26 @@ export function AiAssistChat({ quota, onDraftReady, onManual, onCreditsPurchased
 
   const quotaExhausted = !!quota && quota.used >= quota.total;
 
+  // Reanudación: si hay una conversación activa guardada (p. ej. tras un
+  // redirect a /login por expiración de sesión), se ofrece continuar en vez
+  // de empezar de cero -- el borrador en el backend nunca se pierde.
+  useEffect(() => {
+    const savedId = sessionStorage.getItem(STORAGE_KEY);
+    if (!savedId) return;
+    getConversation(savedId)
+      .then((conv) => {
+        if (conv.status === 'ACTIVE') {
+          setResumeOffer({ conversationId: savedId, step: conv.currentStep });
+        } else {
+          sessionStorage.removeItem(STORAGE_KEY);
+        }
+      })
+      .catch(() => sessionStorage.removeItem(STORAGE_KEY));
+  }, []);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [turns, pendingQuestion]);
+  }, [turns, stepData]);
 
   const handlePhoto = (list: FileList | null) => {
     const file = list?.[0];
@@ -214,32 +166,37 @@ export function AiAssistChat({ quota, onDraftReady, onManual, onCreditsPurchased
     setPhoto(file);
   };
 
-  const handleResult = (result: ConversationTurnResponse, userTurn: ChatTurn) => {
-    setTurns((prev) => [...prev, userTurn, { role: 'assistant', text: result.text }]);
-    if (result.kind === 'question') {
-      setPendingQuestion(result.question);
+  const applyResult = (result: ConversationTurnResponse, userTurn: ChatTurn | null) => {
+    setConversationId(result.conversationId);
+    sessionStorage.setItem(STORAGE_KEY, result.conversationId);
+    setTurns((prev) => [...prev, ...(userTurn ? [userTurn] : []), { role: 'assistant', text: result.text }]);
+    if (result.kind === 'step') {
+      setStepData({
+        stepIndex: result.stepIndex,
+        totalSteps: result.totalSteps,
+        imageDropzoneLabel: result.imageDropzoneLabel,
+        chips: result.chips,
+      });
     } else {
-      setPendingQuestion(null);
-      if (result.kind === 'draft_ready') {
-        onDraftReady({ response: result, productPhoto: lastProductPhoto });
-      }
+      setStepData(null);
+      sessionStorage.removeItem(STORAGE_KEY);
+      setIsRedirecting(true);
+      window.setTimeout(() => router.push(`/dashboard/products/${result.productId}?fromAssistant=1`), 1200);
     }
   };
 
-  const send = async (input: { text?: string; followUpAnswer?: string }, userTurn: ChatTurn) => {
+  const send = async (input: { text?: string; choice?: string }, userTurn: ChatTurn | null) => {
     setIsSending(true);
     setError(null);
     setQuotaExceeded(false);
     try {
       const images = photo ? [await resizeLabelImage(photo)] : undefined;
-      if (photo) setLastProductPhoto(photo);
       setPhoto(null);
       const payload = { ...input, ...(images && { images }) };
       const result = conversationId
         ? await postConversationMessage(conversationId, payload)
         : await startConversation(payload);
-      setConversationId(result.conversationId);
-      handleResult(result, userTurn);
+      applyResult(result, userTurn);
     } catch (err) {
       setError(friendlyError(err));
       setQuotaExceeded(err instanceof AiAssistError && err.code === 'AI_PRODUCER_QUOTA_EXCEEDED');
@@ -251,24 +208,71 @@ export function AiAssistChat({ quota, onDraftReady, onManual, onCreditsPurchased
   const handleSend = () => {
     const trimmed = text.trim();
     if (!trimmed && !photo) return;
-    const userTurn: ChatTurn = {
-      role: 'user',
-      text: trimmed,
-      imageUrl: photo ? URL.createObjectURL(photo) : undefined,
-    };
+    const userTurn: ChatTurn = { role: 'user', text: trimmed, imageUrl: photo ? URL.createObjectURL(photo) : undefined };
     setText('');
     void send({ text: trimmed || undefined }, userTurn);
   };
 
-  const handleAnswer = (value: string) => {
-    if (!pendingQuestion) return;
-    void send({ followUpAnswer: value }, { role: 'user', text: value });
+  const handleChip = (choice: string) => {
+    const label = choice.startsWith('usda:') ? choice.split(':').slice(2).join(':') : choice;
+    void send({ choice }, { role: 'user', text: label });
   };
 
-  const handleSkip = () => {
-    if (!pendingQuestion) return;
-    void send({ followUpAnswer: 'No lo sé, sigue sin este dato.' }, { role: 'user', text: '(sin responder)' });
-  };
+  if (resumeOffer) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <Card variant="elevated" className="p-6 sm:p-8 text-center space-y-4">
+          <p className="text-base font-medium text-origen-bosque">
+            👋 Retomamos donde lo dejaste (paso {stepIndexOf(resumeOffer.step)} de {TOTAL_STEPS}).
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => {
+                setConversationId(resumeOffer.conversationId);
+                const step = resumeOffer.step as AiAssistUserStep;
+                const prompt = STEP_PROMPTS[step];
+                setTurns([{ role: 'assistant', text: prompt?.text ?? 'Sigamos.' }]);
+                if (prompt) {
+                  setStepData({
+                    stepIndex: stepIndexOf(step),
+                    totalSteps: TOTAL_STEPS,
+                    imageDropzoneLabel: prompt.imageDropzoneLabel,
+                    chips: prompt.chips,
+                  });
+                }
+                setResumeOffer(null);
+              }}
+            >
+              Continuar
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                sessionStorage.removeItem(STORAGE_KEY);
+                setResumeOffer(null);
+              }}
+            >
+              Empezar de nuevo
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isRedirecting) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <Card variant="elevated" className="p-10 flex flex-col items-center gap-4 text-center" aria-busy="true">
+          <Loader2 className="h-8 w-8 animate-spin text-origen-bosque" aria-hidden="true" />
+          <p className="text-sm text-muted-foreground">Preparando tu ficha…</p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -285,16 +289,31 @@ export function AiAssistChat({ quota, onDraftReady, onManual, onCreditsPurchased
         />
       )}
 
+      {stepData && (
+        <Progress
+          value={stepData.stepIndex}
+          max={stepData.totalSteps}
+          showLabel
+          label={`Paso ${stepData.stepIndex} de ${stepData.totalSteps}`}
+          size="sm"
+        />
+      )}
+
       <Card variant="elevated" className="flex flex-col p-0 overflow-hidden">
-        <div className="flex max-h-[60vh] min-h-[320px] flex-col gap-4 overflow-y-auto p-4 sm:p-6">
+        <div className="flex max-h-[60vh] min-h-[280px] flex-col gap-4 overflow-y-auto p-4 sm:p-6">
+          {turns.length === 0 && !isSending && (
+            <div className="flex justify-start">
+              <div className="max-w-[85%] rounded-2xl bg-origen-pastel/60 px-4 py-2.5 text-sm text-origen-oscuro">
+                Hola, soy Origen Assist. {STEP_PROMPTS.PRODUCT_PHOTO.text}
+              </div>
+            </div>
+          )}
           {turns.map((turn, i) => (
             <div key={i} className={cn('flex', turn.role === 'user' ? 'justify-end' : 'justify-start')}>
               <div
                 className={cn(
                   'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap',
-                  turn.role === 'user'
-                    ? 'bg-origen-bosque text-white'
-                    : 'bg-origen-pastel/60 text-origen-oscuro',
+                  turn.role === 'user' ? 'bg-origen-bosque text-white' : 'bg-origen-pastel/60 text-origen-oscuro',
                 )}
               >
                 {turn.imageUrl && (
@@ -309,20 +328,12 @@ export function AiAssistChat({ quota, onDraftReady, onManual, onCreditsPurchased
             <div className="flex justify-start">
               <div className="flex items-center gap-2 rounded-2xl bg-origen-pastel/60 px-4 py-2.5 text-sm text-origen-oscuro">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                Pensando...
+                Pensando…
               </div>
             </div>
           )}
-          {pendingQuestion && !isSending && (
-            <div className="rounded-2xl border border-border-subtle bg-surface-alt p-4 space-y-3">
-              <p className="text-sm font-medium text-origen-bosque">{pendingQuestion.question}</p>
-              <PendingQuestionAnswer
-                question={pendingQuestion}
-                disabled={isSending}
-                onAnswer={handleAnswer}
-                onSkip={handleSkip}
-              />
-            </div>
+          {stepData?.chips && !isSending && (
+            <QuickReplyChips chips={stepData.chips} disabled={isSending} onPick={handleChip} />
           )}
           <div ref={bottomRef} />
         </div>
@@ -336,26 +347,28 @@ export function AiAssistChat({ quota, onDraftReady, onManual, onCreditsPurchased
           </div>
         )}
 
-        {!pendingQuestion && (
-          <div className="border-t border-border-subtle p-3 sm:p-4">
-            <input
-              ref={photoInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="sr-only"
-              tabIndex={-1}
-              onChange={(e) => handlePhoto(e.target.files)}
-            />
-            {photo && (
-              <div className="mb-2 flex items-center gap-2 rounded-xl border border-border-subtle bg-origen-pastel/40 px-3 py-2 text-xs text-origen-bosque">
-                <Camera className="h-3.5 w-3.5" aria-hidden="true" />
-                {photo.name}
-                <button type="button" onClick={() => setPhoto(null)} aria-label="Quitar foto" className="ml-auto">
-                  <X className="h-3.5 w-3.5" aria-hidden="true" />
-                </button>
-              </div>
-            )}
-            <div className="flex items-end gap-2">
+        <div className="border-t border-border-subtle p-3 sm:p-4">
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="sr-only"
+            tabIndex={-1}
+            onChange={(e) => handlePhoto(e.target.files)}
+          />
+          {stepData?.imageDropzoneLabel && (
+            <button
+              type="button"
+              disabled={isSending || quotaExhausted}
+              onClick={() => photoInputRef.current?.click()}
+              className="mb-2 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border-strong/40 bg-origen-pastel/30 px-4 py-3 text-xs font-medium text-origen-bosque transition-colors hover:bg-origen-pastel/60"
+            >
+              <Camera className="h-4 w-4" aria-hidden="true" />
+              {photo ? photo.name : stepData.imageDropzoneLabel}
+            </button>
+          )}
+          <div className="flex items-end gap-2">
+            {!stepData?.imageDropzoneLabel && (
               <Button
                 type="button"
                 variant="secondary"
@@ -366,32 +379,32 @@ export function AiAssistChat({ quota, onDraftReady, onManual, onCreditsPurchased
               >
                 <Camera className="h-4 w-4" aria-hidden="true" />
               </Button>
-              <Textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Escribe aquí..."
-                className="min-h-[44px] flex-1"
-                disabled={isSending || quotaExhausted}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-              />
-              <Button
-                type="button"
-                variant="primary"
-                size="icon"
-                disabled={isSending || quotaExhausted || (!text.trim() && !photo)}
-                onClick={handleSend}
-                aria-label="Enviar"
-              >
-                <Send className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            </div>
+            )}
+            <Textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Escribe aquí…"
+              className="min-h-[44px] flex-1"
+              disabled={isSending || quotaExhausted}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="primary"
+              size="icon"
+              disabled={isSending || quotaExhausted || (!text.trim() && !photo)}
+              onClick={handleSend}
+              aria-label="Enviar"
+            >
+              <Send className="h-4 w-4" aria-hidden="true" />
+            </Button>
           </div>
-        )}
+        </div>
 
         <AddCreditsModal
           open={showAddCredits}
