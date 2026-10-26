@@ -1,41 +1,35 @@
 /**
- * Tipos del chat conversacional "Origen Assist" (rediseño 2026-10-26):
- * `POST /ai-assist/conversation` y `POST /ai-assist/conversation/:id/message`.
- * Cuando el asistente entrega el borrador final (`kind: 'draft_ready'`), la
- * respuesta tiene exactamente la misma forma que `ProductDraftResponse` (más
- * `kind`/`conversationId`/`text`/`done`) -- así `draftToPatches()` y
- * `AiProductReview` se reutilizan sin cambios.
+ * Tipos de la máquina de pasos fija "Origen Assist" (rediseño v2,
+ * 2026-10-26, petición del humano con spec detallado): sustituye al chat
+ * libre de la ronda anterior. `POST /ai-assist/conversation` y
+ * `POST /ai-assist/conversation/:id/message` devuelven siempre o bien el
+ * siguiente paso (`kind: 'step'`) o bien el borrador ya creado
+ * (`kind: 'draft_ready'`).
  */
 import type { LabelImagePayload } from './resize-label-image';
-import type { FollowUpField, ProductDraftResponse } from './product-draft';
 
 export interface ConversationMessageInput {
   text?: string;
   images?: LabelImagePayload[];
-  /** Respuesta a una pregunta de cierre pendiente (ver `ConversationQuestion`). */
-  followUpAnswer?: string;
-}
-
-export interface ConversationQuestion {
-  field: FollowUpField;
-  question: string;
-  type: 'text' | 'single_choice';
-  options: string[] | null;
+  /** Chip pulsado por el productor (p. ej. "Local", "Ninguno", "No tengo foto", "usda:0:..."). */
+  choice?: string;
 }
 
 export type ConversationTurnResponse =
-  | { kind: 'message'; conversationId: string; text: string; done: false }
   | {
-      kind: 'question';
+      kind: 'step';
       conversationId: string;
       text: string;
-      question: ConversationQuestion;
+      stepIndex: number;
+      totalSteps: number;
+      imageDropzoneLabel?: string;
+      chips?: string[];
       done: false;
     }
-  | ({
+  | {
       kind: 'draft_ready';
       conversationId: string;
       text: string;
       productId: string;
       done: true;
-    } & ProductDraftResponse);
+    };
