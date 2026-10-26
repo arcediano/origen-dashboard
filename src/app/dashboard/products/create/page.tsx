@@ -173,33 +173,18 @@ export default function CreateProductPage() {
       <div className="hidden lg:block fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       <PageHeader
-<<<<<<< HEAD
-        title={mode === 'ai-intake' ? 'Crear un nuevo producto con IA' : 'Crear producto'}
-        description={
-          mode === 'ai-intake'
-            ? 'Sube una foto o describe tu producto. Origen Assist completará la información y te guiará hasta tener una ficha lista para publicar.'
-            : mode === 'ai-review'
-              ? 'Revisa la ficha y publícala'
-              : 'Completa los pasos para publicar tu producto'
-=======
         title={mode === 'ai-chat' ? 'Crea tu producto charlando' : 'Crear producto'}
         description={
           mode === 'ai-chat'
             ? 'Sube una foto y cuéntale a Origen Assist qué es tu producto (origen, elaboración, formato…). Te irá preguntando lo que falte; tú solo revisas y decides al final.'
             : 'Completa los pasos para publicar tu producto'
->>>>>>> e83b66aec1a59664c41db7b8d3ee6ec4a4cbc94c
         }
         badgeIcon={mode === 'ai-chat' ? Sparkles : Package}
         badgeText={mode === 'ai-chat' ? 'Asistente de IA' : 'Nuevo producto'}
         tooltip={mode === 'ai-chat' ? 'Asistente de IA' : 'Creación de producto'}
         tooltipDetailed={
-<<<<<<< HEAD
-          mode === 'ai-intake'
-            ? 'La IA analiza la foto, detecta marca, formato, categoría y genera una ficha lista para revisar y publicar. Puedes completar detalles clave en el chat o dejar que la IA lo haga por ti.'
-=======
           mode === 'ai-chat'
             ? 'La foto le dice a Origen Assist qué aspecto tiene tu producto, pero no puede contarle su origen, cómo lo elaboras o el formato — eso solo lo sabes tú. Cuéntaselo en el chat: cuanta más información le des, mejor saldrá la ficha. Después la revisas tú antes de publicar.'
->>>>>>> e83b66aec1a59664c41db7b8d3ee6ec4a4cbc94c
             : 'Completa todos los pasos para publicar tu producto en el catálogo'
         }
         showBackButton
