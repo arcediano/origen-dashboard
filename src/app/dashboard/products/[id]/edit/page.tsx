@@ -306,6 +306,23 @@ export default function EditProductPage() {
               onVariantsChange={onVariantsChange}
             />
 
+            {/* Checklist de requisitos de publicación — móvil/tablet. Vive
+                dentro de la columna con scroll normal (que ya reserva
+                `appShellPaddingClass` para el ActionBar fijo) en vez de justo
+                antes del ActionBar a nivel de página: puesto ahí quedaba
+                tapado/cortado por la barra fija al no tener hueco reservado
+                debajo (hallazgo real, petición del humano, 2026-10-26,
+                captura de pantalla en móvil). */}
+            {!isPublishedProduct && (
+              <div className="lg:hidden">
+                <PublicationRequirementsChecklist
+                  publicationStatus={publicationStatus}
+                  clientMissing={requiredStepErrors}
+                  onJumpToStep={handleTabChange}
+                />
+              </div>
+            )}
+
             {/* Navegación de pasos — sólo visible en ≥ lg; hasta ahí usa ActionBar */}
             <div className="hidden lg:block">
               <CreateProductNavigation
@@ -356,18 +373,6 @@ export default function EditProductPage() {
           </div>
         </motion.div>
       </div>
-
-      {/* Checklist de requisitos de publicación — móvil, siempre visible
-          mientras falte algo (petición del humano, 2026-10-26). */}
-      {!canPublish && !isPublishedProduct && (
-        <div className={`sm:hidden px-4 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 8)}`}>
-          <PublicationRequirementsChecklist
-            publicationStatus={publicationStatus}
-            clientMissing={requiredStepErrors}
-            onJumpToStep={handleTabChange}
-          />
-        </div>
-      )}
 
       {/* ── Panel de errores móvil — aparece sobre el ActionBar ── */}
       {showMobileErrors && currentStepErrors.length > 0 && (
