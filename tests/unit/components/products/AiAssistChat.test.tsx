@@ -66,10 +66,10 @@ describe('AiAssistChat', () => {
     startMock.mockResolvedValue({
       kind: 'step',
       conversationId: 'conv-1',
-      text: '📸 Ahora la etiqueta frontal (marca y nombre). ¿La subes?',
+      text: '📸 ¿Tienes la tabla nutricional? Súbela.',
       stepIndex: 2,
-      totalSteps: 7,
-      imageDropzoneLabel: 'Arrastra la foto de la etiqueta frontal aquí',
+      totalSteps: 5,
+      imageDropzoneLabel: 'Arrastra la foto de la tabla nutricional aquí',
       chips: ['No tengo foto'],
       done: false,
     });
@@ -79,10 +79,10 @@ describe('AiAssistChat', () => {
     await user.click(screen.getByRole('button', { name: 'Enviar' }));
 
     expect(startMock).toHaveBeenCalledWith({ text: 'Es un queso de oveja' });
-    expect(await screen.findByText(/Ahora la etiqueta frontal/)).toBeTruthy();
+    expect(await screen.findByText(/¿Tienes la tabla nutricional\?/)).toBeTruthy();
     const progress = container.querySelector('progress');
     expect(progress?.getAttribute('value')).toBe('2');
-    expect(progress?.getAttribute('max')).toBe('7');
+    expect(progress?.getAttribute('max')).toBe('5');
     expect(screen.getByRole('button', { name: 'No tengo foto' })).toBeTruthy();
     expect(sessionStorage.getItem(STORAGE_KEY)).toBe('conv-1');
   });
@@ -92,31 +92,30 @@ describe('AiAssistChat', () => {
     startMock.mockResolvedValue({
       kind: 'step',
       conversationId: 'conv-1',
-      text: '¿Este producto es local o importado?',
-      stepIndex: 5,
-      totalSteps: 7,
-      chips: ['Local', 'Importado', 'No sé'],
+      text: '¿Tiene algún certificado?',
+      stepIndex: 4,
+      totalSteps: 5,
+      chips: ['Orgánico', 'Vegano', 'Sin gluten', 'Ninguno'],
       done: false,
     });
     postMock.mockResolvedValue({
       kind: 'step',
       conversationId: 'conv-1',
-      text: '¿Tiene algún certificado?',
-      stepIndex: 6,
-      totalSteps: 7,
-      chips: ['Orgánico', 'Vegano', 'Sin gluten', 'Ninguno'],
+      text: '¿Cuál es el formato de venta? (unidad, pack, peso)',
+      stepIndex: 5,
+      totalSteps: 5,
       done: false,
     });
     render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
 
     await user.type(screen.getByPlaceholderText('Escribe aquí…'), 'hola');
     await user.click(screen.getByRole('button', { name: 'Enviar' }));
-    expect(await screen.findByRole('button', { name: 'Local' })).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'Orgánico' })).toBeTruthy();
 
-    await user.click(screen.getByRole('button', { name: 'Local' }));
+    await user.click(screen.getByRole('button', { name: 'Orgánico' }));
 
-    expect(postMock).toHaveBeenCalledWith('conv-1', { choice: 'Local' });
-    expect(await screen.findByText('¿Tiene algún certificado?')).toBeTruthy();
+    expect(postMock).toHaveBeenCalledWith('conv-1', { choice: 'Orgánico' });
+    expect(await screen.findByText(/formato de venta/)).toBeTruthy();
   });
 
   it('un chip de candidato USDA muestra solo la descripción pero envía el valor completo', async () => {
@@ -125,8 +124,8 @@ describe('AiAssistChat', () => {
       kind: 'step',
       conversationId: 'conv-1',
       text: 'He encontrado estas coincidencias, ¿alguna es la tuya?',
-      stepIndex: 3,
-      totalSteps: 7,
+      stepIndex: 2,
+      totalSteps: 5,
       chips: ['usda:0:Apples, raw, golden delicious', 'usda:1:Apples, raw, fuji', 'Ninguna'],
       done: false,
     });
@@ -134,8 +133,8 @@ describe('AiAssistChat', () => {
       kind: 'step',
       conversationId: 'conv-1',
       text: 'Perfecto, sigamos.',
-      stepIndex: 4,
-      totalSteps: 7,
+      stepIndex: 3,
+      totalSteps: 5,
       done: false,
     });
     render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
@@ -178,20 +177,20 @@ describe('AiAssistChat', () => {
       id: 'conv-1',
       status: 'ACTIVE',
       productId: null,
-      currentStep: 'ORIGIN',
+      currentStep: 'CERTIFICATIONS',
     });
     const user = userEvent.setup();
     const { container } = render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
 
     expect(await screen.findByText(/Retomamos donde lo dejaste/)).toBeTruthy();
-    expect(screen.getByText(/paso 5 de 7/)).toBeTruthy();
+    expect(screen.getByText(/paso 4 de 5/)).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: 'Continuar' }));
 
-    expect(screen.getByText('¿Este producto es local o importado?')).toBeTruthy();
+    expect(screen.getByText('¿Tiene algún certificado?')).toBeTruthy();
     const progress = container.querySelector('progress');
-    expect(progress?.getAttribute('value')).toBe('5');
-    expect(progress?.getAttribute('max')).toBe('7');
+    expect(progress?.getAttribute('value')).toBe('4');
+    expect(progress?.getAttribute('max')).toBe('5');
   });
 
   it('"Empezar de nuevo" en la reanudación limpia la conversación guardada', async () => {
