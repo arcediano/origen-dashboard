@@ -341,10 +341,10 @@ export default function CreateProductPage() {
       <div className="hidden lg:block fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       <PageHeader
-        title={mode === 'ai-intake' ? 'Crea tu producto en un minuto' : 'Crear producto'}
+        title={mode === 'ai-intake' ? 'Crear un nuevo producto con IA' : 'Crear producto'}
         description={
           mode === 'ai-intake'
-            ? 'Sube una foto y cuéntanos qué es con tus palabras (origen, elaboración, formato…). Preparamos la ficha completa combinando ambas cosas; tú solo la revisas y decides.'
+            ? 'Sube una foto o describe tu producto. Origen Assist completará la información y te guiará hasta tener una ficha lista para publicar.'
             : mode === 'ai-review'
               ? 'Revisa la ficha y publícala'
               : 'Completa los pasos para publicar tu producto'
@@ -354,7 +354,7 @@ export default function CreateProductPage() {
         tooltip={mode === 'ai-intake' ? 'Asistente de IA' : 'Creación de producto'}
         tooltipDetailed={
           mode === 'ai-intake'
-            ? 'La foto le dice a la IA qué aspecto tiene tu producto, pero no puede contarle su origen, cómo lo elaboras o el formato — eso solo lo sabes tú. Escribe unas líneas con esos detalles: cuanta más información le des, mejor saldrá la ficha. Después la revisas tú antes de publicar.'
+            ? 'La IA analiza la foto, detecta marca, formato, categoría y genera una ficha lista para revisar y publicar. Puedes completar detalles clave en el chat o dejar que la IA lo haga por ti.'
             : 'Completa todos los pasos para publicar tu producto en el catálogo'
         }
         showBackButton
