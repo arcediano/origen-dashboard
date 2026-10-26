@@ -185,30 +185,13 @@ export function CreateProductNavigation({
               {isSaving ? 'Guardando...' : (isEditMode ? 'Guardar cambios' : 'Guardar borrador')}
             </Button>
 
-            {isLastStep && isPublishedProduct ? (
-              // Producto ya ACTIVE/OUT_OF_STOCK: no hay nada que "publicar" en
-              // el último paso -- el botón "Guardar cambios" de la izquierda
-              // (onSave) ya cubre esta acción; no se repite aquí. "Publicar"
-              // llevaría el producto a PENDING_APPROVAL y lo sacaría del
-              // catálogo público sin que el productor lo pidiera.
-              null
-            ) : isLastStep ? (
+            {/* "Siguiente" se oculta solo en el último paso; en el resto convive
+                con "Publicar" (petición del humano, 2026-10-26: el botón de
+                publicar debe estar visible desde cualquier paso del wizard, no
+                solo al llegar al final, igual que el checklist de requisitos). */}
+            {!isLastStep && (
               <Button
-                variant="primary"
-                onClick={onPublish}
-                disabled={isPublishing || !canPublish}
-                leftIcon={isPublishing
-                  ? <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
-                  : <Send className="w-4 h-4" aria-hidden="true" />
-                }
-                className={cn(!canPublish && 'opacity-50 cursor-not-allowed')}
-                title={!canPublish ? 'Completa todos los pasos' : undefined}
-              >
-                {getPublishButtonText()}
-              </Button>
-            ) : (
-              <Button
-                variant={isCurrentStepBlocked ? 'outline' : 'primary'}
+                variant={isCurrentStepBlocked ? 'outline' : 'secondary'}
                 onClick={handleNext}
                 rightIcon={isCurrentStepBlocked
                   ? <AlertCircle className="w-4 h-4 text-feedback-warning" aria-hidden="true" />
@@ -218,11 +201,35 @@ export function CreateProductNavigation({
                 {isCurrentStepBlocked ? 'Completa este paso' : 'Siguiente'}
               </Button>
             )}
+
+            {isPublishedProduct ? (
+              // Producto ya ACTIVE/OUT_OF_STOCK: no hay nada que "publicar" --
+              // el botón "Guardar cambios" de la izquierda (onSave) ya cubre
+              // esta acción. "Publicar" llevaría el producto a
+              // PENDING_APPROVAL y lo sacaría del catálogo público sin que el
+              // productor lo pidiera.
+              null
+            ) : (
+              <Button
+                variant="primary"
+                onClick={onPublish}
+                disabled={isPublishing || !canPublish}
+                leftIcon={isPublishing
+                  ? <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
+                  : <Send className="w-4 h-4" aria-hidden="true" />
+                }
+                className={cn(!canPublish && 'opacity-50 cursor-not-allowed')}
+                title={!canPublish ? 'Completa todos los requisitos para publicar' : undefined}
+              >
+                {getPublishButtonText()}
+              </Button>
+            )}
           </div>
         </div>
 
-        {/* Mensajes de estado de publicación */}
-        {isLastStep && publishStatus === 'error' && (
+        {/* Mensajes de estado de publicación -- visibles en cualquier paso,
+            ya que "Publicar" ahora se puede pulsar desde cualquiera. */}
+        {publishStatus === 'error' && (
           <div className="p-3 bg-feedback-danger-subtle rounded-xl border border-feedback-danger/30 flex items-start gap-2">
             <XCircle className="w-4 h-4 text-feedback-danger shrink-0 mt-0.5" aria-hidden="true" />
             <div>
@@ -234,7 +241,7 @@ export function CreateProductNavigation({
           </div>
         )}
 
-        {isLastStep && publishStatus === 'success' && (
+        {publishStatus === 'success' && (
           <div className="p-3 bg-origen-pastel/20 rounded-xl border border-origen-pradera/30 flex items-start gap-2">
             <CheckCircle className="w-4 h-4 text-origen-hoja shrink-0 mt-0.5" aria-hidden="true" />
             <div>
@@ -244,7 +251,7 @@ export function CreateProductNavigation({
           </div>
         )}
 
-        {isLastStep && hasCertifications && !certificationsApproved && allStepsCompleted && (
+        {hasCertifications && !certificationsApproved && allStepsCompleted && (
           <div className="p-3 bg-origen-crema/40 rounded-xl border border-origen-pradera/20 flex items-start gap-2">
             <Shield className="w-4 h-4 text-hoja-tinta shrink-0 mt-0.5" aria-hidden="true" />
             <div>
@@ -256,7 +263,7 @@ export function CreateProductNavigation({
           </div>
         )}
 
-        {isLastStep && hasPendingManualCerts && allStepsCompleted && (
+        {hasPendingManualCerts && allStepsCompleted && (
           <div className="p-3 bg-feedback-warning-subtle rounded-xl border border-feedback-warning/30 flex items-start gap-2">
             <Clock className="w-4 h-4 text-feedback-warning shrink-0 mt-0.5" aria-hidden="true" />
             <div>

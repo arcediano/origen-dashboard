@@ -14,6 +14,7 @@ import {
   CreateProductNavigation,
   CreateProductCancelDialog,
   SuccessPublishModal,
+  PublicationRequirementsChecklist,
 } from '@/app/dashboard/products/components';
 import { ProductFormSteps } from '@/app/dashboard/products/components/ProductFormSteps';
 import { AiAssistChat } from '@/app/dashboard/products/components/ai-onboarding/AiAssistChat';
@@ -72,6 +73,8 @@ export default function CreateProductPage() {
     showSuccessModal,
     setShowSuccessModal,
     allStepsCompleted,
+    publicationStatus,
+    requiredStepErrors,
     hasCertifications,
     certificationsApproved,
     hasPendingManualCerts,
@@ -298,6 +301,11 @@ export default function CreateProductPage() {
                   onTabChange={handleTabChange}
                   embedded
                 />
+                <PublicationRequirementsChecklist
+                  publicationStatus={publicationStatus}
+                  clientMissing={requiredStepErrors}
+                  onJumpToStep={handleTabChange}
+                />
                 <ProductFormSidebar
                   tips={tips}
                   keyFact={KEY_FACTS_BY_STEP[activeTab]}
@@ -309,6 +317,18 @@ export default function CreateProductPage() {
           </>
         )}
       </div>
+
+      {/* Checklist de requisitos de publicación — móvil, siempre visible
+          mientras falte algo (petición del humano, 2026-10-26). */}
+      {mode === 'wizard' && !canPublish && (
+        <div className={`sm:hidden px-4 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 8)}`}>
+          <PublicationRequirementsChecklist
+            publicationStatus={publicationStatus}
+            clientMissing={requiredStepErrors}
+            onJumpToStep={handleTabChange}
+          />
+        </div>
+      )}
 
       {/* Panel de errores móvil — aparece sobre el ActionBar */}
       {mode === 'wizard' && showMobileErrors && currentStepErrors.length > 0 && (
@@ -346,16 +366,28 @@ export default function CreateProductPage() {
       {/* ActionBar móvil — navegación entre pasos con pulgar */}
       {mode === 'wizard' && (
       <ActionBar
-        primaryAction={{
-          id: 'primary',
-          label: isLastStep ? (!canPublish ? 'Completa todos los pasos' : 'Publicar') : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
-          onClick: isLastStep ? handlePublish : handleNext,
-          disabled: isLastStep ? (isPublishing || !canPublish) : false,
-          loading: isLastStep ? isPublishing : false,
-          loadingText: 'Publicando...',
-          rightIcon: !isLastStep ? <ChevronRight className="w-4 h-4" aria-hidden="true" /> : undefined,
-          leftIcon: isLastStep ? <Send className="w-4 h-4" aria-hidden="true" /> : undefined,
-        }}
+        primaryAction={
+          // "Publicar" visible desde cualquier paso en cuanto se cumplen los
+          // requisitos (petición del humano, 2026-10-26), no solo al llegar
+          // al último paso del wizard.
+          canPublish
+            ? {
+                id: 'primary',
+                label: 'Publicar',
+                onClick: handlePublish,
+                disabled: isPublishing,
+                loading: isPublishing,
+                loadingText: 'Publicando...',
+                leftIcon: <Send className="w-4 h-4" aria-hidden="true" />,
+              }
+            : {
+                id: 'primary',
+                label: isLastStep ? 'Completa todos los requisitos' : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
+                onClick: isLastStep ? handleSave : handleNext,
+                disabled: isLastStep,
+                rightIcon: !isLastStep ? <ChevronRight className="w-4 h-4" aria-hidden="true" /> : undefined,
+              }
+        }
         secondaryActions={[
           {
             id: 'prev',

@@ -19,6 +19,7 @@ import {
   CreateProductNavigation,
   CreateProductCancelDialog,
   SuccessPublishModal,
+  PublicationRequirementsChecklist,
 } from '../../components';
 import { ProductFormSteps } from '../../components/ProductFormSteps';
 import { ProductFormSidebar } from '../../components/ProductFormSidebar';
@@ -62,6 +63,8 @@ export default function EditProductPage() {
     skuSuggestion,
     onVariantsChange,
     allStepsCompleted,
+    publicationStatus,
+    requiredStepErrors,
     hasCertifications,
     certificationsApproved,
     hasPendingManualCerts,
@@ -339,6 +342,11 @@ export default function EditProductPage() {
                 onTabChange={handleTabChange}
                 embedded
               />
+              <PublicationRequirementsChecklist
+                publicationStatus={publicationStatus}
+                clientMissing={requiredStepErrors}
+                onJumpToStep={handleTabChange}
+              />
               <ProductFormSidebar
                 tips={tips}
                 keyFact={KEY_FACTS_BY_STEP[activeTab]}
@@ -348,6 +356,18 @@ export default function EditProductPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Checklist de requisitos de publicación — móvil, siempre visible
+          mientras falte algo (petición del humano, 2026-10-26). */}
+      {!canPublish && !isPublishedProduct && (
+        <div className={`sm:hidden px-4 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 8)}`}>
+          <PublicationRequirementsChecklist
+            publicationStatus={publicationStatus}
+            clientMissing={requiredStepErrors}
+            onJumpToStep={handleTabChange}
+          />
+        </div>
+      )}
 
       {/* ── Panel de errores móvil — aparece sobre el ActionBar ── */}
       {showMobileErrors && currentStepErrors.length > 0 && (
@@ -385,11 +405,11 @@ export default function EditProductPage() {
       {/* ── ActionBar móvil — navegación entre pasos con pulgar ── */}      {/* Oculta el BottomTabBar global mientras el ActionBar está activo */}
       <HideBottomTabBar />      <ActionBar
         primaryAction={
-          // Producto ya ACTIVE/OUT_OF_STOCK: no hay nada que "publicar" en el
-          // último paso -- solo guardar cambios (igual que en cualquier otro
-          // paso). "Publicar" aquí llevaría el producto a PENDING_APPROVAL y
-          // lo sacaría del catálogo público sin que el productor lo pidiera.
-          isLastStep && isPublishedProduct
+          // Producto ya ACTIVE/OUT_OF_STOCK: no hay nada que "publicar" --
+          // solo guardar cambios (igual que en cualquier otro paso).
+          // "Publicar" aquí llevaría el producto a PENDING_APPROVAL y lo
+          // sacaría del catálogo público sin que el productor lo pidiera.
+          isPublishedProduct
             ? {
                 id: 'primary',
                 label: isSaving ? 'Guardando...' : 'Guardar cambios',
@@ -398,15 +418,24 @@ export default function EditProductPage() {
                 loading: isSaving,
                 leftIcon: <Save className="w-4 h-4" />,
               }
+            // "Publicar" visible desde cualquier paso en cuanto se cumplen
+            // los requisitos (petición del humano, 2026-10-26).
+            : canPublish
+            ? {
+                id: 'primary',
+                label: 'Publicar',
+                onClick: handlePublish,
+                disabled: isPublishing,
+                loading: isPublishing,
+                loadingText: 'Publicando...',
+                leftIcon: <Send className="w-4 h-4" />,
+              }
             : {
                 id: 'primary',
-                label: isLastStep ? 'Publicar' : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
-                onClick: isLastStep ? handlePublish : handleNext,
-                disabled: isLastStep ? (isPublishing || !canPublish) : false,
-                loading: isLastStep ? isPublishing : false,
-                loadingText: isPublishing ? 'Publicando...' : undefined,
+                label: isLastStep ? 'Completa todos los requisitos' : (isMobileStepBlocked ? 'Completa este paso' : 'Siguiente'),
+                onClick: isLastStep ? handleSave : handleNext,
+                disabled: isLastStep,
                 rightIcon: !isLastStep ? <ChevronRight className="w-4 h-4" /> : undefined,
-                leftIcon: isLastStep ? <Send className="w-4 h-4" /> : undefined,
               }
         }
         secondaryActions={[
