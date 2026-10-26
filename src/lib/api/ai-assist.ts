@@ -18,6 +18,10 @@ import type {
   AiCreditsCheckoutResult,
   AiCreditsPricingInfo,
 } from '@/lib/ai-assist/ai-credits';
+import type {
+  ConversationMessageInput,
+  ConversationTurnResponse,
+} from '@/lib/ai-assist/conversation';
 
 /** Lectura con visión: hasta ~90 s en el gateway. */
 const LABEL_READING_TIMEOUT_MS = 90_000;
@@ -25,6 +29,8 @@ const LABEL_READING_TIMEOUT_MS = 90_000;
 const TEXT_IMPROVEMENT_TIMEOUT_MS = 60_000;
 /** Onboarding completo (foto + etiquetas con Opus): hasta ~120 s en el gateway. */
 const PRODUCT_DRAFT_TIMEOUT_MS = 125_000;
+/** Chat conversacional "Origen Assist": cada turno puede hacer varias llamadas a Opus en el bucle del backend. */
+const CONVERSATION_TIMEOUT_MS = 125_000;
 
 export type AiAssistErrorCode =
   | 'AI_DISABLED'
@@ -120,6 +126,53 @@ export async function draftProduct(
       { assistKey, ...input },
       { timeoutMs: PRODUCT_DRAFT_TIMEOUT_MS },
     );
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+/**
+ * Chat conversacional "Origen Assist" (rediseño 2026-10-26): sustituye al
+ * wizard de `draftProduct()` en el flujo del dashboard, turno a turno.
+ */
+export async function startConversation(
+  input: ConversationMessageInput,
+): Promise<ConversationTurnResponse> {
+  try {
+    return await gatewayClient.post<ConversationTurnResponse>(
+      '/ai-assist/conversation',
+      input,
+      { timeoutMs: CONVERSATION_TIMEOUT_MS },
+    );
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+export async function postConversationMessage(
+  conversationId: string,
+  input: ConversationMessageInput,
+): Promise<ConversationTurnResponse> {
+  try {
+    return await gatewayClient.post<ConversationTurnResponse>(
+      `/ai-assist/conversation/${conversationId}/message`,
+      input,
+      { timeoutMs: CONVERSATION_TIMEOUT_MS },
+    );
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+export interface ConversationRecord {
+  id: string;
+  status: 'ACTIVE' | 'COMPLETED' | 'ABANDONED';
+  productId: string | null;
+}
+
+export async function getConversation(conversationId: string): Promise<ConversationRecord> {
+  try {
+    return await gatewayClient.get<ConversationRecord>(`/ai-assist/conversation/${conversationId}`);
   } catch (error) {
     throw toAiAssistError(error);
   }
