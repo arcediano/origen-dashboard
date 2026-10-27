@@ -20,11 +20,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Camera, Loader2, Send, Sparkles } from 'lucide-react';
+import { Camera, Loader2, Paperclip, Send, Sparkles, X } from 'lucide-react';
 import {
   Alert,
   AlertDescription,
   AlertTitle,
+  Badge,
   Button,
   Card,
   Progress,
@@ -45,6 +46,13 @@ interface ChatTurn {
   role: 'user' | 'assistant';
   text: string;
   imageUrl?: string;
+}
+
+interface AttachedImage {
+  id: string;
+  file: File;
+  previewUrl: string;
+  name: string;
 }
 
 interface AiAssistChatProps {
@@ -109,6 +117,23 @@ function QuickReplyChips({
   );
 }
 
+function stepSummary(stepData: { stepIndex: number; totalSteps: number; imageDropzoneLabel?: string; chips?: string[] } | null) {
+  if (!stepData) {
+    return 'Foto del producto';
+  }
+
+  const currentStep = stepData.stepIndex;
+  const mapping = [
+    'Foto del producto',
+    'Ficha nutricional',
+    'Ingredientes y alérgenos',
+    'Certificados',
+    'Formato de venta',
+  ];
+
+  return mapping[Math.min(currentStep - 1, mapping.length - 1)] ?? 'Sigue creando tu producto';
+}
+
 export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistChatProps) {
   const router = useRouter();
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -121,7 +146,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
   } | null>(null);
   const [resumeOffer, setResumeOffer] = useState<{ conversationId: string; step: string } | null>(null);
   const [text, setText] = useState('');
-  const [photo, setPhoto] = useState<File | null>(null);
+  const [attachments, setAttachments] = useState<AttachedImage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -133,9 +158,6 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
 
   const quotaExhausted = !!quota && quota.used >= quota.total;
 
-  // Reanudación: si hay una conversación activa guardada (p. ej. tras un
-  // redirect a /login por expiración de sesión), se ofrece continuar en vez
-  // de empezar de cero -- el borrador en el backend nunca se pierde.
   useEffect(() => {
     const savedId = sessionStorage.getItem(STORAGE_KEY);
     if (!savedId) return;
@@ -159,28 +181,53 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
   // (fricción real en móvil). Se excluye deliberadamente el paso con foto
   // (`imageDropzoneLabel`): ahí la acción principal es tocar el dropzone, no
   // escribir, y el foco automático puede disparar el teclado virtual justo
-  // cuando el usuario va a mirar la zona de subida -- un efecto molesto que
-  // no se puede verificar en dispositivo real desde este entorno, así que se
-  // evita por precaución en vez de asumir que es seguro en todos los pasos.
+  // cuando el usuario va a mirar la zona de subida.
   useEffect(() => {
     if (isSending || isRedirecting || stepData?.imageDropzoneLabel) return;
     textareaRef.current?.focus();
   }, [turns, isSending, isRedirecting, stepData?.imageDropzoneLabel]);
 
+  const removeAttachment = (id: string) => {
+    setAttachments((prev) => {
+      const item = prev.find((entry) => entry.id === id);
+      if (item) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter((entry) => entry.id !== id);
+    });
+  };
+
   const handlePhoto = (list: FileList | null) => {
-    const file = list?.[0];
     if (photoInputRef.current) photoInputRef.current.value = '';
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setError('El archivo debe ser una imagen (JPG, PNG o WebP).');
-      return;
+    const files = list ? Array.from(list) : [];
+    if (!files.length) return;
+
+    const validFiles: File[] = [];
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        setError('El archivo debe ser una imagen (JPG, PNG o WebP).');
+        continue;
+      }
+      if (file.size > MAX_FILE_MB * 1024 * 1024) {
+        setError(`La imagen "${file.name}" supera los ${MAX_FILE_MB} MB. Prueba con otra.`);
+        continue;
+      }
+      validFiles.push(file);
     }
-    if (file.size > MAX_FILE_MB * 1024 * 1024) {
-      setError(`La imagen supera los ${MAX_FILE_MB} MB. Prueba con otra.`);
-      return;
-    }
+
+    if (!validFiles.length) return;
+
     setError(null);
-    setPhoto(file);
+    setAttachments((prev) => {
+      const next = [
+        ...prev,
+        ...validFiles.map((file) => ({
+          id: `${file.name}-${file.lastModified}-${Math.random().toString(36).slice(2, 9)}`,
+          file,
+          previewUrl: URL.createObjectURL(file),
+          name: file.name,
+        })),
+      ];
+      return next.slice(-5);
+    });
   };
 
   const applyResult = (result: ConversationTurnResponse, userTurn: ChatTurn | null) => {
@@ -207,8 +254,11 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
     setError(null);
     setQuotaExceeded(false);
     try {
-      const images = photo ? [await resizeLabelImage(photo)] : undefined;
-      setPhoto(null);
+      const images = attachments.length > 0 ? await Promise.all(attachments.map(({ file }) => resizeLabelImage(file))) : undefined;
+      setAttachments((prev) => {
+        prev.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+        return [];
+      });
       const payload = { ...input, ...(images && { images }) };
       const result = conversationId
         ? await postConversationMessage(conversationId, payload)
@@ -224,8 +274,12 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
 
   const handleSend = () => {
     const trimmed = text.trim();
-    if (!trimmed && !photo) return;
-    const userTurn: ChatTurn = { role: 'user', text: trimmed, imageUrl: photo ? URL.createObjectURL(photo) : undefined };
+    if (!trimmed && !attachments.length) return;
+    const userTurn: ChatTurn = {
+      role: 'user',
+      text: trimmed || (attachments.length > 1 ? 'He adjuntado imágenes' : 'He adjuntado una imagen'),
+      imageUrl: attachments[0]?.previewUrl,
+    };
     setText('');
     void send({ text: trimmed || undefined }, userTurn);
   };
@@ -291,180 +345,307 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
     );
   }
 
+  const currentTask = stepSummary(stepData);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="mx-auto max-w-2xl space-y-6"
+      className="mx-auto w-full max-w-6xl space-y-4 sm:space-y-6"
     >
-      {quota && (
-        <AiCreditsPanel
-          quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
-          onRecharge={() => setShowAddCredits(true)}
-          onManual={quotaExhausted || quotaExceeded ? onManual : undefined}
-        />
-      )}
-
-      {stepData && (
-        <Progress
-          value={stepData.stepIndex}
-          max={stepData.totalSteps}
-          showLabel
-          label={`Paso ${stepData.stepIndex} de ${stepData.totalSteps}`}
-          size="sm"
-        />
-      )}
-
-      <Card variant="elevated" className="flex flex-col p-0 overflow-hidden">
-        {/* role="log" + aria-live="polite": sin esto, un lector de pantalla
-            nunca se entera de que llegó una respuesta nueva -- tendría que
-            navegar manualmente a buscarla tras cada turno. */}
-        <div
-          role="log"
-          aria-live="polite"
-          aria-label="Conversación con Origen Assist"
-          // `dvh` (dynamic viewport height) en vez de `vh`: `vh` en iOS/Android
-          // no se reduce cuando se abre el teclado virtual, así que el log
-          // podía quedar más alto que el viewport visible real y empujar el
-          // input fuera de la pantalla -- hallazgo de la auditoría UX
-          // (petición del humano). `dvh` sí se recalcula con el teclado
-          // abierto en los navegadores móviles actuales (iOS Safari ≥15.4,
-          // Chrome Android ≥108).
-          className="flex max-h-[60dvh] min-h-[280px] flex-col gap-4 overflow-y-auto p-4 sm:p-6"
-        >
-          {turns.length === 0 && !isSending && (
-            <div className="flex justify-start">
-              <div className="max-w-[85%] rounded-2xl bg-origen-pastel/60 px-4 py-2.5 text-sm text-origen-oscuro">
-                Hola, soy Origen Assist. {STEP_PROMPTS.PRODUCT_PHOTO.text}
-              </div>
+      <div className="rounded-3xl border border-border-subtle bg-gradient-to-br from-origen-pradera/8 via-white to-origen-pastel/50 p-4 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="min-w-0 space-y-2">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-origen-bosque/70">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+              Asistente de IA
             </div>
-          )}
-          {turns.map((turn, i) => (
-            <div key={i} className={cn('flex', turn.role === 'user' ? 'justify-end' : 'justify-start')}>
-              <div
-                className={cn(
-                  'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap',
-                  turn.role === 'user' ? 'bg-origen-bosque text-white' : 'bg-origen-pastel/60 text-origen-oscuro',
-                )}
-              >
-                {turn.imageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={turn.imageUrl} alt="" className="mb-2 h-28 w-28 rounded-xl object-cover" />
-                )}
-                {turn.text}
-              </div>
+            <div className="space-y-2">
+              <h1 className="text-2xl font-semibold tracking-tight text-origen-bosque sm:text-3xl">
+                Crea tu producto con ayuda
+              </h1>
+              <p className="max-w-2xl text-sm text-text-subtle sm:text-base">
+                Sube una foto y cuéntanos lo esencial. Te ayudamos a preparar la ficha sin complicarte el trabajo.
+              </p>
             </div>
-          ))}
-          {isSending && (
-            <div className="flex justify-start">
-              <div className="flex items-center gap-2 rounded-2xl bg-origen-pastel/60 px-4 py-2.5 text-sm text-origen-oscuro">
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                Pensando…
-              </div>
-            </div>
-          )}
-          {stepData?.chips && !isSending && (
-            <div className="space-y-1.5">
-              <QuickReplyChips chips={stepData.chips} disabled={isSending} onPick={handleChip} />
-              {/* Aclara que las fichas y el campo de texto son dos formas de
-                  responder lo mismo -- sin esto, no quedaba claro si había
-                  que elegir una ficha o si también valía escribir la
-                  respuesta a mano (hallazgo de la auditoría UX). */}
-              <p className="text-micro text-text-subtle">O escribe tu respuesta abajo.</p>
-            </div>
-          )}
-          <div ref={bottomRef} />
-        </div>
-
-        {error && (
-          <div className="px-4 sm:px-6">
-            <Alert variant={quotaExceeded ? 'warning' : 'error'}>
-              <AlertTitle>{quotaExceeded ? 'Sin créditos del asistente' : 'Algo ha ido mal'}</AlertTitle>
-              <AlertDescription><p>{error}</p></AlertDescription>
-            </Alert>
           </div>
-        )}
-
-        <div className="border-t border-border-subtle p-3 sm:p-4">
-          <input
-            ref={photoInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="sr-only"
-            tabIndex={-1}
-            onChange={(e) => handlePhoto(e.target.files)}
-          />
-          {stepData?.imageDropzoneLabel && (
-            <button
-              type="button"
-              disabled={isSending || quotaExhausted}
-              onClick={() => photoInputRef.current?.click()}
-              className="mb-2 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border-strong/40 bg-origen-pastel/30 px-4 py-3 text-xs font-medium text-origen-bosque transition-colors hover:bg-origen-pastel/60"
-            >
-              <Camera className="h-4 w-4" aria-hidden="true" />
-              {photo ? photo.name : stepData.imageDropzoneLabel}
-            </button>
-          )}
-          <div className="flex items-end gap-2">
-            {!stepData?.imageDropzoneLabel && (
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon"
-                disabled={isSending || quotaExhausted}
-                onClick={() => photoInputRef.current?.click()}
-                aria-label="Añadir foto"
-              >
-                <Camera className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            )}
-            <Textarea
-              ref={textareaRef}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Escribe aquí…"
-              className="min-h-[44px] flex-1"
-              disabled={isSending || quotaExhausted}
-              // Complementa el fix de `dvh`: cuando el teclado virtual
-              // empuja el layout, asegura que el propio campo (no solo el
-              // contenedor) quede visible en vez de depender solo del
-              // recálculo de altura.
-              onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-            />
+          <div className="flex flex-wrap items-center gap-2 self-start xl:self-center">
+            <Badge variant="leaf" size="sm" className="bg-white/80 text-origen-bosque">
+              {stepData ? `Paso ${stepData.stepIndex} de ${stepData.totalSteps}` : 'Listo para empezar'}
+            </Badge>
             <Button
               type="button"
-              variant="primary"
-              size="icon"
-              disabled={isSending || quotaExhausted || (!text.trim() && !photo)}
-              onClick={handleSend}
-              aria-label="Enviar"
+              variant="secondary"
+              size="sm"
+              className="shrink-0"
+              onClick={onManual}
             >
-              <Send className="h-4 w-4" aria-hidden="true" />
+              Crear manualmente
             </Button>
           </div>
         </div>
+      </div>
 
-        <AddCreditsModal
-          open={showAddCredits}
-          onOpenChange={setShowAddCredits}
-          onCreditsPurchased={() => {
-            setError(null);
-            setQuotaExceeded(false);
-            onCreditsPurchased?.();
-          }}
-        />
-      </Card>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_360px]">
+        <section className="space-y-4">
+          {stepData && (
+            <div className="rounded-2xl border border-border-subtle bg-white p-3 shadow-sm sm:p-4">
+              <Progress
+                value={stepData.stepIndex}
+                max={stepData.totalSteps}
+                showLabel
+                label={`Paso ${stepData.stepIndex} de ${stepData.totalSteps}`}
+                size="sm"
+              />
+            </div>
+          )}
 
-      <div className="text-center">
-        <Button type="button" variant="ghost" size="sm" onClick={onManual} leftIcon={<Sparkles className="w-4 h-4" aria-hidden="true" />}>
-          Prefiero rellenarlo yo
+          <Card variant="elevated" className="flex min-w-0 flex-col overflow-hidden p-0">
+            <div className="flex items-center justify-between gap-3 border-b border-border-subtle bg-origen-pastel/40 px-4 py-3 sm:px-6">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-origen-bosque shadow-sm">
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-origen-bosque">Origen Assist</p>
+                  <p className="text-[11px] text-text-subtle">{currentTask}</p>
+                </div>
+              </div>
+              <Badge variant="neutral" size="xs" className="shrink-0">
+                {stepData ? 'En curso' : 'Preparando'}
+              </Badge>
+            </div>
+
+            {/* role="log" + aria-live: sin esto, un lector de pantalla nunca
+                se entera de que llegó una respuesta nueva. `dvh` en vez de
+                `vh`: `vh` no se reduce al abrir el teclado virtual en
+                iOS/Android, podía empujar el input fuera del viewport
+                visible; `dvh` sí se recalcula con el teclado abierto. */}
+            <div
+              role="log"
+              aria-live="polite"
+              aria-label="Conversación con Origen Assist"
+              className="flex max-h-[62dvh] min-h-[260px] min-w-0 flex-col gap-4 overflow-y-auto bg-white p-4 sm:p-6"
+            >
+              {turns.length === 0 && !isSending && (
+                <div className="space-y-4">
+                  <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-origen-pastel/60 px-4 py-3 text-sm text-origen-oscuro shadow-sm">
+                    Hola, soy Origen Assist. {STEP_PROMPTS.PRODUCT_PHOTO.text}
+                  </div>
+                  <div className="rounded-2xl border border-border-subtle bg-surface-alt p-3 text-sm text-text-subtle">
+                    <p className="font-medium text-origen-bosque">Qué te pediremos</p>
+                    <ul className="mt-2 space-y-2">
+                      <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-origen-pradera" aria-hidden="true" />Foto principal y nombre del producto</li>
+                      <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-origen-pradera" aria-hidden="true" />Tabla nutricional o ingredientes si los tienes</li>
+                      <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-origen-pradera" aria-hidden="true" />Formato de venta y certificados</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {turns.map((turn, i) => (
+                <div key={i} className={cn('flex min-w-0', turn.role === 'user' ? 'justify-end' : 'justify-start')}>
+                  <div
+                    className={cn(
+                      'max-w-[85%] min-w-0 rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap shadow-sm',
+                      turn.role === 'user'
+                        ? 'rounded-br-md bg-origen-bosque text-white'
+                        : 'rounded-bl-md border border-border-subtle bg-origen-pastel/60 text-origen-oscuro',
+                    )}
+                  >
+                    {turn.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={turn.imageUrl} alt="Imagen adjunta" className="mb-2 h-24 w-24 max-w-full rounded-xl object-cover sm:h-28 sm:w-28" />
+                    )}
+                    {turn.text}
+                  </div>
+                </div>
+              ))}
+
+              {isSending && (
+                <div className="flex justify-start">
+                  <div className="flex items-center gap-2 rounded-2xl rounded-bl-md border border-border-subtle bg-origen-pastel/60 px-4 py-3 text-sm text-origen-oscuro shadow-sm">
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    Estamos preparando tu ficha…
+                  </div>
+                </div>
+              )}
+
+              {stepData?.chips && !isSending && (
+                <div className="space-y-1.5">
+                  <QuickReplyChips chips={stepData.chips} disabled={isSending} onPick={handleChip} />
+                  {/* Aclara que las fichas y el campo de texto son dos formas
+                      de responder lo mismo -- sin esto, no quedaba claro si
+                      había que elegir una ficha o si también valía escribir
+                      la respuesta a mano. */}
+                  <p className="text-xs text-text-subtle">O escribe tu respuesta abajo.</p>
+                </div>
+              )}
+
+              <div ref={bottomRef} />
+            </div>
+
+            {error && (
+              <div className="border-t border-border-subtle px-4 py-4 sm:px-6">
+                <Alert variant={quotaExceeded ? 'warning' : 'error'}>
+                  <AlertTitle>{quotaExceeded ? 'Sin créditos del asistente' : 'Algo ha ido mal'}</AlertTitle>
+                  <AlertDescription><p>{error}</p></AlertDescription>
+                </Alert>
+              </div>
+            )}
+
+            <div className="border-t border-border-subtle bg-surface-alt/40 p-3 sm:p-4">
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="sr-only"
+                tabIndex={-1}
+                onChange={(e) => handlePhoto(e.target.files)}
+              />
+
+              {attachments.length > 0 && (
+                <div className="mb-3 flex min-w-0 items-center gap-2 overflow-x-auto pb-1">
+                  {attachments.map((item) => (
+                    <div key={item.id} className="group relative shrink-0 overflow-hidden rounded-xl border border-border-subtle bg-white shadow-sm">
+                      <img src={item.previewUrl} alt={item.name} className="h-16 w-16 object-cover sm:h-20 sm:w-20" />
+                      <button
+                        type="button"
+                        aria-label={`Eliminar adjunto ${item.name}`}
+                        onClick={() => removeAttachment(item.id)}
+                        className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-origen-oscuro/80 text-white transition-opacity hover:bg-origen-oscuro"
+                      >
+                        <X className="h-3 w-3" aria-hidden="true" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {stepData?.imageDropzoneLabel && (
+                <button
+                  type="button"
+                  disabled={isSending || quotaExhausted}
+                  onClick={() => photoInputRef.current?.click()}
+                  className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border-strong/40 bg-white px-3 py-2.5 text-xs font-medium text-origen-bosque transition-colors hover:bg-origen-pastel/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera"
+                >
+                  <Paperclip className="h-4 w-4" aria-hidden="true" />
+                  {attachments[0] ? `${attachments.length} imagen${attachments.length > 1 ? 'es' : ''} preparada${attachments.length > 1 ? 's' : ''}` : stepData.imageDropzoneLabel}
+                </button>
+              )}
+
+              <div className="flex items-end gap-2 sm:gap-3">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="h-11 w-11 shrink-0 rounded-xl"
+                  disabled={isSending || quotaExhausted}
+                  onClick={() => photoInputRef.current?.click()}
+                  aria-label="Adjuntar imagen"
+                >
+                  <Paperclip className="h-4 w-4" aria-hidden="true" />
+                </Button>
+
+                <Textarea
+                  ref={textareaRef}
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder={stepData?.imageDropzoneLabel ? 'Describe lo que quieres cambiar o añade más detalle…' : 'Escribe aquí lo que quieras añadir…'}
+                  className="min-h-[44px] max-h-[180px] flex-1 resize-none border-border-subtle bg-white text-sm leading-5 focus-visible:ring-2 focus-visible:ring-origen-pradera"
+                  disabled={isSending || quotaExhausted}
+                  // Complementa el fix de `dvh`: cuando el teclado virtual
+                  // empuja el layout, asegura que el propio campo quede
+                  // visible, no solo el contenedor.
+                  onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                />
+
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="icon"
+                  className="h-11 w-11 shrink-0 rounded-xl"
+                  disabled={isSending || quotaExhausted || (!text.trim() && attachments.length === 0)}
+                  onClick={handleSend}
+                  aria-label="Enviar mensaje"
+                >
+                  <Send className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </div>
+            </div>
+
+            <AddCreditsModal
+              open={showAddCredits}
+              onOpenChange={setShowAddCredits}
+              onCreditsPurchased={() => {
+                setError(null);
+                setQuotaExceeded(false);
+                onCreditsPurchased?.();
+              }}
+            />
+          </Card>
+        </section>
+
+        <aside className="space-y-4">
+          {quota && (
+            <AiCreditsPanel
+              quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
+              onRecharge={() => setShowAddCredits(true)}
+              onManual={onManual}
+            />
+          )}
+
+          <Card variant="elevated" className="p-4 sm:p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-origen-pradera/10 text-origen-bosque">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+              </div>
+              <h2 className="text-sm font-semibold text-origen-bosque">Qué te pedimos</h2>
+            </div>
+            <ul className="space-y-3 text-sm text-text-subtle">
+              <li className="flex gap-2"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />Foto del producto para reconocer marca, forma y estilo.</li>
+              <li className="flex gap-2"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />Info útil como origen, elaboración, formato y certificados.</li>
+              <li className="flex gap-2"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />La ficha queda lista para revisar y publicar con un solo vistazo.</li>
+            </ul>
+          </Card>
+
+          <Card variant="elevated" className="p-4 sm:p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-origen-pastel text-origen-bosque">
+                <Camera className="h-4 w-4" aria-hidden="true" />
+              </div>
+              <h2 className="text-sm font-semibold text-origen-bosque">Resumen</h2>
+            </div>
+            <div className="rounded-2xl border border-border-subtle bg-surface-alt p-3 text-sm text-text-subtle">
+              <p className="font-medium text-origen-bosque">Tarea actual</p>
+              <p className="mt-1">{currentTask}</p>
+              <div className="mt-3 h-px bg-border-subtle" />
+              <p className="mt-3 text-xs uppercase tracking-[0.12em] text-origen-bosque/70">Sugerencias rápidas</p>
+              <p className="mt-2">
+                {stepData?.chips?.length ? stepData.chips.slice(0, 2).join(' • ') : 'Sube fotos, responde con un par de frases y deja que la IA te ayude.'}
+              </p>
+            </div>
+          </Card>
+        </aside>
+      </div>
+
+      <div className="flex justify-center">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={onManual}
+          leftIcon={<Sparkles className="w-4 h-4" aria-hidden="true" />}
+        >
+          Crear producto manualmente
         </Button>
       </div>
     </motion.div>

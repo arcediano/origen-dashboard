@@ -75,8 +75,8 @@ describe('AiAssistChat', () => {
     });
     const { container } = render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
 
-    await user.type(screen.getByPlaceholderText('Escribe aquí…'), 'Es un queso de oveja');
-    await user.click(screen.getByRole('button', { name: 'Enviar' }));
+    await user.type(screen.getByPlaceholderText('Escribe aquí lo que quieras añadir…'), 'Es un queso de oveja');
+    await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
 
     expect(startMock).toHaveBeenCalledWith({ text: 'Es un queso de oveja' });
     expect(await screen.findByText(/¿Tienes la tabla nutricional\?/)).toBeTruthy();
@@ -108,8 +108,8 @@ describe('AiAssistChat', () => {
     });
     render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
 
-    await user.type(screen.getByPlaceholderText('Escribe aquí…'), 'hola');
-    await user.click(screen.getByRole('button', { name: 'Enviar' }));
+    await user.type(screen.getByPlaceholderText('Escribe aquí lo que quieras añadir…'), 'hola');
+    await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
     expect(await screen.findByRole('button', { name: 'Orgánico' })).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: 'Orgánico' }));
@@ -139,8 +139,8 @@ describe('AiAssistChat', () => {
     });
     render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
 
-    await user.type(screen.getByPlaceholderText('Escribe aquí…'), 'hola');
-    await user.click(screen.getByRole('button', { name: 'Enviar' }));
+    await user.type(screen.getByPlaceholderText('Escribe aquí lo que quieras añadir…'), 'hola');
+    await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
 
     const chip = await screen.findByRole('button', { name: 'Apples, raw, golden delicious' });
     await user.click(chip);
@@ -160,8 +160,8 @@ describe('AiAssistChat', () => {
     });
     render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
 
-    await user.type(screen.getByPlaceholderText('Escribe aquí…'), 'listo');
-    await user.click(screen.getByRole('button', { name: 'Enviar' }));
+    await user.type(screen.getByPlaceholderText('Escribe aquí lo que quieras añadir…'), 'listo');
+    await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
 
     expect(await screen.findByText('Preparando tu ficha…')).toBeTruthy();
     expect(sessionStorage.getItem(STORAGE_KEY)).toBeNull();
