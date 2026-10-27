@@ -206,8 +206,15 @@ export function AiAssistChat({ quota, onManual }: AiAssistChatProps) {
   };
 
   const handlePhoto = (list: FileList | null) => {
-    if (photoInputRef.current) photoInputRef.current.value = '';
+    // Leer el FileList ANTES de limpiar el input (hallazgo real, 2026-10-27,
+    // reporte del humano en iPhone/Safari: elegir una foto de la fototeca no
+    // se reflejaba nunca en el chat). En iOS Safari, `input.files` no es una
+    // instantánea independiente -- resetear `input.value` invalida también la
+    // referencia `list` ya capturada en el handler, así que `Array.from(list)`
+    // devolvía un array vacío después del reset y la foto se descartaba en
+    // silencio, sin ningún error visible. El orden importa.
     const files = list ? Array.from(list) : [];
+    if (photoInputRef.current) photoInputRef.current.value = '';
     if (!files.length) return;
 
     const validFiles: File[] = [];
