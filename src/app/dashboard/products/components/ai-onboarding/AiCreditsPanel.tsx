@@ -93,52 +93,51 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
       data-state="available"
       className={cn('rounded-2xl border border-origen-pradera/30 bg-origen-pradera/10 p-4 sm:p-5', className)}
     >
-      {/* Una sola rejilla para ambos tamaños. Móvil: icono + título arriba, fichas a todo
-          el ancho, y una fila final con la equivalencia a la izquierda y "Recargar" a la
-          derecha (el botón deja de ocupar una fila entera y de competir con el resto).
-          Escritorio: icono a la izquierda, texto en columna y botón a la derecha. */}
-      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-3 sm:gap-x-4 sm:gap-y-2">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-origen-bosque shadow-subtle sm:row-span-3 sm:h-12 sm:w-12">
-          <Sparkles className="h-5 w-5" aria-hidden="true" />
-        </span>
-        <h2
-          id="ai-credits-title"
-          className="col-span-2 min-w-0 text-base font-semibold text-origen-bosque sm:col-span-1 sm:col-start-2 sm:text-lg"
-        >
-          Te {plural(remaining, 'queda', 'quedan')}{' '}
-          <span className="tabular-nums" data-testid="ai-credits-remaining">{remaining}</span>{' '}
-          {plural(remaining, 'crédito', 'créditos')}
-        </h2>
-        <div className="col-span-3 sm:col-span-1 sm:col-start-2">
-          <CreditTokens remaining={remaining} />
-        </div>
-        <p
-          className="col-span-2 inline-flex items-center gap-1.5 justify-self-start whitespace-nowrap rounded-full bg-white px-2.5 py-1 text-xs font-medium text-origen-bosque shadow-subtle sm:col-span-1 sm:col-start-2"
-          data-testid="ai-credits-equivalence"
-        >
-          <Coins className="hidden h-3.5 w-3.5 sm:block" aria-hidden="true" />
-          1 crédito
-          <span aria-hidden="true">=</span>
-          <Package className="h-3.5 w-3.5" aria-hidden="true" />
-          1 producto
-        </p>
-        <div className="col-start-3 flex flex-wrap items-center justify-end gap-2 sm:row-span-3 sm:row-start-1 sm:self-center">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="w-auto shrink-0"
-            onClick={onRecharge}
-            aria-label="Recargar créditos"
-            leftIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
-          >
-            Recargar
-          </Button>
-          {onManual && (
-            <Button type="button" variant="ghost" size="sm" className="w-auto shrink-0" onClick={onManual}>
-              Crear manualmente
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex min-w-0 flex-wrap items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-origen-bosque shadow-subtle sm:h-12 sm:w-12">
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
+          </span>
+
+          <div className="min-w-0 flex-1">
+            <h2 id="ai-credits-title" className="min-w-0 text-base font-semibold text-origen-bosque sm:text-lg">
+              Te {plural(remaining, 'queda', 'quedan')}{' '}
+              <span className="tabular-nums" data-testid="ai-credits-remaining">{remaining}</span>{' '}
+              {plural(remaining, 'crédito', 'créditos')}
+            </h2>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <CreditTokens remaining={remaining} />
+              <p
+                className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-origen-bosque shadow-subtle sm:text-xs"
+                data-testid="ai-credits-equivalence"
+              >
+                <Coins className="h-3.5 w-3.5" aria-hidden="true" />
+                1 crédito
+                <span aria-hidden="true">=</span>
+                <Package className="h-3.5 w-3.5" aria-hidden="true" />
+                1 producto
+              </p>
+            </div>
+          </div>
+
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-auto shrink-0"
+              onClick={onRecharge}
+              aria-label="Recargar créditos"
+              leftIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
+            >
+              Recarga
             </Button>
-          )}
+            {onManual && (
+              <Button type="button" variant="ghost" size="sm" className="w-auto shrink-0" onClick={onManual}>
+                Crear a mano
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </section>
