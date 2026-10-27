@@ -152,12 +152,18 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quotaExceeded, setQuotaExceeded] = useState(false);
+  // Cierre sin cobro por límite de uso/fallo técnico (RN-2, 2026-10-27): la
+  // conversación queda ABANDONED en el backend, así que un turno nuevo
+  // fallaría -- se bloquea el composer en vez de dejar que el usuario
+  // escriba en una conversación que ya no existe.
+  const [closedWithoutCharge, setClosedWithoutCharge] = useState(false);
   const [showAddCredits, setShowAddCredits] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const quotaExhausted = !!quota && quota.used >= quota.total;
+  const inputDisabled = isSending || quotaExhausted || closedWithoutCharge;
 
   useEffect(() => {
     const savedId = sessionStorage.getItem(STORAGE_KEY);
@@ -249,12 +255,20 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
         imageDropzoneLabel: result.imageDropzoneLabel,
         chips: result.chips,
       });
-    } else {
-      setStepData(null);
-      sessionStorage.removeItem(STORAGE_KEY);
-      setIsRedirecting(true);
-      window.setTimeout(() => router.push(`/dashboard/products/${result.productId}?fromAssistant=1`), 1200);
+      return;
     }
+    setStepData(null);
+    sessionStorage.removeItem(STORAGE_KEY);
+    // Cierre por límite de uso o fallo técnico (control de coste, RN-2,
+    // 2026-10-27): solo redirige a la ficha cuando SÍ se ha cobrado (ya
+    // existe un `Product` real que mostrar) -- si no, el productor se queda
+    // en el chat viendo el mensaje de cierre y puede terminarlo a mano.
+    if (result.kind === 'closed' && !result.charged) {
+      setClosedWithoutCharge(true);
+      return;
+    }
+    setIsRedirecting(true);
+    window.setTimeout(() => router.push(`/dashboard/products/${result.productId}?fromAssistant=1`), 1200);
   };
 
   const send = async (input: { text?: string; choice?: string }, userTurn: ChatTurn | null) => {
@@ -494,7 +508,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
 
               {stepData?.chips && !isSending && (
                 <div className="space-y-1.5">
-                  <QuickReplyChips chips={stepData.chips} disabled={isSending} onPick={handleChip} />
+                  <QuickReplyChips chips={stepData.chips} disabled={inputDisabled} onPick={handleChip} />
                   {/* Aclara que las fichas y el campo de texto son dos formas
                       de responder lo mismo -- sin esto, no quedaba claro si
                       había que elegir una ficha o si también valía escribir
@@ -512,6 +526,20 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
                   <AlertTitle>{quotaExceeded ? 'Sin créditos del asistente' : 'Algo ha ido mal'}</AlertTitle>
                   <AlertDescription><p>{error}</p></AlertDescription>
                 </Alert>
+              </div>
+            )}
+
+            {closedWithoutCharge && (
+              <div className="border-t border-border-subtle px-4 py-4 sm:px-6">
+                <Alert variant="warning">
+                  <AlertTitle>No se te ha cobrado nada</AlertTitle>
+                  <AlertDescription>
+                    <p>Esta conversación se ha cerrado. Puedes terminar el producto rellenándolo a mano cuando quieras.</p>
+                  </AlertDescription>
+                </Alert>
+                <Button type="button" variant="primary" size="sm" className="mt-3 w-auto" onClick={onManual}>
+                  Crear a mano
+                </Button>
               </div>
             )}
 
@@ -568,7 +596,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
               {stepData?.imageDropzoneLabel && (
                 <button
                   type="button"
-                  disabled={isSending || quotaExhausted}
+                  disabled={inputDisabled}
                   onClick={() => photoInputRef.current?.click()}
                   className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border-strong/40 bg-white px-3 py-2.5 text-xs font-medium text-origen-bosque transition-colors hover:bg-origen-pastel/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera"
                 >
@@ -583,7 +611,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
                   variant="secondary"
                   size="icon"
                   className="h-11 w-11 shrink-0 rounded-xl"
-                  disabled={isSending || quotaExhausted}
+                  disabled={inputDisabled}
                   onClick={() => photoInputRef.current?.click()}
                   aria-label="Adjuntar imagen"
                 >
@@ -596,7 +624,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
                   onChange={(e) => setText(e.target.value)}
                   placeholder={stepData?.imageDropzoneLabel ? 'Describe lo que quieres cambiar o añade más detalle…' : 'Escribe aquí lo que quieras añadir…'}
                   className="min-h-[44px] max-h-[180px] flex-1 resize-none border-border-subtle bg-white text-sm leading-5 focus-visible:ring-2 focus-visible:ring-origen-pradera"
-                  disabled={isSending || quotaExhausted}
+                  disabled={inputDisabled}
                   // Complementa el fix de `dvh`: cuando el teclado virtual
                   // empuja el layout, asegura que el propio campo quede
                   // visible, no solo el contenedor.
@@ -614,7 +642,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
                   variant="primary"
                   size="icon"
                   className="h-11 w-11 shrink-0 rounded-xl"
-                  disabled={isSending || quotaExhausted || (!text.trim() && attachments.length === 0)}
+                  disabled={inputDisabled || (!text.trim() && attachments.length === 0)}
                   onClick={handleSend}
                   aria-label="Enviar mensaje"
                 >
