@@ -74,11 +74,6 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
               <Button type="button" variant="primary" size="sm" className="w-auto" onClick={onRecharge} leftIcon={<Coins className="h-4 w-4" aria-hidden="true" />}>
                 Recargar créditos
               </Button>
-              {onManual && (
-                <Button type="button" variant="ghost" size="sm" className="w-auto" onClick={onManual}>
-                  Prefiero rellenarlo yo
-                </Button>
-              )}
             </div>
           </div>
         </div>
@@ -143,17 +138,6 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
           >
             Recarga
           </Button>
-          {onManual && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="w-full shrink-0 px-3 xs:w-auto"
-              onClick={onManual}
-            >
-              Crear a mano
-            </Button>
-          )}
         </div>
       </div>
     </section>
