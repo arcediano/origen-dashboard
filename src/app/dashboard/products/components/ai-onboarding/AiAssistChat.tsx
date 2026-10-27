@@ -25,6 +25,7 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
+  Badge,
   Button,
   Card,
   Progress,
@@ -106,6 +107,23 @@ function QuickReplyChips({
   );
 }
 
+function stepSummary(stepData: { stepIndex: number; totalSteps: number; imageDropzoneLabel?: string; chips?: string[] } | null) {
+  if (!stepData) {
+    return 'Foto del producto';
+  }
+
+  const currentStep = stepData.stepIndex;
+  const mapping = [
+    'Foto del producto',
+    'Ficha nutricional',
+    'Ingredientes y alérgenos',
+    'Certificados',
+    'Formato de venta',
+  ];
+
+  return mapping[Math.min(currentStep - 1, mapping.length - 1)] ?? 'Sigue creando tu producto';
+}
+
 export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistChatProps) {
   const router = useRouter();
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -129,9 +147,6 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
 
   const quotaExhausted = !!quota && quota.used >= quota.total;
 
-  // Reanudación: si hay una conversación activa guardada (p. ej. tras un
-  // redirect a /login por expiración de sesión), se ofrece continuar en vez
-  // de empezar de cero -- el borrador en el backend nunca se pierde.
   useEffect(() => {
     const savedId = sessionStorage.getItem(STORAGE_KEY);
     if (!savedId) return;
@@ -274,148 +289,247 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
     );
   }
 
+  const currentTask = stepSummary(stepData);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="mx-auto max-w-2xl space-y-6"
+      className="mx-auto max-w-6xl space-y-6"
     >
-      {quota && (
-        <AiCreditsPanel
-          quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
-          onRecharge={() => setShowAddCredits(true)}
-          onManual={quotaExhausted || quotaExceeded ? onManual : undefined}
-        />
-      )}
-
-      {stepData && (
-        <Progress
-          value={stepData.stepIndex}
-          max={stepData.totalSteps}
-          showLabel
-          label={`Paso ${stepData.stepIndex} de ${stepData.totalSteps}`}
-          size="sm"
-        />
-      )}
-
-      <Card variant="elevated" className="flex flex-col p-0 overflow-hidden">
-        <div className="flex max-h-[60vh] min-h-[280px] flex-col gap-4 overflow-y-auto p-4 sm:p-6">
-          {turns.length === 0 && !isSending && (
-            <div className="flex justify-start">
-              <div className="max-w-[85%] rounded-2xl bg-origen-pastel/60 px-4 py-2.5 text-sm text-origen-oscuro">
-                Hola, soy Origen Assist. {STEP_PROMPTS.PRODUCT_PHOTO.text}
-              </div>
+      <div className="rounded-3xl border border-border-subtle bg-gradient-to-br from-origen-pradera/8 via-white to-origen-pastel/50 p-4 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-origen-bosque/70">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+              Asistente de IA
             </div>
-          )}
-          {turns.map((turn, i) => (
-            <div key={i} className={cn('flex', turn.role === 'user' ? 'justify-end' : 'justify-start')}>
-              <div
-                className={cn(
-                  'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap',
-                  turn.role === 'user' ? 'bg-origen-bosque text-white' : 'bg-origen-pastel/60 text-origen-oscuro',
-                )}
-              >
-                {turn.imageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={turn.imageUrl} alt="" className="mb-2 h-28 w-28 rounded-xl object-cover" />
-                )}
-                {turn.text}
-              </div>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-origen-bosque sm:text-3xl">
+                Crea tu producto con ayuda
+              </h1>
+              <p className="mt-1 max-w-2xl text-sm text-text-subtle sm:text-base">
+                Sube una foto y cuéntanos lo esencial. Te ayudamos a preparar la ficha sin complicarte el trabajo.
+              </p>
             </div>
-          ))}
-          {isSending && (
-            <div className="flex justify-start">
-              <div className="flex items-center gap-2 rounded-2xl bg-origen-pastel/60 px-4 py-2.5 text-sm text-origen-oscuro">
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                Pensando…
-              </div>
-            </div>
-          )}
-          {stepData?.chips && !isSending && (
-            <QuickReplyChips chips={stepData.chips} disabled={isSending} onPick={handleChip} />
-          )}
-          <div ref={bottomRef} />
-        </div>
-
-        {error && (
-          <div className="px-4 sm:px-6">
-            <Alert variant={quotaExceeded ? 'warning' : 'error'}>
-              <AlertTitle>{quotaExceeded ? 'Sin créditos del asistente' : 'Algo ha ido mal'}</AlertTitle>
-              <AlertDescription><p>{error}</p></AlertDescription>
-            </Alert>
           </div>
-        )}
+          <div className="flex items-center gap-2 self-start lg:self-center">
+            <Badge variant="leaf" size="sm" className="bg-white/80 text-origen-bosque">
+              {stepData ? `Paso ${stepData.stepIndex} de ${stepData.totalSteps}` : 'Listo para empezar'}
+            </Badge>
+          </div>
+        </div>
+      </div>
 
-        <div className="border-t border-border-subtle p-3 sm:p-4">
-          <input
-            ref={photoInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="sr-only"
-            tabIndex={-1}
-            onChange={(e) => handlePhoto(e.target.files)}
-          />
-          {stepData?.imageDropzoneLabel && (
-            <button
-              type="button"
-              disabled={isSending || quotaExhausted}
-              onClick={() => photoInputRef.current?.click()}
-              className="mb-2 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border-strong/40 bg-origen-pastel/30 px-4 py-3 text-xs font-medium text-origen-bosque transition-colors hover:bg-origen-pastel/60"
-            >
-              <Camera className="h-4 w-4" aria-hidden="true" />
-              {photo ? photo.name : stepData.imageDropzoneLabel}
-            </button>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_360px]">
+        <section className="space-y-4">
+          {stepData && (
+            <div className="rounded-2xl border border-border-subtle bg-white p-3 shadow-sm sm:p-4">
+              <Progress
+                value={stepData.stepIndex}
+                max={stepData.totalSteps}
+                showLabel
+                label={`Paso ${stepData.stepIndex} de ${stepData.totalSteps}`}
+                size="sm"
+              />
+            </div>
           )}
-          <div className="flex items-end gap-2">
-            {!stepData?.imageDropzoneLabel && (
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon"
-                disabled={isSending || quotaExhausted}
-                onClick={() => photoInputRef.current?.click()}
-                aria-label="Añadir foto"
-              >
-                <Camera className="h-4 w-4" aria-hidden="true" />
-              </Button>
+
+          <Card variant="elevated" className="flex flex-col overflow-hidden p-0">
+            <div className="flex items-center justify-between gap-3 border-b border-border-subtle bg-origen-pastel/40 px-4 py-3 sm:px-6">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-origen-bosque shadow-sm">
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-origen-bosque">Origen Assist</p>
+                  <p className="text-[11px] text-text-subtle">{currentTask}</p>
+                </div>
+              </div>
+              <Badge variant="neutral" size="xs" className="shrink-0">
+                {stepData ? 'En curso' : 'Preparando'}
+              </Badge>
+            </div>
+
+            <div className="flex max-h-[62vh] min-h-[280px] flex-col gap-4 overflow-y-auto bg-white p-4 sm:p-6">
+              {turns.length === 0 && !isSending && (
+                <div className="space-y-4">
+                  <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-origen-pastel/60 px-4 py-3 text-sm text-origen-oscuro shadow-sm">
+                    Hola, soy Origen Assist. {STEP_PROMPTS.PRODUCT_PHOTO.text}
+                  </div>
+                  <div className="rounded-2xl border border-border-subtle bg-surface-alt p-3 text-sm text-text-subtle">
+                    <p className="font-medium text-origen-bosque">Qué te pediremos</p>
+                    <ul className="mt-2 space-y-2">
+                      <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-origen-pradera" aria-hidden="true" />Foto principal y nombre del producto</li>
+                      <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-origen-pradera" aria-hidden="true" />Tabla nutricional o ingredientes si los tienes</li>
+                      <li className="flex gap-2"><span className="mt-1 h-1.5 w-1.5 rounded-full bg-origen-pradera" aria-hidden="true" />Formato de venta y certificados</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {turns.map((turn, i) => (
+                <div key={i} className={cn('flex', turn.role === 'user' ? 'justify-end' : 'justify-start')}>
+                  <div
+                    className={cn(
+                      'max-w-[85%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap shadow-sm',
+                      turn.role === 'user'
+                        ? 'rounded-br-md bg-origen-bosque text-white'
+                        : 'rounded-bl-md border border-border-subtle bg-origen-pastel/60 text-origen-oscuro',
+                    )}
+                  >
+                    {turn.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={turn.imageUrl} alt="Imagen adjunta" className="mb-2 h-28 w-28 rounded-xl object-cover" />
+                    )}
+                    {turn.text}
+                  </div>
+                </div>
+              ))}
+
+              {isSending && (
+                <div className="flex justify-start">
+                  <div className="flex items-center gap-2 rounded-2xl rounded-bl-md border border-border-subtle bg-origen-pastel/60 px-4 py-3 text-sm text-origen-oscuro shadow-sm">
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    Estamos preparando tu ficha…
+                  </div>
+                </div>
+              )}
+
+              {stepData?.chips && !isSending && (
+                <QuickReplyChips chips={stepData.chips} disabled={isSending} onPick={handleChip} />
+              )}
+
+              <div ref={bottomRef} />
+            </div>
+
+            {error && (
+              <div className="border-t border-border-subtle px-4 py-4 sm:px-6">
+                <Alert variant={quotaExceeded ? 'warning' : 'error'}>
+                  <AlertTitle>{quotaExceeded ? 'Sin créditos del asistente' : 'Algo ha ido mal'}</AlertTitle>
+                  <AlertDescription><p>{error}</p></AlertDescription>
+                </Alert>
+              </div>
             )}
-            <Textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Escribe aquí…"
-              className="min-h-[44px] flex-1"
-              disabled={isSending || quotaExhausted}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
+
+            <div className="border-t border-border-subtle bg-surface-alt/40 p-3 sm:p-4">
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                tabIndex={-1}
+                onChange={(e) => handlePhoto(e.target.files)}
+              />
+
+              {stepData?.imageDropzoneLabel && (
+                <button
+                  type="button"
+                  disabled={isSending || quotaExhausted}
+                  onClick={() => photoInputRef.current?.click()}
+                  className="mb-2 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border-strong/40 bg-white px-4 py-3 text-xs font-medium text-origen-bosque transition-colors hover:bg-origen-pastel/40"
+                >
+                  <Camera className="h-4 w-4" aria-hidden="true" />
+                  {photo ? photo.name : stepData.imageDropzoneLabel}
+                </button>
+              )}
+
+              <div className="flex items-end gap-2">
+                {!stepData?.imageDropzoneLabel && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="icon"
+                    disabled={isSending || quotaExhausted}
+                    onClick={() => photoInputRef.current?.click()}
+                    aria-label="Añadir foto"
+                  >
+                    <Camera className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                )}
+
+                <Textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Escribe aquí lo que quieras añadir…"
+                  className="min-h-[44px] flex-1 border-border-subtle bg-white"
+                  disabled={isSending || quotaExhausted}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                />
+
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="icon"
+                  disabled={isSending || quotaExhausted || (!text.trim() && !photo)}
+                  onClick={handleSend}
+                  aria-label="Enviar"
+                >
+                  <Send className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </div>
+            </div>
+
+            <AddCreditsModal
+              open={showAddCredits}
+              onOpenChange={setShowAddCredits}
+              onCreditsPurchased={() => {
+                setError(null);
+                setQuotaExceeded(false);
+                onCreditsPurchased?.();
               }}
             />
-            <Button
-              type="button"
-              variant="primary"
-              size="icon"
-              disabled={isSending || quotaExhausted || (!text.trim() && !photo)}
-              onClick={handleSend}
-              aria-label="Enviar"
-            >
-              <Send className="h-4 w-4" aria-hidden="true" />
-            </Button>
-          </div>
-        </div>
+          </Card>
+        </section>
 
-        <AddCreditsModal
-          open={showAddCredits}
-          onOpenChange={setShowAddCredits}
-          onCreditsPurchased={() => {
-            setError(null);
-            setQuotaExceeded(false);
-            onCreditsPurchased?.();
-          }}
-        />
-      </Card>
+        <aside className="space-y-4">
+          {quota && (
+            <AiCreditsPanel
+              quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
+              onRecharge={() => setShowAddCredits(true)}
+              onManual={quotaExhausted || quotaExceeded ? onManual : undefined}
+            />
+          )}
+
+          <Card variant="elevated" className="p-4 sm:p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-origen-pradera/10 text-origen-bosque">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+              </div>
+              <h2 className="text-sm font-semibold text-origen-bosque">Qué te pedimos</h2>
+            </div>
+            <ul className="space-y-3 text-sm text-text-subtle">
+              <li className="flex gap-2"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />Foto del producto para reconocer marca, forma y estilo.</li>
+              <li className="flex gap-2"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />Info útil como origen, elaboración, formato y certificados.</li>
+              <li className="flex gap-2"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />La ficha queda lista para revisar y publicar con un solo vistazo.</li>
+            </ul>
+          </Card>
+
+          <Card variant="elevated" className="p-4 sm:p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-origen-pastel text-origen-bosque">
+                <Camera className="h-4 w-4" aria-hidden="true" />
+              </div>
+              <h2 className="text-sm font-semibold text-origen-bosque">Resumen</h2>
+            </div>
+            <div className="rounded-2xl border border-border-subtle bg-surface-alt p-3 text-sm text-text-subtle">
+              <p className="font-medium text-origen-bosque">Tarea actual</p>
+              <p className="mt-1">{currentTask}</p>
+              <div className="mt-3 h-px bg-border-subtle" />
+              <p className="mt-3 text-xs uppercase tracking-[0.12em] text-origen-bosque/70">Sugerencias rápidas</p>
+              <p className="mt-2">
+                {stepData?.chips?.length ? stepData.chips.slice(0, 2).join(' • ') : 'Sube fotos, responde con un par de frases y deja que la IA te ayude.'}
+              </p>
+            </div>
+          </Card>
+        </aside>
+      </div>
 
       <div className="text-center">
         <Button type="button" variant="ghost" size="sm" onClick={onManual} leftIcon={<Sparkles className="w-4 h-4" aria-hidden="true" />}>
