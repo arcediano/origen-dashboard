@@ -36,8 +36,6 @@ import { resizeLabelImage } from '@/lib/ai-assist/resize-label-image';
 import { AiAssistError, getConversation, postConversationMessage, startConversation } from '@/lib/api/ai-assist';
 import type { ConversationTurnResponse } from '@/lib/ai-assist/conversation';
 import { STEP_PROMPTS, TOTAL_STEPS, stepIndexOf, type AiAssistUserStep } from '@/lib/ai-assist/step-prompts';
-import { AddCreditsModal } from './AddCreditsModal';
-import { AiCreditsPanel } from './AiCreditsPanel';
 
 const MAX_FILE_MB = 10;
 const STORAGE_KEY = 'origen-ai-assist-conversation-id';
@@ -59,7 +57,6 @@ interface AttachedImage {
 interface AiAssistChatProps {
   quota: { used: number; total: number; free?: number; purchased?: number } | null;
   onManual: () => void;
-  onCreditsPurchased?: () => void;
 }
 
 function friendlyError(error: unknown): string {
@@ -135,7 +132,7 @@ function stepSummary(stepData: { stepIndex: number; totalSteps: number; imageDro
   return mapping[Math.min(currentStep - 1, mapping.length - 1)] ?? 'Sigue creando tu producto';
 }
 
-export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistChatProps) {
+export function AiAssistChat({ quota, onManual }: AiAssistChatProps) {
   const router = useRouter();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [turns, setTurns] = useState<ChatTurn[]>([]);
@@ -157,7 +154,6 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
   // fallaría -- se bloquea el composer en vez de dejar que el usuario
   // escriba en una conversación que ya no existe.
   const [closedWithoutCharge, setClosedWithoutCharge] = useState(false);
-  const [showAddCredits, setShowAddCredits] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -375,38 +371,6 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
 
   return (
     <>
-      {quota && (
-        <div className="mb-3 lg:hidden">
-          <AiCreditsPanel
-            quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
-            onRecharge={() => setShowAddCredits(true)}
-            onManual={onManual}
-            className="p-3 sm:p-4"
-          />
-        </div>
-      )}
-
-      <div className="mb-3 flex items-stretch gap-2 lg:hidden">
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          onClick={onManual}
-          className="flex-1 min-w-0 justify-center px-3"
-        >
-          Crear manualmente
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setShowAddCredits(true)}
-          className="flex-1 min-w-0 justify-center px-3"
-        >
-          Recargar
-        </Button>
-      </div>
-
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -650,30 +614,10 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
                 </Button>
               </div>
             </div>
-
-            <AddCreditsModal
-              open={showAddCredits}
-              onOpenChange={setShowAddCredits}
-              onCreditsPurchased={() => {
-                setError(null);
-                setQuotaExceeded(false);
-                onCreditsPurchased?.();
-              }}
-            />
           </Card>
         </section>
 
         <aside className="min-w-0 space-y-4">
-          {quota && (
-            <div className="hidden lg:block">
-              <AiCreditsPanel
-                quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
-                onRecharge={() => setShowAddCredits(true)}
-                onManual={onManual}
-              />
-            </div>
-          )}
-
           <Card variant="elevated" className="p-4 sm:p-5">
             <div className="mb-3 flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-origen-pradera/10 text-origen-bosque">
