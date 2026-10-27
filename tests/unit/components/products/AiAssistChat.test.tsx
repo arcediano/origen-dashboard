@@ -193,6 +193,57 @@ describe('AiAssistChat', () => {
     expect(progress?.getAttribute('max')).toBe('5');
   });
 
+  it('cierre por límite de uso CON cobro (RN-2): muestra el mensaje y redirige a la ficha igual que draft_ready', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup();
+    startMock.mockResolvedValue({
+      kind: 'closed',
+      conversationId: 'conv-1',
+      text: 'Hemos llegado al límite de esta conversación, pero ya teníamos lo esencial -- hemos creado tu ficha. Te hemos cobrado 1 crédito.',
+      reason: 'limit_turns',
+      charged: true,
+      productId: 'prod-1',
+      done: true,
+    });
+    render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
+
+    await user.type(screen.getByPlaceholderText('Escribe aquí lo que quieras añadir…'), 'listo');
+    await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
+
+    expect(await screen.findByText('Preparando tu ficha…')).toBeTruthy();
+    expect(sessionStorage.getItem(STORAGE_KEY)).toBeNull();
+
+    await vi.advanceTimersByTimeAsync(1200);
+
+    expect(pushMock).toHaveBeenCalledWith('/dashboard/products/prod-1?fromAssistant=1');
+  });
+
+  it('cierre por límite de uso SIN cobro (RN-2): muestra el aviso, no redirige y bloquea el composer', async () => {
+    const user = userEvent.setup();
+    startMock.mockResolvedValue({
+      kind: 'closed',
+      conversationId: 'conv-1',
+      text: 'Hemos llegado al límite de esta conversación y aún no hay suficiente información para crear tu producto. No se te ha cobrado nada -- puedes terminarlo a mano cuando quieras.',
+      reason: 'limit_turns',
+      charged: false,
+      done: true,
+    });
+    render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
+
+    await user.type(screen.getByPlaceholderText('Escribe aquí lo que quieras añadir…'), 'listo');
+    await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
+
+    expect(await screen.findByRole('heading', { name: 'No se te ha cobrado nada' })).toBeTruthy();
+    expect(pushMock).not.toHaveBeenCalled();
+
+    const composer = screen.getByPlaceholderText('Escribe aquí lo que quieras añadir…');
+    expect(composer).toBeDisabled();
+
+    const manualButtons = screen.getAllByRole('button', { name: 'Crear a mano' });
+    await user.click(manualButtons[0]);
+    expect(onManual).toHaveBeenCalled();
+  });
+
   it('"Empezar de nuevo" en la reanudación limpia la conversación guardada', async () => {
     sessionStorage.setItem(STORAGE_KEY, 'conv-1');
     getConversationMock.mockResolvedValue({
