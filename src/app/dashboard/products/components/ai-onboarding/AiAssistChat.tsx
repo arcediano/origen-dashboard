@@ -354,6 +354,17 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
 
   return (
     <>
+      {quota && (
+        <div className="mb-3 lg:hidden">
+          <AiCreditsPanel
+            quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
+            onRecharge={() => setShowAddCredits(true)}
+            onManual={onManual}
+            className="p-3 sm:p-4"
+          />
+        </div>
+      )}
+
       <div className="mb-3 flex items-stretch gap-2 lg:hidden">
         <Button
           type="button"

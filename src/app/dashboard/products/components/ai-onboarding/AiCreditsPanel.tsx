@@ -55,7 +55,7 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
         data-testid="ai-credits-panel"
         data-state="exhausted"
         className={cn(
-          'rounded-2xl border border-origen-mandarina/40 bg-origen-mandarina/10 p-4 sm:p-5',
+          'rounded-2xl border border-origen-mandarina/40 bg-origen-mandarina/10 p-3 sm:p-4',
           className,
         )}
       >
@@ -86,7 +86,7 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
       aria-labelledby="ai-credits-title"
       data-testid="ai-credits-panel"
       data-state="available"
-      className={cn('rounded-2xl border border-origen-pradera/30 bg-origen-pradera/10 p-4 sm:p-5', className)}
+      className={cn('rounded-2xl border border-origen-pradera/30 bg-origen-pradera/10 p-3 sm:p-4', className)}
     >
       <div className="flex flex-col gap-3 sm:gap-4">
         {/* Icono + contenido en fila propia, sin los botones de acción --
@@ -117,10 +117,7 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
                 data-testid="ai-credits-equivalence"
               >
                 <Coins className="h-3 w-3" aria-hidden="true" />
-                1 crédito
-                <span aria-hidden="true">=</span>
-                <Package className="h-3 w-3" aria-hidden="true" />
-                1 producto
+                <span>1 crédito = 1 producto</span>
               </p>
             </div>
           </div>
