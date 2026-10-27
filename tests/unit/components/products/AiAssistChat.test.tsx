@@ -61,6 +61,42 @@ describe('AiAssistChat', () => {
     expect(screen.getByText(/Sube una foto del producto/)).toBeTruthy();
   });
 
+  it('al adjuntar una imagen por el clip, se ve su miniatura antes de enviar', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
+
+    const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['fake-image-bytes'], 'foto.jpg', { type: 'image/jpeg' });
+    await user.upload(fileInput, file);
+
+    expect(screen.getByText('Imagen adjunta')).toBeTruthy();
+    expect(screen.getByAltText('foto.jpg')).toBeTruthy();
+  });
+
+  it('la foto adjunta se envía y se ve en la burbuja del propio turno del usuario', async () => {
+    const user = userEvent.setup();
+    startMock.mockResolvedValue({
+      kind: 'step',
+      conversationId: 'conv-1',
+      text: '📸 ¿Tienes la tabla nutricional? Súbela.',
+      stepIndex: 2,
+      totalSteps: 5,
+      done: false,
+    });
+    const { container } = render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
+
+    const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['fake-image-bytes'], 'foto.jpg', { type: 'image/jpeg' });
+    await user.upload(fileInput, file);
+    await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
+
+    expect(startMock).toHaveBeenCalledWith({
+      images: [{ mediaType: 'image/jpeg', data: 'QUJD' }],
+    });
+    const bubbleImg = await screen.findByAltText('Imagen adjunta');
+    expect(bubbleImg).toBeTruthy();
+  });
+
   it('envía el primer turno a startConversation y muestra el siguiente paso con su progreso', async () => {
     const user = userEvent.setup();
     startMock.mockResolvedValue({
