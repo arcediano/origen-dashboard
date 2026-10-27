@@ -122,17 +122,24 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
           <Package className="h-3.5 w-3.5" aria-hidden="true" />
           1 producto
         </p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="col-start-3 w-auto shrink-0 sm:row-span-3 sm:row-start-1 sm:self-center"
-          onClick={onRecharge}
-          aria-label="Recargar créditos"
-          leftIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
-        >
-          Recargar
-        </Button>
+        <div className="col-start-3 flex flex-wrap items-center justify-end gap-2 sm:row-span-3 sm:row-start-1 sm:self-center">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-auto shrink-0"
+            onClick={onRecharge}
+            aria-label="Recargar créditos"
+            leftIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
+          >
+            Recargar
+          </Button>
+          {onManual && (
+            <Button type="button" variant="ghost" size="sm" className="w-auto shrink-0" onClick={onManual}>
+              Crear manualmente
+            </Button>
+          )}
+        </div>
       </div>
     </section>
   );

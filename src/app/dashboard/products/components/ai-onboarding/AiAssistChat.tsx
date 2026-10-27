@@ -20,7 +20,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Camera, Loader2, Send, Sparkles } from 'lucide-react';
+import { Camera, Loader2, Paperclip, Send, Sparkles, X } from 'lucide-react';
 import {
   Alert,
   AlertDescription,
@@ -46,6 +46,13 @@ interface ChatTurn {
   role: 'user' | 'assistant';
   text: string;
   imageUrl?: string;
+}
+
+interface AttachedImage {
+  id: string;
+  file: File;
+  previewUrl: string;
+  name: string;
 }
 
 interface AiAssistChatProps {
@@ -136,7 +143,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
   } | null>(null);
   const [resumeOffer, setResumeOffer] = useState<{ conversationId: string; step: string } | null>(null);
   const [text, setText] = useState('');
-  const [photo, setPhoto] = useState<File | null>(null);
+  const [attachments, setAttachments] = useState<AttachedImage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -165,20 +172,47 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [turns, stepData]);
 
+  const removeAttachment = (id: string) => {
+    setAttachments((prev) => {
+      const item = prev.find((entry) => entry.id === id);
+      if (item) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter((entry) => entry.id !== id);
+    });
+  };
+
   const handlePhoto = (list: FileList | null) => {
-    const file = list?.[0];
     if (photoInputRef.current) photoInputRef.current.value = '';
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setError('El archivo debe ser una imagen (JPG, PNG o WebP).');
-      return;
+    const files = list ? Array.from(list) : [];
+    if (!files.length) return;
+
+    const validFiles: File[] = [];
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        setError('El archivo debe ser una imagen (JPG, PNG o WebP).');
+        continue;
+      }
+      if (file.size > MAX_FILE_MB * 1024 * 1024) {
+        setError(`La imagen "${file.name}" supera los ${MAX_FILE_MB} MB. Prueba con otra.`);
+        continue;
+      }
+      validFiles.push(file);
     }
-    if (file.size > MAX_FILE_MB * 1024 * 1024) {
-      setError(`La imagen supera los ${MAX_FILE_MB} MB. Prueba con otra.`);
-      return;
-    }
+
+    if (!validFiles.length) return;
+
     setError(null);
-    setPhoto(file);
+    setAttachments((prev) => {
+      const next = [
+        ...prev,
+        ...validFiles.map((file) => ({
+          id: `${file.name}-${file.lastModified}-${Math.random().toString(36).slice(2, 9)}`,
+          file,
+          previewUrl: URL.createObjectURL(file),
+          name: file.name,
+        })),
+      ];
+      return next.slice(-5);
+    });
   };
 
   const applyResult = (result: ConversationTurnResponse, userTurn: ChatTurn | null) => {
@@ -205,8 +239,11 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
     setError(null);
     setQuotaExceeded(false);
     try {
-      const images = photo ? [await resizeLabelImage(photo)] : undefined;
-      setPhoto(null);
+      const images = attachments.length > 0 ? await Promise.all(attachments.map(({ file }) => resizeLabelImage(file))) : undefined;
+      setAttachments((prev) => {
+        prev.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+        return [];
+      });
       const payload = { ...input, ...(images && { images }) };
       const result = conversationId
         ? await postConversationMessage(conversationId, payload)
@@ -222,8 +259,12 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
 
   const handleSend = () => {
     const trimmed = text.trim();
-    if (!trimmed && !photo) return;
-    const userTurn: ChatTurn = { role: 'user', text: trimmed, imageUrl: photo ? URL.createObjectURL(photo) : undefined };
+    if (!trimmed && !attachments.length) return;
+    const userTurn: ChatTurn = {
+      role: 'user',
+      text: trimmed || (attachments.length > 1 ? 'He adjuntado imágenes' : 'He adjuntado una imagen'),
+      imageUrl: attachments[0]?.previewUrl,
+    };
     setText('');
     void send({ text: trimmed || undefined }, userTurn);
   };
@@ -296,28 +337,37 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="mx-auto max-w-6xl space-y-6"
+      className="mx-auto w-full max-w-6xl space-y-4 sm:space-y-6"
     >
       <div className="rounded-3xl border border-border-subtle bg-gradient-to-br from-origen-pradera/8 via-white to-origen-pastel/50 p-4 shadow-sm sm:p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-origen-bosque/70">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="min-w-0 space-y-2">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-origen-bosque/70">
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               Asistente de IA
             </div>
-            <div>
+            <div className="space-y-2">
               <h1 className="text-2xl font-semibold tracking-tight text-origen-bosque sm:text-3xl">
                 Crea tu producto con ayuda
               </h1>
-              <p className="mt-1 max-w-2xl text-sm text-text-subtle sm:text-base">
+              <p className="max-w-2xl text-sm text-text-subtle sm:text-base">
                 Sube una foto y cuéntanos lo esencial. Te ayudamos a preparar la ficha sin complicarte el trabajo.
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 self-start lg:self-center">
+          <div className="flex flex-wrap items-center gap-2 self-start xl:self-center">
             <Badge variant="leaf" size="sm" className="bg-white/80 text-origen-bosque">
               {stepData ? `Paso ${stepData.stepIndex} de ${stepData.totalSteps}` : 'Listo para empezar'}
             </Badge>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="shrink-0"
+              onClick={onManual}
+            >
+              Crear manualmente
+            </Button>
           </div>
         </div>
       </div>
@@ -336,7 +386,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
             </div>
           )}
 
-          <Card variant="elevated" className="flex flex-col overflow-hidden p-0">
+          <Card variant="elevated" className="flex min-w-0 flex-col overflow-hidden p-0">
             <div className="flex items-center justify-between gap-3 border-b border-border-subtle bg-origen-pastel/40 px-4 py-3 sm:px-6">
               <div className="flex items-center gap-2 min-w-0">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-origen-bosque shadow-sm">
@@ -352,7 +402,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
               </Badge>
             </div>
 
-            <div className="flex max-h-[62vh] min-h-[280px] flex-col gap-4 overflow-y-auto bg-white p-4 sm:p-6">
+            <div className="flex max-h-[62vh] min-h-[260px] min-w-0 flex-col gap-4 overflow-y-auto bg-white p-4 sm:p-6">
               {turns.length === 0 && !isSending && (
                 <div className="space-y-4">
                   <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-origen-pastel/60 px-4 py-3 text-sm text-origen-oscuro shadow-sm">
@@ -370,10 +420,10 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
               )}
 
               {turns.map((turn, i) => (
-                <div key={i} className={cn('flex', turn.role === 'user' ? 'justify-end' : 'justify-start')}>
+                <div key={i} className={cn('flex min-w-0', turn.role === 'user' ? 'justify-end' : 'justify-start')}>
                   <div
                     className={cn(
-                      'max-w-[85%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap shadow-sm',
+                      'max-w-[85%] min-w-0 rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap shadow-sm',
                       turn.role === 'user'
                         ? 'rounded-br-md bg-origen-bosque text-white'
                         : 'rounded-bl-md border border-border-subtle bg-origen-pastel/60 text-origen-oscuro',
@@ -381,7 +431,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
                   >
                     {turn.imageUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={turn.imageUrl} alt="Imagen adjunta" className="mb-2 h-28 w-28 rounded-xl object-cover" />
+                      <img src={turn.imageUrl} alt="Imagen adjunta" className="mb-2 h-24 w-24 max-w-full rounded-xl object-cover sm:h-28 sm:w-28" />
                     )}
                     {turn.text}
                   </div>
@@ -418,42 +468,60 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
                 ref={photoInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
+                multiple
                 className="sr-only"
                 tabIndex={-1}
                 onChange={(e) => handlePhoto(e.target.files)}
               />
+
+              {attachments.length > 0 && (
+                <div className="mb-3 flex min-w-0 items-center gap-2 overflow-x-auto pb-1">
+                  {attachments.map((item) => (
+                    <div key={item.id} className="group relative shrink-0 overflow-hidden rounded-xl border border-border-subtle bg-white shadow-sm">
+                      <img src={item.previewUrl} alt={item.name} className="h-16 w-16 object-cover sm:h-20 sm:w-20" />
+                      <button
+                        type="button"
+                        aria-label={`Eliminar adjunto ${item.name}`}
+                        onClick={() => removeAttachment(item.id)}
+                        className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-origen-oscuro/80 text-white transition-opacity hover:bg-origen-oscuro"
+                      >
+                        <X className="h-3 w-3" aria-hidden="true" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {stepData?.imageDropzoneLabel && (
                 <button
                   type="button"
                   disabled={isSending || quotaExhausted}
                   onClick={() => photoInputRef.current?.click()}
-                  className="mb-2 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border-strong/40 bg-white px-4 py-3 text-xs font-medium text-origen-bosque transition-colors hover:bg-origen-pastel/40"
+                  className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border-strong/40 bg-white px-3 py-2.5 text-xs font-medium text-origen-bosque transition-colors hover:bg-origen-pastel/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera"
                 >
-                  <Camera className="h-4 w-4" aria-hidden="true" />
-                  {photo ? photo.name : stepData.imageDropzoneLabel}
+                  <Paperclip className="h-4 w-4" aria-hidden="true" />
+                  {attachments[0] ? `${attachments.length} imagen${attachments.length > 1 ? 'es' : ''} preparada${attachments.length > 1 ? 's' : ''}` : stepData.imageDropzoneLabel}
                 </button>
               )}
 
-              <div className="flex items-end gap-2">
-                {!stepData?.imageDropzoneLabel && (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="icon"
-                    disabled={isSending || quotaExhausted}
-                    onClick={() => photoInputRef.current?.click()}
-                    aria-label="Añadir foto"
-                  >
-                    <Camera className="h-4 w-4" aria-hidden="true" />
-                  </Button>
-                )}
+              <div className="flex items-end gap-2 sm:gap-3">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="h-11 w-11 shrink-0 rounded-xl"
+                  disabled={isSending || quotaExhausted}
+                  onClick={() => photoInputRef.current?.click()}
+                  aria-label="Adjuntar imagen"
+                >
+                  <Paperclip className="h-4 w-4" aria-hidden="true" />
+                </Button>
 
                 <Textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="Escribe aquí lo que quieras añadir…"
-                  className="min-h-[44px] flex-1 border-border-subtle bg-white"
+                  placeholder={stepData?.imageDropzoneLabel ? 'Describe lo que quieres cambiar o añade más detalle…' : 'Escribe aquí lo que quieras añadir…'}
+                  className="min-h-[44px] max-h-[180px] flex-1 resize-none border-border-subtle bg-white text-sm leading-5 focus-visible:ring-2 focus-visible:ring-origen-pradera"
                   disabled={isSending || quotaExhausted}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -467,9 +535,10 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
                   type="button"
                   variant="primary"
                   size="icon"
-                  disabled={isSending || quotaExhausted || (!text.trim() && !photo)}
+                  className="h-11 w-11 shrink-0 rounded-xl"
+                  disabled={isSending || quotaExhausted || (!text.trim() && attachments.length === 0)}
                   onClick={handleSend}
-                  aria-label="Enviar"
+                  aria-label="Enviar mensaje"
                 >
                   <Send className="h-4 w-4" aria-hidden="true" />
                 </Button>
@@ -493,7 +562,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
             <AiCreditsPanel
               quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
               onRecharge={() => setShowAddCredits(true)}
-              onManual={quotaExhausted || quotaExceeded ? onManual : undefined}
+              onManual={onManual}
             />
           )}
 
@@ -531,9 +600,15 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
         </aside>
       </div>
 
-      <div className="text-center">
-        <Button type="button" variant="ghost" size="sm" onClick={onManual} leftIcon={<Sparkles className="w-4 h-4" aria-hidden="true" />}>
-          Prefiero rellenarlo yo
+      <div className="flex justify-center">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={onManual}
+          leftIcon={<Sparkles className="w-4 h-4" aria-hidden="true" />}
+        >
+          Crear producto manualmente
         </Button>
       </div>
     </motion.div>
