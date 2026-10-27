@@ -372,24 +372,15 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
         </div>
       )}
 
-      <div className="mb-3 flex items-stretch gap-2 lg:hidden">
+      <div className="mb-3 flex items-stretch justify-end gap-2">
         <Button
           type="button"
           variant="secondary"
           size="sm"
           onClick={onManual}
-          className="flex-1 min-w-0 justify-center px-3"
+          className="min-w-0 justify-center px-3"
         >
           Crear manualmente
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setShowAddCredits(true)}
-          className="flex-1 min-w-0 justify-center px-3"
-        >
-          Recargar
         </Button>
       </div>
 
