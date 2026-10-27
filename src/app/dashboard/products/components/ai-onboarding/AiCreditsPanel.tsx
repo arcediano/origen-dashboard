@@ -94,38 +94,39 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
       className={cn('rounded-2xl border border-origen-pradera/30 bg-origen-pradera/10 p-4 sm:p-5', className)}
     >
       <div className="flex flex-col gap-3 sm:gap-4">
-        <div className="flex min-w-0 flex-wrap items-start gap-3">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-origen-bosque shadow-subtle sm:h-12 sm:w-12">
             <Sparkles className="h-5 w-5" aria-hidden="true" />
           </span>
 
           <div className="min-w-0 flex-1">
-            <h2 id="ai-credits-title" className="min-w-0 text-base font-semibold text-origen-bosque sm:text-lg">
+            <h2 id="ai-credits-title" className="min-w-0 text-base font-semibold leading-tight text-origen-bosque sm:text-lg">
               Te {plural(remaining, 'queda', 'quedan')}{' '}
               <span className="tabular-nums" data-testid="ai-credits-remaining">{remaining}</span>{' '}
               {plural(remaining, 'crédito', 'créditos')}
             </h2>
+
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <CreditTokens remaining={remaining} />
               <p
-                className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-origen-bosque shadow-subtle sm:text-xs"
+                className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[10px] font-medium text-origen-bosque shadow-subtle sm:text-xs"
                 data-testid="ai-credits-equivalence"
               >
-                <Coins className="h-3.5 w-3.5" aria-hidden="true" />
+                <Coins className="h-3 w-3" aria-hidden="true" />
                 1 crédito
                 <span aria-hidden="true">=</span>
-                <Package className="h-3.5 w-3.5" aria-hidden="true" />
+                <Package className="h-3 w-3" aria-hidden="true" />
                 1 producto
               </p>
             </div>
           </div>
 
-          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+          <div className="flex w-full flex-col gap-2 sm:ml-auto sm:w-auto sm:flex-row sm:items-center sm:justify-end">
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="w-auto shrink-0"
+              className="w-full shrink-0 px-3 sm:w-auto"
               onClick={onRecharge}
               aria-label="Recargar créditos"
               leftIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
@@ -133,7 +134,13 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
               Recarga
             </Button>
             {onManual && (
-              <Button type="button" variant="ghost" size="sm" className="w-auto shrink-0" onClick={onManual}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="w-full shrink-0 px-3 sm:w-auto"
+                onClick={onManual}
+              >
                 Crear a mano
               </Button>
             )}
