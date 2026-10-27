@@ -46,6 +46,7 @@ interface ChatTurn {
   role: 'user' | 'assistant';
   text: string;
   imageUrl?: string;
+  imageUrls?: string[];
 }
 
 interface AttachedImage {
@@ -193,6 +194,13 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
     textareaRef.current?.focus();
   }, [turns, isSending, isRedirecting, stepData?.imageDropzoneLabel]);
 
+  const clearAttachments = () => {
+    setAttachments((prev) => {
+      prev.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      return [];
+    });
+  };
+
   const removeAttachment = (id: string) => {
     setAttachments((prev) => {
       const item = prev.find((entry) => entry.id === id);
@@ -264,11 +272,14 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
   };
 
   const send = async (input: { text?: string; choice?: string }, userTurn: ChatTurn | null) => {
+    const draftText = text;
+    const draftAttachments = attachments;
     setIsSending(true);
     setError(null);
     setQuotaExceeded(false);
     try {
-      const images = attachments.length > 0 ? await Promise.all(attachments.map(({ file }) => resizeLabelImage(file))) : undefined;
+      const images = draftAttachments.length > 0 ? await Promise.all(draftAttachments.map(({ file }) => resizeLabelImage(file))) : undefined;
+      setText('');
       setAttachments((prev) => {
         prev.forEach((item) => URL.revokeObjectURL(item.previewUrl));
         return [];
@@ -279,6 +290,8 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
         : await startConversation(payload);
       applyResult(result, userTurn);
     } catch (err) {
+      setText(draftText);
+      setAttachments(draftAttachments);
       setError(friendlyError(err));
       setQuotaExceeded(err instanceof AiAssistError && err.code === 'AI_PRODUCER_QUOTA_EXCEEDED');
     } finally {
@@ -292,9 +305,8 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
     const userTurn: ChatTurn = {
       role: 'user',
       text: trimmed || (attachments.length > 1 ? 'He adjuntado imágenes' : 'He adjuntado una imagen'),
-      imageUrl: attachments[0]?.previewUrl,
+      imageUrls: attachments.map((attachment) => attachment.previewUrl),
     };
-    setText('');
     void send({ text: trimmed || undefined }, userTurn);
   };
 
@@ -362,46 +374,46 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
   const currentTask = stepSummary(stepData);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="mx-auto w-full max-w-6xl space-y-4 sm:space-y-6"
-    >
-      <div className="rounded-3xl border border-border-subtle bg-gradient-to-br from-origen-pradera/8 via-white to-origen-pastel/50 p-4 shadow-sm sm:p-6">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          <div className="min-w-0 space-y-2">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-origen-bosque/70">
-              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-              Asistente de IA
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight text-origen-bosque sm:text-3xl">
-                Crea tu producto con ayuda
-              </h1>
-              <p className="max-w-2xl text-sm text-text-subtle sm:text-base">
-                Sube una foto y cuéntanos lo esencial. Te ayudamos a preparar la ficha sin complicarte el trabajo.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 self-start xl:self-center">
-            <Badge variant="leaf" size="sm" className="bg-white/80 text-origen-bosque">
-              {stepData ? `Paso ${stepData.stepIndex} de ${stepData.totalSteps}` : 'Listo para empezar'}
-            </Badge>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              className="shrink-0"
-              onClick={onManual}
-            >
-              Crear manualmente
-            </Button>
-          </div>
+    <>
+      {quota && (
+        <div className="mb-3 lg:hidden">
+          <AiCreditsPanel
+            quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
+            onRecharge={() => setShowAddCredits(true)}
+            onManual={onManual}
+            className="p-3 sm:p-4"
+          />
         </div>
+      )}
+
+      <div className="mb-3 flex items-stretch gap-2 lg:hidden">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={onManual}
+          className="flex-1 min-w-0 justify-center px-3"
+        >
+          Crear manualmente
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setShowAddCredits(true)}
+          className="flex-1 min-w-0 justify-center px-3"
+        >
+          Recargar
+        </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_360px]">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="mx-auto w-full max-w-6xl space-y-4 sm:space-y-6"
+      >
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_360px]">
         <section className="space-y-4">
           {stepData && (
             <div className="rounded-2xl border border-border-subtle bg-white p-3 shadow-sm sm:p-4">
@@ -468,9 +480,17 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
                         : 'rounded-bl-md border border-border-subtle bg-origen-pastel/60 text-origen-oscuro',
                     )}
                   >
-                    {turn.imageUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={turn.imageUrl} alt="Imagen adjunta" className="mb-2 h-24 w-24 max-w-full rounded-xl object-cover sm:h-28 sm:w-28" />
+                    {(turn.imageUrls ?? (turn.imageUrl ? [turn.imageUrl] : [])).length > 0 && (
+                      <div className="mb-2 flex flex-wrap gap-2">
+                        {(turn.imageUrls ?? (turn.imageUrl ? [turn.imageUrl] : [])).map((imageUrl, imageIndex) => (
+                          <img
+                            key={`${i}-${imageIndex}`}
+                            src={imageUrl}
+                            alt="Imagen adjunta"
+                            className="h-24 w-24 max-w-full rounded-xl object-cover border border-white/20 sm:h-28 sm:w-28"
+                          />
+                        ))}
+                      </div>
                     )}
                     {turn.text}
                   </div>
@@ -535,20 +555,41 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
               />
 
               {attachments.length > 0 && (
-                <div className="mb-3 flex min-w-0 items-center gap-2 overflow-x-auto pb-1">
-                  {attachments.map((item) => (
-                    <div key={item.id} className="group relative shrink-0 overflow-hidden rounded-xl border border-border-subtle bg-white shadow-sm">
-                      <img src={item.previewUrl} alt={item.name} className="h-16 w-16 object-cover sm:h-20 sm:w-20" />
-                      <button
-                        type="button"
-                        aria-label={`Eliminar adjunto ${item.name}`}
-                        onClick={() => removeAttachment(item.id)}
-                        className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-origen-oscuro/80 text-white transition-opacity hover:bg-origen-oscuro"
+                <div className="mb-3 rounded-2xl border border-border-subtle bg-white p-2 shadow-sm">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-origen-bosque/70">
+                      Imagen adjunta
+                    </span>
+                    <button
+                      type="button"
+                      onClick={clearAttachments}
+                      className="text-xs font-medium text-text-subtle transition-colors hover:text-origen-bosque focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera"
+                    >
+                      Eliminar todas
+                    </button>
+                  </div>
+                  <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1">
+                    {attachments.map((item) => (
+                      <div
+                        key={item.id}
+                        className="group relative flex shrink-0 items-center gap-2 overflow-hidden rounded-xl border border-border-subtle bg-surface-alt p-1.5"
                       >
-                        <X className="h-3 w-3" aria-hidden="true" />
-                      </button>
-                    </div>
-                  ))}
+                        <img src={item.previewUrl} alt={item.name} className="h-14 w-14 rounded-lg object-cover sm:h-16 sm:w-16" />
+                        <div className="min-w-0 max-w-[120px]">
+                          <p className="truncate text-[11px] font-medium text-origen-bosque">{item.name}</p>
+                          <button
+                            type="button"
+                            aria-label={`Eliminar adjunto ${item.name}`}
+                            onClick={() => removeAttachment(item.id)}
+                            className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-text-subtle transition-colors hover:text-origen-bosque focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera"
+                          >
+                            <X className="h-3 w-3" aria-hidden="true" />
+                            Eliminar
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -622,13 +663,15 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
           </Card>
         </section>
 
-        <aside className="space-y-4">
+        <aside className="min-w-0 space-y-4">
           {quota && (
-            <AiCreditsPanel
-              quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
-              onRecharge={() => setShowAddCredits(true)}
-              onManual={onManual}
-            />
+            <div className="hidden lg:block">
+              <AiCreditsPanel
+                quota={quotaExceeded ? { ...quota, used: Math.max(quota.used, quota.total) } : quota}
+                onRecharge={() => setShowAddCredits(true)}
+                onManual={onManual}
+              />
+            </div>
           )}
 
           <Card variant="elevated" className="p-4 sm:p-5">
@@ -638,14 +681,14 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
               </div>
               <h2 className="text-sm font-semibold text-origen-bosque">Qué te pedimos</h2>
             </div>
-            <ul className="space-y-3 text-sm text-text-subtle">
-              <li className="flex gap-2"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />Foto del producto para reconocer marca, forma y estilo.</li>
-              <li className="flex gap-2"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />Info útil como origen, elaboración, formato y certificados.</li>
-              <li className="flex gap-2"><span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />La ficha queda lista para revisar y publicar con un solo vistazo.</li>
+            <ul className="space-y-2.5 text-sm leading-6 text-text-subtle">
+              <li className="flex gap-2.5"><span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />Foto del producto para reconocer marca, forma y estilo.</li>
+              <li className="flex gap-2.5"><span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />Info útil como origen, elaboración, formato y certificados.</li>
+              <li className="flex gap-2.5"><span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-origen-pradera" aria-hidden="true" />La ficha queda lista para revisar y publicar con un solo vistazo.</li>
             </ul>
           </Card>
 
-          <Card variant="elevated" className="p-4 sm:p-5">
+          <Card variant="elevated" className="min-w-0 p-4 sm:p-5">
             <div className="mb-3 flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-origen-pastel text-origen-bosque">
                 <Camera className="h-4 w-4" aria-hidden="true" />
@@ -654,28 +697,17 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
             </div>
             <div className="rounded-2xl border border-border-subtle bg-surface-alt p-3 text-sm text-text-subtle">
               <p className="font-medium text-origen-bosque">Tarea actual</p>
-              <p className="mt-1">{currentTask}</p>
+              <p className="mt-1 break-words">{currentTask}</p>
               <div className="mt-3 h-px bg-border-subtle" />
-              <p className="mt-3 text-xs uppercase tracking-[0.12em] text-origen-bosque/70">Sugerencias rápidas</p>
-              <p className="mt-2">
+              <p className="mt-3 text-[11px] uppercase tracking-[0.12em] text-origen-bosque/70">Sugerencias rápidas</p>
+              <p className="mt-2 break-words">
                 {stepData?.chips?.length ? stepData.chips.slice(0, 2).join(' • ') : 'Sube fotos, responde con un par de frases y deja que la IA te ayude.'}
               </p>
             </div>
           </Card>
         </aside>
       </div>
-
-      <div className="flex justify-center">
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          onClick={onManual}
-          leftIcon={<Sparkles className="w-4 h-4" aria-hidden="true" />}
-        >
-          Crear producto manualmente
-        </Button>
-      </div>
     </motion.div>
+    </>
   );
 }
