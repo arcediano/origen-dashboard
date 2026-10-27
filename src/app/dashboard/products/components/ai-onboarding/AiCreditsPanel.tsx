@@ -94,7 +94,16 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
       className={cn('rounded-2xl border border-origen-pradera/30 bg-origen-pradera/10 p-4 sm:p-5', className)}
     >
       <div className="flex flex-col gap-3 sm:gap-4">
-        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start">
+        {/* Icono + contenido en fila propia, sin los botones de acción --
+            este panel SOLO se usa en la columna lateral de 360px fijos de
+            AiAssistChat.tsx (lg:grid-cols-[...]_360px]). Los breakpoints de
+            Tailwind responden al ancho del VIEWPORT, no al de ese contenedor
+            -- a partir de 640px (`sm:`) el título entraba en fila junto a los
+            2 botones de acción, compitiendo por un ancho real de ~360px y
+            partiéndose palabra por palabra (hallazgo real, captura de
+            pantalla del humano en escritorio, 2026-10-27). Las acciones se
+            quedan siempre en su propia fila, sin depender del viewport. */}
+        <div className="flex min-w-0 items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-origen-bosque shadow-subtle sm:h-12 sm:w-12">
             <Sparkles className="h-5 w-5" aria-hidden="true" />
           </span>
@@ -120,31 +129,31 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
               </p>
             </div>
           </div>
+        </div>
 
-          <div className="flex w-full flex-col gap-2 sm:ml-auto sm:w-auto sm:flex-row sm:items-center sm:justify-end">
+        <div className="flex flex-col gap-2 xs:flex-row xs:items-center">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full shrink-0 px-3 xs:w-auto"
+            onClick={onRecharge}
+            aria-label="Recargar créditos"
+            leftIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
+          >
+            Recarga
+          </Button>
+          {onManual && (
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="w-full shrink-0 px-3 sm:w-auto"
-              onClick={onRecharge}
-              aria-label="Recargar créditos"
-              leftIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
+              className="w-full shrink-0 px-3 xs:w-auto"
+              onClick={onManual}
             >
-              Recarga
+              Crear a mano
             </Button>
-            {onManual && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="w-full shrink-0 px-3 sm:w-auto"
-                onClick={onManual}
-              >
-                Crear a mano
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </section>
