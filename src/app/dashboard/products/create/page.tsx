@@ -18,6 +18,8 @@ import {
 } from '@/app/dashboard/products/components';
 import { ProductFormSteps } from '@/app/dashboard/products/components/ProductFormSteps';
 import { AiAssistChat } from '@/app/dashboard/products/components/ai-onboarding/AiAssistChat';
+import { AiCreditsPanel } from '@/app/dashboard/products/components/ai-onboarding/AiCreditsPanel';
+import { AddCreditsModal } from '@/app/dashboard/products/components/ai-onboarding/AddCreditsModal';
 import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductFormSidebar';
 
 import { useProductForm } from '@/hooks/useProductForm';
@@ -50,8 +52,15 @@ const containerVariants: Variants = {
  * Cómo se crea el producto: con el asistente de IA (máquina de pasos fija
  * "Origen Assist" -- rediseño v2, 2026-10-26 -- que redirige a la ficha real
  * al terminar) o a mano con el wizard de 8 pasos.
+ *
+ * Decisión de Negocio (comentario del humano sobre el informe funcional,
+ * 2026-10-27, sustituye al punto de elección simétrico anterior): el modo
+ * manual es SIEMPRE el que se ve por defecto -- ya no depende de si el
+ * asistente está activo ni se espera a cargar el cupo para decidirlo. El
+ * asistente se ofrece como un enlace/CTA persistente ("Probar IA"), nunca
+ * como pantalla de entrada.
  */
-type CreateMode = 'loading' | 'ai-chat' | 'wizard';
+type CreateMode = 'ai-chat' | 'wizard';
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
@@ -89,8 +98,9 @@ export default function CreateProductPage() {
     savedVariantsCount,
   } = useProductForm();
 
-  const [mode, setMode] = useState<CreateMode>('loading');
+  const [mode, setMode] = useState<CreateMode>('wizard');
   const [quota, setQuota] = useState<AiAssistQuota | null>(null);
+  const [showAddCredits, setShowAddCredits] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,16 +120,11 @@ export default function CreateProductPage() {
       .catch(() => {});
   }, []);
 
-  // Con el cupo cargado se decide el modo inicial: si el asistente está
-  // activo, siempre entra primero por ahí — aunque el cupo gratis esté
-  // agotado, la propia pantalla del asistente es quien debe avisar de eso y
-  // ofrecer comprar créditos (si se salta aquí a mano, esa pantalla nunca
-  // llega a verse). Un borrador local a medias se ofrece continuar o
-  // descartar dentro de esa misma pantalla, no se salta el asistente.
-  useEffect(() => {
-    if (mode !== 'loading' || !quota) return;
-    setMode(quota.enabled ? 'ai-chat' : 'wizard');
-  }, [mode, quota]);
+  // Créditos + "Probar IA" siempre visibles en la cabecera (decisión del
+  // humano, 2026-10-27, B.1 del informe funcional): null cuando el asistente
+  // está desactivado por completo (sin esto no habría nada que ofrecer).
+  const aiQuota = quota?.enabled ? { used: quota.used, total: quota.total, free: quota.free, purchased: quota.purchased } : null;
+  const aiQuotaExhausted = !!aiQuota && aiQuota.used >= aiQuota.total;
 
   useEffect(() => {
     if (error) {
@@ -205,18 +210,37 @@ export default function CreateProductPage() {
       />
 
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {mode === 'loading' && (
-          <div className="mx-auto max-w-2xl space-y-4" aria-busy="true" aria-label="Cargando">
-            <div className="mx-auto h-8 w-2/3 animate-pulse rounded-xl bg-origen-pastel" />
-            <div className="h-64 animate-pulse rounded-2xl bg-origen-pastel/70" />
+        {/* Créditos + enlace al asistente, siempre visibles en ambos modos
+            (Decisión de Negocio, 2026-10-27, B.1 del informe funcional) --
+            fuera de los bloques por modo de abajo para que persista en
+            cualquier paso del wizard manual, no solo en el primero. */}
+        {aiQuota && (
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start">
+            <AiCreditsPanel
+              quota={aiQuota}
+              onRecharge={() => setShowAddCredits(true)}
+              onManual={mode === 'ai-chat' ? () => setMode('wizard') : undefined}
+              className="flex-1"
+            />
+            {mode === 'wizard' && (
+              <Button
+                type="button"
+                variant={aiQuotaExhausted ? 'outline' : 'primary'}
+                onClick={() => setMode('ai-chat')}
+                disabled={aiQuotaExhausted}
+                leftIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
+                className="shrink-0"
+              >
+                Probar IA
+              </Button>
+            )}
           </div>
         )}
 
         {mode === 'ai-chat' && (
           <AiAssistChat
-            quota={quota && quota.enabled ? { used: quota.used, total: quota.total, free: quota.free, purchased: quota.purchased } : null}
+            quota={aiQuota}
             onManual={() => setMode('wizard')}
-            onCreditsPurchased={handleCreditsPurchased}
           />
         )}
 
@@ -446,6 +470,12 @@ export default function CreateProductPage() {
         open={showSuccessModal}
         onOpenChange={setShowSuccessModal}
         productName={formData.name || 'Producto'}
+      />
+
+      <AddCreditsModal
+        open={showAddCredits}
+        onOpenChange={setShowAddCredits}
+        onCreditsPurchased={handleCreditsPurchased}
       />
 
     </div>

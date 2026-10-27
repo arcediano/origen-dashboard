@@ -1,7 +1,8 @@
 /**
  * @component AiCreditsPanel
- * @description Estado de los créditos del asistente de IA, siempre visible arriba del
- * alta con IA (sin hacer scroll). Es visual, no textual: una ficha por cada crédito que
+ * @description Estado de los créditos del asistente de IA, siempre visible en la cabecera
+ * de `/dashboard/products/create` (modo manual y modo IA por igual, petición del humano,
+ * 2026-10-27). Es visual, no textual: una ficha por cada crédito que
  * le queda (sin desglose gratis/comprados ni créditos gastados) y la equivalencia
  * "1 crédito = 1 producto". Sin créditos, cambia a un aviso neutro (no de error) con la
  * acción de recargar.
