@@ -324,7 +324,14 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
           role="log"
           aria-live="polite"
           aria-label="Conversación con Origen Assist"
-          className="flex max-h-[60vh] min-h-[280px] flex-col gap-4 overflow-y-auto p-4 sm:p-6"
+          // `dvh` (dynamic viewport height) en vez de `vh`: `vh` en iOS/Android
+          // no se reduce cuando se abre el teclado virtual, así que el log
+          // podía quedar más alto que el viewport visible real y empujar el
+          // input fuera de la pantalla -- hallazgo de la auditoría UX
+          // (petición del humano). `dvh` sí se recalcula con el teclado
+          // abierto en los navegadores móviles actuales (iOS Safari ≥15.4,
+          // Chrome Android ≥108).
+          className="flex max-h-[60dvh] min-h-[280px] flex-col gap-4 overflow-y-auto p-4 sm:p-6"
         >
           {turns.length === 0 && !isSending && (
             <div className="flex justify-start">
@@ -358,7 +365,14 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
             </div>
           )}
           {stepData?.chips && !isSending && (
-            <QuickReplyChips chips={stepData.chips} disabled={isSending} onPick={handleChip} />
+            <div className="space-y-1.5">
+              <QuickReplyChips chips={stepData.chips} disabled={isSending} onPick={handleChip} />
+              {/* Aclara que las fichas y el campo de texto son dos formas de
+                  responder lo mismo -- sin esto, no quedaba claro si había
+                  que elegir una ficha o si también valía escribir la
+                  respuesta a mano (hallazgo de la auditoría UX). */}
+              <p className="text-micro text-text-subtle">O escribe tu respuesta abajo.</p>
+            </div>
           )}
           <div ref={bottomRef} />
         </div>
@@ -412,6 +426,11 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
               placeholder="Escribe aquí…"
               className="min-h-[44px] flex-1"
               disabled={isSending || quotaExhausted}
+              // Complementa el fix de `dvh`: cuando el teclado virtual
+              // empuja el layout, asegura que el propio campo (no solo el
+              // contenedor) quede visible en vez de depender solo del
+              // recálculo de altura.
+              onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' })}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
