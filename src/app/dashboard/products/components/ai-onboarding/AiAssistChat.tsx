@@ -188,6 +188,13 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
     textareaRef.current?.focus();
   }, [turns, isSending, isRedirecting, stepData?.imageDropzoneLabel]);
 
+  const clearAttachments = () => {
+    setAttachments((prev) => {
+      prev.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      return [];
+    });
+  };
+
   const removeAttachment = (id: string) => {
     setAttachments((prev) => {
       const item = prev.find((entry) => entry.id === id);
@@ -520,20 +527,41 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
               />
 
               {attachments.length > 0 && (
-                <div className="mb-3 flex min-w-0 items-center gap-2 overflow-x-auto pb-1">
-                  {attachments.map((item) => (
-                    <div key={item.id} className="group relative shrink-0 overflow-hidden rounded-xl border border-border-subtle bg-white shadow-sm">
-                      <img src={item.previewUrl} alt={item.name} className="h-16 w-16 object-cover sm:h-20 sm:w-20" />
-                      <button
-                        type="button"
-                        aria-label={`Eliminar adjunto ${item.name}`}
-                        onClick={() => removeAttachment(item.id)}
-                        className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-origen-oscuro/80 text-white transition-opacity hover:bg-origen-oscuro"
+                <div className="mb-3 rounded-2xl border border-border-subtle bg-white p-2 shadow-sm">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-origen-bosque/70">
+                      Imagen adjunta
+                    </span>
+                    <button
+                      type="button"
+                      onClick={clearAttachments}
+                      className="text-xs font-medium text-text-subtle transition-colors hover:text-origen-bosque focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera"
+                    >
+                      Eliminar todas
+                    </button>
+                  </div>
+                  <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1">
+                    {attachments.map((item) => (
+                      <div
+                        key={item.id}
+                        className="group relative flex shrink-0 items-center gap-2 overflow-hidden rounded-xl border border-border-subtle bg-surface-alt p-1.5"
                       >
-                        <X className="h-3 w-3" aria-hidden="true" />
-                      </button>
-                    </div>
-                  ))}
+                        <img src={item.previewUrl} alt={item.name} className="h-14 w-14 rounded-lg object-cover sm:h-16 sm:w-16" />
+                        <div className="min-w-0 max-w-[120px]">
+                          <p className="truncate text-[11px] font-medium text-origen-bosque">{item.name}</p>
+                          <button
+                            type="button"
+                            aria-label={`Eliminar adjunto ${item.name}`}
+                            onClick={() => removeAttachment(item.id)}
+                            className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-text-subtle transition-colors hover:text-origen-bosque focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera"
+                          >
+                            <X className="h-3 w-3" aria-hidden="true" />
+                            Eliminar
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
