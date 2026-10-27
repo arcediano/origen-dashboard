@@ -511,7 +511,13 @@ export function AiAssistChat({ quota, onManual }: AiAssistChatProps) {
               <input
                 ref={photoInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                // "image/*" en vez de listar jpeg/png/webp -- iOS Safari se
+                // comporta de forma errática con una lista concreta de tipos
+                // en `accept` (el selector nativo de Fotos puede no devolver
+                // nada al confirmar, sin error visible); la validación real
+                // de tipo sigue haciéndose en `handlePhoto()`, esto solo
+                // afecta al filtro del selector nativo.
+                accept="image/*"
                 multiple
                 className="sr-only"
                 tabIndex={-1}
