@@ -80,7 +80,10 @@ function QuickReplyChips({
   onPick: (value: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    // role="group" + aria-label: sin esto, un lector de pantalla anuncia cada
+    // chip como un botón suelto sin relación entre sí -- no transmite que son
+    // opciones alternativas a la misma pregunta.
+    <div className="flex flex-wrap gap-2" role="group" aria-label="Respuestas rápidas">
       {chips.map((chip) => {
         // Chips de candidatos USDA llevan "usda:<i>:<descripción>" -- se muestra solo la descripción.
         const label = chip.startsWith('usda:') ? chip.split(':').slice(2).join(':') : chip;
@@ -126,6 +129,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
   const [showAddCredits, setShowAddCredits] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const quotaExhausted = !!quota && quota.used >= quota.total;
 
@@ -149,6 +153,19 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [turns, stepData]);
+
+  // Tras cada respuesta del asistente, devolver el foco al campo de texto --
+  // sin esto, el usuario tenía que volver a tocar el input en cada turno
+  // (fricción real en móvil). Se excluye deliberadamente el paso con foto
+  // (`imageDropzoneLabel`): ahí la acción principal es tocar el dropzone, no
+  // escribir, y el foco automático puede disparar el teclado virtual justo
+  // cuando el usuario va a mirar la zona de subida -- un efecto molesto que
+  // no se puede verificar en dispositivo real desde este entorno, así que se
+  // evita por precaución en vez de asumir que es seguro en todos los pasos.
+  useEffect(() => {
+    if (isSending || isRedirecting || stepData?.imageDropzoneLabel) return;
+    textareaRef.current?.focus();
+  }, [turns, isSending, isRedirecting, stepData?.imageDropzoneLabel]);
 
   const handlePhoto = (list: FileList | null) => {
     const file = list?.[0];
@@ -300,7 +317,15 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
       )}
 
       <Card variant="elevated" className="flex flex-col p-0 overflow-hidden">
-        <div className="flex max-h-[60vh] min-h-[280px] flex-col gap-4 overflow-y-auto p-4 sm:p-6">
+        {/* role="log" + aria-live="polite": sin esto, un lector de pantalla
+            nunca se entera de que llegó una respuesta nueva -- tendría que
+            navegar manualmente a buscarla tras cada turno. */}
+        <div
+          role="log"
+          aria-live="polite"
+          aria-label="Conversación con Origen Assist"
+          className="flex max-h-[60vh] min-h-[280px] flex-col gap-4 overflow-y-auto p-4 sm:p-6"
+        >
           {turns.length === 0 && !isSending && (
             <div className="flex justify-start">
               <div className="max-w-[85%] rounded-2xl bg-origen-pastel/60 px-4 py-2.5 text-sm text-origen-oscuro">
@@ -381,6 +406,7 @@ export function AiAssistChat({ quota, onManual, onCreditsPurchased }: AiAssistCh
               </Button>
             )}
             <Textarea
+              ref={textareaRef}
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Escribe aquí…"
