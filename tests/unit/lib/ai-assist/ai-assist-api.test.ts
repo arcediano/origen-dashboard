@@ -8,7 +8,11 @@ vi.mock('@/lib/api/client', async (importOriginal) => {
 });
 
 import { GatewayError } from '@/lib/api/client';
-import { AiAssistError, getAiAssistQuota, improveText, readLabel } from '@/lib/api/ai-assist';
+import { AiAssistError, getAiAssistQuota, startConversation } from '@/lib/api/ai-assist';
+
+// Las rutas F1 (`label-reading`)/F2 (`text-improvement`) se retiraron
+// (petición del humano, 2026-11-03): código muerto, sustituidas por
+// `conversation*` desde el rediseño v2 del backend (2026-10-26).
 
 describe('ai-assist API', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -19,24 +23,13 @@ describe('ai-assist API', () => {
     expect(getMock).toHaveBeenCalledWith('/ai-assist/quota');
   });
 
-  it('readLabel envía assistKey + imágenes con timeout ampliado', async () => {
-    postMock.mockResolvedValue({ legible: true });
-    const images = [{ mediaType: 'image/jpeg' as const, data: 'QUJD' }];
-    await readLabel('clave-12345', images);
+  it('startConversation envía el turno con su timeout ampliado', async () => {
+    postMock.mockResolvedValue({ kind: 'step' });
+    await startConversation({ text: 'Es un queso de oveja' });
     expect(postMock).toHaveBeenCalledWith(
-      '/ai-assist/label-reading',
-      { assistKey: 'clave-12345', images },
-      { timeoutMs: 90_000 },
-    );
-  });
-
-  it('improveText envía assistKey + borrador con su timeout', async () => {
-    postMock.mockResolvedValue({ proposal: {} });
-    await improveText('clave-12345', { name: 'Miel' });
-    expect(postMock).toHaveBeenCalledWith(
-      '/ai-assist/text-improvement',
-      { assistKey: 'clave-12345', name: 'Miel' },
-      { timeoutMs: 60_000 },
+      '/ai-assist/conversation',
+      { text: 'Es un queso de oveja' },
+      { timeoutMs: 125_000 },
     );
   });
 
@@ -44,7 +37,7 @@ describe('ai-assist API', () => {
     postMock.mockRejectedValue(
       new GatewayError(503, 'Límite alcanzado', { code: 'AI_MONTHLY_CAP_REACHED' }),
     );
-    const err = await readLabel('clave-12345', []).catch((e) => e);
+    const err = await startConversation({}).catch((e) => e);
     expect(err).toBeInstanceOf(AiAssistError);
     expect(err).toMatchObject({
       code: 'AI_MONTHLY_CAP_REACHED',
@@ -55,9 +48,9 @@ describe('ai-assist API', () => {
 
   it('sin code deja code = null; un error no-Gateway también se envuelve', async () => {
     postMock.mockRejectedValueOnce(new GatewayError(500, 'boom'));
-    expect(await readLabel('k', []).catch((e) => e)).toMatchObject({ code: null, status: 500 });
+    expect(await startConversation({}).catch((e) => e)).toMatchObject({ code: null, status: 500 });
     postMock.mockRejectedValueOnce(new Error('red caída'));
-    expect(await readLabel('k', []).catch((e) => e)).toMatchObject({
+    expect(await startConversation({}).catch((e) => e)).toMatchObject({
       code: null,
       status: 0,
       message: 'red caída',

@@ -50,6 +50,11 @@ export function StatsGrid({
     {
       label: 'Visitas hoy',
       value: displayStats.profileViews.today,
+      // Solo visitas al perfil del productor (no a fichas de producto, que se
+      // cuentan aparte). Deduplicadas por IP en 24h, no por dispositivo: dos
+      // visitas desde la misma red (p. ej. PC y móvil por el mismo wifi)
+      // cuentan como una sola; desde redes distintas, como dos.
+      subtitle: 'Por IP, 24h',
       icon: <Eye />,
       variant: 'pradera',
       trend: displayStats.profileViews.trend
