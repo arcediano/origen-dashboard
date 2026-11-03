@@ -1,17 +1,16 @@
 /**
- * Cliente del asistente de IA (F1: lectura de etiqueta · F2: mejora de textos).
- * Rutas: GET /ai-assist/quota · POST /ai-assist/label-reading · POST /ai-assist/text-improvement
- * (gateway → products-service).
- * La API key de Anthropic vive solo en el backend.
+ * Cliente del asistente de IA "Origen Assist" (chat conversacional de
+ * creación de producto) + créditos de IA.
+ * Rutas: GET /ai-assist/quota · POST /ai-assist/conversation* (gateway →
+ * products-service). La API key de Anthropic vive solo en el backend.
+ *
+ * Las rutas F1 (`label-reading`)/F2 (`text-improvement`) se retiraron
+ * (petición del humano, 2026-11-03): código muerto, sustituidas por
+ * `conversation*` desde el rediseño v2 del backend (2026-10-26).
  */
 
 import { gatewayClient, GatewayError } from './client';
-import type {
-  AiAssistQuota,
-  LabelReadingResponse,
-} from '@/lib/ai-assist/label-proposal';
-import type { TextDraft, TextImprovementResponse } from '@/lib/ai-assist/text-proposal';
-import type { LabelImagePayload } from '@/lib/ai-assist/resize-label-image';
+import type { AiAssistQuota } from '@/lib/ai-assist/label-proposal';
 import type {
   AiCreditPurchaseStatusResult,
   AiCreditsCheckoutResult,
@@ -22,10 +21,6 @@ import type {
   ConversationTurnResponse,
 } from '@/lib/ai-assist/conversation';
 
-/** Lectura con visión: hasta ~90 s en el gateway. */
-const LABEL_READING_TIMEOUT_MS = 90_000;
-/** Redacción de textos: hasta ~60 s en el gateway. */
-const TEXT_IMPROVEMENT_TIMEOUT_MS = 60_000;
 /** Chat conversacional "Origen Assist": cada turno puede hacer varias llamadas a Opus en el bucle del backend. */
 const CONVERSATION_TIMEOUT_MS = 125_000;
 
@@ -69,36 +64,6 @@ function toAiAssistError(error: unknown): AiAssistError {
 export async function getAiAssistQuota(): Promise<AiAssistQuota> {
   try {
     return await gatewayClient.get<AiAssistQuota>('/ai-assist/quota');
-  } catch (error) {
-    throw toAiAssistError(error);
-  }
-}
-
-export async function readLabel(
-  assistKey: string,
-  images: LabelImagePayload[],
-): Promise<LabelReadingResponse> {
-  try {
-    return await gatewayClient.post<LabelReadingResponse>(
-      '/ai-assist/label-reading',
-      { assistKey, images },
-      { timeoutMs: LABEL_READING_TIMEOUT_MS },
-    );
-  } catch (error) {
-    throw toAiAssistError(error);
-  }
-}
-
-export async function improveText(
-  assistKey: string,
-  draft: TextDraft,
-): Promise<TextImprovementResponse> {
-  try {
-    return await gatewayClient.post<TextImprovementResponse>(
-      '/ai-assist/text-improvement',
-      { assistKey, ...draft },
-      { timeoutMs: TEXT_IMPROVEMENT_TIMEOUT_MS },
-    );
   } catch (error) {
     throw toAiAssistError(error);
   }
