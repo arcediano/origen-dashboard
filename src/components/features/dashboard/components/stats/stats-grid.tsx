@@ -54,7 +54,7 @@ export function StatsGrid({
       // cuentan aparte). Deduplicadas por IP en 24h, no por dispositivo: dos
       // visitas desde la misma red (p. ej. PC y móvil por el mismo wifi)
       // cuentan como una sola; desde redes distintas, como dos.
-      subtitle: 'Visitantes únicos (por IP, 24h)',
+      subtitle: 'Por IP, 24h',
       icon: <Eye />,
       variant: 'pradera',
       trend: displayStats.profileViews.trend

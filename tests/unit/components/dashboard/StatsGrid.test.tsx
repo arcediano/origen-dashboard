@@ -30,6 +30,6 @@ describe('StatsGrid', () => {
     render(<StatsGrid stats={STATS} />);
 
     expect(screen.getByText('Visitas hoy')).toBeDefined();
-    expect(screen.getByText('Visitantes únicos (por IP, 24h)')).toBeDefined();
+    expect(screen.getByText('Por IP, 24h')).toBeDefined();
   });
 });
