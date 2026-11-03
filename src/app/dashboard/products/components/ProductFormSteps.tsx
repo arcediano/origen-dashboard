@@ -118,6 +118,10 @@ export function ProductFormSteps({
             onOriginRegionChange={(value) => onInputChange('originRegion', value)}
             originLocality={formData.originLocality}
             onOriginLocalityChange={(value) => onInputChange('originLocality', value)}
+            isSeasonal={formData.isSeasonal}
+            onIsSeasonalChange={(value) => onInputChange('isSeasonal', value)}
+            seasonMonths={formData.seasonMonths}
+            onSeasonMonthsChange={(value) => onInputChange('seasonMonths', value)}
             completed={completedTabs.production}
             isPublishedProduct={isPublishedProduct}
           />

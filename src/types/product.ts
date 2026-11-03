@@ -385,6 +385,10 @@ export interface Product {
   originRegion?: AutonomousCommunityCode;
   /** Municipio o enclave de origen, texto libre (ej. "Sierra del Rincón") -- petición del humano, 2026-10-17. Complementa a originRegion; sin valor por defecto. */
   originLocality?: string;
+  /** Marca el producto como "de temporada" (petición del humano, 2026-11-03). Gobierna la sección de temporada de la home y el filtro público del catálogo. */
+  isSeasonal?: boolean;
+  /** Meses (1-12) en que el producto está de temporada. Vacío si isSeasonal es false. */
+  seasonMonths?: number[];
   categoryId: string;
   categoryName: string;
   subcategoryId?: string;
@@ -449,6 +453,10 @@ export interface ProductFormData {
   originRegion?: AutonomousCommunityCode;
   /** Municipio o enclave de origen, texto libre (ej. "Sierra del Rincón") -- petición del humano, 2026-10-17. */
   originLocality?: string;
+  /** Marca el producto como "de temporada" (petición del humano, 2026-11-03). Gobierna la sección de temporada de la home y el filtro público del catálogo. */
+  isSeasonal?: boolean;
+  /** Meses (1-12) en que el producto está de temporada. Vacío si isSeasonal es false. */
+  seasonMonths?: number[];
   categoryId: string;
   categoryName: string;
   subcategoryId?: string;
@@ -564,6 +572,8 @@ export const defaultFormData: ProductFormData = {
   fullDescription: '',
   originRegion: undefined,
   originLocality: undefined,
+  isSeasonal: false,
+  seasonMonths: [],
   categoryId: '',
   categoryName: '',
   subcategoryId: '',
