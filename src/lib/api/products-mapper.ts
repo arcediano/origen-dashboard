@@ -206,6 +206,10 @@ export interface ApiProduct {
   originRegion?: AutonomousCommunityCode | null;
   /** Municipio o enclave de origen, texto libre (petición del humano, 2026-10-17); null si no está informado (sin valor por defecto). */
   originLocality?: string | null;
+  /** Marca el producto como "de temporada" (petición del humano, 2026-11-03). */
+  isSeasonal?: boolean;
+  /** Meses (1-12) en que el producto está de temporada. */
+  seasonMonths?: number[];
   categoryId: string;
   categoryName?: string;
   subcategoryId?: string;
@@ -524,6 +528,8 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     fullDescription:  api.fullDescription,
     originRegion:     api.originRegion ?? undefined,
     originLocality:   api.originLocality ?? undefined,
+    isSeasonal:       api.isSeasonal ?? false,
+    seasonMonths:     api.seasonMonths ?? [],
     categoryId:       api.categoryId,
     categoryName:     api.categoryName ?? '',
     subcategoryId:    api.subcategoryId,
