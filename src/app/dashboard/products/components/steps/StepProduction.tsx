@@ -30,6 +30,7 @@ import {
   Package,
   MapPin,
   BookOpen,
+  CalendarDays,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -53,6 +54,12 @@ interface StepProductionProps {
   /** Municipio o enclave de origen, texto libre (petición del humano, 2026-10-17) -- también campo de Product, mismo motivo que originRegion. */
   originLocality?: string;
   onOriginLocalityChange?: (value: string | undefined) => void;
+  /** Marca el producto como "de temporada" (petición del humano, 2026-11-03) -- campo de Product, mismo motivo que originRegion. */
+  isSeasonal?: boolean;
+  onIsSeasonalChange?: (value: boolean) => void;
+  /** Meses (1-12) en que el producto está de temporada. */
+  seasonMonths?: number[];
+  onSeasonMonthsChange?: (value: number[]) => void;
   completed?: boolean;
   /** Dentro de la pantalla de revisión del onboarding con IA: sin tarjeta ni cabecera propias. */
   embedded?: boolean;
@@ -92,6 +99,22 @@ const SUSTAINABLE_PRACTICES = [
   { id: 'fair_trade', label: 'Comercio justo', icon: <Heart className="w-4 h-4" />, description: 'Condiciones laborales éticas' },
 ];
 
+/** Meses del año en español (petición del humano, 2026-11-03) -- para el selector de temporada. */
+const MONTHS = [
+  { value: 1, label: 'Enero' },
+  { value: 2, label: 'Febrero' },
+  { value: 3, label: 'Marzo' },
+  { value: 4, label: 'Abril' },
+  { value: 5, label: 'Mayo' },
+  { value: 6, label: 'Junio' },
+  { value: 7, label: 'Julio' },
+  { value: 8, label: 'Agosto' },
+  { value: 9, label: 'Septiembre' },
+  { value: 10, label: 'Octubre' },
+  { value: 11, label: 'Noviembre' },
+  { value: 12, label: 'Diciembre' },
+] as const;
+
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
@@ -116,6 +139,10 @@ export function StepProduction({
   onOriginRegionChange,
   originLocality,
   onOriginLocalityChange,
+  isSeasonal = false,
+  onIsSeasonalChange,
+  seasonMonths = [],
+  onSeasonMonthsChange,
   completed,
   embedded = false,
   isPublishedProduct = false,
@@ -156,6 +183,13 @@ export function StepProduction({
   // ============================================================================
   // GESTIÓN DE PRÁCTICAS SOSTENIBLES
   // ============================================================================
+
+  const toggleMonth = (month: number) => () => {
+    const next = seasonMonths.includes(month)
+      ? seasonMonths.filter((m) => m !== month)
+      : [...seasonMonths, month].sort((a, b) => a - b);
+    onSeasonMonthsChange?.(next);
+  };
 
   const handlePracticeToggle = (practiceId: string) => {
     const current = productionInfo.practices || [];
@@ -211,6 +245,7 @@ export function StepProduction({
                 {[
                   { id: 'story', label: 'Historia', icon: <BookOpen className="w-4 h-4" /> },
                   { id: 'origin', label: 'Origen', icon: <MapPin className="w-4 h-4" /> },
+                  { id: 'season', label: 'Temporada', icon: <CalendarDays className="w-4 h-4" /> },
                   { id: 'sustainability', label: 'Sostenibilidad', icon: <TreePine className="w-4 h-4" /> },
                 ].map((tab) => (
                   <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-2">
@@ -399,6 +434,84 @@ export function StepProduction({
                   className="h-12 rounded-xl"
                 />
               </div>
+          </TabsContent>
+
+          {/* TAB TEMPORADA (petición del humano, 2026-11-03) */}
+          <TabsContent value="season" className="space-y-6">
+              <div className="flex items-start gap-3 p-4 bg-origen-crema/40 rounded-xl border border-origen-pradera/20">
+                <Checkbox
+                  id="is-seasonal"
+                  checked={isSeasonal}
+                  onCheckedChange={(checked) => {
+                    const next = checked as boolean;
+                    onIsSeasonalChange?.(next);
+                    if (!next) onSeasonMonthsChange?.([]);
+                  }}
+                  className="mt-0.5"
+                />
+                <div>
+                  <label htmlFor="is-seasonal" className="text-sm font-medium text-origen-bosque cursor-pointer">
+                    Es un producto de temporada
+                  </label>
+                  <p className="text-xs text-origen-hoja mt-1">
+                    Si lo activas, el producto solo aparecerá en la sección «De temporada» de la
+                    tienda durante los meses que marques abajo. No afecta a tu stock ni a si el
+                    producto está disponible para la venta.
+                  </p>
+                </div>
+              </div>
+
+              <AnimatePresence>
+                {isSeasonal && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Meses de temporada</Label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {MONTHS.map((month) => {
+                          const active = seasonMonths.includes(month.value);
+                          return (
+                            <div
+                              key={month.value}
+                              role="checkbox"
+                              aria-checked={active}
+                              aria-label={month.label}
+                              tabIndex={0}
+                              className={cn(
+                                'flex items-center gap-2 p-3 rounded-lg border transition-all cursor-pointer',
+                                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera',
+                                active
+                                  ? 'border-origen-pradera bg-origen-pastel/30'
+                                  : 'border-border bg-surface-alt hover:border-origen-pradera/30',
+                              )}
+                              onClick={toggleMonth(month.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  toggleMonth(month.value)();
+                                }
+                              }}
+                            >
+                              <Checkbox checked={active} className="pointer-events-none" />
+                              <span className="text-sm">{month.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {seasonMonths.length === 0 && (
+                        <div className="flex items-start gap-2 rounded-lg bg-feedback-warning-subtle border border-feedback-warning/30 px-3 py-2 text-xs text-feedback-warning-text">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                          Selecciona al menos un mes para que el producto aparezca de temporada.
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
           </TabsContent>
 
           {/* TAB SOSTENIBILIDAD */}
