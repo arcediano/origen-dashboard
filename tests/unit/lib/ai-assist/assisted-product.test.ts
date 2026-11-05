@@ -54,7 +54,6 @@ describe('assisted-product (formulario guiado de Origen Assist)', () => {
         certifications: ['Orgánico'],
         netContent: 250,
         netContentUnit: 'g',
-        improvePhoto: true,
       },
       images,
     );
@@ -67,17 +66,15 @@ describe('assisted-product (formulario guiado de Origen Assist)', () => {
       extraInfo: undefined,
       certifications: ['Orgánico'],
       netContent: { value: 250, unit: 'g' },
-      improvePhoto: true,
     });
   });
 
-  it('sin certificados, formato ni mejora de foto no envía esos campos', () => {
+  it('sin certificados ni formato no envía esos campos', () => {
     const input = buildAssistedProductInput(
       { ...EMPTY_TEXT_STATE, productDescription: 'Queso curado de oveja' },
       { product: { mediaType: 'image/jpeg', data: 'QUJD' } },
     );
     expect(input.certifications).toBeUndefined();
     expect(input.netContent).toBeUndefined();
-    expect(input.improvePhoto).toBeUndefined();
   });
 });

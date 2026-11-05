@@ -25,7 +25,6 @@ export interface CreateAssistedProductInput {
   extraInfo?: string;
   certifications?: AssistedCertification[];
   netContent?: { value: number; unit: NetContentUnit };
-  improvePhoto?: boolean;
 }
 
 export interface AssistedProductResponse {
@@ -76,7 +75,6 @@ export interface AssistedTextState {
   certifications: AssistedCertification[];
   netContent?: number;
   netContentUnit?: NetContentUnit;
-  improvePhoto: boolean;
 }
 
 export const EMPTY_TEXT_STATE: AssistedTextState = {
@@ -88,7 +86,6 @@ export const EMPTY_TEXT_STATE: AssistedTextState = {
   certifications: [],
   netContent: undefined,
   netContentUnit: undefined,
-  improvePhoto: false,
 };
 
 export interface StepValidationInput extends AssistedTextState {
@@ -136,6 +133,5 @@ export function buildAssistedProductInput(
       state.netContent && state.netContent > 0
         ? { value: state.netContent, unit: state.netContentUnit ?? 'g' }
         : undefined,
-    improvePhoto: state.improvePhoto || undefined,
   };
 }

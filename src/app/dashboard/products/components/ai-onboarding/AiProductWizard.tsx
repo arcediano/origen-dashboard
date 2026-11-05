@@ -249,7 +249,6 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
               photos={photos}
               remainingCredits={remainingCredits}
               onEdit={goTo}
-              onImprovePhoto={(value) => updateText('improvePhoto', value)}
             />
           )}
 

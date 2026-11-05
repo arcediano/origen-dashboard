@@ -43,6 +43,7 @@ import { type Product } from '@/types/product';
 import { fetchProductById, deleteProduct, updateProduct } from '@/lib/api/products';
 import { sanitizeHtml, ensureRichTextHtml } from '@/lib/html-sanitizer';
 import { formatFieldsInSentence } from '@/lib/constants/sensitiveFields';
+import { AUTONOMOUS_COMMUNITY_NAMES } from '@/lib/constants/autonomous-community';
 
 // ============================================================================
 // ANIMACIONES
@@ -207,8 +208,31 @@ function NutricionalSection({ info }: { info: NonNullable<Product['nutritionalIn
   );
 }
 
-function ProduccionSection({ info, formatDate }: {
+/**
+ * Etiqueta de origen para la fila "Origen" (hallazgo del humano, 2026-11-05):
+ * el párrafo libre que redacta la IA en `productionInfo.origin` es
+ * demasiado largo para una fila de datos -- solo hace falta comunidad y
+ * enclave/municipio, mismo criterio ya usado en origen-web
+ * (`buildOriginLabel`, `product-detail-view-model.ts`): "{enclave}, {comunidad}",
+ * con el enclave (texto libre del productor) capitalizado en su primera
+ * letra sin tocar el resto (los nombres de comunidad ya vienen bien
+ * capitalizados en `AUTONOMOUS_COMMUNITY_NAMES`).
+ */
+function buildOriginLabel(originRegion?: string, originLocality?: string): string | undefined {
+  const region = originRegion && originRegion in AUTONOMOUS_COMMUNITY_NAMES
+    ? AUTONOMOUS_COMMUNITY_NAMES[originRegion as keyof typeof AUTONOMOUS_COMMUNITY_NAMES]
+    : undefined;
+  const locality = originLocality?.trim()
+    ? originLocality.trim().charAt(0).toUpperCase() + originLocality.trim().slice(1)
+    : undefined;
+  if (locality && region) return `${locality}, ${region}`;
+  return locality || region;
+}
+
+function ProduccionSection({ info, originRegion, originLocality, formatDate }: {
   info: NonNullable<Product['productionInfo']>;
+  originRegion?: string;
+  originLocality?: string;
   formatDate: (d?: Date | string | null) => string;
 }) {
   return (
@@ -249,7 +273,7 @@ function ProduccionSection({ info, formatDate }: {
       {/* Información general */}
       <div>
         <InfoRow label="Productor" value={info.farmName} />
-        <InfoRow label="Origen" value={info.origin} />
+        <InfoRow label="Origen" value={buildOriginLabel(originRegion, originLocality) ?? info.origin} />
         <InfoRow label="Lote" value={info.batchNumber} />
         <InfoRow label="Cosecha" value={info.harvestDate ? formatDate(info.harvestDate) : undefined} />
         <InfoRow label="Caducidad" value={info.expiryDate ? formatDate(info.expiryDate) : undefined} />
@@ -720,7 +744,14 @@ export default function ProductoDetallePage() {
     },
     {
       id: 'produccion', label: 'Producción', icon: Leaf, show: !!product.productionInfo,
-      content: product.productionInfo ? <ProduccionSection info={product.productionInfo} formatDate={formatDate} /> : null,
+      content: product.productionInfo ? (
+        <ProduccionSection
+          info={product.productionInfo}
+          originRegion={product.originRegion}
+          originLocality={product.originLocality}
+          formatDate={formatDate}
+        />
+      ) : null,
     },
     {
       id: 'atributos', label: 'Atributos', icon: Tag, show: product.attributes.length > 0,
@@ -776,54 +807,62 @@ export default function ProductoDetallePage() {
             {/* ── Banner borrador — visible hasta que el producto esté activo ──
                 Cuando viene de "Origen Assist" (?fromAssistant=1) se muestra
                 el texto y los 2 botones del spec en vez del mensaje genérico
-                de edición manual. */}
+                de edición manual. Usa el componente Alert del design system
+                (sección 8.4 de la guía de diseño) en vez de un div a mano:
+                su layout `flex-col sm:flex-row` + `trailing` es el que ya
+                apila icono+texto sobre las acciones en móvil (patrón
+                existente en products/create/page.tsx) -- el div anterior no
+                apilaba y dejaba texto y botones apretados en 2 columnas en
+                pantallas estrechas (hallazgo del humano, 2026-11-05). */}
             {product.status === 'draft' && fromAssistant && (
-              <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 mb-4">
-                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-amber-800">
-                    ✅ Producto creado en borrador. Este es el resultado de tu asistente.
-                  </p>
-                  <p className="text-xs text-amber-700 mt-0.5">
-                    Revisa los textos que ha redactado la IA (descripción, origen y elaboración), corrige lo que no te encaje y añade el precio cuando quieras publicarlo.
-                  </p>
+              <Alert
+                variant="warning"
+                className="mb-4"
+                trailing={
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <Link href={`/dashboard/products/${product.id}/edit`}>
+                      <Button variant="primary" size="sm" leftIcon={<Edit className="w-3.5 h-3.5" />}
+                        className="text-xs whitespace-nowrap w-full">
+                        Añadir precio ahora
+                      </Button>
+                    </Link>
+                    <Button variant="outline" size="sm" onClick={dismissAssistantBanner}
+                      className="text-xs whitespace-nowrap">
+                      Revisar más tarde
+                    </Button>
+                  </div>
+                }
+              >
+                <AlertTitle>✅ Producto creado en borrador. Este es el resultado de tu asistente.</AlertTitle>
+                <AlertDescription>
+                  Revisa los textos que ha redactado la IA (descripción, origen y elaboración), corrige lo que no te encaje y añade el precio cuando quieras publicarlo.
                   {usdaNutrition && (
-                    <p className="text-xs text-amber-800 font-medium mt-1" data-testid="usda-nutrition-note">
+                    <p className="font-medium mt-1" data-testid="usda-nutrition-note">
                       Los valores nutricionales son orientativos (por 100 g, de la base de datos pública de USDA), no los de tu etiqueta: revísalos o corrígelos en la pestaña Nutricional antes de publicar.
                     </p>
                   )}
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-                  <Link href={`/dashboard/products/${product.id}/edit`}>
-                    <Button variant="primary" size="sm" leftIcon={<Edit className="w-3.5 h-3.5" />}
-                      className="text-xs whitespace-nowrap">
-                      Añadir precio ahora
-                    </Button>
-                  </Link>
-                  <Button variant="outline" size="sm" onClick={dismissAssistantBanner}
-                    className="border-amber-300 text-amber-800 hover:bg-amber-100 text-xs whitespace-nowrap">
-                    Revisar más tarde
-                  </Button>
-                </div>
-              </div>
+                </AlertDescription>
+              </Alert>
             )}
 
             {product.status === 'draft' && !fromAssistant && (
-              <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 mb-4">
-                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-amber-800">Este producto es un borrador</p>
-                  <p className="text-xs text-amber-700 mt-0.5">
-                    No es visible en el marketplace. Completa toda la información en el formulario de edición antes de publicarlo.
-                  </p>
-                </div>
-                <Link href={`/dashboard/products/${product.id}/edit`} className="shrink-0">
-                  <Button variant="outline" size="sm" leftIcon={<Edit className="w-3.5 h-3.5" />}
-                    className="border-amber-300 text-amber-800 hover:bg-amber-100 text-xs">
-                    Completar
-                  </Button>
-                </Link>
-              </div>
+              <Alert
+                variant="warning"
+                className="mb-4"
+                trailing={
+                  <Link href={`/dashboard/products/${product.id}/edit`}>
+                    <Button variant="outline" size="sm" leftIcon={<Edit className="w-3.5 h-3.5" />}
+                      className="text-xs whitespace-nowrap">
+                      Completar
+                    </Button>
+                  </Link>
+                }
+              >
+                <AlertTitle>Este producto es un borrador</AlertTitle>
+                <AlertDescription>
+                  No es visible en el marketplace. Completa toda la información en el formulario de edición antes de publicarlo.
+                </AlertDescription>
+              </Alert>
             )}
 
             <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6">
