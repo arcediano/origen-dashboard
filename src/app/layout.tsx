@@ -6,14 +6,19 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Plus_Jakarta_Sans, Cormorant_Garamond } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
 import { fetchSiteStatus } from "@/lib/maintenance-server";
 import { MAINTENANCE_PATH } from "@/lib/maintenance";
 
 const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-sans", weight: ["400", "500", "600", "700", "800"] });
-const cormorant = Cormorant_Garamond({ subsets: ["latin"], variable: "--font-serif", weight: ["400", "500", "600", "700"] });
+// Petición del humano, 2026-11-05: se retira Cormorant Garamond de la identidad de marca
+// (se veía cursiva/poco legible en títulos grandes). `--font-serif` ya no carga una
+// tipografía aparte: en globals.css apunta a `var(--font-sans)` (o, si este app no la
+// redefine, a la de @arcediano/ux-library tras su propia actualización), así que las
+// clases `font-serif` existentes siguen funcionando sin tocarlas, solo que ahora
+// renderizan con Plus Jakarta Sans.
 
 export const metadata: Metadata = {
   title: "Origen - Panel de Vendedores",
@@ -56,7 +61,7 @@ export default async function RootLayout({
 
   return (
     <html lang="es">
-      <body className={`${plusJakartaSans.variable} ${cormorant.variable} font-sans`}>
+      <body className={`${plusJakartaSans.variable} font-sans`}>
         {/* /mantenimiento: sin Providers (no hay sesión que cargar) ni navegación del panel */}
         {onMaintenancePage ? children : <Providers>{children}</Providers>}
       </body>
