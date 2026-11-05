@@ -51,7 +51,30 @@ vi.mock('@arcediano/ux-library', () => {
 	const Avatar = passthrough('div');
 	const AvatarImage = passthrough('img');
 	const AvatarFallback = passthrough('span');
-	const Progress = passthrough('progress');
+	// Mock fiel al contrato real de Progress (ver dist/index.js del paquete):
+	// con `label`/`showLabel` pinta una fila con el texto visible del label y,
+	// si `showLabel`, el porcentaje -- nunca un <progress> nativo, que solo
+	// admite `label` como atributo crudo, invisible para el usuario y para
+	// cualquier test que busque ese texto (hallazgo del humano, 2026-11-05:
+	// el passthrough genérico dejaba "Paso X de Y" como atributo DOM, no como
+	// texto, así que ningún test podía encontrarlo).
+	const Progress = React.forwardRef<any, any>(({ value = 0, max = 100, showLabel, label, ...props }, ref) => {
+		const safeMax = max > 0 ? max : 100;
+		const percentage = Math.min(Math.max((value / safeMax) * 100, 0), 100);
+		return React.createElement(
+			'div',
+			{ ref, role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': safeMax, 'aria-valuenow': value, ...props },
+			(showLabel || label)
+				? React.createElement(
+					'div',
+					null,
+					label ? React.createElement('span', null, label) : null,
+					showLabel ? React.createElement('span', null, `${Math.round(percentage)}%`) : null,
+				)
+				: null,
+		);
+	});
+	Progress.displayName = 'Progress';
 	// Mock fiel al contrato real de Toggle (ver dist/index.js del paquete):
 	// es un <button type="button" aria-pressed> -- nunca un role="checkbox"/
 	// "switch" -- que traduce checked/onCheckedChange (o pressed/onPressedChange)

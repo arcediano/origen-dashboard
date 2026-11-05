@@ -28,9 +28,11 @@ export const KEY_FACTS_BY_STEP: Record<FormStepId, string> = {
 /**
  * Último consejo de cada paso (petición del humano, 2026-10-08): en el alta
  * manual (sin asistente de IA) se le recuerda al productor que puede usar el
- * asistente completo para rehacer el producto, con un acabado más
- * profesional — visible en cualquier paso, no solo al principio, porque el
+ * asistente guiado (fotos + preguntas sencillas) para crear el producto más
+ * rápido — visible en cualquier paso, no solo al principio, porque el
  * productor puede decidir cambiarse a mitad de rellenar el formulario a mano.
+ * Texto actualizado junto con el rediseño de Origen Assist a formulario
+ * guiado (2026-11-05): ya no describe un chat conversacional.
  */
 const AI_ASSIST_TIP = {
   description:

@@ -2,8 +2,9 @@
  * @file useStepTips.test.ts
  * @description Petición del humano (2026-10-08): en la edición y creación
  * manual de productos (sin asistente de IA), los consejos útiles deben
- * incentivar el uso del asistente de IA para rehacer el producto con un
- * acabado más profesional.
+ * incentivar el uso del asistente de IA guiado para crear el producto más
+ * rápido. Texto del consejo actualizado junto con el rediseño de Origen
+ * Assist a formulario guiado (2026-11-05, ver useStepTips.ts).
  *
  * Indexado por `FormStepId` (no por posición numérica, mismo cambio y misma
  * fecha): ver useStepTips.ts.
@@ -18,7 +19,7 @@ describe('useStepTips — recuerdo del asistente de IA', () => {
     expect(tips.length).toBeGreaterThan(0);
     const last = tips[tips.length - 1];
     expect(last.description).toContain('asistente de IA');
-    expect(last.description).toContain('profesional');
+    expect(last.description).toContain('redacta los textos');
   });
 
   it('no añade nada en un paso sin consejos (id desconocido)', () => {
