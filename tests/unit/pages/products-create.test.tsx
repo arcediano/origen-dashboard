@@ -5,12 +5,11 @@ import userEvent from '@testing-library/user-event';
 /**
  * Decisión de Negocio (comentario del humano sobre el informe funcional,
  * 2026-10-27): el modo manual es SIEMPRE el que se ve por defecto al entrar
- * a /dashboard/products/create -- ya no depende de si el asistente está
- * activo. Un enlace/CTA "Probar IA" persistente ofrece el acceso al
- * asistente, y los créditos + el botón de recarga se ven siempre, en ambos
- * modos. Estos tests cubren exactamente ese comportamiento nuevo; el resto
- * de la página (pasos del wizard, guardado, publicación) ya tiene su propia
- * cobertura en useProductForm.test.ts y no se repite aquí.
+ * a /dashboard/products/create. Desde 2026-11-05 el asistente de IA se ofrece
+ * con un aviso destacado (`AiAssistBanner`) que explica que se puede crear el
+ * producto con ayuda de la IA en unos sencillos pasos, en lugar del botón
+ * suelto "Probar IA". El resto de la página (pasos del wizard, guardado,
+ * publicación) ya tiene su propia cobertura en useProductForm.test.ts.
  */
 
 const { getAiAssistQuotaMock, pushMock } = vi.hoisted(() => ({
@@ -23,11 +22,11 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: pushMock, replace: vi.fn(), prefetch: vi.fn(), back: vi.fn() }),
 }));
 
-vi.mock('@/app/dashboard/products/components/ai-onboarding/AiAssistChat', () => ({
-  AiAssistChat: ({ onManual }: { onManual: () => void }) => (
-    <div data-testid="ai-assist-chat">
+vi.mock('@/app/dashboard/products/components/ai-onboarding/AiProductWizard', () => ({
+  AiProductWizard: ({ onManual }: { onManual: () => void }) => (
+    <div data-testid="ai-assist-wizard">
       <button type="button" onClick={onManual}>
-        (chat) Crear manualmente
+        (asistente) Prefiero hacerlo a mano
       </button>
     </div>
   ),
@@ -100,56 +99,76 @@ describe('/dashboard/products/create', () => {
     render(<CreateProductPage />);
 
     expect(screen.getByTestId('wizard-steps')).toBeTruthy();
-    expect(screen.queryByTestId('ai-assist-chat')).toBeNull();
+    expect(screen.queryByTestId('ai-assist-wizard')).toBeNull();
   });
 
-  it('muestra "Probar IA" + los créditos en el modo manual, y cambia a modo IA al pulsarlo', async () => {
+  it('muestra un aviso destacado que explica cómo crear el producto con IA, con los créditos', async () => {
+    getAiAssistQuotaMock.mockResolvedValue({ enabled: true, used: 1, total: 3 });
+    render(<CreateProductPage />);
+
+    const banner = await screen.findByTestId('ai-assist-banner');
+    expect(banner.textContent).toMatch(/Crea tu producto con ayuda de la IA en unos sencillos pasos/);
+    expect(screen.getByTestId('ai-assist-banner-credits').textContent).toMatch(/2.*créditos/);
+    expect(screen.queryByRole('button', { name: /Probar IA/ })).toBeNull();
+  });
+
+  it('"Empezar con el asistente" cambia al asistente por pasos', async () => {
     getAiAssistQuotaMock.mockResolvedValue({ enabled: true, used: 1, total: 3 });
     const user = userEvent.setup();
     render(<CreateProductPage />);
 
-    const tryAi = await screen.findByRole('button', { name: /Probar IA/ });
-    expect(tryAi).not.toBeDisabled();
-    expect(screen.getByTestId('ai-credits-panel')).toBeTruthy();
-    expect(screen.getByTestId('ai-credits-remaining').textContent).toBe('2');
+    await user.click(await screen.findByRole('button', { name: /Empezar con el asistente/ }));
 
-    await user.click(tryAi);
-
-    expect(await screen.findByTestId('ai-assist-chat')).toBeTruthy();
+    expect(await screen.findByTestId('ai-assist-wizard')).toBeTruthy();
     expect(screen.queryByTestId('wizard-steps')).toBeNull();
-    // los créditos siguen visibles también en modo IA (petición del humano)
-    expect(screen.getByTestId('ai-credits-panel')).toBeTruthy();
+    expect(screen.queryByTestId('ai-assist-banner')).toBeNull();
   });
 
-  it('con el cupo agotado, "Probar IA" se muestra pero deshabilitado (nunca se oculta)', async () => {
-    getAiAssistQuotaMock.mockResolvedValue({ enabled: true, used: 3, total: 3 });
-    render(<CreateProductPage />);
-
-    const tryAi = await screen.findByRole('button', { name: /Probar IA/ });
-    expect(tryAi).toBeDisabled();
-    expect(screen.getByTestId('ai-credits-panel').getAttribute('data-state')).toBe('exhausted');
-  });
-
-  it('con el asistente desactivado, no se ve ni "Probar IA" ni el panel de créditos', async () => {
-    getAiAssistQuotaMock.mockResolvedValue({ enabled: false, used: 0, total: 0 });
-    render(<CreateProductPage />);
-
-    await waitFor(() => expect(getAiAssistQuotaMock).toHaveBeenCalled());
-    expect(screen.queryByRole('button', { name: /Probar IA/ })).toBeNull();
-    expect(screen.queryByTestId('ai-credits-panel')).toBeNull();
-  });
-
-  it('volver desde el chat al wizard (botón "Crear manualmente" del propio chat) restaura el modo manual', async () => {
+  it('"Prefiero rellenarlo a mano" pliega el aviso pero deja siempre a mano "Crear con IA"', async () => {
+    localStorage.clear();
     getAiAssistQuotaMock.mockResolvedValue({ enabled: true, used: 0, total: 3 });
     const user = userEvent.setup();
     render(<CreateProductPage />);
 
-    await user.click(await screen.findByRole('button', { name: /Probar IA/ }));
-    expect(await screen.findByTestId('ai-assist-chat')).toBeTruthy();
+    await user.click(await screen.findByRole('button', { name: /Prefiero rellenarlo a mano/ }));
 
-    await user.click(screen.getByRole('button', { name: '(chat) Crear manualmente' }));
+    expect(screen.getByTestId('ai-assist-banner-compact')).toBeTruthy();
+    expect(screen.queryByTestId('ai-assist-banner')).toBeNull();
+    await user.click(screen.getByRole('button', { name: /Crear con IA/ }));
+    expect(await screen.findByTestId('ai-assist-wizard')).toBeTruthy();
+    localStorage.clear();
+  });
+
+  it('con el cupo agotado, avisa de que no quedan créditos y no ofrece empezar (nunca se oculta)', async () => {
+    getAiAssistQuotaMock.mockResolvedValue({ enabled: true, used: 3, total: 3 });
+    render(<CreateProductPage />);
+
+    const panel = await screen.findByTestId('ai-credits-panel');
+    expect(panel.getAttribute('data-state')).toBe('exhausted');
+    expect(screen.queryByRole('button', { name: /Empezar con el asistente/ })).toBeNull();
+    expect(screen.getByRole('button', { name: /Recargar créditos/ })).toBeTruthy();
+  });
+
+  it('con el asistente desactivado, no se ve ni el aviso ni el panel de créditos', async () => {
+    getAiAssistQuotaMock.mockResolvedValue({ enabled: false, used: 0, total: 0 });
+    render(<CreateProductPage />);
+
+    await waitFor(() => expect(getAiAssistQuotaMock).toHaveBeenCalled());
+    expect(screen.queryByTestId('ai-assist-banner')).toBeNull();
+    expect(screen.queryByTestId('ai-credits-panel')).toBeNull();
+  });
+
+  it('volver desde el asistente al manual ("Prefiero hacerlo a mano") restaura el modo manual', async () => {
+    getAiAssistQuotaMock.mockResolvedValue({ enabled: true, used: 0, total: 3 });
+    const user = userEvent.setup();
+    render(<CreateProductPage />);
+
+    await user.click(await screen.findByRole('button', { name: /Empezar con el asistente/ }));
+    expect(await screen.findByTestId('ai-assist-wizard')).toBeTruthy();
+
+    await user.click(screen.getByRole('button', { name: '(asistente) Prefiero hacerlo a mano' }));
 
     expect(await screen.findByTestId('wizard-steps')).toBeTruthy();
-    expect(screen.queryByTestId('ai-assist-chat')).toBeNull();
+    expect(screen.queryByTestId('ai-assist-wizard')).toBeNull();
   });
 });

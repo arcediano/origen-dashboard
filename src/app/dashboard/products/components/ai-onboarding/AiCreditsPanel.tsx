@@ -1,8 +1,8 @@
 /**
  * @component AiCreditsPanel
- * @description Estado de los créditos del asistente de IA, siempre visible en la cabecera
- * de `/dashboard/products/create` (modo manual y modo IA por igual, petición del humano,
- * 2026-10-27). Es visual, no textual: una ficha por cada crédito que
+ * @description Estado de los créditos del asistente de IA, mostrado por `AiAssistBanner`
+ * al principio de `/dashboard/products/create` cuando no quedan créditos.
+ * Es visual, no textual: una ficha por cada crédito que
  * le queda (sin desglose gratis/comprados ni créditos gastados) y la equivalencia
  * "1 crédito = 1 producto". Sin créditos, cambia a un aviso neutro (no de error) con la
  * acción de recargar.
@@ -91,11 +91,10 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
     >
       <div className="flex flex-col gap-3 sm:gap-4">
         {/* Icono + contenido en fila propia, sin los botones de acción --
-            este panel SOLO se usa en la columna lateral de 360px fijos de
-            AiAssistChat.tsx (lg:grid-cols-[...]_360px]). Los breakpoints de
+            este panel se usa en espacios estrechos. Los breakpoints de
             Tailwind responden al ancho del VIEWPORT, no al de ese contenedor
             -- a partir de 640px (`sm:`) el título entraba en fila junto a los
-            2 botones de acción, compitiendo por un ancho real de ~360px y
+            2 botones de acción, compitiendo por el ancho real y
             partiéndose palabra por palabra (hallazgo real, captura de
             pantalla del humano en escritorio, 2026-10-27). Las acciones se
             quedan siempre en su propia fila, sin depender del viewport. */}

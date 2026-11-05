@@ -34,7 +34,7 @@ export const KEY_FACTS_BY_STEP: Record<FormStepId, string> = {
  */
 const AI_ASSIST_TIP = {
   description:
-    '¿Vas con prisa? El asistente de IA puede rehacer este producto a partir de una foto y dejarlo con un acabado más profesional en segundos.',
+    '¿Vas con prisa? Con el asistente de IA puedes crear un producto nuevo subiendo tus fotos y respondiendo unas preguntas sencillas: él redacta los textos por ti. Lo encontrarás al principio de esta página.',
 };
 
 export function useStepTips(
