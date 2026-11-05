@@ -1,12 +1,8 @@
 /**
- * Cliente del asistente de IA "Origen Assist" (chat conversacional de
- * creación de producto) + créditos de IA.
- * Rutas: GET /ai-assist/quota · POST /ai-assist/conversation* (gateway →
+ * Cliente del asistente de IA "Origen Assist" (formulario guiado de creación
+ * de producto) + créditos de IA.
+ * Rutas: GET /ai-assist/quota · POST /ai-assist/assisted-product (gateway →
  * products-service). La API key de Anthropic vive solo en el backend.
- *
- * Las rutas F1 (`label-reading`)/F2 (`text-improvement`) se retiraron
- * (petición del humano, 2026-11-03): código muerto, sustituidas por
- * `conversation*` desde el rediseño v2 del backend (2026-10-26).
  */
 
 import { gatewayClient, GatewayError } from './client';
@@ -21,17 +17,8 @@ import type {
   CreateAssistedProductInput,
 } from '@/lib/ai-assist/assisted-product';
 
-<<<<<<< Updated upstream
-/** Chat conversacional "Origen Assist": cada turno puede hacer varias llamadas a Opus en el bucle del backend. */
-const CONVERSATION_TIMEOUT_MS = 125_000;
-=======
-/** Lectura con visión: hasta ~90 s en el gateway. */
-const LABEL_READING_TIMEOUT_MS = 90_000;
-/** Redacción de textos: hasta ~60 s en el gateway. */
-const TEXT_IMPROVEMENT_TIMEOUT_MS = 60_000;
 /** Formulario guiado "Origen Assist": lectura de hasta 3 etiquetas + redacción + FLUX opcional; el proxy de Next corta a los 130 s. */
 const ASSISTED_PRODUCT_TIMEOUT_MS = 125_000;
->>>>>>> Stashed changes
 
 export type AiAssistErrorCode =
   | 'AI_DISABLED'
