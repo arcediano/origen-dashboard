@@ -587,19 +587,23 @@ export default function ProductoDetallePage() {
   const [showStatusSheet, setShowStatusSheet]   = useState(false);
   const [confirmDraftOpen, setConfirmDraftOpen] = useState(false);
   /**
-   * El asistente "Origen Assist" (máquina de pasos, 2026-10-26) redirige aquí
+   * El asistente "Origen Assist" (formulario guiado, 2026-11-05) redirige aquí
    * con `?fromAssistant=1` al terminar. Se guarda en estado (no se lee
    * `searchParams` directamente en el JSX) para poder quitar el query param
    * al pulsar "Revisar más tarde" sin perder el resto de la página.
    */
   const [fromAssistant, setFromAssistant] = useState(false);
+  // `?nutrition=usda`: los valores nutricionales son orientativos (USDA), no de la etiqueta.
+  const [usdaNutrition, setUsdaNutrition] = useState(false);
 
   useEffect(() => {
     if (searchParams.get('fromAssistant') === '1') setFromAssistant(true);
+    if (searchParams.get('nutrition') === 'usda') setUsdaNutrition(true);
   }, [searchParams]);
 
   const dismissAssistantBanner = useCallback(() => {
     setFromAssistant(false);
+    setUsdaNutrition(false);
     router.replace(`/dashboard/products/${productId}`);
   }, [router, productId]);
 
@@ -781,8 +785,13 @@ export default function ProductoDetallePage() {
                     ✅ Producto creado en borrador. Este es el resultado de tu asistente.
                   </p>
                   <p className="text-xs text-amber-700 mt-0.5">
-                    Revisa la ficha y añade el precio cuando quieras publicarlo.
+                    Revisa los textos que ha redactado la IA (descripción, origen y elaboración), corrige lo que no te encaje y añade el precio cuando quieras publicarlo.
                   </p>
+                  {usdaNutrition && (
+                    <p className="text-xs text-amber-800 font-medium mt-1" data-testid="usda-nutrition-note">
+                      Los valores nutricionales son orientativos (por 100 g, de la base de datos pública de USDA), no los de tu etiqueta: revísalos o corrígelos en la pestaña Nutricional antes de publicar.
+                    </p>
+                  )}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 shrink-0">
                   <Link href={`/dashboard/products/${product.id}/edit`}>

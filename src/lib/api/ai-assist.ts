@@ -17,12 +17,21 @@ import type {
   AiCreditsPricingInfo,
 } from '@/lib/ai-assist/ai-credits';
 import type {
-  ConversationMessageInput,
-  ConversationTurnResponse,
-} from '@/lib/ai-assist/conversation';
+  AssistedProductResponse,
+  CreateAssistedProductInput,
+} from '@/lib/ai-assist/assisted-product';
 
+<<<<<<< Updated upstream
 /** Chat conversacional "Origen Assist": cada turno puede hacer varias llamadas a Opus en el bucle del backend. */
 const CONVERSATION_TIMEOUT_MS = 125_000;
+=======
+/** Lectura con visión: hasta ~90 s en el gateway. */
+const LABEL_READING_TIMEOUT_MS = 90_000;
+/** Redacción de textos: hasta ~60 s en el gateway. */
+const TEXT_IMPROVEMENT_TIMEOUT_MS = 60_000;
+/** Formulario guiado "Origen Assist": lectura de hasta 3 etiquetas + redacción + FLUX opcional; el proxy de Next corta a los 130 s. */
+const ASSISTED_PRODUCT_TIMEOUT_MS = 125_000;
+>>>>>>> Stashed changes
 
 export type AiAssistErrorCode =
   | 'AI_DISABLED'
@@ -70,49 +79,19 @@ export async function getAiAssistQuota(): Promise<AiAssistQuota> {
 }
 
 /**
- * Chat conversacional "Origen Assist" (rediseño 2026-10-26): sustituye al
- * wizard de `draftProduct()` en el flujo del dashboard, turno a turno.
+ * Formulario guiado "Origen Assist" (2026-11-05): un único envío con todas
+ * las respuestas y fotos; el backend lee las etiquetas, redacta los textos y
+ * crea el producto en borrador.
  */
-export async function startConversation(
-  input: ConversationMessageInput,
-): Promise<ConversationTurnResponse> {
+export async function createAssistedProduct(
+  input: CreateAssistedProductInput,
+): Promise<AssistedProductResponse> {
   try {
-    return await gatewayClient.post<ConversationTurnResponse>(
-      '/ai-assist/conversation',
+    return await gatewayClient.post<AssistedProductResponse>(
+      '/ai-assist/assisted-product',
       input,
-      { timeoutMs: CONVERSATION_TIMEOUT_MS },
+      { timeoutMs: ASSISTED_PRODUCT_TIMEOUT_MS },
     );
-  } catch (error) {
-    throw toAiAssistError(error);
-  }
-}
-
-export async function postConversationMessage(
-  conversationId: string,
-  input: ConversationMessageInput,
-): Promise<ConversationTurnResponse> {
-  try {
-    return await gatewayClient.post<ConversationTurnResponse>(
-      `/ai-assist/conversation/${conversationId}/message`,
-      input,
-      { timeoutMs: CONVERSATION_TIMEOUT_MS },
-    );
-  } catch (error) {
-    throw toAiAssistError(error);
-  }
-}
-
-export interface ConversationRecord {
-  id: string;
-  status: 'ACTIVE' | 'COMPLETED' | 'ABANDONED';
-  productId: string | null;
-  /** Paso actual de la máquina de pasos fija (ver `lib/ai-assist/conversation.ts`), para reanudar tras recargar. */
-  currentStep: string;
-}
-
-export async function getConversation(conversationId: string): Promise<ConversationRecord> {
-  try {
-    return await gatewayClient.get<ConversationRecord>(`/ai-assist/conversation/${conversationId}`);
   } catch (error) {
     throw toAiAssistError(error);
   }

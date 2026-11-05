@@ -17,8 +17,8 @@ import {
   PublicationRequirementsChecklist,
 } from '@/app/dashboard/products/components';
 import { ProductFormSteps } from '@/app/dashboard/products/components/ProductFormSteps';
-import { AiAssistChat } from '@/app/dashboard/products/components/ai-onboarding/AiAssistChat';
-import { AiCreditsPanel } from '@/app/dashboard/products/components/ai-onboarding/AiCreditsPanel';
+import { AiProductWizard } from '@/app/dashboard/products/components/ai-onboarding/AiProductWizard';
+import { AiAssistBanner } from '@/app/dashboard/products/components/ai-onboarding/AiAssistBanner';
 import { AddCreditsModal } from '@/app/dashboard/products/components/ai-onboarding/AddCreditsModal';
 import { ProductFormSidebar } from '@/app/dashboard/products/components/ProductFormSidebar';
 
@@ -49,18 +49,17 @@ const containerVariants: Variants = {
 };
 
 /**
- * Cómo se crea el producto: con el asistente de IA (máquina de pasos fija
- * "Origen Assist" -- rediseño v2, 2026-10-26 -- que redirige a la ficha real
- * al terminar) o a mano con el wizard de 8 pasos.
+ * Cómo se crea el producto: con el asistente de IA ("Origen Assist",
+ * formulario guiado por pasos -- 2026-11-05, sustituye al chat -- que
+ * redacta los textos y redirige a la ficha real al terminar) o a mano con el
+ * wizard de 8 pasos.
  *
  * Decisión de Negocio (comentario del humano sobre el informe funcional,
- * 2026-10-27, sustituye al punto de elección simétrico anterior): el modo
- * manual es SIEMPRE el que se ve por defecto -- ya no depende de si el
- * asistente está activo ni se espera a cargar el cupo para decidirlo. El
- * asistente se ofrece como un enlace/CTA persistente ("Probar IA"), nunca
- * como pantalla de entrada.
+ * 2026-10-27): el modo manual es SIEMPRE el que se ve por defecto. El
+ * asistente se ofrece con un aviso destacado y persistente en la cabecera
+ * (`AiAssistBanner`, 2026-11-05), nunca como pantalla de entrada.
  */
-type CreateMode = 'ai-chat' | 'wizard';
+type CreateMode = 'ai-assist' | 'wizard';
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
@@ -120,11 +119,9 @@ export default function CreateProductPage() {
       .catch(() => {});
   }, []);
 
-  // Créditos + "Probar IA" siempre visibles en la cabecera (decisión del
-  // humano, 2026-10-27, B.1 del informe funcional): null cuando el asistente
-  // está desactivado por completo (sin esto no habría nada que ofrecer).
+  // Aviso del asistente + créditos: null cuando el asistente está desactivado
+  // por completo (sin esto no habría nada que ofrecer).
   const aiQuota = quota?.enabled ? { used: quota.used, total: quota.total, free: quota.free, purchased: quota.purchased } : null;
-  const aiQuotaExhausted = !!aiQuota && aiQuota.used >= aiQuota.total;
 
   useEffect(() => {
     if (error) {
@@ -178,18 +175,18 @@ export default function CreateProductPage() {
       <div className="hidden lg:block fixed bottom-0 left-0 w-48 h-48 bg-origen-hoja/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       <PageHeader
-        title={mode === 'ai-chat' ? 'Crea tu producto charlando' : 'Crear producto'}
+        title={mode === 'ai-assist' ? 'Crea tu producto con IA' : 'Crear producto'}
         description={
-          mode === 'ai-chat'
-            ? 'Sube una foto y cuéntale a Origen Assist qué es tu producto (origen, elaboración, formato…). Te irá preguntando lo que falte; tú solo revisas y decides al final.'
+          mode === 'ai-assist'
+            ? 'Responde unas preguntas sencillas y sube tus fotos: Origen Assist redacta la ficha por ti con un tono comercial y cuidado. Tú la revisas y decides al final.'
             : 'Completa los pasos para publicar tu producto'
         }
-        badgeIcon={mode === 'ai-chat' ? Sparkles : Package}
-        badgeText={mode === 'ai-chat' ? 'Asistente de IA' : 'Nuevo producto'}
-        tooltip={mode === 'ai-chat' ? 'Asistente de IA' : 'Creación de producto'}
+        badgeIcon={mode === 'ai-assist' ? Sparkles : Package}
+        badgeText={mode === 'ai-assist' ? 'Asistente de IA' : 'Nuevo producto'}
+        tooltip={mode === 'ai-assist' ? 'Asistente de IA' : 'Creación de producto'}
         tooltipDetailed={
-          mode === 'ai-chat'
-            ? 'La foto le dice a Origen Assist qué aspecto tiene tu producto, pero no puede contarle su origen, cómo lo elaboras o el formato — eso solo lo sabes tú. Cuéntaselo en el chat: cuanta más información le des, mejor saldrá la ficha. Después la revisas tú antes de publicar.'
+          mode === 'ai-assist'
+            ? 'Origen Assist te pregunta lo que solo tú sabes (origen, elaboración, formato) y lee las etiquetas que subas. Con tus frases sencillas redacta textos comerciales, sin inventar datos. La ficha se crea como borrador y la revisas tú antes de publicar.'
             : 'Completa todos los pasos para publicar tu producto en el catálogo'
         }
         showBackButton
@@ -210,37 +207,27 @@ export default function CreateProductPage() {
       />
 
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Créditos + enlace al asistente, siempre visibles en ambos modos
-            (Decisión de Negocio, 2026-10-27, B.1 del informe funcional) --
-            fuera de los bloques por modo de abajo para que persista en
-            cualquier paso del wizard manual, no solo en el primero. */}
-        {aiQuota && (
-          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start">
-            <AiCreditsPanel
-              quota={aiQuota}
-              onRecharge={() => setShowAddCredits(true)}
-              onManual={mode === 'ai-chat' ? () => setMode('wizard') : undefined}
-              className="flex-1"
-            />
-            {mode === 'wizard' && (
-              <Button
-                type="button"
-                variant={aiQuotaExhausted ? 'outline' : 'primary'}
-                onClick={() => setMode('ai-chat')}
-                disabled={aiQuotaExhausted}
-                leftIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
-                className="shrink-0"
-              >
-                Probar IA
-              </Button>
-            )}
-          </div>
+        {/* Aviso destacado del asistente de IA en el alta manual (petición del
+            humano, 2026-11-05): explica que se puede crear el producto con
+            ayuda de la IA en unos sencillos pasos. Fuera de los bloques por
+            modo para que siga visible en cualquier paso del wizard manual. */}
+        {mode === 'wizard' && quota === null && (
+          <div className="mb-6 h-32 animate-pulse rounded-2xl bg-origen-pastel/40" aria-hidden="true" />
+        )}
+        {mode === 'wizard' && aiQuota && (
+          <AiAssistBanner
+            quota={aiQuota}
+            onStart={() => setMode('ai-assist')}
+            onRecharge={() => setShowAddCredits(true)}
+            className="mb-6"
+          />
         )}
 
-        {mode === 'ai-chat' && (
-          <AiAssistChat
+        {mode === 'ai-assist' && (
+          <AiProductWizard
             quota={aiQuota}
             onManual={() => setMode('wizard')}
+            onRecharge={() => setShowAddCredits(true)}
           />
         )}
 
@@ -278,9 +265,10 @@ export default function CreateProductPage() {
                   extenderlo también a la edición) — ProductFormSteps ya no
                   acepta aiAssistKey/onAiAssistUsed ni los reenvía a esos
                   pasos. Si quiere usar la IA, el asistente completo (modo
-                  "ai-chat", máquina de pasos "Origen Assist") sigue
-                  disponible y se promociona desde los propios consejos
-                  útiles del alta manual (ver useStepTips). */}
+                  "ai-assist", formulario guiado "Origen Assist") sigue
+                  disponible y se promociona con el aviso de arriba y desde
+                  los propios consejos útiles del alta manual (ver
+                  useStepTips). */}
               <ProductFormSteps
                 activeTab={activeTab}
                 formData={formData}
