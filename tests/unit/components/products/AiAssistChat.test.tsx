@@ -61,6 +61,42 @@ describe('AiAssistChat', () => {
     expect(screen.getByText(/Sube una foto del producto/)).toBeTruthy();
   });
 
+  it('al adjuntar una imagen por el clip, se ve su miniatura antes de enviar', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
+
+    const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['fake-image-bytes'], 'foto.jpg', { type: 'image/jpeg' });
+    await user.upload(fileInput, file);
+
+    expect(screen.getByText('Imagen adjunta')).toBeTruthy();
+    expect(screen.getByAltText('foto.jpg')).toBeTruthy();
+  });
+
+  it('la foto adjunta se envía y se ve en la burbuja del propio turno del usuario', async () => {
+    const user = userEvent.setup();
+    startMock.mockResolvedValue({
+      kind: 'step',
+      conversationId: 'conv-1',
+      text: '📸 ¿Tienes la tabla nutricional? Súbela.',
+      stepIndex: 2,
+      totalSteps: 5,
+      done: false,
+    });
+    const { container } = render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
+
+    const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['fake-image-bytes'], 'foto.jpg', { type: 'image/jpeg' });
+    await user.upload(fileInput, file);
+    await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
+
+    expect(startMock).toHaveBeenCalledWith({
+      images: [{ mediaType: 'image/jpeg', data: 'QUJD' }],
+    });
+    const bubbleImg = await screen.findByAltText('Imagen adjunta');
+    expect(bubbleImg).toBeTruthy();
+  });
+
   it('envía el primer turno a startConversation y muestra el siguiente paso con su progreso', async () => {
     const user = userEvent.setup();
     startMock.mockResolvedValue({
@@ -191,6 +227,57 @@ describe('AiAssistChat', () => {
     const progress = container.querySelector('progress');
     expect(progress?.getAttribute('value')).toBe('4');
     expect(progress?.getAttribute('max')).toBe('5');
+  });
+
+  it('cierre por límite de uso CON cobro (RN-2): muestra el mensaje y redirige a la ficha igual que draft_ready', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup();
+    startMock.mockResolvedValue({
+      kind: 'closed',
+      conversationId: 'conv-1',
+      text: 'Hemos llegado al límite de esta conversación, pero ya teníamos lo esencial -- hemos creado tu ficha. Te hemos cobrado 1 crédito.',
+      reason: 'limit_turns',
+      charged: true,
+      productId: 'prod-1',
+      done: true,
+    });
+    render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
+
+    await user.type(screen.getByPlaceholderText('Escribe aquí lo que quieras añadir…'), 'listo');
+    await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
+
+    expect(await screen.findByText('Preparando tu ficha…')).toBeTruthy();
+    expect(sessionStorage.getItem(STORAGE_KEY)).toBeNull();
+
+    await vi.advanceTimersByTimeAsync(1200);
+
+    expect(pushMock).toHaveBeenCalledWith('/dashboard/products/prod-1?fromAssistant=1');
+  });
+
+  it('cierre por límite de uso SIN cobro (RN-2): muestra el aviso, no redirige y bloquea el composer', async () => {
+    const user = userEvent.setup();
+    startMock.mockResolvedValue({
+      kind: 'closed',
+      conversationId: 'conv-1',
+      text: 'Hemos llegado al límite de esta conversación y aún no hay suficiente información para crear tu producto. No se te ha cobrado nada -- puedes terminarlo a mano cuando quieras.',
+      reason: 'limit_turns',
+      charged: false,
+      done: true,
+    });
+    render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
+
+    await user.type(screen.getByPlaceholderText('Escribe aquí lo que quieras añadir…'), 'listo');
+    await user.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
+
+    expect(await screen.findByRole('heading', { name: 'No se te ha cobrado nada' })).toBeTruthy();
+    expect(pushMock).not.toHaveBeenCalled();
+
+    const composer = screen.getByPlaceholderText('Escribe aquí lo que quieras añadir…');
+    expect(composer).toBeDisabled();
+
+    const manualButtons = screen.getAllByRole('button', { name: 'Crear a mano' });
+    await user.click(manualButtons[0]);
+    expect(onManual).toHaveBeenCalled();
   });
 
   it('"Empezar de nuevo" en la reanudación limpia la conversación guardada', async () => {
