@@ -446,13 +446,11 @@ export function ReviewStep({
   photos,
   remainingCredits,
   onEdit,
-  onImprovePhoto,
 }: {
   state: AssistedTextState;
   photos: Partial<Record<PhotoKey, PickedPhoto>>;
   remainingCredits: number | null;
   onEdit: (step: WizardStepId) => void;
-  onImprovePhoto: (value: boolean) => void;
 }) {
   const labelPhotos = [
     photos.nutrition && 'tabla nutricional',
@@ -500,26 +498,11 @@ export function ReviewStep({
         </SummaryRow>
       </div>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border-subtle bg-surface-alt/60 p-3">
-        <input
-          type="checkbox"
-          checked={state.improvePhoto}
-          onChange={(e) => onImprovePhoto(e.target.checked)}
-          className="mt-1 h-4 w-4 shrink-0 accent-origen-pradera"
-        />
-        <span className="text-sm">
-          <span className="font-semibold text-origen-bosque">Mejorar mi foto con IA (fondo blanco)</span>
-          <span className="mt-0.5 block text-xs text-text-subtle">
-            Recortamos tu foto sobre un fondo blanco y en formato cuadrado, al estilo catálogo. No verás una vista previa:
-            podrás cambiar la imagen después en la ficha.
-          </span>
-        </span>
-      </label>
-
       <Disclaimer>
         <p className="font-semibold">Al pulsar «Crear mi producto con IA»</p>
         <ul className="mt-1 list-disc space-y-0.5 pl-4">
           <li>Se usará 1 crédito{remainingCredits !== null ? ` (te quedan ${remainingCredits})` : ''}, solo si la ficha se crea.</li>
+          <li>Mejoramos tu foto sobre fondo blanco y en formato cuadrado, al estilo catálogo. No verás una vista previa: podrás cambiar la imagen después en la ficha.</li>
           <li>Se creará un borrador: no se publica nada hasta que tú lo decidas.</li>
           <li>Tarda entre 30 y 90 segundos. No cierres esta página.</li>
         </ul>

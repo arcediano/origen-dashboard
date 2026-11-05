@@ -110,11 +110,10 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     await user.click(await screen.findByRole('button', { name: 'Orgánico' }));
     await user.click(screen.getByRole('button', { name: 'Siguiente' }));
 
-    // Resumen: lo introducido, la casilla de foto con IA y el aviso del crédito
+    // Resumen: lo introducido y el aviso del crédito
     expect(await screen.findByText(/Revisa lo que le vas a dar a la IA/)).toBeTruthy();
     expect(screen.getByText(/Queso curado de oveja, intenso/)).toBeTruthy();
     expect(screen.getByText(/tabla nutricional/)).toBeTruthy();
-    await user.click(screen.getByLabelText(/Mejorar mi foto con IA/));
     await user.click(screen.getByRole('button', { name: 'Crear mi producto con IA' }));
 
     await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/dashboard/products/prod-9?fromAssistant=1'));
@@ -133,7 +132,6 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
       extraInfo: undefined,
       certifications: ['Orgánico'],
       netContent: undefined,
-      improvePhoto: true,
     });
     expect(sessionStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
   });
