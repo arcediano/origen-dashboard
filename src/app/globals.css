@@ -150,6 +150,10 @@
 
 @layer base {
   :root {
+    /* Sin tipografía serif propia en la identidad de marca (petición del humano,
+       2026-11-05) -- font-serif resuelve a la misma sans en toda la app. */
+    --font-serif: var(--font-sans);
+
     /* === PALETA "BOSQUE PROFUNDO" - ORIGEN v3.0 === */
 
     /* ----- COLORES PRINCIPALES (Manual Sección 3.1) ----- */

@@ -80,7 +80,7 @@ describe('AiAssistChat', () => {
       conversationId: 'conv-1',
       text: '📸 ¿Tienes la tabla nutricional? Súbela.',
       stepIndex: 2,
-      totalSteps: 5,
+      totalSteps: 7,
       done: false,
     });
     const { container } = render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
@@ -104,7 +104,7 @@ describe('AiAssistChat', () => {
       conversationId: 'conv-1',
       text: '📸 ¿Tienes la tabla nutricional? Súbela.',
       stepIndex: 2,
-      totalSteps: 5,
+      totalSteps: 7,
       imageDropzoneLabel: 'Arrastra la foto de la tabla nutricional aquí',
       chips: ['No tengo foto'],
       done: false,
@@ -118,7 +118,7 @@ describe('AiAssistChat', () => {
     expect(await screen.findByText(/¿Tienes la tabla nutricional\?/)).toBeTruthy();
     const progress = container.querySelector('progress');
     expect(progress?.getAttribute('value')).toBe('2');
-    expect(progress?.getAttribute('max')).toBe('5');
+    expect(progress?.getAttribute('max')).toBe('7');
     expect(screen.getByRole('button', { name: 'No tengo foto' })).toBeTruthy();
     expect(sessionStorage.getItem(STORAGE_KEY)).toBe('conv-1');
   });
@@ -130,7 +130,7 @@ describe('AiAssistChat', () => {
       conversationId: 'conv-1',
       text: '¿Tiene algún certificado?',
       stepIndex: 4,
-      totalSteps: 5,
+      totalSteps: 7,
       chips: ['Orgánico', 'Vegano', 'Sin gluten', 'Ninguno'],
       done: false,
     });
@@ -139,7 +139,7 @@ describe('AiAssistChat', () => {
       conversationId: 'conv-1',
       text: '¿Cuál es el formato de venta? (unidad, pack, peso)',
       stepIndex: 5,
-      totalSteps: 5,
+      totalSteps: 7,
       done: false,
     });
     render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
@@ -161,7 +161,7 @@ describe('AiAssistChat', () => {
       conversationId: 'conv-1',
       text: 'He encontrado estas coincidencias, ¿alguna es la tuya?',
       stepIndex: 2,
-      totalSteps: 5,
+      totalSteps: 7,
       chips: ['usda:0:Apples, raw, golden delicious', 'usda:1:Apples, raw, fuji', 'Ninguna'],
       done: false,
     });
@@ -170,7 +170,7 @@ describe('AiAssistChat', () => {
       conversationId: 'conv-1',
       text: 'Perfecto, sigamos.',
       stepIndex: 3,
-      totalSteps: 5,
+      totalSteps: 7,
       done: false,
     });
     render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
@@ -219,14 +219,14 @@ describe('AiAssistChat', () => {
     const { container } = render(<AiAssistChat quota={{ used: 0, total: 3 }} onManual={onManual} />);
 
     expect(await screen.findByText(/Retomamos donde lo dejaste/)).toBeTruthy();
-    expect(screen.getByText(/paso 4 de 5/)).toBeTruthy();
+    expect(screen.getByText(/paso 5 de 7/)).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: 'Continuar' }));
 
     expect(screen.getByText('¿Tiene algún certificado?')).toBeTruthy();
     const progress = container.querySelector('progress');
-    expect(progress?.getAttribute('value')).toBe('4');
-    expect(progress?.getAttribute('max')).toBe('5');
+    expect(progress?.getAttribute('value')).toBe('5');
+    expect(progress?.getAttribute('max')).toBe('7');
   });
 
   it('cierre por límite de uso CON cobro (RN-2): muestra el mensaje y redirige a la ficha igual que draft_ready', async () => {

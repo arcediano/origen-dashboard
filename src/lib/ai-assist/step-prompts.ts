@@ -1,22 +1,28 @@
 /**
- * Copia de los textos fijos de cada paso de "Origen Assist" (rediseño v2,
- * 2026-10-26) -- debe reflejar exactamente
- * `ai-assist-step-flow.schema.ts` (`STEP_PROMPTS`) de
+ * Copia de los textos fijos de cada paso de "Origen Assist" -- debe reflejar
+ * exactamente `ai-assist-step-flow.schema.ts` (`STEP_PROMPTS`) de
  * `origen-master-microservices`. Se usa solo para reconstruir la pantalla al
  * reanudar una conversación tras recargar (ver `AiAssistChat.tsx`); el texto
  * real de cada turno siempre lo manda el backend.
  *
- * Ajuste (petición del humano, 2026-10-26, mismo día): la foto de "marca"
- * (antes LABEL_PHOTO) se fusiona con la foto de producto -- una sola foto
- * sirve para ambas cosas. El paso ORIGIN se retira: el origen real
- * (comunidad autónoma + municipio) se rellena solo con los datos del
- * perfil del productor, nunca se pregunta.
+ * Ajuste (petición del humano, 2026-10-26): la foto de "marca" (antes
+ * LABEL_PHOTO) se fusiona con la foto de producto -- una sola foto sirve
+ * para ambas cosas. El paso ORIGIN se retira: el origen real (comunidad
+ * autónoma + municipio) se rellena solo con los datos del perfil del
+ * productor, nunca se pregunta.
+ *
+ * Rediseño v3 (petición del humano, 2026-11-03): añade CONSERVATION_PHOTO
+ * (foto de instrucciones de conservación, antes nunca pedida) y
+ * ADDITIONAL_INFO (texto libre del productor para cualquier información
+ * extra), ver el mismo archivo en el backend para el detalle.
  */
 export const STEP_ORDER = [
   'PRODUCT_PHOTO',
   'NUTRITION_PHOTO',
   'INGREDIENTS_PHOTO',
+  'CONSERVATION_PHOTO',
   'CERTIFICATIONS',
+  'ADDITIONAL_INFO',
   'FORMAT',
 ] as const;
 export type AiAssistUserStep = (typeof STEP_ORDER)[number];
@@ -45,9 +51,18 @@ export const STEP_PROMPTS: Record<
     imageDropzoneLabel: 'Arrastra la foto de ingredientes/sellos aquí',
     chips: ['No tengo foto'],
   },
+  CONSERVATION_PHOTO: {
+    text: '📸 ¿Tienes alguna instrucción de conservación en la etiqueta (frío, caducidad...)? Súbela.',
+    imageDropzoneLabel: 'Arrastra la foto de conservación aquí',
+    chips: ['No tengo foto'],
+  },
   CERTIFICATIONS: {
     text: '¿Tiene algún certificado?',
     chips: ['Orgánico', 'Vegano', 'Sin gluten', 'Ninguno'],
+  },
+  ADDITIONAL_INFO: {
+    text: '¿Algo más que quieras contar sobre tu producto? (elaboración artesanal, premios, historia...) Puedes dejarlo en blanco.',
+    chips: ['Nada más'],
   },
   FORMAT: {
     text: '¿Cuál es el formato de venta? (unidad, pack, peso)',
