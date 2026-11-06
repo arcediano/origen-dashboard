@@ -40,7 +40,7 @@ import {
 } from 'lucide-react';
 
 import { type Product } from '@/types/product';
-import { fetchProductById, deleteProduct, updateProduct } from '@/lib/api/products';
+import { fetchProductById, deleteProduct, updateProduct, getPublicationStatus, type PublicationStatus } from '@/lib/api/products';
 import { sanitizeHtml, ensureRichTextHtml } from '@/lib/html-sanitizer';
 import { formatFieldsInSentence } from '@/lib/constants/sensitiveFields';
 import { AUTONOMOUS_COMMUNITY_NAMES } from '@/lib/constants/autonomous-community';
@@ -431,13 +431,32 @@ function StatusCard({
   const isInactive        = product.status === 'inactive';
   const isPendingApproval = product.status === 'pending_approval';
 
-  // Completitud del producto — misma lógica que ProductCard
-  const missingFields: string[] = [];
-  if (!product.name || !product.categoryId) missingFields.push('información básica');
-  if (!product.gallery?.length && !product.mainImage) missingFields.push('imágenes');
-  if (!product.basePrice || product.basePrice <= 0) missingFields.push('precio de venta');
-  if (!product.sku) missingFields.push('SKU');
-  const isComplete = missingFields.length === 0;
+  // Completitud del producto (hallazgo del humano, 2026-11-06): este
+  // componente comprobaba solo 4 campos propios (nombre/categoría,
+  // imágenes, precio, SKU) -- "información básica completa" según este
+  // chequeo no coincidía con los criterios REALES que exige el backend al
+  // enviar a revisión (ProductsService.updateStatus → getModerationCriteriaErrors),
+  // que además exige descripción ≥100 caracteres, stock > 0 e información
+  // nutricional. El resultado: la tarjeta decía "Toda la información está
+  // completa" y dejaba pulsar "Enviar a revisión" en productos que el
+  // propio backend iba a rechazar con un 400. Se sustituye por
+  // GET /products/:id/publication-status, la misma fuente única de verdad
+  // que ya usa el wizard de creación/edición (PublicationRequirementsChecklist).
+  const [publicationStatus, setPublicationStatus] = useState<PublicationStatus | null>(null);
+  useEffect(() => {
+    if (!isDraft) { setPublicationStatus(null); return; }
+    let active = true;
+    getPublicationStatus(product.id).then((res) => {
+      if (active && res.data) setPublicationStatus(res.data);
+    });
+    return () => { active = false; };
+  }, [product.id, isDraft, product.status]);
+
+  const missingFields = publicationStatus?.missing.map((m) => m.message) ?? [];
+  // Mientras no se ha confirmado el estado real con el servidor, nunca se
+  // asume "completo": evita el falso positivo que motivó este cambio.
+  const isComplete = publicationStatus?.canPublish === true;
+  const isCheckingCompleteness = isDraft && publicationStatus === null;
 
   // Enviar a revisión: solo aplica a un borrador completo en su primera
   // publicación. Un producto INACTIVE ya no pasa por aquí -- reactivar
@@ -511,8 +530,13 @@ function StatusCard({
         })()
       )}
 
+      {/* Comprobando con el servidor — nunca se asume "completo" sin confirmar */}
+      {isCheckingCompleteness && (
+        <div className="h-16 animate-pulse rounded-2xl bg-origen-pastel/40" aria-hidden="true" />
+      )}
+
       {/* Borrador incompleto — explicar por qué no se puede publicar */}
-      {isDraft && !isComplete && (
+      {isDraft && !isCheckingCompleteness && !isComplete && (
         <Alert variant="warning">
           <AlertTitle>No se puede enviar a revisión</AlertTitle>
           <AlertDescription className="space-y-2">
@@ -531,7 +555,7 @@ function StatusCard({
       )}
 
       {/* Borrador completo — listo para enviar */}
-      {isDraft && isComplete && (
+      {isDraft && !isCheckingCompleteness && isComplete && (
         <Alert variant="success">
           <AlertTitle>Toda la información está completa</AlertTitle>
           <AlertDescription>
