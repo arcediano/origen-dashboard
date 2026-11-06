@@ -56,13 +56,18 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
         data-testid="ai-credits-panel"
         data-state="exhausted"
         className={cn(
-          'rounded-2xl border border-origen-mandarina/40 bg-origen-mandarina/10 p-3 sm:p-4',
+          // Mismo patrón hero de ancho completo que AiAssistBanner (al que
+          // sustituye en esta posición cuando no quedan créditos): card
+          // blanca + borde de acento, no un fondo de card completo
+          // teñido (hallazgo del humano, 2026-11-06; sección 1.3 de la
+          // guía de diseño).
+          'rounded-[28px] border border-origen-mandarina/30 bg-surface-alt p-3 shadow-sm sm:p-4',
           className,
         )}
       >
         <div className="flex items-start gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-feedback-warning-text shadow-subtle">
-            <Coins className="h-5 w-5" aria-hidden="true" />
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-origen-mandarina/15">
+            <Coins className="h-5 w-5 text-feedback-warning-text" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1 space-y-1">
             <h2 id="ai-credits-title" className="text-base font-semibold text-origen-bosque">
@@ -87,7 +92,13 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
       aria-labelledby="ai-credits-title"
       data-testid="ai-credits-panel"
       data-state="available"
-      className={cn('rounded-2xl border border-origen-pradera/30 bg-origen-pradera/10 p-3 sm:p-4', className)}
+      className={cn(
+        // Mismo patrón hero de ancho completo que AiAssistBanner (sección
+        // 1.3/4 de la guía de diseño: rounded-[28px], card blanca con
+        // borde de acento, nunca un fondo de card completo teñido).
+        'rounded-[28px] border border-origen-pradera/25 bg-surface-alt p-3 shadow-sm sm:p-4',
+        className,
+      )}
     >
       <div className="flex flex-col gap-3 sm:gap-4">
         {/* Icono + contenido en fila propia, sin los botones de acción --
@@ -99,8 +110,8 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
             pantalla del humano en escritorio, 2026-10-27). Las acciones se
             quedan siempre en su propia fila, sin depender del viewport. */}
         <div className="flex min-w-0 items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-origen-bosque shadow-subtle sm:h-12 sm:w-12">
-            <Sparkles className="h-5 w-5" aria-hidden="true" />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-origen-pradera/15 sm:h-12 sm:w-12">
+            <Sparkles className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />
           </span>
 
           <div className="min-w-0 flex-1">
