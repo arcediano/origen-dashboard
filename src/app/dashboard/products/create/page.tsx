@@ -212,7 +212,7 @@ export default function CreateProductPage() {
             ayuda de la IA en unos sencillos pasos. Fuera de los bloques por
             modo para que siga visible en cualquier paso del wizard manual. */}
         {mode === 'wizard' && quota === null && (
-          <div className="mb-6 h-32 animate-pulse rounded-2xl bg-origen-pastel/40" aria-hidden="true" />
+          <div className="mb-6 h-32 animate-pulse rounded-[28px] bg-origen-pastel/40" aria-hidden="true" />
         )}
         {mode === 'wizard' && aiQuota && (
           <AiAssistBanner
