@@ -16,6 +16,7 @@ import type {
   AssistedProductResponse,
   CreateAssistedProductInput,
 } from '@/lib/ai-assist/assisted-product';
+import type { ProfileReviewFields, ProfileReviewResult } from '@/lib/ai-assist/profile-review';
 
 /** Formulario guiado "Origen Assist": lectura de hasta 3 etiquetas + redacción + FLUX opcional; el proxy de Next corta a los 130 s. */
 const ASSISTED_PRODUCT_TIMEOUT_MS = 125_000;
@@ -79,6 +80,22 @@ export async function createAssistedProduct(
       input,
       { timeoutMs: ASSISTED_PRODUCT_TIMEOUT_MS },
     );
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+/**
+ * "Mejorar con IA" del perfil comercial ("Mi negocio", petición del humano,
+ * 2026-11-08): revisa los textos actuales campo a campo y propone mejoras --
+ * nunca sobrescribe nada, el productor acepta o descarta cada sugerencia.
+ * Cobra 1 crédito de la misma bolsa que la creación de producto asistida.
+ */
+export async function reviewProfile(
+  fields: ProfileReviewFields,
+): Promise<ProfileReviewResult> {
+  try {
+    return await gatewayClient.post<ProfileReviewResult>('/ai-assist/profile-review', fields);
   } catch (error) {
     throw toAiAssistError(error);
   }

@@ -8,7 +8,7 @@ vi.mock('@/lib/api/client', async (importOriginal) => {
 });
 
 import { GatewayError } from '@/lib/api/client';
-import { AiAssistError, createAssistedProduct, getAiAssistQuota } from '@/lib/api/ai-assist';
+import { AiAssistError, createAssistedProduct, getAiAssistQuota, reviewProfile } from '@/lib/api/ai-assist';
 
 const ASSISTED_PRODUCT_INPUT = {
   images: { product: { mediaType: 'image/jpeg' as const, data: 'QUJD' } },
@@ -52,6 +52,26 @@ describe('ai-assist API', () => {
       status: 503,
       message: 'Límite alcanzado',
     });
+  });
+
+  // Petición del humano, 2026-11-08: "Mejorar con IA" del perfil comercial,
+  // misma bolsa de créditos que crear un producto.
+  it('reviewProfile envía los campos y devuelve las sugerencias', async () => {
+    const fields = { tagline: 'Miel de mi pueblo' };
+    postMock.mockResolvedValue({
+      suggestions: [{ field: 'tagline', current: 'Miel de mi pueblo', suggested: 'Miel cruda de mi pueblo', reason: 'Más concreto' }],
+    });
+    await expect(reviewProfile(fields)).resolves.toEqual({
+      suggestions: [{ field: 'tagline', current: 'Miel de mi pueblo', suggested: 'Miel cruda de mi pueblo', reason: 'Más concreto' }],
+    });
+    expect(postMock).toHaveBeenCalledWith('/ai-assist/profile-review', fields);
+  });
+
+  it('reviewProfile traduce el código de cupo agotado', async () => {
+    postMock.mockRejectedValue(new GatewayError(403, 'cupo', { code: 'AI_PRODUCER_QUOTA_EXCEEDED' }));
+    const err = await reviewProfile({ tagline: 'x' }).catch((e) => e);
+    expect(err).toBeInstanceOf(AiAssistError);
+    expect(err).toMatchObject({ code: 'AI_PRODUCER_QUOTA_EXCEEDED', status: 403 });
   });
 
   it('sin code deja code = null; un error no-Gateway también se envuelve', async () => {
