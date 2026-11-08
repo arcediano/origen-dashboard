@@ -34,14 +34,18 @@ export interface ProfileImageCollectionConfig {
   >;
   /** Categoría de subida (el backend solo admite el prefijo `visual/` para productores). */
   uploadCategory: string;
-  /** Máximo de imágenes. Equipo (3) y entorno (10) = límites del backend/onboarding; galería (10) = propuesto. */
+  /**
+   * Máximo de imágenes. Equipo (3) = límite del backend/onboarding; entorno y galería
+   * bajan de 10 a 5 (petición del humano, 2026-11-08) -- 10 invitaba a subir de más
+   * y alargaba demasiado la lista en el propio formulario.
+   */
   max: number;
 }
 
 export const PROFILE_IMAGE_COLLECTIONS: Record<ProfileImageCollection, ProfileImageCollectionConfig> = {
   teamPhotos: { payloadKey: 'teamPhotoKeys', uploadCategory: 'visual/team', max: 3 },
-  locationImages: { payloadKey: 'locationImageKeys', uploadCategory: 'visual/location', max: 10 },
-  galleryImages: { payloadKey: 'galleryImageKeys', uploadCategory: 'visual/gallery', max: 10 },
+  locationImages: { payloadKey: 'locationImageKeys', uploadCategory: 'visual/location', max: 5 },
+  galleryImages: { payloadKey: 'galleryImageKeys', uploadCategory: 'visual/gallery', max: 5 },
 };
 
 /** Formatos y tamaño que ya exige el onboarding del productor para fotos del perfil. */

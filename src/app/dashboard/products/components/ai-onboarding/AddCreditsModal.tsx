@@ -271,7 +271,10 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
           <DialogDescription>
             {succeeded
               ? 'Créditos añadidos a tu cuenta.'
-              : 'Cada crédito te permite crear un producto más con el asistente de IA.'}
+              // Genérico (petición del humano, 2026-11-08): "1 crédito" ya no es
+              // solo "1 producto más" -- este mismo modal se reutiliza también
+              // para revisar el perfil comercial con IA.
+              : 'Cada crédito te permite un uso más del asistente de IA.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -281,10 +284,10 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
               <Sparkles className="h-6 w-6" aria-hidden="true" />
             </span>
             <p className="text-sm text-origen-oscuro">
-              Ya puedes seguir creando productos con el asistente de IA.
+              Ya puedes seguir usando el asistente de IA.
             </p>
             <Button type="button" variant="primary" size="sm" onClick={() => onOpenChange(false)}>
-              Seguir creando
+              Continuar
             </Button>
           </div>
         ) : loadError ? (

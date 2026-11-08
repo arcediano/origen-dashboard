@@ -34,10 +34,13 @@ beforeEach(() => {
 });
 
 describe('límites por colección', () => {
-  it('equipo y entorno respetan los límites del backend; cada una escribe su campo del payload', () => {
+  // Petición del humano, 2026-11-08: entorno y galería bajan de 10 a 5 (el backend
+  // sigue admitiendo hasta 10 -- ver ArrayMaxSize(10) en update-profile.dto.ts -- así
+  // que un productor con más de 5 ya guardadas de antes no queda bloqueado).
+  it('equipo, entorno y galería respetan sus límites; cada una escribe su campo del payload', () => {
     expect(PROFILE_IMAGE_COLLECTIONS.teamPhotos).toMatchObject({ payloadKey: 'teamPhotoKeys', max: 3 });
-    expect(PROFILE_IMAGE_COLLECTIONS.locationImages).toMatchObject({ payloadKey: 'locationImageKeys', max: 10 });
-    expect(PROFILE_IMAGE_COLLECTIONS.galleryImages).toMatchObject({ payloadKey: 'galleryImageKeys', max: 10 });
+    expect(PROFILE_IMAGE_COLLECTIONS.locationImages).toMatchObject({ payloadKey: 'locationImageKeys', max: 5 });
+    expect(PROFILE_IMAGE_COLLECTIONS.galleryImages).toMatchObject({ payloadKey: 'galleryImageKeys', max: 5 });
   });
 
   it('las subidas usan el prefijo visual/ que admite el backend para productores', () => {

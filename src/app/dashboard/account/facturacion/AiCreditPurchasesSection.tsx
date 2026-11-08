@@ -51,7 +51,8 @@ export function AiCreditPurchasesSection() {
           Compras de créditos del asistente de IA
         </h2>
         <p className="text-xs text-text-subtle">
-          Pagos con tarjeta para crear productos con el asistente. La factura de estas compras se emitirá próximamente.
+          Pagos con tarjeta para seguir usando el asistente de IA (crear productos, revisar tu perfil comercial…). La
+          factura de estas compras se emitirá próximamente.
         </p>
       </div>
       <div className="space-y-3">

@@ -59,7 +59,7 @@ export interface ProfileImageManagerProps {
 const ACCEPT = PROFILE_IMAGE_ALLOWED_TYPES.join(',');
 
 const ICON_BUTTON =
-  'inline-flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-surface-alt text-origen-bosque transition-colors hover:text-origen-pradera focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-origen-pradera disabled:cursor-not-allowed disabled:opacity-40';
+  'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-alt text-origen-bosque transition-colors hover:text-origen-pradera focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-origen-pradera disabled:cursor-not-allowed disabled:opacity-40';
 
 async function validateFile(file: File, requirement?: ImageQualityRequirement): Promise<string | null> {
   const basic = validateImageFileBasics(file);
@@ -102,6 +102,13 @@ export function ProfileImageManager({
   const [messages, setMessages] = React.useState<string[]>([]);
   const [announcement, setAnnouncement] = React.useState('');
   const [isDragging, setIsDragging] = React.useState(false);
+  // Hallazgo real (petición del humano, 2026-11-08, captura de "Mi negocio" móvil): una
+  // imagen cuyo `<img src>` falla (CDN caída, blob: caducado tras segundo plano
+  // prolongado en iOS Safari, etc.) se quedaba con el icono de "imagen rota" nativo del
+  // navegador -- confuso, parece que la foto nunca se subió. Se detecta el fallo y se
+  // muestra el mismo marcador que ya usa la ficha sin foto, por URL (no por id: así una
+  // sustitución que cambia la URL se "autocura" sin lógica extra).
+  const [brokenUrls, setBrokenUrls] = React.useState<ReadonlySet<string>>(new Set());
 
   const active = activeItems(items);
   const isFull = active.length >= max;
@@ -235,17 +242,23 @@ export function ProfileImageManager({
                 )}
               >
                 <div className="relative aspect-4/3 w-28 shrink-0 overflow-hidden rounded-lg bg-surface sm:w-full sm:rounded-none">
-                  {item.url ? (
+                  {item.url && !brokenUrls.has(item.url) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={item.url}
                       alt={isRemoved ? '' : `${altPrefix} ${currentPosition}`}
                       loading="lazy"
                       className="h-full w-full object-cover"
+                      onError={() => setBrokenUrls((prev) => new Set(prev).add(item.url))}
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-border" aria-hidden="true">
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-border" aria-hidden="true">
                       <ImagePlus className="h-8 w-8" />
+                      {item.url && (
+                        <span className="px-1 text-center text-[10px] leading-tight text-feedback-danger">
+                          No se pudo cargar
+                        </span>
+                      )}
                     </div>
                   )}
                   {isUploading && (
@@ -286,7 +299,10 @@ export function ProfileImageManager({
                   )}
 
                   {editable && (
-                    <div className="flex flex-wrap gap-1.5">
+                    // Petición del humano, 2026-11-08: los botones de acción de cada foto
+                    // deben verse siempre en una sola línea, nunca partidos en dos (`flex-wrap`
+                    // los repartía en 2 filas en algunos anchos de tarjeta).
+                    <div className="flex flex-nowrap gap-1.5">
                       {isRemoved ? (
                         <Button
                           type="button"
