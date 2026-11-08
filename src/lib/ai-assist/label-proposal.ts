@@ -9,9 +9,10 @@
 
 export interface AiAssistQuota {
   enabled: boolean;
+  /** Usos del asistente ya consumidos (crear producto + revisar perfil, misma bolsa). */
   used: number;
   total: number;
-  /** Productos con asistente incluidos gratis. */
+  /** Usos del asistente incluidos gratis. */
   free?: number;
   /** Créditos comprados por el productor. */
   purchased?: number;

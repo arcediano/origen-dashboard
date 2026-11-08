@@ -21,6 +21,7 @@ import {
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
 import { ProfileImageManager } from '@/app/dashboard/profile/components/ProfileImageManager';
+import { ProfileAiReviewButton } from '@/app/dashboard/profile/components/ProfileAiReviewButton';
 import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 import {
   Alert,
@@ -1223,10 +1224,23 @@ export default function BusinessInfoPage() {
                       Historia y valores
                       <Badge variant="neutral" size="xs">Opcional</Badge>
                     </CardTitle>
-                    <SectionStatusBadge 
-                      isComplete={sectionCompleteness.story.isComplete}
-                      percent={sectionCompleteness.story.percent}
-                    />
+                    <div className="flex items-center gap-2">
+                      {isEditing && (
+                        <ProfileAiReviewButton
+                          fields={{
+                            tagline: form.tagline,
+                            description: form.description,
+                            productionPhilosophy: form.productionPhilosophy,
+                            animalWelfare: form.animalWelfare,
+                          }}
+                          onApply={(field, value) => setForm((prev) => ({ ...prev, [field]: value }))}
+                        />
+                      )}
+                      <SectionStatusBadge
+                        isComplete={sectionCompleteness.story.isComplete}
+                        percent={sectionCompleteness.story.percent}
+                      />
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
