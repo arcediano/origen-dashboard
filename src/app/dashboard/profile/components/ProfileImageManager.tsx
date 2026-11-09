@@ -6,8 +6,10 @@
  *
  * Es un componente controlado: los cambios viven en el estado del formulario padre y no
  * se persisten hasta que el productor pulsa «Guardar» (la subida y el PATCH los hace la
- * página). El primer puesto es la imagen destacada (la que usa la ficha pública como
- * portada de la historia / mosaico).
+ * página). El orden solo decide cómo se muestran las fotos entre sí -- a diferencia de
+ * la foto principal de un producto, aquí no hay concepto de "destacada" (petición del
+ * humano, 2026-11-09: ese badge inducía a pensar que aplicaba lo mismo que en la ficha
+ * de producto, y no es así).
  */
 
 'use client';
@@ -273,11 +275,6 @@ export function ProfileImageManager({
                   <div className="flex flex-wrap items-center gap-1.5">
                     {!isRemoved && (
                       <span className="text-xs font-semibold text-origen-bosque">Foto {currentPosition}</span>
-                    )}
-                    {!isRemoved && currentPosition === 1 && (
-                      <Badge variant="leaf" size="xs">
-                        Destacada
-                      </Badge>
                     )}
                     {isPending(item) && !isRemoved && (
                       <Badge variant="warning" size="xs">

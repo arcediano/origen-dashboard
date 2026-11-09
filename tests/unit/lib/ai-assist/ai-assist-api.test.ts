@@ -64,7 +64,11 @@ describe('ai-assist API', () => {
     await expect(reviewProfile(fields)).resolves.toEqual({
       suggestions: [{ field: 'tagline', current: 'Miel de mi pueblo', suggested: 'Miel cruda de mi pueblo', reason: 'Más concreto' }],
     });
-    expect(postMock).toHaveBeenCalledWith('/ai-assist/profile-review', fields);
+    expect(postMock).toHaveBeenCalledWith(
+      '/ai-assist/profile-review',
+      fields,
+      expect.objectContaining({ timeoutMs: expect.any(Number) }),
+    );
   });
 
   it('reviewProfile traduce el código de cupo agotado', async () => {

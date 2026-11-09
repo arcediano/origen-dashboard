@@ -16,10 +16,16 @@ import type {
   AssistedProductResponse,
   CreateAssistedProductInput,
 } from '@/lib/ai-assist/assisted-product';
-import type { ProfileReviewFields, ProfileReviewResult } from '@/lib/ai-assist/profile-review';
+import type {
+  ProfilePhotoCollection,
+  ProfileReviewFields,
+  ProfileReviewResult,
+} from '@/lib/ai-assist/profile-review';
 
 /** Formulario guiado "Origen Assist": lectura de hasta 3 etiquetas + redacción + FLUX opcional; el proxy de Next corta a los 130 s. */
 const ASSISTED_PRODUCT_TIMEOUT_MS = 125_000;
+/** La revisión de perfil puede incluir hasta 3 fotos procesadas con FLUX -- mismo presupuesto que el formulario guiado. */
+const PROFILE_REVIEW_TIMEOUT_MS = 125_000;
 
 export type AiAssistErrorCode =
   | 'AI_DISABLED'
@@ -85,17 +91,31 @@ export async function createAssistedProduct(
   }
 }
 
+/** Una foto a revisar: la URL ya resuelta (CDN) de la primera foto activa de una galería. */
+export interface ProfileReviewPhotoInput {
+  collection: ProfilePhotoCollection;
+  key: string;
+  url: string;
+}
+
 /**
  * "Mejorar con IA" del perfil comercial ("Mi negocio", petición del humano,
- * 2026-11-08): revisa los textos actuales campo a campo y propone mejoras --
- * nunca sobrescribe nada, el productor acepta o descarta cada sugerencia.
- * Cobra 1 crédito de la misma bolsa que la creación de producto asistida.
+ * 2026-11-08, ampliado a fotos 2026-11-09): revisa los textos actuales campo
+ * a campo y, si se envían, hasta 3 fotos (una por galería) -- nunca
+ * sobrescribe/sube nada, el productor acepta o descarta cada sugerencia.
+ * Cobra 1 crédito en total de la misma bolsa que la creación de producto
+ * asistida, cubra texto, fotos o ambos.
  */
 export async function reviewProfile(
   fields: ProfileReviewFields,
+  photos?: ProfileReviewPhotoInput[],
 ): Promise<ProfileReviewResult> {
   try {
-    return await gatewayClient.post<ProfileReviewResult>('/ai-assist/profile-review', fields);
+    return await gatewayClient.post<ProfileReviewResult>(
+      '/ai-assist/profile-review',
+      { ...fields, ...(photos && photos.length > 0 ? { photos } : {}) },
+      { timeoutMs: PROFILE_REVIEW_TIMEOUT_MS },
+    );
   } catch (error) {
     throw toAiAssistError(error);
   }

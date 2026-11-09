@@ -96,6 +96,59 @@ describe('ProfileAiReviewButton', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Mejorar con IA' }));
     await userEvent.click(await screen.findByRole('button', { name: 'Gastar 1 crédito y revisar' }));
 
-    await screen.findByText('Tus textos ya están bien');
+    await screen.findByText('Tu perfil ya está bien');
+  });
+
+  const PHOTO = {
+    collection: 'teamPhotos' as const,
+    itemId: 'item-1',
+    key: 'producers/1/documents/team/a.jpg',
+    url: 'https://cdn.test/a.jpg',
+  };
+
+  it('variant="banner" muestra un aviso prominente con los créditos restantes', async () => {
+    quotaMock.mockResolvedValue({ enabled: true, used: 1, total: 5 });
+    render(<ProfileAiReviewButton variant="banner" fields={FIELDS} onApply={vi.fn()} />);
+
+    expect(screen.getByText('Mejora tu perfil con IA')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('profile-ai-review-banner-credits')).toHaveTextContent('4'));
+  });
+
+  it('deshabilitado sin texto NI fotos', () => {
+    render(<ProfileAiReviewButton fields={{}} onApply={vi.fn()} photos={[]} />);
+    expect(screen.getByRole('button', { name: 'Mejorar con IA' })).toBeDisabled();
+  });
+
+  it('habilitado con solo fotos, aunque no haya texto', () => {
+    render(<ProfileAiReviewButton fields={{}} onApply={vi.fn()} photos={[PHOTO]} />);
+    expect(screen.getByRole('button', { name: 'Mejorar con IA' })).not.toBeDisabled();
+  });
+
+  it('al aceptar una sugerencia de foto, la convierte en File y llama a onApplyPhoto', async () => {
+    reviewMock.mockResolvedValue({
+      suggestions: [],
+      photoSuggestions: [{ collection: 'teamPhotos', key: PHOTO.key, after: 'data:image/jpeg;base64,Zm9v' }],
+    });
+    const onApplyPhoto = vi.fn();
+    render(
+      <ProfileAiReviewButton
+        fields={{}}
+        onApply={vi.fn()}
+        photos={[PHOTO]}
+        onApplyPhoto={onApplyPhoto}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Mejorar con IA' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Gastar 1 crédito y revisar' }));
+    await screen.findByText('Sugerencias del asistente');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Aceptar' }));
+
+    await waitFor(() => expect(onApplyPhoto).toHaveBeenCalledTimes(1));
+    const [collection, itemId, file] = onApplyPhoto.mock.calls[0];
+    expect(collection).toBe('teamPhotos');
+    expect(itemId).toBe('item-1');
+    expect(file).toBeInstanceOf(File);
   });
 });
