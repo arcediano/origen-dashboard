@@ -176,8 +176,11 @@ function PaymentStep({
   return (
     <>
       <div className={CONTENT_AREA_CLASSNAME}>
-        {/* Solo tarjeta: el PaymentIntent del backend admite únicamente `card`; sin Link ni guardar datos para pagos rápidos. */}
-        <PaymentElement options={{ wallets: { applePay: 'never', googlePay: 'never', link: 'never' } }} />
+        {/* Tarjeta + Stripe Link (petición del humano, 2026-11-09: pago más
+            rápido, sin volver a introducir la tarjeta en compras
+            siguientes) -- el PaymentIntent del backend ya admite `link`.
+            Sin Apple/Google Pay. */}
+        <PaymentElement options={{ wallets: { applePay: 'never', googlePay: 'never' } }} />
         {error && (
           <Alert variant="error">
             <AlertDescription>{error}</AlertDescription>
