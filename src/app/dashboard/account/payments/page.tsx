@@ -21,6 +21,7 @@ import { fetchSellerPayouts, type SellerPayoutItem } from '@/lib/api/orders';
 import { openStripeDashboard } from '@/lib/stripe/connect-client';
 import { useStripeConnectPolling } from '@/lib/stripe/use-stripe-connect-polling';
 import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-connect-onboarding';
+import { PayoutHistorySection } from './PayoutHistorySection';
 
 interface StripeStatusResponse {
   success: boolean;
@@ -599,6 +600,8 @@ export default function PaymentsPage() {
                   </CardContent>
                 </Card>
               </div>
+
+              {paymentStage === 'connected' && <PayoutHistorySection />}
             </div>
           </MobilePullRefresh>
         )}
