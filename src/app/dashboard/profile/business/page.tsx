@@ -22,6 +22,7 @@ import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { ProfileSectionNav } from '@/app/dashboard/profile/components/ProfileSectionNav';
 import { ProfileImageManager } from '@/app/dashboard/profile/components/ProfileImageManager';
 import { ProfileAiReviewButton } from '@/app/dashboard/profile/components/ProfileAiReviewButton';
+import type { ProfilePhotoCandidate, ProfilePhotoCollection } from '@/lib/ai-assist/profile-review';
 import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 import {
   Alert,
@@ -65,9 +66,12 @@ import { isValidVideoUrl } from '@/lib/onboarding/video';
 import { IMAGE_QUALITY_PRESETS } from '@/lib/validations/image-quality';
 import {
   PROFILE_IMAGE_COLLECTIONS,
+  activeItems,
   hasImageChanges,
+  isPending,
   itemsFromApi,
   releasePendingUrls,
+  replaceWithFile,
   toKeys,
   uploadPendingItems,
   type ProfileImageCollection,
@@ -437,6 +441,24 @@ export default function BusinessInfoPage() {
 
   const isDirty = useMemo(() => isFormDirty(form, initialForm), [form, initialForm]);
   const isUploadingImages = uploadingImageIds.size > 0;
+
+  // "Mejorar con IA" (petición del humano, 2026-11-09): solo la primera foto
+  // activa Y YA GUARDADA de cada galería no vacía -- una pendiente de subir
+  // (blob:, sin key) no es alcanzable desde el backend, así que se omite.
+  const photoCandidates = useMemo(() => {
+    const candidates: ProfilePhotoCandidate[] = [];
+    (['teamPhotos', 'locationImages', 'galleryImages'] as const).forEach((collection) => {
+      const first = activeItems(form[collection]).find((item) => !isPending(item) && item.key);
+      if (first?.key) {
+        candidates.push({ collection, itemId: first.id, key: first.key, url: first.url });
+      }
+    });
+    return candidates;
+  }, [form.teamPhotos, form.locationImages, form.galleryImages]);
+
+  const handleApplyAiPhoto = (collection: ProfilePhotoCollection, itemId: string, file: File) => {
+    setForm((prev) => ({ ...prev, [collection]: replaceWithFile(prev[collection], itemId, file) }));
+  };
 
   // Avisa antes de abandonar la página con cambios sin guardar.
   useEffect(() => {
@@ -934,6 +956,25 @@ export default function BusinessInfoPage() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
             >
+              {/* "Mejorar con IA" (petición del humano, 2026-11-09): sección
+                  prominente al principio, no un botón pequeño escondido en
+                  la cabecera de "Historia y valores" como antes -- cubre
+                  texto Y fotos en la misma revisión. */}
+              {isEditing && (
+                <ProfileAiReviewButton
+                  variant="banner"
+                  fields={{
+                    tagline: form.tagline,
+                    description: form.description,
+                    productionPhilosophy: form.productionPhilosophy,
+                    animalWelfare: form.animalWelfare,
+                  }}
+                  onApply={(field, value) => setForm((prev) => ({ ...prev, [field]: value }))}
+                  photos={photoCandidates}
+                  onApplyPhoto={handleApplyAiPhoto}
+                />
+              )}
+
               {/* Progress indicator */}
               <Card className="border-origen-pradera/20 bg-linear-to-r from-origen-pradera/5 to-transparent">
                 <CardContent className="pt-6">
@@ -1225,17 +1266,6 @@ export default function BusinessInfoPage() {
                       <Badge variant="neutral" size="xs">Opcional</Badge>
                     </CardTitle>
                     <div className="flex items-center gap-2">
-                      {isEditing && (
-                        <ProfileAiReviewButton
-                          fields={{
-                            tagline: form.tagline,
-                            description: form.description,
-                            productionPhilosophy: form.productionPhilosophy,
-                            animalWelfare: form.animalWelfare,
-                          }}
-                          onApply={(field, value) => setForm((prev) => ({ ...prev, [field]: value }))}
-                        />
-                      )}
                       <SectionStatusBadge
                         isComplete={sectionCompleteness.story.isComplete}
                         percent={sectionCompleteness.story.percent}
@@ -1305,7 +1335,7 @@ export default function BusinessInfoPage() {
                     </CardTitle>
                   </div>
                   <CardDescription size="sm">
-                    Se muestran en tu página pública. La primera foto de cada bloque es la destacada: ordénalas como quieras que las vea el cliente. Los cambios se publican al guardar.
+                    Se muestran en tu página pública. Ordénalas como quieras que las vea el cliente. Los cambios se publican al guardar.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
