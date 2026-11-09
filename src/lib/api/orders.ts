@@ -716,6 +716,95 @@ export async function fetchSellerPayouts(params?: {
   }
 }
 
+// ─── Histórico de cobros (programado + ejecutado + revertido + reembolsado) ───
+
+export type SellerPayoutHistoryStatus = 'scheduled' | 'executed' | 'reversed' | 'refunded';
+
+interface BackendPayoutHistoryItem {
+  orderId: string;
+  orderNumber: string;
+  createdAt: string;
+  netAmountCents: number;
+  status: SellerPayoutHistoryStatus;
+  transferScheduledAt: string | null;
+  transferExecutedAt: string | null;
+  transferReversedAt: string | null;
+  refundedAt: string | null;
+  refundedAmountCents: number | null;
+}
+
+interface BackendPayoutHistoryResponse {
+  items: BackendPayoutHistoryItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface SellerPayoutHistoryItem {
+  orderId: string;
+  orderNumber: string;
+  createdAt: string;
+  netAmount: number;
+  status: SellerPayoutHistoryStatus;
+  transferScheduledAt: string | null;
+  transferExecutedAt: string | null;
+  transferReversedAt: string | null;
+  refundedAt: string | null;
+  refundedAmount: number | null;
+}
+
+/**
+ * Histórico completo de cobros del productor (programado, ya ejecutado,
+ * revertido o con pedido reembolsado) — a diferencia de fetchSellerPayouts()
+ * (solo pendientes), aquí se incluye TODA la actividad de Transfer para la
+ * sección "Historial de cobros" del dashboard.
+ * GET /api/v1/orders/seller/payouts/history
+ */
+export async function fetchSellerPayoutHistory(params?: {
+  page?: number;
+  limit?: number;
+}): Promise<ApiResponse<{ items: SellerPayoutHistoryItem[]; total: number; page: number; limit: number }>> {
+  try {
+    const res = await gatewayClient.get<BackendPayoutHistoryResponse>('/orders/seller/payouts/history', {
+      params: {
+        ...(params?.page !== undefined ? { page: params.page } : {}),
+        ...(params?.limit !== undefined ? { limit: params.limit } : {}),
+      },
+    });
+
+    const items = (res.items ?? []).map((item) => ({
+      orderId: item.orderId,
+      orderNumber: item.orderNumber,
+      createdAt: item.createdAt,
+      netAmount: item.netAmountCents / 100,
+      status: item.status,
+      transferScheduledAt: item.transferScheduledAt,
+      transferExecutedAt: item.transferExecutedAt,
+      transferReversedAt: item.transferReversedAt,
+      refundedAt: item.refundedAt,
+      refundedAmount: item.refundedAmountCents !== null ? item.refundedAmountCents / 100 : null,
+    }));
+
+    return {
+      data: {
+        items,
+        total: res.total,
+        page: res.page,
+        limit: res.limit,
+      },
+      status: 200,
+    };
+  } catch (err) {
+    console.error('[orders] fetchSellerPayoutHistory', err);
+    const message =
+      err instanceof GatewayError ? err.message : 'Error al cargar el histórico de cobros';
+    return {
+      error: message,
+      status: err instanceof GatewayError ? err.status : 500,
+    };
+  }
+}
+
 // ─── Facturas de comisión mensuales ───────────────────────────────────────────
 
 interface BackendCommissionInvoiceItem {
