@@ -413,6 +413,15 @@ export default function CreateProductPage() {
                 rightIcon: <ChevronRight className="w-4 h-4" aria-hidden="true" />,
               }
         }
+        // Hasta 3 acciones a la vez aquí (Anterior + Publicar + Guardar, ver
+        // petición del humano 2026-10-26 más abajo) -- min-w-0 + padding/gap
+        // reducidos para que quepan sin desbordar en móviles estrechos (320-
+        // 390px): el ActionBar de la librería las reparte con `flex-1` pero
+        // sin `min-w-0` cada botón conserva su ancho mínimo de contenido y
+        // la fila se sale de la pantalla con 3 (hallazgo real, captura de
+        // pantalla en "Editar producto", 2026-11-09 -- mismo bug aquí, en
+        // products/create, por el mismo patrón duplicado). Verificado en
+        // Playwright a 320/360/375/390px, con y sin estados "...ando".
         secondaryActions={[
           {
             id: 'prev',
@@ -421,6 +430,7 @@ export default function CreateProductPage() {
             disabled: isFirstStep,
             variant: 'secondary',
             leftIcon: <ChevronLeft className="w-4 h-4" aria-hidden="true" />,
+            className: 'min-w-0 px-2.5 gap-1.5',
           },
           ...(canPublish && !isLastStep
             ? [{
@@ -431,6 +441,7 @@ export default function CreateProductPage() {
                 loading: isPublishing,
                 variant: 'primary' as const,
                 leftIcon: <Send className="w-4 h-4" aria-hidden="true" />,
+                className: 'min-w-0 px-2.5 gap-1.5',
               }]
             : []),
           {
@@ -443,6 +454,7 @@ export default function CreateProductPage() {
             leftIcon: isSaving
               ? <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
               : <Save className="w-4 h-4" aria-hidden="true" />,
+            className: 'min-w-0 px-2.5 gap-1.5',
           },
         ]}
       />

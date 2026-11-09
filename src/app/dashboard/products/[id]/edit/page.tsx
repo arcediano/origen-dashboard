@@ -455,6 +455,14 @@ export default function EditProductPage() {
                 rightIcon: <ChevronRight className="w-4 h-4" />,
               }
         }
+        // Hasta 3 acciones a la vez aquí (Anterior + Publicar + Guardar, ver
+        // petición del humano 2026-10-26 más abajo) -- min-w-0 + padding/gap
+        // reducidos para que quepan sin desbordar en móviles estrechos (320-
+        // 390px): el ActionBar de la librería las reparte con `flex-1` pero
+        // sin `min-w-0` cada botón conserva su ancho mínimo de contenido y
+        // la fila se sale de la pantalla con 3 (hallazgo real, captura de
+        // pantalla en "Editar producto", 2026-11-09). Verificado en
+        // Playwright a 320/360/375/390px, con y sin estados "...ando".
         secondaryActions={[
           {
             id: 'prev',
@@ -463,6 +471,7 @@ export default function EditProductPage() {
             disabled: isFirstStep,
             variant: 'secondary' as const,
             leftIcon: <ChevronLeft className="w-4 h-4" />,
+            className: 'min-w-0 px-2.5 gap-1.5',
           },
           ...(!isPublishedProduct && canPublish && !isLastStep
             ? [{
@@ -473,6 +482,7 @@ export default function EditProductPage() {
                 loading: isPublishing,
                 variant: 'primary' as const,
                 leftIcon: <Send className="w-4 h-4" />,
+                className: 'min-w-0 px-2.5 gap-1.5',
               }]
             : []),
           {
@@ -485,6 +495,7 @@ export default function EditProductPage() {
             leftIcon: isSaving
               ? <RefreshCw className="w-4 h-4 animate-spin" />
               : <Save className="w-4 h-4" />,
+            className: 'min-w-0 px-2.5 gap-1.5',
           },
         ]}
       />
