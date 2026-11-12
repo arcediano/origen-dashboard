@@ -9,6 +9,3 @@ export type { KpiItem, MobileKPIRowProps } from './MobileKPIRow';
 
 export { SectionTitle } from './SectionTitle';
 export type { SectionTitleProps } from './SectionTitle';
-
-export { StatStrip } from './StatStrip';
-export type { StatStripItem, StatStripProps, StatStripVariant } from './StatStrip';
