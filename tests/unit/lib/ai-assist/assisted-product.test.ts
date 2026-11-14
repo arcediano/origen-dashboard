@@ -14,9 +14,9 @@ const valid: StepValidationInput = {
 };
 
 describe('assisted-product (formulario guiado de Origen Assist)', () => {
-  it('exige la foto del producto en el paso de foto', () => {
-    expect(validateStep('photo', { ...valid, hasProductPhoto: false })).toMatch(/foto del producto/);
-    expect(validateStep('photo', valid)).toBeNull();
+  it('exige la foto del producto en el paso de fotos', () => {
+    expect(validateStep('images', { ...valid, hasProductPhoto: false })).toMatch(/foto del producto/);
+    expect(validateStep('images', valid)).toBeNull();
   });
 
   it('exige una descripción mínima del producto', () => {
@@ -24,10 +24,9 @@ describe('assisted-product (formulario guiado de Origen Assist)', () => {
     expect(validateStep('product', valid)).toBeNull();
   });
 
-  it('origen, elaboración y etiquetas son opcionales', () => {
+  it('origen y elaboración son opcionales', () => {
     expect(validateStep('origin', valid)).toBeNull();
     expect(validateStep('production', valid)).toBeNull();
-    expect(validateStep('labels', valid)).toBeNull();
   });
 
   it('un formato de venta indicado debe ser mayor que 0', () => {
@@ -38,7 +37,7 @@ describe('assisted-product (formulario guiado de Origen Assist)', () => {
 
   it('firstInvalidStep devuelve el primer paso que falla (o null)', () => {
     expect(firstInvalidStep(valid)).toBeNull();
-    expect(firstInvalidStep({ ...valid, hasProductPhoto: false, productDescription: '' })).toBe('photo');
+    expect(firstInvalidStep({ ...valid, hasProductPhoto: false, productDescription: '' })).toBe('images');
     expect(firstInvalidStep({ ...valid, productDescription: '' })).toBe('product');
   });
 

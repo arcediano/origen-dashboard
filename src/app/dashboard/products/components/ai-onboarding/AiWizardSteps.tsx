@@ -165,53 +165,115 @@ export function IntroStep({ remainingCredits }: { remainingCredits: number | nul
   );
 }
 
-// ─── 1 · Foto y nombre ────────────────────────────────────────────────────────
+// ─── 1 · Fotos ────────────────────────────────────────────────────────────────
 
-export function PhotoStep({
-  photo,
+/** Una sección de foto dentro de la pantalla de fotos: título propio, para que cada imagen pedida sea inequívoca. */
+function PhotoSection({ children }: { children: ReactNode }) {
+  return <div className="rounded-2xl border border-border-subtle bg-surface-alt/40 p-3 sm:p-4">{children}</div>;
+}
+
+export function ImagesStep({
+  photos,
   name,
   recoveredAnswers,
   onPick,
   onRemove,
   onName,
 }: {
-  photo?: PickedPhoto;
+  photos: Partial<Record<PhotoKey, PickedPhoto>>;
   name: string;
   recoveredAnswers: boolean;
-  onPick: (file: File) => string | null;
-  onRemove: () => void;
+  onPick: (key: PhotoKey, file: File) => string | null;
+  onRemove: (key: PhotoKey) => void;
   onName: (value: string) => void;
 }) {
   return (
-    <StepFrame title="Foto y nombre" question="Empecemos por lo que se ve: la foto principal de tu producto.">
-      {recoveredAnswers && !photo && (
+    <StepFrame
+      title="Fotos"
+      question="Sube las fotos que tengas a mano. Cada sección es independiente: solo la del producto es obligatoria."
+    >
+      {recoveredAnswers && !photos.product && (
         <Disclaimer tone="warning">
           Hemos recuperado tus respuestas anteriores. Por seguridad las fotos no se guardan: vuelve a subirlas.
         </Disclaimer>
       )}
-      <AiPhotoField
-        label="Foto del producto"
-        hint="Con buena luz y en la que se vea bien el envase, la marca y el nombre. Si lo deseas, podrás mejorarla con fondo blanco al final."
-        photo={photo}
-        required
-        testId="photo-product"
-        onPick={onPick}
-        onRemove={onRemove}
-      />
-      <div className="space-y-2">
-        <Label htmlFor="ai-name">Nombre del producto (opcional)</Label>
-        <Input
-          id="ai-name"
-          value={name}
-          onChange={(e) => onName(e.target.value)}
-          maxLength={MAX_NAME_LENGTH}
-          placeholder="Ej: Queso curado de oveja El Pastor"
-          inputSize="lg"
-        />
-        <p className="text-xs text-text-subtle">
-          Si lo dejas vacío, la IA lo leerá de la foto. Si lo escribes, lo respetaremos tal cual.
-        </p>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <PhotoSection>
+          <AiPhotoField
+            label="Foto del producto"
+            hint="Con buena luz y en la que se vea bien el envase, la marca y el nombre. Si lo deseas, podrás mejorarla con fondo blanco al final."
+            photo={photos.product}
+            required
+            testId="photo-product"
+            onPick={(file) => onPick('product', file)}
+            onRemove={() => onRemove('product')}
+          />
+          <div className="mt-3 space-y-2">
+            <Label htmlFor="ai-name">Nombre del producto (opcional)</Label>
+            <Input
+              id="ai-name"
+              value={name}
+              onChange={(e) => onName(e.target.value)}
+              maxLength={MAX_NAME_LENGTH}
+              placeholder="Ej: Queso curado de oveja El Pastor"
+              inputSize="lg"
+            />
+            <p className="text-xs text-text-subtle">
+              Si lo dejas vacío, la IA lo leerá de la foto. Si lo escribes, lo respetaremos tal cual.
+            </p>
+          </div>
+        </PhotoSection>
+
+        <PhotoSection>
+          <AiPhotoField
+            label="Tabla nutricional"
+            hint="Foto de frente, sin reflejos y con el texto bien legible."
+            photo={photos.nutrition}
+            testId="photo-nutrition"
+            onPick={(file) => onPick('nutrition', file)}
+            onRemove={() => onRemove('nutrition')}
+          />
+        </PhotoSection>
+
+        <PhotoSection>
+          <AiPhotoField
+            label="Ingredientes y alérgenos"
+            hint="La lista de ingredientes y los alérgenos marcados en el envase."
+            photo={photos.ingredients}
+            testId="photo-ingredients"
+            onPick={(file) => onPick('ingredients', file)}
+            onRemove={() => onRemove('ingredients')}
+          />
+        </PhotoSection>
+
+        <PhotoSection>
+          <AiPhotoField
+            label="Conservación"
+            hint="Instrucciones de conservación y fecha de caducidad o consumo preferente."
+            photo={photos.conservation}
+            testId="photo-conservation"
+            onPick={(file) => onPick('conservation', file)}
+            onRemove={() => onRemove('conservation')}
+          />
+        </PhotoSection>
       </div>
+
+      <Disclaimer>
+        La IA <strong>transcribe lo que se lee</strong> en cada foto, no lo calcula ni lo estima. A partir de aquí te
+        hará las preguntas que falten para completar la ficha. Lo que no subas o no se lea con seguridad quedará vacío
+        y podrás completarlo después.
+      </Disclaimer>
+      {!photos.nutrition && (
+        <Disclaimer>
+          <p className="font-semibold">Sin foto de la tabla nutricional</p>
+          <p>
+            Buscaremos valores <strong>orientativos por 100 g</strong> de un alimento equivalente en la base de datos
+            pública de USDA (EE. UU.). Son aproximados, no los de tu producto: revísalos en la ficha antes de publicar
+            o sube la foto de la tabla para usar tus datos reales.
+          </p>
+        </Disclaimer>
+      )}
     </StepFrame>
   );
 }
@@ -275,65 +337,7 @@ export function ProductionStep({ value, onChange }: { value: string; onChange: (
   );
 }
 
-// ─── 5 · Etiquetas ────────────────────────────────────────────────────────────
-
-export function LabelsStep({
-  photos,
-  onPick,
-  onRemove,
-}: {
-  photos: Partial<Record<PhotoKey, PickedPhoto>>;
-  onPick: (key: PhotoKey, file: File) => string | null;
-  onRemove: (key: PhotoKey) => void;
-}) {
-  return (
-    <StepFrame
-      title="Etiquetas"
-      question="Si tienes las etiquetas a mano, súbelas y la IA leerá los datos por ti. Todo es opcional."
-    >
-      <AiPhotoField
-        label="Tabla nutricional"
-        hint="Foto de frente, sin reflejos y con el texto bien legible."
-        photo={photos.nutrition}
-        testId="photo-nutrition"
-        onPick={(file) => onPick('nutrition', file)}
-        onRemove={() => onRemove('nutrition')}
-      />
-      <AiPhotoField
-        label="Ingredientes y alérgenos"
-        hint="La lista de ingredientes y los alérgenos marcados en el envase."
-        photo={photos.ingredients}
-        testId="photo-ingredients"
-        onPick={(file) => onPick('ingredients', file)}
-        onRemove={() => onRemove('ingredients')}
-      />
-      <AiPhotoField
-        label="Conservación"
-        hint="Instrucciones de conservación y fecha de caducidad o consumo preferente."
-        photo={photos.conservation}
-        testId="photo-conservation"
-        onPick={(file) => onPick('conservation', file)}
-        onRemove={() => onRemove('conservation')}
-      />
-      <Disclaimer>
-        La IA <strong>transcribe lo que se lee</strong> en la foto, no lo calcula ni lo estima. Lo que no suba o no se
-        lea con seguridad quedará vacío y podrás completarlo después en la ficha.
-      </Disclaimer>
-      {!photos.nutrition && (
-        <Disclaimer>
-          <p className="font-semibold">Sin foto de la tabla nutricional</p>
-          <p>
-            Buscaremos valores <strong>orientativos por 100 g</strong> de un alimento equivalente en la base de datos
-            pública de USDA (EE. UU.). Son aproximados, no los de tu producto: revísalos en la ficha antes de publicar o
-            sube la foto de la tabla para usar tus datos reales.
-          </p>
-        </Disclaimer>
-      )}
-    </StepFrame>
-  );
-}
-
-// ─── 6 · Detalles de venta ────────────────────────────────────────────────────
+// ─── 5 · Detalles de venta ────────────────────────────────────────────────────
 
 export function DetailsStep({
   state,
@@ -461,13 +465,17 @@ export function ReviewStep({
   return (
     <StepFrame title="Resumen" question="Revisa lo que le vas a dar a la IA. Podrás ajustar el resultado en la ficha.">
       <div className="space-y-2.5">
-        <SummaryRow label="Foto y nombre" step="photo" onEdit={onEdit}>
+        <SummaryRow label="Fotos" step="images" onEdit={onEdit}>
           <div className="flex items-center gap-3">
             {photos.product && (
               <img src={photos.product.previewUrl} alt="Foto del producto" className="h-12 w-12 rounded-lg object-cover" />
             )}
             <span>{state.name.trim() || 'La IA lo leerá de la foto'}</span>
           </div>
+          <p className="mt-1 text-xs text-text-subtle">
+            {labelPhotos.length ? `También: ${labelPhotos.join(', ')}` : 'Sin fotos de etiquetas'}
+            {!photos.nutrition && ' · sin tabla nutricional: se usarán valores orientativos de USDA (a revisar)'}
+          </p>
         </SummaryRow>
         <SummaryRow label="Tu producto" step="product" onEdit={onEdit}>
           {clip(state.productDescription) || EMPTY}
@@ -477,14 +485,6 @@ export function ReviewStep({
         </SummaryRow>
         <SummaryRow label="Elaboración" step="production" onEdit={onEdit}>
           {clip(state.productionProcess) || EMPTY}
-        </SummaryRow>
-        <SummaryRow label="Etiquetas" step="labels" onEdit={onEdit}>
-          {labelPhotos.length ? labelPhotos.join(', ') : EMPTY}
-          {!photos.nutrition && (
-            <p className="mt-1 text-xs text-text-subtle">
-              Sin tabla nutricional: se usarán valores orientativos de USDA (a revisar).
-            </p>
-          )}
         </SummaryRow>
         <SummaryRow label="Detalles de venta" step="details" onEdit={onEdit}>
           <p>
