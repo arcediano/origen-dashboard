@@ -36,11 +36,10 @@ export interface AssistedProductResponse {
 
 export const WIZARD_STEP_IDS = [
   'intro',
-  'photo',
+  'images',
   'product',
   'origin',
   'production',
-  'labels',
   'details',
   'review',
 ] as const;
@@ -51,11 +50,10 @@ export const QUESTION_STEP_IDS: readonly WizardStepId[] = WIZARD_STEP_IDS.filter
 
 export const WIZARD_STEP_LABELS: Record<WizardStepId, string> = {
   intro: 'Cómo funciona',
-  photo: 'Foto y nombre',
+  images: 'Fotos',
   product: 'Tu producto',
   origin: 'Origen',
   production: 'Elaboración',
-  labels: 'Etiquetas',
   details: 'Detalles de venta',
   review: 'Resumen',
 };
@@ -95,7 +93,7 @@ export interface StepValidationInput extends AssistedTextState {
 /** Mensaje de error del paso, o `null` si se puede avanzar. */
 export function validateStep(step: WizardStepId, state: StepValidationInput): string | null {
   switch (step) {
-    case 'photo':
+    case 'images':
       return state.hasProductPhoto ? null : 'Sube una foto del producto para continuar.';
     case 'product':
       return state.productDescription.trim().length >= MIN_PRODUCT_DESCRIPTION

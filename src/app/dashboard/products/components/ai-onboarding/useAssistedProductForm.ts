@@ -63,9 +63,9 @@ export function useAssistedProductForm() {
     const stored = readStoredDraft();
     if (stored) {
       setText(stored.text);
-      // Sin las fotos (solo en memoria) no se puede estar más allá del paso de foto.
-      const needsPhotos = stored.step !== 'intro' && stored.step !== 'photo';
-      setStep(needsPhotos ? 'photo' : stored.step);
+      // Sin las fotos (solo en memoria) no se puede estar más allá del paso de fotos.
+      const needsPhotos = stored.step !== 'intro' && stored.step !== 'images';
+      setStep(needsPhotos ? 'images' : stored.step);
       setRecoveredAnswers(needsPhotos);
     }
     setRestored(true);

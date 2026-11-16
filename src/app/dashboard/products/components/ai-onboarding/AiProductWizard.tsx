@@ -1,10 +1,14 @@
 /**
  * @component AiProductWizard
- * @description "Origen Assist" como formulario guiado por pasos (2026-11-05):
- * sustituye al chat. El productor responde pregunta a pregunta (con
- * aclaraciones de qué hará la IA con cada respuesta), revisa un resumen y, con
- * un único envío, el backend lee las etiquetas, redacta los textos
- * comerciales y crea el producto en borrador. Al terminar redirige a su ficha.
+ * @description "Origen Assist" como formulario guiado por pasos (2026-11-05,
+ * pantalla de fotos por secciones 2026-11-14): sustituye al chat. Primero una
+ * única pantalla con una sección clara por imagen (producto, tabla
+ * nutricional, ingredientes, conservación) — no una conversación libre.
+ * Después, el productor responde pregunta a pregunta lo que la IA necesite
+ * para completar la ficha (con aclaraciones de qué hará con cada respuesta),
+ * revisa un resumen y, con un único envío, el backend lee las etiquetas,
+ * redacta los textos comerciales y crea el producto en borrador. Al terminar
+ * redirige a su ficha.
  */
 'use client';
 
@@ -27,10 +31,9 @@ import {
 import { useAssistedProductForm, type PhotoKey } from './useAssistedProductForm';
 import {
   DetailsStep,
+  ImagesStep,
   IntroStep,
-  LabelsStep,
   OriginStep,
-  PhotoStep,
   ProductStep,
   ProductionStep,
   ReviewStep,
@@ -222,13 +225,13 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
 
         <div ref={frameRef} tabIndex={-1} className="p-4 outline-none sm:p-6">
           {step === 'intro' && <IntroStep remainingCredits={remainingCredits} />}
-          {step === 'photo' && (
-            <PhotoStep
-              photo={photos.product}
+          {step === 'images' && (
+            <ImagesStep
+              photos={photos}
               name={text.name}
               recoveredAnswers={recoveredAnswers}
-              onPick={pickPhoto('product')}
-              onRemove={() => setPhoto('product', null)}
+              onPick={(key, file) => pickPhoto(key)(file)}
+              onRemove={(key) => setPhoto(key, null)}
               onName={(value) => updateText('name', value)}
             />
           )}
@@ -238,9 +241,6 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
           {step === 'origin' && <OriginStep value={text.originStory} onChange={(v) => updateText('originStory', v)} />}
           {step === 'production' && (
             <ProductionStep value={text.productionProcess} onChange={(v) => updateText('productionProcess', v)} />
-          )}
-          {step === 'labels' && (
-            <LabelsStep photos={photos} onPick={(key, file) => pickPhoto(key)(file)} onRemove={(key) => setPhoto(key, null)} />
           )}
           {step === 'details' && <DetailsStep state={text} onChange={updateText} />}
           {step === 'review' && (

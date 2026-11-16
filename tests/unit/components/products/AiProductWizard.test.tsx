@@ -63,7 +63,7 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     expect(screen.queryByRole('button', { name: 'Enviar mensaje' })).toBeNull();
   });
 
-  it('no deja avanzar del paso de foto sin foto, y muestra el progreso al avanzar', async () => {
+  it('no deja avanzar del paso de fotos sin la del producto, y muestra el progreso al avanzar', async () => {
     const user = userEvent.setup();
     render(<AiProductWizard quota={null} onManual={onManual} />);
 
@@ -75,7 +75,26 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     await user.click(screen.getByRole('button', { name: 'Siguiente' }));
 
     expect(await screen.findByText('Describe tu producto')).toBeTruthy();
-    expect(screen.getByText(/Paso 2 de 7/)).toBeTruthy();
+    expect(screen.getByText(/Paso 2 de 6/)).toBeTruthy();
+  });
+
+  it('la pantalla de fotos muestra una sección clara e independiente por cada imagen', async () => {
+    const user = userEvent.setup();
+    render(<AiProductWizard quota={null} onManual={onManual} />);
+    await user.click(screen.getByRole('button', { name: 'Empezar' }));
+
+    expect(screen.getByText('Foto del producto')).toBeTruthy();
+    expect(screen.getByText('Tabla nutricional')).toBeTruthy();
+    expect(screen.getByText('Ingredientes y alérgenos')).toBeTruthy();
+    expect(screen.getByText('Conservación')).toBeTruthy();
+    // No es un chat: nada de esto depende de un mensaje de texto libre
+    expect(screen.queryByRole('button', { name: 'Enviar mensaje' })).toBeNull();
+
+    await uploadTo('photo-nutrition');
+    const nutritionPanel = within(screen.getByTestId('photo-nutrition'));
+    expect(nutritionPanel.getByText('Foto añadida')).toBeTruthy();
+    // El resto de secciones siguen intactas, sin foto
+    expect(within(screen.getByTestId('photo-ingredients')).getByText('Subir o hacer una foto')).toBeTruthy();
   });
 
   it('exige una descripción del producto antes de seguir', async () => {
@@ -93,7 +112,11 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     const user = userEvent.setup();
     createMock.mockResolvedValue({ productId: 'prod-9', charged: true, nutritionSource: 'label' });
     render(<AiProductWizard quota={{ used: 0, total: 3 }} onManual={onManual} />);
-    await goToProductStep(user);
+
+    await user.click(screen.getByRole('button', { name: 'Empezar' }));
+    await uploadTo('photo-product');
+    await uploadTo('photo-nutrition');
+    await user.click(screen.getByRole('button', { name: 'Siguiente' }));
 
     await user.type(screen.getByLabelText('Describe tu producto'), 'Queso curado de oveja, intenso');
     await user.click(screen.getByRole('button', { name: 'Siguiente' }));
@@ -102,9 +125,6 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     await user.click(screen.getByRole('button', { name: 'Siguiente' }));
 
     await user.type(await screen.findByLabelText('Proceso de elaboración'), 'Leche cruda y maduración lenta');
-    await user.click(screen.getByRole('button', { name: 'Siguiente' }));
-
-    await uploadTo('photo-nutrition');
     await user.click(screen.getByRole('button', { name: 'Siguiente' }));
 
     await user.click(await screen.findByRole('button', { name: 'Orgánico' }));
@@ -140,11 +160,11 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     const user = userEvent.setup();
     createMock.mockResolvedValue({ productId: 'prod-7', charged: true, nutritionSource: 'usda' });
     render(<AiProductWizard quota={{ used: 0, total: 3 }} onManual={onManual} />);
-    await goToProductStep(user);
-    await user.type(screen.getByLabelText('Describe tu producto'), 'Queso curado de oveja, intenso');
-    for (let i = 0; i < 3; i++) await user.click(screen.getByRole('button', { name: 'Siguiente' }));
 
-    // Paso de etiquetas, sin foto nutricional
+    await user.click(screen.getByRole('button', { name: 'Empezar' }));
+    await uploadTo('photo-product');
+
+    // En la propia pantalla de fotos, sin foto nutricional
     expect(await screen.findByText(/Sin foto de la tabla nutricional/)).toBeTruthy();
     expect(screen.getByText(/orientativos por 100 g/)).toBeTruthy();
     await uploadTo('photo-nutrition');
@@ -153,7 +173,8 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     expect(await screen.findByText(/Sin foto de la tabla nutricional/)).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: 'Siguiente' }));
-    await user.click(screen.getByRole('button', { name: 'Siguiente' }));
+    await user.type(screen.getByLabelText('Describe tu producto'), 'Queso curado de oveja, intenso');
+    for (let i = 0; i < 4; i++) await user.click(screen.getByRole('button', { name: 'Siguiente' }));
     expect(await screen.findByText(/valores orientativos de USDA/)).toBeTruthy();
     await user.click(screen.getByRole('button', { name: 'Crear mi producto con IA' }));
 
@@ -167,7 +188,7 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     render(<AiProductWizard quota={null} onManual={onManual} />);
     await goToProductStep(user);
     await user.type(screen.getByLabelText('Describe tu producto'), 'Queso curado de oveja, intenso');
-    for (let i = 0; i < 5; i++) await user.click(screen.getByRole('button', { name: 'Siguiente' }));
+    for (let i = 0; i < 4; i++) await user.click(screen.getByRole('button', { name: 'Siguiente' }));
 
     await user.click(await screen.findByRole('button', { name: 'Editar tu producto' }));
 
@@ -180,7 +201,7 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     render(<AiProductWizard quota={{ used: 0, total: 3 }} onManual={onManual} onRecharge={onRecharge} />);
     await goToProductStep(user);
     await user.type(screen.getByLabelText('Describe tu producto'), 'Queso curado de oveja, intenso');
-    for (let i = 0; i < 5; i++) await user.click(screen.getByRole('button', { name: 'Siguiente' }));
+    for (let i = 0; i < 4; i++) await user.click(screen.getByRole('button', { name: 'Siguiente' }));
     await user.click(await screen.findByRole('button', { name: 'Crear mi producto con IA' }));
 
     const alert = await screen.findByText('Sin créditos del asistente');
