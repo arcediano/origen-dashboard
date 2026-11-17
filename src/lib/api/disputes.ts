@@ -92,3 +92,16 @@ export async function sendDisputeMessage(id: string, content: string): Promise<D
   const raw = await gatewayClient.post<unknown>(`/disputes/${id}/messages`, { content });
   return unwrap<DisputeMessage>(raw);
 }
+
+/** Plazo (días desde la entrega) para solicitar una devolución, configurado en origen-admin → Plazos. */
+export async function fetchReturnWindowDays(fallback = 14): Promise<number> {
+  try {
+    const raw = await gatewayClient.get<unknown>('/orders/public/policy', {
+      fetchOptions: { cache: 'no-store' },
+    });
+    const days = (unwrap<{ returnWindowDays?: number }>(raw) ?? {}).returnWindowDays;
+    return typeof days === 'number' && days > 0 ? days : fallback;
+  } catch {
+    return fallback;
+  }
+}

@@ -32,6 +32,7 @@ import {
 } from '@arcediano/ux-library';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
+import { fetchReturnWindowDays } from '@/lib/api/disputes';
 import { OrderDisputeSection } from '@/components/orders/OrderDisputeSection';
 
 // Hooks y API
@@ -49,14 +50,8 @@ import type { Order } from '@/types/order';
  */
 const STATUSES_REQUIRING_PAYMENT: Order['status'][] = ['processing', 'shipped', 'delivered'];
 
-/**
- * Espejo de RETURN_REQUEST_WINDOW_DAYS en el backend
- * (origen-master-microservices/src/modules/orders/orders/orders.service.ts) —
- * gate duro de 12 días naturales desde `deliveredAt` para poder solicitar
- * una devolución. Mismo motivo de duplicación que STATUSES_REQUIRING_PAYMENT
- * de arriba: sin paquete de constantes compartido entre repos.
- */
-const RETURN_REQUEST_WINDOW_DAYS = 12;
+/** Plazo por defecto para solicitar una devolución (el real se lee de origen-admin → Plazos). */
+const DEFAULT_RETURN_WINDOW_DAYS = 14;
 
 const statusConfig: Record<Order['status'], {
   variant: 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'leaf';
@@ -239,6 +234,11 @@ export default function OrderDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [returnWindowDays, setReturnWindowDays] = useState(DEFAULT_RETURN_WINDOW_DAYS);
+
+  useEffect(() => {
+    void fetchReturnWindowDays(DEFAULT_RETURN_WINDOW_DAYS).then(setReturnWindowDays);
+  }, []);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [invoiceError, setInvoiceError] = useState<string | null>(null);
   const [showStatusSheet, setShowStatusSheet] = useState(false);
@@ -371,7 +371,7 @@ export default function OrderDetailPage() {
 
   const status    = statusConfig[order.status];
   const canCancel  = ['pending', 'processing', 'shipped'].includes(order.status);
-  // Plazo de 12 días naturales desde la entrega para solicitar una
+  // Plazo (configurable) de días naturales desde la entrega para solicitar una
   // devolución (petición del humano, 2026-09-25/27) — el backend ya lo hace
   // cumplir como gate duro (changeStatusBySeller rechaza pasado el plazo);
   // esto solo refleja el mismo límite en la UI para no dejar que el
@@ -382,7 +382,7 @@ export default function OrderDetailPage() {
     : null;
   const returnWindowDaysLeft = daysSinceDelivery == null
     ? null
-    : RETURN_REQUEST_WINDOW_DAYS - daysSinceDelivery;
+    : returnWindowDays - daysSinceDelivery;
   const returnWindowExpired = returnWindowDaysLeft != null && returnWindowDaysLeft <= 0;
   // Flujo híbrido de devoluciones (2026-08-29): el productor solo puede
   // SOLICITAR la devolución desde "delivered" — aprobarla/rechazarla (y
@@ -594,7 +594,7 @@ export default function OrderDetailPage() {
                           <div className="flex items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
                             <Info className="w-4 h-4 text-origen-pino shrink-0 mt-0.5" aria-hidden />
                             <p className="text-xs text-text-subtle leading-relaxed">
-                              El plazo de {RETURN_REQUEST_WINDOW_DAYS} días naturales desde la entrega para solicitar una devolución ya ha vencido.
+                              El plazo de {returnWindowDays} días naturales desde la entrega para solicitar una devolución ya ha vencido.
                             </p>
                           </div>
                         )}
