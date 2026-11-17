@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
-import { ShoppingBag, FileText } from 'lucide-react';
+import { ShoppingBag, FileText, Scale } from 'lucide-react';
 
 // Componentes UI
 import { Card, Pagination, MobilePullRefresh, PageLoader, PageError, EmptyState, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
@@ -191,9 +191,13 @@ export default function OrdersPage() {
           es la única entrada a facturas de venta en cualquier tamaño de
           pantalla (decisión del humano, 2026-09-09: se elimina el ítem de
           menú principal, ver sidebar.ts). */}
-      <div className="px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 sm:px-6 lg:px-8">
         <Link href="/dashboard/facturas" className="inline-flex items-center gap-1.5 text-sm font-medium text-hoja-tinta hover:underline transition-colors">
           <FileText className="h-4 w-4" /> Ver facturas de venta
+        </Link>
+        {/* En móvil no hay menú lateral: la bandeja de disputas se alcanza desde aquí y desde la pestaña Cuenta. */}
+        <Link href="/dashboard/disputas" className="inline-flex items-center gap-1.5 text-sm font-medium text-hoja-tinta hover:underline transition-colors">
+          <Scale className="h-4 w-4" /> Ver disputas
         </Link>
       </div>
 

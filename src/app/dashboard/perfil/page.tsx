@@ -15,7 +15,7 @@ import { useLogout } from '@/hooks/useLogout';
 import { useReadiness } from '@/contexts/ReadinessContext';
 import { mapBlockerToText, splitStatusBlocker } from '@/lib/readiness-blockers';
 import { Avatar, AvatarFallback, Badge, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD } from '@arcediano/ux-library';
-import { AlertTriangle, ChevronRight, Eye, EyeOff, HelpCircle, LogOut, Settings2, User } from 'lucide-react';
+import { AlertTriangle, ChevronRight, Eye, EyeOff, HelpCircle, LogOut, Scale, Settings2, User } from 'lucide-react';
 
 export default function PerfilPage() {
   const { user } = useAuth();
@@ -38,6 +38,13 @@ export default function PerfilPage() {
       description: 'Seguridad, cobros y perfil comercial',
       href: '/dashboard/account',
       icon: User,
+    },
+    {
+      id: 'disputas',
+      label: 'Disputas',
+      description: 'Conversación con compradores y el equipo de Origen',
+      href: '/dashboard/disputas',
+      icon: Scale,
     },
     {
       id: 'configuraciones',
