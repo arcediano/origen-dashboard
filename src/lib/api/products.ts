@@ -1125,6 +1125,31 @@ export async function getPublicationStatus(
   }
 }
 
+/**
+ * Datos que la validación de IA (o un administrador al revertir) ha marcado
+ * como incorrectos y el productor debe corregir antes de reenviar el producto.
+ * `null` si no hay nada pendiente. Ruta backend: GET /products/:id/ai-feedback
+ */
+export interface AiFeedback {
+  kind: 'NEEDS_CORRECTION' | 'REVERTED';
+  problems: Array<{ field: string; message: string }>;
+  attempt: number;
+  createdAt: string;
+}
+
+export async function getAiFeedback(
+  productId: string,
+): Promise<ApiResponse<AiFeedback | null>> {
+  try {
+    const raw = await gatewayClient.get<AiFeedback | null>(
+      `/products/${productId}/ai-feedback`,
+    );
+    return { data: raw ?? null, status: 200 };
+  } catch (error) {
+    return handleError(error, 'getAiFeedback');
+  }
+}
+
 // ─── OFERTAS FLASH AGREGADAS ──────────────────────────────────────────────────
 
 /**
