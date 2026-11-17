@@ -18,20 +18,23 @@ const base = {
   publishStatus: 'idle' as const,
 };
 
+type Props = React.ComponentProps<typeof CreateProductNavigation>;
+const props = base as unknown as Props;
+
 describe('CreateProductNavigation — botón Publicar', () => {
   it('se muestra en un borrador completo', () => {
-    render(<CreateProductNavigation {...(base as never)} />);
+    render(<CreateProductNavigation {...props} />);
     expect(screen.getByRole('button', { name: /^Publicar$/ })).toBeInTheDocument();
   });
 
   it('no se muestra si el producto ya está en revisión (pendiente de aprobación)', () => {
-    render(<CreateProductNavigation {...(base as never)} isPendingApproval />);
+    render(<CreateProductNavigation {...props} isPendingApproval />);
     expect(screen.queryByRole('button', { name: /^Publicar$/ })).toBeNull();
     expect(screen.getByRole('button', { name: /Guardar cambios/ })).toBeInTheDocument();
   });
 
   it('no se muestra si el producto ya está publicado', () => {
-    render(<CreateProductNavigation {...(base as never)} isPublishedProduct />);
+    render(<CreateProductNavigation {...props} isPublishedProduct />);
     expect(screen.queryByRole('button', { name: /^Publicar$/ })).toBeNull();
   });
 });
