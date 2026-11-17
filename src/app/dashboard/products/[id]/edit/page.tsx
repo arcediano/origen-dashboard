@@ -25,6 +25,8 @@ import { ProductFormSteps } from '../../components/ProductFormSteps';
 import { ProductFormSidebar } from '../../components/ProductFormSidebar';
 
 import { useProductForm } from '@/hooks/useProductForm';
+import { useAiFeedback } from '@/hooks/useAiFeedback';
+import { AiFeedbackNotice } from '../../components/AiFeedbackNotice';
 import { useStepTips, KEY_FACTS_BY_STEP } from '@/hooks/useStepTips';
 import { useDelayedLoading } from '@/hooks/useDelayedLoading';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
@@ -86,6 +88,7 @@ export default function EditProductPage() {
 
   const showPageLoader = useDelayedLoading(isLoading);
 
+  const aiFeedback = useAiFeedback(productId, !isPendingApproval);
   const tips = useStepTips(activeTab, formData);
 
   const handleTabChange = (tab: FormStepId) => {
@@ -202,6 +205,11 @@ export default function EditProductPage() {
             isPendingApproval -- si no, un producto ya enviado y esperando
             aprobación del admin mostraba "¡Todo completado!, publícalo ya"
             (hallazgo real, petición del humano, 2026-10-09). */}
+        {aiFeedback && (
+          <div className="mt-4">
+            <AiFeedbackNotice feedback={aiFeedback} productId={productId} onJumpToStep={handleTabChange} />
+          </div>
+        )}
         {formData.status === 'draft' && !isPendingApproval && !allStepsCompleted && (() => {
           const pendingSteps = Object.entries(completedTabs)
             .filter(([, done]) => !done)

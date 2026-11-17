@@ -41,6 +41,8 @@ import {
 
 import { type Product } from '@/types/product';
 import { fetchProductById, deleteProduct, updateProduct, getPublicationStatus, type PublicationStatus } from '@/lib/api/products';
+import { AiFeedbackNotice } from '../components/AiFeedbackNotice';
+import { useAiFeedback } from '@/hooks/useAiFeedback';
 import { sanitizeHtml, ensureRichTextHtml } from '@/lib/html-sanitizer';
 import { formatFieldsInSentence } from '@/lib/constants/sensitiveFields';
 import { AUTONOMOUS_COMMUNITY_NAMES } from '@/lib/constants/autonomous-community';
@@ -506,10 +508,12 @@ function StatusCard({
             // Caso a: Primera publicación
             return (
               <Alert variant="warning">
-                <AlertTitle>Pendiente de revisión</AlertTitle>
+                <AlertTitle>Validando tu producto</AlertTitle>
                 <AlertDescription>
-                  Tu producto está siendo revisado por el equipo de Origen. Te notificaremos
-                  cuando sea aprobado o si necesita cambios.
+                  Estamos revisando tu producto: suele tardar solo unos segundos. Si todo está
+                  bien se publica al momento; si hay datos que corregir, te lo diremos aquí y
+                  te lo notificaremos. Si no puede validarse automáticamente, lo revisará el
+                  equipo de Origen.
                 </AlertDescription>
               </Alert>
             );
@@ -675,6 +679,25 @@ export default function ProductoDetallePage() {
 
   useEffect(() => { if (productId) loadProduct(); }, [productId, loadProduct]);
 
+  // Validación de IA: problemas que el productor debe corregir (o reversión de un admin).
+  const aiFeedback = useAiFeedback(
+    productId,
+    !!product && product.status !== 'pending_approval',
+    product?.status,
+  );
+
+  // Tras enviar a revisión la IA decide en segundos: un único refresco silencioso (sin
+  // spinner ni polling) para reflejar el resultado (publicado o con problemas nuevos).
+  const reviewing = product?.status === 'pending_approval';
+  useEffect(() => {
+    if (!reviewing) return;
+    const timer = setTimeout(async () => {
+      const res = await fetchProductById(productId);
+      if (res.data) setProduct(res.data);
+    }, 10_000);
+    return () => clearTimeout(timer);
+  }, [reviewing, productId]);
+
   const handleStatusChange = async (newStatus: Product['status']) => {
     if (!product) return;
     setIsUpdating(true);
@@ -798,7 +821,8 @@ export default function ProductoDetallePage() {
           badgeText={
             product.status === 'active'      ? 'Activo'    :
             product.status === 'inactive'    ? 'Inactivo'  :
-            product.status === 'out_of_stock'? 'Sin stock' : 'Borrador'
+            product.status === 'out_of_stock'? 'Sin stock' :
+            product.status === 'pending_approval' ? 'Validando' : 'Borrador'
           }
           tooltip="Detalle del producto"
           tooltipDetailed="Consulta y gestiona toda la información de este producto: precio, stock, imágenes, certificaciones y estado de publicación."
@@ -838,6 +862,8 @@ export default function ProductoDetallePage() {
                 existente en products/create/page.tsx) -- el div anterior no
                 apilaba y dejaba texto y botones apretados en 2 columnas en
                 pantallas estrechas (hallazgo del humano, 2026-11-05). */}
+            {aiFeedback && <AiFeedbackNotice feedback={aiFeedback} productId={product.id} />}
+
             {product.status === 'draft' && fromAssistant && (
               <Alert
                 variant="warning"
@@ -869,7 +895,7 @@ export default function ProductoDetallePage() {
               </Alert>
             )}
 
-            {product.status === 'draft' && !fromAssistant && (
+            {product.status === 'draft' && !fromAssistant && !aiFeedback && (
               <Alert
                 variant="warning"
                 className="mb-4"
