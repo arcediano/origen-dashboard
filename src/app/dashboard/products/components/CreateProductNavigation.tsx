@@ -42,6 +42,8 @@ export interface CreateProductNavigationProps {
   isEditMode?: boolean;
   /** Si el producto ya está ACTIVE/OUT_OF_STOCK -- ya está publicado, "Publicar" no aplica */
   isPublishedProduct?: boolean;
+  /** Producto ya enviado a revisión (PENDING_APPROVAL): no hay nada que publicar hasta que el admin resuelva; solo "Guardar cambios" */
+  isPendingApproval?: boolean;
   /** Si todos los pasos están completados */
   allStepsCompleted: boolean;
   /** Si tiene certificaciones */
@@ -75,6 +77,7 @@ export function CreateProductNavigation({
   isSaving,
   isEditMode = false,
   isPublishedProduct = false,
+  isPendingApproval = false,
   allStepsCompleted,
   hasCertifications,
   certificationsApproved,
@@ -202,7 +205,7 @@ export function CreateProductNavigation({
               </Button>
             )}
 
-            {isPublishedProduct ? (
+            {isPublishedProduct || isPendingApproval ? (
               // Producto ya ACTIVE/OUT_OF_STOCK: no hay nada que "publicar" --
               // el botón "Guardar cambios" de la izquierda (onSave) ya cubre
               // esta acción. "Publicar" llevaría el producto a

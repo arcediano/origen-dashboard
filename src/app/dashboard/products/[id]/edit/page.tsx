@@ -342,6 +342,7 @@ export default function EditProductPage() {
                 isSaving={isSaving}
                 isEditMode={isEditMode}
                 isPublishedProduct={isPublishedProduct}
+                isPendingApproval={isPendingApproval}
                 allStepsCompleted={allStepsCompleted}
                 hasCertifications={hasCertifications}
                 certificationsApproved={certificationsApproved}
@@ -427,7 +428,7 @@ export default function EditProductPage() {
           // avanzar de paso era tocando el stepper de arriba -- hallazgo
           // real, captura de pantalla en edición de producto).
           isLastStep
-            ? (isPublishedProduct
+            ? (isPublishedProduct || isPendingApproval
                 // Producto ya ACTIVE/OUT_OF_STOCK: no hay nada que
                 // "publicar" -- solo guardar cambios. "Publicar" aquí
                 // llevaría el producto a PENDING_APPROVAL y lo sacaría del
@@ -481,7 +482,7 @@ export default function EditProductPage() {
             leftIcon: <ChevronLeft className="w-4 h-4" />,
             className: 'min-w-0 px-2.5 gap-1.5',
           },
-          ...(!isPublishedProduct && canPublish && !isLastStep
+          ...(!isPublishedProduct && !isPendingApproval && canPublish && !isLastStep
             ? [{
                 id: 'publish',
                 label: isPublishing ? 'Publicando...' : 'Publicar',
