@@ -405,7 +405,7 @@ export default function PersonalInfoPage() {
                         alt={form.name}
                         shape="rounded"
                         size="2xl"
-                        className="w-24 h-24 shadow-md bg-origen-bosque"
+                        className={`w-24 h-24 shadow-md ${form.avatar ? 'bg-white' : 'bg-origen-bosque'}`}
                         fallback={<span className="text-white text-3xl font-semibold">{initials}</span>}
                       />
 
