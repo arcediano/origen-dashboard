@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AiFeedbackNotice, aiFieldLabel, aiFieldStep, photoReason } from '@/app/dashboard/products/components/AiFeedbackNotice';
+import { AiFeedbackNotice, aiFieldLabel, aiFieldStep, photoReason, unrelatedReason } from '@/app/dashboard/products/components/AiFeedbackNotice';
 import type { AiFeedback } from '@/lib/api/products';
 
 const aiApi = vi.hoisted(() => ({
@@ -245,6 +245,50 @@ describe('AiFeedbackNotice', () => {
       expect(screen.getByTestId('ai-partial-note')).toHaveTextContent(/sigue a la venta/);
       expect(screen.getByTestId('ai-partial-note')).toHaveTextContent(/queda 1 campo/);
       expect(screen.getByText('Descripción:')).toBeInTheDocument();
+    });
+  });
+
+  describe('foto sin relación con el producto', () => {
+    const unrelatedFeedback = (): AiFeedback =>
+      feedback({
+        problems: [
+          {
+            field: 'mainImage',
+            message:
+              'La foto principal no parece corresponder a «Miel de romero» (se ve: un paisaje de montaña). El asistente de IA no puede generar una foto de producto a partir de una imagen que no tiene relación con él. Sube una foto real del producto.',
+            imageUrl: 'https://cdn/x.jpg',
+            unrelated: true,
+          },
+        ],
+      });
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+      aiApi.getAiAssistQuota.mockResolvedValue({ enabled: true, used: 0, total: 3 });
+    });
+
+    it('avisa de que no hay relación, de que no se gasta crédito y NO ofrece generar con IA', () => {
+      render(<AiFeedbackNotice feedback={unrelatedFeedback()} productId="p1" onPhotoRegenerated={vi.fn()} />);
+      expect(screen.getByTestId('ai-photo-unrelated')).toBeInTheDocument();
+      expect(screen.getByText('La foto no tiene relación con el producto')).toBeInTheDocument();
+      expect(screen.getByText('En la foto se ve un paisaje de montaña.')).toBeInTheDocument();
+      expect(screen.getByTestId('ai-photo-unrelated-note')).toHaveTextContent(/ningún crédito/);
+      expect(screen.queryByRole('button', { name: /Generar con IA/ })).toBeNull();
+      expect(screen.getByRole('link', { name: /Subir una foto real del producto/ })).toBeInTheDocument();
+    });
+
+    it('en el formulario el botón lleva al paso de imágenes', () => {
+      const onJump = vi.fn();
+      render(
+        <AiFeedbackNotice feedback={unrelatedFeedback()} productId="p1" onJumpToStep={onJump} onPhotoRegenerated={vi.fn()} />,
+      );
+      fireEvent.click(screen.getByRole('button', { name: /Subir una foto real del producto/ }));
+      expect(onJump).toHaveBeenCalledWith('images');
+    });
+
+    it('unrelatedReason extrae qué se ve', () => {
+      expect(unrelatedReason('x (se ve: una persona) y')).toBe('En la foto se ve una persona.');
+      expect(unrelatedReason('sin detalle')).toBe('');
     });
   });
 });
