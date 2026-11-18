@@ -8,7 +8,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Table, type Column } from '@arcediano/ux-library';
-import { StatusBadge } from '@arcediano/ux-library';
+import { ProductStatusBadge } from './ProductStatusBadge';
 import { ProductImage } from '@arcediano/ux-library';
 import { ProductTableActions } from './ProductTableActions';
 import { ProductExpandableDetails } from './ProductExpandableDetails';
@@ -110,9 +110,9 @@ export function ProductTable({
     {
       key: 'estado',
       header: 'Estado',
-      accessor: (item) => <StatusBadge status={item.status as import('@arcediano/ux-library').StatusType} size="sm" />,
+      accessor: (item) => <ProductStatusBadge product={item} size="sm" />,
       sortable: true,
-      sortValue: (item) => item.status,
+      sortValue: (item) => (item.aiCorrectionPending ? 'draft-correccion' : item.status),
     },
     {
       key: 'ventas',

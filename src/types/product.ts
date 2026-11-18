@@ -430,6 +430,8 @@ export interface Product {
   hasUnreviewedChanges?: boolean;
   /** Propuesta de cambios sensibles pendiente de aprobación por un admin (ProductPendingRevision). Aplica tanto a un producto ACTIVE/OUT_OF_STOCK editado como a uno INACTIVE que ya estuvo publicado antes. */
   hasPendingRevision?: boolean;
+  /** Borrador devuelto por la IA/admin con datos pendientes de corregir (solo en el listado). */
+  aiCorrectionPending?: boolean;
   sales?: number;
   revenue?: number;
   rating?: number;
