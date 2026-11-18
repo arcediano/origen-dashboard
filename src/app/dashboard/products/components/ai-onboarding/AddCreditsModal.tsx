@@ -15,7 +15,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import {
+  Elements,
+  PaymentElement,
+  useElements,
+  useStripe,
+} from '@stripe/react-stripe-js';
 import { Check, Coins, Loader2, Sparkles } from 'lucide-react';
 import {
   Alert,
@@ -30,7 +35,11 @@ import {
   DialogTitle,
 } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
-import { checkoutAiCredits, getAiCreditPurchaseStatus, getAiCreditsPricing } from '@/lib/api/ai-assist';
+import {
+  checkoutAiCredits,
+  getAiCreditPurchaseStatus,
+  getAiCreditsPricing,
+} from '@/lib/api/ai-assist';
 import {
   formatEurCents,
   type AiCreditPriceQuote,
@@ -88,7 +97,9 @@ function PresetCard({
       <span className="text-lg font-bold text-origen-bosque">
         {quote.credits} {quote.credits === 1 ? 'crédito' : 'créditos'}
       </span>
-      <span className="text-sm font-semibold text-origen-oscuro">{formatEurCents(quote.totalCents)}</span>
+      <span className="text-sm font-semibold text-origen-oscuro">
+        {formatEurCents(quote.totalCents)}
+      </span>
       {quote.discountPct > 0 ? (
         <Badge variant="success" size="xs">
           -{quote.discountPct}%
@@ -234,7 +245,9 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
       const result = await checkoutAiCredits(selectedCredits);
       setCheckout(result);
     } catch (err) {
-      setCheckoutError(err instanceof Error ? err.message : 'No se ha podido iniciar la compra. Inténtalo de nuevo.');
+      setCheckoutError(
+        err instanceof Error ? err.message : 'No se ha podido iniciar la compra. Inténtalo de nuevo.',
+      );
     } finally {
       setIsStartingCheckout(false);
     }
@@ -245,7 +258,10 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
     onCreditsPurchased();
   };
 
-  const stripeOptions = useMemo(() => (checkout ? { clientSecret: checkout.clientSecret } : undefined), [checkout]);
+  const stripeOptions = useMemo(
+    () => (checkout ? { clientSecret: checkout.clientSecret } : undefined),
+    [checkout],
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -258,10 +274,10 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
           <DialogDescription>
             {succeeded
               ? 'Créditos añadidos a tu cuenta.'
-              : // Genérico (petición del humano, 2026-11-08): "1 crédito" ya no es
-                // solo "1 producto más" -- este mismo modal se reutiliza también
-                // para revisar el perfil comercial con IA.
-                'Cada crédito te permite un uso más del asistente de IA.'}
+              // Genérico (petición del humano, 2026-11-08): "1 crédito" ya no es
+              // solo "1 producto más" -- este mismo modal se reutiliza también
+              // para revisar el perfil comercial con IA.
+              : 'Cada crédito te permite un uso más del asistente de IA.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -270,7 +286,9 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-origen-pradera/10 text-origen-bosque">
               <Sparkles className="h-6 w-6" aria-hidden="true" />
             </span>
-            <p className="text-sm text-origen-oscuro">Ya puedes seguir usando el asistente de IA.</p>
+            <p className="text-sm text-origen-oscuro">
+              Ya puedes seguir usando el asistente de IA.
+            </p>
             <Button type="button" variant="primary" size="sm" onClick={() => onOpenChange(false)}>
               Continuar
             </Button>
@@ -287,7 +305,11 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
           </div>
         ) : checkout ? (
           <Elements stripe={getStripe()} options={stripeOptions}>
-            <PaymentStep checkout={checkout} onSucceeded={handleSucceeded} onBack={() => setCheckout(null)} />
+            <PaymentStep
+              checkout={checkout}
+              onSucceeded={handleSucceeded}
+              onBack={() => setCheckout(null)}
+            />
           </Elements>
         ) : (
           <>
