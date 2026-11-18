@@ -130,6 +130,12 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
         icon:        Package,
       },
       {
+        eventType:   'PRODUCT_REVISION_PARTIALLY_APPROVED',
+        title:       'Cambios de producto aprobados en parte',
+        description: 'Hemos publicado parte de tus cambios y otros campos necesitan tu acción.',
+        icon:        Package,
+      },
+      {
         eventType:   'PRODUCT_REVISION_REJECTED',
         title:       'Cambios de producto no aprobados',
         description: 'Los cambios que propusiste no han sido aprobados; el producto sigue publicado con sus datos anteriores.',

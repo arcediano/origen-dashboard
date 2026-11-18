@@ -30,6 +30,7 @@
 
 'use client';
 
+import { swapMainImage } from '@/lib/products/swap-main-image';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAiAssistKey, clearAiAssistDraft } from '@/hooks/useAiAssistKey';
 import { useRouter } from 'next/navigation';
@@ -728,20 +729,7 @@ export function useProductForm(productId?: string) {
    * imagen principal, sustituyendo a la actual en la ficha. No guarda: el productor publica después.
    */
   const replaceMainImage = useCallback((photo: { key: string; url: string }) => {
-    setFormData(prev => {
-      const next: ProductImage = {
-        id: photo.key,
-        url: photo.url,
-        isMain: true,
-        sortOrder: 0,
-        focusX: 50,
-        focusY: 50,
-      };
-      const rest = prev.gallery
-        .filter(img => !img.isMain && img.id !== prev.mainImage?.id)
-        .map((img, i) => ({ ...img, sortOrder: i + 1 }));
-      return { ...prev, mainImage: next, gallery: [next, ...rest] };
-    });
+    setFormData(prev => ({ ...prev, ...swapMainImage(prev, photo) }));
   }, []);
 
   // ==========================================================================
