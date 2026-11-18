@@ -21,7 +21,7 @@ import {
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
-import { Check, Coins, Loader2, Sparkles } from 'lucide-react';
+import { Check, Coins, CreditCard, Loader2, Sparkles } from 'lucide-react';
 import {
   Alert,
   AlertDescription,
@@ -37,14 +37,22 @@ import {
 import { cn } from '@/lib/utils';
 import {
   checkoutAiCredits,
+  checkoutAiCreditsWithSavedCard,
+  getAiCreditCards,
   getAiCreditPurchaseStatus,
   getAiCreditsPricing,
+  setAiCreditDefaultCard,
 } from '@/lib/api/ai-assist';
 import {
+  cardBrandLabel,
+  cardExpiry,
   formatEurCents,
+  isCardExpired,
   type AiCreditPriceQuote,
   type AiCreditsCheckoutResult,
   type AiCreditsPricingInfo,
+  type AiSavedCard,
+  type AiSavedCardsInfo,
 } from '@/lib/ai-assist/ai-credits';
 
 const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -65,6 +73,133 @@ const CONTENT_AREA_CLASSNAME = 'space-y-5 px-6 py-5';
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * El webhook de Stripe es quien acredita los créditos: se consulta el estado hasta que llegue, en vez
+ * de darlo por hecho solo porque Stripe confirmó el cobro. `TIMEOUT` = cobrado pero aún sin acreditar
+ * (los créditos aparecerán en cuanto se procese; nunca se pierde el cobro).
+ */
+async function waitForPurchase(purchaseId: string): Promise<'SUCCEEDED' | 'FAILED' | 'TIMEOUT'> {
+  for (let attempt = 0; attempt < STATUS_POLL_ATTEMPTS; attempt += 1) {
+    try {
+      const status = await getAiCreditPurchaseStatus(purchaseId);
+      if (status.status === 'SUCCEEDED') return 'SUCCEEDED';
+      if (status.status === 'FAILED') return 'FAILED';
+    } catch {
+      // Un fallo de red puntual no debe cortar el sondeo.
+    }
+    await sleep(STATUS_POLL_DELAY_MS);
+  }
+  return 'TIMEOUT';
+}
+
+/** Tarjeta guardada: «Visa •••• 4242 · caduca 08/30». */
+function cardLabel(card: AiSavedCard): string {
+  return `${cardBrandLabel(card.brand)} •••• ${card.last4}`;
+}
+
+/**
+ * Pago de un clic: resumen de la tarjeta guardada con «Cambiar». El selector lista las tarjetas
+ * guardadas y la opción de usar otra nueva. Nunca se muestra el número completo.
+ */
+function SavedCardPicker({
+  cards,
+  selectedId,
+  disabled,
+  onSelect,
+  onUseNewCard,
+}: {
+  cards: AiSavedCardsInfo;
+  selectedId: string | null;
+  disabled: boolean;
+  onSelect: (id: string) => void;
+  onUseNewCard: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = cards.methods.find((m) => m.id === selectedId) ?? cards.methods[0];
+  if (!selected) return null;
+  const expired = isCardExpired(selected);
+  return (
+    <section
+      aria-label="Método de pago"
+      className="rounded-xl border border-border-subtle bg-surface-alt p-3"
+      data-testid="saved-card"
+    >
+      <div className="flex items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-origen-pradera/10 text-origen-bosque">
+          <CreditCard className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-origen-oscuro">{cardLabel(selected)}</p>
+          <p className={cn('text-xs', expired ? 'text-feedback-danger-text' : 'text-text-subtle')}>
+            {expired ? 'Caducada' : 'Caduca'} {cardExpiry(selected)}
+          </p>
+        </div>
+        <div className="shrink-0">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="!w-auto"
+            disabled={disabled}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            data-testid="change-card"
+          >
+            Cambiar
+          </Button>
+        </div>
+      </div>
+      {expired && (
+        <p className="mt-2 text-xs text-feedback-danger-text" role="alert">
+          Esta tarjeta ha caducado. Elige otra o usa una nueva.
+        </p>
+      )}
+      {open && (
+        <ul role="radiogroup" aria-label="Tarjetas guardadas" className="mt-3 space-y-1.5">
+          {cards.methods.map((card) => {
+            const checked = card.id === selected.id;
+            return (
+              <li key={card.id}>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={checked}
+                  onClick={() => {
+                    onSelect(card.id);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    'flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm',
+                    checked
+                      ? 'border-origen-bosque bg-origen-pradera/5 text-origen-oscuro'
+                      : 'border-border-subtle bg-surface text-origen-oscuro hover:border-origen-pradera/60',
+                  )}
+                >
+                  <span>{cardLabel(card)}</span>
+                  <span className="text-xs text-text-subtle">{cardExpiry(card)}</span>
+                </button>
+              </li>
+            );
+          })}
+          <li>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onUseNewCard();
+              }}
+              className="w-full rounded-lg border border-dashed border-border-subtle px-3 py-2 text-left text-sm font-medium text-hoja-tinta hover:border-origen-pradera/60"
+              data-testid="use-new-card"
+            >
+              Usar otra tarjeta
+            </button>
+          </li>
+        </ul>
+      )}
+    </section>
+  );
 }
 
 /** Tarjeta de cantidad (1 / 3 / 5 créditos), con el precio ya calculado por el backend. */
@@ -142,30 +277,17 @@ function PaymentStep({
     }
     if (paymentIntent?.status === 'succeeded' || paymentIntent?.status === 'processing') {
       setIsConfirming(true);
-      // El webhook de Stripe es quien acredita los créditos — se consulta el
-      // estado hasta que llegue, en vez de darlo por hecho solo porque Stripe
-      // confirmó el cobro desde el navegador.
-      for (let attempt = 0; attempt < STATUS_POLL_ATTEMPTS; attempt += 1) {
-        try {
-          const status = await getAiCreditPurchaseStatus(checkout.purchaseId);
-          if (status.status === 'SUCCEEDED') {
-            onSucceeded();
-            return;
-          }
-          if (status.status === 'FAILED') {
-            setError('El pago no se ha podido confirmar. Inténtalo de nuevo.');
-            setIsConfirming(false);
-            setIsPaying(false);
-            return;
-          }
-        } catch {
-          // Reintenta en el siguiente intento; un fallo de red puntual no debe cortar el sondeo.
-        }
-        await sleep(STATUS_POLL_DELAY_MS);
+      // La tarjeta nueva queda como predeterminada para que la próxima compra sea de un clic.
+      if (typeof paymentIntent.payment_method === 'string') {
+        void setAiCreditDefaultCard(paymentIntent.payment_method).catch(() => undefined);
       }
-      // Pasados los intentos, el pago está confirmado por Stripe pero el
-      // webhook aún no ha llegado: se cierra igualmente, los créditos
-      // aparecerán en cuanto se procese (nunca se pierde el cobro).
+      const outcome = await waitForPurchase(checkout.purchaseId);
+      if (outcome === 'FAILED') {
+        setError('El pago no se ha podido confirmar. Inténtalo de nuevo.');
+        setIsConfirming(false);
+        setIsPaying(false);
+        return;
+      }
       onSucceeded();
       return;
     }
@@ -181,6 +303,10 @@ function PaymentStep({
             siguientes) -- el PaymentIntent del backend ya admite `link`.
             Sin Apple/Google Pay. */}
         <PaymentElement options={{ wallets: { applePay: 'never', googlePay: 'never' } }} />
+        <p className="text-xs text-text-subtle">
+          Guardaremos tu tarjeta de forma segura en Stripe para que la próxima compra sea de un clic.
+          Podrás cambiarla cuando quieras.
+        </p>
         {error && (
           <Alert variant="error">
             <AlertDescription>{error}</AlertDescription>
@@ -222,6 +348,12 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
   const [checkout, setCheckout] = useState<AiCreditsCheckoutResult | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [succeeded, setSucceeded] = useState(false);
+  // Pago de un clic con la tarjeta guardada.
+  const [cards, setCards] = useState<AiSavedCardsInfo | null>(null);
+  const [cardId, setCardId] = useState<string | null>(null);
+  const [useNewCard, setUseNewCard] = useState(false);
+  const [isPayingSaved, setIsPayingSaved] = useState(false);
+  const [savedError, setSavedError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -232,9 +364,20 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
     setCheckout(null);
     setCheckoutError(null);
     setSucceeded(false);
+    setCards(null);
+    setCardId(null);
+    setUseNewCard(false);
+    setSavedError(null);
     getAiCreditsPricing()
       .then(setPricing)
       .catch(() => setLoadError('No se han podido cargar los precios. Inténtalo de nuevo.'));
+    // Sin tarjetas guardadas (o si falla la consulta) se paga con tarjeta nueva, como siempre.
+    getAiCreditCards()
+      .then((info) => {
+        setCards(info);
+        setCardId(info.defaultId);
+      })
+      .catch(() => setCards({ defaultId: null, methods: [] }));
   }, [open]);
 
   const handleStartCheckout = async () => {
@@ -250,6 +393,49 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
       );
     } finally {
       setIsStartingCheckout(false);
+    }
+  };
+
+  const savedCard = cards?.methods.find((m) => m.id === cardId) ?? cards?.methods[0] ?? null;
+  const oneClick = !useNewCard && savedCard !== null;
+  const selectedQuote = pricing?.presets.find((q) => q.credits === selectedCredits) ?? null;
+
+  const handleSelectCard = (id: string) => {
+    setCardId(id);
+    setSavedError(null);
+    // La elegida pasa a ser la predeterminada de las próximas compras (si falla no bloquea el pago).
+    void setAiCreditDefaultCard(id).catch(() => undefined);
+  };
+
+  /** Pago de un clic: cobra la tarjeta guardada en el servidor; solo pide algo si el banco exige 3D Secure. */
+  const handlePaySaved = async () => {
+    if (!selectedCredits || !savedCard || isPayingSaved) return;
+    setIsPayingSaved(true);
+    setSavedError(null);
+    try {
+      const result = await checkoutAiCreditsWithSavedCard(selectedCredits, savedCard.id);
+      if (result.status === 'requires_action' && result.clientSecret) {
+        const stripe = await getStripe();
+        if (!stripe) throw new Error('No se ha podido cargar el pago seguro. Inténtalo de nuevo.');
+        const { error } = await stripe.handleNextAction({ clientSecret: result.clientSecret });
+        if (error) {
+          throw new Error(error.message ?? 'No se ha podido autenticar el pago con tu banco.');
+        }
+      } else if (result.status === 'succeeded') {
+        handleSucceeded();
+        return;
+      }
+      const outcome = await waitForPurchase(result.purchaseId);
+      if (outcome === 'FAILED') {
+        throw new Error('El pago no se ha podido confirmar. Prueba con otra tarjeta.');
+      }
+      handleSucceeded();
+    } catch (err) {
+      setSavedError(
+        err instanceof Error ? err.message : 'No se ha podido procesar el pago. Inténtalo de nuevo.',
+      );
+    } finally {
+      setIsPayingSaved(false);
     }
   };
 
@@ -332,25 +518,63 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
                 </p>
               )}
 
-              {checkoutError && (
+              {cards && oneClick && (
+                <SavedCardPicker
+                  cards={cards}
+                  selectedId={savedCard?.id ?? null}
+                  disabled={isPayingSaved}
+                  onSelect={handleSelectCard}
+                  onUseNewCard={() => {
+                    setUseNewCard(true);
+                    setSavedError(null);
+                  }}
+                />
+              )}
+              {cards && !oneClick && cards.methods.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setUseNewCard(false)}
+                  className="text-sm font-medium text-hoja-tinta underline underline-offset-2"
+                >
+                  Usar mi tarjeta guardada
+                </button>
+              )}
+
+              {(oneClick ? savedError : checkoutError) && (
                 <Alert variant="error">
-                  <AlertDescription>{checkoutError}</AlertDescription>
+                  <AlertDescription>{oneClick ? savedError : checkoutError}</AlertDescription>
                 </Alert>
               )}
             </div>
 
             <DialogFooter>
-              <Button
-                type="button"
-                variant="primary"
-                size="sm"
-                fullWidth
-                disabled={!selectedCredits}
-                loading={isStartingCheckout}
-                onClick={() => void handleStartCheckout()}
-              >
-                Continuar al pago
-              </Button>
+              {oneClick ? (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  fullWidth
+                  disabled={!selectedCredits || (savedCard !== null && isCardExpired(savedCard))}
+                  loading={isPayingSaved}
+                  loadingText="Procesando pago…"
+                  onClick={() => void handlePaySaved()}
+                  data-testid="pay-saved"
+                >
+                  {selectedQuote ? `Pagar ${formatEurCents(selectedQuote.totalCents)}` : 'Elige una cantidad'}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  fullWidth
+                  disabled={!selectedCredits}
+                  loading={isStartingCheckout}
+                  onClick={() => void handleStartCheckout()}
+                >
+                  Continuar al pago
+                </Button>
+              )}
             </DialogFooter>
           </>
         )}

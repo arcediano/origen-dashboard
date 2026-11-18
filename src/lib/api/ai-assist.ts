@@ -10,6 +10,8 @@ import type { AiAssistQuota } from '@/lib/ai-assist/label-proposal';
 import type {
   AiCreditPurchaseStatusResult,
   AiCreditsCheckoutResult,
+  AiCreditsSavedCheckoutResult,
+  AiSavedCardsInfo,
   AiCreditsPricingInfo,
 } from '@/lib/ai-assist/ai-credits';
 import type {
@@ -161,6 +163,39 @@ export async function checkoutAiCredits(credits: number): Promise<AiCreditsCheck
     return await gatewayClient.post<AiCreditsCheckoutResult>('/ai-assist/credits/checkout', {
       credits,
     });
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+/** Tarjetas guardadas del productor y cuál es la predeterminada (para el pago de un clic). */
+export async function getAiCreditCards(): Promise<AiSavedCardsInfo> {
+  try {
+    return await gatewayClient.get<AiSavedCardsInfo>('/ai-assist/credits/payment-methods');
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+/** «Cambiar tarjeta»: fija la tarjeta predeterminada para los próximos pagos. */
+export async function setAiCreditDefaultCard(paymentMethodId: string): Promise<void> {
+  try {
+    await gatewayClient.put('/ai-assist/credits/payment-methods/default', { paymentMethodId });
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+/** Compra de créditos con una tarjeta ya guardada: sin Payment Element ni volver a escribir nada. */
+export async function checkoutAiCreditsWithSavedCard(
+  credits: number,
+  paymentMethodId?: string,
+): Promise<AiCreditsSavedCheckoutResult> {
+  try {
+    return await gatewayClient.post<AiCreditsSavedCheckoutResult>(
+      '/ai-assist/credits/checkout/saved',
+      { credits, ...(paymentMethodId ? { paymentMethodId } : {}) },
+    );
   } catch (error) {
     throw toAiAssistError(error);
   }
