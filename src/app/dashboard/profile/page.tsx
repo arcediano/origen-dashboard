@@ -11,12 +11,13 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle, PageLoader } from '@arcediano/ux-library';
+import { Avatar, Card, CardContent, CardHeader, CardTitle, PageLoader } from '@arcediano/ux-library';
 import { Badge, Button } from '@arcediano/ux-library';
 import { Progress } from '@arcediano/ux-library';
 import { useProducerProfile } from '@/components/features/dashboard/hooks';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReadiness } from '@/contexts/ReadinessContext';
+import { getProducerProfile, type ProducerProfileData } from '@/lib/api/producers';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -35,6 +36,24 @@ export default function ProfilePage() {
   const { producer, isLoading } = useProducerProfile();
   const { user: authUser } = useAuth();
   const { readiness, isLoading: isReadinessLoading } = useReadiness();
+
+  // Identidad visible del negocio (logo, nombre, eslogan): el mismo dato que ve el cliente en la tienda.
+  const [business, setBusiness] = React.useState<ProducerProfileData | null>(null);
+  React.useEffect(() => {
+    let cancelled = false;
+    getProducerProfile()
+      .then((res) => {
+        if (!cancelled) setBusiness(res.data ?? null);
+      })
+      .catch(() => {
+        // Degradación silenciosa: sin identidad, el resto del perfil sigue funcionando.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const businessName = business?.fiscal?.businessName || business?.story?.businessName || '';
+  const logoUrl = business?.visual?.logoUrl && /^https?:\/\//i.test(business.visual.logoUrl) ? business.visual.logoUrl : undefined;
 
   if (isLoading || isReadinessLoading) return <PageLoader message="Cargando perfil..." />;
 
@@ -88,6 +107,31 @@ export default function ProfilePage() {
       />
 
       <div className="container mx-auto px-4 pb-6 sm:px-6 sm:pb-8 lg:px-8 lg:pb-10">
+
+      {/* ── Identidad del negocio: logo + nombre ── */}
+      <Card className="mt-4 border-border-subtle bg-surface-alt shadow-sm sm:mt-6" data-testid="profile-identity">
+        <CardContent className="flex items-center gap-4 p-4 sm:p-5">
+          <Avatar
+            src={logoUrl}
+            alt={businessName ? `Logo de ${businessName}` : 'Logo del negocio'}
+            shape="rounded"
+            size="xl"
+            className="h-16 w-16 shrink-0 border border-border-subtle bg-white sm:h-20 sm:w-20"
+            fallback={<span className="text-xl font-bold text-hoja-tinta">{(businessName || '?').charAt(0).toUpperCase()}</span>}
+          />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-semibold text-origen-bosque sm:text-lg">{businessName || 'Tu negocio'}</p>
+            {business?.story?.tagline && (
+              <p className="truncate text-sm text-text-subtle">{business.story.tagline}</p>
+            )}
+            {!logoUrl && (
+              <Link href="/dashboard/profile/business" className="mt-1 inline-block text-xs font-medium text-origen-pino hover:underline">
+                Añade tu logo para que los clientes te reconozcan
+              </Link>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* ── Barra de completitud ── */}
       <div className="mt-4 mb-5 sm:mt-6 sm:mb-8">
