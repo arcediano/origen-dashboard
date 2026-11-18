@@ -135,7 +135,7 @@ export default function PerfilPage() {
                 })()}
               </div>
             )}
-            {readinessReport.blockers.some((b) => b.startsWith('DOCUMENT_EXPIRED') || b.startsWith('DOCUMENT_MISSING') || b.startsWith('DOCUMENT_REJECTED')) && (
+            {readinessReport.blockers.some((b) => b.startsWith('DOCUMENT_EXPIRED') || b.startsWith('DOCUMENT_MISSING') || b.startsWith('DOCUMENT_REJECTED') || b.startsWith('DOCUMENT_PENDING')) && (
               <Link
                 href="/dashboard/profile/certifications"
                 className="mt-2 flex items-center gap-1.5 text-[11px] text-hoja-tinta hover:underline"
