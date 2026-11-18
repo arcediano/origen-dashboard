@@ -29,6 +29,7 @@ import {
   type WizardStepId,
 } from '@/lib/ai-assist/assisted-product';
 import { useAssistedProductForm, type PhotoKey } from './useAssistedProductForm';
+import { AiWizardStepper } from './AiWizardStepper';
 import {
   DetailsStep,
   ImagesStep,
@@ -174,8 +175,8 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
 
   if (isSubmitting || isRedirecting) {
     return (
-      <div className="mx-auto max-w-2xl">
-        <Card variant="elevated" className="flex flex-col items-center gap-4 p-8 text-center sm:p-10" aria-busy="true">
+      <div className="mx-auto w-full max-w-3xl">
+        <Card variant="elevated" className="flex flex-col items-center gap-5 p-8 text-center sm:p-14" aria-busy="true">
           <Loader2 className="h-9 w-9 animate-spin text-origen-bosque" aria-hidden="true" />
           <h2 className="text-lg font-semibold text-origen-bosque">
             {isRedirecting ? 'Preparando tu ficha…' : 'Origen Assist está creando tu producto'}
@@ -196,10 +197,10 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="mx-auto w-full max-w-3xl space-y-4"
+      className="w-full space-y-4 sm:space-y-6"
     >
       {step !== 'intro' && (
-        <div className="rounded-2xl border border-border-subtle bg-white p-3 shadow-sm sm:p-4">
+        <div className="rounded-2xl border border-border-subtle bg-white p-3 shadow-sm sm:p-4 xl:hidden">
           <Progress
             value={questionIndex}
             max={QUESTION_STEP_IDS.length}
@@ -211,19 +212,34 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
       )}
 
       <Card variant="elevated" className="overflow-hidden p-0">
-        <div className="flex items-center justify-between gap-3 border-b border-border-subtle bg-origen-pastel/40 px-4 py-3 sm:px-6">
+        <div className="flex items-center justify-between gap-3 border-b border-border-subtle bg-origen-pastel/40 px-4 py-3 sm:px-8 sm:py-4">
           <div className="flex min-w-0 items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-origen-bosque shadow-sm">
               <Sparkles className="h-4 w-4" aria-hidden="true" />
             </span>
             <p className="truncate text-sm font-semibold text-origen-bosque">Origen Assist</p>
           </div>
-          <Badge variant="neutral" size="xs" className="shrink-0">
-            {step === 'intro' ? 'Asistente de IA' : 'En curso'}
-          </Badge>
+          <div className="flex shrink-0 items-center gap-2">
+            {remainingCredits !== null && (
+              <span className="hidden text-xs font-medium text-text-subtle sm:inline" data-testid="ai-wizard-credits">
+                {remainingCredits === 1 ? '1 crédito disponible' : `${remainingCredits} créditos disponibles`}
+              </span>
+            )}
+            <Badge variant="neutral" size="xs" className="shrink-0">
+              {step === 'intro' ? 'Asistente de IA' : 'En curso'}
+            </Badge>
+          </div>
         </div>
 
-        <div ref={frameRef} tabIndex={-1} className="p-4 outline-none sm:p-6">
+        {step !== 'intro' && (
+          <AiWizardStepper
+            step={step}
+            onGoTo={goTo}
+            className="hidden border-b border-border-subtle bg-white px-8 py-2 xl:block"
+          />
+        )}
+
+        <div ref={frameRef} tabIndex={-1} className="p-4 outline-none sm:p-8">
           {step === 'intro' && <IntroStep remainingCredits={remainingCredits} />}
           {step === 'images' && (
             <ImagesStep
@@ -244,12 +260,7 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
           )}
           {step === 'details' && <DetailsStep state={text} onChange={updateText} />}
           {step === 'review' && (
-            <ReviewStep
-              state={text}
-              photos={photos}
-              remainingCredits={remainingCredits}
-              onEdit={goTo}
-            />
+            <ReviewStep state={text} photos={photos} remainingCredits={remainingCredits} onEdit={goTo} />
           )}
 
           {stepError && (
@@ -269,7 +280,9 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
 
           {submitError && (
             <Alert variant={quotaExceeded ? 'warning' : 'error'} className="mt-4">
-              <AlertTitle>{quotaExceeded ? 'Sin créditos del asistente' : 'No se ha podido crear el producto'}</AlertTitle>
+              <AlertTitle>
+                {quotaExceeded ? 'Sin créditos del asistente' : 'No se ha podido crear el producto'}
+              </AlertTitle>
               <AlertDescription>
                 <p>{submitError}</p>
                 {quotaExceeded && onRecharge && (
@@ -282,7 +295,7 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
           )}
         </div>
 
-        <div className="flex flex-col-reverse gap-2 border-t border-border-subtle bg-surface-alt/40 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+        <div className="flex flex-col-reverse gap-2 border-t border-border-subtle bg-surface-alt/40 p-3 sm:flex-row sm:items-center sm:justify-between sm:px-8 sm:py-4">
           <div className="flex items-center gap-2">
             {step !== 'intro' && (
               <Button

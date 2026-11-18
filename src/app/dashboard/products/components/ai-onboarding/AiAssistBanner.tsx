@@ -123,8 +123,8 @@ export function AiAssistBanner({ quota, onStart, onRecharge, className }: AiAssi
                 Crea tu producto con ayuda de la IA en unos sencillos pasos
               </h2>
               <p className="mt-1 text-sm text-text-subtle">
-                Origen Assist te guía con preguntas claras y redacta por ti la descripción, el origen y la elaboración con un
-                tono comercial y cuidado. Tú lo revisas antes de publicar.
+                Origen Assist te guía con preguntas claras y redacta por ti la descripción, el origen y la elaboración
+                con un tono comercial y cuidado. Tú lo revisas antes de publicar.
               </p>
             </div>
           </div>
@@ -147,7 +147,10 @@ export function AiAssistBanner({ quota, onStart, onRecharge, className }: AiAssi
 
         <ol className="grid gap-2 sm:grid-cols-3" aria-label="Cómo funciona">
           {HOW_IT_WORKS.map(({ icon: Icon, text }, index) => (
-            <li key={text} className="flex items-center gap-2 rounded-xl bg-origen-pastel/40 p-2.5 text-xs text-origen-oscuro sm:text-sm">
+            <li
+              key={text}
+              className="flex items-center gap-2 rounded-xl bg-origen-pastel/40 p-2.5 text-xs text-origen-oscuro sm:text-sm"
+            >
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-origen-bosque text-[11px] font-semibold text-white">
                 {index + 1}
               </span>

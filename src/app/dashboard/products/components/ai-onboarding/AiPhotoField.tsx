@@ -41,7 +41,12 @@ export function AiPhotoField({ label, hint, photo, required, testId, onPick, onR
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-semibold text-origen-bosque">
           {label}
-          {required && <span className="text-feedback-danger" aria-hidden="true"> *</span>}
+          {required && (
+            <span className="text-feedback-danger" aria-hidden="true">
+              {' '}
+              *
+            </span>
+          )}
         </p>
         {photo && (
           <span className="inline-flex items-center gap-1 text-xs font-medium text-origen-hoja">

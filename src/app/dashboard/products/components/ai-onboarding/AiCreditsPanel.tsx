@@ -77,7 +77,14 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
               Recarga con tarjeta{onManual ? ' o crea este producto a mano' : ''}. 1 crédito = 1 producto.
             </p>
             <div className="flex flex-col gap-2 pt-2 sm:flex-row">
-              <Button type="button" variant="primary" size="sm" className="w-auto" onClick={onRecharge} leftIcon={<Coins className="h-4 w-4" aria-hidden="true" />}>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                className="w-auto"
+                onClick={onRecharge}
+                leftIcon={<Coins className="h-4 w-4" aria-hidden="true" />}
+              >
                 Recargar créditos
               </Button>
             </div>
@@ -115,9 +122,14 @@ export function AiCreditsPanel({ quota, onRecharge, onManual, className }: AiCre
           </span>
 
           <div className="min-w-0 flex-1">
-            <h2 id="ai-credits-title" className="min-w-0 text-base font-semibold leading-tight text-origen-bosque sm:text-lg">
+            <h2
+              id="ai-credits-title"
+              className="min-w-0 text-base font-semibold leading-tight text-origen-bosque sm:text-lg"
+            >
               Te {plural(remaining, 'queda', 'quedan')}{' '}
-              <span className="tabular-nums" data-testid="ai-credits-remaining">{remaining}</span>{' '}
+              <span className="tabular-nums" data-testid="ai-credits-remaining">
+                {remaining}
+              </span>{' '}
               {plural(remaining, 'crédito', 'créditos')}
             </h2>
 
