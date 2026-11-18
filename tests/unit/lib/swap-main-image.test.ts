@@ -22,4 +22,11 @@ describe('swapMainImage', () => {
   it('funciona sin galería previa', () => {
     expect(swapMainImage({}, { key: 'n', url: 'u' }).gallery).toHaveLength(1);
   });
+
+  it('conserva el archivo elegido en el equipo para subirlo al guardar', () => {
+    const file = new File(['x'], 'f.jpg', { type: 'image/jpeg' });
+    const r = swapMainImage({}, { key: 'temp-1', url: 'blob:x', file });
+    expect(r.mainImage.file).toBe(file);
+    expect(r.gallery[0].file).toBe(file);
+  });
 });

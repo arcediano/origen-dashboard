@@ -97,6 +97,22 @@ export default function EditProductPage() {
     setActiveTab(tab);
   };
 
+  /**
+   * Salto desde el aviso de correcciones (arriba de la página): además de cambiar de paso, lleva la
+   * vista hasta el formulario. En móvil el paso se abría fuera de pantalla y el productor no se
+   * enteraba de que había cambiado.
+   */
+  const jumpToStep = (tab: FormStepId) => {
+    handleTabChange(tab);
+    requestAnimationFrame(() => {
+      const el = document.getElementById('product-form-step');
+      if (!el) return;
+      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+      el.focus({ preventScroll: true });
+    });
+  };
+
   // ─── Navegación por pasos (usado por ActionBar móvil) ─────────────────────
   const currentIndex = FORM_STEPS.findIndex(s => s.id === activeTab);
   const isFirstStep  = currentIndex === 0;
@@ -211,8 +227,9 @@ export default function EditProductPage() {
             <AiFeedbackNotice
               feedback={aiFeedback}
               productId={productId}
-              onJumpToStep={handleTabChange}
+              onJumpToStep={jumpToStep}
               onPhotoRegenerated={replaceMainImage}
+              onUploadPhoto={(file, url) => replaceMainImage({ key: `temp-${Date.now()}`, url, file })}
               currentAllergens={formData.nutritionalInfo?.allergens ?? []}
               onApplyAllergens={(values) =>
                 handleNestedChange('nutritionalInfo', 'allergens', [
@@ -314,7 +331,11 @@ export default function EditProductPage() {
               mostrarse en el MISMO breakpoint (lg:) o queda un hueco de
               640-1023px sin espacio reservado mientras la ActionBar sigue
               fija abajo, tapando el formulario. */}
-          <div className={`lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-0`}>
+          <div
+            id="product-form-step"
+            tabIndex={-1}
+            className={`scroll-mt-24 outline-none lg:col-span-2 space-y-6 ${appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 64)} lg:pb-0`}
+          >
             <ProductFormSteps
               activeTab={activeTab}
               formData={formData}

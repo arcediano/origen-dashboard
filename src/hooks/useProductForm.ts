@@ -728,7 +728,7 @@ export function useProductForm(productId?: string) {
    * Pone una foto ya subida a S3 (p. ej. la que la IA genera tras bloquear la anterior) como
    * imagen principal, sustituyendo a la actual en la ficha. No guarda: el productor publica después.
    */
-  const replaceMainImage = useCallback((photo: { key: string; url: string }) => {
+  const replaceMainImage = useCallback((photo: { key: string; url: string; file?: File }) => {
     setFormData(prev => ({ ...prev, ...swapMainImage(prev, photo) }));
   }, []);
 
