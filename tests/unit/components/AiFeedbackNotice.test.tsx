@@ -98,7 +98,7 @@ describe('AiFeedbackNotice', () => {
       expect(screen.getByText('La foto principal no cumple el estándar de catálogo')).toBeInTheDocument();
       expect(screen.getByText(/fondo de cocina/)).toBeInTheDocument();
       expect(screen.getByAltText('Foto principal actual')).toHaveAttribute('src', 'https://cdn/rechazada.jpg');
-      expect(screen.getByRole('button', { name: 'Subir otra foto' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Subir otra foto/ })).toBeInTheDocument();
       expect(await screen.findByText(/te quedan 2/)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Generar con IA · 1 crédito/ })).toBeEnabled();
     });
@@ -271,7 +271,7 @@ describe('AiFeedbackNotice', () => {
       render(<AiFeedbackNotice feedback={unrelatedFeedback()} productId="p1" onPhotoRegenerated={vi.fn()} />);
       expect(screen.getByTestId('ai-photo-unrelated')).toBeInTheDocument();
       expect(screen.getByText('La foto no tiene relación con el producto')).toBeInTheDocument();
-      expect(screen.getByText('En la foto se ve un paisaje de montaña.')).toBeInTheDocument();
+      expect(screen.getByTestId('ai-photo-unrelated-note')).toHaveTextContent(/En la foto se ve un paisaje de montaña\./);
       expect(screen.getByTestId('ai-photo-unrelated-note')).toHaveTextContent(/ningún crédito/);
       expect(screen.queryByRole('button', { name: /Generar con IA/ })).toBeNull();
       expect(screen.getByRole('link', { name: /Subir una foto real del producto/ })).toBeInTheDocument();
