@@ -134,4 +134,56 @@ describe('AiFeedbackNotice', () => {
       expect(screen.getByRole('link', { name: /Corregir ahora/ })).toBeInTheDocument();
     });
   });
+
+  describe('recomendación de alérgenos (la IA nunca los modifica)', () => {
+    const allergenFeedback = (): AiFeedback =>
+      feedback({
+        problems: [
+          {
+            field: 'nutritionalInfo.allergens',
+            message: 'Declara el alérgeno Lácteos.',
+            suggestedValues: ['Lácteos'],
+          },
+        ],
+      });
+
+    it('muestra la recomendación con el campo en castellano y deja decidir al productor', () => {
+      const onApply = vi.fn();
+      const onJump = vi.fn();
+      render(
+        <AiFeedbackNotice
+          feedback={allergenFeedback()}
+          productId="p1"
+          onJumpToStep={onJump}
+          onApplyAllergens={onApply}
+        />,
+      );
+      expect(screen.getByTestId('ai-allergen-suggestion')).toBeInTheDocument();
+      expect(screen.getByText(/La IA no modifica los alérgenos/)).toBeInTheDocument();
+      expect(onApply).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByRole('button', { name: /Revisar yo mismo/ }));
+      expect(onJump).toHaveBeenCalledWith('nutritional');
+    });
+
+    it('«Añadir» aplica solo lo que falta y lo confirma', () => {
+      const onApply = vi.fn();
+      render(
+        <AiFeedbackNotice
+          feedback={allergenFeedback()}
+          productId="p1"
+          onJumpToStep={vi.fn()}
+          currentAllergens={['Gluten']}
+          onApplyAllergens={onApply}
+        />,
+      );
+      fireEvent.click(screen.getByTestId('ai-allergen-apply'));
+      expect(onApply).toHaveBeenCalledWith(['Lácteos']);
+      expect(screen.getByRole('status')).toHaveTextContent(/Añadidos a tu ficha/);
+    });
+
+    it('los campos nutritionalInfo.* tienen etiqueta y paso', () => {
+      expect(aiFieldLabel('nutritionalInfo.ingredients')).toBe('Ingredientes');
+      expect(aiFieldStep('nutritionalInfo.allergens')).toBe('nutritional');
+    });
+  });
 });

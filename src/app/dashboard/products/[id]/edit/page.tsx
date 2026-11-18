@@ -213,6 +213,12 @@ export default function EditProductPage() {
               productId={productId}
               onJumpToStep={handleTabChange}
               onPhotoRegenerated={replaceMainImage}
+              currentAllergens={formData.nutritionalInfo?.allergens ?? []}
+              onApplyAllergens={(values) =>
+                handleNestedChange('nutritionalInfo', 'allergens', [
+                  ...new Set([...(formData.nutritionalInfo?.allergens ?? []), ...values]),
+                ])
+              }
             />
           </div>
         )}

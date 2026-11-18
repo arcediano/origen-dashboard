@@ -10,7 +10,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Edit, Sparkles } from 'lucide-react';
+import { Check, Edit, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle, Button } from '@arcediano/ux-library';
 import type { AiFeedback } from '@/lib/api/products';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
@@ -33,6 +33,8 @@ const FIELD_LABEL: Record<string, string> = {
   'productionInfo.story': 'Historia del producto',
   nutritionalInfo: 'Información nutricional',
   allergens: 'Alérgenos',
+  'nutritionalInfo.allergens': 'Alérgenos',
+  'nutritionalInfo.ingredients': 'Ingredientes',
   ingredients: 'Ingredientes',
   images: 'Imágenes',
   mainImage: 'Foto principal',
@@ -49,6 +51,8 @@ const FIELD_STEP: Record<string, FormStepId> = {
   mainImage: 'images',
   nutritionalInfo: 'nutritional',
   allergens: 'nutritional',
+  'nutritionalInfo.allergens': 'nutritional',
+  'nutritionalInfo.ingredients': 'nutritional',
   ingredients: 'nutritional',
   'productionInfo.story': 'production',
 };
@@ -205,11 +209,84 @@ function PhotoBlock({
   );
 }
 
+/**
+ * Recomendación de alérgenos: la IA NUNCA los modifica (es información delicada de seguridad
+ * alimentaria), solo sugiere. El productor decide: añadirlos con un clic o revisarlos a mano.
+ */
+function AllergenSuggestion({
+  message,
+  values,
+  currentAllergens,
+  onApply,
+  onReview,
+}: {
+  message: string;
+  values: string[];
+  currentAllergens: string[];
+  onApply?: (values: string[]) => void;
+  onReview?: () => void;
+}) {
+  const missing = values.filter((v) => !currentAllergens.includes(v));
+  const [applied, setApplied] = useState(false);
+  const allDone = applied || missing.length === 0;
+  return (
+    <div
+      className="rounded-2xl border border-border bg-surface-alt p-3 sm:p-4"
+      data-testid="ai-allergen-suggestion"
+    >
+      <p className="text-sm font-semibold text-text-primary">Alérgenos: confirma esta recomendación</p>
+      <p className="mt-1 text-sm text-text-primary">{message}</p>
+      <ul className="mt-2 flex flex-wrap gap-2" aria-label="Alérgenos recomendados">
+        {values.map((v) => (
+          <li
+            key={v}
+            className="rounded-full border border-border bg-surface px-3 py-1 text-sm font-medium text-text-primary"
+          >
+            {v}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-2 text-xs text-text-subtle">
+        La IA no modifica los alérgenos: es una recomendación y la decisión es tuya.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {allDone ? (
+          <p className="flex items-center gap-1.5 text-sm font-medium text-feedback-success-text" role="status">
+            <Check className="h-4 w-4" aria-hidden="true" />
+            Añadidos a tu ficha. Revísalos y vuelve a publicar.
+          </p>
+        ) : (
+          onApply && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                onApply(missing);
+                setApplied(true);
+              }}
+              data-testid="ai-allergen-apply"
+            >
+              Añadir {missing.length === 1 ? 'este alérgeno' : 'estos alérgenos'}
+            </Button>
+          )
+        )}
+        {onReview && (
+          <Button variant="outline" size="sm" onClick={onReview}>
+            Revisar yo mismo
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function AiFeedbackNotice({
   feedback,
   productId,
   onJumpToStep,
   onPhotoRegenerated,
+  currentAllergens = [],
+  onApplyAllergens,
 }: {
   feedback: AiFeedback;
   productId: string;
@@ -217,7 +294,14 @@ export function AiFeedbackNotice({
   onJumpToStep?: (step: FormStepId) => void;
   /** Solo en la edición: recibe la foto generada por la IA para ponerla como principal. */
   onPhotoRegenerated?: (photo: RegeneratedProductPhoto) => void;
+  /** Alérgenos que ya tiene la ficha (para no ofrecer los que ya están). */
+  currentAllergens?: string[];
+  /** Solo en la edición: añade a la ficha los alérgenos recomendados (decisión del productor). */
+  onApplyAllergens?: (values: string[]) => void;
 }) {
+  const allergenProblem = feedback.problems.find(
+    (p) => p.field === 'nutritionalInfo.allergens' && (p.suggestedValues?.length ?? 0) > 0,
+  );
   const photoProblem = feedback.problems.find((p) => p.field === 'mainImage');
   const reverted = feedback.kind === 'REVERTED';
   return (
@@ -227,7 +311,7 @@ export function AiFeedbackNotice({
       </AlertTitle>
       <AlertDescription className="space-y-3">
         <ul className="list-disc space-y-1.5 pl-5">
-          {feedback.problems.map((p, i) => {
+          {feedback.problems.filter((p) => p !== allergenProblem).map((p, i) => {
             const label = aiFieldLabel(p.field);
             const step = aiFieldStep(p.field);
             const stepLabel = step ? FORM_STEPS.find((s) => s.id === step)?.label : undefined;
@@ -251,6 +335,15 @@ export function AiFeedbackNotice({
             );
           })}
         </ul>
+        {allergenProblem && (
+          <AllergenSuggestion
+            message={allergenProblem.message}
+            values={allergenProblem.suggestedValues ?? []}
+            currentAllergens={currentAllergens}
+            onApply={onApplyAllergens}
+            onReview={onJumpToStep ? () => onJumpToStep('nutritional') : undefined}
+          />
+        )}
         {photoProblem && onPhotoRegenerated && (
           <PhotoBlock
             productId={productId}
