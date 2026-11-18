@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
-import { SwipeableRow, ProductImage, StatusBadge } from '@arcediano/ux-library';
+import { SwipeableRow, ProductImage } from '@arcediano/ux-library';
+import { ProductStatusBadge } from './ProductStatusBadge';
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────
 
@@ -121,7 +122,7 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
             {/* L2: categoría (izq) + estado (der) */}
             <div className="flex items-center justify-between gap-2">
               <p className="text-[11px] text-text-subtle truncate flex-1">{product.categoryName}</p>
-              <StatusBadge status={product.status} size="xs" />
+              <ProductStatusBadge product={product} size="xs" />
             </div>
 
             {/* L3: precio + indicador de stock */}

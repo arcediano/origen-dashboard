@@ -244,6 +244,7 @@ export interface ApiProduct {
   hasUnreviewedChanges?: boolean;
   /** Propuesta de cambios sensibles pendiente de aprobación por un admin. */
   hasPendingRevision?: boolean;
+  aiCorrectionPending?: boolean;
   // Estadísticas
   rating: number;
   reviewCount: number;
@@ -571,6 +572,7 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
     publishedAt: api.publishedAt ? new Date(api.publishedAt) : undefined,
     hasUnreviewedChanges: api.hasUnreviewedChanges,
     hasPendingRevision: api.hasPendingRevision,
+    aiCorrectionPending: api.aiCorrectionPending,
 
     sales:       api.sales,
     revenue:     api.revenue,
