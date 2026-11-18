@@ -10,8 +10,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Check, Edit, ImagePlus, Send, Sparkles } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle, Button } from '@arcediano/ux-library';
+import { AlertTriangle, Check, Edit, ImagePlus, Send, Sparkles } from 'lucide-react';
+import { Button } from '@arcediano/ux-library';
 import type { AiFeedback } from '@/lib/api/products';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 import {
@@ -66,9 +66,10 @@ export function aiFieldStep(field: string): FormStepId | null {
 }
 
 /**
- * Bloqueo de la foto principal: la foto no cumple el estándar de catálogo (fondo blanco,
- * cuadrada, resolución suficiente). El productor puede subir otra, o pedir a la IA que
- * genere una válida a partir de la rechazada (1 crédito).
+ * Bloqueo de la foto principal. Móvil primero: miniatura + título en una fila, el motivo técnico
+ * plegado, y una sola tarjeta con la opción recomendada (IA) a ancho completo; subir otra foto
+ * queda como acción secundaria. Los colores son explícitos: dentro del aviso naranja el texto no
+ * debe heredar el tono del contenedor.
  */
 function PhotoBlock({
   productId,
@@ -146,116 +147,128 @@ function PhotoBlock({
     }
   };
 
+  const manualButton = (variant: 'primary' | 'outline', label: string) =>
+    onManualUpload ? (
+      <Button
+        variant={variant}
+        size="sm"
+        className="w-full sm:w-auto"
+        leftIcon={<ImagePlus className="h-3.5 w-3.5" />}
+        onClick={onManualUpload}
+        data-testid="ai-photo-manual"
+      >
+        {label}
+      </Button>
+    ) : (
+      <Link href={editHref} className="block">
+        <Button
+          variant={variant}
+          size="sm"
+          className="w-full sm:w-auto"
+          leftIcon={<ImagePlus className="h-3.5 w-3.5" />}
+          data-testid="ai-photo-manual"
+        >
+          {label}
+        </Button>
+      </Link>
+    );
+
   return (
     <div
-      className="rounded-2xl border border-border bg-surface p-3 sm:p-4"
+      className="space-y-3 rounded-2xl border border-border bg-surface p-3 text-foreground"
       data-testid={unrelated ? 'ai-photo-unrelated' : 'ai-photo-block'}
     >
-      <div className="flex gap-3 sm:gap-4">
+      <div className="flex items-center gap-3">
         {(newUrl ?? imageUrl) && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={(newUrl ?? imageUrl) as string}
             alt={done ? 'Foto principal nueva' : 'Foto principal actual'}
-            className="h-20 w-20 shrink-0 rounded-xl border border-border object-cover sm:h-28 sm:w-28"
+            className="h-14 w-14 shrink-0 rounded-lg border border-border object-cover sm:h-20 sm:w-20"
           />
         )}
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-text-primary">
-            {done
-              ? 'Foto nueva lista'
-              : unrelated
-                ? 'La foto no tiene relación con el producto'
-                : 'La foto principal no cumple el estándar de catálogo'}
-          </p>
-          {!done && reason && <p className="mt-1 text-sm text-text-muted">{reason}</p>}
-          {!done && unrelated && (
-            <p className="mt-1 text-sm text-text-primary" data-testid="ai-photo-unrelated-note">
-              El asistente de IA no puede generar una foto de producto a partir de una imagen que no
-              corresponde a este producto: <strong>no se ha usado ningún crédito</strong>. Sube una foto
-              real de tu producto.
-            </p>
-          )}
-          {done && (
-            <p className="mt-1 text-sm text-text-primary" data-testid="ai-photo-done">
-              {onResubmit
-                ? 'Ya la hemos puesto como foto principal de tu ficha. Solo falta volver a publicar.'
-                : 'La hemos puesto como foto principal de tu ficha: revísala en «Imágenes» y vuelve a publicar para que la IA la compruebe.'}
-            </p>
-          )}
-        </div>
+        <p className="min-w-0 text-sm font-semibold leading-snug text-foreground">
+          {done
+            ? 'Foto nueva lista'
+            : unrelated
+              ? 'La foto no tiene relación con el producto'
+              : 'La foto principal no cumple el estándar de catálogo'}
+        </p>
       </div>
+
+      {done && (
+        <p className="text-sm text-foreground" data-testid="ai-photo-done">
+          {onResubmit
+            ? 'Ya la hemos puesto como foto principal de tu ficha. Solo falta volver a publicar.'
+            : 'La hemos puesto como foto principal de tu ficha: revísala en «Imágenes» y vuelve a publicar para que la IA la compruebe.'}
+        </p>
+      )}
+
+      {!done && unrelated && (
+        <p className="text-sm text-foreground" data-testid="ai-photo-unrelated-note">
+          {reason && <>{reason} </>}
+          El asistente de IA no puede generar una foto de producto a partir de una imagen que no
+          corresponde a este producto: <strong>no se ha usado ningún crédito</strong>.
+        </p>
+      )}
+
+      {!done && !unrelated && reason && (
+        <details className="group text-sm text-foreground">
+          <summary className="cursor-pointer select-none font-medium text-feedback-info-text underline underline-offset-2">
+            Ver por qué
+          </summary>
+          <p className="mt-1.5 text-text-subtle">{reason}</p>
+        </details>
+      )}
 
       {done ? (
         onResubmit && (
-          <div className="mt-3">
-            <Button
-              variant="primary"
-              size="sm"
-              leftIcon={<Send className="h-3.5 w-3.5" />}
-              onClick={resubmit}
-              loading={resubmitting}
-              loadingText="Enviando..."
-              data-testid="ai-photo-resubmit"
-            >
-              Volver a publicar
-            </Button>
-          </div>
+          <Button
+            variant="primary"
+            size="sm"
+            className="w-full sm:w-auto"
+            leftIcon={<Send className="h-3.5 w-3.5" />}
+            onClick={resubmit}
+            loading={resubmitting}
+            loadingText="Enviando..."
+            data-testid="ai-photo-resubmit"
+          >
+            Volver a publicar
+          </Button>
         )
       ) : unrelated ? (
-        <div className="mt-3">
-          {onManualUpload ? (
-            <Button
-              variant="primary"
-              size="sm"
-              leftIcon={<ImagePlus className="h-3.5 w-3.5" />}
-              onClick={onManualUpload}
-              data-testid="ai-photo-manual"
-            >
-              Subir una foto real del producto
-            </Button>
-          ) : (
-            <Link href={editHref}>
-              <Button
-                variant="primary"
-                size="sm"
-                leftIcon={<ImagePlus className="h-3.5 w-3.5" />}
-                data-testid="ai-photo-manual"
-              >
-                Subir una foto real del producto
-              </Button>
-            </Link>
-          )}
-        </div>
+        manualButton('primary', 'Subir una foto real del producto')
       ) : (
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          <div className="rounded-xl border border-origen-pradera/40 bg-origen-pradera/10 p-3">
-            <p className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-              <Sparkles className="h-4 w-4 text-origen-pradera" aria-hidden="true" />
-              Que lo haga la IA
-              <span className="rounded-full bg-origen-pradera/20 px-2 py-0.5 text-[11px] font-medium">
+        <div className="space-y-2">
+          <div className="rounded-xl border border-border bg-surface-alt p-3">
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <Sparkles className="h-4 w-4 text-hoja-tinta" aria-hidden="true" />
+                Que lo haga la IA
+              </span>
+              <span className="rounded-full bg-feedback-success-subtle px-2 py-0.5 text-[11px] font-medium text-feedback-success-text">
                 Recomendado
               </span>
             </p>
-            <p className="mt-1 text-xs text-text-muted">
-              En unos segundos crea una foto cuadrada con fondo blanco a partir de la tuya. Es el
-              mismo producto: no inventa nada. Usa <strong>1 crédito</strong>
+            <p className="mt-1 text-xs text-text-subtle">
+              Foto cuadrada con fondo blanco, a partir de la tuya. Es el mismo producto: no inventa
+              nada. <strong className="text-foreground">1 crédito</strong>
               {remaining !== null && (
                 <>
-                  {' '}
-                  ·{' '}
+                  {' · '}
                   {noCredits
-                    ? 'no te quedan créditos'
+                    ? 'no te quedan'
                     : `te ${remaining === 1 ? 'queda' : 'quedan'} ${remaining}`}
                 </>
               )}
               .
             </p>
-            <div className="mt-2">
+            <div className="mt-2.5">
               {noCredits ? (
                 <Button
                   variant="primary"
                   size="sm"
+                  className="w-full sm:w-auto"
                   leftIcon={<Sparkles className="h-3.5 w-3.5" />}
                   onClick={() => setShowCredits(true)}
                 >
@@ -265,6 +278,7 @@ function PhotoBlock({
                 <Button
                   variant="primary"
                   size="sm"
+                  className="w-full sm:w-auto"
                   leftIcon={<Sparkles className="h-3.5 w-3.5" />}
                   onClick={generate}
                   disabled={busy || unavailable}
@@ -282,33 +296,12 @@ function PhotoBlock({
               </p>
             )}
           </div>
-          <div className="rounded-xl border border-border p-3">
-            <p className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-              <ImagePlus className="h-4 w-4" aria-hidden="true" />
-              Subir otra foto yo
-            </p>
-            <p className="mt-1 text-xs text-text-muted">
-              Mejor cuadrada (o casi), con el producto solo, bien iluminado y sobre fondo blanco.
-              No gasta créditos.
-            </p>
-            <div className="mt-2">
-              {onManualUpload ? (
-                <Button variant="outline" size="sm" onClick={onManualUpload} data-testid="ai-photo-manual">
-                  Subir otra foto
-                </Button>
-              ) : (
-                <Link href={editHref}>
-                  <Button variant="outline" size="sm" data-testid="ai-photo-manual">
-                    Subir otra foto
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </div>
+          {manualButton('outline', 'Subir otra foto yo (gratis)')}
         </div>
       )}
+
       {error && (
-        <p role="alert" className="mt-2 text-sm text-feedback-danger-text">
+        <p role="alert" className="text-sm text-feedback-danger-text">
           {error}
         </p>
       )}
@@ -349,16 +342,16 @@ function AllergenSuggestion({
   const allDone = applied || missing.length === 0;
   return (
     <div
-      className="rounded-2xl border border-border bg-surface-alt p-3 sm:p-4"
+      className="rounded-2xl border border-border bg-surface p-3 text-foreground"
       data-testid="ai-allergen-suggestion"
     >
-      <p className="text-sm font-semibold text-text-primary">Alérgenos: confirma esta recomendación</p>
-      <p className="mt-1 text-sm text-text-primary">{message}</p>
+      <p className="text-sm font-semibold text-foreground">Alérgenos: confirma esta recomendación</p>
+      <p className="mt-1 text-sm text-foreground">{message}</p>
       <ul className="mt-2 flex flex-wrap gap-2" aria-label="Alérgenos recomendados">
         {values.map((v) => (
           <li
             key={v}
-            className="rounded-full border border-border bg-surface px-3 py-1 text-sm font-medium text-text-primary"
+            className="rounded-full border border-border bg-surface px-3 py-1 text-sm font-medium text-foreground"
           >
             {v}
           </li>
@@ -447,92 +440,110 @@ export function AiFeedbackNotice({
   const editHref = `/dashboard/products/${productId}/edit`;
   const aiCanHelp =
     !reverted && !partial && ((photoProblem && !photoProblem.unrelated) || allergenProblem);
+
+  // Contenedor propio (no el Alert de la librería): el Alert tiñe de naranja TODO su contenido
+  // y las tarjetas internas quedaban ilegibles. Aquí solo el borde y la cabecera llevan el tono.
+  const tone = reverted
+    ? 'border-red-200 bg-feedback-danger-subtle'
+    : 'border-amber-200 bg-feedback-warning-subtle';
+  const toneText = reverted ? 'text-feedback-danger-text' : 'text-feedback-warning-text';
+
   return (
-    <Alert variant={reverted ? 'error' : 'warning'} className="mb-4" data-testid="ai-feedback-notice">
-      <AlertTitle>
-        {reverted
-          ? 'Un administrador ha revertido la publicación'
-          : partial
-            ? 'Hemos publicado parte de tus cambios'
-            : 'Hay datos que debes corregir'}
-      </AlertTitle>
-      <AlertDescription className="space-y-3">
-        {partial && (
-          <p className="text-sm" data-testid="ai-partial-note">
-            Lo que estaba bien ya está publicado y tu producto sigue a la venta. Solo{' '}
-            {total === 1 ? 'queda 1 campo' : `quedan ${total} campos`} por rehacer:
-          </p>
-        )}
-        {!reverted && !partial && (
-          <p className="text-sm">
-            {total === 1 ? 'Solo hay 1 cosa' : `Hay ${total} cosas`} que ajustar para publicarlo
-            {aiCanHelp ? ' y la IA te lo pone fácil: elige una opción de abajo.' : '.'}
-          </p>
-        )}
-        {plain.length > 0 && (
-          <ul className="list-disc space-y-1.5 pl-5">
-            {plain.map((p, i) => {
-              const label = aiFieldLabel(p.field);
-              const step = aiFieldStep(p.field);
-              const stepLabel = step ? FORM_STEPS.find((s) => s.id === step)?.label : undefined;
-              return (
-                <li key={i}>
-                  {label && <span className="font-semibold">{label}: </span>}
-                  {p.message}
-                  {stepLabel && onJumpToStep && (
-                    <>
-                      {' '}
-                      <button
-                        type="button"
-                        onClick={() => onJumpToStep(step!)}
-                        className="font-medium underline underline-offset-2"
-                      >
-                        Ir a «{stepLabel}»
-                      </button>
-                    </>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-        {allergenProblem && (
-          <AllergenSuggestion
-            message={allergenProblem.message}
-            values={allergenProblem.suggestedValues ?? []}
-            currentAllergens={currentAllergens}
-            onApply={onApplyAllergens}
-            onReview={onJumpToStep ? () => onJumpToStep('nutritional') : undefined}
-          />
-        )}
-        {photoProblem && onPhotoRegenerated && (
-          <PhotoBlock
-            productId={productId}
-            imageUrl={photoProblem.imageUrl}
-            reason={photoProblem.unrelated ? unrelatedReason(photoProblem.message) : photoReason(photoProblem.message)}
-            unrelated={photoProblem.unrelated === true}
-            onRegenerated={onPhotoRegenerated}
-            onResubmit={onResubmit}
-            onManualUpload={onJumpToStep ? () => onJumpToStep('images') : undefined}
-            editHref={editHref}
-          />
-        )}
-        <p className="text-xs">
-          {feedback.attempt > 1
-            ? `Es la revisión nº ${feedback.attempt} de este producto. `
-            : ''}
-          {partial
-            ? 'Cuando rehagas ese campo, lo revisaremos de nuevo en unos segundos y, si todo está bien, se publicará al momento.'
-            : 'Cuando lo corrijas y lo vuelvas a enviar, lo revisaremos de nuevo en unos segundos y, si todo está bien, se publicará al momento.'}
-        </p>
-        {!onJumpToStep && (
-          <Link href={editHref}>
-            <Button variant="outline" size="sm" leftIcon={<Edit className="h-3.5 w-3.5" />}>
-              Corregir ahora
-            </Button>
-          </Link>
-        )}
-      </AlertDescription>
-    </Alert>
+    <section
+      aria-labelledby="ai-feedback-title"
+      className={`mb-4 space-y-3 rounded-2xl border p-3 text-foreground sm:p-4 ${tone}`}
+      data-testid="ai-feedback-notice"
+    >
+      <div className="flex items-start gap-2.5">
+        <AlertTriangle className={`mt-0.5 h-5 w-5 shrink-0 ${toneText}`} aria-hidden="true" />
+        <div className="min-w-0">
+          <h2 id="ai-feedback-title" className={`text-base font-semibold leading-snug ${toneText}`}>
+            {reverted
+              ? 'Un administrador ha revertido la publicación'
+              : partial
+                ? 'Hemos publicado parte de tus cambios'
+                : 'Hay datos que debes corregir'}
+          </h2>
+          {partial && (
+            <p className="mt-0.5 text-sm text-foreground" data-testid="ai-partial-note">
+              Lo que estaba bien ya está publicado y tu producto sigue a la venta. Solo{' '}
+              {total === 1 ? 'queda 1 campo' : `quedan ${total} campos`} por rehacer:
+            </p>
+          )}
+          {!reverted && !partial && (
+            <p className="mt-0.5 text-sm text-foreground">
+              {total === 1 ? 'Solo hay 1 cosa' : `Hay ${total} cosas`} que ajustar para publicarlo
+              {aiCanHelp ? ' y la IA te lo pone fácil: elige una opción de abajo.' : '.'}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {plain.length > 0 && (
+        <ul className="list-disc space-y-1.5 pl-5 text-sm text-foreground">
+          {plain.map((p, i) => {
+            const label = aiFieldLabel(p.field);
+            const step = aiFieldStep(p.field);
+            const stepLabel = step ? FORM_STEPS.find((s) => s.id === step)?.label : undefined;
+            return (
+              <li key={i}>
+                {label && <span className="font-semibold">{label}: </span>}
+                {p.message}
+                {stepLabel && onJumpToStep && (
+                  <>
+                    {' '}
+                    <button
+                      type="button"
+                      onClick={() => onJumpToStep(step!)}
+                      className="font-medium underline underline-offset-2"
+                    >
+                      Ir a «{stepLabel}»
+                    </button>
+                  </>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {allergenProblem && (
+        <AllergenSuggestion
+          message={allergenProblem.message}
+          values={allergenProblem.suggestedValues ?? []}
+          currentAllergens={currentAllergens}
+          onApply={onApplyAllergens}
+          onReview={onJumpToStep ? () => onJumpToStep('nutritional') : undefined}
+        />
+      )}
+      {photoProblem && onPhotoRegenerated && (
+        <PhotoBlock
+          productId={productId}
+          imageUrl={photoProblem.imageUrl}
+          reason={
+            photoProblem.unrelated
+              ? unrelatedReason(photoProblem.message)
+              : photoReason(photoProblem.message)
+          }
+          unrelated={photoProblem.unrelated === true}
+          onRegenerated={onPhotoRegenerated}
+          onResubmit={onResubmit}
+          onManualUpload={onJumpToStep ? () => onJumpToStep('images') : undefined}
+          editHref={editHref}
+        />
+      )}
+      <p className="text-xs text-text-subtle">
+        {feedback.attempt > 1 ? `Es la revisión nº ${feedback.attempt} de este producto. ` : ''}
+        {partial
+          ? 'Cuando rehagas ese campo, lo revisaremos de nuevo en unos segundos y, si todo está bien, se publicará al momento.'
+          : 'Cuando lo corrijas y lo vuelvas a enviar, lo revisaremos de nuevo en unos segundos y, si todo está bien, se publicará al momento.'}
+      </p>
+      {!onJumpToStep && !photoProblem && (
+        <Link href={editHref} className="block sm:inline-block">
+          <Button variant="outline" size="sm" fullWidth leftIcon={<Edit className="h-3.5 w-3.5" />}>
+            Corregir ahora
+          </Button>
+        </Link>
+      )}
+    </section>
   );
 }
