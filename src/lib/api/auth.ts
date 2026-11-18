@@ -25,7 +25,8 @@ export interface AuthUser {
   activeRole?: UserRole;
   roles?: UserRole[];
   producerCode: string | null;
-  onboardingCompleted: boolean;
+  /** null = desconocido (producers no respondió): no equivale a «pendiente». */
+  onboardingCompleted: boolean | null;
   phone?: string | null;
   birthDate?: string | null;
   createdAt: string;
