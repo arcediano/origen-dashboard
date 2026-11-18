@@ -51,7 +51,7 @@ export function EnhancedStep2Visual({ data, onChange, errors = {} }: EnhancedSte
               onRemove={() => update({ logo: null })}
               leading={
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={data.logo.preview ?? data.logo.url ?? ''} alt="Vista previa del logo" className="h-full w-full object-contain" />
+                <img src={data.logo.preview ?? data.logo.url ?? ''} alt="Vista previa del logo" className="h-full w-full bg-white object-contain" />
               }
             />
           ) : (

@@ -191,7 +191,7 @@ export function SimpleLogin() {
         return;
       }
 
-      router.push(loggedUser.onboardingCompleted ? '/dashboard' : '/onboarding');
+      router.push(loggedUser.onboardingCompleted === false ? '/onboarding' : '/dashboard');
     } catch (err) {
       setErrors({ general: 'Sesión iniciada correctamente, pero no se pudo cargar tu perfil. Inténtalo de nuevo.' });
     } finally {
@@ -244,7 +244,7 @@ export function SimpleLogin() {
         return;
       }
 
-      router.push(loggedUser.onboardingCompleted ? '/dashboard' : '/onboarding');
+      router.push(loggedUser.onboardingCompleted === false ? '/onboarding' : '/dashboard');
     } catch (err) {
       setErrors({ twoFactor: 'Verificación exitosa, pero no se pudo cargar tu perfil. Inténtalo de nuevo.' });
       setIsLoading(false);
