@@ -75,6 +75,7 @@ export default function EditProductPage() {
     handleInputChange,
     handleNestedChange,
     handleImagesChange,
+    replaceMainImage,
     handleSave,
     handlePublish,
     handleCancel,
@@ -207,7 +208,12 @@ export default function EditProductPage() {
             (hallazgo real, petición del humano, 2026-10-09). */}
         {aiFeedback && (
           <div className="mt-4">
-            <AiFeedbackNotice feedback={aiFeedback} productId={productId} onJumpToStep={handleTabChange} />
+            <AiFeedbackNotice
+              feedback={aiFeedback}
+              productId={productId}
+              onJumpToStep={handleTabChange}
+              onPhotoRegenerated={replaceMainImage}
+            />
           </div>
         )}
         {formData.status === 'draft' && !isPendingApproval && !allStepsCompleted && (() => {
@@ -263,13 +269,15 @@ export default function EditProductPage() {
             .filter(Boolean);
           return (
             <Alert variant="warning" className="mt-4">
-              <AlertTitle>Tienes cambios listos para enviar a revisión</AlertTitle>
+              <AlertTitle>Tienes cambios listos para publicar</AlertTitle>
               <AlertDescription className="space-y-3">
                 <p>
                   Has modificado <span className="font-medium">{fieldLabels.join(', ')}</span>.
-                  Un administrador debe revisar estos cambios antes de publicarlos — mientras
-                  tanto tu producto sigue visible con sus datos actuales. Puedes mandarlos a
-                  revisión ahora mismo, no hace falta llegar al último paso.
+                  Al publicar, la IA revisa los cambios al momento: corrige faltas de ortografía,
+                  valida la categoría y los textos y, si todo está bien, los publica
+                  automáticamente. Mientras tanto tu producto sigue visible con sus datos
+                  actuales. Si cambias la foto principal, debe tener fondo blanco y formato
+                  cuadrado; si no los cumple te avisaremos y podrás pedir a la IA que la genere.
                 </p>
                 <Button
                   variant="primary"
@@ -278,9 +286,9 @@ export default function EditProductPage() {
                   onClick={confirmSensitiveSave}
                   disabled={isSaving}
                   loading={isSaving}
-                  loadingText="Enviando..."
+                  loadingText="Publicando..."
                 >
-                  Mandar a revisión
+                  Publicar cambios
                 </Button>
               </AlertDescription>
             </Alert>
@@ -428,11 +436,7 @@ export default function EditProductPage() {
           // avanzar de paso era tocando el stepper de arriba -- hallazgo
           // real, captura de pantalla en edición de producto).
           isLastStep
-            ? (isPublishedProduct || isPendingApproval
-                // Producto ya ACTIVE/OUT_OF_STOCK: no hay nada que
-                // "publicar" -- solo guardar cambios. "Publicar" aquí
-                // llevaría el producto a PENDING_APPROVAL y lo sacaría del
-                // catálogo público sin que el productor lo pidiera.
+            ? (isPendingApproval
                 ? {
                     id: 'primary',
                     label: isSaving ? 'Guardando...' : 'Guardar cambios',
@@ -441,7 +445,27 @@ export default function EditProductPage() {
                     loading: isSaving,
                     leftIcon: <Save className="w-4 h-4" />,
                   }
-                : canPublish
+                : isPublishedProduct
+                  // Producto ya publicado: "Publicar" solo aparece si hay cambios
+                  // que la IA tenga que validar (petición del humano, 2026-11-18);
+                  // sin cambios no hay nada que publicar.
+                  ? sensitiveDirtyFields.length > 0
+                    ? {
+                        id: 'primary',
+                        label: 'Publicar cambios',
+                        onClick: confirmSensitiveSave,
+                        disabled: isSaving,
+                        loading: isSaving,
+                        loadingText: 'Publicando...',
+                        leftIcon: <Send className="w-4 h-4" />,
+                      }
+                    : {
+                        id: 'primary',
+                        label: 'Sin cambios por publicar',
+                        onClick: handleSave,
+                        disabled: true,
+                      }
+                  : canPublish
                   ? {
                       id: 'primary',
                       label: 'Publicar',

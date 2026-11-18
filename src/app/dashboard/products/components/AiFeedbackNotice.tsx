@@ -8,11 +8,20 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Edit } from 'lucide-react';
+import { Edit, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle, Button } from '@arcediano/ux-library';
 import type { AiFeedback } from '@/lib/api/products';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
+import {
+  AiAssistError,
+  getAiAssistQuota,
+  regenerateProductPhoto,
+  type RegeneratedProductPhoto,
+} from '@/lib/api/ai-assist';
+import type { AiAssistQuota } from '@/lib/ai-assist/label-proposal';
+import { AddCreditsModal } from './ai-onboarding/AddCreditsModal';
 
 const FIELD_LABEL: Record<string, string> = {
   name: 'Nombre',
@@ -26,6 +35,7 @@ const FIELD_LABEL: Record<string, string> = {
   allergens: 'Alérgenos',
   ingredients: 'Ingredientes',
   images: 'Imágenes',
+  mainImage: 'Foto principal',
 };
 
 const FIELD_STEP: Record<string, FormStepId> = {
@@ -36,6 +46,7 @@ const FIELD_STEP: Record<string, FormStepId> = {
   categoryId: 'basic',
   subcategoryId: 'basic',
   images: 'images',
+  mainImage: 'images',
   nutritionalInfo: 'nutritional',
   allergens: 'nutritional',
   ingredients: 'nutritional',
@@ -50,16 +61,164 @@ export function aiFieldStep(field: string): FormStepId | null {
   return FIELD_STEP[field] ?? (field.startsWith('productionInfo') ? 'production' : null);
 }
 
+/**
+ * Bloqueo de la foto principal: la foto no cumple el estándar de catálogo (fondo blanco,
+ * cuadrada, resolución suficiente). El productor puede subir otra, o pedir a la IA que
+ * genere una válida a partir de la rechazada (1 crédito).
+ */
+function PhotoBlock({
+  productId,
+  imageUrl,
+  onRegenerated,
+}: {
+  productId: string;
+  imageUrl?: string;
+  onRegenerated: (photo: RegeneratedProductPhoto) => void;
+}) {
+  const [quota, setQuota] = useState<AiAssistQuota | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [newUrl, setNewUrl] = useState<string | null>(null);
+  const done = newUrl !== null;
+  const [error, setError] = useState<string | null>(null);
+  const [showCredits, setShowCredits] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getAiAssistQuota()
+      .then((q) => !cancelled && setQuota(q))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const remaining = quota ? Math.max(0, quota.total - quota.used) : null;
+  const noCredits = remaining !== null && remaining <= 0;
+  const unavailable = quota?.enabled === false;
+
+  const generate = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const photo = await regenerateProductPhoto(productId);
+      onRegenerated(photo);
+      setNewUrl(photo.url);
+      getAiAssistQuota()
+        .then(setQuota)
+        .catch(() => undefined);
+    } catch (e) {
+      if (e instanceof AiAssistError && e.code === 'AI_PRODUCER_QUOTA_EXCEEDED') {
+        setShowCredits(true);
+      }
+      setError(e instanceof Error ? e.message : 'No se ha podido generar la foto.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div
+      className="rounded-2xl border border-border bg-surface-alt p-3 sm:p-4"
+      data-testid="ai-photo-block"
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+        {(newUrl ?? imageUrl) && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={(newUrl ?? imageUrl) as string}
+            alt={done ? 'Foto principal nueva' : 'Foto principal rechazada'}
+            className="h-24 w-24 shrink-0 rounded-xl border border-border object-cover"
+          />
+        )}
+        <div className="min-w-0 flex-1 space-y-2">
+          {done ? (
+            <p className="text-sm text-text-primary" data-testid="ai-photo-done">
+              <strong>Foto nueva lista.</strong> La hemos puesto como foto principal de tu ficha:
+              revísala en «Imágenes» y vuelve a publicar para que la IA la compruebe.
+            </p>
+          ) : (
+            <>
+              <p className="text-sm text-text-primary">
+                <strong>¿Prefieres que lo haga la IA?</strong> Genera una foto de producto con
+                fondo blanco y formato cuadrado a partir de la que no ha pasado la revisión
+                (no inventa nada: es el mismo producto). Usa{' '}
+                <strong>1 crédito</strong>
+                {remaining !== null && (
+                  <>
+                    {' '}
+                    · {noCredits ? 'no te quedan créditos' : `te ${remaining === 1 ? 'queda' : 'quedan'} ${remaining}`}
+                  </>
+                )}
+                .
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {noCredits ? (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    leftIcon={<Sparkles className="h-3.5 w-3.5" />}
+                    onClick={() => setShowCredits(true)}
+                  >
+                    Conseguir créditos
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    leftIcon={<Sparkles className="h-3.5 w-3.5" />}
+                    onClick={generate}
+                    disabled={busy || unavailable}
+                    loading={busy}
+                    loadingText="Generando foto..."
+                    data-testid="ai-photo-generate"
+                  >
+                    Generar con IA · 1 crédito
+                  </Button>
+                )}
+              </div>
+              {unavailable && (
+                <p className="text-xs text-text-subtle">
+                  El asistente de IA no está disponible ahora mismo. Sube otra foto en «Imágenes».
+                </p>
+              )}
+            </>
+          )}
+          {error && (
+            <p role="alert" className="text-sm text-feedback-danger-text">
+              {error}
+            </p>
+          )}
+        </div>
+      </div>
+      <AddCreditsModal
+        open={showCredits}
+        onOpenChange={setShowCredits}
+        onCreditsPurchased={() => {
+          setShowCredits(false);
+          setError(null);
+          getAiAssistQuota()
+            .then(setQuota)
+            .catch(() => undefined);
+        }}
+      />
+    </div>
+  );
+}
+
 export function AiFeedbackNotice({
   feedback,
   productId,
   onJumpToStep,
+  onPhotoRegenerated,
 }: {
   feedback: AiFeedback;
   productId: string;
   /** En el formulario de edición: salta al paso. En el detalle, el atajo enlaza a la edición. */
   onJumpToStep?: (step: FormStepId) => void;
+  /** Solo en la edición: recibe la foto generada por la IA para ponerla como principal. */
+  onPhotoRegenerated?: (photo: RegeneratedProductPhoto) => void;
 }) {
+  const photoProblem = feedback.problems.find((p) => p.field === 'mainImage');
   const reverted = feedback.kind === 'REVERTED';
   return (
     <Alert variant={reverted ? 'error' : 'warning'} className="mb-4" data-testid="ai-feedback-notice">
@@ -92,6 +251,13 @@ export function AiFeedbackNotice({
             );
           })}
         </ul>
+        {photoProblem && onPhotoRegenerated && (
+          <PhotoBlock
+            productId={productId}
+            imageUrl={photoProblem.imageUrl}
+            onRegenerated={onPhotoRegenerated}
+          />
+        )}
         <p className="text-xs">
           {feedback.attempt > 1
             ? `Es la revisión nº ${feedback.attempt} de este producto. `

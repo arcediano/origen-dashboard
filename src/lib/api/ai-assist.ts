@@ -91,6 +91,31 @@ export async function createAssistedProduct(
   }
 }
 
+/** Foto principal generada por la IA a partir de la rechazada (ya subida a S3). */
+export interface RegeneratedProductPhoto {
+  key: string;
+  url: string;
+}
+
+/**
+ * Genera con la IA una foto principal válida (fondo blanco, cuadrada) a partir de la
+ * que la validación rechazó. Gasta 1 crédito solo si se entrega. No modifica el
+ * producto: el productor la coloca en su ficha y vuelve a publicar.
+ */
+export async function regenerateProductPhoto(
+  productId: string,
+): Promise<RegeneratedProductPhoto> {
+  try {
+    return await gatewayClient.post<RegeneratedProductPhoto>(
+      `/ai-assist/products/${encodeURIComponent(productId)}/regenerate-photo`,
+      {},
+      { timeoutMs: ASSISTED_PRODUCT_TIMEOUT_MS },
+    );
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
 /** Una foto a revisar: la URL ya resuelta (CDN) de la primera foto activa de una galería. */
 export interface ProfileReviewPhotoInput {
   collection: ProfilePhotoCollection;
