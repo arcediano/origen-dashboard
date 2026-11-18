@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-const { pricingMock, checkoutMock, statusMock, confirmPaymentMock, cardsMock, savedCheckoutMock, setDefaultMock, nextActionMock } =
+const { pricingMock, checkoutMock, statusMock, confirmPaymentMock, cardsMock, savedCheckoutMock, setDefaultMock, nextActionMock, deleteCardMock } =
   vi.hoisted(() => ({
     pricingMock: vi.fn(),
     checkoutMock: vi.fn(),
@@ -13,6 +13,7 @@ const { pricingMock, checkoutMock, statusMock, confirmPaymentMock, cardsMock, sa
     savedCheckoutMock: vi.fn(),
     setDefaultMock: vi.fn(),
     nextActionMock: vi.fn(),
+    deleteCardMock: vi.fn(),
   }));
 
 vi.mock('@/lib/api/ai-assist', async (importOriginal) => {
@@ -25,6 +26,7 @@ vi.mock('@/lib/api/ai-assist', async (importOriginal) => {
     getAiCreditCards: cardsMock,
     checkoutAiCreditsWithSavedCard: savedCheckoutMock,
     setAiCreditDefaultCard: setDefaultMock,
+    deleteAiCreditCard: deleteCardMock,
   };
 });
 
@@ -52,6 +54,7 @@ describe('AddCreditsModal', () => {
     pricingMock.mockResolvedValue({ purchasedCredits: 0, presets });
     cardsMock.mockResolvedValue({ defaultId: null, methods: [] });
     setDefaultMock.mockResolvedValue(undefined);
+    deleteCardMock.mockResolvedValue(undefined);
   });
 
   it('carga y muestra las 3 cantidades preconfiguradas con su descuento', async () => {
@@ -254,6 +257,72 @@ describe('AddCreditsModal', () => {
       await user.click(await screen.findByText('1 crédito'));
       expect(screen.getByText(/ha caducado/)).toBeTruthy();
       expect((screen.getByTestId('pay-saved') as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('el listado explica qué es: título, dónde se guardan, «Predeterminada» y acciones claras', async () => {
+      const user = userEvent.setup();
+      render(<AddCreditsModal open onOpenChange={vi.fn()} onCreditsPurchased={vi.fn()} />);
+      await screen.findByText('Visa •••• 4242');
+      await user.click(screen.getByTestId('change-card'));
+      const list = screen.getByTestId('card-list');
+      expect(list.textContent).toMatch(/Tus tarjetas guardadas/);
+      expect(list.textContent).toMatch(/Stripe/);
+      expect(list.textContent).toMatch(/nunca ve el número completo/);
+      expect(list.textContent).toMatch(/Predeterminada/);
+      expect(screen.getByRole('button', { name: /Eliminar tarjeta Mastercard •••• 0005/ })).toBeTruthy();
+      expect(screen.getByTestId('use-new-card').textContent).toMatch(/Añadir otra tarjeta/);
+    });
+
+    it('eliminar pide confirmación, borra la tarjeta en Stripe y la quita de la lista', async () => {
+      const user = userEvent.setup();
+      render(<AddCreditsModal open onOpenChange={vi.fn()} onCreditsPurchased={vi.fn()} />);
+      await screen.findByText('Visa •••• 4242');
+      await user.click(screen.getByTestId('change-card'));
+      await user.click(screen.getByTestId('remove-card-pm_2'));
+      expect(deleteCardMock).not.toHaveBeenCalled(); // antes de confirmar no se borra nada
+      await user.click(screen.getByTestId('confirm-remove-pm_2'));
+      await waitFor(() => expect(deleteCardMock).toHaveBeenCalledWith('pm_2'));
+      await waitFor(() => expect(screen.queryByRole('radio', { name: /Mastercard/ })).toBeNull());
+      expect(screen.getAllByText(/Visa •••• 4242/).length).toBeGreaterThan(0);
+    });
+
+    it('cancelar la confirmación no borra nada', async () => {
+      const user = userEvent.setup();
+      render(<AddCreditsModal open onOpenChange={vi.fn()} onCreditsPurchased={vi.fn()} />);
+      await screen.findByText('Visa •••• 4242');
+      await user.click(screen.getByTestId('change-card'));
+      await user.click(screen.getByTestId('remove-card-pm_2'));
+      await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+      expect(deleteCardMock).not.toHaveBeenCalled();
+      expect(screen.getByRole('radio', { name: /Mastercard/ })).toBeTruthy();
+    });
+
+    it('al eliminar la tarjeta elegida pasa a la siguiente; al eliminar la última vuelve a tarjeta nueva', async () => {
+      const user = userEvent.setup();
+      render(<AddCreditsModal open onOpenChange={vi.fn()} onCreditsPurchased={vi.fn()} />);
+      await screen.findByText('Visa •••• 4242');
+      await user.click(screen.getByTestId('change-card'));
+      await user.click(screen.getByTestId('remove-card-pm_1'));
+      await user.click(screen.getByTestId('confirm-remove-pm_1'));
+      await waitFor(() => expect(screen.queryByTestId('remove-card-pm_1')).toBeNull());
+      expect(screen.getAllByText('Mastercard •••• 0005').length).toBeGreaterThan(0);
+      // El panel sigue abierto: se elimina la que queda.
+      await user.click(screen.getByTestId('remove-card-pm_2'));
+      await user.click(screen.getByTestId('confirm-remove-pm_2'));
+      await waitFor(() => expect(screen.queryByTestId('saved-card')).toBeNull());
+      expect(screen.getByRole('button', { name: /Continuar al pago/ })).toBeTruthy();
+    });
+
+    it('si falla el borrado lo dice y no quita la tarjeta', async () => {
+      deleteCardMock.mockRejectedValue(new Error('boom'));
+      const user = userEvent.setup();
+      render(<AddCreditsModal open onOpenChange={vi.fn()} onCreditsPurchased={vi.fn()} />);
+      await screen.findByText('Visa •••• 4242');
+      await user.click(screen.getByTestId('change-card'));
+      await user.click(screen.getByTestId('remove-card-pm_2'));
+      await user.click(screen.getByTestId('confirm-remove-pm_2'));
+      expect(await screen.findByText(/No se ha podido eliminar la tarjeta/)).toBeTruthy();
+      expect(screen.getByRole('radio', { name: /Mastercard/ })).toBeTruthy();
     });
   });
 });

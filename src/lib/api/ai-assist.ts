@@ -186,6 +186,15 @@ export async function setAiCreditDefaultCard(paymentMethodId: string): Promise<v
   }
 }
 
+/** Elimina una tarjeta guardada (se desvincula en Stripe). */
+export async function deleteAiCreditCard(paymentMethodId: string): Promise<void> {
+  try {
+    await gatewayClient.delete(`/ai-assist/credits/payment-methods/${encodeURIComponent(paymentMethodId)}`);
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
 /** Compra de créditos con una tarjeta ya guardada: sin Payment Element ni volver a escribir nada. */
 export async function checkoutAiCreditsWithSavedCard(
   credits: number,
