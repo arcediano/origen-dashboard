@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AlertTriangle, Check, Edit, ImagePlus, Send, Sparkles } from 'lucide-react';
 import { Button } from '@arcediano/ux-library';
@@ -21,6 +21,7 @@ import {
   type RegeneratedProductPhoto,
 } from '@/lib/api/ai-assist';
 import type { AiAssistQuota } from '@/lib/ai-assist/label-proposal';
+import { MAIN_PHOTO_REQUIREMENTS, validateMainPhoto } from '@/lib/products/photo-requirements';
 import { AddCreditsModal } from './ai-onboarding/AddCreditsModal';
 
 const FIELD_LABEL: Record<string, string> = {
@@ -78,6 +79,7 @@ function PhotoBlock({
   unrelated = false,
   onRegenerated,
   onResubmit,
+  onUploadFile,
   onManualUpload,
   editHref,
 }: {
@@ -91,7 +93,9 @@ function PhotoBlock({
   onRegenerated: (photo: RegeneratedProductPhoto) => void | Promise<void>;
   /** Detalle del producto: tras guardar la foto nueva ofrece volver a publicar en un clic. */
   onResubmit?: () => void | Promise<void>;
-  /** «Subir otra foto yo»: en el formulario salta al paso de imágenes; en el detalle enlaza a la edición. */
+  /** Foto elegida por el productor (ya validada): la deja como principal. Sin esto cae a `onManualUpload`/enlace. */
+  onUploadFile?: (file: File, previewUrl: string) => void | Promise<void>;
+  /** Alternativa sin subida directa: salta al paso de imágenes. */
   onManualUpload?: () => void;
   editHref: string;
 }) {
@@ -102,6 +106,9 @@ function PhotoBlock({
   const done = newUrl !== null;
   const [error, setError] = useState<string | null>(null);
   const [showCredits, setShowCredits] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedByUser, setUploadedByUser] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -137,6 +144,28 @@ function PhotoBlock({
     }
   };
 
+  const handleFile = async (file: File | undefined) => {
+    if (!file || !onUploadFile) return;
+    setError(null);
+    const problem = await validateMainPhoto(file);
+    if (problem) {
+      setError(problem);
+      return;
+    }
+    setUploading(true);
+    const preview = URL.createObjectURL(file);
+    try {
+      await onUploadFile(file, preview);
+      setNewUrl(preview);
+      setUploadedByUser(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se ha podido guardar la foto.');
+    } finally {
+      setUploading(false);
+      if (fileInput.current) fileInput.current.value = '';
+    }
+  };
+
   const resubmit = async () => {
     if (!onResubmit) return;
     setResubmitting(true);
@@ -147,8 +176,37 @@ function PhotoBlock({
     }
   };
 
-  const manualButton = (variant: 'primary' | 'outline', label: string) =>
-    onManualUpload ? (
+  const manualButton = (variant: 'primary' | 'outline', label: string) => {
+    if (onUploadFile) {
+      return (
+        <>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="sr-only"
+            tabIndex={-1}
+            aria-label="Elegir la foto principal"
+            data-testid="ai-photo-file"
+            onChange={(e) => void handleFile(e.target.files?.[0])}
+          />
+          <Button
+            variant={variant}
+            size="sm"
+            className="w-full sm:w-auto"
+            leftIcon={<ImagePlus className="h-3.5 w-3.5" />}
+            onClick={() => fileInput.current?.click()}
+            disabled={uploading}
+            loading={uploading}
+            loadingText="Subiendo..."
+            data-testid="ai-photo-manual"
+          >
+            {label}
+          </Button>
+        </>
+      );
+    }
+    return onManualUpload ? (
       <Button
         variant={variant}
         size="sm"
@@ -172,6 +230,24 @@ function PhotoBlock({
         </Button>
       </Link>
     );
+  };
+
+  const requirements = (
+    <div
+      className="rounded-xl border border-border bg-surface-alt p-3 text-foreground"
+      data-testid="ai-photo-requirements"
+    >
+      <p className="text-sm font-semibold">Para que la foto sea aceptada</p>
+      <ul className="mt-1.5 space-y-1 text-xs text-text-subtle">
+        {MAIN_PHOTO_REQUIREMENTS.map((r) => (
+          <li key={r} className="flex gap-1.5">
+            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-hoja-tinta" aria-hidden="true" />
+            <span>{r}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 
   return (
     <div
@@ -199,8 +275,12 @@ function PhotoBlock({
       {done && (
         <p className="text-sm text-foreground" data-testid="ai-photo-done">
           {onResubmit
-            ? 'Ya la hemos puesto como foto principal de tu ficha. Solo falta volver a publicar.'
-            : 'La hemos puesto como foto principal de tu ficha: revísala en «Imágenes» y vuelve a publicar para que la IA la compruebe.'}
+            ? uploadedByUser
+              ? 'Tu foto está guardada como foto principal. Solo falta volver a publicar para que la revisemos.'
+              : 'Ya la hemos puesto como foto principal de tu ficha. Solo falta volver a publicar.'
+            : uploadedByUser
+              ? 'Tu foto ya es la foto principal de la ficha. Pulsa «Guardar» o vuelve a publicar para que la revisemos.'
+              : 'La hemos puesto como foto principal de tu ficha: revísala en «Imágenes» y vuelve a publicar para que la IA la compruebe.'}
         </p>
       )}
 
@@ -237,7 +317,10 @@ function PhotoBlock({
           </Button>
         )
       ) : unrelated ? (
-        manualButton('primary', 'Subir una foto real del producto')
+        <div className="space-y-2">
+          {requirements}
+          {manualButton('primary', 'Subir una foto real del producto')}
+        </div>
       ) : (
         <div className="space-y-2">
           <div className="rounded-xl border border-border bg-surface-alt p-3">
@@ -296,7 +379,15 @@ function PhotoBlock({
               </p>
             )}
           </div>
-          {manualButton('outline', 'Subir otra foto yo (gratis)')}
+          <div className="rounded-xl border border-border p-3">
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+              <ImagePlus className="h-4 w-4" aria-hidden="true" />
+              Subir otra foto yo
+              <span className="text-xs font-normal text-text-subtle">· gratis</span>
+            </p>
+            <div className="mt-2">{requirements}</div>
+            <div className="mt-2.5">{manualButton('outline', onUploadFile ? 'Elegir foto' : 'Subir otra foto')}</div>
+          </div>
         </div>
       )}
 
@@ -410,6 +501,7 @@ export function AiFeedbackNotice({
   onJumpToStep,
   onPhotoRegenerated,
   onResubmit,
+  onUploadPhoto,
   currentAllergens = [],
   onApplyAllergens,
 }: {
@@ -424,6 +516,8 @@ export function AiFeedbackNotice({
   onPhotoRegenerated?: (photo: RegeneratedProductPhoto) => void | Promise<void>;
   /** Detalle: vuelve a enviar a revisión tras guardar la foto nueva. */
   onResubmit?: () => void | Promise<void>;
+  /** Foto elegida por el productor (ya validada: tamaño, proporción, tipo): la deja como principal. */
+  onUploadPhoto?: (file: File, previewUrl: string) => void | Promise<void>;
   /** Alérgenos que ya tiene la ficha (para no ofrecer los que ya están). */
   currentAllergens?: string[];
   /** Solo en la edición: añade a la ficha los alérgenos recomendados (decisión del productor). */
@@ -527,6 +621,7 @@ export function AiFeedbackNotice({
           unrelated={photoProblem.unrelated === true}
           onRegenerated={onPhotoRegenerated}
           onResubmit={onResubmit}
+          onUploadFile={onUploadPhoto}
           onManualUpload={onJumpToStep ? () => onJumpToStep('images') : undefined}
           editHref={editHref}
         />

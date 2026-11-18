@@ -213,6 +213,7 @@ export default function EditProductPage() {
               productId={productId}
               onJumpToStep={handleTabChange}
               onPhotoRegenerated={replaceMainImage}
+              onUploadPhoto={(file, url) => replaceMainImage({ key: `temp-${Date.now()}`, url, file })}
               currentAllergens={formData.nutritionalInfo?.allergens ?? []}
               onApplyAllergens={(values) =>
                 handleNestedChange('nutritionalInfo', 'allergens', [

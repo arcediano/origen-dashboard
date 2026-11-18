@@ -291,4 +291,63 @@ describe('AiFeedbackNotice', () => {
       expect(unrelatedReason('sin detalle')).toBe('');
     });
   });
+
+  describe('subir otra foto (directo, con requisitos)', () => {
+    const photoFeedback = (): AiFeedback =>
+      feedback({
+        problems: [
+          { field: 'mainImage', message: 'La foto principal no cumple el estándar de catálogo (fondo de cocina).', imageUrl: 'https://cdn/x.jpg' },
+        ],
+      });
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+      aiApi.getAiAssistQuota.mockResolvedValue({ enabled: true, used: 0, total: 3 });
+      URL.createObjectURL = vi.fn(() => 'blob:preview');
+    });
+
+    const pick = (file: File) => fireEvent.change(screen.getByTestId('ai-photo-file'), { target: { files: [file] } });
+
+    it('muestra desde el principio lo que debe cumplir la foto para ser aceptada', () => {
+      render(<AiFeedbackNotice feedback={photoFeedback()} productId="p1" onUploadPhoto={vi.fn()} onPhotoRegenerated={vi.fn()} />);
+      const req = screen.getByTestId('ai-photo-requirements');
+      expect(req).toHaveTextContent('Para que la foto sea aceptada');
+      expect(req).toHaveTextContent(/fondo blanco/i);
+      expect(req).toHaveTextContent(/cuadrada/i);
+      expect(req).toHaveTextContent(/800 px/);
+    });
+
+    it('rechaza un archivo que no es imagen sin subir nada y explica por qué', async () => {
+      const onUpload = vi.fn();
+      render(<AiFeedbackNotice feedback={photoFeedback()} productId="p1" onUploadPhoto={onUpload} onPhotoRegenerated={vi.fn()} />);
+      pick(new File(['x'], 'doc.pdf', { type: 'application/pdf' }));
+      expect(await screen.findByRole('alert')).toHaveTextContent(/JPG, PNG o WebP/);
+      expect(onUpload).not.toHaveBeenCalled();
+    });
+
+    it('con una foto válida la entrega al padre y confirma que ya es la principal', async () => {
+      const onUpload = vi.fn().mockResolvedValue(undefined);
+      const original = globalThis.Image;
+      // jsdom no decodifica imágenes: simulamos una de 1000×1000.
+      globalThis.Image = class {
+        width = 1000;
+        height = 1000;
+        naturalWidth = 1000;
+        naturalHeight = 1000;
+        onload: (() => void) | null = null;
+        set src(_v: string) {
+          setTimeout(() => this.onload?.(), 0);
+        }
+      } as unknown as typeof Image;
+      try {
+        render(<AiFeedbackNotice feedback={photoFeedback()} productId="p1" onUploadPhoto={onUpload} onPhotoRegenerated={vi.fn()} />);
+        const file = new File(['x'], 'foto.jpg', { type: 'image/jpeg' });
+        pick(file);
+        await waitFor(() => expect(onUpload).toHaveBeenCalledWith(file, 'blob:preview'));
+        expect(await screen.findByTestId('ai-photo-done')).toHaveTextContent(/Tu foto ya es la foto principal/);
+      } finally {
+        globalThis.Image = original;
+      }
+    });
+  });
 });
