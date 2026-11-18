@@ -937,6 +937,31 @@ export default function BusinessInfoPage() {
             </Card>
           </div>
 
+          {/* "Mejorar textos e imágenes con IA" (petición del humano, 2026-11-18):
+              siempre visible en la página principal, no solo al pulsar Editar.
+              Al aceptar una sugerencia se entra en modo edición para que el
+              cambio quede pendiente de «Guardar cambios». */}
+          <div className="mb-6">
+            <ProfileAiReviewButton
+              variant="banner"
+              fields={{
+                tagline: form.tagline,
+                description: form.description,
+                productionPhilosophy: form.productionPhilosophy,
+                animalWelfare: form.animalWelfare,
+              }}
+              onApply={(field, value) => {
+                setIsEditing(true);
+                setForm((prev) => ({ ...prev, [field]: value }));
+              }}
+              photos={photoCandidates}
+              onApplyPhoto={(collection, itemId, file) => {
+                setIsEditing(true);
+                handleApplyAiPhoto(collection, itemId, file);
+              }}
+            />
+          </div>
+
           {!isEditing && (
             <div className="mb-8 flex flex-col sm:flex-row sm:justify-end gap-3">
               <Button onClick={() => setIsEditing(true)} size="md" disabled={isLoading} className="w-full sm:w-auto">
@@ -956,25 +981,6 @@ export default function BusinessInfoPage() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
             >
-              {/* "Mejorar con IA" (petición del humano, 2026-11-09): sección
-                  prominente al principio, no un botón pequeño escondido en
-                  la cabecera de "Historia y valores" como antes -- cubre
-                  texto Y fotos en la misma revisión. */}
-              {isEditing && (
-                <ProfileAiReviewButton
-                  variant="banner"
-                  fields={{
-                    tagline: form.tagline,
-                    description: form.description,
-                    productionPhilosophy: form.productionPhilosophy,
-                    animalWelfare: form.animalWelfare,
-                  }}
-                  onApply={(field, value) => setForm((prev) => ({ ...prev, [field]: value }))}
-                  photos={photoCandidates}
-                  onApplyPhoto={handleApplyAiPhoto}
-                />
-              )}
-
               {/* Progress indicator */}
               <Card className="border-origen-pradera/20 bg-linear-to-r from-origen-pradera/5 to-transparent">
                 <CardContent className="pt-6">
