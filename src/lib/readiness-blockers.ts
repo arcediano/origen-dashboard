@@ -46,6 +46,7 @@ export function mapBlockerToText(blocker: string): string {
   const docLabel = docType ? (DOCUMENT_TYPE_LABEL[docType] ?? docType) : '';
   if (docPrefix === 'DOCUMENT_MISSING') return `Sube el documento de ${docLabel}`;
   if (docPrefix === 'DOCUMENT_EXPIRED') return `El documento de ${docLabel} ha caducado — súbelo de nuevo`;
+  if (docPrefix === 'DOCUMENT_PENDING') return `El documento de ${docLabel} está pendiente de validación por el equipo de Origen`;
   if (docPrefix === 'DOCUMENT_REJECTED') return `El documento de ${docLabel} fue rechazado — súbelo de nuevo`;
 
   return blocker;

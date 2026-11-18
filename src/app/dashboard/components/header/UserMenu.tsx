@@ -231,7 +231,7 @@ export function UserMenu({
                   const expiring = Object.entries(docs).filter(([, status]) => status === 'VERIFIED');
                   return expiring.length > 0 && !readinessReport.canSubmitProducts ? null : null;
                 })()}
-                {readinessReport.blockers.some((b) => b.startsWith('DOCUMENT_EXPIRED') || b.startsWith('DOCUMENT_MISSING') || b.startsWith('DOCUMENT_REJECTED')) && (
+                {readinessReport.blockers.some((b) => b.startsWith('DOCUMENT_EXPIRED') || b.startsWith('DOCUMENT_MISSING') || b.startsWith('DOCUMENT_REJECTED') || b.startsWith('DOCUMENT_PENDING')) && (
                   <Link
                     href="/dashboard/profile/certifications"
                     onClick={closeMenu}
