@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AiFeedbackNotice, aiFieldLabel, aiFieldStep } from '@/app/dashboard/products/components/AiFeedbackNotice';
+import { AiFeedbackNotice, aiFieldLabel, aiFieldStep, photoReason } from '@/app/dashboard/products/components/AiFeedbackNotice';
 import type { AiFeedback } from '@/lib/api/products';
 
 const aiApi = vi.hoisted(() => ({
@@ -95,8 +95,10 @@ describe('AiFeedbackNotice', () => {
       render(
         <AiFeedbackNotice feedback={photoFeedback()} productId="p1" onJumpToStep={vi.fn()} onPhotoRegenerated={vi.fn()} />,
       );
-      expect(screen.getByText('Foto principal:')).toBeInTheDocument();
-      expect(screen.getByAltText('Foto principal rechazada')).toHaveAttribute('src', 'https://cdn/rechazada.jpg');
+      expect(screen.getByText('La foto principal no cumple el estándar de catálogo')).toBeInTheDocument();
+      expect(screen.getByText(/fondo de cocina/)).toBeInTheDocument();
+      expect(screen.getByAltText('Foto principal actual')).toHaveAttribute('src', 'https://cdn/rechazada.jpg');
+      expect(screen.getByRole('button', { name: 'Subir otra foto' })).toBeInTheDocument();
       expect(await screen.findByText(/te quedan 2/)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Generar con IA · 1 crédito/ })).toBeEnabled();
     });
@@ -128,10 +130,51 @@ describe('AiFeedbackNotice', () => {
       expect(onPhoto).not.toHaveBeenCalled();
     });
 
-    it('en el detalle (sin formulario) no ofrece generar: solo enlaza a la edición', () => {
-      render(<AiFeedbackNotice feedback={photoFeedback()} productId="p1" />);
-      expect(screen.queryByTestId('ai-photo-block')).toBeNull();
-      expect(screen.getByRole('link', { name: /Corregir ahora/ })).toBeInTheDocument();
+    it('en el detalle la opción de la IA se ve desde el primer momento, sin pulsar «Corregir ahora»', async () => {
+      render(<AiFeedbackNotice feedback={photoFeedback()} productId="p1" onPhotoRegenerated={vi.fn()} />);
+      expect(screen.getByTestId('ai-photo-block')).toBeInTheDocument();
+      expect(screen.getByText('Que lo haga la IA')).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: /Generar con IA · 1 crédito/ })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Subir otra foto/ })).toHaveAttribute(
+        'href',
+        '/dashboard/products/p1/edit',
+      );
+    });
+
+    it('en el detalle, tras generar guarda la foto y ofrece «Volver a publicar» en un clic', async () => {
+      const onPhoto = vi.fn().mockResolvedValue(undefined);
+      const onResubmit = vi.fn().mockResolvedValue(undefined);
+      aiApi.regenerateProductPhoto.mockResolvedValue({ key: 'k/new.jpg', url: 'https://cdn/new.jpg' });
+      render(
+        <AiFeedbackNotice feedback={photoFeedback()} productId="p1" onPhotoRegenerated={onPhoto} onResubmit={onResubmit} />,
+      );
+      fireEvent.click(await screen.findByRole('button', { name: /Generar con IA/ }));
+      fireEvent.click(await screen.findByTestId('ai-photo-resubmit'));
+      await waitFor(() => expect(onResubmit).toHaveBeenCalled());
+      expect(onPhoto).toHaveBeenCalledWith({ key: 'k/new.jpg', url: 'https://cdn/new.jpg' });
+    });
+
+    it('si guardar la foto falla, muestra el error y no ofrece volver a publicar', async () => {
+      aiApi.regenerateProductPhoto.mockResolvedValue({ key: 'k/new.jpg', url: 'https://cdn/new.jpg' });
+      render(
+        <AiFeedbackNotice
+          feedback={photoFeedback()}
+          productId="p1"
+          onPhotoRegenerated={vi.fn().mockRejectedValue(new Error('No se pudo guardar'))}
+          onResubmit={vi.fn()}
+        />,
+      );
+      fireEvent.click(await screen.findByRole('button', { name: /Generar con IA/ }));
+      expect(await screen.findByRole('alert')).toHaveTextContent(/No se pudo guardar/);
+      expect(screen.queryByTestId('ai-photo-resubmit')).toBeNull();
+    });
+
+    it('photoReason deja solo el motivo, sin la invitación final', () => {
+      expect(
+        photoReason(
+          'La foto principal no cumple el estándar de catálogo (proporción no válida; fondo no blanco). Sube otra foto o deja que la IA genere una nueva a partir de esta (usa 1 crédito).',
+        ),
+      ).toBe('proporción no válida; fondo no blanco');
     });
   });
 
