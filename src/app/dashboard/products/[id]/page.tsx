@@ -41,9 +41,9 @@ import {
 
 import { type Product } from '@/types/product';
 import { fetchProductById, deleteProduct, updateProduct, getPublicationStatus, type PublicationStatus } from '@/lib/api/products';
-import { AiFeedbackNotice } from '../components/AiFeedbackNotice';
+import { AiFeedbackNotice, AiFeedbackNoticeSkeleton } from '../components/AiFeedbackNotice';
 import { swapMainImage } from '@/lib/products/swap-main-image';
-import { useAiFeedback } from '@/hooks/useAiFeedback';
+import { useAiFeedbackState } from '@/hooks/useAiFeedback';
 import { sanitizeHtml, ensureRichTextHtml } from '@/lib/html-sanitizer';
 import { formatFieldsInSentence } from '@/lib/constants/sensitiveFields';
 import { AUTONOMOUS_COMMUNITY_NAMES } from '@/lib/constants/autonomous-community';
@@ -681,7 +681,7 @@ export default function ProductoDetallePage() {
   useEffect(() => { if (productId) loadProduct(); }, [productId, loadProduct]);
 
   // Validación de IA: problemas que el productor debe corregir (o reversión de un admin).
-  const aiFeedback = useAiFeedback(
+  const { feedback: aiFeedback, loading: aiFeedbackLoading } = useAiFeedbackState(
     productId,
     !!product && product.status !== 'pending_approval',
     product?.status,
@@ -863,6 +863,7 @@ export default function ProductoDetallePage() {
                 existente en products/create/page.tsx) -- el div anterior no
                 apilaba y dejaba texto y botones apretados en 2 columnas en
                 pantallas estrechas (hallazgo del humano, 2026-11-05). */}
+            {!aiFeedback && aiFeedbackLoading && product.aiCorrectionPending && <AiFeedbackNoticeSkeleton />}
             {aiFeedback && (
               <AiFeedbackNotice
                 feedback={aiFeedback}
