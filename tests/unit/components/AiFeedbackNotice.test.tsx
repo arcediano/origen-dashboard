@@ -229,4 +229,22 @@ describe('AiFeedbackNotice', () => {
       expect(aiFieldStep('nutritionalInfo.allergens')).toBe('nutritional');
     });
   });
+
+  describe('aprobación parcial', () => {
+    it('explica que lo bueno ya está publicado y qué queda por rehacer', () => {
+      render(
+        <AiFeedbackNotice
+          feedback={feedback({
+            kind: 'PARTIAL',
+            problems: [{ field: 'fullDescription', message: 'Quita la promesa de salud' }],
+          })}
+          productId="p1"
+        />,
+      );
+      expect(screen.getByText('Hemos publicado parte de tus cambios')).toBeInTheDocument();
+      expect(screen.getByTestId('ai-partial-note')).toHaveTextContent(/sigue a la venta/);
+      expect(screen.getByTestId('ai-partial-note')).toHaveTextContent(/queda 1 campo/);
+      expect(screen.getByText('Descripción:')).toBeInTheDocument();
+    });
+  });
 });

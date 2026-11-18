@@ -396,17 +396,28 @@ export function AiFeedbackNotice({
   );
   const photoProblem = feedback.problems.find((p) => p.field === 'mainImage');
   const reverted = feedback.kind === 'REVERTED';
+  const partial = feedback.kind === 'PARTIAL';
   const plain = feedback.problems.filter((p) => p !== allergenProblem && p !== photoProblem);
   const total = feedback.problems.length;
   const editHref = `/dashboard/products/${productId}/edit`;
-  const aiCanHelp = !reverted && (photoProblem || allergenProblem);
+  const aiCanHelp = !reverted && !partial && (photoProblem || allergenProblem);
   return (
     <Alert variant={reverted ? 'error' : 'warning'} className="mb-4" data-testid="ai-feedback-notice">
       <AlertTitle>
-        {reverted ? 'Un administrador ha revertido la publicación' : 'Hay datos que debes corregir'}
+        {reverted
+          ? 'Un administrador ha revertido la publicación'
+          : partial
+            ? 'Hemos publicado parte de tus cambios'
+            : 'Hay datos que debes corregir'}
       </AlertTitle>
       <AlertDescription className="space-y-3">
-        {!reverted && (
+        {partial && (
+          <p className="text-sm" data-testid="ai-partial-note">
+            Lo que estaba bien ya está publicado y tu producto sigue a la venta. Solo{' '}
+            {total === 1 ? 'queda 1 campo' : `quedan ${total} campos`} por rehacer:
+          </p>
+        )}
+        {!reverted && !partial && (
           <p className="text-sm">
             {total === 1 ? 'Solo hay 1 cosa' : `Hay ${total} cosas`} que ajustar para publicarlo
             {aiCanHelp ? ' y la IA te lo pone fácil: elige una opción de abajo.' : '.'}
@@ -463,8 +474,9 @@ export function AiFeedbackNotice({
           {feedback.attempt > 1
             ? `Es la revisión nº ${feedback.attempt} de este producto. `
             : ''}
-          Cuando lo corrijas y lo vuelvas a enviar, lo revisaremos de nuevo en unos segundos
-          y, si todo está bien, se publicará al momento.
+          {partial
+            ? 'Cuando rehagas ese campo, lo revisaremos de nuevo en unos segundos y, si todo está bien, se publicará al momento.'
+            : 'Cuando lo corrijas y lo vuelvas a enviar, lo revisaremos de nuevo en unos segundos y, si todo está bien, se publicará al momento.'}
         </p>
         {!onJumpToStep && (
           <Link href={editHref}>
