@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AiFeedbackNotice, aiFieldLabel, aiFieldStep, photoReason, unrelatedReason } from '@/app/dashboard/products/components/AiFeedbackNotice';
+import { AiFeedbackNotice, aiFieldLabel, aiFieldStep, photoReason, unrelatedReason, AiFeedbackNoticeSkeleton } from '@/app/dashboard/products/components/AiFeedbackNotice';
 import type { AiFeedback } from '@/lib/api/products';
 
 const aiApi = vi.hoisted(() => ({
@@ -348,6 +348,31 @@ describe('AiFeedbackNotice', () => {
       } finally {
         globalThis.Image = original;
       }
+    });
+  });
+
+  describe('sin parpadeos al cargar', () => {
+    it('el marcador de sitio ocupa el lugar del aviso y avisa a los lectores de pantalla de que carga', () => {
+      render(<AiFeedbackNoticeSkeleton />);
+      expect(screen.getByTestId('ai-feedback-skeleton')).toHaveAttribute('aria-busy', 'true');
+    });
+
+    it('el botón de generar está en su sitio pero deshabilitado hasta conocer el cupo (no cambia de golpe)', async () => {
+      let resolveQuota: (v: unknown) => void = () => undefined;
+      aiApi.getAiAssistQuota.mockReturnValue(new Promise((r) => (resolveQuota = r)));
+      render(
+        <AiFeedbackNotice
+          feedback={feedback({ problems: [{ field: 'mainImage', message: 'La foto principal no cumple el estándar de catálogo (fondo).', imageUrl: 'https://cdn/x.jpg' }] })}
+          productId="p1"
+          onPhotoRegenerated={vi.fn()}
+        />,
+      );
+      const btn = screen.getByRole('button', { name: /Generar con IA · 1 crédito/ });
+      expect((btn as HTMLButtonElement).disabled).toBe(true);
+      resolveQuota({ enabled: true, used: 0, total: 3 });
+      await waitFor(() =>
+        expect((screen.getByRole('button', { name: /Generar con IA · 1 crédito/ }) as HTMLButtonElement).disabled).toBe(false),
+      );
     });
   });
 });

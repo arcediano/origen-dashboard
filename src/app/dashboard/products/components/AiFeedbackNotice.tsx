@@ -333,18 +333,23 @@ function PhotoBlock({
                 Recomendado
               </span>
             </p>
-            <p className="mt-1 text-xs text-text-subtle">
+            <p className="mt-1 min-h-[2.5rem] text-xs text-text-subtle">
               Foto cuadrada con fondo blanco, a partir de la tuya. Es el mismo producto: no inventa
               nada. <strong className="text-foreground">1 crédito</strong>
-              {remaining !== null && (
+              {remaining !== null ? (
                 <>
                   {' · '}
                   {noCredits
                     ? 'no te quedan'
                     : `te ${remaining === 1 ? 'queda' : 'quedan'} ${remaining}`}
                 </>
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className="ml-1 inline-block h-3 w-24 animate-pulse rounded bg-border align-middle"
+                />
               )}
-              .
+              {remaining !== null && '.'}
             </p>
             <div className="mt-2.5">
               {noCredits ? (
@@ -364,7 +369,9 @@ function PhotoBlock({
                   className="w-full sm:w-auto"
                   leftIcon={<Sparkles className="h-3.5 w-3.5" />}
                   onClick={generate}
-                  disabled={busy || unavailable}
+                  // Hasta conocer el cupo el botón ocupa su sitio pero no se puede pulsar (no cambia de
+                  // «Generar» a «Conseguir créditos» de golpe).
+                  disabled={busy || unavailable || quota === null}
                   loading={busy}
                   loadingText="Generando foto..."
                   data-testid="ai-photo-generate"
@@ -493,6 +500,30 @@ export function photoReason(message: string): string {
 export function unrelatedReason(message: string): string {
   const seen = message.match(/\(se ve: ([^)]*)\)/);
   return seen ? `En la foto se ve ${seen[1].trim()}.` : '';
+}
+
+/**
+ * Marcador de sitio del aviso mientras llega el feedback de la IA (el producto ya sabe que lo tiene):
+ * misma caja y altura aproximada, para que al aparecer el contenido no se desplace nada.
+ */
+export function AiFeedbackNoticeSkeleton() {
+  return (
+    <section
+      aria-busy="true"
+      aria-label="Cargando las correcciones de tu producto"
+      className="mb-4 space-y-3 rounded-2xl border border-amber-200 bg-feedback-warning-subtle p-3 sm:p-4"
+      data-testid="ai-feedback-skeleton"
+    >
+      <div className="flex items-start gap-2.5">
+        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-feedback-warning-text" aria-hidden="true" />
+        <div className="w-full space-y-2">
+          <div className="h-4 w-48 animate-pulse rounded bg-amber-200/70" />
+          <div className="h-3 w-full max-w-md animate-pulse rounded bg-amber-200/50" />
+        </div>
+      </div>
+      <div className="h-40 animate-pulse rounded-2xl border border-border bg-surface" />
+    </section>
+  );
 }
 
 export function AiFeedbackNotice({
