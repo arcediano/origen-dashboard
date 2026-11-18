@@ -74,6 +74,7 @@ function PhotoBlock({
   productId,
   imageUrl,
   reason,
+  unrelated = false,
   onRegenerated,
   onResubmit,
   onManualUpload,
@@ -83,6 +84,8 @@ function PhotoBlock({
   imageUrl?: string;
   /** Motivo técnico de la IA, ya limpio, para explicar qué falla. */
   reason: string;
+  /** La foto no tiene relación con el producto: la IA no puede generar nada a partir de ella. */
+  unrelated?: boolean;
   /** Recibe la foto generada y la deja como principal (en el formulario o guardándola). */
   onRegenerated: (photo: RegeneratedProductPhoto) => void | Promise<void>;
   /** Detalle del producto: tras guardar la foto nueva ofrece volver a publicar en un clic. */
@@ -146,7 +149,7 @@ function PhotoBlock({
   return (
     <div
       className="rounded-2xl border border-border bg-surface p-3 sm:p-4"
-      data-testid="ai-photo-block"
+      data-testid={unrelated ? 'ai-photo-unrelated' : 'ai-photo-block'}
     >
       <div className="flex gap-3 sm:gap-4">
         {(newUrl ?? imageUrl) && (
@@ -159,9 +162,20 @@ function PhotoBlock({
         )}
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-text-primary">
-            {done ? 'Foto nueva lista' : 'La foto principal no cumple el estándar de catálogo'}
+            {done
+              ? 'Foto nueva lista'
+              : unrelated
+                ? 'La foto no tiene relación con el producto'
+                : 'La foto principal no cumple el estándar de catálogo'}
           </p>
           {!done && reason && <p className="mt-1 text-sm text-text-muted">{reason}</p>}
+          {!done && unrelated && (
+            <p className="mt-1 text-sm text-text-primary" data-testid="ai-photo-unrelated-note">
+              El asistente de IA no puede generar una foto de producto a partir de una imagen que no
+              corresponde a este producto: <strong>no se ha usado ningún crédito</strong>. Sube una foto
+              real de tu producto.
+            </p>
+          )}
           {done && (
             <p className="mt-1 text-sm text-text-primary" data-testid="ai-photo-done">
               {onResubmit
@@ -188,6 +202,31 @@ function PhotoBlock({
             </Button>
           </div>
         )
+      ) : unrelated ? (
+        <div className="mt-3">
+          {onManualUpload ? (
+            <Button
+              variant="primary"
+              size="sm"
+              leftIcon={<ImagePlus className="h-3.5 w-3.5" />}
+              onClick={onManualUpload}
+              data-testid="ai-photo-manual"
+            >
+              Subir una foto real del producto
+            </Button>
+          ) : (
+            <Link href={editHref}>
+              <Button
+                variant="primary"
+                size="sm"
+                leftIcon={<ImagePlus className="h-3.5 w-3.5" />}
+                data-testid="ai-photo-manual"
+              >
+                Subir una foto real del producto
+              </Button>
+            </Link>
+          )}
+        </div>
       ) : (
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <div className="rounded-xl border border-origen-pradera/40 bg-origen-pradera/10 p-3">
@@ -366,6 +405,12 @@ export function photoReason(message: string): string {
   return text.replace(/^la foto principal no cumple el estándar de catálogo\s*/i, '').trim();
 }
 
+/** Mensaje de «sin relación»: la parte que dice qué se ve en la foto; el resto lo explica la tarjeta. */
+export function unrelatedReason(message: string): string {
+  const seen = message.match(/\(se ve: ([^)]*)\)/);
+  return seen ? `En la foto se ve ${seen[1].trim()}.` : '';
+}
+
 export function AiFeedbackNotice({
   feedback,
   productId,
@@ -400,7 +445,8 @@ export function AiFeedbackNotice({
   const plain = feedback.problems.filter((p) => p !== allergenProblem && p !== photoProblem);
   const total = feedback.problems.length;
   const editHref = `/dashboard/products/${productId}/edit`;
-  const aiCanHelp = !reverted && !partial && (photoProblem || allergenProblem);
+  const aiCanHelp =
+    !reverted && !partial && ((photoProblem && !photoProblem.unrelated) || allergenProblem);
   return (
     <Alert variant={reverted ? 'error' : 'warning'} className="mb-4" data-testid="ai-feedback-notice">
       <AlertTitle>
@@ -463,7 +509,8 @@ export function AiFeedbackNotice({
           <PhotoBlock
             productId={productId}
             imageUrl={photoProblem.imageUrl}
-            reason={photoReason(photoProblem.message)}
+            reason={photoProblem.unrelated ? unrelatedReason(photoProblem.message) : photoReason(photoProblem.message)}
+            unrelated={photoProblem.unrelated === true}
             onRegenerated={onPhotoRegenerated}
             onResubmit={onResubmit}
             onManualUpload={onJumpToStep ? () => onJumpToStep('images') : undefined}
