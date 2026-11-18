@@ -42,6 +42,7 @@ import {
 import { type Product } from '@/types/product';
 import { fetchProductById, deleteProduct, updateProduct, getPublicationStatus, type PublicationStatus } from '@/lib/api/products';
 import { AiFeedbackNotice } from '../components/AiFeedbackNotice';
+import { swapMainImage } from '@/lib/products/swap-main-image';
 import { useAiFeedback } from '@/hooks/useAiFeedback';
 import { sanitizeHtml, ensureRichTextHtml } from '@/lib/html-sanitizer';
 import { formatFieldsInSentence } from '@/lib/constants/sensitiveFields';
@@ -862,7 +863,19 @@ export default function ProductoDetallePage() {
                 existente en products/create/page.tsx) -- el div anterior no
                 apilaba y dejaba texto y botones apretados en 2 columnas en
                 pantallas estrechas (hallazgo del humano, 2026-11-05). */}
-            {aiFeedback && <AiFeedbackNotice feedback={aiFeedback} productId={product.id} />}
+            {aiFeedback && (
+              <AiFeedbackNotice
+                feedback={aiFeedback}
+                productId={product.id}
+                onPhotoRegenerated={async (photo) => {
+                  // Guarda la foto generada como principal: aquí no hay formulario que la retenga.
+                  const res = await updateProduct(product.id, swapMainImage(product, photo));
+                  if (res.error) throw new Error(res.error);
+                  if (res.data) setProduct(res.data);
+                }}
+                onResubmit={() => handleStatusChange('pending_approval')}
+              />
+            )}
 
             {product.status === 'draft' && fromAssistant && (
               <Alert
