@@ -826,12 +826,26 @@ export default function BusinessInfoPage() {
 
           <div className="mb-6">
             <Card variant="elevated" className="overflow-hidden">
+              {/* Aviso de edición: sin él no se sabe que el banner y el logo se cambian con su icono de cámara. */}
+              {isEditing && (
+                <div
+                  role="note"
+                  className="flex items-center gap-2.5 border-b border-border-subtle bg-origen-pastel/40 px-4 py-2.5 text-sm text-origen-oscuro sm:px-6"
+                >
+                  <Camera className="h-4 w-4 shrink-0 text-origen-bosque" aria-hidden="true" />
+                  <p>
+                    Para cambiar el <strong>banner</strong> o el <strong>logo</strong>, pulsa el botón con el icono de
+                    cámara sobre cada imagen. Se publican al guardar.
+                  </p>
+                </div>
+              )}
               <div className="h-40 sm:h-48 bg-linear-to-r from-origen-pradera to-origen-hoja relative">
                 {form.banner ? (
-                  <img src={form.banner} alt="Banner" className="w-full h-full object-cover" />
+                  <img key={form.banner} src={form.banner} alt="Banner" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <ImageIcon className="w-16 h-16 text-white/30" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-white/70">
+                    <ImageIcon className="w-12 h-12 sm:w-16 sm:h-16 text-white/40" aria-hidden="true" />
+                    {isEditing && <span className="hidden text-sm font-medium sm:inline">Aún no tienes banner</span>}
                   </div>
                 )}
                 {isUploadingBanner && (
@@ -845,10 +859,11 @@ export default function BusinessInfoPage() {
                     type="button"
                     disabled={isUploadingBanner}
                     onClick={() => bannerInputRef.current?.click()}
-                    className="absolute bottom-3 right-3 w-11 h-11 rounded-full bg-surface-alt shadow-lg flex items-center justify-center text-origen-bosque hover:text-origen-pradera transition-colors disabled:opacity-50"
+                    className="absolute bottom-3 right-3 inline-flex h-11 items-center gap-2 rounded-full bg-surface-alt px-4 text-sm font-semibold text-origen-bosque shadow-lg ring-1 ring-black/5 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera disabled:opacity-50"
                     aria-label="Cambiar banner"
                   >
-                    <Camera className="w-5 h-5" />
+                    <Camera className="h-5 w-5" aria-hidden="true" />
+                    <span>{form.banner ? 'Cambiar banner' : 'Añadir banner'}</span>
                   </button>
                 )}
                 <input
@@ -872,43 +887,53 @@ export default function BusinessInfoPage() {
               <CardContent className="px-4 sm:px-6 pb-5 sm:pb-6">
                 <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
                   <div className="relative flex flex-col items-start shrink-0 -mt-10 sm:-mt-14">
-                    <Avatar
-                      src={form.logo ?? undefined}
-                      alt={form.businessName || 'Logo de negocio'}
-                      shape="rounded"
-                      size="2xl"
-                      className="w-20 h-20 sm:w-28 sm:h-28 border-4 border-white shadow-xl bg-white"
-                      fallback={<span className="text-2xl sm:text-3xl font-bold text-hoja-tinta">{producerInitial}</span>}
-                    />
-                    {isUploadingLogo && (
-                      <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-origen-oscuro/50 backdrop-blur-[1px]">
-                        <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 text-white animate-spin" aria-hidden="true" />
-                        <span className="sr-only">Subiendo imagen…</span>
-                      </div>
-                    )}
-                    {isEditing && (
-                      <button
-                        type="button"
-                        aria-label="Cambiar logo"
-                        disabled={isUploadingLogo}
-                        onClick={() => logoInputRef.current?.click()}
-                        className="absolute -bottom-2 -right-2 h-11 w-11 rounded-full bg-surface-alt border border-border shadow-md flex items-center justify-center text-origen-bosque hover:text-origen-pradera disabled:opacity-50"
-                      >
-                        <Camera className="w-4 h-4" />
-                      </button>
-                    )}
-                    {isEditing && (
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        aria-label="Cambiar logo"
-                        onClick={() => logoInputRef.current?.click()}
-                        onKeyDown={(e) => e.key === 'Enter' && logoInputRef.current?.click()}
-                        className="absolute inset-0 hidden sm:flex bg-origen-oscuro/50 rounded-xl opacity-0 hover:opacity-100 transition-opacity items-center justify-center cursor-pointer"
-                      >
-                        <Camera className="w-8 h-8 text-white" />
-                      </div>
-                    )}
+                    <div className="relative">
+                      {(() => {
+                        const avatar = (
+                          <Avatar
+                            key={form.logo ?? 'sin-logo'}
+                            src={form.logo ?? undefined}
+                            alt={form.businessName || 'Logo de negocio'}
+                            shape="rounded"
+                            size="2xl"
+                            className="w-20 h-20 sm:w-28 sm:h-28 border-4 border-white shadow-xl bg-white"
+                            fallback={<span className="text-2xl sm:text-3xl font-bold text-hoja-tinta">{producerInitial}</span>}
+                          />
+                        );
+                        return isEditing ? (
+                          // Todo el logo es el botón (objetivo táctil grande); la cámara de la esquina indica que se puede cambiar.
+                          <button
+                            type="button"
+                            aria-label="Cambiar logo"
+                            disabled={isUploadingLogo}
+                            onClick={() => logoInputRef.current?.click()}
+                            className="group relative block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera disabled:opacity-60"
+                          >
+                            {avatar}
+                            <span
+                              aria-hidden="true"
+                              className="absolute inset-0 hidden items-center justify-center rounded-xl bg-origen-oscuro/40 opacity-0 transition-opacity group-hover:opacity-100 sm:flex"
+                            >
+                              <Camera className="h-8 w-8 text-white" />
+                            </span>
+                            <span
+                              aria-hidden="true"
+                              className="absolute -bottom-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface-alt text-origen-bosque shadow-md"
+                            >
+                              <Camera className="h-4 w-4" />
+                            </span>
+                          </button>
+                        ) : (
+                          avatar
+                        );
+                      })()}
+                      {isUploadingLogo && (
+                        <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-origen-oscuro/50 backdrop-blur-[1px]">
+                          <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 text-white animate-spin" aria-hidden="true" />
+                          <span className="sr-only">Subiendo imagen…</span>
+                        </div>
+                      )}
+                    </div>
                     <input
                       ref={logoInputRef}
                       type="file"
