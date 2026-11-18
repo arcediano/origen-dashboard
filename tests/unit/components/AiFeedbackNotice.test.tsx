@@ -1,7 +1,23 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AiFeedbackNotice, aiFieldLabel, aiFieldStep } from '@/app/dashboard/products/components/AiFeedbackNotice';
 import type { AiFeedback } from '@/lib/api/products';
+
+const aiApi = vi.hoisted(() => ({
+  getAiAssistQuota: vi.fn(),
+  regenerateProductPhoto: vi.fn(),
+}));
+vi.mock('@/lib/api/ai-assist', () => {
+  class AiAssistError extends Error {
+    constructor(message: string, public code: string | null = null, public status = 0) {
+      super(message);
+    }
+  }
+  return { ...aiApi, AiAssistError };
+});
+vi.mock('@/app/dashboard/products/components/ai-onboarding/AddCreditsModal', () => ({
+  AddCreditsModal: ({ open }: { open: boolean }) => (open ? <div data-testid="add-credits-modal" /> : null),
+}));
 
 const feedback = (over: Partial<AiFeedback> = {}): AiFeedback => ({
   kind: 'NEEDS_CORRECTION',
@@ -56,5 +72,66 @@ describe('AiFeedbackNotice', () => {
     expect(aiFieldLabel('productionInfo.story')).toBe('Historia del producto');
     expect(aiFieldStep('productionInfo.story')).toBe('production');
     expect(aiFieldLabel('algo_raro')).toBeNull();
+  });
+
+  describe('foto principal bloqueada', () => {
+    const photoFeedback = () =>
+      feedback({
+        problems: [
+          {
+            field: 'mainImage',
+            message: 'La foto principal no cumple el estándar de catálogo (fondo de cocina).',
+            imageUrl: 'https://cdn/rechazada.jpg',
+          },
+        ],
+      });
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+      aiApi.getAiAssistQuota.mockResolvedValue({ enabled: true, used: 1, total: 3 });
+    });
+
+    it('muestra la foto rechazada y propone generar una con IA gastando 1 crédito', async () => {
+      render(
+        <AiFeedbackNotice feedback={photoFeedback()} productId="p1" onJumpToStep={vi.fn()} onPhotoRegenerated={vi.fn()} />,
+      );
+      expect(screen.getByText('Foto principal:')).toBeInTheDocument();
+      expect(screen.getByAltText('Foto principal rechazada')).toHaveAttribute('src', 'https://cdn/rechazada.jpg');
+      expect(await screen.findByText(/te quedan 2/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Generar con IA · 1 crédito/ })).toBeEnabled();
+    });
+
+    it('al generar entrega la foto nueva para ponerla como principal y avisa de volver a publicar', async () => {
+      const onPhoto = vi.fn();
+      aiApi.regenerateProductPhoto.mockResolvedValue({ key: 'k/new.jpg', url: 'https://cdn/new.jpg' });
+      render(<AiFeedbackNotice feedback={photoFeedback()} productId="p1" onJumpToStep={vi.fn()} onPhotoRegenerated={onPhoto} />);
+      fireEvent.click(await screen.findByRole('button', { name: /Generar con IA/ }));
+      await waitFor(() => expect(onPhoto).toHaveBeenCalledWith({ key: 'k/new.jpg', url: 'https://cdn/new.jpg' }));
+      expect(aiApi.regenerateProductPhoto).toHaveBeenCalledWith('p1');
+      expect(await screen.findByTestId('ai-photo-done')).toHaveTextContent(/vuelve a publicar/);
+    });
+
+    it('sin créditos ofrece conseguirlos en vez de generar', async () => {
+      aiApi.getAiAssistQuota.mockResolvedValue({ enabled: true, used: 3, total: 3 });
+      render(<AiFeedbackNotice feedback={photoFeedback()} productId="p1" onJumpToStep={vi.fn()} onPhotoRegenerated={vi.fn()} />);
+      fireEvent.click(await screen.findByRole('button', { name: /Conseguir créditos/ }));
+      expect(screen.getByTestId('add-credits-modal')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Generar con IA/ })).toBeNull();
+    });
+
+    it('si falla la generación muestra el error y no da la foto por buena', async () => {
+      const onPhoto = vi.fn();
+      aiApi.regenerateProductPhoto.mockRejectedValue(new Error('No se ha podido generar una foto válida'));
+      render(<AiFeedbackNotice feedback={photoFeedback()} productId="p1" onJumpToStep={vi.fn()} onPhotoRegenerated={onPhoto} />);
+      fireEvent.click(await screen.findByRole('button', { name: /Generar con IA/ }));
+      expect(await screen.findByRole('alert')).toHaveTextContent(/No se ha podido generar/);
+      expect(onPhoto).not.toHaveBeenCalled();
+    });
+
+    it('en el detalle (sin formulario) no ofrece generar: solo enlaza a la edición', () => {
+      render(<AiFeedbackNotice feedback={photoFeedback()} productId="p1" />);
+      expect(screen.queryByTestId('ai-photo-block')).toBeNull();
+      expect(screen.getByRole('link', { name: /Corregir ahora/ })).toBeInTheDocument();
+    });
   });
 });

@@ -723,6 +723,27 @@ export function useProductForm(productId?: string) {
     setFormData(prev => ({ ...prev, gallery: images }));
   }, []);
 
+  /**
+   * Pone una foto ya subida a S3 (p. ej. la que la IA genera tras bloquear la anterior) como
+   * imagen principal, sustituyendo a la actual en la ficha. No guarda: el productor publica después.
+   */
+  const replaceMainImage = useCallback((photo: { key: string; url: string }) => {
+    setFormData(prev => {
+      const next: ProductImage = {
+        id: photo.key,
+        url: photo.url,
+        isMain: true,
+        sortOrder: 0,
+        focusX: 50,
+        focusY: 50,
+      };
+      const rest = prev.gallery
+        .filter(img => !img.isMain && img.id !== prev.mainImage?.id)
+        .map((img, i) => ({ ...img, sortOrder: i + 1 }));
+      return { ...prev, mainImage: next, gallery: [next, ...rest] };
+    });
+  }, []);
+
   // ==========================================================================
   // ACCIONES PRINCIPALES
   // ==========================================================================
@@ -945,6 +966,7 @@ export function useProductForm(productId?: string) {
     handleInputChange,
     handleNestedChange,
     handleImagesChange,
+    replaceMainImage,
     handleSave,
     handlePublish,
     handleCancel,

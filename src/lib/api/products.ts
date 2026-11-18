@@ -1132,7 +1132,8 @@ export async function getPublicationStatus(
  */
 export interface AiFeedback {
   kind: 'NEEDS_CORRECTION' | 'REVERTED';
-  problems: Array<{ field: string; message: string }>;
+  /** `field: 'mainImage'` = foto principal bloqueada; `imageUrl` es la foto rechazada. */
+  problems: Array<{ field: string; message: string; imageUrl?: string }>;
   attempt: number;
   createdAt: string;
 }
