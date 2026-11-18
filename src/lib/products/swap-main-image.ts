@@ -6,7 +6,7 @@ import type { ProductImage } from '@/types/product';
  */
 export function swapMainImage(
   current: { mainImage?: ProductImage | null; gallery?: ProductImage[] | null },
-  photo: { key: string; url: string },
+  photo: { key: string; url: string; /** Foto elegida en el equipo: se sube al guardar. */ file?: File },
 ): { mainImage: ProductImage; gallery: ProductImage[] } {
   const next: ProductImage = {
     id: photo.key,
@@ -15,6 +15,7 @@ export function swapMainImage(
     sortOrder: 0,
     focusX: 50,
     focusY: 50,
+    ...(photo.file ? { file: photo.file } : {}),
   };
   const rest = (current.gallery ?? [])
     .filter((img) => !img.isMain && img.id !== current.mainImage?.id)

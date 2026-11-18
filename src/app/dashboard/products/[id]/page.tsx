@@ -874,6 +874,13 @@ export default function ProductoDetallePage() {
                   if (res.data) setProduct(res.data);
                 }}
                 // Solo un borrador se reenvía a revisión; en un producto publicado el cambio entra solo.
+                onUploadPhoto={async (file, url) => {
+                  // La imagen se sube al guardar (updateProduct la sube y devuelve la URL definitiva).
+                  const { gallery } = swapMainImage(product, { key: `temp-${Date.now()}`, url, file });
+                  const res = await updateProduct(product.id, { gallery });
+                  if (res.error) throw new Error(res.error);
+                  if (res.data) setProduct(res.data);
+                }}
                 onResubmit={product.status === 'draft' ? () => handleStatusChange('pending_approval') : undefined}
               />
             )}
