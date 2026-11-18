@@ -21,7 +21,7 @@ import {
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
-import { Check, Coins, CreditCard, Loader2, Sparkles } from 'lucide-react';
+import { Check, Coins, CreditCard, Loader2, Plus, Sparkles, Trash2 } from 'lucide-react';
 import {
   Alert,
   AlertDescription,
@@ -38,6 +38,7 @@ import { cn } from '@/lib/utils';
 import {
   checkoutAiCredits,
   checkoutAiCreditsWithSavedCard,
+  deleteAiCreditCard,
   getAiCreditCards,
   getAiCreditPurchaseStatus,
   getAiCreditsPricing,
@@ -100,26 +101,46 @@ function cardLabel(card: AiSavedCard): string {
 }
 
 /**
- * Pago de un clic: resumen de la tarjeta guardada con «Cambiar». El selector lista las tarjetas
- * guardadas y la opción de usar otra nueva. Nunca se muestra el número completo.
+ * Pago de un clic: resumen de la tarjeta guardada con «Cambiar». El panel lista las tarjetas
+ * guardadas (con «Predeterminada» y «Caducada» a la vista), permite eliminarlas y añadir otra nueva.
+ * Nunca se muestra el número completo: Stripe es quien guarda la tarjeta.
  */
 function SavedCardPicker({
   cards,
   selectedId,
   disabled,
   onSelect,
+  onRemove,
   onUseNewCard,
 }: {
   cards: AiSavedCardsInfo;
   selectedId: string | null;
   disabled: boolean;
   onSelect: (id: string) => void;
+  onRemove: (id: string) => Promise<void>;
   onUseNewCard: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [removeError, setRemoveError] = useState<string | null>(null);
   const selected = cards.methods.find((m) => m.id === selectedId) ?? cards.methods[0];
   if (!selected) return null;
   const expired = isCardExpired(selected);
+
+  const remove = async (id: string) => {
+    setRemovingId(id);
+    setRemoveError(null);
+    try {
+      await onRemove(id);
+      setConfirmId(null);
+    } catch {
+      setRemoveError('No se ha podido eliminar la tarjeta. Inténtalo de nuevo.');
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
   return (
     <section
       aria-label="Método de pago"
@@ -147,56 +168,147 @@ function SavedCardPicker({
             onClick={() => setOpen((v) => !v)}
             data-testid="change-card"
           >
-            Cambiar
+            {open ? 'Cerrar' : 'Cambiar'}
           </Button>
         </div>
       </div>
       {expired && (
         <p className="mt-2 text-xs text-feedback-danger-text" role="alert">
-          Esta tarjeta ha caducado. Elige otra o usa una nueva.
+          Esta tarjeta ha caducado. Elige otra o añade una nueva.
         </p>
       )}
+
       {open && (
-        <ul role="radiogroup" aria-label="Tarjetas guardadas" className="mt-3 space-y-1.5">
-          {cards.methods.map((card) => {
-            const checked = card.id === selected.id;
-            return (
-              <li key={card.id}>
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={checked}
-                  onClick={() => {
-                    onSelect(card.id);
-                    setOpen(false);
-                  }}
+        <div className="mt-3 border-t border-border-subtle pt-3" data-testid="card-list">
+          <h3 className="text-sm font-semibold text-origen-oscuro">Tus tarjetas guardadas</h3>
+          <p className="mt-0.5 text-xs text-text-subtle">
+            Se guardan de forma segura en Stripe: Origen nunca ve el número completo. Toca una para
+            usarla; puedes eliminarla cuando quieras.
+          </p>
+          <ul role="radiogroup" aria-label="Tarjetas guardadas" className="mt-2.5 space-y-2">
+            {cards.methods.map((card) => {
+              const checked = card.id === selected.id;
+              const cardExpired = isCardExpired(card);
+              const confirming = confirmId === card.id;
+              return (
+                <li
+                  key={card.id}
                   className={cn(
-                    'flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm',
-                    checked
-                      ? 'border-origen-bosque bg-origen-pradera/5 text-origen-oscuro'
-                      : 'border-border-subtle bg-surface text-origen-oscuro hover:border-origen-pradera/60',
+                    'rounded-lg border bg-surface',
+                    checked ? 'border-origen-bosque' : 'border-border-subtle',
                   )}
                 >
-                  <span>{cardLabel(card)}</span>
-                  <span className="text-xs text-text-subtle">{cardExpiry(card)}</span>
-                </button>
-              </li>
-            );
-          })}
-          <li>
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onUseNewCard();
-              }}
-              className="w-full rounded-lg border border-dashed border-border-subtle px-3 py-2 text-left text-sm font-medium text-hoja-tinta hover:border-origen-pradera/60"
-              data-testid="use-new-card"
-            >
-              Usar otra tarjeta
-            </button>
-          </li>
-        </ul>
+                  <div className="flex items-center">
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={checked}
+                      onClick={() => {
+                        onSelect(card.id);
+                        setOpen(false);
+                      }}
+                      className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2',
+                          checked ? 'border-origen-bosque bg-origen-bosque text-white' : 'border-border-subtle',
+                        )}
+                      >
+                        {checked && <Check className="h-2.5 w-2.5" />}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                          <span className="text-sm font-medium text-origen-oscuro">{cardLabel(card)}</span>
+                          {checked && !cardExpired && (
+                            <span className="rounded-full bg-feedback-success-subtle px-2 py-0.5 text-[11px] font-medium text-feedback-success-text">
+                              Predeterminada
+                            </span>
+                          )}
+                          {cardExpired && (
+                            <span className="rounded-full bg-feedback-danger-subtle px-2 py-0.5 text-[11px] font-medium text-feedback-danger-text">
+                              Caducada
+                            </span>
+                          )}
+                        </span>
+                        <span className="block text-xs text-text-subtle">
+                          {cardExpired ? 'Caducó' : 'Caduca'} {cardExpiry(card)}
+                        </span>
+                      </span>
+                    </button>
+                    {!confirming && (
+                      <button
+                        type="button"
+                        aria-label={`Eliminar tarjeta ${cardLabel(card)}`}
+                        onClick={() => {
+                          setRemoveError(null);
+                          setConfirmId(card.id);
+                        }}
+                        className="mr-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-text-subtle hover:bg-feedback-danger-subtle hover:text-feedback-danger-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera"
+                        data-testid={`remove-card-${card.id}`}
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+                  {confirming && (
+                    <div
+                      className="flex flex-col gap-2 border-t border-border-subtle px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between"
+                      role="group"
+                      aria-label={`Confirmar eliminar ${cardLabel(card)}`}
+                    >
+                      <p className="text-xs text-origen-oscuro">
+                        ¿Eliminar <strong>{cardLabel(card)}</strong>? Tendrás que volver a introducirla para usarla.
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="!w-auto"
+                          disabled={removingId === card.id}
+                          onClick={() => setConfirmId(null)}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="!w-auto"
+                          loading={removingId === card.id}
+                          loadingText="Eliminando…"
+                          onClick={() => void remove(card.id)}
+                          data-testid={`confirm-remove-${card.id}`}
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          {removeError && (
+            <p role="alert" className="mt-2 text-xs text-feedback-danger-text">
+              {removeError}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              onUseNewCard();
+            }}
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border-subtle px-3 py-2.5 text-sm font-medium text-hoja-tinta hover:border-origen-pradera/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-origen-pradera"
+            data-testid="use-new-card"
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Añadir otra tarjeta
+          </button>
+        </div>
       )}
     </section>
   );
@@ -407,6 +519,22 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
     void setAiCreditDefaultCard(id).catch(() => undefined);
   };
 
+  /** Elimina la tarjeta en Stripe y la quita de la lista; si era la elegida pasa a la siguiente (o a tarjeta nueva). */
+  const handleRemoveCard = async (id: string) => {
+    await deleteAiCreditCard(id);
+    setCards((prev) => {
+      if (!prev) return prev;
+      const methods = prev.methods.filter((m) => m.id !== id);
+      return { methods, defaultId: methods.some((m) => m.id === prev.defaultId) ? prev.defaultId : (methods[0]?.id ?? null) };
+    });
+    setCardId((current) => {
+      if (current !== id) return current;
+      const next = cards?.methods.find((m) => m.id !== id);
+      return next?.id ?? null;
+    });
+    setSavedError(null);
+  };
+
   /** Pago de un clic: cobra la tarjeta guardada en el servidor; solo pide algo si el banco exige 3D Secure. */
   const handlePaySaved = async () => {
     if (!selectedCredits || !savedCard || isPayingSaved) return;
@@ -524,6 +652,7 @@ export function AddCreditsModal({ open, onOpenChange, onCreditsPurchased }: AddC
                   selectedId={savedCard?.id ?? null}
                   disabled={isPayingSaved}
                   onSelect={handleSelectCard}
+                  onRemove={handleRemoveCard}
                   onUseNewCard={() => {
                     setUseNewCard(true);
                     setSavedError(null);
