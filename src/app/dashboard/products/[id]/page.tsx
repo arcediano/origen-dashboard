@@ -873,7 +873,8 @@ export default function ProductoDetallePage() {
                   if (res.error) throw new Error(res.error);
                   if (res.data) setProduct(res.data);
                 }}
-                onResubmit={() => handleStatusChange('pending_approval')}
+                // Solo un borrador se reenvía a revisión; en un producto publicado el cambio entra solo.
+                onResubmit={product.status === 'draft' ? () => handleStatusChange('pending_approval') : undefined}
               />
             )}
 

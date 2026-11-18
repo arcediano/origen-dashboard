@@ -1131,7 +1131,7 @@ export async function getPublicationStatus(
  * `null` si no hay nada pendiente. Ruta backend: GET /products/:id/ai-feedback
  */
 export interface AiFeedback {
-  kind: 'NEEDS_CORRECTION' | 'REVERTED';
+  kind: 'NEEDS_CORRECTION' | 'REVERTED' | 'PARTIAL';
   /** `field: 'mainImage'` = foto principal bloqueada; `imageUrl` es la foto rechazada. */
   problems: Array<{ field: string; message: string; imageUrl?: string; suggestedValues?: string[] }>;
   attempt: number;
