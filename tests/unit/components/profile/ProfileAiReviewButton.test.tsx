@@ -110,7 +110,7 @@ describe('ProfileAiReviewButton', () => {
     quotaMock.mockResolvedValue({ enabled: true, used: 1, total: 5 });
     render(<ProfileAiReviewButton variant="banner" fields={FIELDS} onApply={vi.fn()} />);
 
-    expect(screen.getByText('Mejora tu perfil con IA')).toBeInTheDocument();
+    expect(screen.getByText('Mejora textos e imágenes y da más valor a tu perfil')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByTestId('profile-ai-review-banner-credits')).toHaveTextContent('4'));
   });
 

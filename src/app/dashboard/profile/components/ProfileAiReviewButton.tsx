@@ -25,7 +25,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Check, Image as ImageIcon, Loader2, Sparkles, X } from 'lucide-react';
+import { Check, FileText, Image as ImageIcon, Loader2, ShieldCheck, Sparkles, X } from 'lucide-react';
 import {
   Alert,
   AlertDescription,
@@ -197,6 +197,9 @@ export function ProfileAiReviewButton({
   const allPhotosDecided = photoSuggestions.every((s) => photoDecided[s.collection]);
   const allDecided = (suggestions.length > 0 || photoSuggestions.length > 0) && allTextDecided && allPhotosDecided;
 
+  const anyAccepted =
+    Object.values(decided).includes('accepted') || Object.values(photoDecided).includes('accepted');
+  const textCount = Object.values(fields).filter((v) => v?.trim()).length;
   const remaining = quota ? Math.max(0, quota.total - quota.used) : null;
 
   const trigger =
@@ -204,44 +207,91 @@ export function ProfileAiReviewButton({
       <section
         data-testid="profile-ai-review-banner"
         aria-labelledby="profile-ai-review-banner-title"
-        className="rounded-[28px] border border-origen-pradera/25 bg-surface-alt p-4 shadow-sm sm:p-6"
+        className="relative overflow-hidden rounded-[28px] border border-origen-pradera/30 bg-surface-alt p-4 shadow-sm sm:p-6"
       >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex min-w-0 flex-1 items-start gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-origen-pradera/15">
-              <Sparkles className="h-5 w-5 text-hoja-tinta" aria-hidden="true" />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-origen-pradera/10 blur-2xl"
+        />
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-origen-pradera/15">
+              <Sparkles className="h-6 w-6 text-hoja-tinta" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <h2 id="profile-ai-review-banner-title" className="text-base font-semibold text-origen-bosque sm:text-lg">
-                Mejora tu perfil con IA
+              <Badge variant="leaf" size="xs">
+                Asistente de IA
+              </Badge>
+              <h2
+                id="profile-ai-review-banner-title"
+                className="mt-1.5 text-lg font-semibold text-origen-bosque sm:text-xl"
+              >
+                Mejora textos e imágenes y da más valor a tu perfil
               </h2>
               <p className="mt-1 text-sm text-text-subtle">
-                Revisa los textos de tu historia y hasta 3 fotos de tus galerías (equipo, entorno, proceso).
-                Nunca inventa datos ni genera fotos nuevas -- solo pule la redacción y mejora la luz y la
-                nitidez de lo que ya tienes. Tú decides, una a una, qué sugerencia aceptar.
+                Un perfil cuidado transmite confianza y ayuda a que más clientes conozcan tu historia y compren
+                tus productos. La IA revisa lo que ya tienes y te propone mejoras; tú decides cuáles aceptar.
               </p>
             </div>
           </div>
-          <Button
-            type="button"
-            variant="primary"
-            size="lg"
-            disabled={disabled || !canReview}
-            leftIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
-            onClick={handleOpen}
-            className="shrink-0"
-          >
-            Mejorar con IA
-          </Button>
+
+          <div className="flex shrink-0 flex-col items-stretch gap-2 lg:items-end">
+            <Button
+              type="button"
+              variant="primary"
+              size="lg"
+              disabled={disabled || !canReview}
+              leftIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
+              onClick={handleOpen}
+            >
+              Mejorar con IA
+            </Button>
+            <p className="text-xs text-text-subtle lg:text-right" data-testid="profile-ai-review-banner-credits">
+              {remaining !== null ? (
+                <>
+                  Te {remaining === 1 ? 'queda' : 'quedan'}{' '}
+                  <strong className="text-origen-bosque">{remaining}</strong>{' '}
+                  {remaining === 1 ? 'crédito' : 'créditos'} ·{' '}
+                </>
+              ) : null}
+              1 crédito = 1 revisión completa
+            </p>
+          </div>
         </div>
-        <p className="mt-4 text-xs text-text-subtle" data-testid="profile-ai-review-banner-credits">
-          {remaining !== null ? (
-            <>
-              Te {remaining === 1 ? 'queda' : 'quedan'} <strong className="text-origen-bosque">{remaining}</strong>{' '}
-              {remaining === 1 ? 'crédito' : 'créditos'} ·{' '}
-            </>
-          ) : null}
-          1 crédito = 1 revisión completa (texto y fotos), solo se gasta si hay alguna mejora real.
+
+        <ul className="relative mt-5 grid gap-3 sm:grid-cols-3">
+          <li className="flex items-start gap-2.5 rounded-2xl border border-border-subtle bg-surface p-3">
+            <FileText className="mt-0.5 h-4 w-4 shrink-0 text-hoja-tinta" aria-hidden="true" />
+            <span className="text-xs text-text-subtle">
+              <strong className="block text-sm font-semibold text-origen-bosque">Textos más claros</strong>
+              Pule la redacción de tu eslogan, historia, filosofía y bienestar animal sin cambiar su
+              significado.
+              {textCount > 0 && <span className="mt-1 block font-medium text-origen-bosque">{textCount} {textCount === 1 ? 'texto' : 'textos'} listos para revisar</span>}
+            </span>
+          </li>
+          <li className="flex items-start gap-2.5 rounded-2xl border border-border-subtle bg-surface p-3">
+            <ImageIcon className="mt-0.5 h-4 w-4 shrink-0 text-hoja-tinta" aria-hidden="true" />
+            <span className="text-xs text-text-subtle">
+              <strong className="block text-sm font-semibold text-origen-bosque">Fotos con mejor calidad</strong>
+              Mejora la luz y la nitidez de hasta 3 fotos de tus galerías (equipo, entorno y proceso).
+              {photos.length > 0 ? (
+                <span className="mt-1 block font-medium text-origen-bosque">{photos.length} {photos.length === 1 ? 'foto' : 'fotos'} listas para revisar</span>
+              ) : (
+                <span className="mt-1 block">Sube fotos a tus galerías para poder mejorarlas.</span>
+              )}
+            </span>
+          </li>
+          <li className="flex items-start gap-2.5 rounded-2xl border border-border-subtle bg-surface p-3">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-hoja-tinta" aria-hidden="true" />
+            <span className="text-xs text-text-subtle">
+              <strong className="block text-sm font-semibold text-origen-bosque">Tú tienes el control</strong>
+              Nunca inventa datos ni crea fotos nuevas. Aceptas o descartas cada sugerencia y solo se
+              guarda al pulsar Guardar.
+            </span>
+          </li>
+        </ul>
+        <p className="relative mt-3 text-xs text-text-subtle">
+          El crédito solo se gasta si la IA encuentra alguna mejora real.
         </p>
       </section>
     ) : (
@@ -471,6 +521,13 @@ export function ProfileAiReviewButton({
                   );
                 })}
               </div>
+
+              {anyAccepted && (
+                <p className="text-xs text-text-subtle" data-testid="profile-ai-review-save-hint">
+                  Las mejoras aceptadas quedan aplicadas en tu perfil, pero no se publican hasta que pulses
+                  «Guardar cambios».
+                </p>
+              )}
 
               <DialogFooter>
                 <Button type="button" variant="primary" size="sm" onClick={close} disabled={!allDecided}>
