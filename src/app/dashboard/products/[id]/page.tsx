@@ -42,6 +42,7 @@ import {
 import { type Product } from '@/types/product';
 import { fetchProductById, deleteProduct, updateProduct, getPublicationStatus, type PublicationStatus } from '@/lib/api/products';
 import { AiFeedbackNotice, AiFeedbackNoticeSkeleton } from '../components/AiFeedbackNotice';
+import { PublicationBlockersList } from '../components/PublicationBlockersList';
 import { swapMainImage } from '@/lib/products/swap-main-image';
 import { useAiFeedbackState } from '@/hooks/useAiFeedback';
 import { sanitizeHtml, ensureRichTextHtml } from '@/lib/html-sanitizer';
@@ -453,7 +454,7 @@ function StatusCard({
       if (active && res.data) setPublicationStatus(res.data);
     });
     return () => { active = false; };
-  }, [product.id, isDraft, product.status]);
+  }, [product.id, isDraft, product.status, product.stock, product.basePrice]);
 
   const missingFields = publicationStatus?.missing.map((m) => m.message) ?? [];
   // Mientras no se ha confirmado el estado real con el servidor, nunca se
@@ -687,6 +688,22 @@ export default function ProductoDetallePage() {
     product?.status,
   );
 
+  // Requisitos de publicación pendientes del borrador (stock, precio, descripción…): se muestran
+  // agrupados arriba, con la acción para arreglar cada uno a la vista.
+  const [pageBlockers, setPageBlockers] = useState<PublicationStatus | null>(null);
+  const draftStatus = product?.status;
+  const draftStock = product?.stock;
+  const draftPrice = product?.basePrice;
+  useEffect(() => {
+    if (draftStatus !== 'draft') { setPageBlockers(null); return; }
+    let active = true;
+    getPublicationStatus(productId).then((res) => {
+      if (active && res.data) setPageBlockers(res.data);
+    });
+    return () => { active = false; };
+  }, [productId, draftStatus, draftStock, draftPrice]);
+  const pendingBlockers = pageBlockers?.missing ?? [];
+
   // Tras enviar a revisión la IA decide en segundos: un único refresco silencioso (sin
   // spinner ni polling) para reflejar el resultado (publicado o con problemas nuevos).
   const reviewing = product?.status === 'pending_approval';
@@ -883,7 +900,37 @@ export default function ProductoDetallePage() {
                   if (res.data) setProduct(res.data);
                 }}
                 onResubmit={product.status === 'draft' ? () => handleStatusChange('pending_approval') : undefined}
+                blockers={pendingBlockers}
+                hasVariants={product.hasVariants}
+                onProductUpdated={(updated) => updated && setProduct(updated)}
               />
+            )}
+
+            {/* Sin aviso de la IA: solo lo que falta para enviar a revisión, junto y con la acción a mano. */}
+            {product.status === 'draft' && !aiFeedback && pendingBlockers.length > 0 && (
+              <section
+                aria-labelledby="blockers-title"
+                className="mb-4 space-y-3 rounded-2xl border border-amber-200 bg-feedback-warning-subtle p-3 text-foreground sm:p-4"
+                data-testid="publication-blockers-card"
+              >
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-feedback-warning-text" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <h2 id="blockers-title" className="text-base font-semibold leading-snug text-feedback-warning-text">
+                      Qué falta para enviarlo a revisión
+                    </h2>
+                    <p className="mt-0.5 text-sm text-foreground">
+                      {pendingBlockers.length === 1 ? 'Solo falta 1 cosa' : `Faltan ${pendingBlockers.length} cosas`}:
+                      corrígelas aquí mismo o entra al paso indicado.
+                    </p>
+                  </div>
+                </div>
+                <PublicationBlockersList
+                  product={{ id: product.id, hasVariants: product.hasVariants }}
+                  missing={pendingBlockers}
+                  onProductUpdated={(updated) => updated && setProduct(updated)}
+                />
+              </section>
             )}
 
             {product.status === 'draft' && fromAssistant && (
@@ -917,7 +964,7 @@ export default function ProductoDetallePage() {
               </Alert>
             )}
 
-            {product.status === 'draft' && !fromAssistant && !aiFeedback && (
+            {product.status === 'draft' && !fromAssistant && !aiFeedback && pendingBlockers.length === 0 && (
               <Alert
                 variant="warning"
                 className="mb-4"
