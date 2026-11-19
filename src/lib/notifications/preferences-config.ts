@@ -242,6 +242,30 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
         description: 'Tu saldo en Stripe no cubrió una devolución y se te generó una deuda pendiente que se descuenta automáticamente de tus próximas ventas.',
         icon:        UserCheck,
       },
+      {
+        eventType:   'PRODUCER_PAYOUT_SENT',
+        title:       'Cobro enviado a tu cuenta',
+        description: 'Te avisamos cuando enviamos a tu cuenta de Stripe el cobro de un pedido, con el nº de pedido como concepto.',
+        icon:        UserCheck,
+      },
+      {
+        eventType:   'PRODUCER_PAYOUT_HELD',
+        title:       'Cobro congelado temporalmente',
+        description: 'El cobro de un pedido queda en espera por una devolución, disputa o contracargo abierto. Siempre te avisamos.',
+        icon:        UserCheck,
+      },
+      {
+        eventType:   'PRODUCER_PAYOUT_RELEASED',
+        title:       'Cobro liberado',
+        description: 'La incidencia se ha resuelto y el cobro del pedido deja de estar congelado.',
+        icon:        UserCheck,
+      },
+      {
+        eventType:   'PRODUCER_REFUND_DEDUCTED',
+        title:       'Reembolso descontado de tu cobro',
+        description: 'Se ha hecho un reembolso parcial o total al comprador y se descuenta de tu cobro de ese pedido. Siempre te avisamos.',
+        icon:        UserCheck,
+      },
     ],
   },
 

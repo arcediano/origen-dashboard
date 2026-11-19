@@ -25,6 +25,7 @@ import {
   RefreshCw,
   RotateCcw,
   AlertTriangle,
+  Snowflake,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge, SwipeableRow } from '@arcediano/ux-library';
@@ -221,6 +222,11 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
             {order.total.toFixed(2)} €
           </span>
           <PaymentBadge status={order.payment.status} />
+          {order.payoutFreeze?.frozen && (
+            <Badge variant="warning" size="xs" icon={<Snowflake className="w-2.5 h-2.5" />}>
+              Cobro congelado
+            </Badge>
+          )}
           {order.invoice?.hasPdf && (
             <span className="inline-flex items-center gap-1 text-[10px] text-hoja-tinta font-medium">
               <FileText className="w-2.5 h-2.5" />
