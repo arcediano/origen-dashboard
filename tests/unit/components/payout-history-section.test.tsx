@@ -37,6 +37,37 @@ describe('PayoutHistorySection', () => {
     vi.resetAllMocks();
   });
 
+  it('un cobro programado con el pedido congelado se muestra como "Congelado" con motivo y fecha', async () => {
+    vi.mocked(fetchSellerPayoutHistory).mockResolvedValue({
+      data: {
+        items: [
+          {
+            ...baseItem,
+            payoutFreeze: {
+              frozen: true,
+              reason: 'DISPUTE',
+              reasonLabel: 'Disputa abierta',
+              since: '2026-01-20T00:00:00.000Z',
+              ref: 'dsp-1',
+            },
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 10,
+      },
+      status: 200,
+    });
+
+    render(<PayoutHistorySection />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Congelado').length).toBeGreaterThan(0);
+    });
+    expect(screen.queryByText('Programado')).not.toBeInTheDocument();
+    expect(screen.getAllByText(/Disputa abierta/).length).toBeGreaterThan(0);
+  });
+
   it('muestra el aviso de demora bancaria siempre, incluso sin cobros', async () => {
     vi.mocked(fetchSellerPayoutHistory).mockResolvedValue({
       data: { items: [], total: 0, page: 1, limit: 10 },

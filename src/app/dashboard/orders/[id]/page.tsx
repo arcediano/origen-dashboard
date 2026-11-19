@@ -11,7 +11,7 @@ import { format, formatDistanceToNow, differenceInCalendarDays } from 'date-fns'
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown, RotateCcw, Wallet, AlertTriangle } from 'lucide-react';
+import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown, RotateCcw, Wallet, AlertTriangle, Snowflake } from 'lucide-react';
 
 // Componentes UI
 import {
@@ -883,6 +883,29 @@ export default function OrderDetailPage() {
                     con envío propio del productor, el envío se suma
                     íntegro a este importe; la comisión de Origen se
                     descuenta solo de los productos, nunca del envío. */}
+                {order.payoutFreeze?.frozen && (
+                  <div
+                    role="status"
+                    className="mx-5 mb-3 flex items-start gap-3 rounded-2xl border border-amber-200 bg-feedback-warning-subtle px-4 py-3"
+                  >
+                    <Snowflake className="mt-0.5 h-4 w-4 shrink-0 text-feedback-warning-text" aria-hidden="true" />
+                    <div className="min-w-0 text-xs leading-relaxed text-feedback-warning-text">
+                      <p className="text-sm font-semibold">Cobro congelado temporalmente</p>
+                      <p className="mt-0.5">
+                        Motivo: {order.payoutFreeze.reasonLabel ?? 'incidencia abierta'}
+                        {order.payoutFreeze.since
+                          ? ` · desde el ${format(new Date(order.payoutFreeze.since), "d 'de' MMMM 'de' yyyy", { locale: es })}`
+                          : ''}
+                        .
+                      </p>
+                      <p className="mt-1">
+                        No tienes que hacer nada: el importe se liberará o se ajustará
+                        automáticamente cuando se resuelva y te avisaremos por notificación.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {order.sellerNetAmount != null && (
                   <div className="mx-5 mb-4 rounded-2xl border border-origen-pradera bg-linear-to-b from-white to-origen-crema px-4 py-3.5">
                     <div className="flex items-center justify-between gap-3">

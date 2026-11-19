@@ -1,7 +1,7 @@
 /**
  * @file notification-groups.test.ts
  * @description Tests para verificar que NOTIFICATION_GROUPS contiene
- * exactamente 32 eventos (incluyendo los 3 nuevos de P4/P5, y tras eliminar
+ * exactamente 36 eventos (incluyendo los 3 nuevos de P4/P5, y tras eliminar
  * ORDER_STATUS_CHANGED/ORDER_DELIVERED y añadir REVIEW_REQUEST,
  * PRODUCT_REVISION_APPROVED/REJECTED, PRODUCT_AUTO_UNPUBLISHED y
  * PRODUCER_DEBT_PENDING),
@@ -51,7 +51,7 @@ describe('NOTIFICATION_GROUPS — P4/P5 nuevos eventos', () => {
 
   it('debe contener exactamente 32 eventos en total (7 grupos)', () => {
     const totalEvents = NOTIFICATION_GROUPS.reduce((sum, g) => sum + g.events.length, 0);
-    expect(totalEvents).toBe(32);
+    expect(totalEvents).toBe(36);
     expect(NOTIFICATION_GROUPS.length).toBe(7);
   });
 

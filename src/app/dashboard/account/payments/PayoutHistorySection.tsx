@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { History, CalendarClock, CheckCircle2, RotateCcw, Undo2 } from 'lucide-react';
+import { History, CalendarClock, CheckCircle2, RotateCcw, Undo2, Snowflake } from 'lucide-react';
 import { Badge, Card, CardContent, CardHeader, CardIconHeader, Alert, AlertDescription, Pagination, Table, EmptyState, type Column, type BadgeProps } from '@arcediano/ux-library';
 import { fetchSellerPayoutHistory, type SellerPayoutHistoryItem, type SellerPayoutHistoryStatus } from '@/lib/api/orders';
 
@@ -41,7 +41,19 @@ const STATUS_META: Record<
   refunded: { label: 'Reembolsado', variant: 'danger', icon: Undo2 },
 };
 
+const FROZEN_META = { label: 'Congelado', variant: 'warning' as BadgeProps['variant'], icon: Snowflake };
+
+/** Un cobro programado cuyo pedido tiene una incidencia abierta se muestra como congelado. */
+function metaFor(item: SellerPayoutHistoryItem) {
+  return item.status === 'scheduled' && item.payoutFreeze?.frozen ? FROZEN_META : STATUS_META[item.status];
+}
+
 function dateLabelFor(item: SellerPayoutHistoryItem): string {
+  if (item.status === 'scheduled' && item.payoutFreeze?.frozen) {
+    return `${item.payoutFreeze.reasonLabel ?? 'Incidencia abierta'}${
+      item.payoutFreeze.since ? ` · desde el ${formatDate(item.payoutFreeze.since)}` : ''
+    }`;
+  }
   if (item.status === 'reversed' && item.transferReversedAt) {
     return `Revertido el ${formatDate(item.transferReversedAt)}`;
   }
@@ -58,7 +70,7 @@ function dateLabelFor(item: SellerPayoutHistoryItem): string {
 }
 
 function PayoutHistoryCard({ item, onClick }: { item: SellerPayoutHistoryItem; onClick: () => void }) {
-  const meta = STATUS_META[item.status];
+  const meta = metaFor(item);
   return (
     <button
       type="button"
@@ -119,7 +131,7 @@ export function PayoutHistorySection() {
       key: 'status',
       header: 'Estado',
       accessor: (item) => {
-        const meta = STATUS_META[item.status];
+        const meta = metaFor(item);
         return (
           <Badge variant={meta.variant} size="sm" className="flex items-center gap-1.5 w-fit">
             <meta.icon className="h-3 w-3" aria-hidden="true" />
