@@ -22,7 +22,8 @@ import {
   XCircle,
   ChevronRight,
   RotateCcw,
-  AlertTriangle
+  AlertTriangle,
+  Snowflake
 } from 'lucide-react';
 import { fetchSellerOrderInvoice } from '@/lib/api/orders';
 import type { Order } from '@/types/order';
@@ -153,9 +154,16 @@ export function OrdersTable({
       accessor: (item) => {
         const config = statusConfig[item.status];
         return (
-          <Badge variant={config.variant} icon={<config.icon className="w-3 h-3" />}>
-            {config.label}
-          </Badge>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge variant={config.variant} icon={<config.icon className="w-3 h-3" />}>
+              {config.label}
+            </Badge>
+            {item.payoutFreeze?.frozen && (
+              <Badge variant="warning" size="sm" icon={<Snowflake className="w-3 h-3" />}>
+                Cobro congelado
+              </Badge>
+            )}
+          </div>
         );
       },
       sortable: true,

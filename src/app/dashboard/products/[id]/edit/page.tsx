@@ -6,7 +6,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useEffect } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
 import { motion, type Variants } from 'framer-motion';
 import { Package, ChevronLeft, ChevronRight, Save, Send, RefreshCw, X } from 'lucide-react';
 
@@ -44,6 +45,7 @@ const containerVariants: Variants = {
 export default function EditProductPage() {
   const params = useParams();
   const productId = params.id as string;
+  const searchParams = useSearchParams();
 
   const {
     formData,
@@ -90,6 +92,15 @@ export default function EditProductPage() {
   const showPageLoader = useDelayedLoading(isLoading);
 
   const aiFeedback = useAiFeedback(productId, !isPendingApproval);
+  // `?step=` (enlaces directos desde «Qué hay que corregir»): abre el paso que arregla el problema.
+  const stepFromUrl = searchParams.get('step');
+  useEffect(() => {
+    const target = FORM_STEPS.find((s) => s.id === stepFromUrl);
+    if (target && !isLoading) setActiveTab(target.id);
+    // Solo al terminar de cargar el producto: no pisa la navegación posterior del usuario.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, stepFromUrl]);
+
   const tips = useStepTips(activeTab, formData);
 
   const handleTabChange = (tab: FormStepId) => {

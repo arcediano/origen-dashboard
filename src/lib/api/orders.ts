@@ -11,7 +11,7 @@
  */
 
 import { gatewayClient, GatewayError } from './client';
-import type { Order, OrderStatus, OrderStats, OrdersResponse, OrderFilters } from '@/types/order';
+import type { Order, OrderStatus, OrderStats, OrdersResponse, OrderFilters, PayoutFreeze } from '@/types/order';
 import type { ApiResponse } from './products';
 
 // ─── Tipos internos (forma real del backend) ─────────────────────────────────
@@ -68,6 +68,7 @@ interface BackendOrder {
   total: number;
   /** Importe neto que el productor va a ingresar por este pedido (ver Order['sellerNetAmount']). */
   sellerNetAmount?: number;
+  payoutFreeze?: PayoutFreeze;
   estimatedDelivery?: string;
   createdAt: string;
   updatedAt: string;
@@ -228,6 +229,7 @@ function mapBackendOrder(o: BackendOrder): Order {
     discount: o.discountAmount > 0 ? o.discountAmount : undefined,
     total: o.total,
     sellerNetAmount: o.sellerNetAmount,
+    payoutFreeze: o.payoutFreeze,
     couponCode: o.couponCode,
 
     status,
@@ -731,6 +733,7 @@ interface BackendPayoutHistoryItem {
   transferReversedAt: string | null;
   refundedAt: string | null;
   refundedAmountCents: number | null;
+  payoutFreeze?: PayoutFreeze;
 }
 
 interface BackendPayoutHistoryResponse {
@@ -751,6 +754,8 @@ export interface SellerPayoutHistoryItem {
   transferReversedAt: string | null;
   refundedAt: string | null;
   refundedAmount: number | null;
+  /** Cobro congelado (disputa/contracargo/devolución): se muestra en lugar de "Programado". */
+  payoutFreeze?: PayoutFreeze;
 }
 
 /**
@@ -783,6 +788,7 @@ export async function fetchSellerPayoutHistory(params?: {
       transferReversedAt: item.transferReversedAt,
       refundedAt: item.refundedAt,
       refundedAmount: item.refundedAmountCents !== null ? item.refundedAmountCents / 100 : null,
+      payoutFreeze: item.payoutFreeze,
     }));
 
     return {

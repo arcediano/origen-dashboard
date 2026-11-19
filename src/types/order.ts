@@ -129,6 +129,8 @@ export interface Order {
    * (lo que paga el comprador).
    */
   sellerNetAmount?: number;
+  /** Cobro congelado (disputa, contracargo o devolución pendiente), con motivo y desde cuándo. */
+  payoutFreeze?: PayoutFreeze;
 
   status: OrderStatus;
   payment: OrderPayment;
@@ -180,4 +182,12 @@ export interface OrderFilters {
   minAmount?: number;
   maxAmount?: number;
   customerId?: string;
+}
+/** Estado de "cobro congelado" que devuelve el backend para un pedido del productor. */
+export interface PayoutFreeze {
+  frozen: boolean;
+  reason: 'DISPUTE' | 'CHARGEBACK' | 'RETURN' | 'MANUAL' | null;
+  reasonLabel: string | null;
+  since: string | null;
+  ref: string | null;
 }
