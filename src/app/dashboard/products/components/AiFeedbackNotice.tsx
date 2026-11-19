@@ -10,9 +10,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, Check, Edit, ImagePlus, Send, Sparkles } from 'lucide-react';
+import { AlertTriangle, Check, ImagePlus, Send, Sparkles } from 'lucide-react';
 import { Button } from '@arcediano/ux-library';
-import type { AiFeedback } from '@/lib/api/products';
+import type { AiFeedback, PublicationRequirement } from '@/lib/api/products';
+import type { Product } from '@/types/product';
+import { PublicationBlockersList } from './PublicationBlockersList';
 import { FORM_STEPS, type FormStepId } from '@/types/product';
 import {
   AiAssistError,
@@ -535,6 +537,9 @@ export function AiFeedbackNotice({
   onUploadPhoto,
   currentAllergens = [],
   onApplyAllergens,
+  blockers = [],
+  hasVariants = false,
+  onProductUpdated,
 }: {
   feedback: AiFeedback;
   productId: string;
@@ -553,6 +558,11 @@ export function AiFeedbackNotice({
   currentAllergens?: string[];
   /** Solo en la edición: añade a la ficha los alérgenos recomendados (decisión del productor). */
   onApplyAllergens?: (values: string[]) => void;
+  /** Requisitos de publicación pendientes (stock, precio…): se muestran agrupados con los problemas de la IA. */
+  blockers?: PublicationRequirement[];
+  hasVariants?: boolean;
+  /** Tras corregir stock/precio en el propio panel, el padre recarga producto y requisitos. */
+  onProductUpdated?: (updated?: Product) => void;
 }) {
   const allergenProblem = feedback.problems.find(
     (p) => p.field === 'nutritionalInfo.allergens' && (p.suggestedValues?.length ?? 0) > 0,
@@ -560,8 +570,14 @@ export function AiFeedbackNotice({
   const photoProblem = feedback.problems.find((p) => p.field === 'mainImage');
   const reverted = feedback.kind === 'REVERTED';
   const partial = feedback.kind === 'PARTIAL';
-  const plain = feedback.problems.filter((p) => p !== allergenProblem && p !== photoProblem);
-  const total = feedback.problems.length;
+  const plain = feedback.problems.filter(
+    (p) =>
+      p !== allergenProblem &&
+      p !== photoProblem &&
+      // Los requisitos de publicación (field vacío) ya salen agrupados en `blockers`.
+      !(blockers.length > 0 && p.field === ''),
+  );
+  const total = plain.length + (allergenProblem ? 1 : 0) + (photoProblem ? 1 : 0) + blockers.length;
   const editHref = `/dashboard/products/${productId}/edit`;
   const aiCanHelp =
     !reverted && !partial && ((photoProblem && !photoProblem.unrelated) || allergenProblem);
@@ -614,22 +630,43 @@ export function AiFeedbackNotice({
               <li key={i}>
                 {label && <span className="font-semibold">{label}: </span>}
                 {p.message}
-                {stepLabel && onJumpToStep && (
+                {stepLabel && (
                   <>
                     {' '}
-                    <button
-                      type="button"
-                      onClick={() => onJumpToStep(step!)}
-                      className="font-medium underline underline-offset-2"
-                    >
-                      Ir a «{stepLabel}»
-                    </button>
+                    {onJumpToStep ? (
+                      <button
+                        type="button"
+                        onClick={() => onJumpToStep(step!)}
+                        className="font-medium underline underline-offset-2"
+                      >
+                        Ir a «{stepLabel}»
+                      </button>
+                    ) : (
+                      <Link
+                        href={`${editHref}?step=${step}`}
+                        className="font-medium underline underline-offset-2"
+                      >
+                        Ir a «{stepLabel}»
+                      </Link>
+                    )}
                   </>
                 )}
               </li>
             );
           })}
         </ul>
+      )}
+      {blockers.length > 0 && (
+        <div className="space-y-2" data-testid="ai-notice-blockers">
+          <p className="text-sm font-semibold text-foreground">
+            Para poder enviarlo a revisión ({blockers.length} pendiente{blockers.length === 1 ? '' : 's'})
+          </p>
+          <PublicationBlockersList
+            product={{ id: productId, hasVariants }}
+            missing={blockers}
+            onProductUpdated={onProductUpdated}
+          />
+        </div>
       )}
       {allergenProblem && (
         <AllergenSuggestion
@@ -663,13 +700,6 @@ export function AiFeedbackNotice({
           ? 'Cuando rehagas ese campo, lo revisaremos de nuevo en unos segundos y, si todo está bien, se publicará al momento.'
           : 'Cuando lo corrijas y lo vuelvas a enviar, lo revisaremos de nuevo en unos segundos y, si todo está bien, se publicará al momento.'}
       </p>
-      {!onJumpToStep && !photoProblem && (
-        <Link href={editHref} className="block sm:inline-block">
-          <Button variant="outline" size="sm" fullWidth leftIcon={<Edit className="h-3.5 w-3.5" />}>
-            Corregir ahora
-          </Button>
-        </Link>
-      )}
     </section>
   );
 }

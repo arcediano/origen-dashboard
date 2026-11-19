@@ -31,6 +31,29 @@ const feedback = (over: Partial<AiFeedback> = {}): AiFeedback => ({
 });
 
 describe('AiFeedbackNotice', () => {
+  it('agrupa los requisitos pendientes (stock, precio…) con acciones directas, sin pulsar nada antes', () => {
+    render(
+      <AiFeedbackNotice
+        feedback={feedback()}
+        productId="p1"
+        blockers={[
+          { id: 'stock', stepId: 'pricing', message: 'El producto debe tener stock disponible (mayor que 0)' },
+          { id: 'description', stepId: 'basic', message: 'La descripción debe tener al menos 100 caracteres' },
+        ]}
+      />,
+    );
+    expect(screen.getByText(/Para poder enviarlo a revisión \(2 pendientes\)/)).toBeInTheDocument();
+    // Stock editable en el propio panel.
+    expect(screen.getByLabelText('Stock disponible')).toBeInTheDocument();
+    // El resto, con enlace directo al paso.
+    expect(screen.getAllByRole('link', { name: /Ir a «.*»/ })[0]).toHaveAttribute(
+      'href',
+      '/dashboard/products/p1/edit?step=basic',
+    );
+    // El requisito sin campo de la IA ya no se duplica.
+    expect(screen.queryByText(/Falta la imagen principal/)).toBeNull();
+  });
+
   it('lista los problemas con el nombre del campo en castellano, nunca la key', () => {
     render(<AiFeedbackNotice feedback={feedback()} productId="p1" />);
     expect(screen.getByText('Hay datos que debes corregir')).toBeInTheDocument();
@@ -47,7 +70,12 @@ describe('AiFeedbackNotice', () => {
 
   it('en el detalle enlaza a la edición; en la edición salta al paso del campo', () => {
     const { unmount } = render(<AiFeedbackNotice feedback={feedback()} productId="p1" />);
-    expect(screen.getByRole('link', { name: /Corregir ahora/ })).toHaveAttribute('href', '/dashboard/products/p1/edit');
+    // Sin botón «Corregir ahora»: cada problema lleva su acción directa.
+    expect(screen.queryByRole('link', { name: /Corregir ahora/ })).toBeNull();
+    expect(screen.getByRole('link', { name: /Ir a «/ })).toHaveAttribute(
+      'href',
+      '/dashboard/products/p1/edit?step=basic',
+    );
     unmount();
 
     const onJump = vi.fn();
