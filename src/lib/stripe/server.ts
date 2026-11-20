@@ -26,7 +26,7 @@ function getStripe(): Stripe {
       throw new Error('STRIPE_SECRET_KEY is not defined');
     }
     _stripe = new Stripe(secretKey, {
-      apiVersion: '2026-05-27.dahlia',
+      apiVersion: '2026-08-26.dahlia',
       typescript: true,
       maxNetworkRetries: 2,
     });

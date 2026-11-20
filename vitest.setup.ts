@@ -352,3 +352,18 @@ afterEach(() => server.resetHandlers());
 
 // Clean up after all tests
 afterAll(() => server.close());
+
+// happy-dom rechaza `Animation.finished` con AbortError al cancelar una animación; `motion` cancela
+// animaciones al desmontar y nadie escucha esa promesa, lo que vitest cuenta como «Unhandled Rejection»
+// (16 falsos errores y código de salida ≠ 0). Se marca como gestionada antes de cancelar.
+if (typeof Animation !== 'undefined') {
+	const originalCancel = Animation.prototype.cancel;
+	Animation.prototype.cancel = function cancel(this: Animation) {
+		try {
+			void this.finished?.catch(() => undefined);
+		} catch {
+			/* sin promesa finished: nada que silenciar */
+		}
+		return originalCancel.call(this);
+	};
+}
