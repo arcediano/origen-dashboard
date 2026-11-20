@@ -26,7 +26,7 @@ function getStripe(): Stripe {
       throw new Error('STRIPE_SECRET_KEY is not defined');
     }
     _stripe = new Stripe(secretKey, {
-      apiVersion: '2026-05-27.dahlia',
+      apiVersion: '2026-08-26.dahlia',
       typescript: true,
       maxNetworkRetries: 2,
     });
@@ -56,6 +56,74 @@ export function buildCreateAccountIdempotencyKey(producerId: string): string {
     );
   }
   return `connect-account-create:${producerId}`;
+}
+
+/** MCC de «tiendas de alimentación diversas»: coherente con un marketplace de productores locales. */
+const PRODUCER_MCC = '5499';
+const PRODUCT_DESCRIPTION =
+  'Venta de productos locales y artesanos del productor a través del marketplace Origen.';
+
+/** Devuelve una URL https válida (añade el esquema si falta) o undefined si no es utilizable por Stripe. */
+export function normalizeBusinessUrl(raw?: string): string | undefined {
+  const value = raw?.trim();
+  if (!value) return undefined;
+  try {
+    const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
+    const host = url.hostname;
+    if (!host.includes('.') || host === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(host)) return undefined;
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Datos que ya conocemos del productor y que Stripe no tendrá que volver a pedir.
+ * Devuelve undefined si no hay nada que aplicar.
+ */
+export function buildProfilePrefill(params: {
+  sellerId: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  businessName?: string;
+  website?: string;
+}): Stripe.AccountUpdateParams | undefined {
+  const { sellerId } = params;
+  const email = params.email?.trim() || undefined;
+  const firstName = params.firstName?.trim() || undefined;
+  const lastName = params.lastName?.trim() || undefined;
+  const businessName = params.businessName?.trim() || undefined;
+  const url = normalizeBusinessUrl(params.website);
+
+  if (!email && !firstName && !lastName && !businessName && !url) return undefined;
+
+  const payload: Stripe.AccountUpdateParams = {
+    metadata: {
+      sellerId,
+      platform: 'origen-marketplace',
+      ...(firstName ? { firstName } : {}),
+      ...(lastName ? { lastName } : {}),
+    },
+  };
+  if (email) payload.email = email;
+  if (firstName || lastName || email) {
+    payload.individual = {
+      ...(firstName ? { first_name: firstName } : {}),
+      ...(lastName ? { last_name: lastName } : {}),
+      ...(email ? { email } : {}),
+    };
+  }
+  if (businessName || url) {
+    payload.business_profile = {
+      mcc: PRODUCER_MCC,
+      product_description: PRODUCT_DESCRIPTION,
+      ...(businessName ? { name: businessName } : {}),
+      ...(url ? { url } : {}),
+      ...(email ? { support_email: email } : {}),
+    };
+  }
+  return payload;
 }
 
 /**
@@ -129,36 +197,19 @@ export async function createConnectAccount(params: {
     throw error;
   }
 
-  // Aplicar perfil (email, business_profile, firstName, lastName) vía update()
-  // fuera de la protección de idempotencia. No necesita su propia key porque
-  // un update con los mismos valores es inofensivo (no crea recursos).
-  const hasProfileData = email || businessName || website || firstName || lastName;
-  if (hasProfileData) {
+  // Aplicar perfil (email, business_profile, individual) vía update() fuera de la
+  // protección de idempotencia. Stripe NO vuelve a pedir en el formulario embebido
+  // lo que ya está en la cuenta, así que cuanto más se rellene aquí, menos pasos ve el
+  // productor. IMPORTANTE (Express): tras abrir el primer onboarding ya no se pueden
+  // leer ni actualizar estos datos, por eso se hace ahora y no después.
+  const payload = buildProfilePrefill({ sellerId, email, firstName, lastName, businessName, website });
+  if (payload) {
     try {
-      const updatePayload: Stripe.AccountUpdateParams = {
-        metadata: {
-          sellerId,
-          platform: 'origen-marketplace',
-          ...(firstName ? { firstName } : {}),
-          ...(lastName ? { lastName } : {}),
-        },
-      };
-
-      if (email) {
-        updatePayload.email = email;
-      }
-
-      if (businessName || website) {
-        updatePayload.business_profile = {
-          ...(businessName ? { name: businessName } : {}),
-          ...(website ? { url: website } : {}),
-        };
-      }
-
-      await stripe.accounts.update(account.id, updatePayload);
+      await stripe.accounts.update(account.id, payload);
     } catch (updateError) {
-      // Fallo del update no es bloqueante — loguear sin relanzar
-      // (el formulario embebido de Stripe puede solicitar los datos que falten)
+      // Fallo del update no es bloqueante: el formulario de Stripe pedirá lo que falte.
+      // Reintento mínimo (solo email e individual) por si lo que falló fue la URL u otro
+      // dato de negocio que Stripe no acepta; así no se pierde el resto del prefill.
       console.error(
         'Warning: failed to update Stripe account profile (non-blocking)',
         {
@@ -166,7 +217,17 @@ export async function createConnectAccount(params: {
           error: updateError instanceof Error ? updateError.message : String(updateError),
         }
       );
-      // No relanzar — devolvemos la cuenta creada
+      const minimal = buildProfilePrefill({ sellerId, email, firstName, lastName });
+      if (minimal && (minimal.email || minimal.individual)) {
+        try {
+          await stripe.accounts.update(account.id, {
+            ...(minimal.email ? { email: minimal.email } : {}),
+            ...(minimal.individual ? { individual: minimal.individual } : {}),
+          });
+        } catch {
+          // sin más reintentos: Stripe pedirá estos datos en el formulario
+        }
+      }
     }
   }
 

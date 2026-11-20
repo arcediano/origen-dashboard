@@ -1,9 +1,19 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+
+// El componente importa loadConnectAndInitialize de '@stripe/connect-js' (no de react-connect-js);
+// sin este mock intenta cargar connect.js de la red real y revienta en jsdom.
+vi.mock('@stripe/connect-js', () => ({
+  loadConnectAndInitialize: vi.fn(() => ({})),
+}));
+
+// La clave publicable se lee al cargar el módulo: debe existir antes del import del componente.
+vi.hoisted(() => {
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = 'pk_test_unit';
+});
 
 // Mock @stripe/react-connect-js
 vi.mock('@stripe/react-connect-js', () => ({
-  loadConnectAndInitialize: vi.fn(),
   ConnectComponentsProvider: ({ children }: any) => <div>{children}</div>,
   ConnectAccountOnboarding: ({ onExit }: any) => (
     <button onClick={onExit}>Trigger onExit</button>
@@ -23,6 +33,10 @@ import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-con
 import { saveStep5 } from '@/lib/api/onboarding';
 
 describe('StripeConnectOnboarding', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   const defaultProps = {
     stripeAccountId: 'acct_test123',
     source: 'onboarding' as const,
@@ -38,7 +52,7 @@ describe('StripeConnectOnboarding', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    global.fetch = vi.fn();
+    vi.stubGlobal('fetch', vi.fn());
     vi.mocked(saveStep5).mockResolvedValue({ success: true } as any);
   });
 

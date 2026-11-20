@@ -296,10 +296,13 @@ describe('lib/stripe/server', () => {
         'acct_test_update',
         expect.objectContaining({
           email,
-          business_profile: {
+          business_profile: expect.objectContaining({
             name: businessName,
-            url: website,
-          },
+            url: 'https://mybiz.com/',
+            mcc: '5499',
+            support_email: email,
+          }),
+          individual: { first_name: firstName, last_name: lastName, email },
           metadata: expect.objectContaining({
             sellerId,
             platform: 'origen-marketplace',
@@ -308,6 +311,37 @@ describe('lib/stripe/server', () => {
           }),
         })
       );
+    });
+
+    it('si la web no es válida (p. ej. localhost) se omite la URL pero se aplica el resto del prefill', async () => {
+      const { createConnectAccount: testFunc } = await import('@/lib/stripe/server');
+      const mockUpdate = vi.fn().mockResolvedValue({});
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: vi.fn().mockResolvedValue({ id: 'acct_url' }), update: mockUpdate } };
+      } as any);
+
+      await testFunc({ sellerId: 'uuid-url', email: 'a@b.es', businessName: 'Queso', website: 'http://localhost:3000' });
+
+      const payload = mockUpdate.mock.calls[0][1];
+      expect(payload.business_profile.url).toBeUndefined();
+      expect(payload.business_profile.name).toBe('Queso');
+    });
+
+    it('si el update completo falla, reintenta solo con email e individual', async () => {
+      const { createConnectAccount: testFunc } = await import('@/lib/stripe/server');
+      const mockUpdate = vi.fn().mockRejectedValueOnce(new Error('invalid url')).mockResolvedValueOnce({});
+      vi.mocked(Stripe).mockImplementation(function () {
+        return { accounts: { create: vi.fn().mockResolvedValue({ id: 'acct_retry' }), update: mockUpdate } };
+      } as any);
+
+      const res = await testFunc({ sellerId: 'uuid-retry', email: 'a@b.es', firstName: 'Ana', lastName: 'Gil', businessName: 'Queso', website: 'https://x.es' });
+
+      expect(res.id).toBe('acct_retry');
+      expect(mockUpdate).toHaveBeenCalledTimes(2);
+      expect(mockUpdate.mock.calls[1][1]).toEqual({
+        email: 'a@b.es',
+        individual: { first_name: 'Ana', last_name: 'Gil', email: 'a@b.es' },
+      });
     });
 
     it('si solo se proporciona sellerId (sin campos de perfil), update NO se llama', async () => {

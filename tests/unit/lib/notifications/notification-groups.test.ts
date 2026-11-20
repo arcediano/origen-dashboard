@@ -9,6 +9,7 @@
  * y que PROMOTION_CREATED está en el grupo 'marketing'.
  */
 
+import { describe, expect, it } from 'vitest';
 import { NOTIFICATION_GROUPS, ALWAYS_ACTIVE_EVENTS } from '@/lib/notifications/preferences-config';
 
 describe('NOTIFICATION_GROUPS — P4/P5 nuevos eventos', () => {
