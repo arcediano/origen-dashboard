@@ -263,9 +263,9 @@ export default function PaymentsPage() {
   // no repetir el mismo aviso dos veces y ahorrar scroll en móvil.
   const getAlertContent = () => {
     if (paymentStage === 'connected') {
-      return 'Si necesitas cambiar tu cuenta bancaria o actualizar datos de pago, pulsa "Modificar cuenta en Stripe" para acceder de forma segura a tu cuenta existente. Tu historial de cobros y configuración permanecerán intactos.';
+      return 'Si necesitas cambiar tu cuenta bancaria o actualizar datos de pago, pulsa "Modificar cuenta en Stripe": se abre en una pestaña nueva y no pierdes esta página. Tu historial de cobros y configuración permanecerán intactos.';
     }
-    return 'El botón te lleva directamente al onboarding real de Stripe. El acceso es seguro y siempre se genera con un enlace actualizado.';
+    return 'El formulario se abre aquí mismo, sin salir de Origen. Ten a mano tu IBAN, tu DNI/NIE o CIF y tu móvil: Stripe te enviará un código por SMS para verificar tu identidad (es un paso de seguridad de Stripe, solo la primera vez).';
   };
 
   if (isFirstLoad.current && isLoading) {
