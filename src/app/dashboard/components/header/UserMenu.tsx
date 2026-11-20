@@ -215,7 +215,7 @@ export function UserMenu({
                             : [];
                       return reasons.map((blocker) => (
                         <p key={blocker} className="text-[11px] text-text-muted pl-5">
-                          · {mapBlockerToText(blocker)}
+                          · {mapBlockerToText(blocker, readinessReport.payment?.status)}
                         </p>
                       ));
                     })()}
