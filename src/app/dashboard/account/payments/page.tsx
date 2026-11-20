@@ -19,6 +19,7 @@ import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCh
 import { loadProducerProfile } from '@/lib/api/onboarding';
 import { fetchSellerPayouts, type SellerPayoutItem } from '@/lib/api/orders';
 import { openStripeDashboard } from '@/lib/stripe/connect-client';
+import { useReadiness } from '@/contexts/ReadinessContext';
 import { useStripeConnectPolling } from '@/lib/stripe/use-stripe-connect-polling';
 import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-connect-onboarding';
 import { PayoutHistorySection } from './PayoutHistorySection';
@@ -56,6 +57,9 @@ export default function PaymentsPage() {
   const [payoutsTotal, setPayoutsTotal] = useState(0);
 
   // Extraer loadPaymentState a useCallback para reutilizar en múltiples efectos
+  const { readiness, refetch: refetchReadiness } = useReadiness();
+  const isValidating = readiness?.payment.status === 'PENDING_VERIFICATION' && readiness.payment.requirementsDue.length === 0;
+
   const loadPaymentState = useCallback(async () => {
     try {
       const response = await loadProducerProfile();
@@ -75,10 +79,12 @@ export default function PaymentsPage() {
       setFirstName(null);
       setLastName(null);
       setUserEmail(null);
+      // Mantener el dashboard y el menú del avatar en sincronía con lo que muestra esta página.
+      void refetchReadiness();
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : 'Error al cargar estado de cobros');
     }
-  }, []);
+  }, [refetchReadiness]);
 
   const paymentStage = isConnected
     ? 'connected'
@@ -334,11 +340,13 @@ export default function PaymentsPage() {
                         {paymentStage === 'connected'
                           ? 'Tu cuenta está lista para recibir pagos'
                           : paymentStage === 'pending'
-                            ? 'Te queda un paso para activar los cobros'
+                            ? (isValidating ? 'Stripe está validando tu cuenta' : 'Te queda un paso para activar los cobros')
                             : 'Conecta Stripe para empezar a cobrar'}
                       </h2>
                       <p className="mt-2 max-w-xl text-sm sm:text-base leading-relaxed text-text-subtle">
-                        Revisa estado, verificación y acceso directo a Stripe para activar o actualizar tus datos de cobro.
+                        {paymentStage === 'pending' && isValidating
+                          ? 'Has completado el alta. Stripe está comprobando tus datos: suele tardar unos minutos y, como máximo, 1-2 días laborables. Esta página se actualiza sola y te avisaremos cuando los cobros estén activos.'
+                          : 'Revisa estado, verificación y acceso directo a Stripe para activar o actualizar tus datos de cobro.'}
                       </p>
                     </div>
 
@@ -350,7 +358,7 @@ export default function PaymentsPage() {
                           className="flex items-center gap-1.5"
                         >
                           {paymentStage === 'connected' ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> : paymentStage === 'pending' ? <CircleEllipsis className="h-3.5 w-3.5" aria-hidden="true" /> : <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />}
-                          {paymentStage === 'connected' ? 'Cobros activos' : paymentStage === 'pending' ? 'Onboarding pendiente' : 'Sin cuenta de cobro'}
+                          {paymentStage === 'connected' ? 'Cobros activos' : paymentStage === 'pending' ? (isValidating ? 'En validación por Stripe' : 'Onboarding pendiente') : 'Sin cuenta de cobro'}
                         </Badge>
                         {acceptedTermsAt && (
                           <Badge variant="outline" size="sm" className="flex items-center gap-1.5">
@@ -498,10 +506,10 @@ export default function PaymentsPage() {
                         <span className="text-sm font-medium text-text-subtle">Stripe</span>
                         <div className="text-right">
                           <p className="text-sm font-bold text-origen-bosque">
-                            {paymentStage === 'connected' ? 'Operativo' : paymentStage === 'pending' ? 'Pendiente' : 'No configurado'}
+                            {paymentStage === 'connected' ? 'Operativo' : paymentStage === 'pending' ? (isValidating ? 'En validación' : 'Pendiente') : 'No configurado'}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {paymentStage === 'connected' ? 'Puedes editar tus datos cuando lo necesites.' : paymentStage === 'pending' ? 'Verificación todavía en curso.' : 'Todavía no has iniciado el alta.'}
+                            {paymentStage === 'connected' ? 'Puedes editar tus datos cuando lo necesites.' : paymentStage === 'pending' ? (isValidating ? 'Stripe está validando tus datos; no hace falta que hagas nada.' : 'Verificación todavía en curso.') : 'Todavía no has iniciado el alta.'}
                           </p>
                         </div>
                       </div>

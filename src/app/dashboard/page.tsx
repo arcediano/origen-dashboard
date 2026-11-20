@@ -85,7 +85,12 @@ export default function ProducerDashboard() {
   const isFirstLoad = useRef(true);
   // Compartido con DashboardHeader/UserMenu vía ReadinessProvider (antes cada
   // uno pedía getMyReadiness() por su cuenta, duplicando la petición).
-  const { readiness } = useReadiness();
+  const { readiness, refetch: refetchReadiness } = useReadiness();
+
+  // Al volver desde «Cobros» u otra sección el estado de pago puede haber cambiado: se actualiza al entrar.
+  useEffect(() => {
+    void refetchReadiness();
+  }, [refetchReadiness]);
 
   // Hooks para datos
   const {
@@ -148,6 +153,21 @@ export default function ProducerDashboard() {
           dismissible: false,
           action: {
             label: 'Resolver ahora',
+            href: '/dashboard/account/payments',
+          },
+        });
+      }
+
+      // PENDING_VERIFICATION: el productor ya envió sus datos y Stripe los está validando
+      if (status === 'PENDING_VERIFICATION' && readiness.payment.requirementsDue.length === 0) {
+        dashboardAlerts.push({
+          id: 'payment-pending-verification',
+          type: 'accent',
+          title: 'Stripe está validando tu cuenta de cobro',
+          description: 'Has completado el alta y Stripe está comprobando tus datos. Suele tardar unos minutos, y como máximo 1-2 días laborables. Te avisaremos cuando tus cobros estén activos; mientras tanto no podrás recibir pagos.',
+          dismissible: false,
+          action: {
+            label: 'Ver estado de cobros',
             href: '/dashboard/account/payments',
           },
         });
