@@ -49,6 +49,24 @@ export function ReadinessProvider({ children }: { children: ReactNode }) {
     void fetchReadiness();
   }, [fetchReadiness]);
 
+  // El estado de cobros cambia fuera de esta app (Stripe valida la cuenta y avisa por webhook):
+  // se vuelve a pedir al recuperar el foco, como mucho una vez cada 30 s, para no quedarse con
+  // un «cobros pausados» antiguo hasta recargar la página.
+  useEffect(() => {
+    let last = Date.now();
+    const refresh = () => {
+      if (document.visibilityState === 'hidden' || Date.now() - last < 30_000) return;
+      last = Date.now();
+      void fetchReadiness();
+    };
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [fetchReadiness]);
+
   return (
     <ReadinessContext.Provider value={{ readiness, isLoading, refetch: fetchReadiness }}>
       {children}

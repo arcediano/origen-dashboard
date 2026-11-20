@@ -34,7 +34,15 @@ const BLOCKER_TEXT_MAP: Record<string, string> = {
 };
 
 /** Mapea un código de blocker de readiness a texto legible para mostrar en UI. */
-export function mapBlockerToText(blocker: string): string {
+export function mapBlockerToText(blocker: string, paymentStatus?: string): string {
+  // Con la cuenta ya enviada, «conecta tu cuenta» sería engañoso: Stripe la está validando.
+  if (blocker === 'STRIPE_NOT_CONNECTED') {
+    if (paymentStatus === 'PENDING_VERIFICATION') {
+      return 'Stripe está validando tu cuenta de cobro (puede tardar unos minutos o hasta 1-2 días laborables)';
+    }
+    if (paymentStatus === 'ACTION_REQUIRED') return 'Stripe necesita más información para activar tus cobros';
+    if (paymentStatus === 'RESTRICTED') return 'Stripe ha restringido tus cobros: revisa tu cuenta de pagos';
+  }
   if (BLOCKER_TEXT_MAP[blocker]) return BLOCKER_TEXT_MAP[blocker];
 
   if (blocker.startsWith('STATUS_NOT_ACTIVE:')) {
