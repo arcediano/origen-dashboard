@@ -5,10 +5,13 @@ import React, { type JSX } from 'react';
 import { server } from './tests/mocks/server';
 
 vi.mock('@arcediano/ux-library', () => {
-	const passthrough = (tag: keyof JSX.IntrinsicElements) =>
-		React.forwardRef<any, any>(({ children, ...props }, ref) =>
+	const passthrough = (tag: keyof JSX.IntrinsicElements) => {
+		const Component = React.forwardRef<any, any>(({ children, ...props }, ref) =>
 			React.createElement(tag, { ref, ...props }, children)
 		);
+		Component.displayName = `Mock(${tag})`;
+		return Component;
+	};
 
 	const Button = passthrough('button');
 	const Input = React.forwardRef<any, any>(({ label, error, id, ...props }, ref) =>
@@ -20,6 +23,7 @@ vi.mock('@arcediano/ux-library', () => {
 			error ? React.createElement('div', { role: 'alert' }, error) : null
 		)
 	);
+	Input.displayName = 'MockInput';
 	const InputAffixField = React.forwardRef<any, any>(({ label, error, id, affixLeft: _affixLeft, affixRight: _affixRight, ...props }, ref) =>
 		React.createElement(
 			'div',
@@ -29,6 +33,7 @@ vi.mock('@arcediano/ux-library', () => {
 			error ? React.createElement('div', { role: 'alert' }, error) : null
 		)
 	);
+	InputAffixField.displayName = 'MockInputAffixField';
 	const Textarea = passthrough('textarea');
 	const Label = passthrough('label');
 	const Badge = passthrough('span');
@@ -109,6 +114,7 @@ vi.mock('@arcediano/ux-library', () => {
 	const Checkbox = React.forwardRef<any, any>(({ children, ...props }, ref) =>
 		React.createElement('input', { ref, type: 'checkbox', ...props }, children)
 	);
+	Checkbox.displayName = 'MockCheckbox';
 
 	const CheckboxWithLabel = ({ id, label, checked, defaultChecked, onCheckedChange, onChange, ...props }: any) => {
 		const [internalChecked, setInternalChecked] = React.useState(Boolean(defaultChecked));
@@ -229,6 +235,7 @@ vi.mock('@arcediano/ux-library', () => {
 	const Switch = React.forwardRef<any, any>(({ children, ...props }, ref) =>
 		React.createElement('input', { ref, type: 'checkbox', ...props }, children)
 	);
+	Switch.displayName = 'MockSwitch';
 
 	// Hook (no componente) — asume escritorio por defecto; ningún test actual
 	// depende de la rama móvil de este hook a través del mock global.
