@@ -20,10 +20,11 @@ describe('POST /api/stripe/account-session', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     fetchMock = vi.fn();
-    global.fetch = fetchMock as any;
+    vi.stubGlobal('fetch', fetchMock);
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 

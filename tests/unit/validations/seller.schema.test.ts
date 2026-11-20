@@ -252,19 +252,13 @@ describe('initialRegistrationSchema', () => {
     });
   });
 
-  // checkboxes
-  describe('acceptsTerms y acceptsPrivacy', () => {
-    it('rechaza cuando acceptsTerms es false', () => {
-      const result = initialRegistrationSchema.safeParse({ ...validRegistrationData, acceptsTerms: false });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.flatten().fieldErrors.acceptsTerms).toBeDefined();
-      }
-    });
-
-    it('rechaza cuando acceptsPrivacy es false', () => {
-      const result = initialRegistrationSchema.safeParse({ ...validRegistrationData, acceptsPrivacy: false });
-      expect(result.success).toBe(false);
+  // Términos y privacidad: la landing de captación ya no los pide (d85c22d); se aceptan
+  // al final del onboarding (paso de Stripe), así que el registro no debe exigirlos.
+  describe('términos y privacidad', () => {
+    it('no los exige en el registro inicial', () => {
+      const { acceptsTerms, acceptsPrivacy, ...withoutLegal } = validRegistrationData;
+      void acceptsTerms; void acceptsPrivacy;
+      expect(initialRegistrationSchema.safeParse(withoutLegal).success).toBe(true);
     });
   });
 });

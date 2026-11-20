@@ -26,6 +26,31 @@ describe('openStripeDashboard', () => {
     expect(window.location.href).toBe('https://connect.stripe.com/express/acct_existing123');
   });
 
+  it('abre el dashboard en una pestaña nueva (sin salir del portal) cuando el navegador la permite', async () => {
+    const popup = { closed: false, close: vi.fn(), opener: {}, location: { href: '' } };
+    vi.spyOn(window, 'open').mockReturnValue(popup as unknown as Window);
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      json: async () => ({ success: true, data: { dashboardUrl: 'https://connect.stripe.com/express/acct_new' } }),
+    } as Response);
+
+    await openStripeDashboard('acct_new');
+
+    expect(popup.location.href).toBe('https://connect.stripe.com/express/acct_new');
+    expect(popup.opener).toBeNull();
+    expect(window.location.href).toBe('');
+  });
+
+  it('cierra la pestaña en blanco si la petición falla', async () => {
+    const popup = { closed: false, close: vi.fn(), opener: {}, location: { href: '' } };
+    vi.spyOn(window, 'open').mockReturnValue(popup as unknown as Window);
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      json: async () => ({ success: false, error: 'boom' }),
+    } as Response);
+
+    await expect(openStripeDashboard('acct_new')).rejects.toThrow('boom');
+    expect(popup.close).toHaveBeenCalled();
+  });
+
   it('lanza error cuando requiresOnboarding=true (flujo embebido)', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       json: async () => ({

@@ -171,7 +171,9 @@ export function SimpleRegistration({ onSuccess, className }: SimpleRegistrationP
     const draft = loadDraft();
     if (draft) {
       Object.entries(draft).forEach(([key, value]) => {
-        if (value !== undefined && value !== '' && value !== false) {
+        // El formulario solo tiene campos de texto: se ignoran valores no string de borradores
+        // antiguos (p. ej. los booleanos de términos/privacidad, ya retirados del registro).
+        if (typeof value === 'string' && value !== '') {
           setValue(key as any, value as any, { shouldValidate: false });
         }
       });

@@ -141,7 +141,7 @@ export function EnhancedStep5Payments({
         description={
           connected
             ? 'Stripe está configurado y listo para procesar pagos.'
-            : 'Necesitarás tu email, IBAN y DNI/CIF.'
+            : 'Ten a mano tu IBAN, tu DNI/NIE o CIF y tu móvil.'
         }
         className={connected ? 'border-feedback-success/40' : undefined}
       >
@@ -154,7 +154,7 @@ export function EnhancedStep5Payments({
             <p className="flex items-start gap-2 rounded-xl border border-origen-pradera/20 bg-origen-crema/30 p-3 text-xs text-text-subtle">
               <Info className="mt-0.5 h-4 w-4 shrink-0 text-hoja-tinta" aria-hidden="true" />
               <span>
-                ¿No tienes cuenta de Stripe? <span className="font-medium">La creas durante el proceso, es gratis</span>: solo hace falta un email y tus datos bancarios.
+                <span className="font-medium">Todo se hace aquí, sin salir de Origen</span> y no hace falta cuenta previa en Stripe. Ya hemos rellenado tu email y los datos de tu negocio. Stripe te enviará <span className="font-medium">un código por SMS</span> a tu móvil para verificar tu identidad (paso de seguridad de Stripe, solo la primera vez).
               </span>
             </p>
 

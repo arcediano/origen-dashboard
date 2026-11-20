@@ -19,6 +19,16 @@ export async function openStripeDashboard(stripeAccountId: string): Promise<void
     throw new Error('stripeAccountId es requerido');
   }
 
+  // Se abre la pestaña ANTES de la petición, dentro del gesto del clic, para que el navegador no la
+  // bloquee; así el productor no pierde el portal. Si el navegador la bloquea, se navega en esta pestaña.
+  let popup: Window | null = null;
+  try {
+    popup = window.open('', '_blank');
+    if (popup) popup.opener = null;
+  } catch {
+    popup = null;
+  }
+
   try {
     const res = await fetch('/api/stripe/connect/dashboard-link', {
       method: 'POST',
@@ -61,12 +71,17 @@ export async function openStripeDashboard(stripeAccountId: string): Promise<void
       if (!isTrustedStripeUrl(json.data.dashboardUrl)) {
         throw new Error('URL de Stripe no válida');
       }
-      window.location.href = json.data.dashboardUrl;
+      if (popup && !popup.closed) {
+        popup.location.href = json.data.dashboardUrl;
+      } else {
+        window.location.href = json.data.dashboardUrl;
+      }
       return;
     }
 
     throw new Error('No se recibió URL válida del servidor');
   } catch (error) {
+    if (popup && !popup.closed) popup.close();
     console.error('Error opening Stripe dashboard:', error);
     throw error instanceof Error
       ? error
