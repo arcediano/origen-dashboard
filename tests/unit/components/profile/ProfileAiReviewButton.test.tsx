@@ -35,6 +35,14 @@ describe('ProfileAiReviewButton', () => {
     expect(screen.getByRole('button', { name: 'Mejorar con IA' })).toBeDisabled();
   });
 
+  it('banner: explica por qué está deshabilitado y lo oculta cuando hay contenido', () => {
+    const { rerender } = render(<ProfileAiReviewButton variant="banner" fields={{}} onApply={vi.fn()} />);
+    expect(screen.getByTestId('profile-ai-review-unavailable')).toHaveTextContent('Aún no hay nada que revisar');
+    rerender(<ProfileAiReviewButton variant="banner" fields={{ tagline: 'Queso de Cantabria' }} onApply={vi.fn()} />);
+    expect(screen.queryByTestId('profile-ai-review-unavailable')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Mejorar con IA' })).not.toBeDisabled();
+  });
+
   it('pide confirmación de gasto de crédito antes de llamar a la IA', async () => {
     render(<ProfileAiReviewButton fields={FIELDS} onApply={vi.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: 'Mejorar con IA' }));
