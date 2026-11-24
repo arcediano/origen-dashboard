@@ -37,6 +37,30 @@ describe('PayoutHistorySection', () => {
     vi.resetAllMocks();
   });
 
+  it('un cobro programado sin incidencia indica hasta cuándo puede abrirse una disputa', async () => {
+    const future = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+    const past = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    vi.mocked(fetchSellerPayoutHistory).mockResolvedValue({
+      data: {
+        items: [
+          { ...baseItem, orderId: 'o-open', orderNumber: 'ORG-A', disputeDeadlineAt: future },
+          { ...baseItem, orderId: 'o-closed', orderNumber: 'ORG-B', disputeDeadlineAt: past },
+        ],
+        total: 2,
+        page: 1,
+        limit: 10,
+      },
+      status: 200,
+    });
+
+    render(<PayoutHistorySection />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/El comprador puede abrir disputa hasta el/).length).toBeGreaterThan(0);
+    });
+    expect(screen.getAllByText('Plazo de disputa cerrado').length).toBeGreaterThan(0);
+  });
+
   it('un cobro programado con el pedido congelado se muestra como "Congelado" con motivo y fecha', async () => {
     vi.mocked(fetchSellerPayoutHistory).mockResolvedValue({
       data: {
