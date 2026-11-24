@@ -650,7 +650,10 @@ interface BackendPayoutItem {
   orderNumber: string;
   deliveredAt: string | null;
   transferScheduledAt: string;
+  /** Hasta cuándo puede el comprador abrir una disputa (entrega + plazo de disputa). */
+  disputeDeadlineAt?: string | null;
   netAmountCents: number;
+  payoutFreeze?: PayoutFreeze;
 }
 
 interface BackendPayoutsResponse {
@@ -658,6 +661,9 @@ interface BackendPayoutsResponse {
   total: number;
   page: number;
   limit: number;
+  /** Plazos vigentes de la política (los edita el admin): días desde la entrega. */
+  payoutRetentionDays?: number;
+  disputeWindowDays?: number;
 }
 
 export interface SellerPayoutItem {
@@ -665,8 +671,19 @@ export interface SellerPayoutItem {
   orderNumber: string;
   deliveredAt: string | null;
   transferScheduledAt: string;
+  disputeDeadlineAt: string | null;
   netAmount: number;
+  /** Cobro retenido por disputa/devolución/contracargo: no sale hasta que se resuelva. */
+  payoutFreeze?: PayoutFreeze;
 }
+
+/** Plazos que ve el productor: el pago sale N días tras la entrega y el comprador solo puede abrir disputa los primeros M. */
+export interface PayoutPolicyDays {
+  payoutRetentionDays: number;
+  disputeWindowDays: number;
+}
+
+export const DEFAULT_PAYOUT_POLICY_DAYS: PayoutPolicyDays = { payoutRetentionDays: 10, disputeWindowDays: 5 };
 
 /**
  * Obtiene el listado paginado de Transfers pendientes (aún no ejecutados)
@@ -681,7 +698,7 @@ export interface SellerPayoutItem {
 export async function fetchSellerPayouts(params?: {
   page?: number;
   limit?: number;
-}): Promise<ApiResponse<{ items: SellerPayoutItem[]; total: number; page: number; limit: number }>> {
+}): Promise<ApiResponse<{ items: SellerPayoutItem[]; total: number; page: number; limit: number } & PayoutPolicyDays>> {
   try {
     const res = await gatewayClient.get<BackendPayoutsResponse>('/orders/seller/payouts', {
       params: {
@@ -695,7 +712,9 @@ export async function fetchSellerPayouts(params?: {
       orderNumber: item.orderNumber,
       deliveredAt: item.deliveredAt,
       transferScheduledAt: item.transferScheduledAt,
+      disputeDeadlineAt: item.disputeDeadlineAt ?? null,
       netAmount: item.netAmountCents / 100,
+      payoutFreeze: item.payoutFreeze,
     }));
 
     return {
@@ -704,6 +723,8 @@ export async function fetchSellerPayouts(params?: {
         total: res.total,
         page: res.page,
         limit: res.limit,
+        payoutRetentionDays: res.payoutRetentionDays ?? DEFAULT_PAYOUT_POLICY_DAYS.payoutRetentionDays,
+        disputeWindowDays: res.disputeWindowDays ?? DEFAULT_PAYOUT_POLICY_DAYS.disputeWindowDays,
       },
       status: 200,
     };
@@ -726,6 +747,8 @@ interface BackendPayoutHistoryItem {
   orderId: string;
   orderNumber: string;
   createdAt: string;
+  deliveredAt?: string | null;
+  disputeDeadlineAt?: string | null;
   netAmountCents: number;
   status: SellerPayoutHistoryStatus;
   transferScheduledAt: string | null;
@@ -741,12 +764,17 @@ interface BackendPayoutHistoryResponse {
   total: number;
   page: number;
   limit: number;
+  payoutRetentionDays?: number;
+  disputeWindowDays?: number;
 }
 
 export interface SellerPayoutHistoryItem {
   orderId: string;
   orderNumber: string;
   createdAt: string;
+  deliveredAt?: string | null;
+  /** Último día en que el comprador puede abrir una disputa (null si aún no se entregó). */
+  disputeDeadlineAt?: string | null;
   netAmount: number;
   status: SellerPayoutHistoryStatus;
   transferScheduledAt: string | null;
@@ -781,6 +809,8 @@ export async function fetchSellerPayoutHistory(params?: {
       orderId: item.orderId,
       orderNumber: item.orderNumber,
       createdAt: item.createdAt,
+      deliveredAt: item.deliveredAt ?? null,
+      disputeDeadlineAt: item.disputeDeadlineAt ?? null,
       netAmount: item.netAmountCents / 100,
       status: item.status,
       transferScheduledAt: item.transferScheduledAt,
