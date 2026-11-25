@@ -185,6 +185,7 @@ export default function PaymentsPage() {
         setPayoutPolicy({
           payoutRetentionDays: res.data.payoutRetentionDays,
           disputeWindowDays: res.data.disputeWindowDays,
+          returnWindowDays: res.data.returnWindowDays,
         });
       }
     })();
