@@ -652,6 +652,7 @@ interface BackendPayoutItem {
   transferScheduledAt: string;
   /** Hasta cuándo puede el comprador abrir una disputa (entrega + plazo de disputa). */
   disputeDeadlineAt?: string | null;
+  returnDeadlineAt?: string | null;
   netAmountCents: number;
   payoutFreeze?: PayoutFreeze;
 }
@@ -664,6 +665,7 @@ interface BackendPayoutsResponse {
   /** Plazos vigentes de la política (los edita el admin): días desde la entrega. */
   payoutRetentionDays?: number;
   disputeWindowDays?: number;
+  returnWindowDays?: number;
 }
 
 export interface SellerPayoutItem {
@@ -679,11 +681,19 @@ export interface SellerPayoutItem {
 
 /** Plazos que ve el productor: el pago sale N días tras la entrega y el comprador solo puede abrir disputa los primeros M. */
 export interface PayoutPolicyDays {
+  /** Días hasta el pago (el mismo para todo producto; nunca antes de cerrar disputa y desistimiento). */
   payoutRetentionDays: number;
+  /** Disputa en pedidos solo de perecederos. */
   disputeWindowDays: number;
+  /** Desistimiento (y disputa igualada) en pedidos con algún producto que lo admite. */
+  returnWindowDays: number;
 }
 
-export const DEFAULT_PAYOUT_POLICY_DAYS: PayoutPolicyDays = { payoutRetentionDays: 10, disputeWindowDays: 5 };
+export const DEFAULT_PAYOUT_POLICY_DAYS: PayoutPolicyDays = {
+  payoutRetentionDays: 15,
+  disputeWindowDays: 5,
+  returnWindowDays: 14,
+};
 
 /**
  * Obtiene el listado paginado de Transfers pendientes (aún no ejecutados)
@@ -725,6 +735,7 @@ export async function fetchSellerPayouts(params?: {
         limit: res.limit,
         payoutRetentionDays: res.payoutRetentionDays ?? DEFAULT_PAYOUT_POLICY_DAYS.payoutRetentionDays,
         disputeWindowDays: res.disputeWindowDays ?? DEFAULT_PAYOUT_POLICY_DAYS.disputeWindowDays,
+        returnWindowDays: res.returnWindowDays ?? DEFAULT_PAYOUT_POLICY_DAYS.returnWindowDays,
       },
       status: 200,
     };

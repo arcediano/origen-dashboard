@@ -3,9 +3,11 @@
 /**
  * @component PayoutRulesCard
  * @description Reglas de cobro a la vista del productor (petición del humano, 2026-11-24): el pago de cada
- * venta cuenta desde que el pedido figura como ENTREGADO (nunca más de 10 días), el comprador solo puede abrir
- * una disputa durante los primeros días y, mientras haya una abierta, el cobro queda retenido. Los días salen
- * de la política vigente (los edita el admin), no están escritos a mano.
+ * venta sale SIEMPRE el mismo número de días después de que el pedido figure como ENTREGADO (15 por defecto), sea
+ * cual sea el producto, y nunca antes de que el comprador pueda reclamar. En pedidos solo de perecederos (sin
+ * desistimiento) la disputa es corta; si hay algún producto que admite desistimiento, disputa y desistimiento se
+ * igualan para todo el pedido. Mientras haya una disputa o devolución abierta el cobro queda retenido y Origen lo
+ * comprueba justo antes de pagar. Los días salen de la política vigente (los edita el admin).
  *
  * Patrón de la guía de diseño (`guia-diseno-ux.md`): Card con CardIconHeader, tokens origen-*, pasos con
  * número en círculo `bg-origen-pradera/15`; en móvil los pasos se apilan, desde `sm` van en 3 columnas.
@@ -20,7 +22,7 @@ interface PayoutRulesCardProps {
 }
 
 export function PayoutRulesCard({ policy }: PayoutRulesCardProps) {
-  const { payoutRetentionDays, disputeWindowDays } = policy;
+  const { payoutRetentionDays, disputeWindowDays, returnWindowDays } = policy;
   const steps = [
     {
       icon: PackageCheck,
@@ -30,15 +32,15 @@ export function PayoutRulesCard({ policy }: PayoutRulesCardProps) {
     },
     {
       icon: ShieldAlert,
-      when: `Hasta el día ${disputeWindowDays}`,
-      title: 'El comprador puede abrir una disputa',
-      text: 'Pasado ese plazo ya no puede abrirla. Si la abre, tu cobro queda retenido hasta que se resuelva.',
+      when: `Hasta el día ${disputeWindowDays} o ${returnWindowDays}`,
+      title: 'El comprador aún puede reclamar',
+      text: `Si el pedido solo tiene productos perecederos (sin desistimiento), puede abrir una disputa hasta el día ${disputeWindowDays}. Si incluye algún producto que admite desistimiento, disputa y devolución se igualan hasta el día ${returnWindowDays} para todo el pedido.`,
     },
     {
       icon: Landmark,
       when: `Día ${payoutRetentionDays}`,
       title: 'Origen transfiere el importe',
-      text: `El pago llega a tu cuenta de Stripe como máximo ${payoutRetentionDays} días después de la entrega.`,
+      text: `Siempre ${payoutRetentionDays} días después de la entrega, sea cual sea el producto: nunca sale antes de que el comprador pueda reclamar.`,
     },
   ];
 
@@ -72,11 +74,10 @@ export function PayoutRulesCard({ policy }: PayoutRulesCardProps) {
 
         <Alert variant="info">
           <AlertDescription>
-            <strong>Cobro retenido:</strong> si un pedido tiene una disputa o una devolución abierta, su cobro
-            aparece como «Congelado» con el motivo y la fecha, y no sale hasta que se resuelve. Si se resuelve a tu
-            favor, se libera y se paga; si se devuelve el dinero al comprador antes de pagarte, el pago no llega a
-            ejecutarse. Si la devolución llega después de haber cobrado, el importe se descuenta de tu siguiente
-            venta.
+            <strong>Cobro retenido:</strong> si un pedido tiene una disputa o una devolución abierta (completa o
+            parcial), su cobro aparece como «Congelado» con el motivo y la fecha, y no sale hasta que se resuelve.
+            Origen lo comprueba de nuevo justo antes de cada pago. Si se resuelve a tu favor, se libera y se paga; si
+            se devuelve el dinero al comprador antes de pagarte, el pago no llega a ejecutarse.
           </AlertDescription>
         </Alert>
       </CardContent>
