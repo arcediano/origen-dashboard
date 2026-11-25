@@ -241,11 +241,22 @@ export function ProfileAiReviewButton({
               variant="primary"
               size="lg"
               disabled={disabled || !canReview}
+              aria-describedby={!canReview ? 'profile-ai-review-unavailable' : undefined}
               leftIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
               onClick={handleOpen}
             >
               Mejorar con IA
             </Button>
+            {!canReview && (
+              <p
+                id="profile-ai-review-unavailable"
+                data-testid="profile-ai-review-unavailable"
+                className="rounded-xl bg-origen-pradera/10 px-3 py-2 text-xs font-medium text-origen-bosque lg:max-w-xs lg:text-right"
+              >
+                Aún no hay nada que revisar: escribe tu eslogan, historia, filosofía o bienestar animal, o sube
+                y guarda una foto en tus galerías. En cuanto lo hagas, el botón se activa.
+              </p>
+            )}
             <p className="text-xs text-text-subtle lg:text-right" data-testid="profile-ai-review-banner-credits">
               {remaining !== null ? (
                 <>
@@ -300,6 +311,7 @@ export function ProfileAiReviewButton({
         variant="outline"
         size="sm"
         disabled={disabled || !canReview}
+        title={!canReview ? 'Escribe algún texto o sube una foto para poder revisarlo con IA' : undefined}
         leftIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
         onClick={handleOpen}
       >
@@ -321,7 +333,7 @@ export function ProfileAiReviewButton({
                   Va a leer el eslogan, la historia, la filosofía de producción y el bienestar animal que ya
                   tienes escritos
                   {photos.length > 0
-                    ? `, y a mejorar la luz y nitidez de ${photos.length === 1 ? 'la foto destacada de ' + PROFILE_PHOTO_COLLECTION_LABELS[photos[0].collection].toLowerCase() : `${photos.length} fotos de tus galerías`}`
+                    ? `, y a mejorar la luz y nitidez de ${photos.length === 1 ? 'una foto de ' + PROFILE_PHOTO_COLLECTION_LABELS[photos[0].collection].toLowerCase() : `${photos.length} fotos de tus galerías`}`
                     : ''}
                   . Nunca inventa datos ni genera fotos nuevas, ni cambia el significado de tus textos -- tú
                   decides, una a una, qué sugerencia aceptar. Cuesta 1 crédito en total.

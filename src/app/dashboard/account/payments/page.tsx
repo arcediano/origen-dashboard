@@ -15,9 +15,10 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardIconHeader, Alert, AlertDescription, PageLoader, PageError, MobilePullRefresh, appShellPaddingClass, NAV_HEIGHT_MOBILE_DASHBOARD, toast } from '@arcediano/ux-library';
-import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2, X, Clock, ChevronDown } from 'lucide-react';
+import { CreditCard, CheckCircle2, AlertCircle, ArrowUpRight, Landmark, ShieldCheck, CircleEllipsis, Loader2, X, Clock, Snowflake } from 'lucide-react';
 import { loadProducerProfile } from '@/lib/api/onboarding';
-import { fetchSellerPayouts, type SellerPayoutItem } from '@/lib/api/orders';
+import { fetchSellerPayouts, DEFAULT_PAYOUT_POLICY_DAYS, type PayoutPolicyDays, type SellerPayoutItem } from '@/lib/api/orders';
+import { PayoutRulesCard } from './PayoutRulesCard';
 import { openStripeDashboard } from '@/lib/stripe/connect-client';
 import { useReadiness } from '@/contexts/ReadinessContext';
 import { useStripeConnectPolling } from '@/lib/stripe/use-stripe-connect-polling';
@@ -38,6 +39,7 @@ export default function PaymentsPage() {
   const isFirstLoad = useRef(true);
   const embeddedPanelRef = useRef<HTMLDivElement>(null);
   const prevConnectedRef = useRef<boolean | null>(null);
+  const [payoutPolicy, setPayoutPolicy] = useState<PayoutPolicyDays>(DEFAULT_PAYOUT_POLICY_DAYS);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isOpeningStripe, setIsOpeningStripe] = useState(false);
@@ -169,7 +171,7 @@ export default function PaymentsPage() {
   // Cuenta atrás por pedido: solo tiene sentido con cuenta de cobro activa.
   // Vista previa de los próximos 5 Transfers pendientes (ya vienen ordenados
   // por fecha ascendente desde el backend) — no es una tabla paginada, solo
-  // detalle para complementar el mensaje general de "14 días tras la entrega".
+  // detalle para complementar la explicación general de los plazos (PayoutRulesCard).
   useEffect(() => {
     if (paymentStage !== 'connected') return;
     let mounted = true;
@@ -180,6 +182,11 @@ export default function PaymentsPage() {
       if (res.data) {
         setPayouts(res.data.items);
         setPayoutsTotal(res.data.total);
+        setPayoutPolicy({
+          payoutRetentionDays: res.data.payoutRetentionDays,
+          disputeWindowDays: res.data.disputeWindowDays,
+          returnWindowDays: res.data.returnWindowDays,
+        });
       }
     })();
 
@@ -468,12 +475,28 @@ export default function PaymentsPage() {
                         <p className="mt-1 text-xl font-extrabold text-origen-bosque tabular-nums">
                           {payout.netAmount.toFixed(2)} €
                         </p>
-                        <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
-                          <Clock className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-                          {formatDistanceToNow(new Date(payout.transferScheduledAt), { addSuffix: true, locale: es })}
-                          {' · '}
-                          {format(new Date(payout.transferScheduledAt), 'dd MMM yyyy', { locale: es })}
-                        </p>
+                        {payout.payoutFreeze?.frozen ? (
+                          <p className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-amber-700">
+                            <Snowflake className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                            Retenido · {payout.payoutFreeze.reasonLabel ?? 'incidencia abierta'}
+                          </p>
+                        ) : (
+                          <>
+                            <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
+                              <Clock className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                              Pago {formatDistanceToNow(new Date(payout.transferScheduledAt), { addSuffix: true, locale: es })}
+                              {' · '}
+                              {format(new Date(payout.transferScheduledAt), 'dd MMM yyyy', { locale: es })}
+                            </p>
+                            {payout.disputeDeadlineAt && (
+                              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                                {new Date(payout.disputeDeadlineAt) > new Date()
+                                  ? `Disputa abierta al comprador hasta el ${format(new Date(payout.disputeDeadlineAt), 'dd MMM', { locale: es })}`
+                                  : 'Plazo de disputa cerrado'}
+                              </p>
+                            )}
+                          </>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -484,6 +507,8 @@ export default function PaymentsPage() {
                   )}
                 </div>
               )}
+
+              <PayoutRulesCard policy={payoutPolicy} />
 
               <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6 lg:items-start">
                 <Card className="rounded-xl sm:rounded-2xl" padding="none">
@@ -582,29 +607,6 @@ export default function PaymentsPage() {
                       <p className="text-sm font-medium text-origen-bosque">Acceso directo y seguro</p>
                       <p className="mt-1 text-xs text-muted-foreground">Siempre entrarás con un enlace temporal válido generado para tu cuenta.</p>
                     </div>
-
-                    {/*
-                      details/summary nativo: la explicación de cómo
-                      funcionan los cobros (antes su propia Card en la
-                      columna derecha) pasa a disclosure colapsado dentro
-                      de "Próximos pasos", Opción C del canvas.
-                    */}
-                    <details className="group border-t border-border-subtle pt-3">
-                      <summary className="flex cursor-pointer list-none items-center justify-between text-xs font-semibold text-text-subtle [&::-webkit-details-marker]:hidden">
-                        Cómo funcionan tus cobros
-                        <ChevronDown className="h-3.5 w-3.5 text-text-subtle transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
-                      </summary>
-                      <div className="mt-2 space-y-2 text-xs leading-relaxed text-muted-foreground">
-                        <p>
-                          Cada venta se transfiere a tu cuenta de Stripe <strong className="text-origen-bosque">14 días naturales después de la entrega</strong> del
-                          pedido — el tiempo de retención que Origen usa para poder gestionar posibles devoluciones sin pedirte que adelantes ese dinero.
-                        </p>
-                        <p>
-                          Si un pedido se devuelve dentro de ese plazo, la transferencia simplemente no llega a ejecutarse. Si se devuelve después de que ya la
-                          hayas cobrado, el importe se descuenta de tu siguiente venta.
-                        </p>
-                      </div>
-                    </details>
                   </CardContent>
                 </Card>
               </div>

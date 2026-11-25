@@ -69,6 +69,14 @@ function dateLabelFor(item: SellerPayoutHistoryItem): string {
   return formatDate(item.createdAt);
 }
 
+/** Para un cobro programado y sin incidencia: hasta cuándo puede el comprador abrir una disputa. */
+function disputeLabelFor(item: SellerPayoutHistoryItem): string | null {
+  if (item.status !== 'scheduled' || item.payoutFreeze?.frozen || !item.disputeDeadlineAt) return null;
+  return new Date(item.disputeDeadlineAt) > new Date()
+    ? `El comprador puede abrir disputa hasta el ${formatDate(item.disputeDeadlineAt)}`
+    : 'Plazo de disputa cerrado';
+}
+
 function PayoutHistoryCard({ item, onClick }: { item: SellerPayoutHistoryItem; onClick: () => void }) {
   const meta = metaFor(item);
   return (
@@ -81,6 +89,7 @@ function PayoutHistoryCard({ item, onClick }: { item: SellerPayoutHistoryItem; o
         <div className="min-w-0">
           <p className="text-sm font-bold text-origen-bosque truncate">Pedido {item.orderNumber}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">{dateLabelFor(item)}</p>
+          {disputeLabelFor(item) && <p className="mt-0.5 text-xs text-muted-foreground">{disputeLabelFor(item)}</p>}
         </div>
         <span className="text-base font-bold text-origen-bosque tabular-nums shrink-0">
           {formatEuros(item.netAmount)}
@@ -143,7 +152,12 @@ export function PayoutHistorySection() {
     {
       key: 'date',
       header: 'Fecha',
-      accessor: (item) => <p className="text-sm text-text-subtle">{dateLabelFor(item)}</p>,
+      accessor: (item) => (
+        <div>
+          <p className="text-sm text-text-subtle">{dateLabelFor(item)}</p>
+          {disputeLabelFor(item) && <p className="text-xs text-muted-foreground">{disputeLabelFor(item)}</p>}
+        </div>
+      ),
     },
     {
       key: 'netAmount',
