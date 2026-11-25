@@ -24,6 +24,7 @@ import { useReadiness } from '@/contexts/ReadinessContext';
 import { useStripeConnectPolling } from '@/lib/stripe/use-stripe-connect-polling';
 import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-connect-onboarding';
 import { PayoutHistorySection } from './PayoutHistorySection';
+import { DebtsSection } from './DebtsSection';
 
 interface StripeStatusResponse {
   success: boolean;
@@ -611,6 +612,7 @@ export default function PaymentsPage() {
                 </Card>
               </div>
 
+              {paymentStage === 'connected' && <DebtsSection />}
               {paymentStage === 'connected' && <PayoutHistorySection />}
             </div>
           </MobilePullRefresh>
