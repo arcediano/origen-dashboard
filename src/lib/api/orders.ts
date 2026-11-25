@@ -990,3 +990,65 @@ export async function fetchSellerCommissionCreditNotes(params?: {
     };
   }
 }
+
+// ─── Deudas y contracargos del productor (libro por pedido) ──────────────────
+
+export type SellerDebtKind = 'REVERSAL_FAILED' | 'CHARGEBACK_LOST' | 'MANUAL';
+export type SellerDebtStatus = 'PENDING_REVIEW' | 'OPEN' | 'SETTLED' | 'WAIVED';
+
+export interface SellerDebtEntry {
+  id: string;
+  orderId: string | null;
+  orderNumber: string | null;
+  kind: SellerDebtKind;
+  status: SellerDebtStatus;
+  /** Importe original (€). */
+  amount: number;
+  /** Lo que queda por compensar (€). */
+  remaining: number;
+  reason: string;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+interface BackendSellerDebtsResponse {
+  data?: {
+    entries?: Array<{
+      id: string;
+      orderId: string | null;
+      orderNumber: string | null;
+      kind: SellerDebtKind;
+      status: SellerDebtStatus;
+      amountCents: number;
+      remainingCents: number;
+      reason: string;
+      createdAt: string;
+      resolvedAt: string | null;
+    }>;
+  };
+}
+
+/** GET /api/v1/orders/seller/debts — deudas y contracargos del productor con el pedido de origen. */
+export async function fetchSellerDebts(): Promise<ApiResponse<SellerDebtEntry[]>> {
+  try {
+    const res = await gatewayClient.get<BackendSellerDebtsResponse>('/orders/seller/debts');
+    const entries = (res.data?.entries ?? []).map((e) => ({
+      id: e.id,
+      orderId: e.orderId,
+      orderNumber: e.orderNumber,
+      kind: e.kind,
+      status: e.status,
+      amount: e.amountCents / 100,
+      remaining: e.remainingCents / 100,
+      reason: e.reason,
+      createdAt: e.createdAt,
+      resolvedAt: e.resolvedAt,
+    }));
+    return { data: entries, status: 200 };
+  } catch (err) {
+    return {
+      error: err instanceof GatewayError ? err.message : 'No se pudieron cargar tus deudas',
+      status: err instanceof GatewayError ? err.status : 500,
+    };
+  }
+}
