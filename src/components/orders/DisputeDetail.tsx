@@ -1,22 +1,20 @@
 /**
- * @file OrderDisputeSection.tsx
- * @description Sección "Disputa" del productor: estado, motivo, descripción del comprador,
- * resolución y el hilo de mensajes con formulario de respuesta. Una sola card en el detalle de
- * pedido (`variant="card"`, sin cards anidadas) o sin tarjeta en la bandeja de Disputas
- * (`variant="flat"`). Solo se pinta si el pedido tiene disputa. Ancla `#disputa` para llegar
- * desde la notificación.
+ * @file DisputeDetail.tsx
+ * @description Detalle de una disputa del productor: estado, motivo, descripción del comprador,
+ * resolución y el hilo de mensajes con formulario de respuesta. Es el ÚNICO sitio donde vive la
+ * conversación (el detalle del pedido solo enlaza aquí). Se pinta sin tarjeta sobre la superficie
+ * blanca de la página de Disputas; las notificaciones de disputa llegan a esta pantalla.
  */
 
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Download, Scale } from 'lucide-react';
 import { Badge, Button, Textarea, toast } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import {
-  fetchDisputeForOrder,
   fetchDisputeMessages,
   sendDisputeMessage,
   type Dispute,
@@ -48,48 +46,27 @@ function attachmentName(url: string, index: number): string {
 
 const SECTION_LABEL = 'mb-1.5 text-xs font-semibold uppercase tracking-wide text-origen-hoja';
 
-/**
- * `card` (por defecto, detalle de pedido): una tarjeta sobre el fondo.
- * `flat` (bandeja de Disputas): sin tarjeta; se pinta sobre la superficie blanca de la página,
- * con las secciones separadas por líneas.
- */
-export function OrderDisputeSection({
-  orderId,
-  variant = 'card',
-}: {
-  orderId: string;
-  variant?: 'card' | 'flat';
-}) {
-  const [dispute, setDispute] = useState<Dispute | null>(null);
-  const [messages, setMessages] = useState<DisputeMessage[]>([]);
+export function DisputeDetail({ dispute }: { dispute: Dispute }) {
+  const [messages, setMessages] = useState<DisputeMessage[]>(dispute.messages ?? []);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
-  const ref = useRef<HTMLElement>(null);
 
+  // La lista de disputas puede no traer el hilo: se pide siempre el actualizado.
   useEffect(() => {
     let cancelled = false;
-    fetchDisputeForOrder(orderId)
-      .then((d) => {
-        if (cancelled || !d) return;
-        setDispute(d);
-        setMessages(d.messages ?? []);
+    fetchDisputeMessages(dispute.id)
+      .then((list) => {
+        if (!cancelled) setMessages(list);
       })
-      .catch(() => undefined); // sin disputa o sin acceso: la sección no se muestra
+      .catch(() => undefined); // se mantiene lo que ya hubiera
     return () => {
       cancelled = true;
     };
-  }, [orderId]);
-
-  // Si se llega con #disputa (o desde la notificación), la sección queda a la vista.
-  useEffect(() => {
-    if (dispute && window.location.hash === '#disputa') {
-      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [dispute]);
+  }, [dispute.id]);
 
   const send = useCallback(async () => {
     const content = draft.trim();
-    if (!dispute || !content || sending) return;
+    if (!content || sending) return;
     setSending(true);
     try {
       await sendDisputeMessage(dispute.id, content);
@@ -100,23 +77,13 @@ export function OrderDisputeSection({
     } finally {
       setSending(false);
     }
-  }, [dispute, draft, sending]);
+  }, [dispute.id, draft, sending]);
 
-  if (!dispute) return null;
   const closed = isDisputeClosed(dispute.status);
   const needsReply = dispute.status === 'AWAITING_PRODUCER';
 
   return (
-    <section
-      id="disputa"
-      ref={ref}
-      data-testid="order-dispute"
-      className={cn(
-        'scroll-mt-24',
-        variant === 'card' &&
-          'mb-4 rounded-[28px] border border-origen-pradera/25 bg-surface-alt p-4 shadow-sm sm:p-5 lg:mb-6',
-      )}
-    >
+    <section data-testid="order-dispute" className="scroll-mt-24">
       <div className="mb-5 flex flex-wrap items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-origen-pastel">
           <Scale className="h-5 w-5 text-origen-hoja" aria-hidden="true" />

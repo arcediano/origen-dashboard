@@ -33,7 +33,7 @@ import {
 import { PageHeader } from '@/app/dashboard/components/PageHeader';
 import { HideBottomTabBar } from '@/components/shared/mobile/HideBottomTabBar';
 import { fetchReturnWindowDays } from '@/lib/api/disputes';
-import { OrderDisputeSection } from '@/components/orders/OrderDisputeSection';
+import { OrderDisputeLink } from '@/components/orders/OrderDisputeLink';
 
 // Hooks y API
 import { fetchOrderById, fetchSellerOrderInvoice, updateOrderStatus } from '@/lib/api/orders';
@@ -501,7 +501,7 @@ export default function OrderDetailPage() {
             nextAction ? appShellPaddingClass(NAV_HEIGHT_MOBILE_DASHBOARD, 36) : 'pb-6'
           )}
         >
-          <OrderDisputeSection orderId={orderId} />
+          <OrderDisputeLink orderId={orderId} />
 
           <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6">
 
