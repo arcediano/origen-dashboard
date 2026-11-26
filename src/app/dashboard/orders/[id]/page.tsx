@@ -225,6 +225,11 @@ function SectionAccordion({
   );
 }
 
+/** La tasa llega como fracción decimal (0.12 = 12 %). */
+function formatCommissionRate(rate: number): string {
+  return `${Number((rate * 100).toFixed(2))}%`;
+}
+
 export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -274,6 +279,20 @@ export default function OrderDetailPage() {
     }
   };
 
+  /**
+   * La respuesta del PATCH de estado no incluye el historial ni el desglose
+   * económico: tras cambiar el estado se recarga el pedido completo en segundo
+   * plano (sin spinner) para que "Historial del pedido" muestre el nuevo evento.
+   */
+  const refreshOrder = async () => {
+    try {
+      const response = await fetchOrderById(orderId);
+      if (response.data) setOrder(response.data);
+    } catch (err) {
+      console.error('Error refrescando el pedido:', err);
+    }
+  };
+
   const handleUpdateStatus = async (newStatus: Order['status']) => {
     if (!order) return;
 
@@ -284,6 +303,7 @@ export default function OrderDetailPage() {
         setOrder(response.data);
         setShowStatusSheet(false);
         setShowCancelSheet(false);
+        await refreshOrder();
       } else if (response.error) {
         // El backend rechaza el avance de estado (p.ej. pago aún no confirmado,
         // ver gate de pago en changeStatusBySeller). Antes este error se
@@ -313,6 +333,7 @@ export default function OrderDetailPage() {
         setShowReturnSheet(false);
         setReturnReason('');
         setReturnQuantities({});
+        await refreshOrder();
         toast({
           title: 'Devolución solicitada',
           description: 'El equipo de Origen la revisará en breve.',
@@ -421,6 +442,17 @@ export default function OrderDetailPage() {
    * muestra y se mantiene visible en todos los tamaños.
    */
   const managementActionsDuplicateActionBar = !isMultiSeller && !!nextAction && !isPaymentUnconfirmed;
+
+  // Desglose de la comisión retenida al productor (suma de los snapshots por ítem).
+  const itemsWithCommission = order.items.filter((item) => item.commissionAmount != null);
+  const hasCommissionBreakdown = itemsWithCommission.length > 0;
+  const commissionTotal = itemsWithCommission.reduce((sum, item) => sum + (item.commissionAmount ?? 0), 0);
+  const commissionVatTotal = itemsWithCommission.reduce((sum, item) => sum + (item.commissionVatAmount ?? 0), 0);
+  const commissionRates = Array.from(new Set(
+    itemsWithCommission.map((item) => item.commissionRate).filter((rate): rate is number => rate != null),
+  ));
+  const commissionRateLabel = commissionRates.length === 1 ? formatCommissionRate(commissionRates[0]) : null;
+  const deductedAmount = order.sellerNetAmount != null ? order.total - order.sellerNetAmount : null;
 
   const handleRefresh = async () => { await loadOrder(); };
 
@@ -534,10 +566,10 @@ export default function OrderDetailPage() {
                         </p>
                       </div>
                     ) : (
-                      <>
+                      <div className="flex flex-wrap items-center gap-3 pt-1">
                         {nextAction && (
                           isPaymentUnconfirmed ? (
-                            <div className="flex items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
+                            <div className="flex basis-full items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
                               <Info className="w-4 h-4 text-origen-pino shrink-0 mt-0.5" aria-hidden />
                               <p className="text-xs text-text-subtle leading-relaxed">
                                 El pago de este pedido aún no se ha confirmado. Podrás avanzar su estado en cuanto se confirme el cobro.
@@ -546,12 +578,11 @@ export default function OrderDetailPage() {
                           ) : (
                             <Button
                               variant="primary"
-                              size="md"
+                              size="sm"
                               leftIcon={<nextAction.icon className="w-4 h-4" />}
                               onClick={() => handleUpdateStatus(nextAction.next)}
                               loading={updating}
                               loadingText="Actualizando..."
-                              className="w-full justify-start"
                             >
                               {nextAction.label}
                             </Button>
@@ -559,12 +590,12 @@ export default function OrderDetailPage() {
                         )}
                         {canCancel && (
                           <Button
-                            variant="destructive"
-                            size="md"
+                            variant="outline"
+                            size="sm"
                             leftIcon={<XCircle className="w-4 h-4" />}
                             onClick={() => setShowCancelSheet(true)}
                             disabled={updating}
-                            className="w-full justify-start"
+                            className="border-feedback-danger-text/30 text-feedback-danger-text hover:bg-feedback-danger-subtle"
                           >
                             Cancelar pedido
                           </Button>
@@ -573,16 +604,15 @@ export default function OrderDetailPage() {
                           <>
                             <Button
                               variant="outline"
-                              size="md"
+                              size="sm"
                               leftIcon={<RotateCcw className="w-4 h-4" />}
                               onClick={() => setShowReturnSheet(true)}
                               disabled={updating}
-                              className="w-full justify-start"
                             >
                               Solicitar devolución
                             </Button>
                             {returnWindowDaysLeft != null && (
-                              <p className="text-[11px] text-text-subtle text-center">
+                              <p className="basis-full text-[11px] text-text-subtle">
                                 {returnWindowDaysLeft === 1
                                   ? 'Queda 1 día para solicitar una devolución'
                                   : `Quedan ${returnWindowDaysLeft} días para solicitar una devolución`}
@@ -591,14 +621,14 @@ export default function OrderDetailPage() {
                           </>
                         )}
                         {order.status === 'delivered' && returnWindowExpired && (
-                          <div className="flex items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
+                          <div className="flex basis-full items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
                             <Info className="w-4 h-4 text-origen-pino shrink-0 mt-0.5" aria-hidden />
                             <p className="text-xs text-text-subtle leading-relaxed">
                               El plazo de {returnWindowDays} días naturales desde la entrega para solicitar una devolución ya ha vencido.
                             </p>
                           </div>
                         )}
-                      </>
+                      </div>
                     )}
                   </div>
                 </motion.div>
@@ -823,8 +853,8 @@ export default function OrderDetailPage() {
                             solo el primer caso omite la línea; ambigüedad reportada en
                             bugs-detalle-pedido-comprador, 2026-08-28. */}
                         {item.commissionRate != null && (
-                          <p className="text-xs text-text-subtle mt-1">
-                            Comisión de Origen: {item.commissionRate}%
+                          <p className="text-sm text-text-subtle mt-1">
+                            Comisión de Origen: {formatCommissionRate(item.commissionRate)}
                             {item.commissionAmount != null && ` (${formatCurrency(item.commissionAmount)})`}
                             {/* IVA de la comisión mostrado como línea separada, no
                                 sumado en una única cifra -- petición del humano
@@ -907,26 +937,46 @@ export default function OrderDetailPage() {
                 )}
 
                 {order.sellerNetAmount != null && (
-                  <div className="mx-5 mb-4 rounded-2xl border border-origen-pradera bg-linear-to-b from-white to-origen-crema px-4 py-3.5">
+                  <div className="mx-5 mb-4 rounded-2xl border border-origen-pradera bg-linear-to-b from-white to-origen-crema px-4 py-4">
+                    {/* Desglose de lo descontado al productor (comisión + IVA de la comisión),
+                        en tamaño legible: petición del humano (2026-11-26). order.total aquí
+                        ya es el total propio del productor, no el global del pedido. */}
+                    {deductedAmount != null && deductedAmount > 0 && (
+                      <dl className="mb-3 space-y-1.5 border-b border-border-subtle pb-3 text-sm">
+                        <div className="flex items-center justify-between gap-3 text-text-subtle">
+                          <dt>Total del pedido</dt>
+                          <dd className="font-medium tabular-nums text-foreground">{formatCurrency(order.total)}</dd>
+                        </div>
+                        {hasCommissionBreakdown ? (
+                          <>
+                            <div className="flex items-center justify-between gap-3 text-text-subtle">
+                              <dt>Comisión de Origen{commissionRateLabel ? ` (${commissionRateLabel})` : ''}</dt>
+                              <dd className="font-semibold tabular-nums text-feedback-danger-text">−{formatCurrency(commissionTotal)}</dd>
+                            </div>
+                            {commissionVatTotal > 0 && (
+                              <div className="flex items-center justify-between gap-3 text-text-subtle">
+                                <dt>IVA de la comisión</dt>
+                                <dd className="font-semibold tabular-nums text-feedback-danger-text">−{formatCurrency(commissionVatTotal)}</dd>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="flex items-center justify-between gap-3 text-text-subtle">
+                            <dt>Comisión de Origen + IVA</dt>
+                            <dd className="font-semibold tabular-nums text-feedback-danger-text">−{formatCurrency(deductedAmount)}</dd>
+                          </div>
+                        )}
+                      </dl>
+                    )}
                     <div className="flex items-center justify-between gap-3">
-                      <span className="flex items-center gap-2 text-xs font-semibold text-text-subtle">
-                        <Wallet className="w-3.5 h-3.5 text-hoja-tinta" aria-hidden="true" />
+                      <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <Wallet className="w-4 h-4 text-hoja-tinta" aria-hidden="true" />
                         Vas a recibir
                       </span>
-                      <span className="text-lg font-extrabold text-origen-bosque tabular-nums">
+                      <span className="text-xl font-extrabold text-origen-bosque tabular-nums">
                         {formatCurrency(order.sellerNetAmount)}
                       </span>
                     </div>
-                    {/* Petición del humano (2026-09-17): informar de la comisión
-                        ya descontada del total, a modo de transparencia para el
-                        productor -- order.total aquí ya es el total propio del
-                        productor (ver comentario arriba), no el global del pedido. */}
-                    {order.total > order.sellerNetAmount && (
-                      <p className="mt-1 text-right text-[11px] text-text-subtle">
-                        de un total de {formatCurrency(order.total)}, se ha descontado{' '}
-                        {formatCurrency(order.total - order.sellerNetAmount)} de comisión + IVA
-                      </p>
-                    )}
                   </div>
                 )}
               </motion.div>
