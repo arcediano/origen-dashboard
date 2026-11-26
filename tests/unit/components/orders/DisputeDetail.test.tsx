@@ -1,10 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { server } from '../../../mocks/server';
 import { TEST_API_BASE } from '../../../mocks/api-base';
-import { OrderDisputeSection } from '@/components/orders/OrderDisputeSection';
+import { DisputeDetail } from '@/components/orders/DisputeDetail';
+import { OrderDisputeLink } from '@/components/orders/OrderDisputeLink';
 
 const BASE = TEST_API_BASE;
 const dispute = {
@@ -24,12 +25,9 @@ const dispute = {
   ],
 };
 
-describe('OrderDisputeSection', () => {
-  it('no pinta nada si el pedido no tiene disputa', async () => {
-    server.use(http.get(`${BASE}/disputes/mine`, () => HttpResponse.json([])));
-    const { container } = render(<OrderDisputeSection orderId="o1" />);
-    await new Promise((r) => setTimeout(r, 50));
-    expect(container).toBeEmptyDOMElement();
+describe('DisputeDetail', () => {
+  beforeEach(() => {
+    server.use(http.get(`${BASE}/disputes/d1/messages`, () => HttpResponse.json(dispute.messages)));
   });
 
   it('muestra estado y motivo legibles, y el hilo con autores', async () => {
@@ -37,7 +35,7 @@ describe('OrderDisputeSection', () => {
       http.get(`${BASE}/disputes/mine`, () => HttpResponse.json([dispute])),
       http.get(`${BASE}/disputes/d1`, () => HttpResponse.json(dispute)),
     );
-    render(<OrderDisputeSection orderId="o1" />);
+    render(<DisputeDetail dispute={dispute as never} />);
     expect(await screen.findByText('Esperando tu respuesta')).toBeInTheDocument();
     expect(screen.getByText(/Producto dañado/)).toBeInTheDocument();
     expect(screen.getByText('Equipo de Origen')).toBeInTheDocument();
@@ -58,7 +56,7 @@ describe('OrderDisputeSection', () => {
         HttpResponse.json([...dispute.messages, { id: 'm3', disputeId: 'd1', senderType: 'PRODUCER', senderId: '44', content: 'Fotos enviadas', attachments: [], createdAt: '2026-11-06T10:00:00Z' }]),
       ),
     );
-    render(<OrderDisputeSection orderId="o1" />);
+    render(<DisputeDetail dispute={dispute as never} />);
     await userEvent.type(await screen.findByLabelText('Respuesta a la disputa'), 'Fotos enviadas');
     await userEvent.click(screen.getByRole('button', { name: /Enviar respuesta/ }));
     await waitFor(() => expect(sent).toEqual({ content: 'Fotos enviadas' }));
@@ -79,8 +77,9 @@ describe('OrderDisputeSection', () => {
     server.use(
       http.get(`${BASE}/disputes/mine`, () => HttpResponse.json([mixed])),
       http.get(`${BASE}/disputes/d1`, () => HttpResponse.json(mixed)),
+      http.get(`${BASE}/disputes/d1/messages`, () => HttpResponse.json(mixed.messages)),
     );
-    const { container } = render(<OrderDisputeSection orderId="o1" variant="flat" />);
+    const { container } = render(<DisputeDetail dispute={mixed as never} />);
     await screen.findByText('Gracias a ambos');
     const roles = Array.from(container.querySelectorAll('[data-role]')).map((el) => el.getAttribute('data-role'));
     expect(roles).toEqual(['BUYER', 'PRODUCER', 'ADMIN']);
@@ -96,12 +95,13 @@ describe('OrderDisputeSection', () => {
     server.use(
       http.get(`${BASE}/disputes/mine`, () => HttpResponse.json([withFile])),
       http.get(`${BASE}/disputes/d1`, () => HttpResponse.json(withFile)),
+      http.get(`${BASE}/disputes/d1/messages`, () => HttpResponse.json(withFile.messages)),
     );
-    render(<OrderDisputeSection orderId="o1" variant="flat" />);
+    render(<DisputeDetail dispute={withFile as never} />);
     const link = await screen.findByRole('link', { name: /foto caja\.jpg/ });
     expect(link).toHaveAttribute('href', 'https://cdn.origen.test/disputes/foto%20caja.jpg?sig=abc');
     expect(link).toHaveAttribute('download');
-    // sin tarjeta: la variante plana no lleva borde/sombra de card
+    // sin tarjeta: el detalle va sobre la superficie de la página
     expect(screen.getByTestId('order-dispute').className).not.toMatch(/shadow|rounded-\[28px\]/);
   });
 
@@ -111,8 +111,40 @@ describe('OrderDisputeSection', () => {
       http.get(`${BASE}/disputes/mine`, () => HttpResponse.json([resolved])),
       http.get(`${BASE}/disputes/d1`, () => HttpResponse.json(resolved)),
     );
-    render(<OrderDisputeSection orderId="o1" />);
+    render(<DisputeDetail dispute={resolved as never} />);
     expect(await screen.findByTestId('dispute-verdict')).toHaveTextContent('A favor del comprador');
+    expect(screen.queryByLabelText('Respuesta a la disputa')).toBeNull();
+  });
+
+  it('el detalle de una disputa pide el hilo actualizado al abrirse', async () => {
+    const fresh = [
+      ...dispute.messages,
+      { id: 'm9', disputeId: 'd1', senderType: 'BUYER', senderId: '10', content: 'Mensaje nuevo del comprador', attachments: [], createdAt: '2026-11-07T10:00:00Z' },
+    ];
+    server.use(http.get(`${BASE}/disputes/d1/messages`, () => HttpResponse.json(fresh)));
+    render(<DisputeDetail dispute={{ ...dispute, messages: undefined } as never} />);
+    expect(await screen.findByText('Mensaje nuevo del comprador')).toBeInTheDocument();
+  });
+});
+
+describe('OrderDisputeLink — detalle de pedido', () => {
+  it('no pinta nada si el pedido no tiene disputa', async () => {
+    server.use(http.get(`${BASE}/disputes/mine`, () => HttpResponse.json([])));
+    const { container } = render(<OrderDisputeLink orderId="o1" />);
+    await new Promise((r) => setTimeout(r, 50));
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('con disputa solo enlaza a su detalle (sin conversación en el pedido)', async () => {
+    server.use(
+      http.get(`${BASE}/disputes/mine`, () => HttpResponse.json([dispute])),
+      http.get(`${BASE}/disputes/d1`, () => HttpResponse.json(dispute)),
+    );
+    render(<OrderDisputeLink orderId="o1" />);
+    const link = await screen.findByTestId('order-dispute-link');
+    expect(link).toHaveAttribute('href', '/dashboard/disputas?id=d1');
+    expect(link).toHaveTextContent('Esperando tu respuesta');
+    expect(screen.queryByTestId('dispute-thread')).toBeNull();
     expect(screen.queryByLabelText('Respuesta a la disputa')).toBeNull();
   });
 });

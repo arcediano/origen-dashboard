@@ -17,7 +17,7 @@ import { ArrowLeft, ChevronRight, Scale } from 'lucide-react';
 import { Badge, Button, EmptyState, Table, type Column } from '@arcediano/ux-library';
 import { fetchMyDisputes, type Dispute } from '@/lib/api/disputes';
 import { DISPUTE_REASON_LABEL, DISPUTE_STATUS_LABEL, isDisputeClosed } from '@/lib/dispute-labels';
-import { OrderDisputeSection } from './OrderDisputeSection';
+import { DisputeDetail } from './DisputeDetail';
 
 const CONTAINER = 'container mx-auto px-4 sm:px-6 lg:px-8';
 
@@ -99,7 +99,7 @@ export function DisputesInbox({
               Ver el pedido
             </Link>
           </div>
-          <OrderDisputeSection key={selected.id} orderId={selected.orderId} variant="flat" />
+          <DisputeDetail key={selected.id} dispute={selected} />
         </div>
       </div>
     );
