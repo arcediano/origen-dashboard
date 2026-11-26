@@ -11,7 +11,7 @@ import { format, formatDistanceToNow, differenceInCalendarDays } from 'date-fns'
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown, RotateCcw, Wallet, AlertTriangle, Snowflake } from 'lucide-react';
+import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown, RotateCcw, Wallet, AlertTriangle, Snowflake, Download } from 'lucide-react';
 
 // Componentes UI
 import {
@@ -170,8 +170,8 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   if (value === null || value === undefined || value === '') return null;
   return (
     <div className="flex justify-between items-start gap-4 py-2.5 border-b border-border-subtle last:border-0">
-      <span className="text-xs text-text-subtle shrink-0">{label}</span>
-      <span className="text-xs font-semibold text-foreground text-right">{value}</span>
+      <span className="text-sm text-text-subtle shrink-0">{label}</span>
+      <span className="text-sm font-semibold text-foreground text-right">{value}</span>
     </div>
   );
 }
@@ -702,29 +702,32 @@ export default function OrderDetailPage() {
 
                 {/* Tres estados de factura */}
                 {order.invoice ? (
-                  <div className="mt-3 pt-3 border-t border-border-subtle space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <FileText className="w-4 h-4 text-hoja-tinta shrink-0" />
-                        <span className="text-xs text-text-subtle truncate">Factura {order.invoice.invoiceNumber}</span>
+                  <div className="mt-4 rounded-2xl border border-border-subtle bg-origen-nube p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-origen-pastel flex items-center justify-center shrink-0">
+                        <FileText className="w-5 h-5 text-hoja-tinta" aria-hidden />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-text-subtle">Factura</p>
+                        <p className="text-sm font-semibold text-foreground break-all">{order.invoice.invoiceNumber}</p>
                       </div>
                       <Badge variant={order.invoice.status === 'issued' ? 'success' : 'warning'} size="xs">
                         {order.invoice.status === 'issued' ? 'Emitida' : 'Borrador'}
                       </Badge>
                     </div>
                     <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start"
-                      leftIcon={<ExternalLink className="w-3.5 h-3.5" />}
+                      variant="outline"
+                      size="md"
+                      className="mt-3 w-full"
+                      leftIcon={<Download className="w-4 h-4" />}
                       onClick={handleDownloadInvoice}
                       loading={downloadingInvoice}
                       disabled={!order.invoice.hasPdf || downloadingInvoice}
                     >
-                      {order.invoice.hasPdf ? 'Descargar factura' : 'Factura sin PDF'}
+                      {order.invoice.hasPdf ? 'Descargar factura (PDF)' : 'Factura sin PDF'}
                     </Button>
                     {invoiceError && (
-                      <p className="text-xs text-feedback-danger">{invoiceError}</p>
+                      <p className="mt-2 text-xs text-feedback-danger-text">{invoiceError}</p>
                     )}
                   </div>
                 ) : (() => {
@@ -753,45 +756,56 @@ export default function OrderDetailPage() {
 
               {/* ── Envío ── (acordeón) — M4: cerrado por defecto, ver nota en "Cliente" */}
               <SectionAccordion title="Dirección de envío" icon={MapPin} index={4}>
-                {/* Layout de dos columnas en pantallas anchas (nombre / dirección completa),
-                    consistente con el patrón InfoRow del resto de secciones del acordeón —
-                    antes era un bloque icon+texto autodimensionado que dejaba gran parte del
-                    ancho de la tarjeta vacío en desktop. Colapsa a una columna en móvil. */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-6 mb-1 [&>div]:border-0">
-                  <InfoRow label="Nombre" value={order.shipping.address.fullName} />
-                  <InfoRow
-                    label="Dirección"
-                    value={
-                      <span className="block text-right">
-                        <span className="block">{order.shipping.address.addressLine1}</span>
-                        {order.shipping.address.addressLine2 && (
-                          <span className="block">{order.shipping.address.addressLine2}</span>
-                        )}
-                        <span className="block">
-                          {order.shipping.address.postalCode} {order.shipping.address.city}
-                          {order.shipping.address.state && `, ${order.shipping.address.state}`}
-                          {order.shipping.address.country && `, ${order.shipping.address.country}`}
-                        </span>
-                      </span>
-                    }
-                  />
-                </div>
-                {(order.shipping.address.phone || order.shipping.address.email) && (
-                  <div className="pt-3 border-t border-border-subtle space-y-1.5">
-                    {order.shipping.address.phone && (
-                      <InfoRow
-                        label="Teléfono"
-                        value={<a href={`tel:${order.shipping.address.phone}`} className="text-hoja-tinta hover:underline">{order.shipping.address.phone}</a>}
-                      />
-                    )}
-                    {order.shipping.address.email && (
-                      <InfoRow
-                        label="Email"
-                        value={<a href={`mailto:${order.shipping.address.email}`} className="text-hoja-tinta hover:underline">{order.shipping.address.email}</a>}
-                      />
-                    )}
+                {/* Bloque apilado y alineado a la izquierda: destinatario, dirección en
+                    líneas legibles y contacto como enlaces. Antes eran dos columnas con la
+                    dirección alineada a la derecha, difícil de leer y de copiar. */}
+                <div className="space-y-4 pt-2">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-text-subtle">Destinatario</p>
+                    <p className="mt-0.5 text-base font-semibold text-foreground">{order.shipping.address.fullName}</p>
                   </div>
-                )}
+
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-text-subtle">Dirección</p>
+                    <address className="mt-1.5 rounded-2xl border border-border-subtle bg-origen-nube p-4 text-sm not-italic leading-relaxed text-foreground">
+                      <p className="font-medium">{order.shipping.address.addressLine1}</p>
+                      {order.shipping.address.addressLine2 && <p>{order.shipping.address.addressLine2}</p>}
+                      <p>
+                        {order.shipping.address.postalCode} {order.shipping.address.city}
+                        {order.shipping.address.state && `, ${order.shipping.address.state}`}
+                      </p>
+                      {order.shipping.address.country && (
+                        <p className="text-text-subtle">{order.shipping.address.country}</p>
+                      )}
+                    </address>
+                  </div>
+
+                  {(order.shipping.address.phone || order.shipping.address.email) && (
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-text-subtle">Contacto</p>
+                      <div className="mt-1.5 space-y-1.5">
+                        {order.shipping.address.phone && (
+                          <a
+                            href={`tel:${order.shipping.address.phone}`}
+                            className="flex items-center gap-2.5 rounded-xl px-1 py-1.5 text-sm font-medium text-hoja-tinta hover:underline"
+                          >
+                            <Phone className="w-4 h-4 shrink-0" aria-hidden />
+                            {order.shipping.address.phone}
+                          </a>
+                        )}
+                        {order.shipping.address.email && (
+                          <a
+                            href={`mailto:${order.shipping.address.email}`}
+                            className="flex items-center gap-2.5 rounded-xl px-1 py-1.5 text-sm font-medium text-hoja-tinta hover:underline break-all"
+                          >
+                            <Mail className="w-4 h-4 shrink-0" aria-hidden />
+                            {order.shipping.address.email}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 {order.shipping.trackingNumber && (
                   <div className="pt-3 border-t border-border-subtle space-y-1.5">
                     <InfoRow

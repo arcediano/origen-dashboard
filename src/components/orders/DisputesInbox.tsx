@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ArrowLeft, ChevronRight, Scale } from 'lucide-react';
-import { Badge, Button, EmptyState } from '@arcediano/ux-library';
+import { Badge, Button, Card, EmptyState } from '@arcediano/ux-library';
 import { cn } from '@/lib/utils';
 import { fetchMyDisputes, type Dispute } from '@/lib/api/disputes';
 import { DISPUTE_REASON_LABEL, DISPUTE_STATUS_LABEL, isDisputeClosed } from '@/lib/dispute-labels';
@@ -34,12 +34,14 @@ export function DisputesInbox({ initialId }: { initialId?: string | null }) {
   if (!disputes) return <p className="text-sm text-text-subtle">Cargando disputas…</p>;
   if (disputes.length === 0) {
     return (
-      <EmptyState
-        size="sm"
-        icon={<Scale className="h-6 w-6" />}
-        title="No tienes disputas"
-        description="Cuando un comprador abra una disputa sobre uno de tus pedidos, aparecerá aquí con toda la conversación."
-      />
+      <Card>
+        <EmptyState
+          size="sm"
+          icon={<Scale className="h-6 w-6" />}
+          title="No tienes disputas"
+          description="Cuando un comprador abra una disputa sobre uno de tus pedidos, aparecerá aquí con toda la conversación."
+        />
+      </Card>
     );
   }
 
