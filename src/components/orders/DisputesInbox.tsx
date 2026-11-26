@@ -1,7 +1,8 @@
 /**
  * @file DisputesInbox.tsx
- * @description Bandeja "Disputas" del productor, con el mismo patrón que Pedidos y Facturas:
- *  - Lista: tabla en escritorio y lista simple (filas con separadores, sin tarjetas) en móvil.
+ * @description Bandeja "Disputas" del productor, con el mismo patrón que Pedidos:
+ *  - Lista: tabla en escritorio y tarjetas (como OrderCard) en móvil; las que esperan respuesta
+ *    llevan el borde de aviso.
  *  - Detalle: al elegir una disputa se muestra su conversación completa sobre una superficie
  *    blanca a todo el ancho, sin tarjeta, con las secciones separadas por líneas.
  *  - Sin disputas: el estado vacío va directamente sobre el fondo, centrado.
@@ -15,6 +16,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ArrowLeft, ChevronRight, Scale } from 'lucide-react';
 import { Badge, Button, EmptyState, Table, type Column } from '@arcediano/ux-library';
+import { cn } from '@/lib/utils';
 import { fetchMyDisputes, type Dispute } from '@/lib/api/disputes';
 import { DISPUTE_REASON_LABEL, DISPUTE_STATUS_LABEL, isDisputeClosed } from '@/lib/dispute-labels';
 import { DisputeDetail } from './DisputeDetail';
@@ -89,7 +91,7 @@ export function DisputesInbox({
       <div className="border-y border-border-subtle bg-white" data-testid="dispute-detail">
         <div className={`${CONTAINER} py-5 sm:py-6`}>
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <Button variant="ghost" size="md" onClick={() => select(null)} leftIcon={<ArrowLeft className="h-4 w-4" />}>
+            <Button variant="ghost" size="md" className="w-auto" onClick={() => select(null)} leftIcon={<ArrowLeft className="h-4 w-4" />}>
               Todas las disputas
             </Button>
             <Link
@@ -145,29 +147,42 @@ export function DisputesInbox({
 
   return (
     <div className={`${CONTAINER} py-5 sm:py-6 lg:py-8`}>
-      {/* Móvil: lista simple, sin tarjetas */}
-      <ul className="block divide-y divide-border-subtle border-y border-border-subtle lg:hidden" aria-label="Disputas">
-        {disputes.map((d) => (
-          <li key={d.id}>
-            <button
-              type="button"
-              onClick={() => select(d.id)}
-              aria-label={`${DISPUTE_REASON_LABEL[d.reason] ?? 'Otro motivo'}. Abierta el ${openedOn(d)}`}
-              className="flex w-full items-center gap-3 px-1 py-4 text-left transition-colors hover:bg-origen-pastel/30"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="text-base font-semibold text-origen-bosque">{DISPUTE_REASON_LABEL[d.reason] ?? 'Otro motivo'}</p>
-                <p className="mt-0.5 text-sm text-origen-pino">
-                  Abierta el {openedOn(d)} · {lastActivity(d)}
-                </p>
-                <Badge variant={statusVariant(d)} size="sm" className="mt-2">
-                  {DISPUTE_STATUS_LABEL[d.status] ?? 'En curso'}
-                </Badge>
-              </div>
-              <ChevronRight className="h-5 w-5 shrink-0 text-origen-pino" aria-hidden />
-            </button>
-          </li>
-        ))}
+      {/* Móvil: tarjetas, igual que la lista de Pedidos */}
+      <ul className="block space-y-3 lg:hidden" aria-label="Disputas">
+        {disputes.map((d) => {
+          const needsReply = d.status === 'AWAITING_PRODUCER';
+          return (
+            <li key={d.id}>
+              <button
+                type="button"
+                onClick={() => select(d.id)}
+                aria-label={`${DISPUTE_REASON_LABEL[d.reason] ?? 'Otro motivo'}. Abierta el ${openedOn(d)}`}
+                className={cn(
+                  'flex w-full items-center gap-3.5 rounded-xl border bg-surface-alt px-4 py-4 text-left shadow-origen sm:rounded-2xl',
+                  'transition-all duration-300 hover:border-origen-pradera hover:shadow-origen-lg active:bg-origen-crema/40 focus:outline-none',
+                  needsReply ? 'border-feedback-warning-border' : 'border-border',
+                )}
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-origen-pastel shadow-subtle">
+                  <Scale className="h-5 w-5 text-origen-pino" aria-hidden />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold text-origen-bosque">
+                    {DISPUTE_REASON_LABEL[d.reason] ?? 'Otro motivo'}
+                  </span>
+                  <p className="truncate text-sm text-origen-bosque">{d.description}</p>
+                  <Badge variant={statusVariant(d)} size="xs" className="mt-2">
+                    {DISPUTE_STATUS_LABEL[d.status] ?? 'En curso'}
+                  </Badge>
+                  <p className="mt-1.5 text-[11px] text-text-subtle">
+                    Abierta el {openedOn(d)} · {lastActivity(d)}
+                  </p>
+                </div>
+                <ChevronRight className="h-5 w-5 shrink-0 text-origen-pino" aria-hidden />
+              </button>
+            </li>
+          );
+        })}
       </ul>
 
       {/* Escritorio: tabla */}
