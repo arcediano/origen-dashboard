@@ -36,6 +36,8 @@ interface BackendOrderItem {
   commissionRate?: number | null;
   commissionAmount?: number | null;
   commissionVatAmount?: number | null;
+  /** Parte de este producto en la penalización por pedido pequeño de su cesta (€). */
+  smallBasketPenalty?: number | null;
   variantId?: string;
   variantSku?: string;
   variantOptionsSummary?: string;
@@ -68,6 +70,8 @@ interface BackendOrder {
   total: number;
   /** Importe neto que el productor va a ingresar por este pedido (ver Order['sellerNetAmount']). */
   sellerNetAmount?: number;
+  /** Penalización por pedido pequeño retenida en este pedido (€); 0 si la cesta alcanzó el mínimo. */
+  smallBasketPenalty?: number;
   payoutFreeze?: PayoutFreeze;
   estimatedDelivery?: string;
   createdAt: string;
@@ -219,6 +223,7 @@ function mapBackendOrder(o: BackendOrder): Order {
       commissionRate: item.commissionRate,
       commissionAmount: item.commissionAmount,
       commissionVatAmount: item.commissionVatAmount,
+      smallBasketPenalty: item.smallBasketPenalty,
       variantId: item.variantId,
       variantSku: item.variantSku,
       variantOptionsSummary: item.variantOptionsSummary,
@@ -229,6 +234,7 @@ function mapBackendOrder(o: BackendOrder): Order {
     discount: o.discountAmount > 0 ? o.discountAmount : undefined,
     total: o.total,
     sellerNetAmount: o.sellerNetAmount,
+    smallBasketPenalty: o.smallBasketPenalty,
     payoutFreeze: o.payoutFreeze,
     couponCode: o.couponCode,
 

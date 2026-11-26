@@ -452,7 +452,12 @@ export default function OrderDetailPage() {
     itemsWithCommission.map((item) => item.commissionRate).filter((rate): rate is number => rate != null),
   ));
   const commissionRateLabel = commissionRates.length === 1 ? formatCommissionRate(commissionRates[0]) : null;
+  // Penalización por pedido pequeño: importe fijo que Origen retiene al productor porque los productos del pedido no
+  // alcanzan el mínimo (el comprador no paga nada extra). Ya viene descontada de sellerNetAmount.
+  const smallBasketPenalty = order.smallBasketPenalty ?? 0;
   const deductedAmount = order.sellerNetAmount != null ? order.total - order.sellerNetAmount : null;
+  // Lo descontado solo por comisión + IVA (sin la penalización), para que cada fila del desglose cuadre.
+  const commissionDeductedAmount = deductedAmount != null ? deductedAmount - smallBasketPenalty : null;
 
   const handleRefresh = async () => { await loadOrder(); };
 
@@ -879,6 +884,11 @@ export default function OrderDetailPage() {
                             )}
                           </p>
                         )}
+                        {(item.smallBasketPenalty ?? 0) > 0 && (
+                          <p className="text-sm text-feedback-warning-text mt-1" data-testid="item-small-basket-penalty">
+                            Penalización por pedido pequeño: −{formatCurrency(item.smallBasketPenalty ?? 0)}
+                          </p>
+                        )}
                       </div>
                       {/* Precio */}
                       <p className="text-sm font-bold text-foreground shrink-0 tabular-nums">{formatCurrency(item.totalPrice)}</p>
@@ -977,10 +987,32 @@ export default function OrderDetailPage() {
                         ) : (
                           <div className="flex items-center justify-between gap-3 text-text-subtle">
                             <dt>Comisión de Origen + IVA</dt>
-                            <dd className="font-semibold tabular-nums text-feedback-danger-text">−{formatCurrency(deductedAmount)}</dd>
+                            <dd className="font-semibold tabular-nums text-feedback-danger-text">−{formatCurrency(commissionDeductedAmount ?? deductedAmount)}</dd>
+                          </div>
+                        )}
+                        {smallBasketPenalty > 0 && (
+                          <div className="flex items-center justify-between gap-3 text-text-subtle" data-testid="small-basket-penalty-row">
+                            <dt>Penalización por pedido pequeño</dt>
+                            <dd className="shrink-0 whitespace-nowrap font-semibold tabular-nums text-feedback-danger-text">−{formatCurrency(smallBasketPenalty)}</dd>
                           </div>
                         )}
                       </dl>
+                    )}
+                    {/* Petición del humano (2026-11-26): explicar la penalización. Los productos del pedido no
+                        alcanzan el importe mínimo; el comprador no paga nada extra. */}
+                    {smallBasketPenalty > 0 && (
+                      <div
+                        role="status"
+                        data-testid="small-basket-penalty-notice"
+                        className="mb-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-feedback-warning-subtle px-3 py-2.5 text-sm leading-relaxed text-feedback-warning-text"
+                      >
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                        <p>
+                          Los productos de este pedido no alcanzan el importe mínimo, así que se descuenta una penalización de{' '}
+                          <span className="font-semibold">{formatCurrency(smallBasketPenalty)}</span> de lo que vas a recibir. Tu
+                          cliente no paga nada extra.
+                        </p>
+                      </div>
                     )}
                     <div className="flex items-center justify-between gap-3">
                       <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
