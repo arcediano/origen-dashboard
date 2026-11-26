@@ -19,6 +19,7 @@
 
 'use client';
 
+import { SmallBasketNotice } from '@/components/shared/SmallBasketNotice';
 import { useState } from 'react';
 import { StepShell } from './StepShell';
 import { VariantsEditor } from './VariantsEditor';
@@ -157,6 +158,7 @@ export function StepPricingInventory({
 
       {hasVariants ? (
         <div className="mb-8">
+          <SmallBasketNotice className="mb-4" />
           <VariantsEditor productId={productId} basePrice={formData.basePrice} onVariantsChange={onVariantsChange} />
         </div>
       ) : (
@@ -214,6 +216,8 @@ export function StepPricingInventory({
               />
             </div>
           </div>
+
+          <SmallBasketNotice className="mb-8 -mt-2" />
 
           <div className="mb-8">
             <NetContentField
