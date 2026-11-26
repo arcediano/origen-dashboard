@@ -109,13 +109,21 @@ export function PayoutHistorySection() {
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
+    setError(null);
     fetchSellerPayoutHistory({ page, limit: PAGE_SIZE })
       .then((res) => {
-        if (cancelled || !res.data) return;
+        if (cancelled) return;
+        if (!res.data) {
+          // Un fallo de carga NO debe parecer «no hay cobros».
+          setError(res.error ?? 'No se pudo cargar el historial de cobros.');
+          return;
+        }
         setItems(res.data.items);
         setTotal(res.data.total);
       })
@@ -125,7 +133,7 @@ export function PayoutHistorySection() {
     return () => {
       cancelled = true;
     };
-  }, [page]);
+  }, [page, reloadKey]);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const goToOrder = (orderId: string) => router.push(`/dashboard/orders/${orderId}`);
@@ -187,12 +195,21 @@ export function PayoutHistorySection() {
           </AlertDescription>
         </Alert>
 
-        {total === 0 && !isLoading ? (
+        {error && !isLoading ? (
+          <Alert variant="error">
+            <AlertDescription>
+              <span>{error}</span>{' '}
+              <button type="button" className="font-semibold underline" onClick={() => setReloadKey((k) => k + 1)}>
+                Reintentar
+              </button>
+            </AlertDescription>
+          </Alert>
+        ) : total === 0 && !isLoading ? (
           <EmptyState
             size="sm"
             icon={<History className="w-6 h-6" />}
             title="Todavía no hay cobros"
-            description="Aquí verás cada cobro programado o ya realizado en cuanto tengas pedidos entregados."
+            description="Cuando marques un pedido como entregado, su cobro quedará programado y aparecerá aquí, con su estado hasta que se transfiera."
           />
         ) : (
           <>
