@@ -40,6 +40,8 @@ export interface OrderItem {
   commissionAmount?: number | null;
   /** IVA (21%) sobre commissionAmount, retenido junto a la comisión en el Transfer al productor (petición del humano, 2026-10-22, caso ORG-2026-00071). Mismas reglas null/0 que commissionAmount. */
   commissionVatAmount?: number | null;
+  /** Parte de este producto en la penalización por pedido pequeño de su cesta (€); 0/ausente si no aplicó. */
+  smallBasketPenalty?: number | null;
   metadata?: Record<string, any>;
   /**
    * Variante del producto comprada (si el producto tiene variantes).
@@ -129,6 +131,11 @@ export interface Order {
    * (lo que paga el comprador).
    */
   sellerNetAmount?: number;
+  /**
+   * Penalización por pedido pequeño (€) que Origen retiene al productor porque los productos de la cesta no alcanzaron
+   * el importe mínimo. Ya está descontada de `sellerNetAmount`; el comprador no paga nada extra. 0/ausente si no aplicó.
+   */
+  smallBasketPenalty?: number;
   /** Cobro congelado (disputa, contracargo o devolución pendiente), con motivo y desde cuándo. */
   payoutFreeze?: PayoutFreeze;
 

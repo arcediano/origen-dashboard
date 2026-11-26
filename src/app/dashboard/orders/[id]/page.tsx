@@ -835,6 +835,11 @@ export default function OrderDetailPage() {
                             )}
                           </p>
                         )}
+                        {(item.smallBasketPenalty ?? 0) > 0 && (
+                          <p className="text-xs text-feedback-warning-text mt-1" data-testid="item-small-basket-penalty">
+                            Penalización por pedido pequeño: −{formatCurrency(item.smallBasketPenalty ?? 0)}
+                          </p>
+                        )}
                       </div>
                       {/* Precio */}
                       <p className="text-sm font-bold text-foreground shrink-0 tabular-nums">{formatCurrency(item.totalPrice)}</p>
@@ -921,11 +926,31 @@ export default function OrderDetailPage() {
                         ya descontada del total, a modo de transparencia para el
                         productor -- order.total aquí ya es el total propio del
                         productor (ver comentario arriba), no el global del pedido. */}
-                    {order.total > order.sellerNetAmount && (
+                    {order.total > order.sellerNetAmount + (order.smallBasketPenalty ?? 0) && (
                       <p className="mt-1 text-right text-[11px] text-text-subtle">
                         de un total de {formatCurrency(order.total)}, se ha descontado{' '}
-                        {formatCurrency(order.total - order.sellerNetAmount)} de comisión + IVA
+                        {formatCurrency(order.total - order.sellerNetAmount - (order.smallBasketPenalty ?? 0))} de
+                        comisión + IVA
                       </p>
+                    )}
+                    {/* Penalización por pedido pequeño (petición del humano, 2026-11-26): si los productos de la
+                        cesta no alcanzan el importe mínimo, Origen retiene un importe fijo al productor. El
+                        comprador no paga nada extra; aquí se explica el descuento para que cuadre el importe. */}
+                    {(order.smallBasketPenalty ?? 0) > 0 && (
+                      <div
+                        role="status"
+                        data-testid="small-basket-penalty-notice"
+                        className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-feedback-warning-subtle px-3 py-2.5 text-xs leading-relaxed text-feedback-warning-text"
+                      >
+                        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <p>
+                          <span className="font-semibold">
+                            Penalización por pedido pequeño: −{formatCurrency(order.smallBasketPenalty ?? 0)}.
+                          </span>{' '}
+                          Los productos de este pedido no alcanzan el importe mínimo, así que se descuenta de lo que vas a
+                          recibir. Tu cliente no paga nada extra.
+                        </p>
+                      </div>
                     )}
                   </div>
                 )}

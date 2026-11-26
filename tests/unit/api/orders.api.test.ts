@@ -179,6 +179,22 @@ describe('fetchSellerOrderById', () => {
     expect(result.data?.status).toBe('delivered');
   });
 
+  it('mapea la penalización por pedido pequeño (del pedido y de cada línea)', async () => {
+    server.use(
+      http.get(`${BASE}/orders/seller/:id`, () => {
+        const base = makeBackendOrder({ id: 'ord-pen', orderNumber: 'ORG-2026-00099', status: 'confirmed', total: 6.95 });
+        return HttpResponse.json({
+          ...base,
+          smallBasketPenalty: 0.5,
+          items: base.items.map((i: Record<string, unknown>) => ({ ...i, smallBasketPenalty: 0.5 })),
+        });
+      }),
+    );
+    const result = await fetchSellerOrderById('ord-pen');
+    expect(result.data?.smallBasketPenalty).toBe(0.5);
+    expect(result.data?.items[0].smallBasketPenalty).toBe(0.5);
+  });
+
   it('devuelve status 404 para ID inexistente', async () => {
     const result = await fetchSellerOrderById('no-existe');
     expect(result.status).toBe(404);
