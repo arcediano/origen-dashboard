@@ -65,6 +65,27 @@ describe('OrderDisputeSection', () => {
     expect(await screen.findByText('Fotos enviadas', { selector: 'p' })).toBeInTheDocument();
   });
 
+  it('distingue comprador, productor y equipo de Origen aunque el comprador escribiera con rol de productor', async () => {
+    const mixed = {
+      ...dispute,
+      buyerUserId: '10',
+      producerId: '44',
+      messages: [
+        { id: 'a', disputeId: 'd1', senderType: 'PRODUCER', senderId: '10', content: 'Llegó roto', attachments: [], createdAt: '2026-11-05T09:00:00Z' },
+        { id: 'b', disputeId: 'd1', senderType: 'PRODUCER', senderId: '44', content: 'Lo reviso', attachments: [], createdAt: '2026-11-05T10:00:00Z' },
+        { id: 'c', disputeId: 'd1', senderType: 'ADMIN', senderId: '2', content: 'Gracias a ambos', attachments: [], createdAt: '2026-11-05T11:00:00Z' },
+      ],
+    };
+    server.use(
+      http.get(`${BASE}/disputes/mine`, () => HttpResponse.json([mixed])),
+      http.get(`${BASE}/disputes/d1`, () => HttpResponse.json(mixed)),
+    );
+    const { container } = render(<OrderDisputeSection orderId="o1" variant="flat" />);
+    await screen.findByText('Gracias a ambos');
+    const roles = Array.from(container.querySelectorAll('[data-role]')).map((el) => el.getAttribute('data-role'));
+    expect(roles).toEqual(['BUYER', 'PRODUCER', 'ADMIN']);
+  });
+
   it('los adjuntos se muestran como enlaces de descarga con el nombre del archivo', async () => {
     const withFile = {
       ...dispute,

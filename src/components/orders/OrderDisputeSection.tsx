@@ -24,11 +24,11 @@ import {
 } from '@/lib/api/disputes';
 import {
   DISPUTE_REASON_LABEL,
-  DISPUTE_SENDER_LABEL,
   DISPUTE_STATUS_LABEL,
   DISPUTE_VERDICT_LABEL,
   isDisputeClosed,
 } from '@/lib/dispute-labels';
+import { CHAT_ROLE_LABEL, CHAT_ROLE_STYLE, resolveChatRole } from '@/lib/dispute-chat';
 
 const MAX_LENGTH = 2000;
 
@@ -158,24 +158,33 @@ export function OrderDisputeSection({
         {messages.length === 0 ? (
           <p className="text-base text-origen-pino">Todavía no hay mensajes.</p>
         ) : (
-          <ul className="space-y-3" data-testid="dispute-thread">
+          <ul className="space-y-2.5" data-testid="dispute-thread">
             {messages.map((m) => {
-              const mine = m.senderType === 'PRODUCER';
+              const role = resolveChatRole(m, dispute);
+              const style = CHAT_ROLE_STYLE[role];
               return (
-                <li key={m.id} className={cn('flex', mine ? 'justify-end' : 'justify-start')}>
-                  <div
-                    className={cn(
-                      'max-w-[92%] rounded-2xl px-4 py-3 text-base sm:max-w-[80%]',
-                      mine ? 'bg-origen-pastel text-origen-bosque' : 'bg-surface text-origen-bosque ring-1 ring-border',
-                    )}
+                <li
+                  key={m.id}
+                  data-role={role}
+                  className={cn('flex gap-3 rounded-xl border-l-4 px-4 py-3', style.bar, style.bg)}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cn('mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold', style.avatar)}
                   >
-                    <p className="mb-1 text-sm font-semibold">
-                      {DISPUTE_SENDER_LABEL[m.senderType]}
-                      <span className="ml-2 font-normal text-origen-pino">
+                    {CHAT_ROLE_LABEL[role].charAt(0)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className={cn('rounded-full px-2.5 py-0.5 text-sm font-semibold', style.chip)}>
+                        {CHAT_ROLE_LABEL[role]}
+                      </span>
+                      {role === 'PRODUCER' && <span className="text-sm font-semibold text-origen-bosque">Tú</span>}
+                      <span className="text-sm text-origen-pino">
                         {format(new Date(m.createdAt), "d MMM, HH:mm", { locale: es })}
                       </span>
                     </p>
-                    <p className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</p>
+                    <p className="mt-1.5 whitespace-pre-wrap break-words text-base leading-relaxed text-origen-bosque">{m.content}</p>
                     {m.attachments?.length > 0 && (
                       <ul className="mt-2.5 flex flex-wrap gap-2" aria-label="Archivos adjuntos">
                         {m.attachments.map((url, i) => {
