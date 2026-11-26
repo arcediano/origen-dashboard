@@ -403,3 +403,14 @@
     cursor: not-allowed;
   }
 }
+/* ─────────────────────────────────────────────────────────────────────────────
+   Botones de solo icono (Button ghost con p-0: eliminar, editar, ver, cerrar…)
+   El ghost de la librería lleva borde y radio de caja: con un icono dentro se ve como una mini-card pegada al borde
+   de la card o la fila que lo contiene. Aquí se dejan redondos, sin borde ni sombra; el fondo aparece al pasar el
+   ratón. Fuera de @layer a propósito (mismo motivo que el bloque anterior): debe ganar a las utilidades.
+   ───────────────────────────────────────────────────────────────────────────── */
+button[class*="border-origen-pino/15"][class*="p-0"] {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: 9999px;
+}
