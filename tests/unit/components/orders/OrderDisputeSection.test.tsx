@@ -65,6 +65,25 @@ describe('OrderDisputeSection', () => {
     expect(await screen.findByText('Fotos enviadas', { selector: 'p' })).toBeInTheDocument();
   });
 
+  it('los adjuntos se muestran como enlaces de descarga con el nombre del archivo', async () => {
+    const withFile = {
+      ...dispute,
+      messages: [
+        { ...dispute.messages[0], attachments: ['https://cdn.origen.test/disputes/foto%20caja.jpg?sig=abc'] },
+      ],
+    };
+    server.use(
+      http.get(`${BASE}/disputes/mine`, () => HttpResponse.json([withFile])),
+      http.get(`${BASE}/disputes/d1`, () => HttpResponse.json(withFile)),
+    );
+    render(<OrderDisputeSection orderId="o1" variant="flat" />);
+    const link = await screen.findByRole('link', { name: /foto caja\.jpg/ });
+    expect(link).toHaveAttribute('href', 'https://cdn.origen.test/disputes/foto%20caja.jpg?sig=abc');
+    expect(link).toHaveAttribute('download');
+    // sin tarjeta: la variante plana no lleva borde/sombra de card
+    expect(screen.getByTestId('order-dispute').className).not.toMatch(/shadow|rounded-\[28px\]/);
+  });
+
   it('resuelta: muestra la resolución y no deja escribir', async () => {
     const resolved = { ...dispute, status: 'RESOLVED', verdict: 'BUYER_WINS', refundAmount: 7.9, verdictNote: 'Reembolso total' };
     server.use(
