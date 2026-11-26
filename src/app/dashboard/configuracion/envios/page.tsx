@@ -7,6 +7,7 @@
 
 'use client';
 
+import { SmallBasketNotice } from '@/components/shared/SmallBasketNotice';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -525,6 +526,7 @@ export default function EnviosPage() {
               <span className="text-sm text-muted-foreground">euros</span>
             </div>
             <p className="text-xs text-muted-foreground mt-3">Sin mínimo por defecto. Si lo fijas, recomendamos 20-30 € para venta al público general</p>
+            <SmallBasketNotice className="mt-3" />
           </CardContent>
         </Card>
 

@@ -11,6 +11,7 @@
 
 'use client';
 
+import { SmallBasketNotice } from '@/components/shared/SmallBasketNotice';
 import * as React from 'react';
 import {
   Alert,
@@ -422,6 +423,7 @@ export function EnhancedStep3Shipping({
             error={minOrderError ?? errors['onb-min-order']}
           />
         </div>
+        <SmallBasketNotice className="mt-3" />
       </StepSection>
 
       {/* ── Envío gratuito (solo envío gestionado por el productor) ─────── */}
