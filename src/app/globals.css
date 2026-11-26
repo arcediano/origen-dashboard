@@ -371,3 +371,35 @@
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+/*
+  Tailwind v4 dejó los botones con el cursor por defecto (flecha): los elementos clicables
+  no mostraban la mano. Se restaura aquí, en la capa base, para que cualquier utilidad
+  (cursor-default, cursor-not-allowed…) siga pudiendo sobrescribirlo.
+*/
+@layer base {
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='tab']:not([aria-disabled='true']),
+  [role='menuitem']:not([aria-disabled='true']),
+  [role='option']:not([aria-disabled='true']),
+  [role='switch']:not([aria-disabled='true']),
+  [role='checkbox']:not([aria-disabled='true']),
+  [role='radio']:not([aria-disabled='true']),
+  summary,
+  select:not(:disabled),
+  label[for],
+  input[type='checkbox']:not(:disabled),
+  input[type='radio']:not(:disabled),
+  input[type='submit']:not(:disabled),
+  input[type='button']:not(:disabled),
+  input[type='file']:not(:disabled),
+  a[href] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role='button'][aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+}
