@@ -40,6 +40,9 @@ export interface DisputeMessage {
 export interface Dispute {
   id: string;
   orderId: string;
+  /** ID de usuario del comprador y del productor: permiten saber quién escribe cada mensaje. */
+  buyerUserId?: string;
+  producerId?: string;
   reason: DisputeReason;
   description: string;
   status: DisputeStatus;
