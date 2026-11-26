@@ -11,7 +11,7 @@ import { format, formatDistanceToNow, differenceInCalendarDays } from 'date-fns'
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown, RotateCcw, Wallet, AlertTriangle, Snowflake } from 'lucide-react';
+import { ShoppingBag, Package, Truck, CheckCircle, Clock, XCircle, MapPin, CreditCard, Phone, Mail, ExternalLink, Info, FileText, ChevronDown, RotateCcw, Wallet, AlertTriangle, Snowflake, Download } from 'lucide-react';
 
 // Componentes UI
 import {
@@ -170,8 +170,8 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   if (value === null || value === undefined || value === '') return null;
   return (
     <div className="flex justify-between items-start gap-4 py-2.5 border-b border-border-subtle last:border-0">
-      <span className="text-xs text-text-subtle shrink-0">{label}</span>
-      <span className="text-xs font-semibold text-foreground text-right">{value}</span>
+      <span className="text-sm text-text-subtle shrink-0">{label}</span>
+      <span className="text-sm font-semibold text-foreground text-right">{value}</span>
     </div>
   );
 }
@@ -225,6 +225,11 @@ function SectionAccordion({
   );
 }
 
+/** La tasa llega como fracción decimal (0.12 = 12 %). */
+function formatCommissionRate(rate: number): string {
+  return `${Number((rate * 100).toFixed(2))}%`;
+}
+
 export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -274,6 +279,20 @@ export default function OrderDetailPage() {
     }
   };
 
+  /**
+   * La respuesta del PATCH de estado no incluye el historial ni el desglose
+   * económico: tras cambiar el estado se recarga el pedido completo en segundo
+   * plano (sin spinner) para que "Historial del pedido" muestre el nuevo evento.
+   */
+  const refreshOrder = async () => {
+    try {
+      const response = await fetchOrderById(orderId);
+      if (response.data) setOrder(response.data);
+    } catch (err) {
+      console.error('Error refrescando el pedido:', err);
+    }
+  };
+
   const handleUpdateStatus = async (newStatus: Order['status']) => {
     if (!order) return;
 
@@ -284,6 +303,7 @@ export default function OrderDetailPage() {
         setOrder(response.data);
         setShowStatusSheet(false);
         setShowCancelSheet(false);
+        await refreshOrder();
       } else if (response.error) {
         // El backend rechaza el avance de estado (p.ej. pago aún no confirmado,
         // ver gate de pago en changeStatusBySeller). Antes este error se
@@ -313,6 +333,7 @@ export default function OrderDetailPage() {
         setShowReturnSheet(false);
         setReturnReason('');
         setReturnQuantities({});
+        await refreshOrder();
         toast({
           title: 'Devolución solicitada',
           description: 'El equipo de Origen la revisará en breve.',
@@ -421,6 +442,22 @@ export default function OrderDetailPage() {
    * muestra y se mantiene visible en todos los tamaños.
    */
   const managementActionsDuplicateActionBar = !isMultiSeller && !!nextAction && !isPaymentUnconfirmed;
+
+  // Desglose de la comisión retenida al productor (suma de los snapshots por ítem).
+  const itemsWithCommission = order.items.filter((item) => item.commissionAmount != null);
+  const hasCommissionBreakdown = itemsWithCommission.length > 0;
+  const commissionTotal = itemsWithCommission.reduce((sum, item) => sum + (item.commissionAmount ?? 0), 0);
+  const commissionVatTotal = itemsWithCommission.reduce((sum, item) => sum + (item.commissionVatAmount ?? 0), 0);
+  const commissionRates = Array.from(new Set(
+    itemsWithCommission.map((item) => item.commissionRate).filter((rate): rate is number => rate != null),
+  ));
+  const commissionRateLabel = commissionRates.length === 1 ? formatCommissionRate(commissionRates[0]) : null;
+  // Penalización por pedido pequeño: importe fijo que Origen retiene al productor porque los productos del pedido no
+  // alcanzan el mínimo (el comprador no paga nada extra). Ya viene descontada de sellerNetAmount.
+  const smallBasketPenalty = order.smallBasketPenalty ?? 0;
+  const deductedAmount = order.sellerNetAmount != null ? order.total - order.sellerNetAmount : null;
+  // Lo descontado solo por comisión + IVA (sin la penalización), para que cada fila del desglose cuadre.
+  const commissionDeductedAmount = deductedAmount != null ? deductedAmount - smallBasketPenalty : null;
 
   const handleRefresh = async () => { await loadOrder(); };
 
@@ -534,10 +571,10 @@ export default function OrderDetailPage() {
                         </p>
                       </div>
                     ) : (
-                      <>
+                      <div className="flex flex-wrap items-center gap-3 pt-1">
                         {nextAction && (
                           isPaymentUnconfirmed ? (
-                            <div className="flex items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
+                            <div className="flex basis-full items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
                               <Info className="w-4 h-4 text-origen-pino shrink-0 mt-0.5" aria-hidden />
                               <p className="text-xs text-text-subtle leading-relaxed">
                                 El pago de este pedido aún no se ha confirmado. Podrás avanzar su estado en cuanto se confirme el cobro.
@@ -546,12 +583,11 @@ export default function OrderDetailPage() {
                           ) : (
                             <Button
                               variant="primary"
-                              size="md"
+                              size="sm"
                               leftIcon={<nextAction.icon className="w-4 h-4" />}
                               onClick={() => handleUpdateStatus(nextAction.next)}
                               loading={updating}
                               loadingText="Actualizando..."
-                              className="w-full justify-start"
                             >
                               {nextAction.label}
                             </Button>
@@ -559,12 +595,12 @@ export default function OrderDetailPage() {
                         )}
                         {canCancel && (
                           <Button
-                            variant="destructive"
-                            size="md"
+                            variant="outline"
+                            size="sm"
                             leftIcon={<XCircle className="w-4 h-4" />}
                             onClick={() => setShowCancelSheet(true)}
                             disabled={updating}
-                            className="w-full justify-start"
+                            className="border-feedback-danger-text/30 text-feedback-danger-text hover:bg-feedback-danger-subtle"
                           >
                             Cancelar pedido
                           </Button>
@@ -573,16 +609,15 @@ export default function OrderDetailPage() {
                           <>
                             <Button
                               variant="outline"
-                              size="md"
+                              size="sm"
                               leftIcon={<RotateCcw className="w-4 h-4" />}
                               onClick={() => setShowReturnSheet(true)}
                               disabled={updating}
-                              className="w-full justify-start"
                             >
                               Solicitar devolución
                             </Button>
                             {returnWindowDaysLeft != null && (
-                              <p className="text-[11px] text-text-subtle text-center">
+                              <p className="basis-full text-[11px] text-text-subtle">
                                 {returnWindowDaysLeft === 1
                                   ? 'Queda 1 día para solicitar una devolución'
                                   : `Quedan ${returnWindowDaysLeft} días para solicitar una devolución`}
@@ -591,14 +626,14 @@ export default function OrderDetailPage() {
                           </>
                         )}
                         {order.status === 'delivered' && returnWindowExpired && (
-                          <div className="flex items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
+                          <div className="flex basis-full items-start gap-2 rounded-xl bg-origen-nube border border-dashed border-origen-bosque/20 px-3 py-2.5">
                             <Info className="w-4 h-4 text-origen-pino shrink-0 mt-0.5" aria-hidden />
                             <p className="text-xs text-text-subtle leading-relaxed">
                               El plazo de {returnWindowDays} días naturales desde la entrega para solicitar una devolución ya ha vencido.
                             </p>
                           </div>
                         )}
-                      </>
+                      </div>
                     )}
                   </div>
                 </motion.div>
@@ -672,29 +707,32 @@ export default function OrderDetailPage() {
 
                 {/* Tres estados de factura */}
                 {order.invoice ? (
-                  <div className="mt-3 pt-3 border-t border-border-subtle space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <FileText className="w-4 h-4 text-hoja-tinta shrink-0" />
-                        <span className="text-xs text-text-subtle truncate">Factura {order.invoice.invoiceNumber}</span>
+                  <div className="mt-4 rounded-2xl border border-border-subtle bg-origen-nube p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-origen-pastel flex items-center justify-center shrink-0">
+                        <FileText className="w-5 h-5 text-hoja-tinta" aria-hidden />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-text-subtle">Factura</p>
+                        <p className="text-sm font-semibold text-foreground break-all">{order.invoice.invoiceNumber}</p>
                       </div>
                       <Badge variant={order.invoice.status === 'issued' ? 'success' : 'warning'} size="xs">
                         {order.invoice.status === 'issued' ? 'Emitida' : 'Borrador'}
                       </Badge>
                     </div>
                     <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start"
-                      leftIcon={<ExternalLink className="w-3.5 h-3.5" />}
+                      variant="outline"
+                      size="md"
+                      className="mt-3 w-full"
+                      leftIcon={<Download className="w-4 h-4" />}
                       onClick={handleDownloadInvoice}
                       loading={downloadingInvoice}
                       disabled={!order.invoice.hasPdf || downloadingInvoice}
                     >
-                      {order.invoice.hasPdf ? 'Descargar factura' : 'Factura sin PDF'}
+                      {order.invoice.hasPdf ? 'Descargar factura (PDF)' : 'Factura sin PDF'}
                     </Button>
                     {invoiceError && (
-                      <p className="text-xs text-feedback-danger">{invoiceError}</p>
+                      <p className="mt-2 text-xs text-feedback-danger-text">{invoiceError}</p>
                     )}
                   </div>
                 ) : (() => {
@@ -723,45 +761,56 @@ export default function OrderDetailPage() {
 
               {/* ── Envío ── (acordeón) — M4: cerrado por defecto, ver nota en "Cliente" */}
               <SectionAccordion title="Dirección de envío" icon={MapPin} index={4}>
-                {/* Layout de dos columnas en pantallas anchas (nombre / dirección completa),
-                    consistente con el patrón InfoRow del resto de secciones del acordeón —
-                    antes era un bloque icon+texto autodimensionado que dejaba gran parte del
-                    ancho de la tarjeta vacío en desktop. Colapsa a una columna en móvil. */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-6 mb-1 [&>div]:border-0">
-                  <InfoRow label="Nombre" value={order.shipping.address.fullName} />
-                  <InfoRow
-                    label="Dirección"
-                    value={
-                      <span className="block text-right">
-                        <span className="block">{order.shipping.address.addressLine1}</span>
-                        {order.shipping.address.addressLine2 && (
-                          <span className="block">{order.shipping.address.addressLine2}</span>
-                        )}
-                        <span className="block">
-                          {order.shipping.address.postalCode} {order.shipping.address.city}
-                          {order.shipping.address.state && `, ${order.shipping.address.state}`}
-                          {order.shipping.address.country && `, ${order.shipping.address.country}`}
-                        </span>
-                      </span>
-                    }
-                  />
-                </div>
-                {(order.shipping.address.phone || order.shipping.address.email) && (
-                  <div className="pt-3 border-t border-border-subtle space-y-1.5">
-                    {order.shipping.address.phone && (
-                      <InfoRow
-                        label="Teléfono"
-                        value={<a href={`tel:${order.shipping.address.phone}`} className="text-hoja-tinta hover:underline">{order.shipping.address.phone}</a>}
-                      />
-                    )}
-                    {order.shipping.address.email && (
-                      <InfoRow
-                        label="Email"
-                        value={<a href={`mailto:${order.shipping.address.email}`} className="text-hoja-tinta hover:underline">{order.shipping.address.email}</a>}
-                      />
-                    )}
+                {/* Bloque apilado y alineado a la izquierda: destinatario, dirección en
+                    líneas legibles y contacto como enlaces. Antes eran dos columnas con la
+                    dirección alineada a la derecha, difícil de leer y de copiar. */}
+                <div className="space-y-4 pt-2">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-text-subtle">Destinatario</p>
+                    <p className="mt-0.5 text-base font-semibold text-foreground">{order.shipping.address.fullName}</p>
                   </div>
-                )}
+
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-text-subtle">Dirección</p>
+                    <address className="mt-1.5 rounded-2xl border border-border-subtle bg-origen-nube p-4 text-sm not-italic leading-relaxed text-foreground">
+                      <p className="font-medium">{order.shipping.address.addressLine1}</p>
+                      {order.shipping.address.addressLine2 && <p>{order.shipping.address.addressLine2}</p>}
+                      <p>
+                        {order.shipping.address.postalCode} {order.shipping.address.city}
+                        {order.shipping.address.state && `, ${order.shipping.address.state}`}
+                      </p>
+                      {order.shipping.address.country && (
+                        <p className="text-text-subtle">{order.shipping.address.country}</p>
+                      )}
+                    </address>
+                  </div>
+
+                  {(order.shipping.address.phone || order.shipping.address.email) && (
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-text-subtle">Contacto</p>
+                      <div className="mt-1.5 space-y-1.5">
+                        {order.shipping.address.phone && (
+                          <a
+                            href={`tel:${order.shipping.address.phone}`}
+                            className="flex items-center gap-2.5 rounded-xl px-1 py-1.5 text-sm font-medium text-hoja-tinta hover:underline"
+                          >
+                            <Phone className="w-4 h-4 shrink-0" aria-hidden />
+                            {order.shipping.address.phone}
+                          </a>
+                        )}
+                        {order.shipping.address.email && (
+                          <a
+                            href={`mailto:${order.shipping.address.email}`}
+                            className="flex items-center gap-2.5 rounded-xl px-1 py-1.5 text-sm font-medium text-hoja-tinta hover:underline break-all"
+                          >
+                            <Mail className="w-4 h-4 shrink-0" aria-hidden />
+                            {order.shipping.address.email}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 {order.shipping.trackingNumber && (
                   <div className="pt-3 border-t border-border-subtle space-y-1.5">
                     <InfoRow
@@ -823,8 +872,8 @@ export default function OrderDetailPage() {
                             solo el primer caso omite la línea; ambigüedad reportada en
                             bugs-detalle-pedido-comprador, 2026-08-28. */}
                         {item.commissionRate != null && (
-                          <p className="text-xs text-text-subtle mt-1">
-                            Comisión de Origen: {item.commissionRate}%
+                          <p className="text-sm text-text-subtle mt-1">
+                            Comisión de Origen: {formatCommissionRate(item.commissionRate)}
                             {item.commissionAmount != null && ` (${formatCurrency(item.commissionAmount)})`}
                             {/* IVA de la comisión mostrado como línea separada, no
                                 sumado en una única cifra -- petición del humano
@@ -836,7 +885,7 @@ export default function OrderDetailPage() {
                           </p>
                         )}
                         {(item.smallBasketPenalty ?? 0) > 0 && (
-                          <p className="text-xs text-feedback-warning-text mt-1" data-testid="item-small-basket-penalty">
+                          <p className="text-sm text-feedback-warning-text mt-1" data-testid="item-small-basket-penalty">
                             Penalización por pedido pequeño: −{formatCurrency(item.smallBasketPenalty ?? 0)}
                           </p>
                         )}
@@ -912,46 +961,68 @@ export default function OrderDetailPage() {
                 )}
 
                 {order.sellerNetAmount != null && (
-                  <div className="mx-5 mb-4 rounded-2xl border border-origen-pradera bg-linear-to-b from-white to-origen-crema px-4 py-3.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="flex items-center gap-2 text-xs font-semibold text-text-subtle">
-                        <Wallet className="w-3.5 h-3.5 text-hoja-tinta" aria-hidden="true" />
-                        Vas a recibir
-                      </span>
-                      <span className="text-lg font-extrabold text-origen-bosque tabular-nums">
-                        {formatCurrency(order.sellerNetAmount)}
-                      </span>
-                    </div>
-                    {/* Petición del humano (2026-09-17): informar de la comisión
-                        ya descontada del total, a modo de transparencia para el
-                        productor -- order.total aquí ya es el total propio del
-                        productor (ver comentario arriba), no el global del pedido. */}
-                    {order.total > order.sellerNetAmount + (order.smallBasketPenalty ?? 0) && (
-                      <p className="mt-1 text-right text-[11px] text-text-subtle">
-                        de un total de {formatCurrency(order.total)}, se ha descontado{' '}
-                        {formatCurrency(order.total - order.sellerNetAmount - (order.smallBasketPenalty ?? 0))} de
-                        comisión + IVA
-                      </p>
+                  <div className="mx-5 mb-4 rounded-2xl border border-origen-pradera bg-linear-to-b from-white to-origen-crema px-4 py-4">
+                    {/* Desglose de lo descontado al productor (comisión + IVA de la comisión),
+                        en tamaño legible: petición del humano (2026-11-26). order.total aquí
+                        ya es el total propio del productor, no el global del pedido. */}
+                    {deductedAmount != null && deductedAmount > 0 && (
+                      <dl className="mb-3 space-y-1.5 border-b border-border-subtle pb-3 text-sm">
+                        <div className="flex items-center justify-between gap-3 text-text-subtle">
+                          <dt>Total del pedido</dt>
+                          <dd className="font-medium tabular-nums text-foreground">{formatCurrency(order.total)}</dd>
+                        </div>
+                        {hasCommissionBreakdown ? (
+                          <>
+                            <div className="flex items-center justify-between gap-3 text-text-subtle">
+                              <dt>Comisión de Origen{commissionRateLabel ? ` (${commissionRateLabel})` : ''}</dt>
+                              <dd className="font-semibold tabular-nums text-feedback-danger-text">−{formatCurrency(commissionTotal)}</dd>
+                            </div>
+                            {commissionVatTotal > 0 && (
+                              <div className="flex items-center justify-between gap-3 text-text-subtle">
+                                <dt>IVA de la comisión</dt>
+                                <dd className="font-semibold tabular-nums text-feedback-danger-text">−{formatCurrency(commissionVatTotal)}</dd>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="flex items-center justify-between gap-3 text-text-subtle">
+                            <dt>Comisión de Origen + IVA</dt>
+                            <dd className="font-semibold tabular-nums text-feedback-danger-text">−{formatCurrency(commissionDeductedAmount ?? deductedAmount)}</dd>
+                          </div>
+                        )}
+                        {smallBasketPenalty > 0 && (
+                          <div className="flex items-center justify-between gap-3 text-text-subtle" data-testid="small-basket-penalty-row">
+                            <dt>Penalización por pedido pequeño</dt>
+                            <dd className="shrink-0 whitespace-nowrap font-semibold tabular-nums text-feedback-danger-text">−{formatCurrency(smallBasketPenalty)}</dd>
+                          </div>
+                        )}
+                      </dl>
                     )}
-                    {/* Penalización por pedido pequeño (petición del humano, 2026-11-26): si los productos de la
-                        cesta no alcanzan el importe mínimo, Origen retiene un importe fijo al productor. El
-                        comprador no paga nada extra; aquí se explica el descuento para que cuadre el importe. */}
-                    {(order.smallBasketPenalty ?? 0) > 0 && (
+                    {/* Petición del humano (2026-11-26): explicar la penalización. Los productos del pedido no
+                        alcanzan el importe mínimo; el comprador no paga nada extra. */}
+                    {smallBasketPenalty > 0 && (
                       <div
                         role="status"
                         data-testid="small-basket-penalty-notice"
-                        className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-feedback-warning-subtle px-3 py-2.5 text-xs leading-relaxed text-feedback-warning-text"
+                        className="mb-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-feedback-warning-subtle px-3 py-2.5 text-sm leading-relaxed text-feedback-warning-text"
                       >
-                        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                         <p>
-                          <span className="font-semibold">
-                            Penalización por pedido pequeño: −{formatCurrency(order.smallBasketPenalty ?? 0)}.
-                          </span>{' '}
-                          Los productos de este pedido no alcanzan el importe mínimo, así que se descuenta de lo que vas a
-                          recibir. Tu cliente no paga nada extra.
+                          Los productos de este pedido no alcanzan el importe mínimo, así que se descuenta una penalización de{' '}
+                          <span className="font-semibold">{formatCurrency(smallBasketPenalty)}</span> de lo que vas a recibir. Tu
+                          cliente no paga nada extra.
                         </p>
                       </div>
                     )}
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <Wallet className="w-4 h-4 text-hoja-tinta" aria-hidden="true" />
+                        Vas a recibir
+                      </span>
+                      <span className="text-xl font-extrabold text-origen-bosque tabular-nums">
+                        {formatCurrency(order.sellerNetAmount)}
+                      </span>
+                    </div>
                   </div>
                 )}
               </motion.div>
