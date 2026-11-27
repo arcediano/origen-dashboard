@@ -4,6 +4,7 @@
  */
 'use client';
 
+import { ProductStatusBadge, isHiddenFromStore } from '@/app/dashboard/products/components/ProductStatusBadge';
 import { ListingQualityCard } from '@/app/dashboard/products/components/ListingQualityCard';
 import { getListingQuality } from '@/lib/products/listing-quality';
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -497,7 +498,7 @@ function StatusCard({
         <SectionLabel>Estado y publicación</SectionLabel>
         <div className="flex items-center justify-between">
           <span className="text-xs text-text-subtle">Estado actual</span>
-          <StatusBadge status={product.status as any} />
+          <ProductStatusBadge product={product} />
         </div>
       </div>
 
@@ -840,6 +841,7 @@ export default function ProductoDetallePage() {
           description={`${product.categoryName || product.categoryId} · ${product.sku || 'Sin SKU'}`}
           badgeIcon={Package}
           badgeText={
+            isHiddenFromStore(product)       ? 'Activo · oculto' :
             product.status === 'active'      ? 'Activo'    :
             product.status === 'inactive'    ? 'Inactivo'  :
             product.status === 'out_of_stock'? 'Sin stock' :
@@ -1022,7 +1024,7 @@ export default function ProductoDetallePage() {
                       <div className="flex-1 min-w-0 pt-0.5">
                         {/* Badge encima, separado del nombre */}
                         <div className="mb-1.5">
-                          <StatusBadge status={product.status as any} />
+                          <ProductStatusBadge product={product} />
                         </div>
                         {/* Nombre truncado — máx 2 líneas, nunca rompe la imagen */}
                         <h2 className="text-sm font-bold text-origen-bosque leading-snug line-clamp-2 break-words mb-1">

@@ -18,3 +18,14 @@ describe('ProductStatusBadge', () => {
     expect(screen.queryByText('Corregir datos')).toBeNull();
   });
 });
+
+describe('producto activo pero no público', () => {
+  it('se muestra como «Activo · oculto», no como activo', () => {
+    render(<ProductStatusBadge product={{ status: 'active', visibility: 'private' }} />);
+    expect(screen.getByText('Activo · oculto')).toBeTruthy();
+  });
+  it('un activo público conserva el estado normal', () => {
+    render(<ProductStatusBadge product={{ status: 'active', visibility: 'public' }} />);
+    expect(screen.queryByText('Activo · oculto')).toBeNull();
+  });
+});
