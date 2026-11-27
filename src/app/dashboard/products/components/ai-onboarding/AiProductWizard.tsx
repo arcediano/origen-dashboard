@@ -159,7 +159,8 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
       );
       clearDraft();
       setIsRedirecting(true);
-      const nutritionParam = result.nutritionSource === 'usda' ? '&nutrition=usda' : '';
+      // Siempre se informa de dónde salió la nutrición (label / usda / none) para que la ficha lo explique.
+      const nutritionParam = `&nutrition=${result.nutritionSource ?? 'none'}`;
       router.push(`/dashboard/products/${result.productId}?fromAssistant=1${nutritionParam}`);
     } catch (error) {
       setSubmitError(friendlyError(error));
