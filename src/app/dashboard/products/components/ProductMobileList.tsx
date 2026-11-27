@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
 import { SwipeableRow, ProductImage } from '@arcediano/ux-library';
 import { ProductStatusBadge } from './ProductStatusBadge';
+import { formatProductQuantity } from '@/lib/products/quantity-format';
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────
 
@@ -128,7 +129,7 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
             {/* L3: precio + indicador de stock */}
             <div className="flex items-center gap-2 pt-0.5">
               <span className="text-sm font-bold text-origen-bosque tabular-nums">
-                {product.basePrice.toFixed(2)} €
+                {product.basePrice.toFixed(2)} €{product.saleMode === 'WEIGHT' ? '/kg' : ''}
               </span>
               <span className="text-border-subtle" aria-hidden>·</span>
               {product.status === 'out_of_stock' ? (
@@ -142,12 +143,12 @@ function ProductRow({ product, onView, onEdit, onAdjustStock, onStatusChange }: 
                 // por la guía. warning-text es el token semántico de aviso (7.1:1).
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-feedback-warning-text">
                   <span className="w-1.5 h-1.5 rounded-full bg-origen-mandarina shrink-0" />
-                  Stock: {product.stock}
+                  Stock: {formatProductQuantity(product.stock, product.saleMode)}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-[11px] text-text-subtle">
                   <span className="w-1.5 h-1.5 rounded-full bg-origen-pradera/60 shrink-0" />
-                  Stock: {product.stock}
+                  Stock: {formatProductQuantity(product.stock, product.saleMode)}
                 </span>
               )}
             </div>
@@ -210,5 +211,3 @@ export function ProductMobileList({
     </div>
   );
 }
-
-

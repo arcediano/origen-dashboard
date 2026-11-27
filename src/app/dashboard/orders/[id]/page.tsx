@@ -863,7 +863,9 @@ export default function OrderDetailPage() {
                           <p className="text-xs text-hoja-tinta font-medium mt-0.5">{item.variantOptionsSummary}</p>
                         )}
                         <p className="text-xs text-text-subtle mt-0.5">
-                          {item.quantity} × {formatCurrency(item.unitPrice)}
+                          {item.saleMode === 'WEIGHT'
+                            ? `${item.quantity} g × ${formatCurrency((item.pricePerKgCents ?? Math.round(item.unitPrice * 100)) / 100)}/kg`
+                            : `${item.quantity} × ${formatCurrency(item.unitPrice)}`}
                           {item.discount && <span className="text-hoja-tinta ml-1.5">−{item.discount}%</span>}
                         </p>
                         {/* commissionRate == null (no !== undefined) porque el backend distingue
@@ -1213,7 +1215,9 @@ export default function OrderDetailPage() {
                     >
                       <CheckboxWithLabel
                         label={item.productName}
-                        description={`${item.quantity} ${item.quantity === 1 ? 'unidad' : 'unidades'} en el pedido`}
+                        description={item.saleMode === 'WEIGHT'
+                          ? `${item.quantity} g en el pedido`
+                          : `${item.quantity} ${item.quantity === 1 ? 'unidad' : 'unidades'} en el pedido`}
                         checked={checked}
                         disabled={updating}
                         onCheckedChange={(next) => {
@@ -1229,15 +1233,18 @@ export default function OrderDetailPage() {
                         }}
                       />
                       {checked && (
-                        <QuantitySelector
-                          value={returnQuantities[item.id] ?? 1}
-                          onChange={(value) =>
-                            setReturnQuantities((prev) => ({ ...prev, [item.id]: value }))
-                          }
-                          min={1}
-                          max={item.quantity}
-                          disabled={updating}
-                        />
+                        <div className="flex items-center gap-2">
+                          <QuantitySelector
+                            value={returnQuantities[item.id] ?? 1}
+                            onChange={(value) =>
+                              setReturnQuantities((prev) => ({ ...prev, [item.id]: value }))
+                            }
+                            min={1}
+                            max={item.quantity}
+                            disabled={updating}
+                          />
+                          {item.saleMode === 'WEIGHT' && <span className="text-xs text-text-subtle">g</span>}
+                        </div>
                       )}
                     </div>
                   );
@@ -1278,4 +1285,3 @@ export default function OrderDetailPage() {
     </MobilePullRefresh>
   );
 }
-

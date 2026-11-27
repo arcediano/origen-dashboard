@@ -148,7 +148,10 @@ export function OrderCard({ order, onPress, onMarkShipped, className }: OrderCar
     year: 'numeric',
   });
 
-  const itemCount = order.items.reduce((s, i) => s + i.quantity, 0);
+  const itemCount = order.items.reduce(
+    (sum, item) => sum + (item.saleMode === 'WEIGHT' ? 1 : item.quantity),
+    0,
+  );
   const canShip   = order.status === 'processing';
 
   const swipeActions = [

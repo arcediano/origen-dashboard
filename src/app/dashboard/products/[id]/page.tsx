@@ -52,6 +52,7 @@ import { useAiFeedbackState } from '@/hooks/useAiFeedback';
 import { sanitizeHtml, ensureRichTextHtml } from '@/lib/html-sanitizer';
 import { formatFieldsInSentence } from '@/lib/constants/sensitiveFields';
 import { AUTONOMOUS_COMMUNITY_NAMES } from '@/lib/constants/autonomous-community';
+import { formatProductQuantity } from '@/lib/products/quantity-format';
 
 // ============================================================================
 // ANIMACIONES
@@ -314,10 +315,15 @@ function PreciosSection({ product, formatCurrency, hasDiscount, discountPct }: {
     <div className="space-y-4 pt-3">
       <div>
         <InfoRow label="Precio de venta" value={
-          <span className="text-sm font-bold text-origen-bosque">{formatCurrency(product.basePrice)}</span>
+          <span className="text-sm font-bold text-origen-bosque">
+            {formatCurrency(product.basePrice)}{product.saleMode === 'WEIGHT' ? '/kg' : ''}
+          </span>
         } />
         {product.comparePrice && (
-          <InfoRow label="Precio sin descuento" value={formatCurrency(product.comparePrice)} />
+          <InfoRow
+            label="Precio sin descuento"
+            value={`${formatCurrency(product.comparePrice)}${product.saleMode === 'WEIGHT' ? '/kg' : ''}`}
+          />
         )}
         {hasDiscount && (
           <InfoRow label="Descuento" value={
@@ -361,9 +367,9 @@ function InventarioSection({ product }: { product: Product }) {
           <InfoRow label="Código de barras" value={<span className="font-mono">{product.barcode}</span>} />
         )}
         <InfoRow label="Stock actual" value={
-          <span className={cn('font-bold', stockColor)}>{stock} uds.</span>
+          <span className={cn('font-bold', stockColor)}>{formatProductQuantity(stock, product.saleMode)}</span>
         } />
-        <InfoRow label="Alerta stock bajo" value={`${threshold} uds.`} />
+        <InfoRow label="Alerta stock bajo" value={formatProductQuantity(threshold, product.saleMode)} />
         <InfoRow label="Control de inventario" value={product.trackInventory ? 'Activo' : 'No'} />
         <InfoRow label="Pedidos sin stock" value={product.allowBackorders ? 'Permitidos' : 'No permitidos'} />
       </div>
@@ -1011,7 +1017,7 @@ export default function ProductoDetallePage() {
                               Precio
                             </p>
                             <p className="text-sm font-bold text-origen-bosque tabular-nums">
-                              {formatCurrency(product.basePrice)}
+                              {formatCurrency(product.basePrice)}{product.saleMode === 'WEIGHT' ? '/kg' : ''}
                             </p>
                           </div>
                           <div className="w-px h-7 bg-border-subtle shrink-0" />
@@ -1020,7 +1026,7 @@ export default function ProductoDetallePage() {
                               Stock
                             </p>
                             <p className={cn('text-sm font-bold tabular-nums', stockColor)}>
-                              {stock} uds
+                              {formatProductQuantity(stock, product.saleMode)}
                             </p>
                           </div>
                           {hasDiscount && (
@@ -1178,7 +1184,11 @@ export default function ProductoDetallePage() {
               <div className="mx-6 mb-4 flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-700 leading-relaxed">
-                  Este producto tiene <span className="font-semibold">{product.sales} ventas registradas</span>. Su historial de ventas no se podrá recuperar.
+                  Este producto tiene <span className="font-semibold">
+                    {product.saleMode === 'WEIGHT'
+                      ? `${formatProductQuantity(product.sales, product.saleMode)} vendidos`
+                      : `${product.sales} ventas registradas`}
+                  </span>. Su historial de ventas no se podrá recuperar.
                 </p>
               </div>
             )}

@@ -33,6 +33,9 @@ export interface OrderItem {
   productImage?: string;
   quantity: number;
   unitPrice: number;
+  unit?: string;
+  saleMode?: 'UNIT' | 'WEIGHT';
+  pricePerKgCents?: number;
   totalPrice: number;
   discount?: number;
   /** Comisión de Origen sobre esta venta. `null`/`undefined` = sin snapshot capturado (pedido legado o productor sin Stripe Connect); `0` es un valor real (productor con Connect activo pero sin tarifa configurada aún). No conflacionar ambos casos en la UI. */
