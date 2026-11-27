@@ -2,14 +2,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-const { createMock, pushMock } = vi.hoisted(() => ({
+const { createMock, statusMock, pushMock } = vi.hoisted(() => ({
   createMock: vi.fn(),
+  statusMock: vi.fn(),
   pushMock: vi.fn(),
 }));
 
 vi.mock('@/lib/api/ai-assist', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api/ai-assist')>();
-  return { ...actual, createAssistedProduct: createMock };
+  return { ...actual, createAssistedProduct: createMock, getAssistedProductStatus: statusMock };
 });
 
 vi.mock('next/navigation', () => ({
@@ -45,6 +46,7 @@ async function goToProductStep(user: ReturnType<typeof userEvent.setup>) {
 describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    statusMock.mockReset();
     sessionStorage.clear();
   });
 
@@ -139,6 +141,7 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/dashboard/products/prod-9?fromAssistant=1&nutrition=label'));
     expect(createMock).toHaveBeenCalledTimes(1);
     expect(createMock).toHaveBeenCalledWith({
+      clientRequestId: expect.any(String),
       images: {
         product: { mediaType: 'image/jpeg', data: 'QUJD' },
         nutrition: { mediaType: 'image/jpeg', data: 'QUJD' },
@@ -211,6 +214,53 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     expect(pushMock).not.toHaveBeenCalled();
     // sigue en el resumen, con todo intacto
     expect(screen.getByText(/Queso curado de oveja, intenso/)).toBeTruthy();
+  });
+
+  const submitFromReview = async (user: ReturnType<typeof userEvent.setup>) => {
+    render(<AiProductWizard quota={{ used: 0, total: 3 }} onManual={onManual} onRecharge={onRecharge} />);
+    await goToProductStep(user);
+    await user.type(screen.getByLabelText('Describe tu producto'), 'Queso curado de oveja, intenso');
+    for (let i = 0; i < 4; i++) await user.click(screen.getByRole('button', { name: 'Siguiente' }));
+    await user.click(await screen.findByRole('button', { name: 'Crear mi producto con IA' }));
+  };
+
+  it('si la respuesta se pierde, consulta el estado del intento y sigue adelante cuando el producto ya existe', async () => {
+    const realSetTimeout = globalThis.setTimeout;
+    vi.spyOn(globalThis, 'setTimeout').mockImplementation(((fn: () => void, ms?: number) =>
+      realSetTimeout(fn, ms === 5000 ? 0 : ms)) as unknown as typeof setTimeout);
+    const user = userEvent.setup();
+    createMock.mockRejectedValueOnce(new AiAssistError('Failed to fetch', null, 0));
+    statusMock
+      .mockResolvedValueOnce({ status: 'in_progress' })
+      .mockResolvedValueOnce({ status: 'completed', productId: 'prod-rec', nutritionSource: 'usda' });
+
+    await submitFromReview(user);
+
+    await waitFor(() =>
+      expect(pushMock).toHaveBeenCalledWith('/dashboard/products/prod-rec?fromAssistant=1&nutrition=usda'),
+    );
+    expect(createMock).toHaveBeenCalledTimes(1);
+    expect(statusMock).toHaveBeenCalledWith(createMock.mock.calls[0][0].clientRequestId);
+    vi.restoreAllMocks();
+  });
+
+  it('si no se puede confirmar, avisa y el reintento reutiliza el mismo identificador (no duplica ni cobra dos veces)', async () => {
+    const realSetTimeout = globalThis.setTimeout;
+    vi.spyOn(globalThis, 'setTimeout').mockImplementation(((fn: () => void, ms?: number) =>
+      realSetTimeout(fn, ms === 5000 ? 0 : ms)) as unknown as typeof setTimeout);
+    const user = userEvent.setup();
+    createMock
+      .mockRejectedValueOnce(new AiAssistError('Failed to fetch', null, 0))
+      .mockResolvedValueOnce({ productId: 'prod-2', charged: true, nutritionSource: null });
+    statusMock.mockResolvedValue({ status: 'unknown' });
+
+    await submitFromReview(user);
+    expect(await screen.findByText(/No hemos podido confirmar que tu producto se creara/)).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'Crear mi producto con IA' }));
+
+    await waitFor(() => expect(createMock).toHaveBeenCalledTimes(2));
+    expect(createMock.mock.calls[1][0].clientRequestId).toBe(createMock.mock.calls[0][0].clientRequestId);
+    vi.restoreAllMocks();
   });
 
   it('"Prefiero hacerlo a mano" sale del asistente en cualquier paso', async () => {

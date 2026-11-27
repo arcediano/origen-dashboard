@@ -24,7 +24,16 @@ export interface CreateAssistedProductInput {
   productionProcess?: string;
   extraInfo?: string;
   certifications?: AssistedCertification[];
+  /** Identificador del intento: un reintento con el mismo valor no vuelve a crear ni a cobrar. */
+  clientRequestId?: string;
   netContent?: { value: number; unit: NetContentUnit };
+}
+
+/** Estado de un intento de creación (para recuperarse si la respuesta se perdió). */
+export interface AssistedProductStatus {
+  status: 'completed' | 'in_progress' | 'failed' | 'unknown';
+  productId?: string;
+  nutritionSource?: 'label' | 'usda' | null;
 }
 
 export interface AssistedProductResponse {
