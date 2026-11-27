@@ -464,6 +464,9 @@ export function DetailsStep({
                 : onChange('netContentUnit', value as AssistedTextState['netContentUnit'])
             }
           />
+          <p className="text-xs text-text-subtle" data-testid="ai-format-variants-hint">
+            Es el formato principal. Si lo vendes en más formatos (por ejemplo 250 g y 1 kg), podrás añadirlos como variantes al revisar la ficha.
+          </p>
         </div>
 
         <div className="min-w-0 space-y-4">
