@@ -107,7 +107,7 @@ describe('/dashboard/products/create', () => {
     render(<CreateProductPage />);
 
     const banner = await screen.findByTestId('ai-assist-banner');
-    expect(banner.textContent).toMatch(/Crea tu producto con ayuda de la IA en unos sencillos pasos/);
+    expect(banner.textContent).toMatch(/Una ficha mejor vende más/);
     expect(screen.getByTestId('ai-assist-banner-credits').textContent).toMatch(/2.*créditos/);
     expect(screen.queryByRole('button', { name: /Probar IA/ })).toBeNull();
   });
