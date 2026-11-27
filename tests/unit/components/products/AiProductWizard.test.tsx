@@ -136,7 +136,7 @@ describe('AiProductWizard (formulario guiado de Origen Assist)', () => {
     expect(screen.getByText(/tabla nutricional/)).toBeTruthy();
     await user.click(screen.getByRole('button', { name: 'Crear mi producto con IA' }));
 
-    await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/dashboard/products/prod-9?fromAssistant=1'));
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/dashboard/products/prod-9?fromAssistant=1&nutrition=label'));
     expect(createMock).toHaveBeenCalledTimes(1);
     expect(createMock).toHaveBeenCalledWith({
       images: {

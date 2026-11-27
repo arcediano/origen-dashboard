@@ -647,17 +647,18 @@ export default function ProductoDetallePage() {
    * al pulsar "Revisar más tarde" sin perder el resto de la página.
    */
   const [fromAssistant, setFromAssistant] = useState(false);
-  // `?nutrition=usda`: los valores nutricionales son orientativos (USDA), no de la etiqueta.
-  const [usdaNutrition, setUsdaNutrition] = useState(false);
+  // `?nutrition=`: de dónde salió la nutrición — `label` (etiqueta), `usda` (orientativa) o `none` (sin datos).
+  const [nutritionSource, setNutritionSource] = useState<'label' | 'usda' | 'none' | null>(null);
 
   useEffect(() => {
     if (searchParams.get('fromAssistant') === '1') setFromAssistant(true);
-    if (searchParams.get('nutrition') === 'usda') setUsdaNutrition(true);
+    const source = searchParams.get('nutrition');
+    if (source === 'label' || source === 'usda' || source === 'none') setNutritionSource(source);
   }, [searchParams]);
 
   const dismissAssistantBanner = useCallback(() => {
     setFromAssistant(false);
-    setUsdaNutrition(false);
+    setNutritionSource(null);
     router.replace(`/dashboard/products/${productId}`);
   }, [router, productId]);
 
@@ -955,9 +956,19 @@ export default function ProductoDetallePage() {
                 <AlertTitle>✅ Producto creado en borrador. Este es el resultado de tu asistente.</AlertTitle>
                 <AlertDescription>
                   Revisa los textos que ha redactado la IA (descripción, origen y elaboración), corrige lo que no te encaje y añade el precio cuando quieras publicarlo.
-                  {usdaNutrition && (
+                  {nutritionSource === 'usda' && (
                     <p className="font-medium mt-1" data-testid="usda-nutrition-note">
                       Los valores nutricionales son orientativos (por 100 g, de la base de datos pública de USDA), no los de tu etiqueta: revísalos o corrígelos en la pestaña Nutricional antes de publicar.
+                    </p>
+                  )}
+                  {nutritionSource === 'label' && (
+                    <p className="font-medium mt-1" data-testid="label-nutrition-note">
+                      Los valores nutricionales se han leído de la foto de tu etiqueta: compruébalos en la pestaña Nutricional.
+                    </p>
+                  )}
+                  {nutritionSource === 'none' && (
+                    <p className="font-medium mt-1" data-testid="no-nutrition-note">
+                      No hemos podido rellenar la información nutricional (no había etiqueta legible ni un alimento equivalente en la base de datos). Añádela tú en la pestaña Nutricional antes de publicar.
                     </p>
                   )}
                 </AlertDescription>
