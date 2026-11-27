@@ -18,7 +18,7 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Loader2, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle, Badge, Button, Card, Progress } from '@arcediano/ux-library';
 import { resizeLabelImage } from '@/lib/ai-assist/resize-label-image';
-import { AiAssistError, createAssistedProduct } from '@/lib/api/ai-assist';
+import { AiAssistError, createAssistedProduct, getAssistedProductStatus } from '@/lib/api/ai-assist';
 import {
   QUESTION_STEP_IDS,
   WIZARD_STEP_IDS,
@@ -54,6 +54,25 @@ const PROGRESS_MESSAGES = [
   'Preparando tu borrador…',
 ];
 const PROGRESS_INTERVAL_MS = 7000;
+/** Si la respuesta se pierde (conexión móvil), se consulta el estado del intento antes de dar el error por bueno. */
+const RECOVERY_POLL_MS = 5000;
+const RECOVERY_ATTEMPTS = 14;
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const newRequestId = () =>
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+/** Errores en los que el backend puede haber terminado aunque el navegador no lo sepa. */
+const isLostResponse = (error: unknown) =>
+  error instanceof AiAssistError &&
+  (error.status === 0 ||
+    error.status === 408 ||
+    error.status === 502 ||
+    error.status === 504 ||
+    error.code === 'AI_REQUEST_IN_PROGRESS');
 
 function friendlyError(error: unknown): string {
   if (error instanceof AiAssistError) {
@@ -71,7 +90,7 @@ function friendlyError(error: unknown): string {
     }
     // Sin respuesta a tiempo: el backend puede haber terminado igualmente, así que se avisa antes de reintentar.
     if (error.status === 0 || error.status === 408 || error.status === 504) {
-      return 'Está tardando más de lo normal. Antes de reintentarlo, mira en «Mis productos»: si ya aparece tu borrador, no hace falta repetirlo.';
+      return 'No hemos podido confirmar que tu producto se creara. Puedes reintentarlo: si ya estaba creado no se duplicará ni se cobrará dos veces. También puedes mirar en «Mis productos».';
     }
     return error.message;
   }
@@ -87,6 +106,9 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
+  const [recovering, setRecovering] = useState(false);
+  /** Un identificador por intento: se conserva entre reintentos para no crear ni cobrar dos veces. */
+  const requestIdRef = useRef<string | null>(null);
   const frameRef = useRef<HTMLDivElement>(null);
 
   const remainingCredits = quota ? Math.max(0, quota.total - quota.used) : null;
@@ -131,6 +153,28 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
     if (stepIndex > 0) goTo(WIZARD_STEP_IDS[stepIndex - 1]);
   };
 
+  /** La respuesta se perdió: el producto puede estar ya creado. Se consulta su estado hasta confirmarlo. */
+  const recoverLostResponse = async (requestId: string, original: unknown) => {
+    setRecovering(true);
+    try {
+      for (let attempt = 0; attempt < RECOVERY_ATTEMPTS; attempt += 1) {
+        await wait(RECOVERY_POLL_MS);
+        try {
+          const status = await getAssistedProductStatus(requestId);
+          if (status.status === 'completed' && status.productId) {
+            return { productId: status.productId, charged: true as const, nutritionSource: status.nutritionSource ?? null };
+          }
+          if (status.status === 'failed' || status.status === 'unknown') break;
+        } catch {
+          // Sin conexión todavía: se sigue intentando durante la ventana de recuperación.
+        }
+      }
+      throw original;
+    } finally {
+      setRecovering(false);
+    }
+  };
+
   const handleSubmit = async () => {
     const invalid = firstInvalidStep(validationInput);
     if (invalid) {
@@ -149,14 +193,24 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
       const [product, nutrition, ingredients, conservation] = await Promise.all(
         (['product', 'nutrition', 'ingredients', 'conservation'] as const).map(resize),
       );
-      const result = await createAssistedProduct(
-        buildAssistedProductInput(text, {
-          product: product as NonNullable<typeof product>,
-          nutrition,
-          ingredients,
-          conservation,
-        }),
-      );
+      requestIdRef.current ??= newRequestId();
+      const requestId = requestIdRef.current;
+      let result;
+      try {
+        result = await createAssistedProduct({
+          ...buildAssistedProductInput(text, {
+            product: product as NonNullable<typeof product>,
+            nutrition,
+            ingredients,
+            conservation,
+          }),
+          clientRequestId: requestId,
+        });
+      } catch (error) {
+        if (!isLostResponse(error)) throw error;
+        result = await recoverLostResponse(requestId, error);
+      }
+      requestIdRef.current = null;
       clearDraft();
       setIsRedirecting(true);
       // Siempre se informa de dónde salió la nutrición (label / usda / none) para que la ficha lo explique.
@@ -180,10 +234,10 @@ export function AiProductWizard({ quota, onManual, onRecharge }: AiProductWizard
         <Card variant="elevated" className="flex flex-col items-center gap-5 p-8 text-center sm:p-14" aria-busy="true">
           <Loader2 className="h-9 w-9 animate-spin text-origen-bosque" aria-hidden="true" />
           <h2 className="text-lg font-semibold text-origen-bosque">
-            {isRedirecting ? 'Preparando tu ficha…' : 'Origen Assist está creando tu producto'}
+            {isRedirecting ? 'Preparando tu ficha…' : recovering ? 'Comprobando que tu producto se haya creado' : 'Origen Assist está creando tu producto'}
           </h2>
           <p role="status" aria-live="polite" className="text-sm text-text-subtle">
-            {isRedirecting ? 'Te llevamos a revisarla.' : PROGRESS_MESSAGES[messageIndex]}
+            {isRedirecting ? 'Te llevamos a revisarla.' : recovering ? 'Se ha cortado la conexión, pero tu producto puede estar ya creado. No cierres esta página.' : PROGRESS_MESSAGES[messageIndex]}
           </p>
           {!isRedirecting && (
             <p className="text-xs text-text-subtle">Puede tardar hasta un minuto y medio. No cierres esta página.</p>

@@ -16,6 +16,7 @@ import type {
 } from '@/lib/ai-assist/ai-credits';
 import type {
   AssistedProductResponse,
+  AssistedProductStatus,
   CreateAssistedProductInput,
 } from '@/lib/ai-assist/assisted-product';
 import type {
@@ -39,7 +40,8 @@ export type AiAssistErrorCode =
   | 'AI_LABEL_UNREADABLE'
   | 'AI_TEXT_UNUSABLE'
   | 'AI_DRAFT_UNUSABLE'
-  | 'AI_DRAFT_NO_CATEGORIES';
+  | 'AI_DRAFT_NO_CATEGORIES'
+  | 'AI_REQUEST_IN_PROGRESS';
 
 /** Error de la API con el código estable del backend (mensaje ya en español). */
 export class AiAssistError extends Error {
@@ -88,6 +90,18 @@ export async function createAssistedProduct(
       input,
       { timeoutMs: ASSISTED_PRODUCT_TIMEOUT_MS },
     );
+  } catch (error) {
+    throw toAiAssistError(error);
+  }
+}
+
+/** Estado de un intento de creación por su identificador (el producto puede existir aunque la respuesta se perdiera). */
+export async function getAssistedProductStatus(clientRequestId: string): Promise<AssistedProductStatus> {
+  try {
+    return await gatewayClient.get<AssistedProductStatus>('/ai-assist/assisted-product/status', {
+      params: { clientRequestId },
+      fetchOptions: { cache: 'no-store' },
+    });
   } catch (error) {
     throw toAiAssistError(error);
   }
