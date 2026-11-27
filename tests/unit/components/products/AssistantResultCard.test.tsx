@@ -26,6 +26,18 @@ describe('buildResultItems', () => {
   });
 });
 
+describe('temporada sugerida', () => {
+  it('si el producto es de temporada lo explica con los meses en texto', () => {
+    const items = buildResultItems({ ...(base as object), isSeasonal: true, seasonMonths: [8, 6, 7] } as never, 'usda');
+    const season = items.find((i) => i.id === 'season');
+    expect(season?.detail).toMatch(/junio, julio y agosto/);
+    expect(season?.action?.step).toBe('production');
+  });
+  it('si no lo es, no añade la fila', () => {
+    expect(buildResultItems(base, 'usda').some((i) => i.id === 'season')).toBe(false);
+  });
+});
+
 describe('AssistantResultCard', () => {
   it('no muestra «Añadir precio ahora» cuando el precio ya existe', () => {
     render(<AssistantResultCard product={base} nutrition="usda" onLater={vi.fn()} />);

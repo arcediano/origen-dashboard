@@ -13,14 +13,23 @@ import type { Product } from '@/types/product';
 
 export type AssistantNutritionSource = 'label' | 'usda' | 'none' | null;
 
-type ResultProduct = Pick<Product, 'id' | 'basePrice' | 'hasVariants' | 'variants' | 'netContent' | 'netContentUnit'>;
+type ResultProduct = Pick<Product, 'id' | 'basePrice' | 'hasVariants' | 'variants' | 'netContent' | 'netContentUnit'> &
+  Partial<Pick<Product, 'isSeasonal' | 'seasonMonths'>>;
 
 export interface ResultItem {
-  id: 'texts' | 'price' | 'format' | 'nutrition';
+  id: 'texts' | 'price' | 'format' | 'season' | 'nutrition';
   done: boolean;
   title: string;
   detail: string;
-  action?: { label: string; step: 'basic' | 'pricing' | 'nutritional' };
+  action?: { label: string; step: 'basic' | 'pricing' | 'nutritional' | 'production' };
+}
+
+const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+/** «junio, julio y agosto» a partir de los números de mes (1-12). */
+export function formatMonths(months: number[]): string {
+  const names = [...new Set(months)].filter((m) => m >= 1 && m <= 12).sort((a, b) => a - b).map((m) => MONTHS[m - 1]);
+  return names.length <= 1 ? names.join('') : `${names.slice(0, -1).join(', ')} y ${names[names.length - 1]}`;
 }
 
 const eur = (v: number) =>
@@ -57,6 +66,17 @@ export function buildResultItems(product: ResultProduct, nutrition: AssistantNut
         : '¿Lo vendes también en otros formatos (250 g, 500 g…)? Añádelos como variantes, cada uno con su precio.',
       action: { label: product.hasVariants ? 'Gestionar formatos' : 'Añadir formatos', step: 'pricing' },
     },
+    ...(product.isSeasonal && (product.seasonMonths?.length ?? 0) > 0
+      ? [
+          {
+            id: 'season' as const,
+            done: true,
+            title: 'Producto de temporada',
+            detail: `La IA sugiere ${formatMonths(product.seasonMonths ?? [])}. Compruébalo: solo se destaca como «de temporada» en esos meses.`,
+            action: { label: 'Revisar meses', step: 'production' as const },
+          },
+        ]
+      : []),
     nutrition === 'none'
       ? { id: 'nutrition', done: false, title: 'Información nutricional', detail: 'No hemos podido rellenarla. Añádela antes de publicar.', action: { label: 'Añadir', step: 'nutritional' } }
       : nutrition === 'usda'
