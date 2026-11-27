@@ -4,6 +4,7 @@
  */
 'use client';
 
+import { AssistantResultCard } from '@/app/dashboard/products/components/AssistantResultCard';
 import { ProductStatusBadge, isHiddenFromStore } from '@/app/dashboard/products/components/ProductStatusBadge';
 import { ListingQualityCard } from '@/app/dashboard/products/components/ListingQualityCard';
 import { getListingQuality } from '@/lib/products/listing-quality';
@@ -939,44 +940,12 @@ export default function ProductoDetallePage() {
             )}
 
             {product.status === 'draft' && fromAssistant && (
-              <Alert
-                variant="warning"
+              <AssistantResultCard
+                product={product}
+                nutrition={nutritionSource}
+                onLater={dismissAssistantBanner}
                 className="mb-4"
-                trailing={
-                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <Link href={`/dashboard/products/${product.id}/edit`}>
-                      <Button variant="primary" size="sm" leftIcon={<Edit className="w-3.5 h-3.5" />}
-                        className="text-xs whitespace-nowrap w-full">
-                        Añadir precio ahora
-                      </Button>
-                    </Link>
-                    <Button variant="outline" size="sm" onClick={dismissAssistantBanner}
-                      className="text-xs whitespace-nowrap">
-                      Revisar más tarde
-                    </Button>
-                  </div>
-                }
-              >
-                <AlertTitle>✅ Producto creado en borrador. Este es el resultado de tu asistente.</AlertTitle>
-                <AlertDescription>
-                  Revisa los textos que ha redactado la IA (descripción, origen y elaboración), corrige lo que no te encaje y añade el precio cuando quieras publicarlo.
-                  {nutritionSource === 'usda' && (
-                    <p className="font-medium mt-1" data-testid="usda-nutrition-note">
-                      Los valores nutricionales son orientativos (por 100 g, de la base de datos pública de USDA), no los de tu etiqueta: revísalos o corrígelos en la pestaña Nutricional antes de publicar.
-                    </p>
-                  )}
-                  {nutritionSource === 'label' && (
-                    <p className="font-medium mt-1" data-testid="label-nutrition-note">
-                      Los valores nutricionales se han leído de la foto de tu etiqueta: compruébalos en la pestaña Nutricional.
-                    </p>
-                  )}
-                  {nutritionSource === 'none' && (
-                    <p className="font-medium mt-1" data-testid="no-nutrition-note">
-                      No hemos podido rellenar la información nutricional (no había etiqueta legible ni un alimento equivalente en la base de datos). Añádela tú en la pestaña Nutricional antes de publicar.
-                    </p>
-                  )}
-                </AlertDescription>
-              </Alert>
+              />
             )}
 
             {product.status === 'draft' && !fromAssistant && !aiFeedback && pendingBlockers.length === 0 && (
@@ -999,11 +968,13 @@ export default function ProductoDetallePage() {
               </Alert>
             )}
 
+            {!(product.status === 'draft' && fromAssistant) && (
             <ListingQualityCard
               quality={getListingQuality(product)}
               editHref={`/dashboard/products/${product.id}/edit`}
               className="mb-4"
             />
+            )}
 
             <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6">
 
