@@ -216,6 +216,11 @@ export interface ApiProduct {
   subcategoryName?: string;
   basePrice: number;
   comparePrice?: number;
+  saleMode?: 'UNIT' | 'WEIGHT';
+  saleModeLocked?: boolean;
+  pricePerKgCents?: number;
+  minWeightGrams?: number;
+  weightIncrementGrams?: number;
   sku: string;
   barcode?: string;
   // Inventario
