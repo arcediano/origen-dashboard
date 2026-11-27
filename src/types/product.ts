@@ -397,6 +397,10 @@ export interface Product {
   gallery: ProductImage[];
   basePrice: number;
   comparePrice?: number;
+  saleMode?: 'UNIT' | 'WEIGHT';
+  pricePerKgCents?: number;
+  minWeightGrams?: number;
+  weightIncrementGrams?: number;
   priceTiers: PriceTier[];
   flashDeal?: FlashDealSummary;
   /** Decisión explícita del productor: precio/stock/peso/SKU únicos (false) o por variante (true). */
@@ -467,6 +471,11 @@ export interface ProductFormData {
   gallery: ProductImage[];
   basePrice?: number;
   comparePrice?: number;
+  saleMode?: 'UNIT' | 'WEIGHT';
+  saleModeLocked?: boolean;
+  pricePerKgCents?: number;
+  minWeightGrams?: number;
+  weightIncrementGrams?: number;
   /** Decisión explícita del productor, elegida al principio del paso unificado de precios/variantes/inventario (petición del humano, 2026-10-09): precio/stock/peso/SKU únicos (false) o por variante (true). */
   hasVariants: boolean;
   sku: string;
@@ -583,6 +592,11 @@ export const defaultFormData: ProductFormData = {
   gallery: [],
   basePrice: undefined,
   comparePrice: undefined,
+  saleMode: 'UNIT',
+  saleModeLocked: false,
+  pricePerKgCents: undefined,
+  minWeightGrams: undefined,
+  weightIncrementGrams: undefined,
   hasVariants: false,
   sku: '',
   barcode: '',

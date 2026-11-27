@@ -154,6 +154,11 @@ export const productToFormData = (product: Product): ProductFormData => {
   gallery,
   basePrice: product.basePrice,
   comparePrice: product.comparePrice,
+  saleMode: product.saleMode ?? 'UNIT',
+  saleModeLocked: !!product.publishedAt,
+  pricePerKgCents: product.pricePerKgCents,
+  minWeightGrams: product.minWeightGrams,
+  weightIncrementGrams: product.weightIncrementGrams,
   hasVariants: product.hasVariants ?? false,
   // Bug encontrado al revisar esta sección (petición del humano, 2026-10-08):
   // netContent/netContentUnit ("Formato de venta", paso Precios) estaban
@@ -221,6 +226,10 @@ export const formDataToProduct = (formData: ProductFormData): Partial<Product> =
     gallery: formData.gallery,
     basePrice: formData.basePrice,
     comparePrice: formData.comparePrice,
+    saleMode: formData.saleMode,
+    pricePerKgCents: formData.pricePerKgCents,
+    minWeightGrams: formData.minWeightGrams,
+    weightIncrementGrams: formData.weightIncrementGrams,
     hasVariants: formData.hasVariants,
     // Mismo bug que en productToFormData (ver nota ahí): sin esto, el
     // guardado ordinario de un producto existente nunca persistía cambios
@@ -609,7 +618,11 @@ export function useProductForm(productId?: string) {
     // stock siempre tiene defaults válidos, 0/5, nunca bloquea el paso).
     const pricingComplete = formData.hasVariants
       ? savedVariantsCount > 0
-      : !!(formData.basePrice && formData.basePrice >= MIN_PRODUCT_PRICE_EUROS);
+      : formData.saleMode === 'WEIGHT'
+        ? (formData.pricePerKgCents ?? 0) >= MIN_PRODUCT_PRICE_EUROS * 100 &&
+          (formData.minWeightGrams ?? 0) > 0 &&
+          (formData.weightIncrementGrams ?? 0) > 0
+        : !!(formData.basePrice && formData.basePrice >= MIN_PRODUCT_PRICE_EUROS);
 
     setCompletedTabs({
       basic: !!(formData.name && formData.categoryId),
@@ -672,8 +685,17 @@ export function useProductForm(productId?: string) {
           if (savedVariantsCount === 0)
             errors.push('Al menos una variante con precio y stock');
         } else {
-          if (!formData.basePrice || formData.basePrice < MIN_PRODUCT_PRICE_EUROS) {
-            errors.push(`Precio de venta (mínimo ${MIN_PRODUCT_PRICE_EUROS.toFixed(2)} €)`);
+          const validPrice = formData.saleMode === 'WEIGHT'
+            ? (formData.pricePerKgCents ?? 0) >= MIN_PRODUCT_PRICE_EUROS * 100
+            : !!formData.basePrice && formData.basePrice >= MIN_PRODUCT_PRICE_EUROS;
+          if (!validPrice) {
+            errors.push(`${formData.saleMode === 'WEIGHT' ? 'Precio por kg' : 'Precio de venta'} (mínimo ${MIN_PRODUCT_PRICE_EUROS.toFixed(2)} €)`);
+          }
+          if (formData.saleMode === 'WEIGHT') {
+            if (!formData.minWeightGrams || formData.minWeightGrams <= 0)
+              errors.push('Cantidad mínima de compra en gramos');
+            if (!formData.weightIncrementGrams || formData.weightIncrementGrams <= 0)
+              errors.push('Incremento de cantidad en gramos');
           }
           // Stock > 0 pasó a obligatorio para publicar (petición del humano,
           // 2026-10-26) -- mismo criterio que el backend (MODERATION_CRITERIA,

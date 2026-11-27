@@ -272,7 +272,11 @@ export function OrdersTable({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-origen-bosque truncate">{item.productName}</p>
-                <p className="text-xs text-text-subtle">{item.quantity} x {item.unitPrice.toFixed(2)}€</p>
+                <p className="text-xs text-text-subtle">
+                  {item.saleMode === 'WEIGHT'
+                    ? `${item.quantity} g × ${((item.pricePerKgCents ?? Math.round(item.unitPrice * 100)) / 100).toFixed(2)}€/kg`
+                    : `${item.quantity} x ${item.unitPrice.toFixed(2)}€`}
+                </p>
               </div>
               <p className="text-sm font-bold text-origen-bosque shrink-0">{item.totalPrice.toFixed(2)}€</p>
             </div>
@@ -357,4 +361,3 @@ export function OrdersTable({
     />
   );
 }
-

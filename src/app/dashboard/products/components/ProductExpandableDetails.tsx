@@ -28,6 +28,7 @@ import {
 } from 'recharts';
 import { cn } from '@/lib/utils';
 import { type Product } from '@/types/product';
+import { formatProductQuantity } from '@/lib/products/quantity-format';
 import { OrganicScoreBadge } from '@/components/shared/products/OrganicScoreBadge';
 import { fetchProductViewChartById, fetchProductViewCount, type ProductViewChartPoint } from '@/lib/api/products';
 
@@ -64,11 +65,12 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
     });
   }, [product.id]);
 
-  const conversionRate = viewCount !== null && viewCount > 0 && product.sales && product.sales > 0
+  const isWeightSale = product.saleMode === 'WEIGHT';
+  const conversionRate = !isWeightSale && viewCount !== null && viewCount > 0 && product.sales && product.sales > 0
     ? ((product.sales / viewCount) * 100).toFixed(1)
     : null;
 
-  const revenuePerSale = product.revenue && product.revenue > 0 && product.sales && product.sales > 0
+  const revenuePerSale = !isWeightSale && product.revenue && product.revenue > 0 && product.sales && product.sales > 0
     ? (product.revenue / product.sales).toFixed(2)
     : null;
 
@@ -124,10 +126,14 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
         <div className="p-4 bg-linear-to-br from-origen-pradera/5 to-transparent rounded-xl border border-origen-pradera/10">
           <div className="flex items-center gap-2 mb-2">
             <ShoppingBag className="w-5 h-5 text-hoja-tinta" />
-            <span className="text-xs font-medium text-muted-foreground">Ventas</span>
+            <span className="text-xs font-medium text-muted-foreground">{isWeightSale ? 'Peso vendido' : 'Ventas'}</span>
           </div>
-          <p className="text-2xl font-bold text-origen-bosque">{product.sales || 0}</p>
-          <p className="mt-2 text-xs text-muted-foreground">Ventas confirmadas acumuladas</p>
+          <p className="text-2xl font-bold text-origen-bosque">
+            {isWeightSale ? formatProductQuantity(product.sales || 0, product.saleMode) : product.sales || 0}
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {isWeightSale ? 'Cantidad acumulada por peso' : 'Ventas confirmadas acumuladas'}
+          </p>
         </div>
 
         {/* Ingresos */}
@@ -158,8 +164,12 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
             <TrendingUp className="w-5 h-5 text-origen-hoja" />
             <span className="text-xs font-medium text-muted-foreground">Conversión</span>
           </div>
-          <p className="text-2xl font-bold text-origen-bosque">{conversionRate || 0}%</p>
-          <p className="mt-2 text-xs text-muted-foreground">Calculada sobre ventas y vistas reales</p>
+          <p className="text-2xl font-bold text-origen-bosque">
+            {isWeightSale ? '—' : `${conversionRate || 0}%`}
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {isWeightSale ? 'No disponible para venta por peso' : 'Calculada sobre ventas y vistas reales'}
+          </p>
         </div>
       </div>
 
@@ -252,12 +262,16 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
           <div className="space-y-3">
             <div className="flex justify-between items-center pb-2 border-b border-border/50">
               <span className="text-sm text-muted-foreground">Precio base</span>
-              <span className="text-base font-semibold text-origen-bosque">{product.basePrice.toFixed(2)}€</span>
+              <span className="text-base font-semibold text-origen-bosque">
+                {product.basePrice.toFixed(2)}€{isWeightSale ? '/kg' : ''}
+              </span>
             </div>
             {product.comparePrice && product.comparePrice > product.basePrice && (
               <div className="flex justify-between items-center pb-2 border-b border-border/50">
                 <span className="text-sm text-muted-foreground">PVP referencia</span>
-                <span className="text-base font-medium text-text-subtle line-through">{product.comparePrice.toFixed(2)}€</span>
+                <span className="text-base font-medium text-text-subtle line-through">
+                  {product.comparePrice.toFixed(2)}€{isWeightSale ? '/kg' : ''}
+                </span>
               </div>
             )}
             {discount && (
@@ -304,13 +318,17 @@ export function ProductExpandableDetails({ product, className }: ProductExpandab
                   product.stock === 0 ? 'bg-feedback-danger' :
                   product.lowStockThreshold && product.stock <= product.lowStockThreshold ? 'bg-feedback-warning' : 'bg-feedback-success'
                 )} />
-                <span className="text-base font-semibold text-origen-bosque">{product.stock} uds</span>
+                <span className="text-base font-semibold text-origen-bosque">
+                  {formatProductQuantity(product.stock, product.saleMode)}
+                </span>
               </div>
             </div>
             {product.lowStockThreshold && (
               <div className="flex justify-between items-center pb-2 border-b border-border/50">
                 <span className="text-sm text-muted-foreground">Umbral bajo</span>
-                <span className="text-base font-medium text-muted-foreground">{product.lowStockThreshold} uds</span>
+                <span className="text-base font-medium text-muted-foreground">
+                  {formatProductQuantity(product.lowStockThreshold, product.saleMode)}
+                </span>
               </div>
             )}
             <div className="flex justify-between items-center">

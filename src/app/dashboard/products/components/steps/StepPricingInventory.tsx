@@ -61,7 +61,10 @@ export function StepPricingInventory({
 
   const hasVariants = !!formData?.hasVariants;
   const basePrice = formData.basePrice || 0;
-  const hasBasePrice = basePrice >= MIN_PRODUCT_PRICE_EUROS;
+  const isWeightSale = formData.saleMode === 'WEIGHT' && !hasVariants;
+  const weightPrice = (formData.pricePerKgCents ?? 0) / 100;
+  const shownPrice = isWeightSale ? weightPrice : basePrice;
+  const hasBasePrice = shownPrice >= MIN_PRODUCT_PRICE_EUROS;
   const isStepComplete = completed ?? hasBasePrice;
 
   const volume = formData?.dimensions?.length && formData?.dimensions?.width && formData?.dimensions?.height
@@ -139,7 +142,10 @@ export function StepPricingInventory({
             type="button"
             role="radio"
             aria-checked={hasVariants}
-            onClick={() => onInputChange('hasVariants', true)}
+            onClick={() => {
+              onInputChange('saleMode', 'UNIT');
+              onInputChange('hasVariants', true);
+            }}
             className={cn(
               'flex items-start gap-3 p-4 rounded-xl border text-left transition-all min-h-[44px]',
               hasVariants
@@ -163,24 +169,67 @@ export function StepPricingInventory({
         </div>
       ) : (
         <>
+          <div className="mb-6">
+            <p className="mb-2 text-sm font-medium text-foreground">¿Cómo se vende este producto?</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Modo de venta">
+              {([
+                { value: 'UNIT', title: 'Por unidad', description: 'Un precio y una cantidad entera de unidades.' },
+                { value: 'WEIGHT', title: 'Por peso', description: 'Precio por kg y cantidades seleccionables en gramos.' },
+              ] as const).map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={(formData.saleMode ?? 'UNIT') === option.value}
+                  disabled={!!formData.saleModeLocked}
+                  onClick={() => onInputChange('saleMode', option.value)}
+                  className={cn(
+                    'min-h-11 rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+                    (formData.saleMode ?? 'UNIT') === option.value
+                      ? 'border-origen-bosque bg-origen-pastel/30 ring-1 ring-origen-bosque'
+                      : 'border-border bg-surface-alt hover:border-origen-pradera/40',
+                  )}
+                >
+                  <span className="block text-sm font-semibold text-origen-bosque">{option.title}</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">{option.description}</span>
+                </button>
+              ))}
+            </div>
+            {formData.saleModeLocked && (
+              <p className="mt-2 text-xs text-text-subtle">
+                El modo de venta de un producto publicado no se puede cambiar desde la edición normal.
+              </p>
+            )}
+          </div>
+
           {/* Precio */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-hoja-tinta" />
                 <span className="text-sm font-medium text-foreground">
-                  Precio de venta
+                  {isWeightSale ? 'Precio por kg' : 'Precio de venta'}
                   <span className="text-feedback-danger ml-1">*</span>
                 </span>
                 <Tooltip
                   content="Precio de venta al público"
-                  detailed="Es el precio que verá el cliente. Todos los descuentos por cantidad se calculan sobre este valor."
+                  detailed={isWeightSale
+                    ? 'Precio por kilogramo. Se cobra el peso seleccionado y el backend redondea el total de cada línea al céntimo.'
+                    : 'Es el precio que verá el cliente. Los descuentos por cantidad se calculan sobre este valor.'}
                   size="sm"
                 />
               </div>
               <CurrencyInput
-                value={basePrice}
-                onChange={(value) => onInputChange('basePrice', value)}
+                value={shownPrice}
+                onChange={(value) => {
+                  if (isWeightSale) {
+                    const cents = Math.round(value * 100);
+                    onInputChange('pricePerKgCents', cents);
+                    onInputChange('basePrice', cents / 100);
+                  } else {
+                    onInputChange('basePrice', value);
+                  }
+                }}
                 onBlur={() => setPriceTouched(true)}
                 min={MIN_PRODUCT_PRICE_EUROS}
                 inputSize="lg"
@@ -188,8 +237,10 @@ export function StepPricingInventory({
                   'h-12 w-full rounded-xl',
                   priceTouched && !hasBasePrice && 'border-feedback-danger',
                 )}
-                placeholder="Ej: 24,50"
-                error={priceTouched && !hasBasePrice ? `El precio de venta es obligatorio (mínimo ${MIN_PRODUCT_PRICE_EUROS.toFixed(2)} €)` : undefined}
+                placeholder={isWeightSale ? 'Ej: 12,99 por kg' : 'Ej: 24,50'}
+                error={priceTouched && !hasBasePrice
+                  ? `${isWeightSale ? 'El precio por kg' : 'El precio de venta'} es obligatorio (mínimo ${MIN_PRODUCT_PRICE_EUROS.toFixed(2)} €)`
+                  : undefined}
               />
             </div>
 
@@ -197,7 +248,7 @@ export function StepPricingInventory({
               <div className="flex items-center gap-2">
                 <Tag className="h-5 w-5 text-hoja-tinta" />
                 <span className="text-sm font-medium text-foreground">
-                  Precio tachado
+                  {isWeightSale ? 'Precio tachado por kg' : 'Precio tachado'}
                   <span className="text-xs font-normal text-muted-foreground ml-1">(opcional)</span>
                 </span>
                 <Tooltip
@@ -227,12 +278,39 @@ export function StepPricingInventory({
             />
           </div>
 
-          {formData.comparePrice && formData.comparePrice > basePrice && (
+          {isWeightSale && (
+            <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+              <Input
+                label="Cantidad mínima (g)"
+                required
+                type="number"
+                min={1}
+                step={1}
+                value={formData.minWeightGrams ?? ''}
+                onChange={(event) => onInputChange('minWeightGrams', Number.parseInt(event.target.value, 10) || undefined)}
+                inputSize="lg"
+                helperText="La primera cantidad que puede comprar el cliente."
+              />
+              <Input
+                label="Incremento (g)"
+                required
+                type="number"
+                min={1}
+                step={1}
+                value={formData.weightIncrementGrams ?? ''}
+                onChange={(event) => onInputChange('weightIncrementGrams', Number.parseInt(event.target.value, 10) || undefined)}
+                inputSize="lg"
+                helperText="Cada opción añade este peso a la cantidad mínima."
+              />
+            </div>
+          )}
+
+          {formData.comparePrice && formData.comparePrice > shownPrice && (
             <div className="mb-8 p-4 bg-origen-pastel/30 rounded-xl border border-origen-pradera/20">
               <div className="flex items-center gap-2">
                 <Percent className="w-5 h-5 text-origen-hoja" />
                 <span className="text-sm font-medium text-origen-hoja">
-                  El cliente ahorra un {Math.round(((formData.comparePrice - basePrice) / formData.comparePrice) * 100)}% respecto al precio tachado
+                  El cliente ahorra un {Math.round(((formData.comparePrice - shownPrice) / formData.comparePrice) * 100)}% respecto al precio tachado
                 </span>
               </div>
             </div>
@@ -276,18 +354,22 @@ export function StepPricingInventory({
           {/* Stock */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <Input
-              label="Stock actual"
+              label={isWeightSale ? 'Stock actual (g)' : 'Stock actual'}
               required
-              tooltip="Número de unidades disponibles para la venta. Se actualizará automáticamente con los pedidos."
+              tooltip={isWeightSale
+                ? 'Stock disponible en gramos; se actualizará automáticamente con los pedidos.'
+                : 'Número de unidades disponibles para la venta. Se actualizará automáticamente con los pedidos.'}
               type="number"
-              value={formData?.stock || 0}
+              value={formData?.stock ?? 0}
               onChange={(e) => onInputChange('stock', parseInt(e.target.value) || 0)}
               min={0}
               inputSize="lg"
             />
             <Input
-              label="Umbral de stock bajo"
-              tooltip="Recibirás una notificación cuando el stock esté por debajo de este número. Recomendado: 5-10 unidades."
+              label={isWeightSale ? 'Umbral de stock bajo (g)' : 'Umbral de stock bajo'}
+              tooltip={isWeightSale
+                ? 'Recibirás una notificación cuando queden menos gramos que este umbral.'
+                : 'Recibirás una notificación cuando el stock esté por debajo de este número. Recomendado: 5-10 unidades.'}
               type="number"
               value={formData?.lowStockThreshold || 5}
               onChange={(e) => onInputChange('lowStockThreshold', parseInt(e.target.value) || 5)}
