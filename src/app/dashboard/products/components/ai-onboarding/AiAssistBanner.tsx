@@ -56,32 +56,45 @@ export function AiAssistBanner({ quota, onStart, onRecharge, className }: AiAssi
   }
 
   if (collapsed) {
+    // Versión plegada: sigue siendo un reclamo, no un aviso gris. Bloque de marca (bosque) con
+    // el beneficio por delante y un único botón claro; el texto va en blanco sobre el color de marca.
     return (
       <section
         data-testid="ai-assist-banner-compact"
         aria-label="Crear el producto con ayuda de la IA"
         className={cn(
-          'flex flex-col gap-2 rounded-2xl border border-origen-pradera/30 bg-origen-pradera/10 p-3 sm:flex-row sm:items-center sm:justify-between',
+          'flex flex-col gap-4 rounded-[28px] bg-origen-bosque p-5 text-white shadow-origen sm:flex-row sm:items-center sm:justify-between sm:p-6',
           className,
         )}
       >
-        <p className="flex items-center gap-2 text-sm font-medium text-origen-bosque">
-          <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />
-          ¿Prefieres que la IA te ayude a crear el producto?
-        </p>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="ghost" size="sm" onClick={() => setCollapsedPersisted(false)}>
-            Ver cómo funciona
-          </Button>
+        <div className="flex min-w-0 items-start gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-lg font-semibold leading-snug sm:text-xl">Vende más con una ficha que enamora</p>
+            <p className="mt-1 text-sm text-white/80">
+              La IA mejora tu foto y redacta tu descripción en unos 5 minutos. Tú revisas antes de publicar.
+            </p>
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-col gap-2 sm:items-end">
           <Button
             type="button"
-            variant="primary"
-            size="sm"
+            variant="outline"
+            size="lg"
             onClick={onStart}
             leftIcon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
           >
             Crear con IA
           </Button>
+          <button
+            type="button"
+            onClick={() => setCollapsedPersisted(false)}
+            className="min-h-11 text-sm font-medium text-white/85 underline underline-offset-4 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          >
+            Ver cómo funciona
+          </button>
         </div>
       </section>
     );
