@@ -4,6 +4,8 @@
  */
 'use client';
 
+import { ListingQualityCard } from '@/app/dashboard/products/components/ListingQualityCard';
+import { getListingQuality } from '@/lib/products/listing-quality';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
@@ -994,6 +996,12 @@ export default function ProductoDetallePage() {
                 </AlertDescription>
               </Alert>
             )}
+
+            <ListingQualityCard
+              quality={getListingQuality(product)}
+              editHref={`/dashboard/products/${product.id}/edit`}
+              className="mb-4"
+            />
 
             <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6">
 
