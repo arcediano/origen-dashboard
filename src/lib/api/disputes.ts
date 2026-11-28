@@ -34,6 +34,8 @@ export interface DisputeMessage {
   senderId: string;
   content: string;
   attachments: string[];
+  /** ALL = hilo común; PRODUCER = mensaje privado del equipo de Origen para ti. */
+  audience?: 'ALL' | 'BUYER' | 'PRODUCER' | 'INTERNAL';
   createdAt: string;
 }
 
