@@ -999,7 +999,7 @@ export async function fetchSellerCommissionCreditNotes(params?: {
 
 // ─── Deudas y contracargos del productor (libro por pedido) ──────────────────
 
-export type SellerDebtKind = 'REVERSAL_FAILED' | 'CHARGEBACK_LOST' | 'MANUAL';
+export type SellerDebtKind = 'REVERSAL_FAILED' | 'CHARGEBACK_LOST' | 'MANUAL' | 'STRIPE_FEE';
 export type SellerDebtStatus = 'PENDING_REVIEW' | 'OPEN' | 'SETTLED' | 'WAIVED';
 
 export interface SellerDebtEntry {

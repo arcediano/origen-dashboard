@@ -26,6 +26,7 @@ const day = (iso: string) => {
 const KIND_LABEL: Record<SellerDebtEntry['kind'], string> = {
   CHARGEBACK_LOST: 'Contracargo perdido',
   REVERSAL_FAILED: 'Reembolso sin saldo en tu cuenta',
+  STRIPE_FEE: 'Tasa de Stripe de un reembolso por un fallo en tu pedido',
   MANUAL: 'Deuda anterior',
 };
 
