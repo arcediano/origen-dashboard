@@ -39,7 +39,7 @@ describe('DisputeDetail', () => {
     expect(await screen.findByText('Esperando tu respuesta')).toBeInTheDocument();
     expect(screen.getByText(/Producto dañado/)).toBeInTheDocument();
     expect(screen.getByText('Equipo de Origen')).toBeInTheDocument();
-    expect(screen.getByText('Tú')).toBeInTheDocument();
+    expect(screen.getByText('Tú (productor)')).toBeInTheDocument();
     expect(screen.queryByText('AWAITING_PRODUCER')).toBeNull();
   });
 
@@ -85,7 +85,7 @@ describe('DisputeDetail', () => {
     expect(roles).toEqual(['BUYER', 'PRODUCER', 'ADMIN']);
   });
 
-  it('los adjuntos se muestran como enlaces de descarga con el nombre del archivo', async () => {
+  it('los adjuntos se muestran como miniatura de la foto, no como un nombre de fichero', async () => {
     const withFile = {
       ...dispute,
       messages: [
@@ -98,9 +98,9 @@ describe('DisputeDetail', () => {
       http.get(`${BASE}/disputes/d1/messages`, () => HttpResponse.json(withFile.messages)),
     );
     render(<DisputeDetail dispute={withFile as never} />);
-    const link = await screen.findByRole('link', { name: /foto caja\.jpg/ });
+    const link = await screen.findByRole('link', { name: 'Foto adjunta 1' });
     expect(link).toHaveAttribute('href', 'https://cdn.origen.test/disputes/foto%20caja.jpg?sig=abc');
-    expect(link).toHaveAttribute('download');
+    expect(screen.getByAltText('Foto adjunta 1')).toHaveAttribute('src', 'https://cdn.origen.test/disputes/foto%20caja.jpg?sig=abc');
     // sin tarjeta: el detalle va sobre la superficie de la página
     expect(screen.getByTestId('order-dispute').className).not.toMatch(/shadow|rounded-\[28px\]/);
   });
@@ -146,5 +146,16 @@ describe('OrderDisputeLink — detalle de pedido', () => {
     expect(link).toHaveTextContent('Esperando tu respuesta');
     expect(screen.queryByTestId('dispute-thread')).toBeNull();
     expect(screen.queryByLabelText('Respuesta a la disputa')).toBeNull();
+  });
+
+  it('marca los mensajes que el equipo de Origen dirige solo al productor', async () => {
+    const msgs = [
+      { ...dispute.messages[0], id: 'p1', content: 'Solo para ti', audience: 'PRODUCER' },
+      { ...dispute.messages[0], id: 'p2', content: 'Para todos', audience: 'ALL' },
+    ];
+    server.use(http.get(`${BASE}/disputes/d1/messages`, () => HttpResponse.json(msgs)));
+    render(<DisputeDetail dispute={{ ...dispute, messages: msgs } as never} />);
+    await screen.findByText('Solo para ti');
+    expect(screen.getAllByTestId('private-message')).toHaveLength(1);
   });
 });

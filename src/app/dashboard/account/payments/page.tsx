@@ -25,6 +25,7 @@ import { useStripeConnectPolling } from '@/lib/stripe/use-stripe-connect-polling
 import { StripeConnectOnboarding } from '@/components/features/stripe/stripe-connect-onboarding';
 import { PayoutHistorySection } from './PayoutHistorySection';
 import { DebtsSection } from './DebtsSection';
+import { DebtAlert } from './DebtAlert';
 
 interface StripeStatusResponse {
   success: boolean;
@@ -300,16 +301,7 @@ export default function PaymentsPage() {
           onBack={() => router.push('/dashboard/account')}
         />
 
-        {hasDebt && !isLoading && (
-          <Alert variant="error" className="mb-4 sm:mb-6">
-            <AlertDescription>
-              Tienes un saldo negativo de <strong>{(debtAmountCents / 100).toFixed(2)}€</strong> pendiente
-              de saldar: una devolución reciente no se pudo compensar automáticamente en Stripe. Se irá
-              descontando de tus próximas transferencias hasta quedar a cero — no necesitas hacer nada,
-              solo te avisamos para que no te sorprenda un cobro más bajo de lo esperado.
-            </AlertDescription>
-          </Alert>
-        )}
+        {hasDebt && !isLoading && <DebtAlert debtAmountCents={debtAmountCents} />}
 
         {loadError && !isLoading ? (
           <PageError
