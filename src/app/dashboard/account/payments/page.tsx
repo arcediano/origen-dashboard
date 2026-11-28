@@ -492,7 +492,7 @@ export default function PaymentsPage() {
                             {payout.disputeDeadlineAt && (
                               <p className="mt-0.5 text-[11px] text-muted-foreground">
                                 {new Date(payout.disputeDeadlineAt) > new Date()
-                                  ? `Disputa abierta al comprador hasta el ${format(new Date(payout.disputeDeadlineAt), 'dd MMM', { locale: es })}`
+                                  ? `El comprador puede abrir disputa hasta el ${format(new Date(payout.disputeDeadlineAt), 'dd MMM', { locale: es })}`
                                   : 'Plazo de disputa cerrado'}
                               </p>
                             )}
