@@ -79,6 +79,8 @@ function friendlyError(error: unknown): string {
     switch (error.code) {
       case 'AI_PRODUCER_QUOTA_EXCEEDED':
         return 'No te quedan créditos del asistente. Recarga para seguir usándolo, o rellena este producto a mano.';
+      case 'AI_PRODUCER_BUDGET_REACHED':
+        return 'Has alcanzado tu límite mensual de uso de la IA. Se renueva el mes que viene; mientras tanto puedes crear el producto rellenándolo a mano.';
       case 'AI_MONTHLY_CAP_REACHED':
       case 'AI_DISABLED':
       case 'AI_NOT_CONFIGURED':
