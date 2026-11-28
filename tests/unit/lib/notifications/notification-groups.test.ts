@@ -50,9 +50,9 @@ describe('NOTIFICATION_GROUPS — P4/P5 nuevos eventos', () => {
     expect(promotionEvent?.title).toBe('Tu campaña está activa');
   });
 
-  it('debe contener exactamente 32 eventos en total (7 grupos)', () => {
+  it('debe contener exactamente 37 eventos en total (7 grupos)', () => {
     const totalEvents = NOTIFICATION_GROUPS.reduce((sum, g) => sum + g.events.length, 0);
-    expect(totalEvents).toBe(36);
+    expect(totalEvents).toBe(37);
     expect(NOTIFICATION_GROUPS.length).toBe(7);
   });
 
