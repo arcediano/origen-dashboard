@@ -252,6 +252,10 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
 
     basePrice:         formData.basePrice,
     comparePrice:      formData.comparePrice || undefined,
+    saleMode:          formData.saleMode,
+    pricePerKgCents:   formData.pricePerKgCents,
+    minWeightGrams:    formData.minWeightGrams,
+    weightIncrementGrams: formData.weightIncrementGrams,
     hasVariants:       formData.hasVariants,
 
     // El backend genera el SKU si está vacío
@@ -374,7 +378,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
 
   const scalar: Array<keyof Product> = [
     'name', 'fullDescription', 'originRegion', 'originLocality', 'isSeasonal', 'seasonMonths', 'categoryId', 'subcategoryId',
-    'basePrice', 'comparePrice', 'hasVariants', 'sku', 'barcode', 'stock',
+    'basePrice', 'comparePrice', 'saleMode', 'pricePerKgCents', 'minWeightGrams', 'weightIncrementGrams', 'hasVariants', 'sku', 'barcode', 'stock',
     'lowStockThreshold', 'trackInventory', 'allowBackorders',
     'netContent', 'netContentUnit', 'weight', 'weightUnit', 'dimensions', 'shippingClass',
   ];
@@ -781,6 +785,10 @@ export async function duplicateProduct(id: string): Promise<ApiResponse<Product>
       subcategoryId:     original.subcategoryId,
       basePrice:         original.basePrice,
       comparePrice:      original.comparePrice,
+      saleMode:         original.saleMode,
+      pricePerKgCents:  original.pricePerKgCents,
+      minWeightGrams:   original.minWeightGrams,
+      weightIncrementGrams: original.weightIncrementGrams,
       stock:             original.stock,
       lowStockThreshold: original.lowStockThreshold,
       trackInventory:    original.trackInventory,

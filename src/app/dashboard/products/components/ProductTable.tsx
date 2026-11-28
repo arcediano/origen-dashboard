@@ -13,6 +13,7 @@ import { ProductImage } from '@arcediano/ux-library';
 import { ProductTableActions } from './ProductTableActions';
 import { ProductExpandableDetails } from './ProductExpandableDetails';
 import { type Product } from '@/types/product';
+import { formatProductQuantity } from '@/lib/products/quantity-format';
 
 // ============================================================================
 // TIPOS
@@ -77,11 +78,11 @@ export function ProductTable({
       accessor: (item) => (
         <div className="whitespace-nowrap">
           <span className="text-sm font-semibold text-origen-bosque">
-            {item.basePrice.toFixed(2)}€
+            {item.basePrice.toFixed(2)}€{item.saleMode === 'WEIGHT' ? '/kg' : ''}
           </span>
           {item.comparePrice && item.comparePrice > item.basePrice && (
             <span className="text-xs text-text-subtle line-through ml-1">
-              {item.comparePrice.toFixed(2)}€
+              {item.comparePrice.toFixed(2)}€{item.saleMode === 'WEIGHT' ? '/kg' : ''}
             </span>
           )}
         </div>
@@ -100,7 +101,7 @@ export function ProductTable({
         return (
           <div className="flex items-center gap-2">
             <div className={cn('w-2 h-2 rounded-full', stockColor)} />
-            <span className="text-sm font-medium">{item.stock}</span>
+            <span className="text-sm font-medium">{formatProductQuantity(item.stock, item.saleMode)}</span>
           </div>
         );
       },
@@ -117,7 +118,13 @@ export function ProductTable({
     {
       key: 'ventas',
       header: 'Ventas',
-      accessor: (item) => <span className="text-sm">{item.sales || 0}</span>,
+      accessor: (item) => (
+        <span className="text-sm">
+          {item.saleMode === 'WEIGHT'
+            ? formatProductQuantity(item.sales || 0, item.saleMode)
+            : item.sales || 0}
+        </span>
+      ),
       sortable: true,
       sortValue: (item) => item.sales || 0,
     },
@@ -157,6 +164,4 @@ export function ProductTable({
     />
   );
 }
-
-
 

@@ -12,6 +12,7 @@ import { Button, Input } from '@arcediano/ux-library';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@arcediano/ux-library';
 import { type Product } from '@/types/product';
 import { updateProductStock } from '@/lib/api/products';
+import { formatProductQuantity } from '@/lib/products/quantity-format';
 
 // ============================================================================
 // TIPOS
@@ -188,9 +189,11 @@ export function AdjustStockDialog({
             id="stock-value"
             type="number"
             label={
-              adjustmentType === 'set' ? 'Nuevo stock' :
-              adjustmentType === 'add' ? 'Cantidad a añadir' :
-              'Cantidad a retirar'
+              adjustmentType === 'set'
+                ? `Nuevo stock${product.saleMode === 'WEIGHT' ? ' (g)' : ''}`
+                : adjustmentType === 'add'
+                  ? `Cantidad a añadir${product.saleMode === 'WEIGHT' ? ' (g)' : ''}`
+                  : `Cantidad a retirar${product.saleMode === 'WEIGHT' ? ' (g)' : ''}`
             }
             value={stockValue}
             onChange={handleStockValueChange}
@@ -207,17 +210,18 @@ export function AdjustStockDialog({
         {stockValue !== '' && (
           <div className="p-3 bg-surface rounded-lg border border-border-subtle">
             <p className="text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">Stock actual:</span> {product.stock} unidades
+              <span className="font-medium text-foreground">Stock actual:</span>{' '}
+              {formatProductQuantity(product.stock, product.saleMode)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               <span className="font-medium text-foreground">Resultado estimado:</span>{' '}
               <span className={cn('font-semibold', estimatedResult === 0 ? 'text-feedback-danger' : 'text-origen-hoja')}>
-                {estimatedResult} unidades
+                {formatProductQuantity(estimatedResult, product.saleMode)}
               </span>
             </p>
             {(product.reservedStock ?? 0) > 0 && estimatedResult < (product.reservedStock ?? 0) && (
               <p className="text-xs text-feedback-danger mt-2">
-                ⚠️ El resultado ({estimatedResult}) sería menor que lo reservado ({product.reservedStock}). El servidor rechazará esto.
+                ⚠️ El resultado ({formatProductQuantity(estimatedResult, product.saleMode)}) sería menor que lo reservado ({formatProductQuantity(product.reservedStock ?? 0, product.saleMode)}). El servidor rechazará esto.
               </p>
             )}
           </div>

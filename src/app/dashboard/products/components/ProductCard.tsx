@@ -10,6 +10,7 @@ import { Edit, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StatusBadge, Button, ProductImage } from '@arcediano/ux-library';
 import { type Product } from '@/types/product';
+import { formatProductQuantity } from '@/lib/products/quantity-format';
 
 export interface ProductCardProps {
   product: Product;
@@ -117,11 +118,11 @@ export function ProductCard({
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-base font-bold text-origen-bosque tabular-nums">
-              {product.basePrice.toFixed(2)} €
+              {product.basePrice.toFixed(2)} €{product.saleMode === 'WEIGHT' ? '/kg' : ''}
             </p>
             {product.comparePrice && product.comparePrice > product.basePrice && (
               <p className="text-[10px] text-text-subtle line-through tabular-nums">
-                {product.comparePrice.toFixed(2)} €
+                {product.comparePrice.toFixed(2)} €{product.saleMode === 'WEIGHT' ? '/kg' : ''}
               </p>
             )}
           </div>
@@ -129,7 +130,7 @@ export function ProductCard({
             'text-[10px] font-semibold px-2 py-1 rounded-lg border',
             stockColor,
           )}>
-            {stock === 0 ? 'Agotado' : `${stock} uds`}
+            {stock === 0 ? 'Agotado' : formatProductQuantity(stock, product.saleMode)}
           </span>
         </div>
 
@@ -155,4 +156,3 @@ export function ProductCard({
     </div>
   );
 }
-
