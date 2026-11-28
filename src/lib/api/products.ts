@@ -253,6 +253,7 @@ function formDataToApiBody(formData: ProductFormData): Record<string, unknown> {
     basePrice:         formData.basePrice,
     comparePrice:      formData.comparePrice || undefined,
     saleMode:          formData.saleMode,
+    measureKind:       formData.saleMode === 'WEIGHT' ? formData.measureKind : undefined,
     pricePerKgCents:   formData.pricePerKgCents,
     minWeightGrams:    formData.minWeightGrams,
     weightIncrementGrams: formData.weightIncrementGrams,
@@ -378,7 +379,7 @@ function partialProductToApiBody(product: Partial<Product>): Record<string, unkn
 
   const scalar: Array<keyof Product> = [
     'name', 'fullDescription', 'originRegion', 'originLocality', 'isSeasonal', 'seasonMonths', 'categoryId', 'subcategoryId',
-    'basePrice', 'comparePrice', 'saleMode', 'pricePerKgCents', 'minWeightGrams', 'weightIncrementGrams', 'hasVariants', 'sku', 'barcode', 'stock',
+    'basePrice', 'comparePrice', 'saleMode', 'measureKind', 'pricePerKgCents', 'minWeightGrams', 'weightIncrementGrams', 'hasVariants', 'sku', 'barcode', 'stock',
     'lowStockThreshold', 'trackInventory', 'allowBackorders',
     'netContent', 'netContentUnit', 'weight', 'weightUnit', 'dimensions', 'shippingClass',
   ];
@@ -786,6 +787,7 @@ export async function duplicateProduct(id: string): Promise<ApiResponse<Product>
       basePrice:         original.basePrice,
       comparePrice:      original.comparePrice,
       saleMode:         original.saleMode,
+      measureKind:      original.measureKind,
       pricePerKgCents:  original.pricePerKgCents,
       minWeightGrams:   original.minWeightGrams,
       weightIncrementGrams: original.weightIncrementGrams,
@@ -1349,9 +1351,13 @@ export async function syncProductVariants(
     option2Value?: string;
     option3Value?: string;
     barcode?: string;
-    price: number;
+    price?: number;
     compareAtPrice?: number;
-    stock: number;
+    stock?: number;
+    /** Solo productos a granel: precio de la preparación por kg o litro, en céntimos. */
+    pricePerKgCents?: number;
+    /** Solo productos a granel: stock de la preparación en gramos o mililitros. */
+    stockBaseUnits?: number;
     trackInventory?: boolean;
     /** Peso de ESTA variante con embalaje, para envío. */
     weight?: number;

@@ -346,6 +346,9 @@ export interface ProductOption {
   values: ProductOptionValue[];
 }
 
+/** Magnitud de la venta a granel: la cantidad se guarda en gramos (MASS) o mililitros (VOLUME). */
+export type MeasureKind = 'MASS' | 'VOLUME';
+
 export interface ProductVariant {
   id: string;
   option1Value?: string;
@@ -357,6 +360,10 @@ export interface ProductVariant {
   price: number;
   compareAtPrice?: number;
   stock: number;
+  /** Preparación de un producto a granel: precio por kg o litro, en céntimos. */
+  pricePerKgCents?: number;
+  /** Preparación de un producto a granel: stock en gramos o mililitros. */
+  stockBaseUnits?: number;
   trackInventory: boolean;
   /** Peso de ESTA variante con embalaje, para envío (petición del humano, 2026-10-09). */
   weight?: number;
@@ -398,6 +405,8 @@ export interface Product {
   basePrice: number;
   comparePrice?: number;
   saleMode?: 'UNIT' | 'WEIGHT';
+  /** Magnitud de la venta a granel: peso (g, kg) o volumen (ml, l). */
+  measureKind?: MeasureKind;
   pricePerKgCents?: number;
   minWeightGrams?: number;
   weightIncrementGrams?: number;
@@ -473,6 +482,7 @@ export interface ProductFormData {
   comparePrice?: number;
   saleMode?: 'UNIT' | 'WEIGHT';
   saleModeLocked?: boolean;
+  measureKind?: MeasureKind;
   pricePerKgCents?: number;
   minWeightGrams?: number;
   weightIncrementGrams?: number;
@@ -594,6 +604,7 @@ export const defaultFormData: ProductFormData = {
   comparePrice: undefined,
   saleMode: 'UNIT',
   saleModeLocked: false,
+  measureKind: 'MASS',
   pricePerKgCents: undefined,
   minWeightGrams: undefined,
   weightIncrementGrams: undefined,

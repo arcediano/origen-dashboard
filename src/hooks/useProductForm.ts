@@ -156,6 +156,7 @@ export const productToFormData = (product: Product): ProductFormData => {
   comparePrice: product.comparePrice,
   saleMode: product.saleMode ?? 'UNIT',
   saleModeLocked: !!product.publishedAt,
+  measureKind: product.measureKind ?? 'MASS',
   pricePerKgCents: product.pricePerKgCents,
   minWeightGrams: product.minWeightGrams,
   weightIncrementGrams: product.weightIncrementGrams,
@@ -227,6 +228,7 @@ export const formDataToProduct = (formData: ProductFormData): Partial<Product> =
     basePrice: formData.basePrice,
     comparePrice: formData.comparePrice,
     saleMode: formData.saleMode,
+    measureKind: formData.measureKind,
     pricePerKgCents: formData.pricePerKgCents,
     minWeightGrams: formData.minWeightGrams,
     weightIncrementGrams: formData.weightIncrementGrams,
@@ -616,12 +618,13 @@ export function useProductForm(productId?: string) {
     // se piden -- se considera completo con al menos una variante guardada
     // (mismo criterio que getStepErrors). Sin variantes, con precio > 0 (el
     // stock siempre tiene defaults válidos, 0/5, nunca bloquea el paso).
+    // A granel (ADR-024) el mínimo y el incremento se piden también con preparaciones.
+    const weightQuantitiesOk =
+      (formData.minWeightGrams ?? 0) > 0 && (formData.weightIncrementGrams ?? 0) > 0;
     const pricingComplete = formData.hasVariants
-      ? savedVariantsCount > 0
+      ? savedVariantsCount > 0 && (formData.saleMode !== 'WEIGHT' || weightQuantitiesOk)
       : formData.saleMode === 'WEIGHT'
-        ? (formData.pricePerKgCents ?? 0) >= MIN_PRODUCT_PRICE_EUROS * 100 &&
-          (formData.minWeightGrams ?? 0) > 0 &&
-          (formData.weightIncrementGrams ?? 0) > 0
+        ? (formData.pricePerKgCents ?? 0) >= MIN_PRODUCT_PRICE_EUROS * 100 && weightQuantitiesOk
         : !!(formData.basePrice && formData.basePrice >= MIN_PRODUCT_PRICE_EUROS);
 
     setCompletedTabs({
@@ -682,8 +685,16 @@ export function useProductForm(productId?: string) {
         // (cada variante define los suyos) -- en su lugar, exige al menos
         // una variante guardada. SKU lo asigna el backend en ambos casos.
         if (formData.hasVariants) {
-          if (savedVariantsCount === 0)
+          if (formData.saleMode === 'WEIGHT') {
+            if (!formData.minWeightGrams || formData.minWeightGrams <= 0)
+              errors.push('Cantidad mínima de compra');
+            if (!formData.weightIncrementGrams || formData.weightIncrementGrams <= 0)
+              errors.push('Incremento de cantidad');
+            if (savedVariantsCount === 0)
+              errors.push('Al menos una preparación con precio y stock');
+          } else if (savedVariantsCount === 0) {
             errors.push('Al menos una variante con precio y stock');
+          }
         } else {
           const validPrice = formData.saleMode === 'WEIGHT'
             ? (formData.pricePerKgCents ?? 0) >= MIN_PRODUCT_PRICE_EUROS * 100
@@ -693,9 +704,9 @@ export function useProductForm(productId?: string) {
           }
           if (formData.saleMode === 'WEIGHT') {
             if (!formData.minWeightGrams || formData.minWeightGrams <= 0)
-              errors.push('Cantidad mínima de compra en gramos');
+              errors.push('Cantidad mínima de compra');
             if (!formData.weightIncrementGrams || formData.weightIncrementGrams <= 0)
-              errors.push('Incremento de cantidad en gramos');
+              errors.push('Incremento de cantidad');
           }
           // Stock > 0 pasó a obligatorio para publicar (petición del humano,
           // 2026-10-26) -- mismo criterio que el backend (MODERATION_CRITERIA,
