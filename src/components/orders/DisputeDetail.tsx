@@ -74,6 +74,22 @@ export function DisputeDetail({ dispute }: { dispute: Dispute }) {
     };
   }, [dispute.id]);
 
+  const closedForPolling = isDisputeClosed(dispute.status);
+  // Los mensajes del comprador y del equipo de Origen llegan sin que hagas nada: se refresca el hilo cada 15 s con
+  // la pestaña visible y al volver a ella.
+  useEffect(() => {
+    if (closedForPolling) return;
+    const refresh = () => {
+      if (document.visibilityState === 'visible') fetchDisputeMessages(dispute.id).then(setMessages).catch(() => undefined);
+    };
+    const id = setInterval(refresh, 15_000);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [dispute.id, closedForPolling]);
+
   const send = useCallback(async () => {
     const content = draft.trim();
     if (!content || sending) return;
@@ -152,9 +168,14 @@ export function DisputeDetail({ dispute }: { dispute: Dispute }) {
             const style = CHAT_ROLE_STYLE[role];
             return (
               <li key={m.id} data-role={role} className={cn('flex flex-col', mine ? 'items-end' : 'items-start')}>
-                <p className="mb-1 text-xs text-origen-pino">
-                  <span className="font-semibold text-origen-bosque">{mine ? 'Tú' : CHAT_ROLE_LABEL[role]}</span>
-                  {' · '}
+                <p className="mb-1 flex flex-wrap items-center gap-x-1.5 text-xs text-origen-pino">
+                  <span className="font-semibold text-origen-bosque">{mine ? 'Tú (productor)' : CHAT_ROLE_LABEL[role]}</span>
+                  {m.audience === 'PRODUCER' && (
+                    <span data-testid="private-message" className="rounded-full border border-violet-300 bg-white px-2 py-0.5 text-[11px] font-semibold text-violet-800">
+                      Mensaje solo para ti
+                    </span>
+                  )}
+                  <span aria-hidden="true">·</span>
                   {format(new Date(m.createdAt), 'd MMM, HH:mm', { locale: es })}
                 </p>
                 <div
@@ -169,6 +190,18 @@ export function DisputeDetail({ dispute }: { dispute: Dispute }) {
                     <ul className="mt-2.5 flex flex-wrap gap-2" aria-label="Archivos adjuntos">
                       {m.attachments.map((url, i) => {
                         const name = attachmentName(url, i);
+                        // Las disputas solo admiten fotos (la URL del medio no lleva extensión): se ven como miniatura, no como un
+                        // nombre de fichero ilegible.
+                        {
+                          return (
+                            <li key={url}>
+                              <a href={url} target="_blank" rel="noopener noreferrer" aria-label={`Foto adjunta ${i + 1}`} className="block overflow-hidden rounded-xl border border-border bg-white">
+                                {/* eslint-disable-next-line @next/next/no-img-element -- adjunto externo (CDN de medios) */}
+                                <img src={url} alt={`Foto adjunta ${i + 1}`} loading="lazy" className="h-24 w-24 object-cover" />
+                              </a>
+                            </li>
+                          );
+                        }
                         return (
                           <li key={url} className="min-w-0 max-w-full">
                             <a
