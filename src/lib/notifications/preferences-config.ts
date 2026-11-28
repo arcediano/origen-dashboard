@@ -266,6 +266,12 @@ export const NOTIFICATION_GROUPS: NotificationEventGroup[] = [
         description: 'Se ha hecho un reembolso parcial o total al comprador y se descuenta de tu cobro de ese pedido. Siempre te avisamos.',
         icon:        UserCheck,
       },
+      {
+        eventType:   'PRODUCER_STRIPE_FEE_CHARGED',
+        title:       'Tasa de Stripe repercutida por una disputa',
+        description: 'Una disputa se resolvió a favor del comprador por un fallo en tu pedido y la tasa de Stripe del reembolso corre a tu cargo: se descuenta de tus próximos cobros. Siempre te avisamos.',
+        icon:        UserCheck,
+      },
     ],
   },
 
