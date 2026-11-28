@@ -22,6 +22,7 @@ import {
   VisitsChart,
 } from '@/components/features/dashboard';
 import type { DashboardAlert } from '@/components/features/dashboard';
+import { CommercialProfileCard } from '@/components/features/dashboard/components/CommercialProfileCard';
 
 // Hooks
 import {
@@ -121,24 +122,6 @@ export default function ProducerDashboard() {
   const alerts = useMemo<DashboardAlert[]>(() => {
     const dashboardAlerts: DashboardAlert[] = [];
 
-    // El banner de onboarding (más abajo, siempre visible mientras
-    // !user.onboardingCompleted) ya cubre este mensaje con más detalle
-    // (progreso + CTA) -- este alert solo aporta valor una vez el
-    // onboarding está completo pero el perfil aún se puede mejorar.
-    if (user?.onboardingCompleted && producer && profileCompleteness < 100) {
-      dashboardAlerts.push({
-        id: 'profile-incomplete',
-        type: 'accent',
-        title: 'Aún puedes mejorar tu perfil',
-        description: `Completa tu perfil de negocio para mejorar confianza y conversión. Estado actual: ${profileCompleteness}%.`,
-        dismissible: true,
-        action: {
-          label: 'Completar perfil',
-          href: '/dashboard/profile/business',
-        },
-      });
-    }
-
     // ── Alertas de Stripe (Estado de cuenta de pago) ──────────────────────────────
     if (readiness?.payment) {
       const { status } = readiness.payment;
@@ -234,6 +217,9 @@ export default function ProducerDashboard() {
       {/* Contenido principal */}
       <DashboardShell>
         {alerts.length > 0 && <AlertList alerts={alerts} />}
+
+        {/* Calidad del perfil comercial: qué falta y acceso a «Mejorar con IA» (el banner de onboarding cubre el alta). */}
+        <CommercialProfileCard enabled={!!user?.onboardingCompleted} />
 
         <StatsGrid
           stats={realStats}
