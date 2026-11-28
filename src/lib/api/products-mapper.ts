@@ -176,6 +176,8 @@ export interface ApiProductVariant {
   price: number;
   compareAtPrice?: number;
   stock: number;
+  pricePerKgCents?: number;
+  stockBaseUnits?: number;
   trackInventory: boolean;
   weight?: number;
   weightUnit?: string;
@@ -216,6 +218,12 @@ export interface ApiProduct {
   subcategoryName?: string;
   basePrice: number;
   comparePrice?: number;
+  saleMode?: 'UNIT' | 'WEIGHT';
+  saleModeLocked?: boolean;
+  measureKind?: 'MASS' | 'VOLUME';
+  pricePerKgCents?: number;
+  minWeightGrams?: number;
+  weightIncrementGrams?: number;
   sku: string;
   barcode?: string;
   // Inventario
@@ -386,6 +394,8 @@ function mapProductVariant(variant: ApiProductVariant): ProductVariant {
     price: variant.price,
     compareAtPrice: variant.compareAtPrice,
     stock: variant.stock,
+    pricePerKgCents: variant.pricePerKgCents,
+    stockBaseUnits: variant.stockBaseUnits,
     trackInventory: variant.trackInventory,
     weight: variant.weight,
     weightUnit: variant.weightUnit as 'kg' | 'g' | undefined,
@@ -541,6 +551,11 @@ export function mapApiProductToProduct(api: ApiProduct): Product {
 
     basePrice:    api.basePrice,
     comparePrice: api.comparePrice,
+    saleMode:     api.saleMode ?? 'UNIT',
+    measureKind:  api.measureKind ?? 'MASS',
+    pricePerKgCents: api.pricePerKgCents,
+    minWeightGrams: api.minWeightGrams,
+    weightIncrementGrams: api.weightIncrementGrams,
     priceTiers:   (api.priceTiers ?? []).map(mapPriceTier),
     flashDeal:    mapFlashDealSummary(api.flashDeal),
     hasVariants:  api.hasVariants ?? false,
